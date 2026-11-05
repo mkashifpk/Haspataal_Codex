@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import type {
   AttendanceDayOut,
@@ -1291,14 +1292,12 @@ export const Attendance: React.FC<AttendanceProps> = ({
                     {punchEmployeeName} (#{punchEmployeeId})
                   </div>
                 ) : (
-                  <input
-                    type="number"
+                  <DirectoryPicker
                     data-help="attendance.modal_punch_emp"
                     value={punchEmployeeId || ""}
                     onChange={(e) => setPunchEmployeeId(Number(e.target.value))}
-                    placeholder="e.g. 1"
                     className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
+                   path="/staff/lookup" idField="employee_id" search />
                 )}
                 {punchValidationErrors.employee_id && (
                   <p className="text-xs text-rose-600 mt-1">{punchValidationErrors.employee_id}</p>
@@ -1422,14 +1421,12 @@ export const Attendance: React.FC<AttendanceProps> = ({
                     {shiftEmployeeName} (#{shiftEmployeeId})
                   </div>
                 ) : (
-                  <input
-                    type="number"
+                  <DirectoryPicker
                     data-help="attendance.shift_modal_emp"
                     value={shiftEmployeeId || ""}
                     onChange={(e) => setShiftEmployeeId(Number(e.target.value))}
-                    placeholder="e.g. 1"
                     className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
+                   path="/staff/lookup" idField="employee_id" search />
                 )}
                 {shiftValidationErrors.employee_id && (
                   <p className="text-xs text-rose-600 mt-1">{shiftValidationErrors.employee_id}</p>
@@ -1493,13 +1490,12 @@ export const Attendance: React.FC<AttendanceProps> = ({
                     <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">
                       {isUrdu ? "شفٹ پیٹرن آئی ڈی:" : "Shift Pattern ID:"}
                     </label>
-                    <input
-                      type="number"
+                    <DirectoryPicker
                       data-help="attendance.shift_modal_pattern_id"
                       value={shiftPatternId}
                       onChange={(e) => setShiftPatternId(Number(e.target.value))}
                       className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
+                     path="/hr/shift-patterns" idField="shift_pattern_id" />
                     {shiftValidationErrors.shift_pattern_id && (
                       <p className="text-xs text-rose-600 mt-1">{shiftValidationErrors.shift_pattern_id}</p>
                     )}

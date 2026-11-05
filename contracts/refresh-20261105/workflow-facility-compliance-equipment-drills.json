@@ -1,0 +1,317 @@
+{
+  "slug": "facility-compliance-equipment-drills",
+  "title": "Licences, equipment maintenance and mock drills (MSDS)",
+  "summary": "The compliance register (licences, registrations, inspection certificates, written plans and the laws that apply, each with its official, its scan, renewals and expiry alerts), the medical equipment inventory with its maintenance and calibration plans from the manufacturer's guidelines, every visit with its result and certificate, the schedule of what is due, the formal write-off, and the mock drills with their coverage by department and shift.",
+  "order": 99,
+  "workflow": "MSDS ROM 115, 119-121; FMS 122-129",
+  "workspaces": [
+    "ops_admin",
+    "maintenance",
+    "quality",
+    "owner_dashboard"
+  ],
+  "file": "facility-compliance-equipment-drills.md",
+  "markdown": "# Licences, equipment maintenance and mock drills (MSDS)\n\n| MSDS | What is checked | Haspataal |\n|---|---|---|\n| ROM 115, 119 | The applicable laws listed, copies kept current by a named official | Kind **Law** entries (13 ship with Haspataal), the official (`responsible_user_id`), the scan, amendments as renewals |\n| ROM 120, 121 | Valid licences and certificates (PNRA, building, fire, lifts, boilers, generator), a mechanism to renew them | The **register** with `state` Valid / DueForRenewal / Expired, renewal applied for, **renewals** that keep the history, **alerts** |\n| FMS 122, 123 | An equipment plan: inventory, installation and testing, maintenance, a formal disposal | The **equipment record** on each asset, the **Commissioning** visit, the written **equipment plan** PDF, the **write-off** approved by the management |\n| FMS 124 | In-house and outsourced maintenance, the contractors' MOU | `maintained_by`, the service contract and its expiry; plans by Contractor |\n| FMS 125 | A PPM and calibration schedule from the OEM, the evidence it was done on time | **Plans** (interval, `oem_reference`), **visits** with result and certificate, `on_time` stamped by the database, the **schedule** |\n| FMS 126-129 | Fire plans and certificates, evacuation, mock drills in every area and shift, staff trained for their roles | Plans and certificates in the register; **mock drills** with participants and their roles; the **coverage** grid |\n\nWho: **Ops Admin** (`facility.view`, `facility.compliance.manage`, `facility.equipment.manage`,\n`facility.maintenance.record`, `facility.drill.manage`); **Maintenance** (`facility.equipment.manage`,\n`facility.maintenance.record`); **Quality Officer** (`facility.view`, `facility.compliance.manage`,\n`facility.drill.manage`); **Owner** (`facility.view`, `facility.equipment.dispose`).\n\n## 1. The compliance register\n\n1. `GET /facility/compliance-documents?kind=&category=&state=&responsible_user_id=&include_closed=` (Expired and\n   DueForRenewal first); one: `GET /facility/compliance-documents/{document_id}` (with the entries it renewed).\n2. Add: `POST /facility/compliance-documents`\n   ```json\n   { \"kind\": \"Licence\", \"category\": \"Radiation\", \"title\": \"PNRA licence: X-ray unit, Radiology\", \"authority\": \"PNRA\",\n     \"reference_no\": \"PNRA/XR/101\", \"issued_on\": \"2025-11-01\", \"valid_until\": \"2026-10-31\",\n     \"responsible_user_id\": 7, \"asset_id\": 52 }\n   ```\n   A licence needs `valid_until`, a plan its review date; a law none. Pick the official with `GET /facility/staff`\n   (`user_id`). Attach the scan: `POST /facility/compliance-documents/{document_id}/scan` (multipart `file`, PDF or\n   image); read it: `GET /facility/compliance-documents/{document_id}/scan`.\n   The equipment it covers from `GET /facility/equipment`, the department from `GET /admin/departments`, the official\n   (`responsible_user_id`) from `GET /facility/staff`; the same on `PUT /facility/compliance-documents/{document_id}`.\n3. The renewal is applied for: `PUT /facility/compliance-documents/{document_id} {\"renewal_applied_on\",\n   \"renewal_reference\"}` (attach the receipt as the scan). Renewed: `POST /facility/compliance-documents/{document_id}/renew\n   {\"issued_on\", \"valid_until\", \"reference_no\"?}`; a new entry replaces the old one (attach the new scan to it). No\n   longer needed: `POST /facility/compliance-documents/{document_id}/withdraw {\"reason\"}`. A renewed or withdrawn entry\n   is final (`COMPLIANCE_DOCUMENT_CLOSED`).\n4. The worker warns the official and the keepers `renewal_lead_days` before the expiry and weekly after it (job\n   facility.alerts). Print for the inspector: `GET /facility/compliance-documents/register/pdf`.\n\n## 2. Medical equipment and its maintenance\n\n1. A new item is an asset first: `POST /ops/assets {\"asset_tag\", \"name\", \"category\", \"department_id\"}` (see\n   [facility and IT](facility-and-it.md)); then its equipment record: `PUT /facility/equipment/{asset_id}`\n   ```json\n   { \"is_medical\": true, \"manufacturer\": \"Shimadzu\", \"model\": \"RADspeed\", \"supplier_vendor_id\": 3,\n     \"warranty_until\": \"2027-06-30\", \"maintained_by\": \"Mixed\", \"service_vendor_id\": 9,\n     \"service_contract_ref\": \"AMC-2026-14\", \"service_contract_until\": \"2027-06-30\" }\n   ```\n   The supplier and the contractor are picked by name from `GET /finance/vendors?vendor_type=EquipmentSupplier` and\n   `?vendor_type=Contractor` (the active ones, `is_active`); so is every `vendor_id` below. Finance adds a new one.\n   Its department from `GET /admin/departments`, its ward from `GET /beds/matrix?include_beds=false`, an OT item's\n   theatre (`ot_id` of `PUT /facility/equipment/{asset_id}`) from `GET /ot/theaters`.\n2. Its plans, one active per kind: `POST /facility/equipment/{asset_id}/plans`\n   `{\"kind\": \"Calibration\", \"interval_days\": 365, \"performed_by\": \"Contractor\", \"vendor_id\": 9,\n   \"oem_reference\": \"Service manual 9.1\", \"next_due\": \"2026-11-15\"}`; change one (with the reason) or end it\n   (`is_active` false): `PUT /facility/maintenance-plans/{plan_id}`.\n3. The work list: `GET /facility/maintenance/schedule?days=&performed_by=` (overdue first; `performed_by=Contractor` is\n   the list for the contractors). The worker announces what is due weekly.\n4. Each visit, once: `POST /facility/equipment/{asset_id}/maintenance`\n   ```json\n   { \"kind\": \"Calibration\", \"performed_on\": \"2026-10-01\", \"vendor_id\": 9, \"technician\": \"Engr. Saad\", \"result\": \"Pass\",\n     \"findings\": \"kVp and mA within tolerance\", \"certificate_no\": \"CAL-77/26\" }\n   ```\n   In house: `employee_id` (from `GET /facility/staff`). The database stamps `due_on` and `on_time` and moves the plan.\n   `Commissioning` (at installation) dates the unit; `Breakdown` records a repair (`work_order_id`). A **failed** check\n   takes the unit out of service; a later passing visit with `return_to_service: true` puts it back.\n   A breakdown's repair names its work order from `GET /ops/work-orders`.\n5. The inventory: `GET /facility/equipment?department_id=&overdue_only=&include_disposed=`; one item with its plans,\n   visits and licences: `GET /facility/equipment/{asset_id}`; the visits: `GET /facility/maintenance?date_from=&kind=&result=`;\n   the statistics (planned visits on time, failures, contracts expired): `GET /facility/maintenance/statistics`.\n6. The written equipment plan for the inspector: `GET /facility/equipment/plan/pdf`.\n7. The write-off, by the owner: `POST /facility/equipment/{asset_id}/dispose {\"disposed_on\", \"method\": \"Scrapped\",\n   \"reason\"}`. Its plans end; nothing more is recorded on it (`ASSET_DISPOSED`).\n\n## 3. Mock drills\n\n1. The coverage first: `GET /facility/drills/coverage`: departments by shift for the last `drill_interval_months`,\n   `departments_not_drilled`, the staff of each department who took part (FMS 129).\n2. Report a drill after it is held (a draft): `POST /facility/drills`\n   ```json\n   { \"kind\": \"Fire\", \"scenario\": \"Smoke from the linen store beside the ER\", \"department_id\": 3, \"shift\": \"Night\",\n     \"held_at\": \"2026-09-30T02:15:00+05:00\", \"announced\": false, \"external_agency\": \"Rescue 1122\",\n     \"response_minutes\": 2.5, \"evacuation_minutes\": 9,\n     \"participants\": [{\"employee_id\": 101, \"drill_role\": \"Fire warden\"}, {\"employee_id\": 87, \"drill_role\": \"Evacuation lead\"}],\n     \"observations\": \"Alarm heard late in the side room\", \"outcome\": \"NeedsImprovement\" }\n   ```\n   Participants from `GET /facility/staff` (support staff without a login included). Complete the draft with\n   `PUT /facility/drills/{drill_id}` (the whole report), then sign it: `POST /facility/drills/{drill_id}/finalize`\n   (`DRILL_REPORT_INCOMPLETE` lists what is missing; then `DRILL_FINAL`).\n   The department from the coverage list `GET /facility/drills/coverage`, the ward from\n   `GET /beds/matrix?include_beds=false`; the same on `PUT /facility/drills/{drill_id}`.\n3. Its actions after signing: `POST /facility/drills/{drill_id}/actions` (the hospital's action register); the report:\n   `GET /facility/drills/{drill_id}/pdf`; the list: `GET /facility/drills?date_from=&kind=&status=`; one drill:\n   `GET /facility/drills/{drill_id}`.\n\n## Equipment requisitions (MSDS FMS)\n\nA department asks for equipment; the staff who will use it evaluate the models on offer; an owner or administrator\ndecides; the purchase joins the equipment register (screen `equipment_requisitions`, on every workspace's menu for the\nroles that hold one of its permissions).\n\n1. Ask (`facility.equipment.request`): `POST /facility/equipment-requisitions {\"title\", \"specification\",\n   \"justification\", \"quantity\", \"estimated_cost\", \"department_id\"}` (with `Idempotency-Key`): Open, numbered EQR-….\n   What was asked for never changes: cancel and raise a new one.\n   The department from `GET /admin/departments`.\n2. The models on offer: `POST /facility/equipment-requisitions/{requisition_id}/options {\"make_model\", \"vendor_id\",\n   \"price\", \"details\"}` (the supplier from `GET /finance/vendors`); the first moves it to Evaluating; the same model twice: `EQUIPMENT_OPTION_EXISTS`.\n3. Evaluate (`facility.equipment.evaluate`, the staff who will use it):\n   `POST /facility/equipment-requisitions/{requisition_id}/evaluations {\"option_id\", \"score\": 1-5, \"remarks\"}`, once per\n   person and model (`EQUIPMENT_EVALUATION_EXISTS`). Show each model with its evaluations and `average_score`\n   (`GET /facility/equipment-requisitions/{requisition_id}`; the list: `GET /facility/equipment-requisitions?status=`).\n4. Decide (`facility.equipment.decide`: owner, hospital admin):\n   `POST /facility/equipment-requisitions/{requisition_id}/decide {\"chosen_option_id\", \"decision_note\", \"meeting_id\"}`.\n   The person who asked never decides (`SELF_APPROVAL_FORBIDDEN`); the chosen model needs an evaluation by someone\n   other than the decider (`EQUIPMENT_EVALUATION_REQUIRED`).\n   The meeting from the committee's minutes: `GET /committees`, then `GET /committees/{committee_id}` (`meeting_list`).\n5. The purchase (`facility.equipment.manage`): add the item to the equipment register first, then\n   `POST /facility/equipment-requisitions/{requisition_id}/purchased {\"asset_id\"}`.\n   The item from the equipment register, `GET /facility/equipment` (add it there first).\n6. Withdraw an Open, Evaluating or Decided requisition: `POST /facility/equipment-requisitions/{requisition_id}/cancel\n   {\"reason\"}`. Any other move: `EQUIPMENT_REQUISITION_STATE_INVALID`.\n\n## 4. The owner's tiles\n\n`GET /facility/summary`: the register's states (expired, due, without a scan or an official), the maintenance of the\nlast 12 months (`on_time_pct`, overdue plans), the drill coverage.",
+  "steps": [
+    {
+      "heading": "1. The compliance register",
+      "anchor": "1-the-compliance-register",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/compliance-documents",
+          "summary": "The compliance register"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/compliance-documents/{document_id}",
+          "summary": "One entry of the register, with the entries it renewed"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/compliance-documents",
+          "summary": "Add a licence, certificate, plan or law to the register"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/staff",
+          "summary": "Pick a member of staff"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/compliance-documents/{document_id}/scan",
+          "summary": "Attach the scan (PDF or image)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/compliance-documents/{document_id}/scan",
+          "summary": "Download the scan"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/equipment",
+          "summary": "The equipment inventory"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/facility/compliance-documents/{document_id}",
+          "summary": "Correct an entry, or record that its renewal is applied for"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/compliance-documents/{document_id}/renew",
+          "summary": "Record the renewal (or the amendment)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/compliance-documents/{document_id}/withdraw",
+          "summary": "Withdraw an entry no longer needed"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/compliance-documents/register/pdf",
+          "summary": "The register to print (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "2. Medical equipment and its maintenance",
+      "anchor": "2-medical-equipment-and-its-maintenance",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/ops/assets",
+          "summary": "Register an asset"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/facility/equipment/{asset_id}",
+          "summary": "The equipment record"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/vendors",
+          "summary": "Vendors"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/theaters",
+          "summary": "All theaters (incl. out-of-service)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/equipment/{asset_id}/plans",
+          "summary": "Plan a maintenance, calibration or inspection"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/facility/maintenance-plans/{plan_id}",
+          "summary": "Change a plan"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/maintenance/schedule",
+          "summary": "What is due: the maintenance work list"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/equipment/{asset_id}/maintenance",
+          "summary": "Record a visit: maintenance, calibration, inspection, commissioning, repair"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/staff",
+          "summary": "Pick a member of staff"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ops/work-orders",
+          "summary": "Open work orders (emergency first); mine=true for reporters"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/equipment",
+          "summary": "The equipment inventory"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/equipment/{asset_id}",
+          "summary": "One item: its record, plans, visits and licences"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/maintenance",
+          "summary": "The visits recorded"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/maintenance/statistics",
+          "summary": "Maintenance done on time, overdue, failures"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/equipment/plan/pdf",
+          "summary": "The written equipment plan and maintenance schedule (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/equipment/{asset_id}/dispose",
+          "summary": "Write the equipment off"
+        }
+      ]
+    },
+    {
+      "heading": "3. Mock drills",
+      "anchor": "3-mock-drills",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/drills/coverage",
+          "summary": "Drill coverage by department and shift"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/drills",
+          "summary": "Report a mock drill"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/staff",
+          "summary": "Pick a member of staff"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/facility/drills/{drill_id}",
+          "summary": "Complete the draft report"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/drills/{drill_id}/finalize",
+          "summary": "Sign the report"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/drills/{drill_id}/actions",
+          "summary": "Record an action the drill showed was needed"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/drills/{drill_id}/pdf",
+          "summary": "The drill report (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/drills",
+          "summary": "The mock drills"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/drills/{drill_id}",
+          "summary": "One drill report"
+        }
+      ]
+    },
+    {
+      "heading": "Equipment requisitions (MSDS FMS)",
+      "anchor": "equipment-requisitions-msds-fms",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/equipment-requisitions",
+          "summary": "Ask for equipment with its specification and justification"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/equipment-requisitions/{requisition_id}/options",
+          "summary": "Add a model on offer"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/vendors",
+          "summary": "Vendors"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/equipment-requisitions/{requisition_id}/evaluations",
+          "summary": "Evaluate a model you will use"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/equipment-requisitions/{requisition_id}",
+          "summary": "One equipment requisition with its models and their evaluations"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/equipment-requisitions",
+          "summary": "The equipment requisitions"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/equipment-requisitions/{requisition_id}/decide",
+          "summary": "Decide on one evaluated model"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/committees",
+          "summary": "The committees"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/committees/{committee_id}",
+          "summary": "A committee and its meetings"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/equipment-requisitions/{requisition_id}/purchased",
+          "summary": "Record the purchase in the equipment register"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/equipment",
+          "summary": "The equipment inventory"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/facility/equipment-requisitions/{requisition_id}/cancel",
+          "summary": "Cancel a requisition"
+        }
+      ]
+    },
+    {
+      "heading": "4. The owner's tiles",
+      "anchor": "4-the-owner-s-tiles",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/summary",
+          "summary": "The facility at a glance"
+        }
+      ]
+    }
+  ]
+}

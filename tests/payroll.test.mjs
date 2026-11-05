@@ -11,6 +11,23 @@ import {
   PAYROLL_ERROR_MESSAGES,
 } from "../src/payroll-policy.ts";
 
+test("payroll: permissions work without role labels and role names grant nothing", () => {
+  for (const role of ["hr_admin", "accountant"]) {
+    const view = getPayrollCapabilityView({ roles: [role], permissions: [] });
+    assert.equal(view.mode, "hidden");
+    assert.equal(view.canRun, false);
+    assert.equal(view.canView, false);
+  }
+  const readOnly = getPayrollCapabilityView({ permissions: ["hr.payroll.view"] });
+  assert.equal(readOnly.mode, "records");
+  assert.equal(readOnly.canFinalize, false);
+  const runner = getPayrollCapabilityView({ permissions: ["hr.payroll.run"] });
+  assert.equal(runner.canRun, true);
+  const records = getPayrollCapabilityView({ permissions: ["hr.payroll.run", "hr.payroll.view"] }, { views: { screens: [{ screen_id: "payroll", view: "records" }] } });
+  assert.equal(records.mode, "records");
+  assert.equal(records.canRun, false);
+});
+
 test("payroll: getPayrollCapabilityView resolves capability views correctly", () => {
   // Anonymous / unauthenticated
   const anonView = getPayrollCapabilityView(null);
@@ -20,7 +37,7 @@ test("payroll: getPayrollCapabilityView resolves capability views correctly", ()
   // Inactive service
   const inactiveView = getPayrollCapabilityView(
     { roles: ["hr_admin"], permissions: ["hr.payroll.run"] },
-    { services: [{ code: "hr", status: "Inactive" }] }
+    { views: { screens: [{ screen_id: "payroll", view: "hidden" }] } }
   );
   assert.equal(inactiveView.mode, "hidden");
 

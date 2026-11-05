@@ -1,0 +1,154 @@
+{
+  "slug": "cost-estimates-and-tariff",
+  "title": "Cost estimates, the tariff and ward transfers (MSDS)",
+  "summary": "The tariff every patient can see, the written uniform pricing policy, the cost estimate prepared from the tariff at admission and explained to the patient or the family in their language and signed, a move to another bed or ward (to and from the ICU) with the new estimate when the daily charge changes, the worklist of estimates due and the statistics (told in time, bills close to the estimates).",
+  "order": 99,
+  "workflow": "MSDS PRE 76-79",
+  "workspaces": [
+    "admissions",
+    "billing_admin",
+    "doctor",
+    "head_nurse",
+    "reception",
+    "owner_dashboard"
+  ],
+  "file": "cost-estimates-and-tariff.md",
+  "markdown": "# Cost estimates, the tariff and ward transfers (MSDS)\n\n| MSDS | What is checked | Haspataal |\n|---|---|---|\n| PRE 76 | A written uniform pricing policy: the same price for a service in a setting, payment terms, how estimates are given | `GET /tariff/pricing-policy/pdf` (settings); every tariff line is priced **by the database** from the tariff |\n| PRE 77 | The tariff available to patients | `GET /tariff` (waiting room screens), `GET /tariff/pdf` |\n| PRE 78 | An estimate given by the designated staff before or at admission | **Cost estimates** explained, with who heard them, in which language, signed; the **worklist** after `estimate_due_hours` |\n| PRE 79 | A new estimate when the condition or the setting changes | **Transfers** log both daily charges; a move to another charge waits on the worklist until a **ChangeOfWard** estimate is explained |\n\nWho: **admissions desk, accounts** (`estimate.prepare`, `estimate.explain`, `ipd.admission.transfer` for admissions);\n**doctors and the head nurse** (`estimate.explain`; the head nurse also moves patients); **owner, quality, cashiers**\n(`estimate.view`); **everyone**: the tariff.\n\n## 1. The tariff (any workspace)\n\n`GET /tariff`: the services by category, each ward's daily bed charge, the laboratory tests; `GET /tariff/pdf` to print\nfor the reception and the admissions desk. The prices come from the service catalogue\n([finance](finance-and-owner.md)); a ward's bed charge is its `room_charge_service_id`.\n\n## 2. The estimate at admission (admissions desk, accounts)\n\n1. The worklist: `GET /cost-estimates/worklist`: each admission without an explained estimate and each move to another\n   daily charge without its ChangeOfWard estimate, overdue first.\n2. Prepare: `POST /cost-estimates` with an `Idempotency-Key`\n   ```json\n   { \"admission_id\": 812, \"reason\": \"Admission\", \"expected_days\": 5,\n     \"services\": [{\"service_id\": 140, \"quantity\": 1}],\n     \"allowances\": [{\"kind\": \"Medicines\", \"description\": \"Antibiotics and IV fluids for 5 days\", \"amount\": 10000}],\n     \"note\": \"Panel patient: the panel covers the ward\" }\n   ```\n   The bed-days are priced at the ward's charge, the services at their tariff price (never typed); the deposit defaults\n   to `estimate_deposit_pct` and the payment terms to `pricing_payment_terms`. Before admission give `patient_id` and\n   `ward_id` instead.\n   Before admission the patient comes from `GET /patients/search`.\n3. Print it to explain and sign: `GET /cost-estimates/{estimate_id}/print-payload` (A4; the Urdu notes in\n   `fields.urdu`, right to left; signature lines while a draft) or `GET /cost-estimates/{estimate_id}/pdf`.\n4. Explained (by the desk, accounts or the doctor): `POST /cost-estimates/{estimate_id}/explain`\n   ```json\n   { \"explained_to\": \"Mr Aslam\", \"explained_relation\": \"Relative\", \"language\": \"Urdu\", \"acknowledged\": true }\n   ```\n   Final (`ESTIMATE_STATE_INVALID` afterwards); it supersedes the admission's estimate explained before.\n5. A draft prepared by mistake, or a wrong estimate: `POST /cost-estimates/{estimate_id}/cancel {\"reason\"}`.\n6. During the stay: `GET /cost-estimates?admission_id=` shows `billed_so_far` beside each total; one estimate:\n   `GET /cost-estimates/{estimate_id}`.\n\n## 3. A move to another bed or ward (admissions desk, head nurse)\n\n1. Pick an Available bed on `GET /beds/matrix`, then `POST /admissions/{admission_id}/transfer`\n   `{\"bed_id\": 31, \"reason\": \"Respiratory failure: needs ventilation in the ICU\"}`. The old bed goes to cleaning, the\n   new one is occupied, both daily charges are logged; `BED_NO_LONGER_AVAILABLE` when someone took it.\n2. When the charge changes (`rate_changed`), `admission.transferred` arrives with priority high and the estimate staff\n   are notified: prepare `POST /cost-estimates {\"admission_id\", \"reason\": \"ChangeOfWard\", \"transfer_id\", \"expected_days\"}`\n   (the ward priced is the new one) and explain it.\n3. The moves of an admission for the estimate: `GET /cost-estimates/admissions/{admission_id}/moves` (the estimate\n   permissions: accounts read it too): from and to ward, both daily charges, `rate_changed`, `estimate_explained`\n   and the move's latest estimate that is not cancelled (`estimate_id`, `estimate_status`: open a Draft rather than\n   prepare another). Pick the `transfer_id` there or take it from the worklist item; never type it. The chart's list\n   with the clinical reason for each move, `GET /admissions/{admission_id}/transfers`, needs `ipd.admission.view`\n   (the admissions desk, the head nurse, doctors), never the accounts.\n\n## 4. Statistics and the policy (owner, quality)\n\n`GET /cost-estimates/statistics?date_from=&date_to=`: admissions told their estimate within `estimate_due_hours`\n(PRE 78), changes of ward told theirs (PRE 79), discharged bills within `estimate_accuracy_pct` of the last estimate.\nThe written policy for approval: `GET /tariff/pricing-policy/pdf`.\n\nEvents: `admission.transferred`, `bed.state_changed`.",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/tariff/pricing-policy/pdf",
+          "summary": "The uniform pricing policy (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/tariff",
+          "summary": "The tariff: every price, by category"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/tariff/pdf",
+          "summary": "The tariff to print and display (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "1. The tariff (any workspace)",
+      "anchor": "1-the-tariff-any-workspace",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/tariff",
+          "summary": "The tariff: every price, by category"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/tariff/pdf",
+          "summary": "The tariff to print and display (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "2. The estimate at admission (admissions desk, accounts)",
+      "anchor": "2-the-estimate-at-admission-admissions-desk-accounts",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/cost-estimates/worklist",
+          "summary": "Estimates to explain: new admissions and changes of ward"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/cost-estimates",
+          "summary": "Prepare a cost estimate"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cost-estimates/{estimate_id}/print-payload",
+          "summary": "The estimate to print and sign (A4)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cost-estimates/{estimate_id}/pdf",
+          "summary": "The estimate (PDF, English)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/cost-estimates/{estimate_id}/explain",
+          "summary": "Record that the estimate was explained"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/cost-estimates/{estimate_id}/cancel",
+          "summary": "Cancel an estimate"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cost-estimates",
+          "summary": "Cost estimates"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cost-estimates/{estimate_id}",
+          "summary": "One cost estimate"
+        }
+      ]
+    },
+    {
+      "heading": "3. A move to another bed or ward (admissions desk, head nurse)",
+      "anchor": "3-a-move-to-another-bed-or-ward-admissions-desk-head-nurse",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/transfer",
+          "summary": "Move an inpatient to another bed or ward"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/cost-estimates",
+          "summary": "Prepare a cost estimate"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cost-estimates/admissions/{admission_id}/moves",
+          "summary": "The moves of an admission, for a ChangeOfWard estimate"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/transfers",
+          "summary": "The moves of an admission"
+        }
+      ]
+    },
+    {
+      "heading": "4. Statistics and the policy (owner, quality)",
+      "anchor": "4-statistics-and-the-policy-owner-quality",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/cost-estimates/statistics",
+          "summary": "Estimate statistics"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/tariff/pricing-policy/pdf",
+          "summary": "The uniform pricing policy (PDF)"
+        }
+      ]
+    }
+  ]
+}

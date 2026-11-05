@@ -1,0 +1,187 @@
+{
+  "slug": "facility-profile-and-services",
+  "title": "Facility settings: the PHC profile and the clinical services",
+  "summary": "What the establishment is: the PHC category on its licence (a clinic, or a hospital of Category II C, II B, II A or I), with the PHC number every printout carries and the date it took effect. What it runs: its clinical services. The establishment switches them on and off itself, in Settings, on the same installation, with no new EXE and no vendor, in either direction, through one previewed, all-or-nothing change. Every frontend reads which services are Active and hides the actions of the others.",
+  "order": 99,
+  "workflow": "§0 (2026-10-14): one installation for a clinic or a hospital of Category II C, II B, II A or I",
+  "workspaces": [
+    "owner_dashboard",
+    "*"
+  ],
+  "file": "facility-profile-and-services.md",
+  "markdown": "# Facility settings: the PHC profile and the clinical services\n\nA new installation runs **no clinical service** until an admin sets it up. Registration, consultation, prescribing,\nbilling, staff, quality and the records are core: every profile has them. Any of the five profiles can be the first.\nLater, any profile can follow any other, for example clinic → II C, II B → I, I → II A, or a hospital → a clinic and\nback. Nothing is reinstalled, no data moves, and no history is lost.\n\n| Concept | Meaning |\n|---|---|\n| **Profile** | The PHC category on the licence: `Clinic`, `IIC` (up to 15 beds), `IIB` (16-30), `IIA` (31-49), `I` (more than 50). It sets the MSDS framework the inspection uses (GET /msds/indicators). The bed count only *suggests*; the licence decides. |\n| **Service** (capability) | One of the 14 services in the table below. Every one is in this release; a service a later release names before building it would come with `implemented` false: offer no button for it. |\n| **State** | `Available` (never switched on), `Preparing` (set up, no new work yet), `Active`, `Retiring` (no new work; the open work continues to its end), `Retired` (records only). |\n| **Indoor services** | The services marked *Indoor* in the table below (6, `hospital_only`). Never Active under the Clinic profile. |\n\n### The services\n\n| Service | Code | Indoor (hospital only) | Needs | What it is |\n|---|---|---|---|---|\n| Pharmacy dispensing | `dispensing` | no | — | Medicines dispensed from the facility's own stock (otherwise prescriptions are printed for the patient to buy outside). |\n| Tests sent to partner laboratories | `outsourced_diagnostics` | no | — | Samples taken here and sent to a laboratory under an MOU (lab tests marked SendOut). |\n| In-house laboratory | `laboratory` | no | — | Tests done in the facility's own laboratory. |\n| Imaging (X-ray, ultrasound, CT, MRI) | `imaging` | no | — | Examinations done and reported in the facility. |\n| Outpatient procedures | `outpatient_procedures` | no | — | Procedures done without admission (dressings, minor procedures), with their procedure notes. |\n| Inpatient care | `inpatient` | yes | — | Admissions, beds, nursing, the medication chart and discharge (medicines come from the pharmacy when dispensing runs, otherwise from outside on printed prescriptions). |\n| Emergency department | `emergency_department` | yes | — | The emergency register, triage by the hospital's algorithm, observation and departure. (Every profile gives first aid and refers: that is part of consultation.) |\n| Operating theatre and anaesthesia | `surgery` | yes | `inpatient` | Operations with the surgical record: pre-operative note, anaesthesia, safety checklist, recovery. |\n| Sterile supply (CSSD) | `cssd` | no | — | Sterilizer loads, packs, issue and recall. |\n| Blood transfusion | `blood_transfusion` | yes | `inpatient` | The hospital blood bank and the bedside: units received from a licensed blood center or bank (or, for a II B or II C hospital without its own bank, under a contract), the storage log, compatibility tests, issue, the two-person bedside check, reactions, wastage and return. Donors and their blood are the blood_center service's. |\n| Blood center (donors and their blood) | `blood_center` | yes | `blood_transfusion` | The hospital's own blood center under its PBTA licence (owner decision B1, decisions 48): donors registered once for life, the doctor's assessment and deferral, written consent, the collection, every donation's five screens and its group, components in quarantine, and their release into the blood bank's stock by two people. Distribution to other hospitals is not in this release. |\n| Maternity and newborn care | `maternity` | yes | `inpatient` | Obstetric risk assessments with the counselling (and the nutritional assessment in Category I and II A) and newborns registered as patients of their own, 'Baby of' the mother, with their own band; the hospital's labour register and the birth notification for the union council, never a certificate (owner decision M1). The list of high-risk cases and its notice are kept whether or not it runs. |\n| Home visits | `home_visits` | no | — | Care at the patient's home by the establishment's doctors or nurses (the clinic manual, indicator 32). Not Active is a valid policy too: the notice for display then says home visits are not provided. |\n| Preventive programmes | `preventive_programmes` | no | — | Immunization, family planning, TB-DOTS, malaria and dengue control and the like, as their national programmes run them: the list displayed, each patient's enrolment and the services given (the clinic manual, indicator 26). Retired only once every enrolment is completed or transferred. |\n\nWho: **Owner, Hospital Admin, Hospital Director or Clinic Director** (`establishment.manage`) changes it; **Quality Officer** reads the history\n(`msds.view`); **every user** reads `GET /establishment`.\n\n## 1. Every frontend: one build for every profile (app shell)\n\nBuild **one** frontend with every workspace and screen in it. A clinic and a Category I hospital run the same build,\nand a change of profile downloads nothing, installs nothing and flips no flag in your app: what the app shows follows\nthe establishment's **services** and their states, which the server tells you. Never decide anything from the profile's\ncategory (`profile.code`). The category picks the inspection framework (`GET /msds/indicators`), the letterhead, and the\nfew rules a screen names itself (the clinic's complete consultation and VCO); the menus follow the services.\n\n1. **After login and again on the event `establishment.changed`:** `GET /establishment`. Any user may read it.\n2. **The launcher:** `views.workspaces` lists the workspaces that exist for a service (Ward Nursing and the Admissions\n   Desk for inpatient care, ER / Triage for the emergency department, the theatre's three for surgery, the CSSD, the\n   pharmacy counter, the laboratory's (bench, verification and lab admin) and radiology's). Show each as its `view` says. A workspace it does not list is\n   core: show it to the users whose permissions open it.\n3. **The menus:** `views.screens` lists the screens that exist for a service, each with its `role` (`work`, `setup` or\n   `records`) and its `view`. A screen it does not list is core and always shown.\n\n   | `view` | What the screen does |\n   |---|---|\n   | `full` | Shown, with every action the user's permissions allow |\n   | `open_work` | The service is Retiring: shown with the banner \"No new … from now on\" (the capability's `new_work`) and its open work; the actions that start new work of it are hidden; everything else stays (completing, transferring, settling, correcting) |\n   | `records` | The service is Retired (or Preparing after it ran): shown under a \"Records\" marker with its lists, details, prints and the corrections the server still accepts; nothing that starts new work |\n   | `setup` | Not in the daily menus: reached from Facility settings, where a preview's prerequisites link to it, to set the service up before switching it on |\n   | `hidden` | In no menu: the service has never run here, so there is nothing to show |\n\n   The server computes these views (`catalog/service_views.py`); do not keep a table of your own. Example: a new clinic\n   that sends tests to a partner laboratory sees the laboratory's send-out screens and none of the ward, theatre,\n   emergency, pharmacy or CSSD workspaces; when it becomes a II C hospital with inpatient care, the Admissions Desk and\n   Ward Nursing appear on `establishment.changed`; when the ward later retires with patients still in it, those\n   workspaces show `open_work` until the last patient leaves, then `records`.\n4. **Inside a screen:** every operation that starts new work of a service lists it in the OpenAPI document as\n   `x-capability-gates` (and in `GET /establishment` → `capabilities[].operations`). Only these operations are gated:\n   reads, the steps of work already started and corrections never are.\n   - A gate without `when` (`POST /admissions` → `inpatient`): hide the action unless the service is in `active`.\n   - A gate with `continues_while_retiring` (`POST /prescriptions/{prescription_id}/dispense` → `dispensing`): show it\n     while the service is Active or Retiring (work started before the retirement finishes).\n   - A gate with `when` names one choice of the action (`POST /reception/registrations` → `emergency_department` \"for\n     an emergency patient (source Emergency) …\"; `POST /lab/requisitions` → `laboratory` for in-house tests,\n     `outsourced_diagnostics` for send-outs; `POST /clinical-encounters` → `outpatient_procedures` for a procedure\n     note): hide or disable that choice, keep the rest of the action. An action left with no choice is hidden.\n5. **If an action is still sent**, the server answers `CAPABILITY_INACTIVE`. Show \"This service is not active here\",\n   not a generic error, and read `GET /establishment` again.\n6. **The category's own rules:** `GET /establishment → rules_in_force` lists the few rules that follow the PHC\n   category (today: a clinic's VCO and complete consultation, a Category I or II A high-risk pregnancy's nutrition, no indoor\n   service in a clinic). Show a rule that `applies` on the screens it names, before the user meets its error.\n\nThe MCP server gives the same for each screen: `get_screen_bundle` → `screen.service` (its services, role and the view\ntable) and each endpoint's `service_gates`; `screen_test_plan` → `service_cases`.\n\n## 2. Setting up or changing the establishment (Owner / Hospital Admin)\n\nThis is facility-wide configuration: the **PHC profile and services** section (`profile_and_services`) of the Facility\ntier of the one Settings window, opened from the avatar or Ctrl+, in any workspace. Build the window's tiers and\nsections from `GET /settings/sections` (only the sections the user's permissions open: this one for holders of\n`establishment.manage`).\n\n1. **Read:** `GET /establishment` (profile, services with their state, open work and `revision`) and\n   `GET /establishment/profiles` (the five profiles with their framework and a `preset`: the services the setup\n   suggests ticking; the person decides each one). `GET /msds/profile` shows what the beds suggest (`note`, the wards\n   table) and `needs_confirmation`.\n2. **The form:**\n   - the category;\n   - the PHC registration or licence number;\n   - the licence from the compliance register (`GET /facility/compliance-documents?category=Hospital`, kind Licence or\n     Registration);\n   - the date it took effect on the licence (`effective_from`: never in the future, never before the current profile's);\n   - the beds the licence names (`licensed_beds`, optional: leave it empty when the licence names none, as a clinic's);\n   - a reason;\n   - the services, each with the state it should reach.\n\n   A category other than the one the beds suggest needs the profile's `reason`. No beds suggest nothing, which is\n   consistent with a clinic. `GET /msds/profile` counts the beds three ways: `suggestion.beds` (set up: the active beds\n   of the active wards, emergency wards left out), `suggestion.operational` (in use: less the beds out of service, a\n   temporary closure) and `licensed_beds` (what the licence names). Show `review` under them: more beds set up than\n   licensed, a licence outside its category's band, beds on a clinic's licence. It is advice: the category stays\n   what the licence says until a person records another.\n3. **Preview:** `POST /establishment/changes/preview`\n\n   ```json\n   {\n     \"profile\": {\"category\": \"IIC\", \"registration_number\": \"PHC/LHR/0456\", \"licence_document_id\": 41,\n                 \"effective_from\": \"2026-11-01\", \"reason\": \"Licensed for 12 beds\"},\n     \"capabilities\": [{\"capability\": \"dispensing\", \"state\": \"Active\"}, {\"capability\": \"inpatient\", \"state\": \"Active\"}],\n     \"reason\": \"The clinic opens its 12-bed ward\"\n   }\n   ```\n\n   The answer writes nothing. Show all of it:\n   - `moves`, in the order they will be applied. Each move to Active carries its `prerequisites`, checked **every\n     time**, a reactivation too (an inpatient ward with beds, a nurse who may give medicines, a theatre and a\n     privileged surgeon, …). Each move away from Active carries its `outstanding` open work: admissions, inpatient\n     bills, emergency visits, operations, lab tests, imaging orders, unacknowledged critical results, prescriptions\n     to dispense, stock on hand, open recalls, sterile packs, programme enrolments, draft procedure notes. Each kind\n     comes with `label`, `how` (how it ends: completed, transferred or settled) and `operations` (`METHOD /path`, all\n     still allowed while the service retires): show them as the to-do list of the contraction, each with a link to its\n     screen. A pending admission that will not happen is cancelled with its reason (`POST /admissions/{id}/cancel`).\n   - `profile`: before and after, the framework change and its `implications`; the beds set up and in use, the\n     `licensed_beds` entered and the `review` notes (never a refusal).\n   - `problems`: why it cannot be applied now. `allowed` is false while there are any. For example\n     `CAPABILITY_DEPENDENCY` (surgery needs inpatient care; the blood center needs blood transfusion), `CAPABILITY_NOT_PERMITTED`\n     (an indoor service under the Clinic profile), `CAPABILITY_PREREQUISITE`, `CAPABILITY_WORK_OUTSTANDING` (Retired\n     while work is open: use Retiring), `CAPABILITY_NOT_IMPLEMENTED`, `MSDS_CATEGORY_REASON_REQUIRED`,\n     `NOTHING_TO_CHANGE`.\n   - `acknowledgements`: show each as a checkbox with its message.\n   - `warnings`: show them; they do not block.\n4. **Apply:** `POST /establishment/changes` with an `Idempotency-Key`, the same body, `expected_revision` (the\n   preview's `revision`) and `acknowledged` (the codes the person ticked). Everything is applied or nothing:\n   - `VERSION_CONFLICT`: someone changed it meanwhile; preview again.\n   - `CONFIRMATION_REQUIRED`: `details.acknowledgements` lists what to tick.\n   - `ESTABLISHMENT_CHANGE_REFUSED`: `details.problems`, as in the preview.\n\n   A repeated request with the same key returns the first answer. Then every terminal receives\n   `establishment.changed`, and printouts carry the new category from its effective date. A document issued earlier\n   keeps the letterhead it was issued with when it is reprinted.\n5. **History:** `GET /establishment/changes` and `GET /establishment/changes/{change_id}`: who, when, why, the profile\n   before and after, each move, and the open work at that moment. `GET /msds/category-confirmations` lists each\n   recorded category with its effective date. A reversal is a new change; nothing is ever deleted.\n\n\n## What is declared to the PHC\n\nEach service in `GET /establishment` also carries `phc_declared`, the services of the declaration to the PHC\n(`GET /phc/services`, the HCE portal's list) that name it, and `declaration_note` where the two disagree: \"Declared to\nthe PHC but not running here\" or \"Running here but not in the services declared to the PHC\". Show the note next to the\nservice with a link to the declaration screen. A declaration switches nothing and proves nothing: the person corrects\nthe declaration (`PUT /phc/services`) or sets the service up. A laboratory service declared once covers the in-house and\nthe partner laboratory alike. Services the PHC lists that Haspataal has no separate service for (cardiology, dialysis,\nthe surgical specialties ...) are not compared.\n\n## Staff and duties (the staffing matrix)\n\n`GET /establishment/staffing` lists each duty (registration, consultation, payments, refunds and their approval,\ndispensing and the high-alert second check, the MAR and its second check, laboratory entry and verification, imaging\nreports, record review, consent, configuration) with the active staff who can do it and a status:\n\n- `Ok`;\n- `NobodyHolds`: no active member of staff holds its permission (the service's work would stop);\n- `NeedsSecondPerson`: a rule needs two different people (an approval is never the requester's, a high-alert medicine\n  is checked by a second person, a result is verified by someone other than who entered it, a reviewer never reviews a\n  record they wrote in) and only one person holds both sides. The rule is never weakened: `solo_alternative` says what\n  is permitted instead (for example, not stocking high-alert medicines, or an outside reviewer's login);\n- `NotApplicable`: the service is not running.\n\nCall it after every applied change and whenever staff join or leave: contraction can break it as well as expansion.\n\n## 3. Typical journeys\n\n- **A clinic grows into a hospital** (Clinic → II C): add the ward and beds, a nurse and the formulary first. Then one\n  change: profile II C, `dispensing` and `inpatient` Active. The clinic's patients keep their MRNs and records; their\n  first admission links to them.\n- **A hospital becomes a clinic** (II B → Clinic, with patients still admitted): one change records the Clinic profile\n  **at once**. `surgery` and `emergency_department` go to Retired (nothing open) and `inpatient` to Retiring\n  (acknowledge `retire:inpatient`). No new admission starts (`CAPABILITY_INACTIVE`). The admitted patients are\n  discharged and their bills settled through the usual steps. Then a second change moves `inpatient` to Retired, which\n  is refused while anything is open.\n- **Back to a hospital:** one change, with the profile and the services back to Active. Every prerequisite is checked\n  again, for example a missing emergency ward blocks the emergency department, and nothing is half-done.\n- **A direct change between categories** (I → II A, II C → I): only the profile moves. The services stay as they are\n  unless the person changes them; a bigger category never switches on a specialty by itself.\n\n## 4. What the change never does\n\nIt never changes the build (DEV/PROD), the licence or the EXE. It never downloads anything, runs a migration, deletes\na record, recalculates an old bill or reverses a stock movement. Earlier self-assessments stay with the framework they\nwere made under. Jobs of a service that is neither Active nor Retiring pause; the follow-up of critical results,\nrecalls, complaints and incidents always runs.\n\n## 5. Acceptance criteria (the staff frontend)\n\nThe backend is complete when its tests pass; the facility settings are complete only when a named person has seen a\nfrontend do all of this with fresh data (frontend guide 17). Until then the UI integration is pending.\n\n1. **App shell, one build.** The same frontend build runs a clinic and a Category I hospital. The launcher and the\n   menus show each workspace and screen as `GET /establishment` → `views` says (a new clinic shows no ward, theatre,\n   emergency, pharmacy or CSSD workspace; a retiring ward keeps its open work with the banner; a retired service's\n   screens are records) and redraw on `establishment.changed` without a new login; nothing is decided from the\n   profile's category. Inside a screen each operation of `x-capability-gates` (or the choice its `when` names) is\n   hidden while its service is not in `active`, and a refused action shows \"This service is not active here\" for\n   `CAPABILITY_INACTIVE`.\n2. **Where it lives.** The profile and the services are a section of the one Settings window (`GET /settings/sections`),\n   shown only to holders of `establishment.manage`; a user without it sees My settings (language, zoom) and nothing of\n   the facility.\n3. **First setup, each profile.** On a new installation the reviewer sets up, once each, a clinic with no beds and a\n   Category I hospital directly, from the profile list and its preset, ticking each service by hand.\n4. **Preview before apply.** Every part of the preview is visible: the moves in order, each prerequisite (met or\n   not), the open work of each service with its `label`, `how` and links to the screens of its `operations`, the\n   problems, the acknowledgements as checkboxes, the warnings and the beds' `review` notes. Apply sends an\n   `Idempotency-Key` and `expected_revision`; `VERSION_CONFLICT` reloads the preview; a double click applies once.\n5. **Contraction.** With a patient admitted, the reviewer moves a hospital to Clinic: the profile changes at once,\n   new admissions are refused, the admitted patient is discharged and the bill settled from the usual screens, a\n   pending admission is cancelled with its reason, and only then does inpatient care retire.\n6. **Reactivation.** Moving a service back to Active shows its prerequisites again; a missing one blocks it.\n7. **History and identity.** The change history shows who, when, why and the open work at that moment; a document\n   issued before the change reprints with its old name and PHC number and its issue line.\n8. **Staff and declaration.** The staffing matrix and each service's PHC declaration note are shown after every\n   change.\n9. **Usability.** F1 opens the help of the screen, the role FAQ answers the settings questions, the screens work at\n   100-250 % zoom.",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/indicators",
+          "summary": "The MSDS indicators of a category"
+        }
+      ]
+    },
+    {
+      "heading": "The services",
+      "anchor": "the-services",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/establishment",
+          "summary": "The establishment's profile and services, with the configuration revision"
+        }
+      ]
+    },
+    {
+      "heading": "1. Every frontend: one build for every profile (app shell)",
+      "anchor": "1-every-frontend-one-build-for-every-profile-app-shell",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/indicators",
+          "summary": "The MSDS indicators of a category"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/establishment",
+          "summary": "The establishment's profile and services, with the configuration revision"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions",
+          "summary": "Doctor: Admit Patient (→ Admission_Pending)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/dispense",
+          "summary": "Dispense Now (partial allowed, FEFO)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/reception/registrations",
+          "summary": "Register + OPD slip + payment + queue token (atomic)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/requisitions",
+          "summary": "Order lab tests for an OPD visit or an inpatient"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/clinical-encounters",
+          "summary": "Write a clinical note (draft or finalize=true)"
+        }
+      ]
+    },
+    {
+      "heading": "2. Setting up or changing the establishment (Owner / Hospital Admin)",
+      "anchor": "2-setting-up-or-changing-the-establishment-owner-hospital-admin",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/settings/sections",
+          "summary": "The Settings window: the tiers and sections this caller may open (also before login)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/establishment",
+          "summary": "The establishment's profile and services, with the configuration revision"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/establishment/profiles",
+          "summary": "The profiles an establishment can have, each with its framework and suggested services"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/profile",
+          "summary": "The PHC category: as confirmed, and what the beds suggest"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/compliance-documents",
+          "summary": "The compliance register"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/establishment/changes/preview",
+          "summary": "Preview a change of profile or services (nothing is saved)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/cancel",
+          "summary": "Cancel an admission that will not happen (before the patient is admitted)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/establishment/changes",
+          "summary": "Apply a change of profile or services"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/establishment/changes",
+          "summary": "The history of changes, newest first"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/establishment/changes/{change_id}",
+          "summary": "One change"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/category-confirmations",
+          "summary": "Every recorded PHC category, newest first"
+        }
+      ]
+    },
+    {
+      "heading": "What is declared to the PHC",
+      "anchor": "what-is-declared-to-the-phc",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/establishment",
+          "summary": "The establishment's profile and services, with the configuration revision"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/services",
+          "summary": "The PHC's services list with what the hospital declares"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/phc/services",
+          "summary": "Declare the services the hospital provides"
+        }
+      ]
+    },
+    {
+      "heading": "Staff and duties (the staffing matrix)",
+      "anchor": "staff-and-duties-the-staffing-matrix",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/establishment/staffing",
+          "summary": "Who can do each duty, and where a second person is missing"
+        }
+      ]
+    },
+    {
+      "heading": "5. Acceptance criteria (the staff frontend)",
+      "anchor": "5-acceptance-criteria-the-staff-frontend",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/establishment",
+          "summary": "The establishment's profile and services, with the configuration revision"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/settings/sections",
+          "summary": "The Settings window: the tiers and sections this caller may open (also before login)"
+        }
+      ]
+    }
+  ]
+}

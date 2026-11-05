@@ -1,0 +1,545 @@
+{
+  "product": "Haspataal HMS backend",
+  "version": "1.0.0",
+  "generated_at": "2026-11-05T08:16:10.122689+00:00",
+  "server_build": "2026-11-05T08:16:10.122689+00:00",
+  "server_build_means": "This DEV server's build (when its knowledge pack was built): a Fixed backend issue report is on this server when server_build is at or after its fixed_in.",
+  "api_base": "/api/v1",
+  "websocket": "/ws/v1/events",
+  "start_here": "get_build_roadmap() says what to build first, next and last; get_screen_bundle(screen_id) has everything to build one screen in one answer.",
+  "counts": {
+    "endpoints": 912,
+    "recorded_examples": 912,
+    "screens": 269,
+    "events": 73,
+    "error_codes": 451,
+    "workspaces": 30,
+    "state_machines": 34,
+    "build_phases": 12,
+    "scenarios": 12,
+    "open_decisions": 22,
+    "lessons": 9,
+    "msds_indicators": 601,
+    "cpsa_documents": 62,
+    "interview_questions": 83
+  },
+  "counts_explained": {
+    "endpoints_without_a_recorded_example": [],
+    "handbook_pages": "one per screen and workspace, including an operator job aid for the badge-station kiosk"
+  },
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "sandbox": {
+    "does": [
+      "real calls as demo accounts on the DEV server (sandbox_call)",
+      "the realtime events a demo account receives (sandbox_events)",
+      "named screen states made with real calls (sandbox_scenario), races included"
+    ],
+    "does_not": [
+      "simulated time (ticket expiry, escalations: wait, or test by hand)",
+      "fault injection (simulate network loss in your own client)",
+      "isolated runs: the demo data is shared by every developer, so scenarios tag their records SCN <run>"
+    ]
+  },
+  "workspaces": {
+    "reception": {
+      "label": "Reception & Front Desk",
+      "description": "Registration, returning-patient lookup, OPD slips, queue management, refunds/waivers, counter cash."
+    },
+    "doctor": {
+      "label": "Clinical OPD / IPD",
+      "description": "Live queue, EMR notes, e-prescriptions with live stock, lab/imaging orders, admissions, re-route."
+    },
+    "admissions": {
+      "label": "Admissions Desk",
+      "description": "Pending admissions, live bed matrix, bed allocation, waitlists, overflow."
+    },
+    "triage": {
+      "label": "ER / Triage",
+      "description": "Code Red one-click admit, trauma profiles, ER flowsheet, medico-legal cases, bodies awaiting handover."
+    },
+    "ward_nurse": {
+      "label": "Ward Nursing",
+      "description": "Assigned beds, vitals grid, MAR checklist, nursing notes, corrections."
+    },
+    "head_nurse": {
+      "label": "Head Nurse",
+      "description": "Nursing duty roster (drag & drop nurses onto beds per shift), roll call, supply indents, leave approvals."
+    },
+    "pharmacy": {
+      "label": "Pharmacy Counter",
+      "description": "Pending prescription queue, FEFO dispensing, partial dispensing, OTC mode, charity override."
+    },
+    "pharmacy_admin": {
+      "label": "Pharmacy Admin",
+      "description": "Batch intake, supplier invoices, low-stock/near-expiry widgets, profit, indent approval."
+    },
+    "lab_tech": {
+      "label": "Lab Technician",
+      "description": "Scanner-first sample processing, dynamic metric grid with live flagging, patient identification at collection, rejected samples, samples sent to partner laboratories, critical results to tell."
+    },
+    "lab_verifier": {
+      "label": "Lab Verifier",
+      "description": "Verify & publish results before doctors see them; tell the doctor every critical result."
+    },
+    "lab_admin": {
+      "label": "Lab Admin",
+      "description": "Test prices and turnaround, reagent inventory, BOM, profit & revenue share, partner laboratories, the lab's quality records (MSDS AAC 1-6)."
+    },
+    "radiology": {
+      "label": "Radiology",
+      "description": "Imaging worklist with the checks before the examination, PACS study linking, the radiologist's report and critical findings, outsourced examinations, repeated images, turnaround (MSDS AAC 7-14)."
+    },
+    "ot_admin": {
+      "label": "OT Admin",
+      "description": "OT request queue, calendar, intra-op consumables, the safety checklist, recovery, finalize & commission split."
+    },
+    "anaesthesia": {
+      "label": "Anaesthesia",
+      "description": "Pre-anaesthesia clinic, the anaesthesia record in the theatre, the sign in, recovery and its discharge, adverse events (MSDS COP 32-40)."
+    },
+    "ot_nurse": {
+      "label": "OT Nursing",
+      "description": "The surgical safety checklist, consumables, recovery observations and discharge (MSDS COP 37, 38, 44)."
+    },
+    "hr": {
+      "label": "HR Admin",
+      "description": "6-step onboarding wizard, documents, ID cards and staff badges, duty rosters, attendance, leave, payroll."
+    },
+    "finance_accountant": {
+      "label": "Accountant",
+      "description": "3-pane audit: shift reconciliation | approval queue | accounts payable."
+    },
+    "finance_cashier": {
+      "label": "Cashier",
+      "description": "Counter collections, dues settlement, cash-backs."
+    },
+    "billing_admin": {
+      "label": "Billing Admin",
+      "description": "Service catalogue, panels, discount ceilings, consultant contracts, waiver/credit approval."
+    },
+    "owner_dashboard": {
+      "label": "Owner / Hospital Admin",
+      "description": "Daily P&L flash, visited vs examined, risk & compliance, approvals."
+    },
+    "inspection": {
+      "label": "PHC Inspector (read-only)",
+      "description": "The Punjab Healthcare Commission's inspector, on a guest login for the days of the inspection (role phc_inspector, the one permission msds.inspect): the hospital's category, the MSDS indicators, the inspection pack and the web portal (CPSA) documents, all read-only; never a patient's chart, money, staff files or the hospital's internal preparation."
+    },
+    "ops_admin": {
+      "label": "Facility Operations",
+      "description": "Facility queues | command & control | live facility feed; utilities & overheads; support-staff duty roster and roll call."
+    },
+    "maintenance": {
+      "label": "Maintenance",
+      "description": "Work orders and assets; medical equipment, its maintenance and calibration."
+    },
+    "super_admin": {
+      "label": "Super Admin (IT)",
+      "description": "Provisioning queue | role matrix | terminal & printer mapping | server health | kill switch."
+    },
+    "zakat": {
+      "label": "Zakat Officer",
+      "description": "Charity approvals."
+    },
+    "quality": {
+      "label": "Quality & Medical Records",
+      "description": "The quarterly medical record review of the Punjab Healthcare Commission's MSDS (IMS-3): cycles, sample, panel, report, deficiencies, corrective and preventive actions; mortality statistics and the medico-legal register."
+    },
+    "infection_control": {
+      "label": "Infection Control",
+      "description": "Infection prevention and control (MSDS IPC 84-92, COP 50): infection cases, the wound surveillance after operations, rounds and audits, the waste log, the sterile supply's sets, sterilizers and recalls, the rates and the committee report."
+    },
+    "cssd": {
+      "label": "Sterile Supply (CSSD)",
+      "description": "The day's sterilizer tests, every load with its indicators and pack labels, the sterile stock and its issue to the wards and theatres (MSDS IPC 90-92)."
+    },
+    "self_service": {
+      "label": "My Workspace",
+      "description": "Own leave requests, balances, duties, attendance, issue reporting."
+    },
+    "badge_station": {
+      "label": "Badge station kiosk",
+      "description": "Not a user workspace: the full-screen page of a barcode-scanner badge station (no login; authenticated by the station's key)."
+    }
+  },
+  "guides": [
+    {
+      "slug": "getting-started",
+      "title": "Getting started",
+      "summary": "Architecture, base URLs, conventions and your first authenticated call in 10 minutes."
+    },
+    {
+      "slug": "authentication",
+      "title": "Authentication & sessions",
+      "summary": "Login, refresh-token rotation, forced password change, workspaces, permissions and the kill switch."
+    },
+    {
+      "slug": "envelope-and-errors",
+      "title": "Envelope & errors",
+      "summary": "The response envelope, the error model and exactly what the UI should do for each class of error."
+    },
+    {
+      "slug": "realtime",
+      "title": "Realtime (WebSocket)",
+      "summary": "One WebSocket per window keeps queues, beds, alerts and boards live — with guaranteed catch-up after reconnects."
+    },
+    {
+      "slug": "idempotency-and-concurrency",
+      "title": "Idempotency, concurrency & corrections",
+      "summary": "Safe retries for record creation, money and stock, optimistic locking with row_version, and append-only corrections."
+    },
+    {
+      "slug": "printing-and-hardware",
+      "title": "Printing & hardware",
+      "summary": "Receipt/label/document print payloads (wristbands and medicine labels too), the letterhead with the PHC number, sets of documents (PDFs only, one per click or one combined PDF by the user's preference), Urdu and right-to-left printouts (laid out by the terminal), terminal→printer mapping, barcode scanners (wristbands and medicines at the bedside), badge stations (RFID, printed QR, biometric) and ID cards."
+    },
+    {
+      "slug": "electron-integration",
+      "title": "Electron integration",
+      "summary": "Trusting the hospital CA, secure token storage, LAN diagnostics, zoom & Urdu, multi-window workspaces."
+    },
+    {
+      "slug": "lan-deployment",
+      "title": "LAN, TLS & environments",
+      "summary": "How the server is reached on the hospital network, ports, the CA download, and dev vs production."
+    },
+    {
+      "slug": "demo-data-and-testing",
+      "title": "Demo data & testing",
+      "summary": "A local backend with a realistic demo hospital, one login per role, recorded examples and the MCP sandbox."
+    },
+    {
+      "slug": "mcp-for-agents",
+      "title": "MCP server for coding agents",
+      "summary": "Connect Claude Code, Cursor or any MCP client so your agent knows every endpoint, payload, screen and rule, and can try requests on the DEV server."
+    },
+    {
+      "slug": "connecting-terminals",
+      "title": "Connecting terminals",
+      "summary": "How a desktop terminal finds the hospital server, trusts it once, remembers every address and survives outages during a shift — with Electron code."
+    },
+    {
+      "slug": "end-user-handbook",
+      "title": "The end-user handbook",
+      "summary": "Staff help delivered with every screen and workspace: purpose, every interaction and outcome, role-specific task FAQs, English and Urdu, offline search and permission-filtered access."
+    },
+    {
+      "slug": "connecting-your-coding-agent",
+      "title": "Connecting your coding agent",
+      "summary": "First access, registration, separate frontend implementations and project-local MCP connections on Windows, macOS and Linux."
+    },
+    {
+      "slug": "glossary",
+      "title": "Glossary",
+      "summary": "The hospital's words as the API uses them (MRN, ticket, token, queue entry, admission, MAR dose, requisition, sample, correction …), what identifies each and where its states come from."
+    },
+    {
+      "slug": "integrations",
+      "title": "Integrations",
+      "summary": "What Haspataal connects to and what it does not: the optional PACS (Orthanc), printers, barcode scanners, badge stations, the WHO code lists, the PHC's web portal; no HL7, FHIR or analyser interfaces."
+    },
+    {
+      "slug": "ui-quality",
+      "title": "Building UI with care",
+      "summary": "The terminal app's quality contract: staff context, approved patterns, complete journeys, explanatory handbooks and evidence before declaring work complete."
+    },
+    {
+      "slug": "workspace-review-checklist",
+      "title": "Human workspace acceptance checklist",
+      "summary": "Mandatory human review of each role's actual frontend, fresh-data CRUD, help and FAQs, bounded zoom, permissions, recovery and handovers before accepting completion."
+    },
+    {
+      "slug": "design-principles",
+      "title": "Design principles: a terminal with character",
+      "summary": "The vendor's point of view for the hospital terminal app, in ten principles from the structure to the last detail, so staff enjoy using it and it never slows their work in the busiest hour."
+    },
+    {
+      "slug": "terminal-installer",
+      "title": "The terminal installer: one self-contained setup EXE",
+      "summary": "How to ship the Windows terminal app as one setup EXE that installs with no internet, as the server's own setup does - everything inside, a free toolchain, a silent install for IT, releases the vendor signs and updates from the hospital's own server."
+    },
+    {
+      "slug": "reporting-backend-issues",
+      "title": "Reporting backend issues",
+      "summary": "When the backend is wrong, or lacks something your screens need, ask your coding agent to report it with report_backend_issue (or report it on the portal); the backend team answers every report."
+    }
+  ],
+  "lessons": [
+    {
+      "slug": "how-haspataal-works",
+      "title": "Lesson 1 · How Haspataal works"
+    },
+    {
+      "slug": "your-first-calls",
+      "title": "Lesson 2 · Your first calls"
+    },
+    {
+      "slug": "answers-and-errors",
+      "title": "Lesson 3 · Answers and errors"
+    },
+    {
+      "slug": "workspaces-and-permissions",
+      "title": "Lesson 4 · Workspaces and permissions"
+    },
+    {
+      "slug": "writing-safely",
+      "title": "Lesson 5 · Writing safely"
+    },
+    {
+      "slug": "live-updates",
+      "title": "Lesson 6 · Live updates"
+    },
+    {
+      "slug": "trusting-the-server",
+      "title": "Lesson 7 · Trusting the server on every platform"
+    },
+    {
+      "slug": "your-first-screen-with-your-agent",
+      "title": "Lesson 8 · Your first screen with your coding agent"
+    },
+    {
+      "slug": "reporting-progress-honestly",
+      "title": "Lesson 9 · Reporting progress honestly"
+    }
+  ],
+  "workflows": [
+    {
+      "slug": "blood-center",
+      "title": "Blood center",
+      "summary": "The hospital's own blood center under its PBTA licence - donors registered once for life, the doctor's assessment against the binding minimums, written consent, deferral and telling the donor why, the collection and the donor's reaction, every donation's five screens and its group, components in quarantine, the clearance, the release into the hospital blood bank by two people, discards, labels, the quarterly return and the registers."
+    },
+    {
+      "slug": "blood-transfusion",
+      "title": "Blood transfusion",
+      "summary": "The hospital blood bank from a licensed source to the bedside - sources, units received, the storage log, requests with the transfusion consent, compatibility tests, issue, the two-person bedside check within 30 minutes, observations, the end, reactions with their incident, discards and returns - and the registers and measures the PHC asks for."
+    },
+    {
+      "slug": "clinic-quality-and-education",
+      "title": "QA rounds, patient feedback and health education",
+      "summary": "The in-charge's recurring QA checklist signed and kept, its findings turned into corrective actions; patient feedback on the client satisfaction form with the person in charge's review; the health education materials and every patient guided."
+    },
+    {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "summary": "EMR notes with correction-only edits, formulary with live stock, FEFO partial dispensing, OTC, Zakat."
+    },
+    {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "summary": "The patients' and families' complaints - received in any way and given a tracking number, acknowledged within the hours the procedure sets with a contact person and a course of action, investigated with progress and extensions told, answered with the right to appeal, the appeal decided by someone independent, the actions that follow, the notice of the right to complain in English and Urdu, the written procedure, the monthly return and the statistics."
+    },
+    {
+      "slug": "consent",
+      "title": "Consent (MSDS)",
+      "summary": "The consent register - the general consent of every admission, the informed consents of operations, anaesthesia, transfusions, procedures and high-risk treatments in the patient's language, who decides for a patient who cannot, the doctor's emergency note, refusals and withdrawals, the scan of the signed form, and the written consent policy."
+    },
+    {
+      "slug": "cost-estimates-and-tariff",
+      "title": "Cost estimates, the tariff and ward transfers (MSDS)",
+      "summary": "The tariff every patient can see, the written uniform pricing policy, the cost estimate prepared from the tariff at admission and explained to the patient or the family in their language and signed, a move to another bed or ward (to and from the ICU) with the new estimate when the daily charge changes, the worklist of estimates due and the statistics (told in time, bills close to the estimates)."
+    },
+    {
+      "slug": "deaths-and-medico-legal-cases",
+      "title": "Deaths and medico-legal cases (MSDS)",
+      "summary": "The medico-legal case register with the police intimation and evidence, the death record with the WHO cause-of-death certificate and the handover of the body, the clinical autopsy, the death register and the mortality statistics."
+    },
+    {
+      "slug": "diagnostic-services",
+      "title": "Diagnostic services quality (MSDS)",
+      "summary": "The quality of the laboratory and imaging services - the patient identified when a sample is taken and before an examination, rejected samples, samples sent to partner laboratories under an MOU, turnaround targets with alerts and the MSDS score, critical results and priority diseases told at once, read back, acknowledged and escalated, the radiologist's report and critical findings, the checks before an examination (site and side, pregnancy, contrast under a doctor), outsourced examinations, repeated images, the statistics and the written lab and imaging policies."
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "summary": "One duty roster for all staff with scoped planners (HR, Head Nurse, Ops), rest days rotating through a week that includes Sunday, the week check, duty swaps between colleagues, roll call where there is no badge station, attendance measured against the rostered shift, and badges that work with RFID, printed QR codes or biometrics."
+    },
+    {
+      "slug": "emergency-department",
+      "title": "The emergency department (MSDS)",
+      "summary": "The ER register, triage by clinical need with the hospital's written algorithm, the medico-legal checklist, the ER board with its waiting times, how each patient left, the staff on duty and on call, the triage scale and the ER statistics."
+    },
+    {
+      "slug": "external-referrals",
+      "title": "External referrals and the emergency contact list",
+      "summary": "Refer an outpatient or emergency patient to another facility with a letter kept in the record, the transport, the care on the way and the receiving facility's acknowledgement when our staff take the patient; the register of the past 12 months; one emergency and referral contact list, printed for display."
+    },
+    {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "summary": "Work orders to AP, overhead logging, zero-interface badge stations, provisioning, role matrix, terminal mapping, server health, kill switch."
+    },
+    {
+      "slug": "facility-compliance-equipment-drills",
+      "title": "Licences, equipment maintenance and mock drills (MSDS)",
+      "summary": "The compliance register (licences, registrations, inspection certificates, written plans and the laws that apply, each with its official, its scan, renewals and expiry alerts), the medical equipment inventory with its maintenance and calibration plans from the manufacturer's guidelines, every visit with its result and certificate, the schedule of what is due, the formal write-off, and the mock drills with their coverage by department and shift."
+    },
+    {
+      "slug": "facility-profile-and-services",
+      "title": "Facility settings: the PHC profile and the clinical services",
+      "summary": "What the establishment is: the PHC category on its licence (a clinic, or a hospital of Category II C, II B, II A or I), with the PHC number every printout carries and the date it took effect. What it runs: its clinical services. The establishment switches them on and off itself, in Settings, on the same installation, with no new EXE and no vendor, in either direction, through one previewed, all-or-nothing change. Every frontend reads which services are Active and hides the actions of the others."
+    },
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "summary": "Drawer-per-counter shifts with verified cash drops, AP/AR, live P&L from the ledger, heuristic risk review."
+    },
+    {
+      "slug": "home-visits-and-preventive-programmes",
+      "title": "Home visits and preventive programmes",
+      "summary": "Whether the establishment provides home visits, the notice for display either way and every visit made; the preventive programmes it offers, the list for display, each patient's enrolment and the services given from the programme's card."
+    },
+    {
+      "slug": "hr-and-payroll",
+      "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
+      "summary": "6-step onboarding (no logins), separate IT provisioning, staff badges, attendance flags against the duty roster, weekly days off and the public holiday calendar, supervisor leave routing, one-click payroll."
+    },
+    {
+      "slug": "icd-coding",
+      "title": "ICD coding (disease classifications)",
+      "summary": "The WHO ICD-11 code list shipped with the server, a hospital's licensed ICD-10, the ICD picker in every coding screen, codes checked against the active list and sent with their titles, coded morbidity and mortality statistics."
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "summary": "Reporting incidents, adverse events and near misses without blame, the hospital's list of sentinel events, the review that classes a report and names the investigator, the analysis (a root cause analysis for a sentinel event), the corrective and preventive actions of the hospital-wide action register, the closure, the screening list of what the records show, the monthly return (nil included) and the statistics."
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "summary": "The sterile supply (sets and their shelf life, sterilizers, the daily Bowie-Dick test, loads released on their mechanical, chemical and biological indicators, pack labels, the issue and the use of each pack on a patient, recalls with the patients exposed), healthcare-associated infections reported and decided, the wound surveillance after operations with its rates by surgeon, procedure and theatre, the audits (hand hygiene by moment), the waste log, and the committee's report."
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "summary": "Live bed matrix, admission → bed allocation/waitlist/overflow, Code Red, flowsheet & MAR, strict discharge state machine."
+    },
+    {
+      "slug": "laboratory-and-radiology",
+      "title": "Laboratory & radiology",
+      "summary": "Order → pay → barcoded sample → scanner-first result grid → verification → publish to doctor; PACS linking."
+    },
+    {
+      "slug": "maternity-and-newborns",
+      "title": "Maternity and newborns",
+      "summary": "The hospital's list of high-risk obstetric cases (managed here or referred), its notice and how patients and referrers were told; obstetric risk assessments with the counselling and, in Category I and II A, the nutritional assessment; the newborn as a patient of its own, \"Baby of\" the mother, with its own band."
+    },
+    {
+      "slug": "medical-record-review",
+      "title": "Medical record review (MSDS IMS-3)",
+      "summary": "The quarterly review the Punjab Healthcare Commission requires - statistical sample, peer review against a checklist, deficiencies to the authors, corrective actions, the surveyor's report."
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "summary": "Medication safety - who may prescribe, verbal and telephone orders with the prescriber's countersignature, the pharmacist's queries on unclear orders, high-alert and look-alike medicines with a second person's check at the counter and at the bedside, identity wristbands and the checks before every dose, labels, batch recalls, expired ward stock, self-administration, the patient's own medicines, the written policy and the statistics."
+    },
+    {
+      "slug": "opd-reception",
+      "title": "OPD reception, queues & re-routing",
+      "summary": "Register → pay → token → live doctor queue; re-route, defer/reactivate, expiry; lab-only walk-ins."
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "summary": "Digital request queue, double-booking-proof scheduling, live board, consumable scanning, one-click settlement & commission split."
+    },
+    {
+      "slug": "personnel-records",
+      "title": "Personnel records (MSDS)",
+      "summary": "The personnel file of every member of staff - orientation in three parts, the job description signed by them and the in-charge, credentials verified with their primary source, the mandatory training and its compliance, performance appraisals on schedule (probation, annual, ad hoc) with development, the disciplinary background and the staff health record (confidential) - with the completeness report the surveyor samples, and each member of staff's own view."
+    },
+    {
+      "slug": "phc-inspection",
+      "title": "PHC inspection: category, readiness, the inspection pack, the web portal (CPSA) documents and the inspector's login",
+      "summary": "The establishment's Punjab Healthcare Commission category (a clinic, or Category II C, II B, II A or I), suggested from the beds and recorded by an admin in the facility settings with the PHC number every printout carries; the readiness for an inspection indicator by indicator with the hospital's own assessment; the inspection pack of policies, registers and reports as PDFs, one per click or one combined PDF by the user's preference (never a ZIP); who may write in the medical record and the written IMS policy; the web portal's 20 Critical Patient Safety Areas with the PHC's templates as published and every document filled from the records (PDF, Excel for the CPSA 1 lists), the declaration pre-filled, the uploads recorded and the services declared; the PHC inspector's read-only guest login for the days of the inspection."
+    },
+    {
+      "slug": "phc-interview-prep",
+      "title": "PHC inspection interviews: daily practice, mock interviews, model answers and readiness",
+      "summary": "The PHC's surveyors verify 72 compliance requirements of the MSDS by questioning staff. Every member of staff rehearses the questions of their own roles, in English or Urdu (a question of the day, flashcards rated Knew / Partly / Didn't know on a spaced schedule, progress, a printed pocket guide) with model answers that quote the hospital's own settings and records; supervisors run mock interviews whose gaps in practice become corrective actions; the quality officer adapts the answers to the hospital's SOPs, marks what does not apply and reads the readiness role by role. None of it is shown to the PHC's inspector."
+    },
+    {
+      "slug": "quality-indicators-and-committees",
+      "title": "Clinical quality indicators and committees (MSDS)",
+      "summary": "The clinical quality indicators counted from the records every month (patient assessment, the diagnostic services, invasive procedures, medicines, anaesthesia, blood, the medical records, outcomes and safety) against the hospital's own benchmarks, frozen monthly for the trend; the inpatient nutrition screening and nursing care plan they measure; the hospital's committees with their terms of reference, members, meetings, minutes approved by the chair and the actions decided."
+    },
+    {
+      "slug": "refunds-waivers-credit",
+      "title": "Refunds, VIP waivers & credit (Udhaar)",
+      "summary": "Every privileged money override is request → locked subject → approver → mandatory cash-back prompt."
+    },
+    {
+      "slug": "surgical-care",
+      "title": "Surgical care (MSDS)",
+      "summary": "The clinical record of an operation - clinical privileges, the surgeon's pre-operative note, the consents, the pre-anaesthesia assessment, the surgical safety checklist, the anaesthesia record, the operative note with the post-operative plan, recovery, the adverse events (reported as incidents), the statistics and the written theatre policy."
+    }
+  ],
+  "how_to_work": [
+    "get_build_roadmap() first: the phases, each screen's dependencies with their evidence, what is ready next for you (from your self-reported progress), sessions sized in rubric points",
+    "get_screen_bundle(screen_id) is the unit of work: rules with their rubric ids, endpoints with who may call them, fields, errors, what a lost answer means, realtime, states, test plan, handbook page, scenarios, recorded examples",
+    "sandbox_scenario(id) puts the demo data into a named screen state; sandbox_call runs one request as a demo account; sandbox_events shows the realtime events it caused",
+    "get_workflow_recipe(slug) lists the calls of a hospital workflow in order, with real payloads",
+    "get_endpoint(method, path) gives one contract in full; generate_typescript writes typed calls; validate_request checks a payload before you code it",
+    "screen_test_plan(id) lists what to test; what_changed after a backend update says what broke and which screens, rubric items and handbook pages to revisit",
+    "open_decisions lists what only people can decide (colours, sounds, alert tiers, masks...): never invent those values",
+    "The terminal's contract (provisioning, trust, sessions, windows, offline): the guides authentication, electron-integration and connecting-terminals",
+    "Progress needs human acceptance on the portal: propose_progress submits evidence, my_progress reads accepted claims; no tool records it",
+    "get_ui_quality_brief(screen_id=... or workspace=...): staff context, UI standards, screen handbooks, role FAQs, frontend coverage checks and human journey review; API tests alone are insufficient",
+    "Compulsory on every screen (delivery_gate.compulsory): F1 contextual Help, detailed FAQs for every role of the workspace, Ctrl/Cmd +/-/0 zoom bounded to 100-250 %, and a named human's review with newly created data (guide workspace-review-checklist, the workspace's own section and human_review.operations). Without them a workspace is not done",
+    "The PHC inspection: list_msds_indicators / get_msds_indicator explain the Punjab Healthcare Commission's standards a screen cites (MSDS COP 37, IMS 145 ...) and the inspection documents that evidence them; list_cpsa_documents / get_cpsa_document the web portal's CPSA documents and how each downloads (the PHC's template, the filled PDF or Excel)",
+    "The PHC inspection interviews: get_interview_prep_brief (what to build: practice, mock interviews, readiness), list_interview_questions(role, area) and get_interview_question(key)"
+  ],
+  "conventions": "# Getting started\n\nHaspataal is a **LAN-only backend for clinics and hospitals**. One server in the facility runs the API; every\nterminal (Electron desktop app, browser, tablet) talks to it over the facility's network. There is\nno cloud, no internet dependency and no recurring cost.\n\n```text\n Terminals (Electron / browser)                         Hospital server (Windows 11)\n ─────────────────────────────                          ────────────────────────────────────────────\n reception, wards, pharmacy,  ──HTTPS / WSS (LAN)──►  Caddy :443 ─► API :8100 ─► PostgreSQL\n lab, OT, finance, admin ...                           (TLS, hospital CA)   ▲          ▲ LISTEN/NOTIFY\n                                                                             │          │\n                                                              Worker (jobs, alerts)   Control Center :9000\n```\n\n## One complete terminal app for every facility profile\n\nThe same server software runs a general practitioner's, family physician's or specialist's **clinic** and the\nPunjab Healthcare Commission's hospital categories **II C, II B, II A and I**. A facility may start in any of these\nprofiles and change later, in either direction and as often as it needs, in its own Settings, on the same\ninstallation. It switches services on and off the same way: inpatient care, the emergency department, the theatre,\nthe pharmacy, the laboratory, imaging, the sterile supply, blood transfusion, the blood center, maternity, home visits,\npreventive programmes.\n\nSo **your terminal app is complete from its first release**: one build containing every workspace and every screen of\nthe catalogue, for every profile and every service. When the facility changes profile or switches a service on, it\nneeds nothing from you: no new build, no download, no feature flag, no update. What each user sees is decided at run\ntime by the server:\n\n* after login and on the event `establishment.changed`, read `GET /establishment`: its `views` list which workspaces and\n  screens to show now, and how (in full, with only the open work of a retiring service, as records, in setup, or\n  hidden); the menus redraw without a new login;\n* inside a screen, an operation that starts new work of a service carries `x-capability-gates` in the OpenAPI document:\n  hide it while that service is not Active;\n* never decide anything from the profile's category; the server's views already follow it.\n\nThe playbook *Facility profile and services* (§1 and its acceptance criteria) has the details. Progress on the frontend\nportal is measured against **every** screen of the catalogue, so an app that covers one profile or a few services is\nnever complete. Each implementation you register is expected to be such a complete app on its own (see *Connecting\nyour coding agent*).\n\n## Base URLs\n\n| Environment | REST base | WebSocket | Docs |\n|---|---|---|---|\n| Hospital (production) | `https://<server-name>/api/v1` | `wss://<server-name>/ws/v1/events` | none: `/docs` exists on DEV servers only (`https://<dev-server>/docs`) |\n| Developer machine | `http://127.0.0.1:8100/api/v1` | `ws://127.0.0.1:8100/ws/v1/events` | `http://127.0.0.1:8100/docs` |\n\nNever hard-code a server address: let the user (or IT) enter the server name once at first start\nand store it in the app's settings. Terminals must trust the hospital CA (see *LAN & TLS*).\n\n## Conventions (read once, rely on everywhere)\n\n* **Envelope** — every JSON response is `{\"data\": …, \"meta\": {\"server_time\": …}, \"request_id\": \"…\"}`.\n  Errors are `{\"error\": {\"code\", \"message\", \"details\", \"retryable\", \"retry_after_seconds\"}, \"request_id\"}`.\n* **Money & quantities** are JSON numbers (`1250.5`). **Timestamps** are ISO-8601 UTC\n  (`2026-09-23T04:12:09.123456+00:00`); display them in the hospital timezone (`GET /meta/settings` →\n  `hospital_timezone`). **Business dates** (`YYYY-MM-DD`) are already in hospital time.\n* **Permissions, not roles** — every operation lists the permissions it needs in OpenAPI\n  (`x-permissions`). Show/hide UI by permission (`GET /auth/me` → `permissions`), never by role name.\n* **Enums** — build dropdowns and badges from `GET /meta/enums` (introspected from database CHECK\n  constraints), not from hard-coded lists.\n* **Writes that move money or stock** accept an `Idempotency-Key` header. Send one per user click.\n* **Append-only records** (clinical notes, flowsheet, MAR, ledger, lab results) are never edited — the\n  API offers *correction* endpoints instead. Your UI must never show an \"Edit\" button for them.\n* **Separation of duties** is enforced server-side (a lab technician cannot take cash, a requester\n  cannot approve their own request). The UI should hide such actions, but the server is the guard.\n* **Sets of documents are PDFs, never a ZIP** (the PHC inspection pack). Follow the user's preference\n  `pdf_download` (`GET /auth/me` → `preferences`, changed in Settings → My settings with `PUT /settings/me`):\n  **Separate** (the default) = one download button per document, one click = one PDF; **Combined** = one button,\n  one click = one PDF holding them all. The answer of `GET /msds/inspection-pack` repeats it as `download_mode`\n  ([printing guide](06-printing-and-hardware.md#sets-of-documents-the-phc-inspection-pack)).\n\n## Your first calls\n\n```ts\nconst BASE = \"http://127.0.0.1:8100/api/v1\";\n\n// 1. Log in (demo data: `hms seed-dev`, password Demo-pass-2026)\nconst login = await fetch(`${BASE}/auth/login`, {\n  method: \"POST\",\n  headers: { \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ username: \"demo.reception\", password: \"Demo-pass-2026\" }),\n}).then((r) => r.json());\n\nconst token = login.data.access_token;        // 30 min, keep in memory\nconst me = login.data.user;                   // roles, permissions, workspaces, preferences\n\n// 2. Call anything with the bearer token\nconst hits = await fetch(`${BASE}/patients/search?q=0300`, {\n  headers: { Authorization: `Bearer ${token}` },\n}).then((r) => r.json());\nconsole.log(hits.data);\n```\n\n## Where to go next\n\n1. **Authentication & sessions** — refresh rotation, forced password change, workspaces.\n2. **Envelope & errors** — how to show every error correctly.\n3. **Realtime** — the WebSocket client every screen uses (queues, beds, alerts).\n4. **Idempotency & concurrency** — safe retries, optimistic locking.\n5. **Printing & hardware** — receipts, labels, ID cards, barcode scanners, badge stations.\n6. **Electron integration** — TLS pinning, secure storage, zoom, Urdu.\n7. **Workflows** — step-by-step API sequences for every hospital workflow.\n8. **Glossary** and **Integrations** — the hospital's words as the API uses them; what the server connects to and what\n   it does not.\n\n> **Using an AI coding agent?** Connect it to the Haspataal MCP server of the DEV server (`https://<dev-server>/mcp`)\n> or run it from your checkout (`hms mcp --transport stdio`). It answers \"which endpoint, with what payload\", \"what does\n> this error mean\", \"what must this screen do\", \"which screen do I build next\", writes typed TypeScript and tries\n> requests and scenarios on the DEV server's demo data. It exists in DEV builds only: see the *MCP server for coding\n> agents* guide.",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7"
+}

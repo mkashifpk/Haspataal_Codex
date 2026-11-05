@@ -1,7 +1,7 @@
 {
   "screen_id": "pending_admissions",
-  "contract_fingerprint": "5f8bd8feecd1d68f7841",
-  "knowledge_revision": "893766fb0e066973",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "5980e5c3b1817f4e",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "admissions",
       "purpose": "Doctor-requested admissions waiting for a bed; allocate, waitlist or overflow.",
@@ -291,10 +291,19 @@
     ],
     "related_workflows": [
       "clinical-and-prescriptions",
+      "complaints",
       "consent",
+      "cost-estimates-and-tariff",
+      "deaths-and-medico-legal-cases",
+      "duty-rosters-and-attendance",
       "emergency-department",
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
       "facility-profile-and-services",
+      "incidents-and-sentinel-events",
+      "infection-control",
       "inpatient-and-discharge",
+      "medication-safety",
       "opd-reception"
     ],
     "service": {
@@ -319,7 +328,7 @@
     "workspace": "admissions",
     "phase": "P4",
     "position": 51,
-    "points": 92,
+    "points": 98,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -330,6 +339,14 @@
       "zoom"
     ],
     "depends_on": [
+      {
+        "from": "pending_admissions",
+        "to": "billing_admin",
+        "kind": "data_candidate",
+        "evidence": "it reads finance/panels, which POST /finance/panels on billing_admin creates",
+        "ordering": false,
+        "forward": true
+      },
       {
         "from": "pending_admissions",
         "to": "consultation",
@@ -368,7 +385,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 92,
+    "points": 98,
     "items": [
       {
         "id": "ep:POST /patients/{patient_id}/documents",
@@ -447,6 +464,18 @@
         "label": "POST /admissions/{admission_id}/confirm-billing",
         "points": 3,
         "claimed": true
+      },
+      {
+        "id": "ep:GET /beds/matrix",
+        "label": "GET /beds/matrix",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /finance/panels",
+        "label": "GET /finance/panels",
+        "points": 3,
+        "claimed": false
       },
       {
         "id": "ev:admission.requested",
@@ -856,6 +885,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -936,6 +966,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -1604,7 +1635,8 @@
             "pointer": "/bed_id",
             "type": "integer",
             "required": true,
-            "nullable": false
+            "nullable": false,
+            "description": "An Available bed (GET /beds/matrix?include_beds=true)"
           },
           {
             "pointer": "/admit_now",
@@ -1629,7 +1661,8 @@
             "pointer": "/panel_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The panel (GET /finance/panels)"
           }
         ],
         "cross_field_rules": {},
@@ -1772,7 +1805,8 @@
             "pointer": "/bed_id",
             "type": "integer",
             "required": true,
-            "nullable": false
+            "nullable": false,
+            "description": "An Available bed (GET /beds/matrix?include_beds=true)"
           },
           {
             "pointer": "/admit_now",
@@ -1797,7 +1831,8 @@
             "pointer": "/panel_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The panel (GET /finance/panels)"
           },
           {
             "pointer": "/reason",
@@ -2492,7 +2527,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "The panel (required for Panel, and only for it)"
+            "description": "The panel (required for Panel, and only for it) (GET /finance/panels)"
           }
         ],
         "cross_field_rules": {
@@ -2510,6 +2545,180 @@
         "emits_events": [],
         "prints": false,
         "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /beds/matrix",
+      "summary": "Live bed matrix (counts per ward + optional bed list)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "BED_NO_LONGER_AVAILABLE",
+          "http_status": 409,
+          "message": "Bed was reserved by another terminal.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "bed_id",
+            "current_state"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/allocate-bed"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "include_beds",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "title": "Include Beds"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_BedMatrixOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "include_beds",
+            "required": false,
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /finance/panels",
+      "summary": "Panels (Sehat Sahulat, Zakat, corporate ...)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_PanelOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
       }
     }
   ],
@@ -2533,7 +2742,9 @@
         ],
         "refresh": [
           "GET /patients/{patient_id}/documents",
-          "GET /admissions"
+          "GET /admissions",
+          "GET /beds/matrix",
+          "GET /finance/panels"
         ]
       },
       {
@@ -2546,7 +2757,9 @@
         "refresh": [
           "GET /patients/{patient_id}/documents",
           "GET /admissions",
-          "GET /wards/{ward_id}/waitlist"
+          "GET /wards/{ward_id}/waitlist",
+          "GET /beds/matrix",
+          "GET /finance/panels"
         ]
       },
       {
@@ -2555,7 +2768,9 @@
         "presentation": null,
         "emitted_by_operations": [],
         "refresh": [
-          "GET /admissions"
+          "GET /admissions",
+          "GET /beds/matrix",
+          "GET /finance/panels"
         ]
       },
       {
@@ -2567,7 +2782,9 @@
         ],
         "refresh": [
           "GET /patients/{patient_id}/documents",
-          "GET /admissions"
+          "GET /admissions",
+          "GET /beds/matrix",
+          "GET /finance/panels"
         ]
       }
     ],
@@ -2745,6 +2962,56 @@
     },
     {
       "values": [
+        "Available",
+        "Reserved",
+        "Occupied",
+        "Dirty",
+        "Cleaning",
+        "OutOfService"
+      ],
+      "column": "beds.current_state",
+      "used_at": "GET /beds/matrix.beds[].current_state",
+      "labels": {
+        "Available": "Available",
+        "Reserved": "Reserved",
+        "Occupied": "Occupied",
+        "Dirty": "Dirty",
+        "Cleaning": "Cleaning",
+        "OutOfService": "Out of service"
+      },
+      "state_machine": "bed",
+      "final_states": [],
+      "transitions": {
+        "Available": [
+          "Reserved",
+          "Occupied",
+          "OutOfService"
+        ],
+        "Reserved": [
+          "Occupied",
+          "Available"
+        ],
+        "Occupied": [
+          "Dirty"
+        ],
+        "Dirty": [
+          "Cleaning",
+          "Available",
+          "OutOfService"
+        ],
+        "Cleaning": [
+          "Available",
+          "Dirty",
+          "OutOfService"
+        ],
+        "OutOfService": [
+          "Available",
+          "Dirty"
+        ]
+      }
+    },
+    {
+      "values": [
         "ClinicalDischarge",
         "PharmacyClearance",
         "NursingMARVerification",
@@ -2851,6 +3118,24 @@
     },
     {
       "values": [
+        "SehatSahulat",
+        "Zakat",
+        "GovernmentEmployee",
+        "Corporate",
+        "Other"
+      ],
+      "column": "panels.panel_type",
+      "used_at": "GET /finance/panels[].panel_type",
+      "labels": {
+        "SehatSahulat": "Sehat sahulat",
+        "Zakat": "Zakat",
+        "GovernmentEmployee": "Government employee",
+        "Corporate": "Corporate",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
         "application/pdf",
         "image/jpeg",
         "image/png"
@@ -2926,6 +3211,52 @@
         "other": "Other",
         "unknown": "Unknown"
       }
+    },
+    {
+      "values": [
+        "male",
+        "female",
+        "any"
+      ],
+      "column": "wards.gender_restriction",
+      "used_at": "GET /beds/matrix.wards[].gender_restriction",
+      "labels": {
+        "male": "Male",
+        "female": "Female",
+        "any": "Any"
+      }
+    },
+    {
+      "values": [
+        "General",
+        "Private",
+        "SemiPrivate",
+        "ICU",
+        "CCU",
+        "NICU",
+        "Surgical",
+        "Pediatric",
+        "Maternity",
+        "Emergency",
+        "Isolation",
+        "Other"
+      ],
+      "column": "wards.ward_type",
+      "used_at": "GET /beds/matrix.wards[].ward_type",
+      "labels": {
+        "General": "General",
+        "Private": "Private",
+        "SemiPrivate": "Semi private",
+        "ICU": "ICU",
+        "CCU": "CCU",
+        "NICU": "NICU",
+        "Surgical": "Surgical",
+        "Pediatric": "Pediatric",
+        "Maternity": "Maternity",
+        "Emergency": "Emergency",
+        "Isolation": "Isolation",
+        "Other": "Other"
+      }
     }
   ],
   "states": [
@@ -2998,6 +3329,11 @@
       "admissions_officer"
     ],
     "partial": [
+      "super_admin",
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
       "receptionist",
       "triage_nurse",
       "doctor",
@@ -3005,7 +3341,15 @@
       "surgeon",
       "anaesthetist",
       "ward_nurse",
-      "head_nurse"
+      "head_nurse",
+      "pharmacist",
+      "pharmacy_admin",
+      "hr_admin",
+      "maintenance_admin",
+      "ops_admin",
+      "quality_officer",
+      "ipc_nurse",
+      "cssd_technician"
     ],
     "page_for": [
       "admissions_officer"
@@ -3076,6 +3420,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -3106,6 +3451,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -3362,6 +3708,63 @@
         ],
         "as_one_of": [
           "admissions_officer"
+        ]
+      },
+      {
+        "id": "case:GET /beds/matrix",
+        "call": "GET /api/v1/beds/matrix",
+        "summary": "Live bed matrix (counts per ward + optional bed list)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "employee_self",
+            "lab_admin"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "BED_NO_LONGER_AVAILABLE",
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /finance/panels",
+        "call": "GET /api/v1/finance/panels",
+        "summary": "Panels (Sehat Sahulat, Zakat, corporate ...)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
         ]
       }
     ],
@@ -3620,6 +4023,34 @@
         ],
         "permissions_mode": "any",
         "access": null
+      },
+      {
+        "id": "pending_admissions::GET /beds/matrix",
+        "task": "Live bed matrix (counts per ward + optional bed list)",
+        "call": "GET /beds/matrix",
+        "is_action": false,
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "pending_admissions::GET /finance/panels",
+        "task": "Panels (Sehat Sahulat, Zakat, corporate ...)",
+        "call": "GET /finance/panels",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
       }
     ],
     "rules_to_explain": [
@@ -3780,9 +4211,29 @@
       "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
     },
     {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
+    {
       "slug": "consent",
       "title": "Consent (MSDS)",
       "recipe": "get_workflow_recipe('consent')"
+    },
+    {
+      "slug": "cost-estimates-and-tariff",
+      "title": "Cost estimates, the tariff and ward transfers (MSDS)",
+      "recipe": "get_workflow_recipe('cost-estimates-and-tariff')"
+    },
+    {
+      "slug": "deaths-and-medico-legal-cases",
+      "title": "Deaths and medico-legal cases (MSDS)",
+      "recipe": "get_workflow_recipe('deaths-and-medico-legal-cases')"
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
     },
     {
       "slug": "emergency-department",
@@ -3790,14 +4241,39 @@
       "recipe": "get_workflow_recipe('emergency-department')"
     },
     {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "facility-compliance-equipment-drills",
+      "title": "Licences, equipment maintenance and mock drills (MSDS)",
+      "recipe": "get_workflow_recipe('facility-compliance-equipment-drills')"
+    },
+    {
       "slug": "facility-profile-and-services",
       "title": "Facility settings: the PHC profile and the clinical services",
       "recipe": "get_workflow_recipe('facility-profile-and-services')"
     },
     {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "recipe": "get_workflow_recipe('infection-control')"
+    },
+    {
       "slug": "inpatient-and-discharge",
       "title": "Admission, beds, nursing & discharge",
       "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
     },
     {
       "slug": "opd-reception",
@@ -4322,6 +4798,2721 @@
         "status": 200,
         "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Unknown Male 1\", \"gender\": \"male\", \"age_years\": null, \"requested_ward_id\": 2, \"requested_ward_name\": \"General Ward\", \"ward_id\": 2, \"ward_name\": \"General Ward\", \"bed_id\": 2, \"bed_label\": \"GW-1\", \"primary_doctor_id\": 8, \"primary_doctor_name\": \"Staff 46151\", \"admission_type\": \"CodeRed\", \"status\": \"DischargeInProgress\", \"billing_category\": \"Cash\", \"panel_id\": null, \"is_billing_confirmed\": true, \"is_billing_deferred\": false, \"is_overflow\": false, \"overflow_reason\": null, \"eta_minutes\": null, \"source_ticket_id\": null, \"admission_reason\": \"Fever and productive cough for 5 days, SpO2 91% on air\", \"provisional_diagnosis\": \"Community-acquired pneumonia\", \"initial_care_plan\": null, \"photo_document_id\": null, \"details_stamp\": {\"at\": \"2026-10-16T00:15:29.605276+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-64748, 16-Oct-2026 05:15\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-64748\"}, \"admission_notes\": null, \"requested_at\": \"2026-10-16T00:15:29.427296+00:00\", \"reserved_at\": \"2026-10-16T00:15:29.427296+00:00\", \"admitted_at\": \"2026-10-16T00:15:29.538192+00:00\", \"discharge_initiated_at\": \"2026-10-16T00:15:29.734993+00:00\", \"discharged_at\": null, \"row_version\": 6, \"discharge\": {\"stages\": [{\"clearance_id\": 1, \"stage\": \"ClinicalDischarge\", \"sequence_no\": 1, \"status\": \"Cleared\", \"cleared_…"
       }
+    },
+    "GET /beds/matrix": {
+      "request": {
+        "path": "/api/v1/beds/matrix"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "wards": [
+              {
+                "ward_id": 2,
+                "code": "GW",
+                "name": "General Ward",
+                "ward_type": "General",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 0,
+                "reserved": 0,
+                "occupied": 1,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 1,
+                "code": "ICU",
+                "name": "ICU",
+                "ward_type": "ICU",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 1,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              }
+            ],
+            "summary": {
+              "General Ward": 0,
+              "ICU": 1
+            },
+            "beds": [
+              {
+                "bed_id": 1,
+                "ward_id": 1,
+                "label": "ICU-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 2,
+                "ward_id": 2,
+                "label": "GW-1",
+                "current_state": "Occupied",
+                "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": 1,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": "Admitted",
+                "is_overflow": false,
+                "discharge_blocked_on": null
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:22.967241+00:00"
+          },
+          "request_id": "802131a929b14db0a0c8033474e8d271"
+        }
+      }
+    },
+    "GET /finance/panels": {
+      "request": {
+        "path": "/api/v1/finance/panels"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "panel_id": 1,
+              "code": "SEHAT",
+              "name": "Sehat Sahulat",
+              "panel_type": "SehatSahulat",
+              "discount_pct": 10,
+              "is_credit_panel": false,
+              "is_active": true,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:36:36.431439+00:00"
+          },
+          "request_id": "6c7c15b5aab44317b856c85dbd02d341"
+        }
+      }
+    }
+  },
+  "schemas": {
+    "AdmissionCancelIn": {
+      "properties": {
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Reason",
+          "examples": [
+            "The family took the patient to another hospital"
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "title": "AdmissionCancelIn"
+    },
+    "AdmissionDetailOut": {
+      "properties": {
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "photo_document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Photo Document Id",
+          "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "requested_ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested Ward Id"
+        },
+        "requested_ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested Ward Name"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "bed_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Id"
+        },
+        "bed_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Label"
+        },
+        "primary_doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Id",
+          "description": "The treating doctor's employee id; null for a Code Red no doctor has taken over yet (decisions 57): show 'Doctor: waiting'"
+        },
+        "primary_doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Name"
+        },
+        "admission_type": {
+          "type": "string",
+          "enum": [
+            "Standard",
+            "Emergency",
+            "CodeRed",
+            "Overflow",
+            "Planned"
+          ],
+          "title": "Admission Type"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AdmissionPending",
+            "Waitlisted",
+            "BedReserved",
+            "CodeRedActive",
+            "Admitted",
+            "DischargeInProgress",
+            "Discharged",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "billing_category": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Panel"
+          ],
+          "title": "Billing Category"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "is_billing_confirmed": {
+          "type": "boolean",
+          "title": "Is Billing Confirmed"
+        },
+        "is_billing_deferred": {
+          "type": "boolean",
+          "title": "Is Billing Deferred"
+        },
+        "is_overflow": {
+          "type": "boolean",
+          "title": "Is Overflow"
+        },
+        "overflow_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Overflow Reason"
+        },
+        "eta_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Eta Minutes"
+        },
+        "source_ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Ticket Id"
+        },
+        "admission_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Reason",
+          "description": "Why the patient was admitted (MSDS 149); null only on a Code Red admission not yet recorded"
+        },
+        "provisional_diagnosis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provisional Diagnosis"
+        },
+        "initial_care_plan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Initial Care Plan"
+        },
+        "details_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who recorded the reason and diagnosis, and when (MSDS 147)"
+        },
+        "admission_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Notes",
+          "description": "For the admissions desk (not clinical)"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "reserved_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reserved At"
+        },
+        "admitted_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admitted At"
+        },
+        "discharge_initiated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharge Initiated At"
+        },
+        "discharged_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharged At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "discharge": {
+          "$ref": "#/components/schemas/DischargeStatusOut"
+        },
+        "invoice": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AdmissionInvoiceOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The running IPD bill"
+        }
+      },
+      "type": "object",
+      "required": [
+        "admission_id",
+        "admission_number",
+        "patient_id",
+        "photo_document_id",
+        "mrn",
+        "patient_name",
+        "gender",
+        "age_years",
+        "requested_ward_id",
+        "requested_ward_name",
+        "ward_id",
+        "ward_name",
+        "bed_id",
+        "bed_label",
+        "primary_doctor_id",
+        "primary_doctor_name",
+        "admission_type",
+        "status",
+        "billing_category",
+        "panel_id",
+        "is_billing_confirmed",
+        "is_billing_deferred",
+        "is_overflow",
+        "overflow_reason",
+        "eta_minutes",
+        "source_ticket_id",
+        "admission_reason",
+        "provisional_diagnosis",
+        "initial_care_plan",
+        "details_stamp",
+        "admission_notes",
+        "requested_at",
+        "reserved_at",
+        "admitted_at",
+        "discharge_initiated_at",
+        "discharged_at",
+        "row_version",
+        "discharge",
+        "invoice"
+      ],
+      "title": "AdmissionDetailOut"
+    },
+    "AdmissionInvoiceOut": {
+      "properties": {
+        "invoice_id": {
+          "type": "integer",
+          "title": "Invoice Id"
+        },
+        "invoice_no": {
+          "type": "string",
+          "title": "Invoice No"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Open",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "gross_total": {
+          "type": "number",
+          "title": "Gross Total"
+        },
+        "net_payable": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Payable"
+        },
+        "amount_paid": {
+          "type": "number",
+          "title": "Amount Paid"
+        }
+      },
+      "type": "object",
+      "required": [
+        "invoice_id",
+        "invoice_no",
+        "status",
+        "gross_total",
+        "net_payable",
+        "amount_paid"
+      ],
+      "title": "AdmissionInvoiceOut"
+    },
+    "AdmissionOut": {
+      "properties": {
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "photo_document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Photo Document Id",
+          "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "requested_ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested Ward Id"
+        },
+        "requested_ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested Ward Name"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "bed_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Id"
+        },
+        "bed_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Label"
+        },
+        "primary_doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Id",
+          "description": "The treating doctor's employee id; null for a Code Red no doctor has taken over yet (decisions 57): show 'Doctor: waiting'"
+        },
+        "primary_doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Name"
+        },
+        "admission_type": {
+          "type": "string",
+          "enum": [
+            "Standard",
+            "Emergency",
+            "CodeRed",
+            "Overflow",
+            "Planned"
+          ],
+          "title": "Admission Type"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AdmissionPending",
+            "Waitlisted",
+            "BedReserved",
+            "CodeRedActive",
+            "Admitted",
+            "DischargeInProgress",
+            "Discharged",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "billing_category": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Panel"
+          ],
+          "title": "Billing Category"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "is_billing_confirmed": {
+          "type": "boolean",
+          "title": "Is Billing Confirmed"
+        },
+        "is_billing_deferred": {
+          "type": "boolean",
+          "title": "Is Billing Deferred"
+        },
+        "is_overflow": {
+          "type": "boolean",
+          "title": "Is Overflow"
+        },
+        "overflow_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Overflow Reason"
+        },
+        "eta_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Eta Minutes"
+        },
+        "source_ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Ticket Id"
+        },
+        "admission_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Reason",
+          "description": "Why the patient was admitted (MSDS 149); null only on a Code Red admission not yet recorded"
+        },
+        "provisional_diagnosis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provisional Diagnosis"
+        },
+        "initial_care_plan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Initial Care Plan"
+        },
+        "details_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who recorded the reason and diagnosis, and when (MSDS 147)"
+        },
+        "admission_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Notes",
+          "description": "For the admissions desk (not clinical)"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "reserved_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reserved At"
+        },
+        "admitted_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admitted At"
+        },
+        "discharge_initiated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharge Initiated At"
+        },
+        "discharged_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharged At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "admission_id",
+        "admission_number",
+        "patient_id",
+        "photo_document_id",
+        "mrn",
+        "patient_name",
+        "gender",
+        "age_years",
+        "requested_ward_id",
+        "requested_ward_name",
+        "ward_id",
+        "ward_name",
+        "bed_id",
+        "bed_label",
+        "primary_doctor_id",
+        "primary_doctor_name",
+        "admission_type",
+        "status",
+        "billing_category",
+        "panel_id",
+        "is_billing_confirmed",
+        "is_billing_deferred",
+        "is_overflow",
+        "overflow_reason",
+        "eta_minutes",
+        "source_ticket_id",
+        "admission_reason",
+        "provisional_diagnosis",
+        "initial_care_plan",
+        "details_stamp",
+        "admission_notes",
+        "requested_at",
+        "reserved_at",
+        "admitted_at",
+        "discharge_initiated_at",
+        "discharged_at",
+        "row_version"
+      ],
+      "title": "AdmissionOut",
+      "description": "An admission with its patient, ward, bed and doctor (service.ADM_COLS)."
+    },
+    "AllocateIn": {
+      "properties": {
+        "bed_id": {
+          "type": "integer",
+          "title": "Bed Id",
+          "description": "An Available bed (GET /beds/matrix?include_beds=true)"
+        },
+        "admit_now": {
+          "type": "boolean",
+          "title": "Admit Now",
+          "description": "Patient is already at the bedside: reserve + admit in one step",
+          "default": false
+        },
+        "billing_category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Cash",
+                "Panel"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Billing Category",
+          "description": "Confirmed billing panel (workflow §2.2)"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id",
+          "description": "The panel (GET /finance/panels)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bed_id"
+      ],
+      "title": "AllocateIn"
+    },
+    "AuthorStampOut": {
+      "properties": {
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation",
+          "description": "Designation and specialty, e.g. \"Medical Officer, General Medicine\""
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "Council registration, e.g. \"PMDC 12345-P\" or \"PNC 67890\""
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At",
+          "description": "When the entry was signed, reported or verified"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "The printed line: name, designation, registration, date and time"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "user_id",
+        "name",
+        "designation",
+        "registration",
+        "at",
+        "text"
+      ],
+      "title": "AuthorStampOut",
+      "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
+    },
+    "BedMatrixBedOut": {
+      "properties": {
+        "bed_id": {
+          "type": "integer",
+          "title": "Bed Id"
+        },
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "current_state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "Reserved",
+            "Occupied",
+            "Dirty",
+            "Cleaning",
+            "OutOfService"
+          ],
+          "title": "Current State"
+        },
+        "state_changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Changed At"
+        },
+        "is_overflow_allowed": {
+          "type": "boolean",
+          "title": "Is Overflow Allowed"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "patient_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Name",
+          "description": "Only with with_patients=true"
+        },
+        "mrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mrn",
+          "description": "Only with with_patients=true"
+        },
+        "admission_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "AdmissionPending",
+                "Waitlisted",
+                "BedReserved",
+                "CodeRedActive",
+                "Admitted",
+                "DischargeInProgress",
+                "Discharged",
+                "Cancelled"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Status"
+        },
+        "is_overflow": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Is Overflow"
+        },
+        "discharge_blocked_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharge Blocked On",
+          "description": "The discharge stage the patient in this bed waits for"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bed_id",
+        "ward_id",
+        "label",
+        "current_state",
+        "state_changed_at",
+        "is_overflow_allowed",
+        "admission_id",
+        "patient_name",
+        "mrn",
+        "admission_status",
+        "is_overflow",
+        "discharge_blocked_on"
+      ],
+      "title": "BedMatrixBedOut"
+    },
+    "BedMatrixOut": {
+      "properties": {
+        "wards": {
+          "items": {
+            "$ref": "#/components/schemas/WardOccupancyOut"
+          },
+          "type": "array",
+          "title": "Wards"
+        },
+        "summary": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "type": "object",
+          "title": "Summary",
+          "description": "Ward name -> available beds"
+        },
+        "beds": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/components/schemas/BedMatrixBedOut"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Beds",
+          "description": "Only with include_beds=true"
+        }
+      },
+      "type": "object",
+      "required": [
+        "wards",
+        "summary"
+      ],
+      "title": "BedMatrixOut"
+    },
+    "BillingConfirmIn": {
+      "properties": {
+        "billing_category": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Panel"
+          ],
+          "title": "Billing Category",
+          "description": "How the stay is paid, as the desk confirmed it"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id",
+          "description": "The panel (required for Panel, and only for it) (GET /finance/panels)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "billing_category"
+      ],
+      "title": "BillingConfirmIn"
+    },
+    "Body_upload_document_api_v1_patients__patient_id__documents_post": {
+      "properties": {
+        "file": {
+          "type": "string",
+          "contentMediaType": "application/octet-stream",
+          "title": "File"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title",
+          "description": "What it is, e.g. 'CBC' or 'Chest X-ray report'"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought from another hospital, laboratory or clinic",
+          "default": false
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "Who issued the outside document (required with is_outside)"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document"
+        }
+      },
+      "type": "object",
+      "required": [
+        "file",
+        "doc_type"
+      ],
+      "title": "Body_upload_document_api_v1_patients__patient_id__documents_post"
+    },
+    "ClearIn": {
+      "properties": {
+        "note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        }
+      },
+      "type": "object",
+      "title": "ClearIn"
+    },
+    "DischargeStageOut": {
+      "properties": {
+        "clearance_id": {
+          "type": "integer",
+          "title": "Clearance Id"
+        },
+        "stage": {
+          "type": "string",
+          "enum": [
+            "ClinicalDischarge",
+            "PharmacyClearance",
+            "NursingMARVerification",
+            "BillingSettlement",
+            "OpsCleaning"
+          ],
+          "title": "Stage"
+        },
+        "sequence_no": {
+          "type": "integer",
+          "title": "Sequence No"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Pending",
+            "Cleared",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "cleared_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cleared By"
+        },
+        "cleared_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cleared By Name"
+        },
+        "cleared_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cleared At"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        },
+        "physically_cleaned_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Physically Cleaned At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "clearance_id",
+        "stage",
+        "sequence_no",
+        "status",
+        "cleared_by",
+        "cleared_by_name",
+        "cleared_at",
+        "note",
+        "physically_cleaned_at"
+      ],
+      "title": "DischargeStageOut"
+    },
+    "DischargeStatusOut": {
+      "properties": {
+        "stages": {
+          "items": {
+            "$ref": "#/components/schemas/DischargeStageOut"
+          },
+          "type": "array",
+          "title": "Stages"
+        },
+        "blocked_on": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ClinicalDischarge",
+                "PharmacyClearance",
+                "NursingMARVerification",
+                "BillingSettlement",
+                "OpsCleaning"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blocked On",
+          "description": "The first pending stage (the one to clear next)"
+        },
+        "started": {
+          "type": "boolean",
+          "title": "Started"
+        },
+        "complete": {
+          "type": "boolean",
+          "title": "Complete"
+        }
+      },
+      "type": "object",
+      "required": [
+        "stages",
+        "blocked_on",
+        "started",
+        "complete"
+      ],
+      "title": "DischargeStatusOut"
+    },
+    "Envelope_AdmissionDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/AdmissionDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[AdmissionDetailOut]"
+    },
+    "Envelope_BedMatrixOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/BedMatrixOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[BedMatrixOut]"
+    },
+    "Envelope_InvoiceDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/InvoiceDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[InvoiceDetailOut]"
+    },
+    "Envelope_PatientDocumentUploadOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PatientDocumentUploadOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PatientDocumentUploadOut]"
+    },
+    "Envelope_list_AdmissionOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/AdmissionOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[AdmissionOut]]"
+    },
+    "Envelope_list_PanelOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PanelOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PanelOut]]"
+    },
+    "Envelope_list_PatientDocumentOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PatientDocumentOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PatientDocumentOut]]"
+    },
+    "Envelope_list_WaitlistEntryOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/WaitlistEntryOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[WaitlistEntryOut]]"
+    },
+    "FinalBillIn": {
+      "properties": {
+        "discount": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            }
+          ],
+          "title": "Discount",
+          "default": "0"
+        },
+        "discount_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discount Reason"
+        }
+      },
+      "type": "object",
+      "title": "FinalBillIn"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "InvoiceDetailOut": {
+      "properties": {
+        "invoice_id": {
+          "type": "integer",
+          "title": "Invoice Id"
+        },
+        "invoice_no": {
+          "type": "string",
+          "title": "Invoice No"
+        },
+        "invoice_type": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "Pharmacy",
+            "Lab",
+            "Imaging",
+            "OT",
+            "OTC",
+            "Other"
+          ],
+          "title": "Invoice Type"
+        },
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "walkin_customer_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Walkin Customer Name"
+        },
+        "walkin_customer_mobile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Walkin Customer Mobile"
+        },
+        "gross_total": {
+          "type": "number",
+          "title": "Gross Total"
+        },
+        "discount_total": {
+          "type": "number",
+          "title": "Discount Total"
+        },
+        "net_payable": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Payable",
+          "description": "Null while the invoice is a draft"
+        },
+        "amount_paid": {
+          "type": "number",
+          "title": "Amount Paid"
+        },
+        "amount_refunded": {
+          "type": "number",
+          "title": "Amount Refunded"
+        },
+        "waiver_amount": {
+          "type": "number",
+          "title": "Waiver Amount"
+        },
+        "waiver_dispensed_amount": {
+          "type": "number",
+          "title": "Waiver Dispensed Amount"
+        },
+        "credit_amount": {
+          "type": "number",
+          "title": "Credit Amount"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Open",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "is_locked": {
+          "type": "boolean",
+          "title": "Is Locked",
+          "description": "Locked while an approval (waiver, credit, refund) is pending"
+        },
+        "locked_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Locked Reason"
+        },
+        "finalized_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finalized At"
+        },
+        "business_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Business Date"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "lines": {
+          "items": {
+            "$ref": "#/components/schemas/InvoiceLineOut"
+          },
+          "type": "array",
+          "title": "Lines"
+        },
+        "balance_due": {
+          "type": "number",
+          "title": "Balance Due"
+        }
+      },
+      "type": "object",
+      "required": [
+        "invoice_id",
+        "invoice_no",
+        "invoice_type",
+        "patient_id",
+        "admission_id",
+        "ticket_id",
+        "panel_id",
+        "employee_id",
+        "walkin_customer_name",
+        "walkin_customer_mobile",
+        "gross_total",
+        "discount_total",
+        "net_payable",
+        "amount_paid",
+        "amount_refunded",
+        "waiver_amount",
+        "waiver_dispensed_amount",
+        "credit_amount",
+        "status",
+        "is_locked",
+        "locked_reason",
+        "finalized_at",
+        "business_date",
+        "created_at",
+        "row_version",
+        "lines",
+        "balance_due"
+      ],
+      "title": "InvoiceDetailOut",
+      "description": "An invoice with its lines and what is still due (billing.invoice_with_lines)."
+    },
+    "InvoiceLineOut": {
+      "properties": {
+        "invoice_item_id": {
+          "type": "integer",
+          "title": "Invoice Item Id"
+        },
+        "line_type": {
+          "type": "string",
+          "enum": [
+            "Consultation",
+            "Service",
+            "Drug",
+            "LabTest",
+            "Imaging",
+            "OTProcedure",
+            "OTConsumable",
+            "RoomCharge",
+            "Reversal"
+          ],
+          "title": "Line Type"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "qty": {
+          "type": "number",
+          "title": "Qty"
+        },
+        "unit_price": {
+          "type": "number",
+          "title": "Unit Price"
+        },
+        "line_total": {
+          "type": "number",
+          "title": "Line Total"
+        },
+        "bed_day": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Day"
+        },
+        "reverses_item_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reverses Item Id",
+          "description": "Set on a reversal line: the line it cancels"
+        },
+        "reversal_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reversal Reason"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "invoice_item_id",
+        "line_type",
+        "description",
+        "qty",
+        "unit_price",
+        "line_total",
+        "bed_day",
+        "reverses_item_id",
+        "reversal_reason",
+        "created_at"
+      ],
+      "title": "InvoiceLineOut"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "OverflowIn": {
+      "properties": {
+        "bed_id": {
+          "type": "integer",
+          "title": "Bed Id",
+          "description": "An Available bed (GET /beds/matrix?include_beds=true)"
+        },
+        "admit_now": {
+          "type": "boolean",
+          "title": "Admit Now",
+          "description": "Patient is already at the bedside: reserve + admit in one step",
+          "default": false
+        },
+        "billing_category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Cash",
+                "Panel"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Billing Category",
+          "description": "Confirmed billing panel (workflow §2.2)"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id",
+          "description": "The panel (GET /finance/panels)"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bed_id",
+        "reason"
+      ],
+      "title": "OverflowIn"
+    },
+    "PanelOut": {
+      "properties": {
+        "panel_id": {
+          "type": "integer",
+          "title": "Panel Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "panel_type": {
+          "type": "string",
+          "enum": [
+            "SehatSahulat",
+            "Zakat",
+            "GovernmentEmployee",
+            "Corporate",
+            "Other"
+          ],
+          "title": "Panel Type"
+        },
+        "discount_pct": {
+          "type": "number",
+          "title": "Discount Pct"
+        },
+        "is_credit_panel": {
+          "type": "boolean",
+          "title": "Is Credit Panel"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "panel_id",
+        "code",
+        "name",
+        "panel_type",
+        "discount_pct",
+        "is_credit_panel",
+        "is_active",
+        "row_version"
+      ],
+      "title": "PanelOut"
+    },
+    "PatientDocumentOut": {
+      "properties": {
+        "document_id": {
+          "type": "integer",
+          "title": "Document Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "application/pdf",
+            "image/jpeg",
+            "image/png"
+          ],
+          "title": "Content Type"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "title": "Size Bytes"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought by the patient from another hospital, laboratory or clinic: show it labelled as an outside document, never as a result of this hospital"
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "The hospital, laboratory or clinic that issued an outside document"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document (the test, the report, the visit)"
+        },
+        "is_verified": {
+          "type": "boolean",
+          "title": "Is Verified"
+        },
+        "uploaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Uploaded At"
+        },
+        "uploaded_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uploaded By"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_id",
+        "patient_id",
+        "doc_type",
+        "title",
+        "content_type",
+        "size_bytes",
+        "is_outside",
+        "source_facility",
+        "document_date",
+        "is_verified",
+        "uploaded_at",
+        "uploaded_by"
+      ],
+      "title": "PatientDocumentOut"
+    },
+    "PatientDocumentUploadOut": {
+      "properties": {
+        "document_id": {
+          "type": "integer",
+          "title": "Document Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "application/pdf",
+            "image/jpeg",
+            "image/png"
+          ],
+          "title": "Content Type"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "title": "Size Bytes"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought by the patient from another hospital, laboratory or clinic: show it labelled as an outside document, never as a result of this hospital"
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "The hospital, laboratory or clinic that issued an outside document"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document (the test, the report, the visit)"
+        },
+        "uploaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Uploaded At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_id",
+        "patient_id",
+        "doc_type",
+        "title",
+        "content_type",
+        "size_bytes",
+        "is_outside",
+        "source_facility",
+        "document_date",
+        "uploaded_at"
+      ],
+      "title": "PatientDocumentUploadOut",
+      "description": "The stored document (download it with GET /patient-documents/{document_id}/download)."
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    },
+    "WaitlistEntryOut": {
+      "properties": {
+        "waitlist_id": {
+          "type": "integer",
+          "title": "Waitlist Id"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "priority": {
+          "type": "integer",
+          "title": "Priority"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "last_notified_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Notified At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "waitlist_id",
+        "admission_id",
+        "patient_id",
+        "patient_name",
+        "mrn",
+        "priority",
+        "requested_at",
+        "last_notified_at"
+      ],
+      "title": "WaitlistEntryOut"
+    },
+    "WaitlistIn": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "priority": {
+          "type": "integer",
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Priority",
+          "default": 0
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id"
+      ],
+      "title": "WaitlistIn"
+    },
+    "WardOccupancyOut": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "ward_type": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Private",
+            "SemiPrivate",
+            "ICU",
+            "CCU",
+            "NICU",
+            "Surgical",
+            "Pediatric",
+            "Maternity",
+            "Emergency",
+            "Isolation",
+            "Other"
+          ],
+          "title": "Ward Type"
+        },
+        "gender_restriction": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "any"
+          ],
+          "title": "Gender Restriction"
+        },
+        "total_beds": {
+          "type": "integer",
+          "title": "Total Beds"
+        },
+        "available": {
+          "type": "integer",
+          "title": "Available"
+        },
+        "reserved": {
+          "type": "integer",
+          "title": "Reserved"
+        },
+        "occupied": {
+          "type": "integer",
+          "title": "Occupied"
+        },
+        "turnover": {
+          "type": "integer",
+          "title": "Turnover",
+          "description": "Beds being cleaned or waiting for discharge clearance"
+        },
+        "out_of_service": {
+          "type": "integer",
+          "title": "Out Of Service"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id",
+        "code",
+        "name",
+        "ward_type",
+        "gender_restriction",
+        "total_beds",
+        "available",
+        "reserved",
+        "occupied",
+        "turnover",
+        "out_of_service"
+      ],
+      "title": "WardOccupancyOut",
+      "description": "A ward's bed counts (view v_bed_matrix)."
     }
   },
   "unknowns": [
@@ -4470,9 +7661,5 @@
       ],
       "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
     }
-  ],
-  "omitted_sections": [
-    "schemas"
-  ],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type."
+  ]
 }

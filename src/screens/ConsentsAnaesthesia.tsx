@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import type { EstablishmentOut } from "../generated/facility_profile";
 import type {
@@ -1230,14 +1231,12 @@ export const ConsentsAnaesthesia: React.FC<ConsentsAnaesthesiaProps> = ({
                     <label className="block text-slate-700 font-semibold mb-1">
                       Concurring Second PMDC-Registered Doctor (employee ID):
                     </label>
-                    <input
-                      type="number"
+                    <DirectoryPicker
                       data-help="consents_anaesthesia.select_second_doctor"
                       value={secondDoctorId ?? ""}
                       onChange={(e) => setSecondDoctorId(Number(e.target.value) || null)}
-                      placeholder="e.g. 102"
                       className="w-full p-2 border rounded-lg bg-white text-slate-900"
-                    />
+                     path="/staff/lookup?license_type=PMDC" idField="employee_id" search />
                   </div>
                 )}
               </div>

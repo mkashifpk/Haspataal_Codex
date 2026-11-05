@@ -22,6 +22,37 @@
           "ward_nurse"
         ]
       },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "admission_id",
@@ -37,488 +68,32 @@
       "request_body": null,
       "responses": {
         "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AdmissionDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
           "content": {
             "application/json": {
               "schema": {
-                "title": "Envelope[AdmissionDetailOut]",
-                "properties": {
-                  "data": {
-                    "title": "AdmissionDetailOut",
-                    "properties": {
-                      "admission_id": {
-                        "type": "integer",
-                        "title": "Admission Id"
-                      },
-                      "admission_number": {
-                        "type": "string",
-                        "title": "Admission Number"
-                      },
-                      "patient_id": {
-                        "type": "integer",
-                        "title": "Patient Id"
-                      },
-                      "photo_document_id": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Photo Document Id",
-                        "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
-                      },
-                      "mrn": {
-                        "type": "string",
-                        "title": "Mrn"
-                      },
-                      "patient_name": {
-                        "type": "string",
-                        "title": "Patient Name"
-                      },
-                      "gender": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "enum": [
-                              "male",
-                              "female",
-                              "other",
-                              "unknown"
-                            ]
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Gender"
-                      },
-                      "age_years": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Age Years"
-                      },
-                      "requested_ward_id": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Requested Ward Id"
-                      },
-                      "requested_ward_name": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Requested Ward Name"
-                      },
-                      "ward_id": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Ward Id"
-                      },
-                      "ward_name": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Ward Name"
-                      },
-                      "bed_id": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Bed Id"
-                      },
-                      "bed_label": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Bed Label"
-                      },
-                      "primary_doctor_id": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Primary Doctor Id"
-                      },
-                      "primary_doctor_name": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Primary Doctor Name"
-                      },
-                      "admission_type": {
-                        "type": "string",
-                        "enum": [
-                          "Standard",
-                          "Emergency",
-                          "CodeRed",
-                          "Overflow",
-                          "Planned"
-                        ],
-                        "title": "Admission Type"
-                      },
-                      "status": {
-                        "type": "string",
-                        "enum": [
-                          "AdmissionPending",
-                          "Waitlisted",
-                          "BedReserved",
-                          "CodeRedActive",
-                          "Admitted",
-                          "DischargeInProgress",
-                          "Discharged",
-                          "Cancelled"
-                        ],
-                        "title": "Status"
-                      },
-                      "billing_category": {
-                        "type": "string",
-                        "enum": [
-                          "Cash",
-                          "Panel"
-                        ],
-                        "title": "Billing Category"
-                      },
-                      "panel_id": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Panel Id"
-                      },
-                      "is_billing_confirmed": {
-                        "type": "boolean",
-                        "title": "Is Billing Confirmed"
-                      },
-                      "is_billing_deferred": {
-                        "type": "boolean",
-                        "title": "Is Billing Deferred"
-                      },
-                      "is_overflow": {
-                        "type": "boolean",
-                        "title": "Is Overflow"
-                      },
-                      "overflow_reason": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Overflow Reason"
-                      },
-                      "eta_minutes": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Eta Minutes"
-                      },
-                      "source_ticket_id": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Source Ticket Id"
-                      },
-                      "admission_reason": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Admission Reason",
-                        "description": "Why the patient was admitted (MSDS 149); null only on a Code Red admission not yet recorded"
-                      },
-                      "provisional_diagnosis": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Provisional Diagnosis"
-                      },
-                      "initial_care_plan": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Initial Care Plan"
-                      },
-                      "details_stamp": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/AuthorStampOut"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "Who recorded the reason and diagnosis, and when (MSDS 147)"
-                      },
-                      "admission_notes": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Admission Notes",
-                        "description": "For the admissions desk (not clinical)"
-                      },
-                      "requested_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Requested At"
-                      },
-                      "reserved_at": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Reserved At"
-                      },
-                      "admitted_at": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Admitted At"
-                      },
-                      "discharge_initiated_at": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Discharge Initiated At"
-                      },
-                      "discharged_at": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Discharged At"
-                      },
-                      "row_version": {
-                        "type": "integer",
-                        "title": "Row Version"
-                      },
-                      "discharge": {
-                        "$ref": "#/components/schemas/DischargeStatusOut"
-                      },
-                      "invoice": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/AdmissionInvoiceOut"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "The running IPD bill"
-                      }
-                    },
-                    "type": "object",
-                    "required": [
-                      "admission_id",
-                      "admission_number",
-                      "patient_id",
-                      "photo_document_id",
-                      "mrn",
-                      "patient_name",
-                      "gender",
-                      "age_years",
-                      "requested_ward_id",
-                      "requested_ward_name",
-                      "ward_id",
-                      "ward_name",
-                      "bed_id",
-                      "bed_label",
-                      "primary_doctor_id",
-                      "primary_doctor_name",
-                      "admission_type",
-                      "status",
-                      "billing_category",
-                      "panel_id",
-                      "is_billing_confirmed",
-                      "is_billing_deferred",
-                      "is_overflow",
-                      "overflow_reason",
-                      "eta_minutes",
-                      "source_ticket_id",
-                      "admission_reason",
-                      "provisional_diagnosis",
-                      "initial_care_plan",
-                      "details_stamp",
-                      "admission_notes",
-                      "requested_at",
-                      "reserved_at",
-                      "admitted_at",
-                      "discharge_initiated_at",
-                      "discharged_at",
-                      "row_version",
-                      "discharge",
-                      "invoice"
-                    ]
-                  },
-                  "meta": {
-                    "title": "Meta",
-                    "properties": {
-                      "server_time": {
-                        "type": "string",
-                        "title": "Server Time",
-                        "description": "Server clock (UTC). Use it to detect terminal clock skew."
-                      },
-                      "page": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Page"
-                      },
-                      "page_size": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Page Size"
-                      },
-                      "total_count": {
-                        "anyOf": [
-                          {
-                            "type": "integer"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "title": "Total Count"
-                      },
-                      "next_cursor": {
-                        "title": "Next Cursor"
-                      }
-                    },
-                    "type": "object",
-                    "required": [
-                      "server_time"
-                    ]
-                  },
-                  "request_id": {
-                    "type": "string",
-                    "title": "Request Id"
-                  }
-                },
-                "type": "object",
-                "required": [
-                  "data",
-                  "meta",
-                  "request_id"
-                ]
+                "$ref": "#/components/schemas/HTTPValidationError"
               }
             }
           }
         }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
       }
     },
     {

@@ -1,7 +1,7 @@
 {
   "screen_id": "obstetric_assessment",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -248,6 +248,8 @@
     ],
     "related_workflows": [
       "clinical-and-prescriptions",
+      "deaths-and-medico-legal-cases",
+      "emergency-department",
       "external-referrals",
       "facility-profile-and-services",
       "maternity-and-newborns"
@@ -294,7 +296,7 @@
     "workspace": "doctor",
     "phase": "P4",
     "position": 83,
-    "points": 58,
+    "points": 61,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -326,6 +328,14 @@
         "evidence": "it reads maternity/high-risk-conditions, which POST /maternity/high-risk-conditions on maternity_policy creates",
         "ordering": false,
         "forward": false
+      },
+      {
+        "from": "obstetric_assessment",
+        "to": "mlc_register",
+        "kind": "data_candidate",
+        "evidence": "it reads mlc/contacts, which POST /mlc/contacts on mlc_register creates",
+        "ordering": false,
+        "forward": true
       }
     ],
     "needed_by": [
@@ -348,35 +358,41 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 58,
+    "points": 61,
     "items": [
       {
         "id": "ep:POST /maternity/assessments",
         "label": "POST /maternity/assessments",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /maternity/assessments",
         "label": "GET /maternity/assessments",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /maternity/high-risk-conditions",
         "label": "GET /maternity/high-risk-conditions",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /referrals",
         "label": "POST /referrals",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /establishment",
         "label": "GET /establishment",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /mlc/contacts",
+        "label": "GET /mlc/contacts",
         "points": 3,
         "claimed": false
       },
@@ -384,61 +400,61 @@
         "id": "ev:establishment.changed",
         "label": "establishment.changed",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:064bedf875",
         "label": "High risk: two buttons, none selected. When high risk: pick the conditions (multi-select from the list, its Managed/Referred shown beside each), the counselling note is required, and a Referred condition suggests 'Refer' (POST /referrals, then its referral_id).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:272b13a3e0",
         "label": "Category I and II A (GET /establishment: profile I or IIA; rules_in_force high_risk_pregnancy_nutrition): the nutritional assessment and the advice are required for a high-risk patient (MATERNAL_NUTRITION_REQUIRED); elsewhere they are offered.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:962fcab00e",
         "label": "Append-only: a later visit gets a new assessment; show the patient's earlier ones (GET /maternity/assessments?patient_id=).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:b8c60b1609",
         "label": "Only while the maternity service is Active (x-capability maternity).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:e6bd3426e5",
         "label": "Exists for the service maternity (work): show it as GET /establishment views.screens says for screen_id obstetric_assessment (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:b46e6c48cc",
         "label": "POST /maternity/assessments starts new maternity work: offer it only while maternity is Active (GET /establishment active).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
@@ -450,7 +466,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -713,8 +729,8 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 1.0,
-            "maximum": 45.0
+            "minimum": 1,
+            "maximum": 45
           },
           {
             "pointer": "/high_risk",
@@ -1445,6 +1461,146 @@
         "filters": [],
         "note": null
       }
+    },
+    {
+      "endpoint": "GET /mlc/contacts",
+      "summary": "Police stations and MLR hospitals (contact list)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "mlc.case.manage",
+          "mlc.register.view",
+          "mlc.setup.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of mlc.case.manage or mlc.register.view or mlc.setup.manage",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "contact_type",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "PoliceStation",
+                  "MlrHospital",
+                  "ReferralHospital",
+                  "HealthOffice",
+                  "TraumaCentre",
+                  "BloodBank",
+                  "RescueService",
+                  "FireBrigade",
+                  "PoliceEmergency",
+                  "Ambulance",
+                  "SocialService"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Type"
+          }
+        },
+        {
+          "name": "include_inactive",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Include Inactive"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_MlcContactOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "contact_type",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PoliceStation",
+              "MlrHospital",
+              "ReferralHospital",
+              "HealthOffice",
+              "TraumaCentre",
+              "BloodBank",
+              "RescueService",
+              "FireBrigade",
+              "PoliceEmergency",
+              "Ambulance",
+              "SocialService"
+            ]
+          },
+          {
+            "name": "include_inactive",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
     }
   ],
   "realtime": {
@@ -1465,7 +1621,8 @@
         "refresh": [
           "GET /maternity/assessments",
           "GET /maternity/high-risk-conditions",
-          "GET /establishment"
+          "GET /establishment",
+          "GET /mlc/contacts"
         ]
       }
     ],
@@ -1656,6 +1813,36 @@
     },
     {
       "values": [
+        "PoliceStation",
+        "MlrHospital",
+        "ReferralHospital",
+        "HealthOffice",
+        "TraumaCentre",
+        "BloodBank",
+        "RescueService",
+        "FireBrigade",
+        "PoliceEmergency",
+        "Ambulance",
+        "SocialService"
+      ],
+      "column": "medico_legal_contacts.contact_type",
+      "used_at": "GET /mlc/contacts[].contact_type",
+      "labels": {
+        "PoliceStation": "Police station",
+        "MlrHospital": "Mlr hospital",
+        "ReferralHospital": "Referral hospital",
+        "HealthOffice": "Health office",
+        "TraumaCentre": "Trauma centre",
+        "BloodBank": "Blood bank",
+        "RescueService": "Rescue service",
+        "FireBrigade": "Fire brigade",
+        "PoliceEmergency": "Police emergency",
+        "Ambulance": "Ambulance",
+        "SocialService": "Social service"
+      }
+    },
+    {
+      "values": [
         "CareHere",
         "Refer"
       ],
@@ -1784,18 +1971,3050 @@
     }
   ],
   "scanner": [],
+  "copy": {
+    "workspace": {
+      "en": "Clinical OPD / IPD",
+      "ur": "ڈاکٹر"
+    },
+    "error_messages": {
+      "ADMINISTRATION_NOT_AUTHORIZED": "Medicines are given (and double-checked) by a registered nurse or doctor, or by staff the hospital allows.",
+      "CAPABILITY_INACTIVE": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+      "CLINICAL_LOCKOUT": "Patient ticket has been refunded. Cannot add clinical data without an active billing slip.",
+      "FORBIDDEN": "You do not have permission to do this.",
+      "MATERNAL_NUTRITION_REQUIRED": "A high-risk obstetric patient's nutritional status is assessed, with the corrective advice (MSDS Category I indicator 28, Category II A indicator 89).",
+      "NOT_FOUND": "The requested resource was not found.",
+      "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
+      "REFERRAL_AUTHOR_INVALID": "The referring author must be an active registered doctor.",
+      "TICKET_NOT_ACTIVE": "This ticket is no longer active; a new visit needs a new ticket.",
+      "TICKET_PATIENT_MISMATCH": "The ticket belongs to another patient.",
+      "VALIDATION_ERROR": "The request is invalid."
+    },
+    "wording_quoted_in_rules": [
+      "No new ... from now on"
+    ],
+    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
+  },
   "same_component_as": [],
-  "scenarios": [],
-  "unknowns": [],
-  "omitted_sections": [
-    "copy",
-    "roles",
-    "test_plan",
-    "handbook",
-    "workflows",
-    "decisions",
-    "examples",
-    "schemas"
+  "roles": {
+    "full": [
+      "doctor",
+      "clinical_specialist",
+      "surgeon"
+    ],
+    "partial": [
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "triage_nurse",
+      "anaesthetist",
+      "ward_nurse",
+      "head_nurse",
+      "quality_officer"
+    ],
+    "page_for": [
+      "doctor",
+      "clinical_specialist",
+      "surgeon"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
+  },
+  "test_plan": {
+    "screen": "obstetric_assessment",
+    "title": "Obstetric risk assessment",
+    "cases": [
+      {
+        "id": "case:POST /maternity/assessments",
+        "call": "POST /api/v1/maternity/assessments",
+        "summary": "Record an obstetric risk assessment",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ADMINISTRATION_NOT_AUTHORIZED",
+          "CAPABILITY_INACTIVE",
+          "CLINICAL_LOCKOUT",
+          "MATERNAL_NUTRITION_REQUIRED",
+          "NOT_FOUND",
+          "REFERENCE_NOT_FOUND",
+          "TICKET_NOT_ACTIVE",
+          "TICKET_PATIENT_MISMATCH",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /maternity/assessments",
+        "call": "GET /api/v1/maternity/assessments",
+        "summary": "Obstetric assessments of a patient or a period",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /maternity/high-risk-conditions",
+        "call": "GET /api/v1/maternity/high-risk-conditions",
+        "summary": "The hospital's high-risk obstetric cases",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /referrals",
+        "call": "POST /api/v1/referrals",
+        "summary": "Refer an outpatient or emergency patient to another facility",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "CLINICAL_LOCKOUT",
+          "FORBIDDEN",
+          "REFERENCE_NOT_FOUND",
+          "REFERRAL_AUTHOR_INVALID",
+          "TICKET_NOT_ACTIVE",
+          "TICKET_PATIENT_MISMATCH",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ]
+      },
+      {
+        "id": "case:GET /establishment",
+        "call": "GET /api/v1/establishment",
+        "summary": "The establishment's profile and services, with the configuration revision",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /mlc/contacts",
+        "call": "GET /api/v1/mlc/contacts",
+        "summary": "Police stations and MLR hospitals (contact list)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ]
+      }
+    ],
+    "service_cases": [
+      {
+        "view": "full",
+        "set_up": "GET /establishment answers views.screens[screen_id=obstetric_assessment].view = full (maternity): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Show it; every action the user's permissions allow."
+      },
+      {
+        "view": "open_work",
+        "set_up": "GET /establishment answers views.screens[screen_id=obstetric_assessment].view = open_work (maternity): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+      },
+      {
+        "view": "records",
+        "set_up": "GET /establishment answers views.screens[screen_id=obstetric_assessment].view = records (maternity): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+      },
+      {
+        "view": "hidden",
+        "set_up": "GET /establishment answers views.screens[screen_id=obstetric_assessment].view = hidden (maternity): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      },
+      {
+        "call": "POST /api/v1/maternity/assessments",
+        "set_up": "maternity not Active in GET /establishment",
+        "expect": "the action is hidden"
+      }
+    ],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100,
+        "max_pct": 250,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/obstetric_assessment",
+    "workspace_guide": "get_handbook_outline('doctor')",
+    "realtime": [
+      {
+        "event": "establishment.changed",
+        "check": "the screen refreshes without polling"
+      }
+    ],
+    "acceptance_rules": [
+      "High risk: two buttons, none selected. When high risk: pick the conditions (multi-select from the list, its Managed/Referred shown beside each), the counselling note is required, and a Referred condition suggests 'Refer' (POST /referrals, then its referral_id).",
+      "Category I and II A (GET /establishment: profile I or IIA; rules_in_force high_risk_pregnancy_nutrition): the nutritional assessment and the advice are required for a high-risk patient (MATERNAL_NUTRITION_REQUIRED); elsewhere they are offered.",
+      "Append-only: a later visit gets a new assessment; show the patient's earlier ones (GET /maternity/assessments?patient_id=).",
+      "Only while the maternity service is Active (x-capability maternity).",
+      "Exists for the service maternity (work): show it as GET /establishment views.screens says for screen_id obstetric_assessment (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+      "POST /maternity/assessments starts new maternity work: offer it only while maternity is Active (GET /establishment active)."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  },
+  "handbook": {
+    "page": "screens/obstetric_assessment",
+    "screen_id": "obstetric_assessment",
+    "title": "Obstetric risk assessment",
+    "purpose": "A woman's risk assessment at her visit or admission: high risk or not, the conditions from the hospital's list, the counselling, the plan (care here or refer) and, in Category I and II A, her nutritional status.",
+    "tasks": [
+      {
+        "id": "obstetric_assessment::POST /maternity/assessments",
+        "task": "Record an obstetric risk assessment",
+        "call": "POST /maternity/assessments",
+        "is_action": true,
+        "permissions": [
+          "maternity.record"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "obstetric_assessment::GET /maternity/assessments",
+        "task": "Obstetric assessments of a patient or a period",
+        "call": "GET /maternity/assessments",
+        "is_action": false,
+        "permissions": [
+          "maternity.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "obstetric_assessment::GET /maternity/high-risk-conditions",
+        "task": "The hospital's high-risk obstetric cases",
+        "call": "GET /maternity/high-risk-conditions",
+        "is_action": false,
+        "permissions": [
+          "maternity.policy.manage",
+          "maternity.view",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "obstetric_assessment::POST /referrals",
+        "task": "Refer an outpatient or emergency patient to another facility",
+        "call": "POST /referrals",
+        "is_action": true,
+        "permissions": [
+          "referral.create"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "obstetric_assessment::GET /establishment",
+        "task": "The establishment's profile and services, with the configuration revision",
+        "call": "GET /establishment",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "obstetric_assessment::GET /mlc/contacts",
+        "task": "Police stations and MLR hospitals (contact list)",
+        "call": "GET /mlc/contacts",
+        "is_action": false,
+        "permissions": [
+          "mlc.case.manage",
+          "mlc.register.view",
+          "mlc.setup.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      }
+    ],
+    "rules_to_explain": [
+      "High risk: two buttons, none selected. When high risk: pick the conditions (multi-select from the list, its Managed/Referred shown beside each), the counselling note is required, and a Referred condition suggests 'Refer' (POST /referrals, then its referral_id).",
+      "Category I and II A (GET /establishment: profile I or IIA; rules_in_force high_risk_pregnancy_nutrition): the nutritional assessment and the advice are required for a high-risk patient (MATERNAL_NUTRITION_REQUIRED); elsewhere they are offered.",
+      "Append-only: a later visit gets a new assessment; show the patient's earlier ones (GET /maternity/assessments?patient_id=).",
+      "Only while the maternity service is Active (x-capability maternity).",
+      "Exists for the service maternity (work): show it as GET /establishment views.screens says for screen_id obstetric_assessment (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+      "POST /maternity/assessments starts new maternity work: offer it only while maternity is Active (GET /establishment active)."
+    ],
+    "updates_by_itself_on": [
+      "establishment.changed"
+    ],
+    "errors_the_user_can_meet": [
+      {
+        "code": "ADMINISTRATION_NOT_AUTHORIZED",
+        "message": "Medicines are given (and double-checked) by a registered nurse or doctor, or by staff the hospital allows.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "CAPABILITY_INACTIVE",
+        "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "CLINICAL_LOCKOUT",
+        "message": "Patient ticket has been refunded. Cannot add clinical data without an active billing slip.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "MATERNAL_NUTRITION_REQUIRED",
+        "message": "A high-risk obstetric patient's nutritional status is assessed, with the corrective advice (MSDS Category I indicator 28, Category II A indicator 89).",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "message": "A referenced record does not exist.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "REFERRAL_AUTHOR_INVALID",
+        "message": "The referring author must be an active registered doctor.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "TICKET_NOT_ACTIVE",
+        "message": "This ticket is no longer active; a new visit needs a new ticket.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "TICKET_PATIENT_MISMATCH",
+        "message": "The ticket belongs to another patient.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "message": "The request is invalid.",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "sections": [
+      "Purpose and audience",
+      "Step by step (one per task, where to click)",
+      "Every control and its effects",
+      "States and feedback",
+      "Messages, mistakes and recovery",
+      "Language and visual examples",
+      "Related help and delivery"
+    ],
+    "requirement_ids": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "delivery": "F1 and contextual screen Help",
+    "requirements": [
+      {
+        "id": "S1",
+        "title": "Purpose and audience",
+        "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+      },
+      {
+        "id": "S2",
+        "title": "Step by step (one per task, where to click)",
+        "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+      },
+      {
+        "id": "S3",
+        "title": "Every control and its effects",
+        "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+      },
+      {
+        "id": "S4",
+        "title": "States and feedback",
+        "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+      },
+      {
+        "id": "S5",
+        "title": "Messages, mistakes and recovery",
+        "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+      },
+      {
+        "id": "S6",
+        "title": "Language and visual examples",
+        "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+      },
+      {
+        "id": "S7",
+        "title": "Related help and delivery",
+        "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+      }
+    ],
+    "workspace_guide": "get_handbook_outline('doctor')"
+  },
+  "workflows": [
+    {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "deaths-and-medico-legal-cases",
+      "title": "Deaths and medico-legal cases (MSDS)",
+      "recipe": "get_workflow_recipe('deaths-and-medico-legal-cases')"
+    },
+    {
+      "slug": "emergency-department",
+      "title": "The emergency department (MSDS)",
+      "recipe": "get_workflow_recipe('emergency-department')"
+    },
+    {
+      "slug": "external-referrals",
+      "title": "External referrals and the emergency contact list",
+      "recipe": "get_workflow_recipe('external-referrals')"
+    },
+    {
+      "slug": "facility-profile-and-services",
+      "title": "Facility settings: the PHC profile and the clinical services",
+      "recipe": "get_workflow_recipe('facility-profile-and-services')"
+    },
+    {
+      "slug": "maternity-and-newborns",
+      "title": "Maternity and newborns",
+      "recipe": "get_workflow_recipe('maternity-and-newborns')"
+    }
   ],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type."
+  "scenarios": [],
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "examples": {
+    "POST /maternity/assessments": {
+      "request": {
+        "path": "/api/v1/maternity/assessments",
+        "body": {
+          "patient_id": 1,
+          "admission_id": 1,
+          "gestation_weeks": 39,
+          "high_risk": true,
+          "conditions": [
+            "Pre-Eclampsia or Eclampsia"
+          ],
+          "counselled": true,
+          "counselling_note": "Explained the raised blood pressure and the warning signs to her and her husband",
+          "plan": "CareHere"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "assessment_id": 3,
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ayesha Bibi",
+            "admission_id": 1,
+            "admission_number": "ADM-2026-00001",
+            "ticket_id": null,
+            "ticket_number": null,
+            "gestation_weeks": 39,
+            "high_risk": true,
+            "conditions": [
+              "Pre-Eclampsia or Eclampsia"
+            ],
+            "condition_note": null,
+            "counselled": true,
+            "counselling_note": "Explained the raised blood pressure and the warning signs to her and her husband",
+            "plan": "CareHere",
+            "referral_id": null,
+            "referral_number": null,
+            "nutrition_assessment": null,
+            "nutrition_advice": null,
+            "follow_up": null,
+            "assessed_by": 1,
+            "author_stamp": {
+              "at": "2026-10-14T12:52:20.148075+00:00",
+              "name": "Dr Ahmed",
+              "text": "Dr Ahmed, Doctor, PMDC PMDC-48418, 14-Oct-2026 17:52",
+              "user_id": 1,
+              "designation": "Doctor",
+              "employee_id": 1,
+              "registration": "PMDC PMDC-48418"
+            },
+            "assessed_at": "2026-10-14T12:52:20.148075+00:00"
+          },
+          "meta": {
+            "server_time": "2026-10-14T12:52:20.161191+00:00"
+          },
+          "request_id": "a91a49f6c9044055ae62ee1621a99e97"
+        }
+      }
+    },
+    "GET /maternity/assessments": {
+      "request": {
+        "path": "/api/v1/maternity/assessments",
+        "query": {
+          "patient_id": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"assessment_id\": 5, \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ayesha Bibi\", \"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"ticket_id\": null, \"ticket_number\": null, \"gestation_weeks\": 39, \"high_risk\": true, \"conditions\": [\"Pre-Eclampsia or Eclampsia\"], \"condition_note\": null, \"counselled\": true, \"counselling_note\": \"Explained the raised blood pressure and the warning signs to her and her husband\", \"plan\": \"CareHere\", \"referral_id\": null, \"referral_number\": null, \"nutrition_assessment\": \"Weight 61 kg, Hb 9.8 g/dL, poor appetite\", \"nutrition_advice\": \"Iron and folate; a protein-rich diet; review in a week\", \"follow_up\": null, \"assessed_by\": 1, \"author_stamp\": {\"at\": \"2026-10-14T12:52:20.327872+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-48418, 14-Oct-2026 17:52\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-48418\"}, \"assessed_at\": \"2026-10-14T12:52:20.327872+00:00\"}, {\"assessment_id\": 3, \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ayesha Bibi\", \"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"ticket_id\": null, \"ticket_number\": null, \"gestation_weeks\": 39, \"high_risk\": true, \"conditions\": [\"Pre-Eclampsia or Eclampsia\"], \"condition_note\": null, \"counselled\": true, \"counselling_note\": \"Explained the raised blood pressure and the warning signs to her and her husband\", \"plan\": \"CareHere\", \"referral_id\": null, \"referral_number\": null, \"nu…"
+      }
+    },
+    "GET /maternity/high-risk-conditions": {
+      "request": {
+        "path": "/api/v1/maternity/high-risk-conditions"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "condition_id": 1,
+              "name": "Haemorrhage",
+              "provision": null,
+              "referral_note": null,
+              "from_manual": true,
+              "is_active": true,
+              "sort_order": 10,
+              "row_version": 1
+            },
+            {
+              "condition_id": 2,
+              "name": "Prolonged or obstructed labour",
+              "provision": null,
+              "referral_note": null,
+              "from_manual": true,
+              "is_active": true,
+              "sort_order": 20,
+              "row_version": 1
+            },
+            {
+              "condition_id": 3,
+              "name": "Postpartum sepsis",
+              "provision": null,
+              "referral_note": null,
+              "from_manual": true,
+              "is_active": true,
+              "sort_order": 30,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-14T12:51:50.661116+00:00"
+          },
+          "request_id": "2bb301e5e7a44f3eb54705eccd99c3e2"
+        }
+      }
+    },
+    "POST /referrals": {
+      "request": {
+        "path": "/api/v1/referrals",
+        "body": {
+          "ticket_id": 1,
+          "encounter_id": 1,
+          "destination_contact_id": 3,
+          "destination_department": "Cardiology",
+          "transport": "WithStaff",
+          "escort_name": "Nurse Saima",
+          "care_during_transfer": "Oxygen 4 L/min, IV line",
+          "reason": "Chest pain with ST elevation",
+          "urgency": "Emergency",
+          "clinical_summary": "Central chest pain for 2 hours; ECG ST elevation V1-V4; provisional anterior MI",
+          "treatment_given": "Aspirin 300 mg chewed"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "referral_id": 1,
+            "referral_number": "REF-2026-00001",
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ali Khan",
+            "father_or_husband_name": null,
+            "gender": "male",
+            "age_years": 40,
+            "address": null,
+            "mobile": "03007091288",
+            "ticket_id": 1,
+            "er_visit_id": null,
+            "encounter_id": 1,
+            "referred_by": 1,
+            "referred_by_name": "Dr Ahmed",
+            "referred_by_stamp": {
+              "at": "2026-10-14T11:29:20.867797+00:00",
+              "name": "Dr Ahmed",
+              "text": "Dr Ahmed, Doctor, PMDC PMDC-29705, 14-Oct-2026 16:29",
+              "user_id": 1,
+              "designation": "Doctor",
+              "employee_id": 1,
+              "registration": "PMDC PMDC-29705"
+            },
+            "destination_contact_id": 3,
+            "destination_name": "Services Hospital",
+            "destination_department": "Cardiology",
+            "reason": "Chest pain with ST elevation",
+            "urgency": "Emergency",
+            "clinical_summary": "Central chest pain for 2 hours; ECG ST elevation V1-V4; provisional anterior MI",
+            "treatment_given": "Aspirin 300 mg chewed",
+            "at_patient_request": false,
+            "transport": "WithStaff",
+            "escort_name": "Nurse Saima",
+            "care_during_transfer": "Oxygen 4 L/min, IV line",
+            "status": "Issued",
+            "acknowledged_by_name": null,
+            "acknowledged_at": null,
+            "acknowledgement_note": null,
+            "cancel_reason": null,
+            "cancelled_at": null,
+            "created_at": "2026-10-14T11:29:20.867797+00:00",
+            "row_version": 1,
+            "acknowledgement_pending": true
+          },
+          "meta": {
+            "server_time": "2026-10-14T11:29:20.882681+00:00"
+          },
+          "request_id": "f324a2d2b958408d806ad017c783f75d"
+        }
+      }
+    },
+    "GET /establishment": {
+      "request": {
+        "path": "/api/v1/establishment"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"revision\": 0, \"profile\": null, \"active\": [\"dispensing\", \"outsourced_diagnostics\", \"laboratory\"], \"rules_in_force\": [{\"code\": \"consultation_requires_vco\", \"description\": \"A clinic's outpatient or follow-up note records whether the patient gave verbal consent to the examination (VCO), declined it, or was not examined, before it is finalized (clinic manual, indicator 41).\", \"applies\": false, \"profiles\": [\"Clinic\"], \"error_code\": \"EXAMINATION_CONSENT_REQUIRED\", \"operations\": [\"POST /clinical-encounters/{encounter_id}/finalize\"], \"screens\": [\"consultation\"], \"source\": \"clinical/service.py finalize; 0013, the clinical encounter guard\"}, {\"code\": \"consultation_complete_record\", \"description\": \"A clinic's outpatient or follow-up note has the complaint or history, the examination (when the patient consented), the diagnosis and the plan before it is finalized (clinic manual, indicator 28).\", \"applies\": false, \"profiles\": [\"Clinic\"], \"error_code\": \"CONSULTATION_INCOMPLETE\", \"operations\": [\"POST /clinical-encounters/{encounter_id}/finalize\"], \"screens\": [\"consultation\"], \"source\": \"clinical/service.py finalize; 0013, the clinical encounter guard\"}, {\"code\": \"high_risk_pregnancy_nutrition\", \"description\": \"In a Category I hospital, a high-risk obstetric assessment includes the nutritional assessment.\", \"applies\": false, \"profiles\": [\"I\"], \"error_code\": \"MATERNAL_NUTRITION_REQUIRED\", \"operations\": [\"POST /maternity/assessments\"], \"screens\": [\"obstetric_as…"
+      }
+    },
+    "GET /mlc/contacts": {
+      "request": {
+        "path": "/api/v1/mlc/contacts"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "contact_id": 2,
+              "contact_type": "MlrHospital",
+              "name": "District Headquarters Hospital",
+              "district": "Lahore",
+              "phone": null,
+              "alt_phone": null,
+              "address": null,
+              "notes": null,
+              "is_active": true
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-28T21:43:04.413300+00:00"
+          },
+          "request_id": "070f596e36b34426ace5f31a7744b295"
+        }
+      }
+    }
+  },
+  "schemas": {
+    "AssessmentIn": {
+      "properties": {
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id"
+        },
+        "gestation_weeks": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 45,
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gestation Weeks"
+        },
+        "high_risk": {
+          "type": "boolean",
+          "title": "High Risk",
+          "description": "Asked on purpose, never pre-filled"
+        },
+        "conditions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 20,
+          "title": "Conditions",
+          "description": "From GET /maternity/high-risk-conditions (active names); at least one when high_risk"
+        },
+        "condition_note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Condition Note"
+        },
+        "counselled": {
+          "type": "boolean",
+          "title": "Counselled",
+          "description": "The patient (and her family) told of the risk and counselled (II C p166)"
+        },
+        "counselling_note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Counselling Note",
+          "description": "Required when high_risk: what was said"
+        },
+        "plan": {
+          "type": "string",
+          "enum": [
+            "CareHere",
+            "Refer"
+          ],
+          "title": "Plan"
+        },
+        "referral_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Referral Id",
+          "description": "The external referral, when referred"
+        },
+        "nutrition_assessment": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Nutrition Assessment",
+          "description": "Required for a high-risk patient in Category I (indicator 28)"
+        },
+        "nutrition_advice": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Nutrition Advice",
+          "description": "Corrective measures and follow-up advice"
+        },
+        "follow_up": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Follow Up"
+        }
+      },
+      "type": "object",
+      "required": [
+        "patient_id",
+        "high_risk",
+        "counselled",
+        "plan"
+      ],
+      "title": "AssessmentIn",
+      "description": "An obstetric patient's risk assessment at her visit or during her admission."
+    },
+    "AuthorStampOut": {
+      "properties": {
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation",
+          "description": "Designation and specialty, e.g. \"Medical Officer, General Medicine\""
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "Council registration, e.g. \"PMDC 12345-P\" or \"PNC 67890\""
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At",
+          "description": "When the entry was signed, reported or verified"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "The printed line: name, designation, registration, date and time"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "user_id",
+        "name",
+        "designation",
+        "registration",
+        "at",
+        "text"
+      ],
+      "title": "AuthorStampOut",
+      "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
+    },
+    "CapabilityOut": {
+      "properties": {
+        "capability": {
+          "type": "string",
+          "enum": [
+            "dispensing",
+            "outsourced_diagnostics",
+            "laboratory",
+            "imaging",
+            "outpatient_procedures",
+            "inpatient",
+            "emergency_department",
+            "surgery",
+            "cssd",
+            "blood_transfusion",
+            "blood_center",
+            "maternity",
+            "home_visits",
+            "preventive_programmes"
+          ],
+          "title": "Capability"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "purpose": {
+          "type": "string",
+          "title": "Purpose"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "Preparing",
+            "Active",
+            "Retiring",
+            "Retired"
+          ],
+          "title": "State",
+          "description": "Available (never switched on), Preparing (set up, no new work), Active, Retiring (no new work, open work continues), Retired (records only)"
+        },
+        "state_since": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Since"
+        },
+        "changed_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Changed By Name"
+        },
+        "requires": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "dispensing",
+              "outsourced_diagnostics",
+              "laboratory",
+              "imaging",
+              "outpatient_procedures",
+              "inpatient",
+              "emergency_department",
+              "surgery",
+              "cssd",
+              "blood_transfusion",
+              "blood_center",
+              "maternity",
+              "home_visits",
+              "preventive_programmes"
+            ]
+          },
+          "type": "array",
+          "title": "Requires"
+        },
+        "hospital_only": {
+          "type": "boolean",
+          "title": "Hospital Only",
+          "description": "Never Active under the Clinic profile"
+        },
+        "implemented": {
+          "type": "boolean",
+          "title": "Implemented",
+          "description": "False: not in this release; it cannot be switched on"
+        },
+        "new_work": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "New Work",
+          "description": "What the database refuses while it is not Active"
+        },
+        "operations": {
+          "items": {
+            "$ref": "#/components/schemas/GateOut"
+          },
+          "type": "array",
+          "title": "Operations",
+          "description": "The operations that start its new work: hide them unless it is Active (the API refuses them anyway: CAPABILITY_INACTIVE). Every other operation, reads and the steps of started work included, stays"
+        },
+        "outstanding": {
+          "items": {
+            "$ref": "#/components/schemas/OutstandingOut"
+          },
+          "type": "array",
+          "title": "Outstanding",
+          "description": "Its open work, while Active or Retiring"
+        },
+        "phc_declared": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Phc Declared",
+          "description": "The services declared to the PHC (GET /phc/services) that name it; a declaration is what the PHC is told, never proof the service runs"
+        },
+        "declaration_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Declaration Note",
+          "description": "Where the declaration and this service disagree: declared but not running, or running but not declared. Advice only"
+        }
+      },
+      "type": "object",
+      "required": [
+        "capability",
+        "label",
+        "purpose",
+        "state",
+        "state_since",
+        "changed_by_name",
+        "requires",
+        "hospital_only",
+        "implemented",
+        "new_work",
+        "operations",
+        "outstanding",
+        "phc_declared",
+        "declaration_note"
+      ],
+      "title": "CapabilityOut"
+    },
+    "CurrentProfileOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "Clinic",
+            "IIC",
+            "IIB",
+            "IIA",
+            "I"
+          ],
+          "title": "Code"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "establishment": {
+          "type": "string",
+          "enum": [
+            "Clinic",
+            "Hospital"
+          ],
+          "title": "Establishment"
+        },
+        "beds": {
+          "type": "string",
+          "title": "Beds",
+          "description": "The PHC's band, in words"
+        },
+        "framework": {
+          "type": "string",
+          "title": "Framework",
+          "description": "The MSDS framework (GET /msds/indicators?category=)"
+        },
+        "framework_edition": {
+          "type": "string",
+          "title": "Framework Edition"
+        },
+        "indicators": {
+          "type": "integer",
+          "title": "Indicators"
+        },
+        "registration_number": {
+          "type": "string",
+          "title": "Registration Number"
+        },
+        "effective_from": {
+          "type": "string",
+          "format": "date",
+          "title": "Effective From"
+        },
+        "licensed_beds": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Licensed Beds",
+          "description": "The beds the licence names; null when none was entered"
+        },
+        "confirmed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Confirmed At"
+        },
+        "confirmed_by_name": {
+          "type": "string",
+          "title": "Confirmed By Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "label",
+        "establishment",
+        "beds",
+        "framework",
+        "framework_edition",
+        "indicators",
+        "registration_number",
+        "effective_from",
+        "licensed_beds",
+        "confirmed_at",
+        "confirmed_by_name"
+      ],
+      "title": "CurrentProfileOut"
+    },
+    "Envelope_EstablishmentOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/EstablishmentOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[EstablishmentOut]"
+    },
+    "Envelope_ObstetricAssessmentOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/ObstetricAssessmentOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[ObstetricAssessmentOut]"
+    },
+    "Envelope_ReferralOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/ReferralOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[ReferralOut]"
+    },
+    "Envelope_list_MlcContactOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/MlcContactOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[MlcContactOut]]"
+    },
+    "Envelope_list_ObstetricAssessmentOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/ObstetricAssessmentOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[ObstetricAssessmentOut]]"
+    },
+    "Envelope_list_ObstetricConditionOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/ObstetricConditionOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[ObstetricConditionOut]]"
+    },
+    "EstablishmentOut": {
+      "properties": {
+        "revision": {
+          "type": "integer",
+          "title": "Revision",
+          "description": "Name it as expected_revision when applying a change"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/CurrentProfileOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Null until the first profile is recorded"
+        },
+        "active": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "dispensing",
+              "outsourced_diagnostics",
+              "laboratory",
+              "imaging",
+              "outpatient_procedures",
+              "inpatient",
+              "emergency_department",
+              "surgery",
+              "cssd",
+              "blood_transfusion",
+              "blood_center",
+              "maternity",
+              "home_visits",
+              "preventive_programmes"
+            ]
+          },
+          "type": "array",
+          "title": "Active",
+          "description": "The capabilities whose new work may start now"
+        },
+        "rules_in_force": {
+          "items": {
+            "$ref": "#/components/schemas/RuleInForceOut"
+          },
+          "type": "array",
+          "title": "Rules In Force",
+          "description": "The rules that follow the PHC category, never a service: show them on their screens instead of learning them from errors (audit H-7)"
+        },
+        "capabilities": {
+          "items": {
+            "$ref": "#/components/schemas/CapabilityOut"
+          },
+          "type": "array",
+          "title": "Capabilities"
+        },
+        "views": {
+          "$ref": "#/components/schemas/ViewsOut",
+          "description": "What each service-bound workspace and screen shows now. Apply it after login and again on establishment.changed; never decide it from the profile's category"
+        }
+      },
+      "type": "object",
+      "required": [
+        "revision",
+        "profile",
+        "active",
+        "rules_in_force",
+        "capabilities",
+        "views"
+      ],
+      "title": "EstablishmentOut"
+    },
+    "GateOut": {
+      "properties": {
+        "operation": {
+          "type": "string",
+          "title": "Operation",
+          "description": "METHOD /path: it starts new work of this service (OpenAPI x-capability-gates)"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "When",
+          "description": "Only the requests it names (hide or disable that choice, not the whole action); null: every request"
+        },
+        "continues_while_retiring": {
+          "type": "boolean",
+          "title": "Continues While Retiring",
+          "description": "True: work started before the service began retiring continues while it is Retiring (show it then too)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "operation",
+        "when",
+        "continues_while_retiring"
+      ],
+      "title": "GateOut"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "MlcContactOut": {
+      "properties": {
+        "contact_id": {
+          "type": "integer",
+          "title": "Contact Id"
+        },
+        "contact_type": {
+          "type": "string",
+          "enum": [
+            "PoliceStation",
+            "MlrHospital",
+            "ReferralHospital",
+            "HealthOffice",
+            "TraumaCentre",
+            "BloodBank",
+            "RescueService",
+            "FireBrigade",
+            "PoliceEmergency",
+            "Ambulance",
+            "SocialService"
+          ],
+          "title": "Contact Type"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "district": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "District"
+        },
+        "phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Phone"
+        },
+        "alt_phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Alt Phone"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        }
+      },
+      "type": "object",
+      "required": [
+        "contact_id",
+        "contact_type",
+        "name",
+        "district",
+        "phone",
+        "alt_phone",
+        "address",
+        "notes",
+        "is_active"
+      ],
+      "title": "MlcContactOut"
+    },
+    "ObstetricAssessmentOut": {
+      "properties": {
+        "assessment_id": {
+          "type": "integer",
+          "title": "Assessment Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id"
+        },
+        "ticket_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Number"
+        },
+        "gestation_weeks": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gestation Weeks"
+        },
+        "high_risk": {
+          "type": "boolean",
+          "title": "High Risk"
+        },
+        "conditions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Conditions"
+        },
+        "condition_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Condition Note"
+        },
+        "counselled": {
+          "type": "boolean",
+          "title": "Counselled"
+        },
+        "counselling_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Counselling Note"
+        },
+        "plan": {
+          "type": "string",
+          "enum": [
+            "CareHere",
+            "Refer"
+          ],
+          "title": "Plan"
+        },
+        "referral_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Referral Id"
+        },
+        "referral_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Referral Number"
+        },
+        "nutrition_assessment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Nutrition Assessment"
+        },
+        "nutrition_advice": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Nutrition Advice"
+        },
+        "follow_up": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Follow Up"
+        },
+        "assessed_by": {
+          "type": "integer",
+          "title": "Assessed By"
+        },
+        "author_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut"
+        },
+        "assessed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Assessed At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "assessment_id",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "admission_id",
+        "admission_number",
+        "ticket_id",
+        "ticket_number",
+        "gestation_weeks",
+        "high_risk",
+        "conditions",
+        "condition_note",
+        "counselled",
+        "counselling_note",
+        "plan",
+        "referral_id",
+        "referral_number",
+        "nutrition_assessment",
+        "nutrition_advice",
+        "follow_up",
+        "assessed_by",
+        "author_stamp",
+        "assessed_at"
+      ],
+      "title": "ObstetricAssessmentOut"
+    },
+    "ObstetricConditionOut": {
+      "properties": {
+        "condition_id": {
+          "type": "integer",
+          "title": "Condition Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "provision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Managed",
+                "Referred"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provision",
+          "description": "Null: not decided yet"
+        },
+        "referral_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Referral Note"
+        },
+        "from_manual": {
+          "type": "boolean",
+          "title": "From Manual",
+          "description": "One of the twelve examples of the PHC manuals (II C p165)"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "sort_order": {
+          "type": "integer",
+          "title": "Sort Order"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "condition_id",
+        "name",
+        "provision",
+        "referral_note",
+        "from_manual",
+        "is_active",
+        "sort_order",
+        "row_version"
+      ],
+      "title": "ObstetricConditionOut"
+    },
+    "OutstandingOut": {
+      "properties": {
+        "kind": {
+          "type": "string",
+          "title": "Kind",
+          "description": "admissions, inpatient_bills, emergency_visits, operations, recovery_stays, lab_tests, imaging_orders, critical_results, prescriptions_to_dispense, stock_on_hand, drug_recalls, sterile_packs, programme_enrolments, procedure_notes"
+        },
+        "count": {
+          "type": "integer",
+          "title": "Count"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label",
+          "description": "What it is, in words"
+        },
+        "how": {
+          "type": "string",
+          "title": "How",
+          "description": "How it ends: completed, transferred or settled (it is never stranded)"
+        },
+        "operations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Operations",
+          "description": "The operations that end it, as METHOD /path; all stay allowed while the service is Retiring"
+        }
+      },
+      "type": "object",
+      "required": [
+        "kind",
+        "count",
+        "label",
+        "how",
+        "operations"
+      ],
+      "title": "OutstandingOut"
+    },
+    "ReferralIn": {
+      "properties": {
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id",
+          "description": "The OPD visit"
+        },
+        "er_visit_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Er Visit Id",
+          "description": "The emergency visit"
+        },
+        "encounter_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Encounter Id",
+          "description": "The consultation note (not an inpatient's: use the admission's transfer or referral slip)"
+        },
+        "destination_contact_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Destination Contact Id",
+          "description": "The facility from the contact list (GET /mlc/contacts)"
+        },
+        "destination_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Destination Name",
+          "description": "Default: the contact's name; the facility the patient chooses when they ask to go"
+        },
+        "destination_department": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Destination Department",
+          "examples": [
+            "Cardiology OPD"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 2000,
+          "minLength": 3,
+          "title": "Reason",
+          "examples": [
+            "Chest pain with ST elevation: needs a cath lab"
+          ]
+        },
+        "urgency": {
+          "type": "string",
+          "enum": [
+            "Routine",
+            "Urgent",
+            "Emergency"
+          ],
+          "title": "Urgency"
+        },
+        "clinical_summary": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Clinical Summary",
+          "description": "Symptoms, findings and the provisional diagnosis for the receiving doctor"
+        },
+        "treatment_given": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Treatment Given"
+        },
+        "at_patient_request": {
+          "type": "boolean",
+          "title": "At Patient Request",
+          "description": "The patient asked to go elsewhere (the note says so)",
+          "default": false
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "Own",
+            "Ambulance",
+            "Rescue",
+            "WithStaff"
+          ],
+          "title": "Transport",
+          "description": "WithStaff: the establishment's staff take the patient; the receiving facility's acknowledgement is then recorded (POST /referrals/{id}/acknowledge)"
+        },
+        "escort_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Escort Name",
+          "description": "Required for WithStaff: who goes with the patient"
+        },
+        "care_during_transfer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Care During Transfer",
+          "description": "Oxygen, a drip, monitoring on the way"
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason",
+        "urgency",
+        "clinical_summary",
+        "transport"
+      ],
+      "title": "ReferralIn",
+      "description": "An outpatient's or emergency patient's referral to another facility (the clinic manual, indicator 29)."
+    },
+    "ReferralOut": {
+      "properties": {
+        "referral_id": {
+          "type": "integer",
+          "title": "Referral Id"
+        },
+        "referral_number": {
+          "type": "string",
+          "title": "Referral Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "father_or_husband_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Father Or Husband Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "mobile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mobile"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id"
+        },
+        "er_visit_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Er Visit Id"
+        },
+        "encounter_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Encounter Id"
+        },
+        "referred_by": {
+          "type": "integer",
+          "title": "Referred By"
+        },
+        "referred_by_name": {
+          "type": "string",
+          "title": "Referred By Name"
+        },
+        "referred_by_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut"
+        },
+        "destination_contact_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Destination Contact Id"
+        },
+        "destination_name": {
+          "type": "string",
+          "title": "Destination Name"
+        },
+        "destination_department": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Destination Department"
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason"
+        },
+        "urgency": {
+          "type": "string",
+          "enum": [
+            "Routine",
+            "Urgent",
+            "Emergency"
+          ],
+          "title": "Urgency"
+        },
+        "clinical_summary": {
+          "type": "string",
+          "title": "Clinical Summary"
+        },
+        "treatment_given": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Treatment Given"
+        },
+        "at_patient_request": {
+          "type": "boolean",
+          "title": "At Patient Request"
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "Own",
+            "Ambulance",
+            "Rescue",
+            "WithStaff"
+          ],
+          "title": "Transport"
+        },
+        "escort_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Escort Name"
+        },
+        "care_during_transfer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Care During Transfer"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Issued",
+            "Acknowledged",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "acknowledged_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Acknowledged By Name"
+        },
+        "acknowledged_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Acknowledged At"
+        },
+        "acknowledgement_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Acknowledgement Note"
+        },
+        "cancel_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancel Reason"
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled At"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "acknowledgement_pending": {
+          "type": "boolean",
+          "title": "Acknowledgement Pending",
+          "description": "Our staff took the patient and the receiving facility's acknowledgement is not recorded yet"
+        }
+      },
+      "type": "object",
+      "required": [
+        "referral_id",
+        "referral_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "father_or_husband_name",
+        "gender",
+        "age_years",
+        "address",
+        "mobile",
+        "ticket_id",
+        "er_visit_id",
+        "encounter_id",
+        "referred_by",
+        "referred_by_name",
+        "referred_by_stamp",
+        "destination_contact_id",
+        "destination_name",
+        "destination_department",
+        "reason",
+        "urgency",
+        "clinical_summary",
+        "treatment_given",
+        "at_patient_request",
+        "transport",
+        "escort_name",
+        "care_during_transfer",
+        "status",
+        "acknowledged_by_name",
+        "acknowledged_at",
+        "acknowledgement_note",
+        "cancel_reason",
+        "cancelled_at",
+        "created_at",
+        "row_version",
+        "acknowledgement_pending"
+      ],
+      "title": "ReferralOut"
+    },
+    "RuleInForceOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "applies": {
+          "type": "boolean",
+          "title": "Applies",
+          "description": "Whether it applies to this establishment's current profile"
+        },
+        "profiles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Profiles",
+          "description": "The PHC categories it applies to"
+        },
+        "error_code": {
+          "type": "string",
+          "title": "Error Code",
+          "description": "What the server answers when the rule is not met"
+        },
+        "operations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Operations"
+        },
+        "screens": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Screens",
+          "description": "The screens that should say it before the server refuses"
+        },
+        "source": {
+          "type": "string",
+          "title": "Source",
+          "description": "Where it is enforced (for the backend team)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "description",
+        "applies",
+        "profiles",
+        "error_code",
+        "operations",
+        "screens",
+        "source"
+      ],
+      "title": "RuleInForceOut"
+    },
+    "ScreenViewOut": {
+      "properties": {
+        "screen_id": {
+          "type": "string",
+          "title": "Screen Id",
+          "description": "The screen catalogue's id (GET /meta/screens, the MCP server's get_screen)"
+        },
+        "workspace": {
+          "type": "string",
+          "title": "Workspace"
+        },
+        "services": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "dispensing",
+              "outsourced_diagnostics",
+              "laboratory",
+              "imaging",
+              "outpatient_procedures",
+              "inpatient",
+              "emergency_department",
+              "surgery",
+              "cssd",
+              "blood_transfusion",
+              "blood_center",
+              "maternity",
+              "home_visits",
+              "preventive_programmes"
+            ]
+          },
+          "type": "array",
+          "title": "Services",
+          "description": "Any one of them gives it its view"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "work",
+            "setup",
+            "records"
+          ],
+          "title": "Role",
+          "description": "Daily work, the setup a service needs before it is switched on, or its registers and statistics"
+        },
+        "view": {
+          "type": "string",
+          "enum": [
+            "full",
+            "open_work",
+            "records",
+            "setup",
+            "hidden"
+          ],
+          "title": "View",
+          "description": "full: show it; open_work: show it without new work of the service and with the banner; records: history, prints and corrections only; setup: only from Facility settings; hidden: in no menu"
+        }
+      },
+      "type": "object",
+      "required": [
+        "screen_id",
+        "workspace",
+        "services",
+        "role",
+        "view"
+      ],
+      "title": "ScreenViewOut"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    },
+    "ViewsOut": {
+      "properties": {
+        "workspaces": {
+          "items": {
+            "$ref": "#/components/schemas/WorkspaceViewOut"
+          },
+          "type": "array",
+          "title": "Workspaces",
+          "description": "The workspaces that exist for a service; any other is core"
+        },
+        "screens": {
+          "items": {
+            "$ref": "#/components/schemas/ScreenViewOut"
+          },
+          "type": "array",
+          "title": "Screens",
+          "description": "The screens that exist for a service (or sit in such a workspace); any other screen is core and always full"
+        }
+      },
+      "type": "object",
+      "required": [
+        "workspaces",
+        "screens"
+      ],
+      "title": "ViewsOut"
+    },
+    "WorkspaceViewOut": {
+      "properties": {
+        "workspace": {
+          "type": "string",
+          "title": "Workspace",
+          "description": "A workspace that exists for these services (GET /meta/workspaces)"
+        },
+        "services": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "dispensing",
+              "outsourced_diagnostics",
+              "laboratory",
+              "imaging",
+              "outpatient_procedures",
+              "inpatient",
+              "emergency_department",
+              "surgery",
+              "cssd",
+              "blood_transfusion",
+              "blood_center",
+              "maternity",
+              "home_visits",
+              "preventive_programmes"
+            ]
+          },
+          "type": "array",
+          "title": "Services",
+          "description": "Any one of them gives it its view"
+        },
+        "view": {
+          "type": "string",
+          "enum": [
+            "full",
+            "open_work",
+            "records",
+            "setup",
+            "hidden"
+          ],
+          "title": "View",
+          "description": "full or open_work: in the launcher (open_work with the banner 'No new ... from now on'); records: in the launcher marked 'Records'; hidden: not in the launcher"
+        }
+      },
+      "type": "object",
+      "required": [
+        "workspace",
+        "services",
+        "view"
+      ],
+      "title": "WorkspaceViewOut"
+    }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
 }

@@ -1,0 +1,202 @@
+{
+  "slug": "maternity-and-newborns",
+  "title": "Maternity and newborns",
+  "summary": "The hospital's list of high-risk obstetric cases (managed here or referred), its notice and how patients and referrers were told; obstetric risk assessments with the counselling and, in Category I and II A, the nutritional assessment; the newborn as a patient of its own, \"Baby of\" the mother, with its own band.",
+  "order": 99,
+  "workflow": "MSDS Category I 26-30; II A 87-91; II B and II C 66-69 (decisions 44)",
+  "workspaces": [
+    "quality",
+    "doctor",
+    "ward_nurse"
+  ],
+  "file": "maternity-and-newborns.md",
+  "markdown": "# Maternity and newborns\n\n| Source | What the surveyor checks | Haspataal |\n|---|---|---|\n| Cat I 26 (PDF p47), II C 66 (p165-167) | High-risk obstetric cases defined; whether the hospital can care for them displayed; its own patients and the referring practitioners and facilities informed, documented (the referrers make it fully met) | `/maternity/high-risk-conditions`, `GET /maternity/high-risk-notice/pdf`, `/maternity/communications` |\n| II C p166 | The attending clinician informs and counsels a high-risk patient; refers early when the hospital cannot manage | `POST /maternity/assessments` (counselling required when high risk; the plan; the referral) |\n| Cat I 28 (p49), II A 89 (p235) | Every high-risk obstetric record documents the nutritional status and corrective advice (a sample of 5) | Under the Category I and II A profiles the assessment is refused without it (`MATERNAL_NUTRITION_REQUIRED`); `GET /maternity/assessments/register/pdf` |\n| Cat I 30 (p50), II C 69 (p174) | An identity tag on the newborn and the mother: the name or \"baby of ...\", the MR number | `POST /maternity/newborns`: the baby's own record and band on the mother's admission |\n\n**The labour register and the birth notification are the hospital's own** (owner decision M1, 15 October 2026). The\nmanuals name them (2013 reference manual p92, II C p166) without a format; the register's default columns come from\nthe Punjab Health Department's HMIS delivery and newborn forms and the PHC manuals, each naming its source, and the\nhospital changes them (section 5). The birth notification is for the union council, which registers the birth and\nissues the certificate: Haspataal never prints a birth certificate. The neonatal equipment (indicator 29) is on-site\nevidence.\n\nThe `maternity` service (it requires inpatient care) is switched on in the facility settings\n([Facility profile and services](facility-profile-and-services.md)) once every case on the list is decided and someone\nholds `maternity.record`. The list, its notice and the communications are kept whether or not it runs: a hospital that\ncares for no high-risk case displays that and where it refers.\n\nWho: the **Owner**, the **Hospital Admin** and the **Quality Officer** keep the policy (`maternity.policy.manage`);\n**doctors** and **nurses** assess and register newborns (`maternity.record`); the clinical staff and quality read\n(`maternity.view`).\n\n## 1. The policy (Quality Officer, Owner)\n\n1. `GET /maternity/high-risk-conditions`: the manuals' twelve examples, `provision` null (undecided) until the hospital\n   decides.\n2. `PATCH /maternity/high-risk-conditions/{condition_id}` with `expected_version`: `provision` Managed, or Referred with\n   `referral_note` (where, how); `is_active` false retires one. `POST /maternity/high-risk-conditions` with an\n   `Idempotency-Key` adds the hospital's own (`OBSTETRIC_CONDITION_EXISTS`).\n3. `GET /maternity/high-risk-notice/pdf` after every change: display it at the main entrance and in the antenatal\n   waiting area.\n4. `POST /maternity/communications` with an `Idempotency-Key`: `communicated_on`, `audience` (OwnPatients |\n   Referrers), `means` (Board, Banner, Brochure, Website, Letter, Meeting, Other), `recipients` (required for a letter\n   or meeting), `summary`. `GET /maternity/communications`.\n\n## 2. The assessment (doctor)\n\n5. `GET /maternity/high-risk-conditions` for the picker.\n6. `POST /maternity/assessments` with an `Idempotency-Key`: `patient_id` and her `ticket_id` or `admission_id`,\n   `gestation_weeks`, `high_risk` (asked, never pre-filled), `conditions` (names from the list; when high risk),\n   `counselled` and `counselling_note` (required when high risk), `plan` (CareHere | Refer) with `referral_id` from\n   `POST /referrals`, and `nutrition_assessment` / `nutrition_advice` (required for a high-risk patient under Category\n   I). `VALIDATION_ERROR`, `MATERNAL_NUTRITION_REQUIRED`, `ADMINISTRATION_NOT_AUTHORIZED`, `CAPABILITY_INACTIVE`.\n   The referral's receiving facility from the contact list, `GET /mlc/contacts`.\n7. `GET /maternity/assessments?patient_id=`: her earlier assessments, newest first.\n\n## 3. The newborn (ward nurse)\n\n8. `POST /maternity/newborns` with an `Idempotency-Key`: the mother's `admission_id`, `born_at`, `gender`. The answer\n   is the baby (`full_name` \"Baby of <mother>\", its own `mrn`) with `wristband` (its band on her admission, the print\n   payload ready for the label printer).\n   A mother still on a trauma profile can have her baby registered: \"Baby of Unknown Female 3\", with `mobile` null.\n   When she is merged into her record the baby takes her name, unless the family has named it, and her contact, so\n   reload on `patient.merged` and offer a new band.\n9. A new band for the baby: `POST /wristbands` with `admission_id`, `newborn_patient_id` and `replacement_reason`.\n10. `GET /maternity/newborns?mother_patient_id=` (or a period).\n\n## 4. Registers (Quality Officer)\n\n11. `GET /maternity/assessments?date_from=&date_to=&high_risk_only=true` and\n    `GET /maternity/assessments/register/pdf?date_from=&date_to=` (each patient printed is logged).\n12. `GET /maternity/newborns?date_from=&date_to=`. The inspection pack carries `obstetric_notice`,\n    `obstetric_communications` and `obstetric_register`.\n13. The labour register of a period: `GET /maternity/labour-register/pdf?date_from=&date_to=` (the deliveries, oldest\n    first, then the babies); `GET /maternity/labour-register?date_from=&date_to=&status=Draft` lists the entries still\n    to sign.\n\n## 5. The labour register (the labour room: ward nurse, doctor)\n\n14. The form: `GET /maternity/labour-register/columns`. Never build a fixed form: the hospital changes its columns. The\n    sections `Admission`, `Delivery`, `Mother` and `Discharge` are filled once per delivery, `Baby` once per baby, in\n    `sort_order`; the input follows `kind` (`Number` with `unit`, `min_value`, `max_value`; `YesNo`; `Choice`;\n    `MultiChoice`; `Date`; `Text`). A column is required when `required`, or when its `when_code` column has\n    `when_value` (the mother's cause of death when her condition is Dead).\n15. Register each baby born alive first (section 3). Then `POST /maternity/labour-register` with an `Idempotency-Key`:\n\n    ```json\n    {\"admission_id\": 41, \"delivered_at\": \"2026-10-15T03:40:00+05:00\", \"attended_by\": 12,\n     \"field_values\": {\"mode_of_delivery\": \"Spontaneous vaginal\", \"third_stage\": [\"Oxytocin administered within 1 min\"],\n                      \"mother_condition\": \"Alive and healthy\"},\n     \"babies\": [{\"baby_no\": 1, \"newborn_patient_id\": 907,\n                 \"field_values\": {\"sex\": \"Female\", \"birth_weight_kg\": 3.1, \"baby_condition\": \"Alive and healthy\"}}]}\n    ```\n\n    A stillbirth is a baby without `newborn_patient_id`. The entry is a draft: `VALIDATION_ERROR` for a value that\n    does not fit its column, an unknown or switched-off column, a newborn of another mother or of another entry, or an\n    admission that has its entry already; `CAPABILITY_INACTIVE` while maternity is not Active.\n16. Complete it as the labour goes on: `PATCH /maternity/labour-register/{entry_id}` with `expected_version` (the\n    values sent change, null clears one; `babies` sent replaces them).\n17. Sign it: `POST /maternity/labour-register/{entry_id}/sign`. `LABOUR_ENTRY_INCOMPLETE` lists `details.missing`\n    (code and label): mark those columns. A signed entry never changes (`LABOUR_ENTRY_SIGNED`); it keeps the labels it\n    was signed with (`labels`) and the signer's `author_stamp`.\n18. The birth notification of each baby born alive: `GET /maternity/labour-register/{entry_id}/babies/{baby_no}/birth-notification/pdf`\n    for the family to take to the union council (NADRA CRMS): the child's MR number, name, sex, date and time of birth,\n    weight, the place, the mother's and father's names and CNICs, the address and who attended. Call it a birth\n    notification, never a certificate.\n19. The columns (Quality Officer, Owner): `POST /maternity/labour-register/columns` adds one of the hospital's own\n    (its `code`, `kind` and `section` never change); `PATCH /maternity/labour-register/columns/{field_id}` with\n    `expected_version` relabels, reorders, adds choices (never removes them), requires or switches it off\n    (`is_active` false: past entries keep their values).",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/high-risk-notice/pdf",
+          "summary": "The high-risk pregnancy notice to display (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/maternity/assessments",
+          "summary": "Record an obstetric risk assessment"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/assessments/register/pdf",
+          "summary": "The high-risk obstetric register (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/maternity/newborns",
+          "summary": "Register a newborn and print its band"
+        }
+      ]
+    },
+    {
+      "heading": "1. The policy (Quality Officer, Owner)",
+      "anchor": "1-the-policy-quality-officer-owner",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/high-risk-conditions",
+          "summary": "The hospital's high-risk obstetric cases"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/maternity/high-risk-conditions/{condition_id}",
+          "summary": "Decide, reword or retire a high-risk obstetric case"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/maternity/high-risk-conditions",
+          "summary": "Add a high-risk obstetric case to the hospital's list"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/high-risk-notice/pdf",
+          "summary": "The high-risk pregnancy notice to display (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/maternity/communications",
+          "summary": "Record how the hospital informed its patients or the referrers"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/communications",
+          "summary": "How the hospital informed its patients and the referrers"
+        }
+      ]
+    },
+    {
+      "heading": "2. The assessment (doctor)",
+      "anchor": "2-the-assessment-doctor",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/high-risk-conditions",
+          "summary": "The hospital's high-risk obstetric cases"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/maternity/assessments",
+          "summary": "Record an obstetric risk assessment"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/referrals",
+          "summary": "Refer an outpatient or emergency patient to another facility"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/mlc/contacts",
+          "summary": "Police stations and MLR hospitals (contact list)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/assessments",
+          "summary": "Obstetric assessments of a patient or a period"
+        }
+      ]
+    },
+    {
+      "heading": "3. The newborn (ward nurse)",
+      "anchor": "3-the-newborn-ward-nurse",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/maternity/newborns",
+          "summary": "Register a newborn and print its band"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/wristbands",
+          "summary": "Print an identity wristband"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/newborns",
+          "summary": "Newborns of a mother or a period"
+        }
+      ]
+    },
+    {
+      "heading": "4. Registers (Quality Officer)",
+      "anchor": "4-registers-quality-officer",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/assessments",
+          "summary": "Obstetric assessments of a patient or a period"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/assessments/register/pdf",
+          "summary": "The high-risk obstetric register (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/newborns",
+          "summary": "Newborns of a mother or a period"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/labour-register/pdf",
+          "summary": "The labour register of a period (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/labour-register",
+          "summary": "Deliveries of a period, newest first"
+        }
+      ]
+    },
+    {
+      "heading": "5. The labour register (the labour room: ward nurse, doctor)",
+      "anchor": "5-the-labour-register-the-labour-room-ward-nurse-doctor",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/labour-register/columns",
+          "summary": "The labour register's columns, in order"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/maternity/labour-register",
+          "summary": "Record a delivery in the labour register (a draft)"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/maternity/labour-register/{entry_id}",
+          "summary": "Complete or correct a draft entry"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/maternity/labour-register/{entry_id}/sign",
+          "summary": "Sign an entry of the labour register"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/maternity/labour-register/{entry_id}/babies/{baby_no}/birth-notification/pdf",
+          "summary": "A baby's birth notification for the union council (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/maternity/labour-register/columns",
+          "summary": "Add a column of the hospital's own to the labour register"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/maternity/labour-register/columns/{field_id}",
+          "summary": "Relabel, reorder, extend the choices, require or switch off a column"
+        }
+      ]
+    }
+  ]
+}

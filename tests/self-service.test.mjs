@@ -15,7 +15,7 @@ import {
 test("self-service capability view assigns full, records, and hidden modes", () => {
   // Full capability for staff with leave & swap permissions
   const full = getSelfServiceCapabilityView(
-    { views: { screens: ["self_service"] } },
+    { views: { screens: [] } },
     ["self.profile.view", "self.leave.request", "self.roster.swap", "ops.workorder.report"],
     "staff_nurse"
   );
@@ -27,12 +27,16 @@ test("self-service capability view assigns full, records, and hidden modes", () 
 
   // Hidden mode when facility explicitly excludes self_service
   const hidden = getSelfServiceCapabilityView(
-    { views: { screens: ["other_screen"] } },
+    { views: { screens: [{screen_id:"self_service",view:"hidden"}] } },
     ["self.profile.view"],
     "staff_nurse"
   );
   assert.equal(hidden.mode, "hidden");
   assert.equal(hidden.canView, false);
+  const read=getSelfServiceCapabilityView({views:{screens:[{screen_id:'self_service',view:'records'}]}},['self.profile.view','ops.workorder.report']);
+  assert.equal(read.mode,'records');assert.equal(read.canReportIssue,false);
+  assert.equal(getSelfServiceCapabilityView({views:{screens:[]}},[]).canView,false);
+  assert.equal(getSelfServiceCapabilityView(undefined,['self.profile.view']).canView,false);
 });
 
 test("validateLeaveRequest validates dates, chronological order, and calculates duration", () => {

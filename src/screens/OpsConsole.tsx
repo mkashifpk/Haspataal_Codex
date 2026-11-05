@@ -1,3 +1,5 @@
+import {canReadDirectory} from "../DirectoryPicker";
+import {DirectoryPicker} from "../DirectoryPicker";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   listWo,
@@ -26,6 +28,7 @@ import {
 } from "../generated/ops_console";
 import {
   getOpsConsoleCapabilityView,
+  canClearOpsDischargeStage,
   evaluatePayableRouting,
   validateAssignForm,
   validateCompleteForm,
@@ -62,7 +65,7 @@ export interface OpsConsoleProps {
 
 export const OpsConsole: React.FC<OpsConsoleProps> = ({
   user,
-  userPermissions = [],
+  userPermissions,
   currentUserRole,
   establishment,
   session,
@@ -72,11 +75,11 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
     if (session) return session;
     if (user) {
       return {
-        user_id: user.user_id || 1,
+        user_id: user.user_id,
         employee_id: user.employee_id,
         username: user.username || "",
-        roles: user.roles || (user.role ? [user.role] : currentUserRole ? [currentUserRole] : ["ops_admin"]),
-        permissions: userPermissions.length > 0 ? userPermissions : user.permissions || ["ops.workorder.manage", "ops.asset.manage"],
+        roles: user.roles || [],
+        permissions: user.permissions ?? userPermissions ?? [],
       } as SessionInfo;
     }
     return null;
@@ -165,9 +168,18 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
   const [dischargeStage, setDischargeStage] = useState<"BillingSettlement" | "NursingMARVerification" | "OpsCleaning" | "PharmacyClearance">("OpsCleaning");
   const [dischargeNote, setDischargeNote] = useState<string>("");
 
+  useEffect(() => {
+    if (!capability.canClearDischarge || !canClearOpsDischargeStage(sessionInfo, dischargeStage)) {
+      const allowed = (["OpsCleaning", "PharmacyClearance", "NursingMARVerification", "BillingSettlement"] as const)
+        .find(stage => canClearOpsDischargeStage(sessionInfo, stage));
+      if (allowed) setDischargeStage(allowed);
+    }
+  }, [sessionInfo, dischargeStage]);
+
   // Load Work Orders
   const loadWorkOrders = useCallback(async () => {
     if (capability.mode === "hidden") return;
+    if (!sessionInfo?.permissions?.some(p => ["ops.workorder.report", "ops.workorder.manage"].includes(p))) { setWorkOrders([]); return; }
     try {
       const q: any = {};
       if (woStatusFilter !== "All") q.status = woStatusFilter;
@@ -178,16 +190,16 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
       const msg = OPS_CONSOLE_ERROR_MESSAGES[err?.code]?.en || err?.message || "Failed to load work orders";
       setError(msg);
     }
-  }, [capability.mode, woStatusFilter, woPriorityFilter]);
+  }, [capability.mode, sessionInfo, woStatusFilter, woPriorityFilter]);
 
   // Load Assets & Utilities
   const loadAssetsAndUtilities = useCallback(async () => {
     if (capability.mode === "hidden") return;
     try {
       const [assetsData, catsData, logsData] = await Promise.all([
-        fetchAssetsList(),
-        fetchCategoriesList(),
-        fetchUtilityLogsList(),
+        canReadDirectory("/ops/assets",sessionInfo?.permissions??[]) ? fetchAssetsList() : Promise.resolve([]),
+        capability.canRecordUtilities || capability.canViewFeed ? fetchCategoriesList() : Promise.resolve([]),
+        capability.canRecordUtilities || capability.canViewFeed ? fetchUtilityLogsList() : Promise.resolve([]),
       ]);
       setAssetsList(assetsData || []);
       setUtilityCats(catsData || []);
@@ -196,18 +208,18 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
       const msg = OPS_CONSOLE_ERROR_MESSAGES[err?.code]?.en || err?.message || "Failed to load assets & utilities";
       setError(msg);
     }
-  }, [capability.mode]);
+  }, [capability.mode, capability.canRecordUtilities, capability.canViewFeed, sessionInfo]);
 
   // Load Live Feed
   const loadFeed = useCallback(async () => {
-    if (capability.mode === "hidden") return;
+    if (!capability.canViewFeed) { setFacilityScans([]); return; }
     try {
       const scans = await fetchFacilityFeed({ limit: 50 });
       setFacilityScans(scans || []);
     } catch (err: any) {
-      // Non-blocking feed load error
+      setError(err?.message || "Facility feed could not be loaded. Refresh to retry.");
     }
-  }, [capability.mode]);
+  }, [capability.canViewFeed]);
 
   // Initial Load
   const refreshAll = useCallback(async () => {
@@ -438,6 +450,10 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
   // Clear Discharge Stage
   const handleClearDischargeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canClearOpsDischargeStage(sessionInfo, dischargeStage)) {
+      setError("Your current permissions do not allow this clearance stage.");
+      return;
+    }
     const admId = Number(dischargeAdmissionId);
     if (!admId) return;
     setSubmitting(true);
@@ -955,7 +971,7 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
                       <td className="px-3 py-2 text-slate-600">{asset.location || "—"}</td>
                       <td className="px-3 py-2 font-mono text-slate-500">{asset.serial_no || "—"}</td>
                       <td className="px-3 py-2 text-right font-mono">
-                        {asset.purchase_cost ? `Rs. ${Number(asset.purchase_cost).toLocaleString()}` : "—"}
+                        {asset.purchase_cost != null ? `Rs. ${Number(asset.purchase_cost).toLocaleString()}` : "—"}
                       </td>
                       <td className="px-3 py-2 text-center">
                         {capability.canManageAssets && (
@@ -967,7 +983,7 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
                               setAssetCategory(asset.category);
                               setAssetLocation(asset.location || "");
                               setAssetSerial(asset.serial_no || "");
-                              setAssetCost(asset.purchase_cost ? String(asset.purchase_cost) : "");
+                              setAssetCost(asset.purchase_cost != null ? String(asset.purchase_cost) : "");
                               setShowAssetModal(true);
                             }}
                             className="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-semibold"
@@ -1161,29 +1177,25 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
 
               {assignType === "employee" ? (
                 <div>
-                  <label className="block font-semibold mb-1">Employee ID *</label>
-                  <input
-                    type="number"
+                  <label className="block font-semibold mb-1">Staff member *</label>
+                  <DirectoryPicker
                     value={assignEmpId}
                     onChange={(e) => setAssignEmpId(e.target.value)}
-                    placeholder="e.g. 5"
                     className="w-full px-3 py-1.5 border rounded"
                     data-help="ops_console.input_assign_emp_id"
                     required
-                  />
+                   path="/staff/lookup" idField="employee_id" search />
                 </div>
               ) : (
                 <div>
-                  <label className="block font-semibold mb-1">Vendor ID *</label>
-                  <input
-                    type="number"
+                  <label className="block font-semibold mb-1">Contractor / provider *</label>
+                  <DirectoryPicker
                     value={assignVendorId}
                     onChange={(e) => setAssignVendorId(e.target.value)}
-                    placeholder="e.g. 1"
                     className="w-full px-3 py-1.5 border rounded"
                     data-help="ops_console.input_assign_vendor_id"
                     required
-                  />
+                   path="/finance/vendors?vendor_type=Contractor" idField="vendor_id" />
                 </div>
               )}
 
@@ -1507,16 +1519,14 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-semibold mb-1">Vendor ID *</label>
-                  <input
-                    type="number"
+                  <label className="block font-semibold mb-1">Contractor / provider *</label>
+                  <DirectoryPicker
                     value={utilVendorId}
                     onChange={(e) => setUtilVendorId(e.target.value)}
-                    placeholder="1"
                     className="w-full px-3 py-1.5 border rounded"
                     data-help="ops_console.input_util_vendor"
                     required
-                  />
+                   path="/finance/vendors?vendor_type=UtilityProvider" idField="vendor_id" />
                 </div>
                 <div>
                   <label className="block font-semibold mb-1">Billing Period *</label>
@@ -1613,14 +1623,12 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
               </div>
               <div>
                 <label className="block font-semibold mb-1">Housekeeping Staff ID (Optional)</label>
-                <input
-                  type="number"
+                <DirectoryPicker
                   value={cleanEmpId}
                   onChange={(e) => setCleanEmpId(e.target.value)}
-                  placeholder="e.g. 23"
                   className="w-full px-3 py-1.5 border rounded"
                   data-help="ops_console.input_clean_emp_id"
-                />
+                 path="/staff/lookup" idField="employee_id" search />
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button
@@ -1671,10 +1679,10 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
                   className="w-full px-3 py-1.5 border rounded"
                   data-help="ops_console.select_discharge_stage"
                 >
-                  <option value="OpsCleaning">OpsCleaning / صفائی و دیکھ بھال</option>
-                  <option value="PharmacyClearance">PharmacyClearance / فارمیسی ادویات واپسی</option>
-                  <option value="NursingMARVerification">NursingMARVerification / نرسنگ تصدیق</option>
-                  <option value="BillingSettlement">BillingSettlement / بلنگ کلیئرنس</option>
+                  <option value="OpsCleaning" disabled={!canClearOpsDischargeStage(sessionInfo, "OpsCleaning")}>OpsCleaning / صفائی و دیکھ بھال</option>
+                  <option value="PharmacyClearance" disabled={!canClearOpsDischargeStage(sessionInfo, "PharmacyClearance")}>PharmacyClearance / فارمیسی ادویات واپسی</option>
+                  <option value="NursingMARVerification" disabled={!canClearOpsDischargeStage(sessionInfo, "NursingMARVerification")}>NursingMARVerification / نرسنگ تصدیق</option>
+                  <option value="BillingSettlement" disabled={!canClearOpsDischargeStage(sessionInfo, "BillingSettlement")}>BillingSettlement / بلنگ کلیئرنس</option>
                 </select>
               </div>
               <div>

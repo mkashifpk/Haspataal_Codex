@@ -50,7 +50,7 @@ export interface BedMatrixBedOut {
   discharge_blocked_on: string | null;
 }
 
-/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view or cssd.operate or infection.control.manage). */
+/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record). */
 export function bedMatrix(query?: { include_beds?: boolean }): Promise<BedMatrixOut> {
   return api<BedMatrixOut>("GET", withQuery(`/beds/matrix`, query), undefined);
 }

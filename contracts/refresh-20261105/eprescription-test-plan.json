@@ -1,0 +1,945 @@
+{
+  "screen": "eprescription",
+  "title": "E-prescription builder",
+  "cases": [
+    {
+      "id": "case:POST /prescriptions/{prescription_id}/cancel",
+      "call": "POST /api/v1/prescriptions/{prescription_id}/cancel",
+      "summary": "Cancel (clinical content is never edited)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/prescriptions/2/cancel",
+            "body": {
+              "reason": "wrong patient"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "prescription_id": 2,
+                "prescription_number": "RX-2026-000002",
+                "patient_id": 1,
+                "prescriber_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "encounter_id": null,
+                "source": "OPD",
+                "destination": "HospitalPharmacy",
+                "status": "Cancelled",
+                "is_content_locked": false,
+                "replaced_by_id": null,
+                "notes": null,
+                "cancelled_at": "2026-10-14T02:42:36.578085+00:00",
+                "cancel_reason": "wrong patient",
+                "external_printed_at": null,
+                "order_mode": "Written",
+                "received_by": null,
+                "read_back": false,
+                "countersigned_by": null,
+                "countersigned_at": null,
+                "countersign_alerted_at": null,
+                "created_by": 1,
+                "created_at": "2026-10-14T02:42:36.565859+00:00",
+                "row_version": 2,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "prescriber_name": "Dr Ahmed",
+                "prescriber_stamp": {
+                  "at": "2026-10-14T02:42:36.565859+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-20014, 14-Oct-2026 07:42",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-20014"
+                },
+                "received_by_name": null,
+                "items": [
+                  {
+                    "prescription_item_id": 2,
+                    "prescription_id": 2,
+                    "drug_id": 1,
+                    "is_external": false,
+                    "external_drug_name": null,
+                    "external_strength": null,
+                    "external_form": null,
+                    "qty_prescribed": 12,
+                    "qty_dispensed": 0,
+                    "dose_text": "500 mg",
+                    "route": "Oral",
+                    "frequency_code": "TDS",
+                    "interval_hours": null,
+                    "duration_days": 4,
+                    "instructions": null,
+                    "start_at": null,
+                    "end_at": null,
+                    "is_prn": false,
+                    "is_stat": false,
+                    "self_administration": false,
+                    "item_status": "Cancelled",
+                    "stopped_at": null,
+                    "stopped_by": null,
+                    "stop_reason": null,
+                    "row_version": 2,
+                    "drug_name": "Amoxicillin 500mg",
+                    "strength": null,
+                    "form": "Capsule",
+                    "unit": "unit",
+                    "qty_available": 15,
+                    "stock_status": "InStock",
+                    "qty_remaining": 12,
+                    "high_alert_category": null,
+                    "is_restricted": false,
+                    "lasa_with": []
+                  }
+                ],
+                "dispensations": [],
+                "queries": [],
+                "handovers": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T02:42:36.585604+00:00"
+              },
+              "request_id": "c486b54747c741eeb45702132f4c036a"
+            }
+          },
+          "errors_seen": [
+            "PRESCRIPTION_STATE_INVALID"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "PRESCRIPTION_STATE_INVALID",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /drugs/search",
+      "call": "GET /api/v1/drugs/search",
+      "summary": "Formulary search with live stock colour",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/drugs/search",
+            "query": {
+              "q": "Insulin"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "drug_id": 3,
+                  "code": "INSN",
+                  "name": "Insulin NPH",
+                  "generic_name": null,
+                  "strength": null,
+                  "form": "Injection",
+                  "unit": "unit",
+                  "schedule": "HospitalOnly",
+                  "is_otc_allowed": false,
+                  "barcode": "8931440574755",
+                  "low_stock_threshold": 0,
+                  "is_active": true,
+                  "high_alert_category": null,
+                  "is_restricted": false,
+                  "lasa_with": [
+                    "Insulin regular"
+                  ],
+                  "qty_available": 50,
+                  "next_expiry": "2099-01-01",
+                  "stock_status": "InStock"
+                },
+                {
+                  "drug_id": 2,
+                  "code": "INSR",
+                  "name": "Insulin regular",
+                  "generic_name": null,
+                  "strength": null,
+                  "form": "Injection",
+                  "unit": "unit",
+                  "schedule": "HospitalOnly",
+                  "is_otc_allowed": false,
+                  "barcode": "8991682543668",
+                  "low_stock_threshold": 0,
+                  "is_active": true,
+                  "high_alert_category": "Insulin",
+                  "is_restricted": false,
+                  "lasa_with": [
+                    "Insulin NPH"
+                  ],
+                  "qty_available": 50,
+                  "next_expiry": "2099-01-01",
+                  "stock_status": "InStock"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:01:45.066819+00:00"
+              },
+              "request_id": "3c9f279059e64b359f9c572408414e0b"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /drugs/{drug_id}/stock-status",
+      "call": "GET /api/v1/drugs/{drug_id}/stock-status",
+      "summary": "Drug stock with batches in FEFO order",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/drugs/1/stock-status"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "drug_id": 1,
+                "code": "AMX-500",
+                "name": "Amoxicillin 500mg",
+                "generic_name": null,
+                "strength": null,
+                "form": "Capsule",
+                "unit": "unit",
+                "schedule": "ScheduleH",
+                "is_otc_allowed": false,
+                "barcode": null,
+                "low_stock_threshold": 0,
+                "is_active": true,
+                "high_alert_category": null,
+                "is_restricted": false,
+                "lasa_with": [],
+                "qty_available": 15,
+                "next_expiry": "2098-01-01",
+                "stock_status": "InStock",
+                "batches": [
+                  {
+                    "batch_id": 2,
+                    "batch_no": "EARLY",
+                    "expiry_date": "2098-01-01",
+                    "qty_available": 5,
+                    "unit_cost": 10,
+                    "retail_price": 20,
+                    "received_at": "2026-09-30T15:28:51.746963+00:00",
+                    "is_expired": false
+                  },
+                  {
+                    "batch_id": 1,
+                    "batch_no": "LATE",
+                    "expiry_date": "2099-01-01",
+                    "qty_available": 10,
+                    "unit_cost": 10,
+                    "retail_price": 20,
+                    "received_at": "2026-09-30T15:28:51.689915+00:00",
+                    "is_expired": false
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:28:52.014186+00:00"
+              },
+              "request_id": "a7701fa19daf4458a570a6d5f88f0bb4"
+            }
+          },
+          "errors_seen": [
+            "NOT_FOUND"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /prescriptions",
+      "call": "POST /api/v1/prescriptions",
+      "summary": "E-prescription (hospital pharmacy or external slip)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/prescriptions",
+            "body": {
+              "ticket_id": 1,
+              "destination": "ExternalMarket",
+              "items": [
+                {
+                  "external_drug_name": "Augmentin 625",
+                  "qty_prescribed": 10,
+                  "dose_text": "625 mg",
+                  "route": "Oral",
+                  "frequency_code": "BD",
+                  "duration_days": 5
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "prescription_id": 1,
+                "prescription_number": "RX-2026-000001",
+                "patient_id": 1,
+                "prescriber_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "encounter_id": null,
+                "source": "OPD",
+                "destination": "ExternalMarket",
+                "status": "ExternalPrinted",
+                "is_content_locked": false,
+                "replaced_by_id": null,
+                "notes": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "external_printed_at": "2026-10-14T01:57:29.662705+00:00",
+                "order_mode": "Written",
+                "received_by": null,
+                "read_back": false,
+                "countersigned_by": null,
+                "countersigned_at": null,
+                "countersign_alerted_at": null,
+                "created_by": 1,
+                "created_at": "2026-10-14T01:57:29.662705+00:00",
+                "row_version": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "prescriber_name": "Dr Ahmed",
+                "prescriber_stamp": {
+                  "at": "2026-10-14T01:57:29.662705+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-47431, 14-Oct-2026 06:57",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-47431"
+                },
+                "received_by_name": null,
+                "items": [
+                  {
+                    "prescription_item_id": 1,
+                    "prescription_id": 1,
+                    "drug_id": null,
+                    "is_external": true,
+                    "external_drug_name": "Augmentin 625",
+                    "external_strength": null,
+                    "external_form": null,
+                    "qty_prescribed": 10,
+                    "qty_dispensed": 0,
+                    "dose_text": "625 mg",
+                    "route": "Oral",
+                    "frequency_code": "BD",
+                    "interval_hours": null,
+                    "duration_days": 5,
+                    "instructions": null,
+                    "start_at": null,
+                    "end_at": null,
+                    "is_prn": false,
+                    "is_stat": false,
+                    "self_administration": false,
+                    "item_status": "Active",
+                    "stopped_at": null,
+                    "stopped_by": null,
+                    "stop_reason": null,
+                    "row_version": 1,
+                    "drug_name": null,
+                    "strength": null,
+                    "form": null,
+                    "unit": null,
+                    "qty_available": null,
+                    "stock_status": null,
+                    "qty_remaining": 10,
+                    "high_alert_category": null,
+                    "is_restricted": null,
+                    "lasa_with": []
+                  }
+                ],
+                "dispensations": [],
+                "queries": [],
+                "handovers": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T01:57:29.711122+00:00"
+              },
+              "request_id": "9f3f3535ac2a4c0c8f2d2d4385077a6b"
+            }
+          },
+          "errors_seen": [
+            "CAPABILITY_INACTIVE",
+            "PRESCRIBER_NOT_AUTHORIZED",
+            "PRESCRIPTION_INCOMPLETE",
+            "SELF_ADMINISTRATION_INVALID"
+          ],
+          "events_emitted": [
+            "pharmacy.prescription.pending"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ADMISSION_PATIENT_MISMATCH",
+        "CAPABILITY_INACTIVE",
+        "CLINICAL_LOCKOUT",
+        "LAB_ONLY_QUEUE_FORBIDDEN",
+        "MEDICATION_ORDER_INVALID",
+        "PRESCRIBER_NOT_AUTHORIZED",
+        "PRESCRIPTION_DESTINATION_MISMATCH",
+        "PRESCRIPTION_INCOMPLETE",
+        "REFERENCE_NOT_FOUND",
+        "SELF_ADMINISTRATION_INVALID",
+        "TICKET_NOT_ACTIVE",
+        "TICKET_PATIENT_MISMATCH",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /prescriptions/{prescription_id}/print-payload",
+      "call": "GET /api/v1/prescriptions/{prescription_id}/print-payload",
+      "summary": "Printable prescription slip",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "pharmacist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/prescriptions/1/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "prescription",
+                "printer_role": "receipt",
+                "paper_width_mm": 80,
+                "fields": {
+                  "prescription_id": 1,
+                  "prescription_number": "RX-2026-000001",
+                  "patient_id": 1,
+                  "prescriber_id": 1,
+                  "ticket_id": 1,
+                  "admission_id": null,
+                  "encounter_id": null,
+                  "source": "OPD",
+                  "destination": "ExternalMarket",
+                  "status": "ExternalPrinted",
+                  "is_content_locked": false,
+                  "replaced_by_id": null,
+                  "notes": null,
+                  "cancelled_at": null,
+                  "cancel_reason": null,
+                  "external_printed_at": "2026-10-14T01:57:29.662705+00:00",
+                  "order_mode": "Written",
+                  "received_by": null,
+                  "read_back": false,
+                  "countersigned_by": null,
+                  "countersigned_at": null,
+                  "countersign_alerted_at": null,
+                  "created_by": 1,
+                  "created_at": "2026-10-14T01:57:29.662705+00:00",
+                  "row_version": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "prescriber_name": "Dr Ahmed",
+                  "prescriber_stamp": {
+                    "at": "2026-10-14T01:57:29.662705+00:00",
+                    "name": "Dr Ahmed",
+                    "text": "Dr Ahmed, Doctor, PMDC PMDC-47431, 14-Oct-2026 06:57",
+                    "user_id": 1,
+                    "designation": "Doctor",
+                    "employee_id": 1,
+                    "registration": "PMDC PMDC-47431"
+                  },
+                  "received_by_name": null,
+                  "items": [
+                    {
+                      "prescription_item_id": 1,
+                      "prescription_id": 1,
+                      "drug_id": null,
+                      "is_external": true,
+                      "external_drug_name": "Augmentin 625",
+                      "external_strength": null,
+                      "external_form": null,
+                      "qty_prescribed": 10,
+                      "qty_dispensed": 0,
+                      "dose_text": "625 mg",
+                      "route": "Oral",
+                      "frequency_code": "BD",
+                      "interval_hours": null,
+                      "duration_days": 5,
+                      "instructions": null,
+                      "start_at": null,
+                      "end_at": null,
+                      "is_prn": false,
+                      "is_stat": false,
+                      "self_administration": false,
+                      "item_status": "Active",
+                      "stopped_at": null,
+                      "stopped_by": null,
+                      "stop_reason": null,
+                      "row_version": 1,
+                      "drug_name": null,
+                      "strength": null,
+                      "form": null,
+                      "unit": null,
+                      "qty_available": null,
+                      "stock_status": null,
+                      "qty_remaining": 10,
+                      "high_alert_category": null,
+                      "is_restricted": null,
+                      "lasa_with": []
+                    }
+                  ],
+                  "dispensations": [],
+                  "queries": [],
+                  "handovers": [],
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": "",
+                    "phc_number": ""
+                  },
+                  "patient": {
+                    "full_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "father_or_husband_name": null,
+                    "gender": "male",
+                    "address": null,
+                    "mobile": "03009217525",
+                    "allergies": null,
+                    "age_years": 40,
+                    "visit_number": 1
+                  },
+                  "consultation": null
+                },
+                "text": "               Haspataal Hospital\n          PRESCRIPTION (LOCAL MARKET)\n------------------------------------------------\nRx                                RX-2026-000001\nDate                           14-Oct-2026 06:57\nVisit                                          1\nPatient                                 Ali Khan\nMRN                              MRN-2026-000001\nAge / gender                      …",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"50.760mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"116\" height=\"116\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m1 0h3m1 0h1m2 0h2m1 0h7m-25 1h1m5 0h1m1 0h2m2 0h3m1 0h1m1 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m2 0h1m1 0h3m1 0h1m2 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m2 0h3m4 0h1m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m2 0h4m2 0h2m1 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m2 0h1m1 0h2m2 0…",
+                "pdf_url": null
+              },
+              "meta": {
+                "server_time": "2026-10-14T01:57:29.752011+00:00"
+              },
+              "request_id": "d83c7c0dcb324aba87462220644daf9a"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /prescriptions/{prescription_id}/handover",
+      "call": "POST /api/v1/prescriptions/{prescription_id}/handover",
+      "summary": "Record that the prescription was handed to the patient and how its copy is kept",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "pharmacist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/prescriptions/1/handover",
+            "body": {
+              "handed_to": "Attendant",
+              "attendant_name": "Bilal (son)",
+              "copy_kept": "CarbonCopy"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "prescription_id": 1,
+                "prescription_number": "RX-2026-000001",
+                "patient_id": 1,
+                "prescriber_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "encounter_id": null,
+                "source": "OPD",
+                "destination": "HospitalPharmacy",
+                "status": "Active",
+                "is_content_locked": false,
+                "replaced_by_id": null,
+                "notes": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "external_printed_at": null,
+                "order_mode": "Written",
+                "received_by": null,
+                "read_back": false,
+                "countersigned_by": null,
+                "countersigned_at": null,
+                "countersign_alerted_at": null,
+                "created_by": 1,
+                "created_at": "2026-10-14T02:37:21.709815+00:00",
+                "row_version": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "prescriber_name": "Dr Ahmed",
+                "prescriber_stamp": {
+                  "at": "2026-10-14T02:37:21.709815+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-47938, 14-Oct-2026 07:37",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-47938"
+                },
+                "received_by_name": null,
+                "items": [
+                  {
+                    "prescription_item_id": 1,
+                    "prescription_id": 1,
+                    "drug_id": 1,
+                    "is_external": false,
+                    "external_drug_name": null,
+                    "external_strength": null,
+                    "external_form": null,
+                    "qty_prescribed": 12,
+                    "qty_dispensed": 0,
+                    "dose_text": "500 mg",
+                    "route": "Oral",
+                    "frequency_code": "TDS",
+                    "interval_hours": null,
+                    "duration_days": 4,
+                    "instructions": null,
+                    "start_at": null,
+                    "end_at": null,
+                    "is_prn": false,
+                    "is_stat": false,
+                    "self_administration": false,
+                    "item_status": "Active",
+                    "stopped_at": null,
+                    "stopped_by": null,
+                    "stop_reason": null,
+                    "row_version": 1,
+                    "drug_name": "Amoxicillin 500mg",
+                    "strength": null,
+                    "form": "Capsule",
+                    "unit": "unit",
+                    "qty_available": 15,
+                    "stock_status": "InStock",
+                    "qty_remaining": 12,
+                    "high_alert_category": null,
+                    "is_restricted": false,
+                    "lasa_with": []
+                  }
+                ],
+                "dispensations": [],
+                "queries": [],
+                "handovers": [
+                  {
+                    "handover_id": 2,
+                    "handed_to": "Attendant",
+                    "attendant_name": "Bilal (son)",
+                    "copy_kept": "CarbonCopy",
+                    "document_id": null,
+                    "handed_by": 7,
+                    "handed_by_name": "u8c6361282b",
+                    "handed_at": "2026-10-14T02:37:21.813715+00:00"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-10-14T02:37:21.820337+00:00"
+              },
+              "request_id": "d246071bfe7543a0b454415a9da0da01"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "REFERENCE_NOT_FOUND",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "PRESCRIPTION_STATE_INVALID",
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /patients/{patient_id}/documents",
+      "call": "POST /api/v1/patients/{patient_id}/documents",
+      "summary": "Upload a patient document (PDF/JPEG/PNG)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/1/documents",
+            "multipart": {
+              "file": "<file>",
+              "doc_type": "CNIC"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "document_id": 1,
+                "patient_id": 1,
+                "doc_type": "CNIC",
+                "title": null,
+                "content_type": "application/pdf",
+                "size_bytes": 31,
+                "is_outside": false,
+                "source_facility": null,
+                "document_date": null,
+                "uploaded_at": "2026-10-13T11:27:11.017375+00:00"
+              },
+              "meta": {
+                "server_time": "2026-10-13T11:27:11.028856+00:00"
+              },
+              "request_id": "16803b23adfa4ca89f6674d80ff160a0"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "IDEMPOTENCY_CONFLICT",
+            "NOT_FOUND",
+            "PAYLOAD_TOO_LARGE",
+            "UNSUPPORTED_MEDIA_TYPE",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "IDEMPOTENCY_CONFLICT",
+        "NOT_FOUND",
+        "PAYLOAD_TOO_LARGE",
+        "UNSUPPORTED_MEDIA_TYPE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    }
+  ],
+  "service_cases": [
+    {
+      "call": "POST /api/v1/prescriptions",
+      "set_up": "dispensing not Active in GET /establishment",
+      "expect": "the choice for the hospital pharmacy (destination HospitalPharmacy) is hidden or disabled; the rest of the action stays"
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/eprescription",
+  "workspace_guide": "get_handbook_outline('doctor')",
+  "realtime": [
+    {
+      "event": "pharmacy.stock.updated",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Show stock_status as green/amber/red; update live from pharmacy.stock.updated.",
+    "Offer 'Hospital Pharmacy' only while dispensing is Active (GET /establishment; the operation is in x-capability-gates); otherwise the only choice is the printed slip for an outside pharmacy.",
+    "External/Local Market prescriptions accept free-text drug names and print a slip; they never enter the pharmacy queue. The slip carries the prescriber's stamp (prescriber_stamp: name, designation, PMDC number, date-time) above the signature line.",
+    "Inpatient orders require dose, route, frequency (or PRN/STAT) and start time — the MAR is generated from them.",
+    "Outpatient (OPD, ER) lines need the dose, the route, how often and for how many days; a single STAT dose the dose and the route (PRESCRIPTION_INCOMPLETE, details.lines lists each line's missing fields: mark them). Pass the consultation's encounter_id so the printout carries its complaint, findings, diagnosis and VCO.",
+    "The printout (print-payload) is the standard prescription: the patient's particulars, the directions in words ('1 tablet oral twice a day for 5 days'), the prescriber's stamp and a signature line. Printing proves nothing: 'Handed over' (POST /prescriptions/{id}/handover) records to whom (patient, or a named attendant) and how the copy is kept (electronic, carbon copy, or the scan of the signed copy from the patient's documents).",
+    "Show each medicine's high_alert_category (red) and lasa_with ('looks like …', ask to confirm). A restricted medicine (is_restricted) needs the RestrictedPrescribing privilege; only PMDC doctors or holders of the Prescribing privilege prescribe (PRESCRIBER_NOT_AUTHORIZED, MSDS 52).",
+    "self_administration (inpatients): the patient may take an oral, inhaled or topical non-high-alert medicine themselves (SELF_ADMINISTRATION_INVALID otherwise).",
+    "POST /prescriptions starts new dispensing work for the hospital pharmacy (destination HospitalPharmacy): offer that choice only while dispensing is Active (GET /establishment active); the rest of the action stays."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

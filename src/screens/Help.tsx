@@ -40,7 +40,7 @@ export function Help({
           ...outline.shared_screens,
           ...outline.workspaces.flatMap((w) => w.screens),
         ].map((s) => s.id)
-      : ["connect_server", "login", "settings", "help_center"],
+      : ["connect_server", "login", "settings", "help_center", "badge_station_kiosk"],
   );
   const screenPages = Object.entries(help).filter(([id]) => allowed.has(id));
   const workspaces = [...(outline?.workspaces || [])].sort(

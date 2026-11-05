@@ -10,9 +10,9 @@ const withQuery = (path: string, q?: Record<string, unknown>) => {
 
 export interface PackUseIn {
   pack_code: string;
-  /** The operation (the theatre) */
+  /** The operation (the theatre) (GET /ot/clinical-worklist) */
   booking_id?: number | null;
-  /** A procedure on the ward */
+  /** A procedure on the ward (GET /ipd/my-beds) */
   admission_id?: number | null;
 }
 
@@ -48,8 +48,37 @@ export interface PackOut {
   expiring_soon: boolean;
 }
 
+export interface SurgicalWorklistItemOut {
+  booking_id: number;
+  booking_number: string;
+  status: "Requested" | "Scheduled" | "InProgress" | "Cleaning" | "Completed" | "Cancelled" | "EmergencyHold";
+  booking_type: "Scheduled" | "Emergency" | "CodeRed";
+  procedure_name: string;
+  anesthesia_type: string | null;
+  scheduled_start: string | null;
+  actual_start: string | null;
+  actual_end: string | null;
+  primary_surgeon_id: number;
+  surgeon_name: string;
+  ot_name: string | null;
+  patient_id: number;
+  mrn: string;
+  patient_name: string;
+  needs_anaesthetist: boolean;
+  anaesthesia_decision: "Fit" | "FitWithConditions" | "NotFit" | "Deferred" | null;
+  anaesthetist_id: number | null;
+  parts: RecordPartOut[];
+  next_step: string | null;
+}
+
+export interface RecordPartOut {
+  part: "PreOpNote" | "OperationConsent" | "PreAnaesthesia" | "AnaesthesiaConsent" | "SignIn" | "TimeOut" | "SignOut" | "AnaesthesiaRecord" | "OperativeNote" | "Recovery";
+  label: string;
+  state: "Missing" | "Draft" | "Final" | "NotNeeded";
+}
+
 /** A sterile pack opened for a patient — POST /api/v1/cssd/packs/use (who may call: holders of cssd.pack.use). */
-export function usePack(body: PackUseIn): Promise<PackOut> {
+export function use(body: PackUseIn): Promise<PackOut> {
   return api<PackOut>("POST", `/cssd/packs/use`, body);
 }
 
@@ -61,4 +90,9 @@ export function getPack(pack_code: string): Promise<PackOut> {
 /** Sterile packs (the stock) — GET /api/v1/cssd/packs (who may call: holders of cssd.view or cssd.operate or cssd.manage or cssd.pack.use). */
 export function listPacks(query?: { status?: "Quarantined" | "Available" | "Issued" | "Used" | "Expired" | "Failed" | "Recalled" | null; set_type_id?: number | null; ward_id?: number | null; ot_id?: number | null; expiring_only?: boolean; limit?: number }): Promise<PackOut[]> {
   return api<PackOut[]>("GET", withQuery(`/cssd/packs`, query), undefined);
+}
+
+/** Operations whose surgical record needs work — GET /api/v1/ot/clinical-worklist (who may call: holders of ot.clinical.view). */
+export function worklistOtClinical(query?: { mine?: boolean; days?: number; admission_id?: number | null }): Promise<SurgicalWorklistItemOut[]> {
+  return api<SurgicalWorklistItemOut[]>("GET", withQuery(`/ot/clinical-worklist`, query), undefined);
 }

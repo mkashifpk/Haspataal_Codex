@@ -1,0 +1,232 @@
+{
+  "slug": "laboratory-and-radiology",
+  "title": "Laboratory & radiology",
+  "summary": "Order → pay → barcoded sample → scanner-first result grid → verification → publish to doctor; PACS linking.",
+  "order": 99,
+  "workflow": "§4.1–§4.6",
+  "workspaces": [
+    "doctor",
+    "reception",
+    "lab_tech",
+    "lab_verifier",
+    "lab_admin",
+    "radiology"
+  ],
+  "file": "laboratory-and-radiology.md",
+  "markdown": "# Laboratory & radiology\n\nThe quality side of both departments (the patient identified at collection and before an examination, rejected samples,\nsamples sent to partner laboratories, turnaround and its MSDS score, critical results, the radiologist's report,\noutsourced examinations, repeats, the written policies) is in [diagnostic services quality](diagnostic-services.md).\n\n## Lab: the 5 steps (§4.1) + verification (§4.5)\n\n1. **Order** — doctor: `POST /lab/requisitions {\"ticket_id\": 42, \"test_ids\": [1, 3], \"priority\": \"STAT\"}`\n   (inpatients: `admission_id` → billed to the running bill). One sample with a unique barcode\n   (`LB-2026-0000123`) is created per test. OPD orders create a finalized **Lab invoice**.\n   The order is written in the consultation or the inpatient's chart: send that visit's `ticket_id`, or the stay's\n   `admission_id` for an inpatient.\n2. **Pay** — at reception/cashier: `POST /finance/invoices/{invoice_id}/payments` (lab staff never take\n   cash; `LAB_PAYMENT_REQUIRED` until paid — IPD and Emergency are exempt).\n3. **Collect & label** — `POST /lab/samples/{sample_id}/collect {\"wristband_code\": \"…\"}` (or\n   `{\"identity_check\": \"TwoIdentifiers\"}`: the patient is identified first, MSDS AAC 3) → label print payload (50 mm\n   label printer). Ward and ER nurses collect at the bedside too. An unusable sample:\n   `POST /lab/samples/{sample_id}/reject {\"code\": \"Haemolysed\"}` (a new sample to collect). A jammed or smudged label:\n   `GET /lab/samples/{sample_id}/label` prints it again. Call it only when the user prints, never for a preview: each\n   call is one more label (`label_print_count` in `GET /lab/scan/{barcode}`), whether or not the printer printed it,\n   and is logged as a PHI access. It never changes the sample, so its `row_version` stays (decisions 53).\n4. **Scan & enter** — bench scanner: `GET /lab/scan/{barcode}` → `metric_grid` with this patient's\n   reference ranges (male/female/default) and critical limits. Flag values live. Then\n   `POST /lab/items/{item_id}/results {\"metrics\": {\"hb\": 6.5, \"wbc\": 12.2}, \"interpretation\": \"…\"}` —\n   result is `PendingVerification`, reagents are deducted by the test's bill of materials (FEFO) and\n   verifiers get `lab.result.pending_verification`, and so does every bench (`lab.result.enter`): refresh the\n   worklist. `POST /lab/samples/{sample_id}/receive` first starts the turnaround clock (`due_at` on the worklist).\n5. **Verify & publish** — `GET /lab/verification-queue` (critical first) →\n   `POST /lab/results/{id}/verify {\"decision\": \"Verified\"}` → `Published`; the ordering doctor gets\n   `lab.result.published` + an inbox notification. A lab-only walk-in has no ordering doctor: its publication goes to\n   the reception desk that registers walk-ins instead ([OPD reception](opd-reception.md), §6). The bench does not get\n   it. `Rejected` (note required) sends it back to the bench.\n   The person who entered a result cannot verify it (`LAB_VERIFIER_MUST_DIFFER`). A critical result opens the critical\n   results log: tell the doctor now and record it (`POST /critical-results/{id}/communications`).\n   Each queue row carries its context, so the verifier's screen needs no other read and never matches names:\n   `requisition_id` and `requisition_number` (open the order with `GET /lab/requisitions/{requisition_id}`),\n   `patient_id`, the sample's `barcode`, `entered_by` (the user who entered it: compare it with the signed-in user's id\n   to warn before `LAB_VERIFIER_MUST_DIFFER`) and `due_at` with `is_overdue` (ask for the optional `delay_reason` before\n   verifying; a correction is never overdue). **A lost verify answer:** never repeat the decision by itself. Read\n   `GET /lab/requisitions/{requisition_id}` and find the `result_id` in `results`: `Published` (with `verified_stamp`)\n   or `Rejected` is decided; still `PendingVerification`, offer it again. A row gone from the queue says neither\n   (backend issue #29).\n\nDoctors only ever see published results: `GET /lab/requisitions/{id}`,\n`GET /lab/patients/{patient_id}/results?test_id=` (trend charts). Each result carries who performed it\n(`performed_stamp`) and who verified it (`verified_stamp`): name, designation, registration, date-time (MSDS 147).\n\n**Critical values** (audit F-23) — when a critical value is entered, the verifiers and the ordering doctor get\n`lab.result.critical_pending` (`release_after_minutes`): verifiers check critical values first. The one exception to\n\"published only\": a critical value still unverified after the setting `lab_critical_release_minutes` (default 15) is\nshown to the ordering doctor, with `status: \"PendingVerification\"` and `provisionally_released_at` set, in\n`GET /lab/requisitions/{id}` and `GET /lab/patients/{patient_id}/results`, announced by `lab.result.provisional` and an\ninbox notification. Show it in red as \"Pending verification\" and never print it (the lab report prints published\nresults only). If the verifier rejects it, `lab.result.provisional_withdrawn`: the doctor must not act on it. The\ncritical results log still opens when the value is published.\n\n**The lab report** — `GET /lab/requisitions/{id}/report/print-payload` (A4) or its `pdf_url`\n(`GET /lab/requisitions/{id}/report/pdf`), for the doctor, the ward or the reception desk handing reports to\nwalk-in patients: the published tests, each metric with the reference range for the patient's sex and its flag, the\ninterpretation, an amended result's reason, and under each test the technician's and the verifier's stamps.\n`complete: false` = some tests are still in the lab (the report says it is partial); nothing verified yet →\n`LAB_REPORT_NOT_READY`.\n\n**Cancelling an order** — before any of its tests is sampled: `POST /lab/requisitions/{requisition_id}/cancel\n{\"reason\": \"...\"}` cancels the tests and voids an unpaid lab bill. The doctor who ordered it cancels their own order;\nthe lab admin any order (another doctor's: `FORBIDDEN`). Once a sample is collected the order stays\n(`LAB_ITEM_STATE_INVALID`): an unusable sample is rejected on the bench instead.\n\n**Re-runs** — `POST /lab/items/{item_id}/rerun {\"reason\"}` creates a linked re-run item with a new\nbarcode, not billed again; its reagent usage is flagged `is_rerun` (abuse is swept).\n**Corrections** — `POST /lab/items/{item_id}/corrections` amends a published result; it is re-verified\nand then supersedes the original.\n\n## Lab admin (§4.3)\n\nTests & metric schemas (`POST /lab/tests`), prices (`PUT /lab/tests/{id}/price`, Lab Admin only;\nexisting orders keep their price), reagents & batches, BOM (`PUT /lab/tests/{id}/bom`),\nwrite-offs, `GET /lab/dashboard` (revenue − reagent COGS = net, contractor/hospital share). A contracted laboratory:\n`PUT /lab/contractor {\"hospital_share_pct\", \"contractor_employee_id\"}`, the contractor picked with\n`GET /staff/lookup?q=`; a contracting firm instead: `contractor_vendor_id` from `GET /finance/vendors`.\nMissing BOM → result submission refused (`LAB_REAGENT_BOM_MISSING`) or flagged, per hospital policy.\nA send-out test's partner from `GET /diagnostic-partners`, a reagent batch's supplier invoice from\n`GET /pharmacy-admin/vendor-invoices`, and the batch of a write-off (`POST /lab/reagent-adjustments`) from\n`GET /lab/reagents/{reagent_id}/batches`: the batches still in stock, the first to expire first, with what is left\n(`qty_available`); an expired one (`is_expired`) is written off with reason `Expiry`.\n\n## Radiology / PACS (§4.6)\n\n1. Doctor: `POST /imaging/orders {\"ticket_id\", \"modality\": \"XRay\", \"body_part\": \"Chest PA\", \"laterality\",\n   \"service_id\"}` → returns `accession_number` (≤ 16 chars) — the modality must use it.\n   The order is written in the consultation or the inpatient's chart (that visit's `ticket_id`, or the stay's\n   `admission_id`); the service from `GET /finance/service-catalog?category=Imaging`.\n2. Radiographer: `GET /imaging/worklist`, `POST /imaging/orders/{id}/status`: `InProgress` records the checks before the\n   examination (the patient identified, `site_confirmed`, `pregnancy_status` when needed), `Completed` the contrast\n   and the doctor present (`contrast_doctor_id`: the `employee_id` from `GET /staff/lookup?q=…&license_type=PMDC`).\n3. Link the study: `POST /imaging/orders/{id}/link-study` with `{}` (auto-find in Orthanc by accession) or\n   `{\"orthanc_study_id\"}` copied from the PACS (the server checks it there and takes the study's UID from the PACS).\n   The worker also auto-links every 2 minutes; a study linked while the examination is in progress\n   completes it. A server without PACS answers `PACS_NOT_CONFIGURED` (never retry: the examination ends with status\n   `Completed`, the report works without images); `ORTHANC_UNAVAILABLE`: the PACS did not answer (retryable);\n   `IMAGING_STUDY_NOT_FOUND`: not in the PACS yet. Doctor gets `imaging.study.available`\n   with `viewer_url` (Stone / OHIF / Orthanc Explorer 2) — open it in a separate window. `viewer_url` is null when\n   IT has set no viewer address (`ORTHANC_PUBLIC_URL`): show the study as linked, without *Open images*.\n4. Report (a radiologist: PMDC and the RadiologyReporting privilege): `POST /imaging/orders/{id}/report {\"report_text\",\n   \"critical_finding_id\"}` → `imaging.report.ready`. The report is final; it\n   carries the reporter's stamp (`reported_stamp` of `GET /imaging/orders/{id}`); a critical finding opens the critical\n   results log.\n5. Print: `GET /imaging/orders/{id}/report/print-payload` (A4: study, clinical indication, report, stamp) or its\n   `pdf_url` (`GET /imaging/orders/{id}/report/pdf`); not reported yet → `IMAGING_REPORT_NOT_READY`.",
+  "steps": [
+    {
+      "heading": "Lab: the 5 steps (§4.1) + verification (§4.5)",
+      "anchor": "lab-the-5-steps-4-1-verification-4-5",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/requisitions",
+          "summary": "Order lab tests for an OPD visit or an inpatient"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/invoices/{invoice_id}/payments",
+          "summary": "Collect a payment (lab / pharmacy / final IPD bill ...)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/samples/{sample_id}/collect",
+          "summary": "Collect a sample → returns the barcode label print payload"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/samples/{sample_id}/reject",
+          "summary": "Reject an unusable sample (the test goes back to collection)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/samples/{sample_id}/label",
+          "summary": "Re-print a sample barcode label"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/scan/{barcode}",
+          "summary": "Scanner lookup → metric grid with this patient's reference ranges"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/items/{item_id}/results",
+          "summary": "Submit & Broadcast a result (goes to the verifier)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/samples/{sample_id}/receive",
+          "summary": "Mark the sample received in the lab (item → Processing)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/verification-queue",
+          "summary": "Results awaiting verification (critical & STAT first)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/results/{result_id}/verify",
+          "summary": "Verify (publish + notify doctor) or reject back to the bench"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/critical-results/{critical_result_id}/communications",
+          "summary": "Record who was told the critical result"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/requisitions/{requisition_id}",
+          "summary": "Requisition with items, samples, results and bill status"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/patients/{patient_id}/results",
+          "summary": "Published results timeline of a patient (EMR)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/requisitions/{requisition_id}/report/print-payload",
+          "summary": "Printable lab report with who performed and who verified each test"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/requisitions/{requisition_id}/report/pdf",
+          "summary": "The lab report as a PDF"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/requisitions/{requisition_id}/cancel",
+          "summary": "Cancel tests not yet sampled (voids an unpaid lab bill)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/items/{item_id}/rerun",
+          "summary": "Re-run a failed test (new barcode, not billed again)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/items/{item_id}/corrections",
+          "summary": "Amend a published result (re-verification required)"
+        }
+      ]
+    },
+    {
+      "heading": "Lab admin (§4.3)",
+      "anchor": "lab-admin-4-3",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/tests",
+          "summary": "Add a test with its metric schema"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/lab/tests/{test_id}/price",
+          "summary": "Set a test price (Lab Admin; history kept)"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/lab/tests/{test_id}/bom",
+          "summary": "Replace the reagent BOM of a test"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/dashboard",
+          "summary": "Lab profit: revenue − reagent COGS, contractor share"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/lab/contractor",
+          "summary": "Set the lab revenue-share agreement from a date"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/vendors",
+          "summary": "Vendors"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/diagnostic-partners",
+          "summary": "Partner laboratories and imaging centres"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/pharmacy-admin/vendor-invoices",
+          "summary": "Supplier invoices and amounts owed"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/reagent-adjustments",
+          "summary": "Write off reagent stock (expiry / damage / count adjustment)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/reagents/{reagent_id}/batches",
+          "summary": "A reagent's batches with stock, the first to expire first"
+        }
+      ]
+    },
+    {
+      "heading": "Radiology / PACS (§4.6)",
+      "anchor": "radiology-pacs-4-6",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/imaging/orders",
+          "summary": "Order imaging (doctor)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/service-catalog",
+          "summary": "Hospital service prices (lab prices live in the lab catalogue)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/imaging/worklist",
+          "summary": "Radiographer worklist (STAT first, then by due time)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/imaging/orders/{order_id}/status",
+          "summary": "Progress / cancel an imaging order"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/imaging/orders/{order_id}/link-study",
+          "summary": "Link the PACS study (auto-find by accession if no ids given)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/imaging/orders/{order_id}/report",
+          "summary": "Enter the radiology report (radiologist)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/imaging/orders/{order_id}",
+          "summary": "Imaging order with viewer URL"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/imaging/orders/{order_id}/report/print-payload",
+          "summary": "Printable radiology report with the reporter's stamp"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/imaging/orders/{order_id}/report/pdf",
+          "summary": "The radiology report as a PDF"
+        }
+      ]
+    }
+  ]
+}

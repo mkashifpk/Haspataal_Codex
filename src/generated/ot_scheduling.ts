@@ -120,13 +120,14 @@ export interface TheaterOut {
 }
 
 export interface BookingIn {
+  /** The patient (GET /patients/search) */
   patient_id: number;
   /** Defaults to the patient's active admission (billed to the running bill) */
   admission_id?: number | null;
   procedure_name: string;
-  /** Catalogued OT/Procedure service → price snapshot */
+  /** Catalogued OT/Procedure service → price snapshot (GET /finance/service-catalog?category=OT) */
   service_id?: number | null;
-  /** Defaults to the requesting surgeon */
+  /** Defaults to the requesting surgeon (GET /staff/lookup?license_type=PMDC) */
   primary_surgeon_id?: number | null;
   booking_type?: "Scheduled" | "Emergency" | "CodeRed";
   emergency_reason?: string | null;
@@ -173,6 +174,7 @@ export interface OtScheduleIn {
   scheduled_start: string;
   /** Surgery time; the turnover buffer is added automatically */
   duration_minutes: number;
+  /** The surgeon (GET /staff/lookup?license_type=PMDC) */
   primary_surgeon_id?: number | null;
   /** Required if the booking has no catalogued price */
   procedure_price?: number | string | null;
@@ -194,6 +196,99 @@ export interface OtBookingListItemOut {
   mrn: string;
   surgeon_name: string;
   is_settled: boolean;
+}
+
+/** A person the search found, always as their master record (merged profiles are never hits of their own). */
+export interface PatientSearchHitOut {
+  patient_id: number;
+  /** The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download */
+  photo_document_id: number | null;
+  mrn: string;
+  registration_type: "Regular" | "LabOnly" | "TraumaTemp" | "Merged";
+  full_name: string;
+  father_or_husband_name: string | null;
+  gender: "male" | "female" | "other" | "unknown" | null;
+  dob: string | null;
+  age_years: number | null;
+  /** When age_years was recorded (the age grows from that date) */
+  age_recorded_on: string | null;
+  mobile: string | null;
+  cnic: string | null;
+  /** The Universal Patient Medical Record Number when one was recorded (optional) */
+  upmrn: string | null;
+  address: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  blood_group: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | "Unknown" | null;
+  allergies: string | null;
+  billing_category: "Cash" | "Panel";
+  panel_id: number | null;
+  panel_name: string | null;
+  panel_member_no: string | null;
+  /** Unknown-trauma label, e.g. "Unknown Male 3" */
+  temp_identifier: string | null;
+  merged_into_id: number | null;
+  linked_employee_id: number | null;
+  is_deceased: boolean;
+  /** The death record (GET /deaths/{death_id}) when the death is recorded */
+  death_id: number | null;
+  death_at: string | null;
+  /** Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked) */
+  mlc_numbers: string[];
+  created_at: string;
+  row_version: number;
+  outstanding: OutstandingBannerOut;
+  /** The profile merged into this record that the search matched when this record itself did not (an old slip's MRN, a trauma label such as "Unknown Male 3", a duplicate's name or numbers): say "Found by MRN-…, merged into this record". Null when this record matched */
+  matched_merged_profile: MergedProfileOut | null;
+}
+
+/** Outstanding dues of the patient's whole merge chain (workflow sections 1.2 and 1.9). */
+export interface OutstandingBannerOut {
+  has_outstanding_ar: boolean;
+  outstanding_ar_balance: number;
+  /** True: reception blocks a new OPD slip unless ER bypass or an override */
+  ar_block_applies: boolean;
+  /** Show it prominently, e.g. "OUTSTANDING BALANCE: RS. 2,500" */
+  banner_text: string | null;
+}
+
+/** Another record of the same person, merged into this one (e.g. a trauma registration). */
+export interface MergedProfileOut {
+  patient_id: number;
+  mrn: string;
+  full_name: string;
+  registration_type: "Regular" | "LabOnly" | "TraumaTemp" | "Merged";
+  temp_identifier: string | null;
+}
+
+/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration their stamp prints, nothing else. */
+export interface StaffLookupOut {
+  /** The id a form's staff field takes (contrast_doctor_id, employee_id, ...) */
+  employee_id: number;
+  emp_number: string;
+  full_name: string;
+  designation: string;
+  department_name: string | null;
+  /** The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none */
+  license_type: "PMDC" | "PNC" | "Other" | null;
+  /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
+  registration: string | null;
+  /** Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62) */
+  user_id: number | null;
+}
+
+export interface ServiceListItemOut {
+  service_id: number;
+  code: string;
+  name: string;
+  category: "OPD" | "IPD" | "OT" | "Imaging" | "RoomCharge" | "Procedure" | "Other";
+  department_id: number | null;
+  doctor_id: number | null;
+  default_price: number;
+  is_active: boolean;
+  row_version: number;
+  department_name: string | null;
+  doctor_name: string | null;
 }
 
 /** Cancel (scanned consumables return to stock) — POST /api/v1/ot/bookings/{booking_id}/cancel (who may call: holders of ot.booking.manage). */
@@ -226,7 +321,7 @@ export function scheduleOtBookings(booking_id: number, body: OtScheduleIn): Prom
   return api<OtBookingDetailOut>("POST", `/ot/bookings/${booking_id}/schedule`, body);
 }
 
-/** All theaters (incl. out-of-service) — GET /api/v1/ot/theaters (who may call: holders of ot.status.view or cssd.operate). */
+/** All theaters (incl. out-of-service) — GET /api/v1/ot/theaters (who may call: holders of ot.status.view or cssd.operate or facility.equipment.manage). */
 export function theaters(): Promise<TheaterOut[]> {
   return api<TheaterOut[]>("GET", `/ot/theaters`, undefined);
 }
@@ -234,4 +329,19 @@ export function theaters(): Promise<TheaterOut[]> {
 /** Bookings (mine=true for a surgeon's own list) — GET /api/v1/ot/bookings (who may call: holders of ot.booking.view or ot.booking.manage). */
 export function listBookings(query?: { mine?: boolean; status?: "Requested" | "Scheduled" | "InProgress" | "Cleaning" | "Completed" | "Cancelled" | "EmergencyHold" | null; limit?: number }): Promise<OtBookingListItemOut[]> {
   return api<OtBookingListItemOut[]>("GET", withQuery(`/ot/bookings`, query), undefined);
+}
+
+/** Returning-patient lookup by name / phone / CNIC / UPMRN / MRN — GET /api/v1/patients/search (who may call: holders of patient.search). */
+export function searchPatients(query: { q: string; limit?: number }): Promise<PatientSearchHitOut[]> {
+  return api<PatientSearchHitOut[]>("GET", withQuery(`/patients/search`, query), undefined);
+}
+
+/** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
+export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
+  return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
+}
+
+/** Hospital service prices (lab prices live in the lab catalogue) — GET /api/v1/finance/service-catalog (who may call: any logged-in user). */
+export function serviceCatalog(query?: { category?: string | null }): Promise<ServiceListItemOut[]> {
+  return api<ServiceListItemOut[]>("GET", withQuery(`/finance/service-catalog`, query), undefined);
 }

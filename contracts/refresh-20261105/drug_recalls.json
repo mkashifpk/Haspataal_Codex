@@ -1,0 +1,4858 @@
+{
+  "screen_id": "drug_recalls",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "ui_quality": {
+    "source": "frontend-docs/guides/16-ui-quality.md",
+    "standard_revision": "7795bdfe5246755d",
+    "context": {
+      "workspace": "pharmacy_admin",
+      "purpose": "Open a recall, see where the batches went, remove the stock, contact the patients, close it.",
+      "roles": [
+        "pharmacy_admin"
+      ],
+      "screens": [
+        {
+          "id": "drug_recalls",
+          "title": "Batch recalls"
+        }
+      ],
+      "also_uses": [
+        "rx_queue"
+      ],
+      "handbook": "get_handbook_outline('pharmacy_admin')",
+      "screen_id": "drug_recalls",
+      "workflow": "MSDS MOM 59",
+      "contract": "get_screen_bundle('drug_recalls')",
+      "service": {
+        "services": [
+          "dispensing"
+        ],
+        "role": "work"
+      }
+    },
+    "requirements": [
+      {
+        "id": "Q1",
+        "title": "Establish the purpose and staff context",
+        "instruction": "Before choosing a layout, state who is doing what, what starts the task, what success looks like and what could\nconfuse them. Use the screen's purpose, workspace, playbook and demo role. Distinguish a busy reception counter,\nbedside nursing, a laboratory scanner and an office review. Record the relevant input devices, interruptions,\nlanguage and display conditions. Keep the patient, visit, money or stock context clear throughout the task.\n\nWrite down why the proposed interaction fits this work. Use actual staff-task evidence and references approved by\nthe frontend lead; do not substitute an attractive generic dashboard for the job. Do not invent software screens\nfor staff whose specified interaction is a physical badge tap."
+      },
+      {
+        "id": "Q2",
+        "title": "Reuse intent through complete patterns",
+        "instruction": "Use the frontend team's approved design system and record its version and owner. Where no shared system has been\napproved, use the team's established components within the backend constraints and record the outstanding decision.\nReuse complete patterns: patient selection and identity, search and selection, a validated write and its result,\npending approval and handover, printing and recovery, corrections to finalized records. Follow the relevant\nplaybook; a template must preserve the permissions and transitions of this particular task.\n\nDocument the reason for a variation. Explore alternatives where they make a task clearer or reduce effort, then\nreview them in the whole journey. Do not introduce arbitrary colours, motion, alerts or different meanings for the\nsame control. Read the relevant standards when building or reviewing the flow; do not rely on an old chat summary."
+      },
+      {
+        "id": "Q3",
+        "title": "Complete the interaction and its recovery",
+        "instruction": "For every task show prerequisites, editable and read-only information, validation, the pending state, the confirmed\nresult and the next step. Distinguish loading, empty, unavailable, denied, stale and failed states. Explain disabled\nactions when the user needs to know how to proceed. Include keyboard and scanner interactions, focus after actions,\nconfirmation, cancellation and navigation with unsaved work.\n\nUse each endpoint's repeat rules, version checks and reconciliation instructions after an uncertain result. Never\nshow success merely because a button was pressed, queue clinical or money writes offline, or offer an unsupported\nundo. Follow the existing guides for printing, reconnects, sessions, realtime refreshes and in-memory form recovery.\nNever persist a co-signer's credentials. Distinguish server-owned rules from frontend presentation choices."
+      },
+      {
+        "id": "Q4",
+        "title": "Make the details work in the actual environment",
+        "instruction": "Review both Light and DarkHighContrast, 100-250 percent zoom, English and Urdu, right-to-left layout, mixed-direction\nidentifiers, long names and dense tables. Bundle the required Urdu font. Keep meaning available through text and\nicons, not colour alone. Verify labels, focus order, keyboard operation and readable status messages using the\nfrontend's accessibility tests and a person using the app.\n\nKeyboard zoom shortcuts are compulsory: Ctrl++ (including Ctrl+=) increases, Ctrl+- decreases, and Ctrl+0 resets\nto 100%; use Command on macOS. Clamp the application's zoom to **100% through 250%, inclusive**. Settings, keyboard,\nmenu and any enabled wheel/pinch zoom must share that bound and one zoom state. Persist `ui_scale_pct` through\n`PUT /settings/me` and restore it on login; do not layer CSS scaling over an independent browser zoom. Touch clients\nmust expose equivalent visible controls and handle shortcuts when a hardware keyboard is attached. Test both bounds,\nreset, intermediate values, reopened windows and dense forms/tables without clipped controls or lost data.\n\nUse the actual terminal workflow and supported devices: a scanner must not type into the wrong field, a printer\nproblem must leave the task understandable, and a realtime update must not silently change the selected patient.\nReview consistency across screens and helpful details such as an explicit selected date, shift or patient. Give\nthe product character through clarity, wording and care for staff, within the approved visual system. Any new\nperformance target or clinical presentation rule needs its designated owner's decision."
+      },
+      {
+        "id": "Q5",
+        "title": "Teach the delivered UI as part of building it",
+        "instruction": "Create or revise the screen handbook and the workspace guide with its role-specific FAQ in the same change as\nthe UI. Follow `get_end_user_handbook_brief` and `get_handbook_outline(workspace)` and the\n[end-user handbook contract](12-end-user-handbook.md). Explain every user-facing control and meaningful outcome,\nincluding frontend-only filters, navigation and dialogs that have no API call. Use actual labels and demo-data\nscreenshots in English and Urdu; flag translations awaiting human review.\n\nCover every supported job task in the role's workspace FAQ, including shared screens and handovers. A help page's\nexistence does not establish completeness. Kiosks also need an operator job aid available through the authorized\nstaff help or training material; do not add a login to the kiosk to deliver it."
+      },
+      {
+        "id": "Q6",
+        "title": "Require evidence before reporting completion",
+        "instruction": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.\n\nThe frontend repository must make these checks part of its build or CI:\n\n- Maintain an inventory of implemented screens, workspaces, supported role tasks and interactive controls. Map each\n  to handbook pages and sections in both languages. Include frontend-only behaviour; catalogue tasks are a minimum.\n- Fail on missing or empty pages/sections, uncovered tasks or controls, broken help links or missing referenced\n  screenshots. Test F1, screen Help, workspace Help, offline help, deep links, search and permission filtering; changing\n  user or roles must not retain another user's navigation or search results.\n- Run the relevant API scenario and frontend interaction tests, including repeat submissions, concurrent edits,\n  uncertain outcomes and hardware failures. A non-applicable case needs a reason, not a silent omission.\n- Apply every section of the [human workspace acceptance checklist](17-workspace-review-checklist.md) to each role\n  and supported task. Create fresh synthetic records through the UI, then read, update and cancel/deactivate/delete\n  only as the API permits. Test refusal where deletion or editing is forbidden. Read-only roles inspect new records\n  created by an authorized upstream role. Record the actual new IDs and outcomes; never treat seeded records alone\n  or an agent's API calls as a human journey pass.\n- Record the standards revision, implemented scope, test results, guide paths, demo screenshots and outstanding\n  decisions in the change's review evidence. A named human reviewer must walk through a complete role journey using\n  only the handbook, check that it matches the UI and review translations. Revise misleading or incomplete details.\n\nThe frontend lead owns the component and flow patterns, the delivery checks and their maintenance. The designated\nclinical/language owners approve their wording and decisions. The backend supplies the contract and examples.\nMCP supplies requirements, not proof that a frontend file exists, that a build passed or that staff can use it.\nAn agent may critique the work and collect evidence; it cannot approve its own human review or award progress."
+      }
+    ],
+    "human_review": {
+      "source": "frontend-docs/guides/17-workspace-review-checklist.md",
+      "required": true,
+      "checklist": [
+        {
+          "id": "R1",
+          "title": "Identify the implementation and complete scope",
+          "instruction": "- [ ] Record implementation ID/name, repository, commit/build, backend/standards revision, workspace, roles,\n  reviewer, date, device/OS, languages and peripherals tested (the review's *Start* step: the portal fills in what it\n  knows).\n- [ ] Inventory each role's screens, tasks, controls, permissions and required handovers. Every task needs a test\n  result and matching FAQ answer. A read-only role or non-applicable operation needs a specific contract-based reason."
+        },
+        {
+          "id": "R2",
+          "title": "Create fresh data through the frontend",
+          "instruction": "- [ ] With the review code in your app's DEV settings, create new records through each applicable create form:\n  patient/visit, request/order, master record, transaction or register entry. The review lists them with their IDs as\n  the server sees them; where a free-text field permits it, you may type the code there too, to find them again.\n- [ ] Try required fields missing, invalid values, duplicate identifiers and cancellation before saving. Verify\n  the visible validation, server refusal and that no partial or duplicate business record is reported as saved.\n- [ ] Complete the valid path and check the generated number, defaults, ownership, patient/visit context and next step.\n  A seeded master may be a prerequisite; the transaction being accepted must be new. Do not create destructive test\n  masters on a shared server without coordinating with its backend team."
+        },
+        {
+          "id": "R3",
+          "title": "Read and retrieve those new records",
+          "instruction": "- [ ] Find each new record by its actual ID/number and relevant search/filter/sort controls. Open list and detail\n  views, refresh, navigate away/back and sign in again. Confirm persistence and exact values, units, dates and status.\n- [ ] Check empty/no-match results and pagination where applicable. A read-only role must read a fresh record created\n  by an authorized upstream role and demonstrate that write actions are unavailable/refused."
+        },
+        {
+          "id": "R4",
+          "title": "Update, correct and exercise permitted deletion",
+          "instruction": "- [ ] Edit each supported field on the new record, save and re-read it. Check cancellation, unsaved-work navigation,\n  stale versions and simultaneous edits from a second session; one user's changes must not silently replace another's.\n- [ ] Test the actual permitted lifecycle: delete a draft where supported, or cancel, deactivate, stop, reverse or\n  append a correction with the required reason/approval. Verify list/detail/history and downstream effects afterwards.\n- [ ] Where deletion or editing is forbidden (for example finalized clinical or financial records), verify the\n  frontend offers the permitted correction and the server refuses the forbidden action. Never invent hard deletion\n  to tick a CRUD box. Record an explicit not-applicable/refused result with the supporting contract."
+        },
+        {
+          "id": "R5",
+          "title": "Permissions, handovers and end-to-end outcomes",
+          "instruction": "- [ ] Test allowed and denied actions with the appropriate accounts, including separation of requester/approver,\n  sign-off, counter-signature and multi-role switching. Check patient and workspace context after every switch.\n- [ ] Follow the new record into the next role's queue and complete the supported journey. Verify live refresh,\n  balances/stock/bed state where relevant, notifications and printable output against the new record's values.\n- [ ] Shared task coverage belongs to every role that uses it; do not mark a workspace done with an unfinished handover."
+        },
+        {
+          "id": "R6",
+          "title": "F1 help and detailed role FAQs",
+          "instruction": "- [ ] Press **F1** on each screen and with a field/dialog focused. Correct contextual help must open without losing\n  input; closing it restores focus. Test visible Help, workspace help, offline reading, search and deep links.\n- [ ] Follow each role task's FAQ using only its instructions. Check prerequisites, actual labels, steps, outcomes,\n  errors, recovery and handovers in English and Urdu. Missing/generic answers fail acceptance.\n- [ ] Change user/permissions and verify restricted pages/search results disappear. Login/locked/kiosk help must\n  reveal only permitted public/operator guidance. Hardware keyboard shortcuts and touch Help must both work where supported."
+        },
+        {
+          "id": "R7",
+          "title": "Zoom, language and usable layouts",
+          "instruction": "- [ ] Test Ctrl++/Ctrl+=, Ctrl+-, Ctrl+0 (Command equivalents on macOS), Settings and any enabled wheel/pinch/menu\n  routes. Verify **100% minimum, 250% maximum**, reset to 100%, persistence and a single shared application zoom state.\n- [ ] Repeatedly try beyond both bounds. Test at 100%, 150%, 200% and 250%, in both themes and languages, including\n  Urdu reading direction, long labels, tables, dialogs, validation messages and Help. All actions remain reachable.\n- [ ] Check tab order, focus, scanner input and visible controls on touch clients. Do not confuse OS magnification\n  with the application's saved zoom preference."
+        },
+        {
+          "id": "R8",
+          "title": "Failures, retries and devices",
+          "instruction": "- [ ] Test double submit, lost reply, disconnect/reconnect, session expiry, stale data and refused operations on\n  the new records. Confirm honest pending/error messages, correct reconciliation and no duplicate writes.\n- [ ] Test required printers/scanners/cameras, denied device permission and unavailable hardware. Verify recovery\n  preserves appropriate form context and does not display success before the server confirms it.\n- [ ] Patient workflows: register and admit a new patient **without** a photo (the form must let you skip it with no\n  reason), then take one and see it on the patient and the admission; a PDF as the photo must be refused. Upload a\n  synthetic outside report with its facility and date, re-open it under the correct patient and check it is labelled\n  as an outside report, never shown as this hospital's result."
+        },
+        {
+          "id": "R9",
+          "title": "Keep reproducible evidence",
+          "instruction": "- [ ] The review on the portal is the evidence, kept on the DEV server: what the server saw your app do (records new\n  and existing, refusals, each operation by lifecycle step and screen), your answers and a note for every Fail and N/A\n  (what failed and how to reproduce it, or why it does not apply). Keep screenshots and longer test output with your\n  app; mention where in the note.\n- [ ] *Test in the app* is a to-do list that ticks itself: an operation turns **Done on a new record** when the server\n  sees your app do it with the code, **Done on existing records only** when it changed demo data alone (the inspectors\n  see that), **Refused** when you tested a refusal. Mark only what is not seen: *Not applicable* or *Fail*, with the note.\n- [ ] *Screens*: for each screen, F1 help, the role FAQs and zoom (one click passes a whole column; then mark the\n  exceptions). The **fresh-data** column is the server's: it passes where your app made new records with that screen's\n  own write operations (any new record, for a screen that only reads); you can only reject it.\n- [ ] *Export* gives the review as one Markdown file for your repository or review system, whenever you want it.\n- [ ] Accepting or reporting **F1 help, the role FAQs, zoom or the fresh-data review** (on a proposal, on *Save this\n  screen* or in the transfer of legacy work) needs **your signed review** of that screen's workspace. The portal\n  preselects the review that passes them and refuses, saying why (`details.field` = `review_id`), an item without a\n  signed review, on a review that does not cover the screen or one that does not pass it there. The backend team's\n  inspectors see the review beside your agent's proposals.\n- [ ] **Approve all reported progress** is one human declaration for the displayed selection; untick any untested items\n  first. Each proposal retains its build, the review it was accepted with and your decision."
+        },
+        {
+          "id": "R10",
+          "title": "Decide and report honestly",
+          "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
+        }
+      ],
+      "workspace_checklist": "- [ ] **Create:** a formulary drug, a batch intake, a supplier invoice, a look-alike pair, a batch recall, a storage\n  temperature reading, a return of part of a batch to its supplier (print its return note).\n- [ ] **Read:** the new drug and batch in stock; the recall's patients; the pending prescription queue and its F1 help\n  in Pharmacy Admin, with only the queue task and no prescription detail or dispensing without those permissions.\n- [ ] **Update / correct:** set the drug's high-alert category; change and retire the pair; record a contact with a\n  recall patient.\n- [ ] **Cancel / delete:** write off part of a batch; remove the recalled stock; cancel a recall opened by mistake;\n  close a recall.\n- [ ] **Hand over:** the invoice reaches the accountant's payables; the recall blocks the batch at the counter; the\n  return waits for the accountant's credit note.",
+      "operations": {
+        "create": [
+          {
+            "call": "POST /drug-recalls",
+            "summary": "Open a batch recall",
+            "screen": "drug_recalls"
+          }
+        ],
+        "update_or_correct": [
+          {
+            "call": "PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+            "summary": "Record a contact with a patient of a recall",
+            "screen": "drug_recalls"
+          }
+        ],
+        "cancel_or_delete": [
+          {
+            "call": "POST /drug-recalls/{recall_id}/remove-stock",
+            "summary": "Remove the recalled stock left",
+            "screen": "drug_recalls"
+          },
+          {
+            "call": "POST /drug-recalls/{recall_id}/cancel",
+            "summary": "Cancel a recall opened by mistake",
+            "screen": "drug_recalls"
+          }
+        ],
+        "other_actions": [
+          {
+            "call": "POST /drug-recalls/{recall_id}/close",
+            "summary": "Close a recall",
+            "screen": "drug_recalls"
+          }
+        ]
+      },
+      "operations_rule": "Exercise each operation on records you create new in this review, through the app: create, then read them back, update or correct them, and cancel, withdraw or delete them where the contract allows (and see the refusal where it does not). The other_actions are the steps of the record's life (sign, approve, dispense ...).",
+      "portal_review": "The human tester records this review on the portal (My progress → the workspace → Start the review), with its code in the app's DEV settings: the server sees the operations the app did on new records, the tester answers the rest and signs. The four compulsory items need that signed review; fresh data needs the server's evidence. You build the Review code setting (dev_build_headers), never start, fill or sign a review; progress_proposals → human_reviews lists the failures to fix.",
+      "dev_build_headers": {
+        "send": [
+          "X-Haspataal-Developer: <portal username>",
+          "X-Haspataal-Implementation: <implementation id>",
+          "X-Haspataal-Review: <the DEV settings' Review code, while the tester has one set>"
+        ],
+        "review_code_setting": "One app-wide field, Review code, in Settings → This terminal (open before login too), empty by default; the shared API client adds the header. Not on any screen or the login form.",
+        "release_build": "The field and all three headers behind the DEV build flag (compiled out, never a runtime switch): the hospital's release build has neither (guide 19, I6 and I9).",
+        "never": "Never set a review code yourself, in tests or scripts: only the tester's writes with it count."
+      }
+    },
+    "verification": {
+      "frontend_files_inspected": false,
+      "progress_recorded": false,
+      "rule": "Requirements only. Frontend CI checks coverage; a named human reviews the working journey."
+    }
+  },
+  "screen": {
+    "id": "drug_recalls",
+    "workspace": "pharmacy_admin",
+    "title": "Batch recalls",
+    "purpose": "Open a recall, see where the batches went, remove the stock, contact the patients, close it.",
+    "workflow": "MSDS MOM 59",
+    "rule_objects": [
+      {
+        "id": "rule:fe2af7a43c",
+        "text": "Open: the medicine, the batches (from GET /drugs/{drug_id}/stock-status, or all_batches), the source and reference (the DRAP alert), the class, the reason, contact_patients. The batches are blocked at once everywhere; the wards and the pharmacy are alerted.",
+        "cites": []
+      },
+      {
+        "id": "rule:6e16f97bd1",
+        "text": "Detail: per batch what is left in the pharmacy and on each ward and what was dispensed, given and used in theatre; the people who received it with their phone numbers. 'Remove stock' writes off every unit left (the note: returned to the supplier or destroyed). Record each contact (Contacted, Unreachable, NotNeeded with a note).",
+        "cites": []
+      },
+      {
+        "id": "rule:2b020bd53b",
+        "text": "Close when can_close (RECALL_NOT_COMPLETE shows what is left). Opened by mistake: Cancel (the batches are released).",
+        "cites": []
+      },
+      {
+        "id": "rule:0bdb1f574d",
+        "text": "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id drug_recalls (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "clinical-and-prescriptions",
+      "incidents-and-sentinel-events",
+      "medication-safety",
+      "operating-theater"
+    ],
+    "service": {
+      "services": [
+        "dispensing"
+      ],
+      "role": "work",
+      "views": {
+        "full": "Show it; every action the user's permissions allow.",
+        "open_work": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting).",
+        "records": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work.",
+        "setup": "Not in the daily menus: reach it from Facility settings (a preview's prerequisites link to it) to set the service up before switching it on.",
+        "hidden": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      },
+      "how": "GET /establishment after login and on establishment.changed: views.screens gives this screen's view (one frontend build for every profile; never decide it from the profile's category)"
+    }
+  },
+  "rules_in_force": null,
+  "build_order": {
+    "screen": "drug_recalls",
+    "title": "Batch recalls",
+    "workspace": "pharmacy_admin",
+    "phase": "P7",
+    "position": 137,
+    "points": 66,
+    "capabilities": [
+      "realtime",
+      "idempotent_writes",
+      "f1_help",
+      "zoom"
+    ],
+    "depends_on": [],
+    "needed_by": [
+      {
+        "from": "dispense",
+        "to": "drug_recalls",
+        "kind": "data",
+        "evidence": "it receives pharmacy.recall.updated, which drug_recalls's calls emitted in the tests",
+        "ordering": false
+      },
+      {
+        "from": "eprescription",
+        "to": "drug_recalls",
+        "kind": "data",
+        "evidence": "it receives pharmacy.stock.updated, which drug_recalls's calls emitted in the tests",
+        "ordering": false
+      },
+      {
+        "from": "medication_safety_ward",
+        "to": "drug_recalls",
+        "kind": "data",
+        "evidence": "it receives pharmacy.recall.updated, which drug_recalls's calls emitted in the tests",
+        "ordering": false
+      },
+      {
+        "from": "medication_statistics",
+        "to": "drug_recalls",
+        "kind": "data",
+        "evidence": "it receives pharmacy.recall.updated, which drug_recalls's calls emitted in the tests",
+        "ordering": true
+      },
+      {
+        "from": "medication_statistics",
+        "to": "drug_recalls",
+        "kind": "data_candidate",
+        "evidence": "it reads drug-recalls, which POST /drug-recalls on drug_recalls creates",
+        "ordering": false
+      },
+      {
+        "from": "pharmacy_admin",
+        "to": "drug_recalls",
+        "kind": "data_candidate",
+        "evidence": "it reads drug-recalls, which POST /drug-recalls on drug_recalls creates",
+        "ordering": false
+      },
+      {
+        "from": "verbal_orders_er",
+        "to": "drug_recalls",
+        "kind": "data",
+        "evidence": "it receives pharmacy.stock.updated, which drug_recalls's calls emitted in the tests",
+        "ordering": false
+      },
+      {
+        "from": "verbal_orders_ward",
+        "to": "drug_recalls",
+        "kind": "data",
+        "evidence": "it receives pharmacy.stock.updated, which drug_recalls's calls emitted in the tests",
+        "ordering": false
+      },
+      {
+        "from": "ward_indent",
+        "to": "drug_recalls",
+        "kind": "data",
+        "evidence": "it receives pharmacy.recall.updated, which drug_recalls's calls emitted in the tests",
+        "ordering": false
+      }
+    ],
+    "go_live_setup": false,
+    "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
+  },
+  "definition_of_done": {
+    "points": 66,
+    "items": [
+      {
+        "id": "ep:POST /drug-recalls",
+        "label": "POST /drug-recalls",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /drug-recalls",
+        "label": "GET /drug-recalls",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /drug-recalls/{recall_id}",
+        "label": "GET /drug-recalls/{recall_id}",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:POST /drug-recalls/{recall_id}/remove-stock",
+        "label": "POST /drug-recalls/{recall_id}/remove-stock",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+        "label": "PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:POST /drug-recalls/{recall_id}/close",
+        "label": "POST /drug-recalls/{recall_id}/close",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:POST /drug-recalls/{recall_id}/cancel",
+        "label": "POST /drug-recalls/{recall_id}/cancel",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /drugs/{drug_id}/stock-status",
+        "label": "GET /drugs/{drug_id}/stock-status",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /drugs/search",
+        "label": "GET /drugs/search",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ev:pharmacy.recall.updated",
+        "label": "pharmacy.recall.updated",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:fe2af7a43c",
+        "label": "Open: the medicine, the batches (from GET /drugs/{drug_id}/stock-status, or all_batches), the source and reference (the DRAP alert), the class, the reason, contact_patients. The batches are blocked at once everywhere; the wards and the pharmacy are alerted.",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:6e16f97bd1",
+        "label": "Detail: per batch what is left in the pharmacy and on each ward and what was dispensed, given and used in theatre; the people who received it with their phone numbers. 'Remove stock' writes off every unit left (the note: returned to the supplier or destroyed). Record each contact (Contacted, Unreachable, NotNeeded with a note).",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:2b020bd53b",
+        "label": "Close when can_close (RECALL_NOT_COMPLETE shows what is left). Opened by mistake: Cancel (the batches are released).",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:0bdb1f574d",
+        "label": "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id drug_recalls (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": true
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": true
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "POST /drug-recalls",
+      "summary": "Open a batch recall",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.recall.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of pharmacy.recall.manage",
+        "roles_allowed": [
+          "pharmacy_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "BATCH_RECALLED",
+          "http_status": 409,
+          "message": "This batch is recalled: it cannot be dispensed, sent to a ward, used in theatre or given.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "RECALL_STATE_INVALID",
+          "http_status": 409,
+          "message": "The recall cannot change that way.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "REFERENCE_NOT_FOUND",
+          "http_status": 422,
+          "message": "A referenced record does not exist.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "ward_id"
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
+        },
+        {
+          "code": "STOCK_BATCH_MISMATCH",
+          "http_status": 422,
+          "message": "The batch does not belong to this item.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RecallIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RecallDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "RecallIn",
+        "fields": [
+          {
+            "pointer": "/drug_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "The recalled medicine (GET /drugs/search)"
+          },
+          {
+            "pointer": "/batch_ids",
+            "type": "array",
+            "required": false,
+            "nullable": true,
+            "description": "The recalled batches of the medicine",
+            "items": "integer"
+          },
+          {
+            "pointer": "/all_batches",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": false,
+            "description": "Recall every batch of the medicine"
+          },
+          {
+            "pointer": "/source",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "DRAP",
+              "Manufacturer",
+              "Supplier",
+              "Internal"
+            ]
+          },
+          {
+            "pointer": "/reference",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200,
+            "description": "The DRAP alert or the supplier's letter"
+          },
+          {
+            "pointer": "/recall_class",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "ClassI",
+              "ClassII",
+              "ClassIII"
+            ],
+            "description": "ClassI: serious harm possible (contact every patient); ClassII: temporary harm; ClassIII: unlikely harm"
+          },
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 1000
+          },
+          {
+            "pointer": "/contact_patients",
+            "type": "boolean",
+            "required": true,
+            "nullable": false,
+            "description": "The recall reaches patients: list and contact everyone who received it"
+          }
+        ],
+        "cross_field_rules": {
+          "RecallIn": [
+            "batch_ids or all_batches is required"
+          ]
+        },
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /drug-recalls",
+        "emits_events": [
+          "notification.created",
+          "pharmacy.recall.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /drug-recalls",
+      "summary": "The recall register",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.recall.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of pharmacy.recall.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Open",
+                  "Closed",
+                  "Cancelled"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "drug_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drug Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_RecallOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Open",
+              "Closed",
+              "Cancelled"
+            ]
+          },
+          {
+            "name": "drug_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /drug-recalls/{recall_id}",
+      "summary": "A recall and where its batches went",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.recall.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of pharmacy.recall.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "recall_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Recall Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RecallDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /drug-recalls/{recall_id}/remove-stock",
+      "summary": "Remove the recalled stock left",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.recall.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of pharmacy.recall.manage",
+        "roles_allowed": [
+          "pharmacy_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "RECALL_STATE_INVALID",
+          "http_status": 409,
+          "message": "The recall cannot change that way.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "recall_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Recall Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RecallNoteIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RecallDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "RecallNoteIn",
+        "fields": [
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 1000
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /drug-recalls/{recall_id}",
+        "emits_events": [
+          "pharmacy.recall.updated",
+          "pharmacy.stock.updated"
+        ],
+        "prints": false,
+        "related_state_machine": "drug_recall"
+      }
+    },
+    {
+      "endpoint": "PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+      "summary": "Record a contact with a patient of a recall",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.recall.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of pharmacy.recall.manage",
+        "roles_allowed": [
+          "pharmacy_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "RECALL_STATE_INVALID",
+          "http_status": 409,
+          "message": "The recall cannot change that way.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "recall_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Recall Id"
+          }
+        },
+        {
+          "name": "recall_patient_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Recall Patient Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RecallContactIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RecallDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "RecallContactIn",
+        "fields": [
+          {
+            "pointer": "/outcome",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Contacted",
+              "Unreachable",
+              "NotNeeded"
+            ]
+          },
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 1000,
+            "description": "Who was reached and what they were told, or why not"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PATCH: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /drug-recalls/{recall_id}",
+        "emits_events": [
+          "pharmacy.recall.updated"
+        ],
+        "prints": false,
+        "related_state_machine": "drug_recall"
+      }
+    },
+    {
+      "endpoint": "POST /drug-recalls/{recall_id}/close",
+      "summary": "Close a recall",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.recall.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of pharmacy.recall.manage",
+        "roles_allowed": [
+          "pharmacy_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "RECALL_NOT_COMPLETE",
+          "http_status": 409,
+          "message": "The recall cannot close yet: stock of the batches is left, or patients are still to be contacted.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "patients_to_contact",
+            "stock_left"
+          ],
+          "details_from": "POST /api/v1/drug-recalls/{recall_id}/close"
+        },
+        {
+          "code": "RECALL_STATE_INVALID",
+          "http_status": 409,
+          "message": "The recall cannot change that way.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "recall_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Recall Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RecallNoteIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RecallDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "RecallNoteIn",
+        "fields": [
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 1000
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /drug-recalls/{recall_id}",
+        "emits_events": [
+          "pharmacy.recall.updated"
+        ],
+        "prints": false,
+        "related_state_machine": "drug_recall"
+      }
+    },
+    {
+      "endpoint": "POST /drug-recalls/{recall_id}/cancel",
+      "summary": "Cancel a recall opened by mistake",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.recall.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of pharmacy.recall.manage",
+        "roles_allowed": [
+          "pharmacy_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "RECALL_STATE_INVALID",
+          "http_status": 409,
+          "message": "The recall cannot change that way.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "recall_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Recall Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MedicationReasonIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RecallDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "MedicationReasonIn",
+        "fields": [
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /drug-recalls/{recall_id}",
+        "emits_events": [
+          "pharmacy.recall.updated"
+        ],
+        "prints": false,
+        "related_state_machine": "drug_recall"
+      }
+    },
+    {
+      "endpoint": "GET /drugs/{drug_id}/stock-status",
+      "summary": "Drug stock with batches in FEFO order",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.formulary.view",
+          "pharmacy.stock.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of pharmacy.formulary.view or pharmacy.stock.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "drug_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Drug Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DrugStockDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /drugs/search",
+      "summary": "Formulary search with live stock colour",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.formulary.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of pharmacy.formulary.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "maxLength": 100,
+            "default": "",
+            "title": "Q"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "default": 30,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DrugStockOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": false,
+            "type": "string",
+            "default": ""
+          }
+        ],
+        "filters": [],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "pharmacy.recall.updated",
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [
+      {
+        "event": "pharmacy.recall.updated",
+        "priority": "normal",
+        "presentation": null,
+        "emitted_by_operations": [
+          "PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+          "POST /drug-recalls",
+          "POST /drug-recalls/{recall_id}/cancel",
+          "POST /drug-recalls/{recall_id}/close",
+          "POST /drug-recalls/{recall_id}/remove-stock"
+        ],
+        "refresh": [
+          "GET /drug-recalls",
+          "GET /drug-recalls/{recall_id}",
+          "GET /drugs/{drug_id}/stock-status",
+          "GET /drugs/search"
+        ]
+      }
+    ],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "handoffs": [
+    {
+      "call": "POST /drug-recalls",
+      "emits": "notification.created",
+      "audience": "the target user, or every holder of the target permission",
+      "reaches_screens": [
+        "my_investigations",
+        "my_complaint_investigations",
+        "my_actions",
+        "notifications",
+        "mlc_cases_doctor",
+        "er_board_doctor",
+        "mlc_cases",
+        "er_board",
+        "medication_orders_doctor",
+        "self_service",
+        "death_register",
+        "mlc_register",
+        "mortality_review",
+        "infection_cases",
+        "committees_quality",
+        "committees_owner",
+        "committees_ipc",
+        "qa_rounds",
+        "qa_rounds_owner",
+        "patient_feedback",
+        "action_register",
+        "facility_profile",
+        "record_review_worklist_doctor",
+        "record_review_worklist_nursing",
+        "record_deficiencies_doctor",
+        "record_deficiencies_nursing"
+      ]
+    },
+    {
+      "call": "POST /drug-recalls",
+      "emits": "pharmacy.recall.updated",
+      "audience": "permissions pharmacy.recall.view, pharmacy.dispense, ward.inventory.view",
+      "reaches_screens": [
+        "ward_indent",
+        "dispense",
+        "medication_safety_ward",
+        "medication_statistics"
+      ]
+    },
+    {
+      "call": "POST /drug-recalls/{recall_id}/remove-stock",
+      "emits": "pharmacy.recall.updated",
+      "audience": "permissions pharmacy.recall.view, pharmacy.dispense, ward.inventory.view",
+      "reaches_screens": [
+        "ward_indent",
+        "dispense",
+        "medication_safety_ward",
+        "medication_statistics"
+      ]
+    },
+    {
+      "call": "POST /drug-recalls/{recall_id}/remove-stock",
+      "emits": "pharmacy.stock.updated",
+      "audience": "permission pharmacy.formulary.view",
+      "reaches_screens": [
+        "eprescription",
+        "dispense",
+        "verbal_orders_ward",
+        "verbal_orders_er"
+      ]
+    },
+    {
+      "call": "PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+      "emits": "pharmacy.recall.updated",
+      "audience": "permissions pharmacy.recall.view, pharmacy.dispense, ward.inventory.view",
+      "reaches_screens": [
+        "ward_indent",
+        "dispense",
+        "medication_safety_ward",
+        "medication_statistics"
+      ]
+    },
+    {
+      "call": "POST /drug-recalls/{recall_id}/close",
+      "emits": "pharmacy.recall.updated",
+      "audience": "permissions pharmacy.recall.view, pharmacy.dispense, ward.inventory.view",
+      "reaches_screens": [
+        "ward_indent",
+        "dispense",
+        "medication_safety_ward",
+        "medication_statistics"
+      ]
+    },
+    {
+      "call": "POST /drug-recalls/{recall_id}/cancel",
+      "emits": "pharmacy.recall.updated",
+      "audience": "permissions pharmacy.recall.view, pharmacy.dispense, ward.inventory.view",
+      "reaches_screens": [
+        "ward_indent",
+        "dispense",
+        "medication_safety_ward",
+        "medication_statistics"
+      ]
+    }
+  ],
+  "patient_context": null,
+  "value_lists": [
+    {
+      "values": [
+        "ToContact",
+        "Contacted",
+        "Unreachable",
+        "NotNeeded"
+      ],
+      "column": "drug_recall_patients.outcome",
+      "used_at": "POST /drug-recalls.patients[].outcome",
+      "labels": {
+        "ToContact": "To contact",
+        "Contacted": "Contacted",
+        "Unreachable": "Unreachable",
+        "NotNeeded": "Not needed"
+      }
+    },
+    {
+      "values": [
+        "ClassI",
+        "ClassII",
+        "ClassIII"
+      ],
+      "column": "drug_recalls.recall_class",
+      "used_at": "POST /drug-recalls.recall_class",
+      "labels": {
+        "ClassI": "Class I",
+        "ClassII": "Class II",
+        "ClassIII": "Class III"
+      }
+    },
+    {
+      "values": [
+        "DRAP",
+        "Manufacturer",
+        "Supplier",
+        "Internal"
+      ],
+      "column": "drug_recalls.source",
+      "used_at": "POST /drug-recalls.source",
+      "labels": {
+        "DRAP": "DRAP",
+        "Manufacturer": "Manufacturer",
+        "Supplier": "Supplier",
+        "Internal": "Internal"
+      }
+    },
+    {
+      "values": [
+        "Open",
+        "Closed",
+        "Cancelled"
+      ],
+      "column": "drug_recalls.status",
+      "used_at": "POST /drug-recalls.status",
+      "labels": {
+        "Open": "Open",
+        "Closed": "Closed",
+        "Cancelled": "Cancelled"
+      },
+      "state_machine": "drug_recall",
+      "final_states": [
+        "Closed",
+        "Cancelled"
+      ],
+      "transitions": {
+        "Open": [
+          "Closed",
+          "Cancelled"
+        ]
+      }
+    },
+    {
+      "values": [
+        "Tablet",
+        "Capsule",
+        "Syrup",
+        "Suspension",
+        "Injection",
+        "Infusion",
+        "Cream",
+        "Ointment",
+        "Drops",
+        "Inhaler",
+        "Suppository",
+        "Powder",
+        "Consumable",
+        "Device",
+        "Other"
+      ],
+      "column": "drugs.form",
+      "used_at": "GET /drugs/{drug_id}/stock-status.form",
+      "labels": {
+        "Tablet": "Tablet",
+        "Capsule": "Capsule",
+        "Syrup": "Syrup",
+        "Suspension": "Suspension",
+        "Injection": "Injection",
+        "Infusion": "Infusion",
+        "Cream": "Cream",
+        "Ointment": "Ointment",
+        "Drops": "Drops",
+        "Inhaler": "Inhaler",
+        "Suppository": "Suppository",
+        "Powder": "Powder",
+        "Consumable": "Consumable",
+        "Device": "Device",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "ConcentratedElectrolyte",
+        "Chemotherapy",
+        "Anticoagulant",
+        "Insulin",
+        "Opioid",
+        "Sedative",
+        "NeuromuscularBlocker",
+        "Inotrope",
+        "Thrombolytic",
+        "Psychotropic",
+        "HighCost",
+        "Other"
+      ],
+      "column": "drugs.high_alert_category",
+      "used_at": "GET /drugs/{drug_id}/stock-status.high_alert_category",
+      "labels": {
+        "ConcentratedElectrolyte": "Concentrated electrolyte",
+        "Chemotherapy": "Chemotherapy",
+        "Anticoagulant": "Anticoagulant",
+        "Insulin": "Insulin",
+        "Opioid": "Opioid",
+        "Sedative": "Sedative",
+        "NeuromuscularBlocker": "Neuromuscular blocker",
+        "Inotrope": "Inotrope",
+        "Thrombolytic": "Thrombolytic",
+        "Psychotropic": "Psychotropic",
+        "HighCost": "High cost",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "OTC",
+        "ScheduleG",
+        "ScheduleH",
+        "ScheduleX",
+        "HospitalOnly"
+      ],
+      "column": "drugs.schedule",
+      "used_at": "GET /drugs/{drug_id}/stock-status.schedule",
+      "labels": {
+        "OTC": "OTC",
+        "ScheduleG": "Schedule G",
+        "ScheduleH": "Schedule H",
+        "ScheduleX": "Schedule X",
+        "HospitalOnly": "Hospital only"
+      }
+    },
+    {
+      "values": [
+        "Contacted",
+        "Unreachable",
+        "NotNeeded"
+      ],
+      "column": null,
+      "used_at": "PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id} body.outcome",
+      "labels": {
+        "Contacted": "Contacted",
+        "Unreachable": "Unreachable",
+        "NotNeeded": "Not needed"
+      }
+    },
+    {
+      "values": [
+        "Dispensed",
+        "Administered",
+        "Theatre"
+      ],
+      "column": null,
+      "used_at": "POST /drug-recalls.patients[].sources[].kind",
+      "labels": {
+        "Dispensed": "Dispensed",
+        "Administered": "Administered",
+        "Theatre": "Theatre"
+      }
+    },
+    {
+      "values": [
+        "InStock",
+        "Low",
+        "OutOfStock"
+      ],
+      "column": null,
+      "used_at": "GET /drugs/{drug_id}/stock-status.stock_status",
+      "labels": {
+        "InStock": "In stock",
+        "Low": "Low",
+        "OutOfStock": "Out of stock"
+      }
+    }
+  ],
+  "states": [
+    {
+      "state": "loading",
+      "why": "every read"
+    },
+    {
+      "state": "error",
+      "why": "every call (show error.code's message)"
+    },
+    {
+      "state": "empty",
+      "why": "a list can be empty: say why and what to do next"
+    },
+    {
+      "state": "forbidden",
+      "why": "actions hidden or disabled by permission (GET /auth/me)"
+    },
+    {
+      "state": "stale / reconnecting",
+      "why": "realtime: show Live / Reconnecting, reload after a truncated replay"
+    },
+    {
+      "state": "submitting / outcome unknown",
+      "why": "a write in flight, or its answer lost: see each write's on_lost_answer"
+    }
+  ],
+  "scanner": [],
+  "copy": {
+    "workspace": {
+      "en": "Pharmacy Admin",
+      "ur": "فارمیسی ایڈمن"
+    },
+    "error_messages": {
+      "BATCH_RECALLED": "This batch is recalled: it cannot be dispensed, sent to a ward, used in theatre or given.",
+      "FORBIDDEN": "You do not have permission to do this.",
+      "NOT_FOUND": "The requested resource was not found.",
+      "RECALL_NOT_COMPLETE": "The recall cannot close yet: stock of the batches is left, or patients are still to be contacted.",
+      "RECALL_STATE_INVALID": "The recall cannot change that way.",
+      "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
+      "STOCK_BATCH_MISMATCH": "The batch does not belong to this item.",
+      "VALIDATION_ERROR": "The request is invalid."
+    },
+    "wording_quoted_in_rules": [
+      "No new ... from now on",
+      "Remove stock"
+    ],
+    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
+  },
+  "same_component_as": [],
+  "roles": {
+    "full": [
+      "pharmacy_admin"
+    ],
+    "partial": [
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "triage_nurse",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "ot_admin",
+      "anaesthetist",
+      "ot_nurse",
+      "ward_nurse",
+      "head_nurse",
+      "pharmacist",
+      "quality_officer"
+    ],
+    "page_for": [
+      "pharmacy_admin"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
+  },
+  "test_plan": {
+    "screen": "drug_recalls",
+    "title": "Batch recalls",
+    "cases": [
+      {
+        "id": "case:POST /drug-recalls",
+        "call": "POST /api/v1/drug-recalls",
+        "summary": "Open a batch recall",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "BATCH_RECALLED",
+          "FORBIDDEN",
+          "RECALL_STATE_INVALID",
+          "REFERENCE_NOT_FOUND",
+          "STOCK_BATCH_MISMATCH",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "pharmacy_admin"
+        ]
+      },
+      {
+        "id": "case:GET /drug-recalls",
+        "call": "GET /api/v1/drug-recalls",
+        "summary": "The recall register",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:GET /drug-recalls/{recall_id}",
+        "call": "GET /api/v1/drug-recalls/{recall_id}",
+        "summary": "A recall and where its batches went",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:POST /drug-recalls/{recall_id}/remove-stock",
+        "call": "POST /api/v1/drug-recalls/{recall_id}/remove-stock",
+        "summary": "Remove the recalled stock left",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "RECALL_STATE_INVALID",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "pharmacy_admin"
+        ]
+      },
+      {
+        "id": "case:PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+        "call": "PATCH /api/v1/drug-recalls/{recall_id}/patients/{recall_patient_id}",
+        "summary": "Record a contact with a patient of a recall",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "RECALL_STATE_INVALID",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "pharmacy_admin"
+        ]
+      },
+      {
+        "id": "case:POST /drug-recalls/{recall_id}/close",
+        "call": "POST /api/v1/drug-recalls/{recall_id}/close",
+        "summary": "Close a recall",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "RECALL_NOT_COMPLETE",
+          "RECALL_STATE_INVALID",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "pharmacy_admin"
+        ]
+      },
+      {
+        "id": "case:POST /drug-recalls/{recall_id}/cancel",
+        "call": "POST /api/v1/drug-recalls/{recall_id}/cancel",
+        "summary": "Cancel a recall opened by mistake",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "RECALL_STATE_INVALID",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "pharmacy_admin"
+        ]
+      },
+      {
+        "id": "case:GET /drugs/{drug_id}/stock-status",
+        "call": "GET /api/v1/drugs/{drug_id}/stock-status",
+        "summary": "Drug stock with batches in FEFO order",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /drugs/search",
+        "call": "GET /api/v1/drugs/search",
+        "summary": "Formulary search with live stock colour",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      }
+    ],
+    "service_cases": [
+      {
+        "view": "full",
+        "set_up": "GET /establishment answers views.screens[screen_id=drug_recalls].view = full (dispensing): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Show it; every action the user's permissions allow."
+      },
+      {
+        "view": "open_work",
+        "set_up": "GET /establishment answers views.screens[screen_id=drug_recalls].view = open_work (dispensing): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+      },
+      {
+        "view": "records",
+        "set_up": "GET /establishment answers views.screens[screen_id=drug_recalls].view = records (dispensing): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+      },
+      {
+        "view": "hidden",
+        "set_up": "GET /establishment answers views.screens[screen_id=drug_recalls].view = hidden (dispensing): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      }
+    ],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100,
+        "max_pct": 250,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/drug_recalls",
+    "workspace_guide": "get_handbook_outline('pharmacy_admin')",
+    "realtime": [
+      {
+        "event": "pharmacy.recall.updated",
+        "check": "the screen refreshes without polling"
+      }
+    ],
+    "acceptance_rules": [
+      "Open: the medicine, the batches (from GET /drugs/{drug_id}/stock-status, or all_batches), the source and reference (the DRAP alert), the class, the reason, contact_patients. The batches are blocked at once everywhere; the wards and the pharmacy are alerted.",
+      "Detail: per batch what is left in the pharmacy and on each ward and what was dispensed, given and used in theatre; the people who received it with their phone numbers. 'Remove stock' writes off every unit left (the note: returned to the supplier or destroyed). Record each contact (Contacted, Unreachable, NotNeeded with a note).",
+      "Close when can_close (RECALL_NOT_COMPLETE shows what is left). Opened by mistake: Cancel (the batches are released).",
+      "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id drug_recalls (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  },
+  "handbook": {
+    "page": "screens/drug_recalls",
+    "screen_id": "drug_recalls",
+    "title": "Batch recalls",
+    "purpose": "Open a recall, see where the batches went, remove the stock, contact the patients, close it.",
+    "tasks": [
+      {
+        "id": "drug_recalls::POST /drug-recalls",
+        "task": "Open a batch recall",
+        "call": "POST /drug-recalls",
+        "is_action": true,
+        "permissions": [
+          "pharmacy.recall.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "drug_recalls::GET /drug-recalls",
+        "task": "The recall register",
+        "call": "GET /drug-recalls",
+        "is_action": false,
+        "permissions": [
+          "pharmacy.recall.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "drug_recalls::GET /drug-recalls/{recall_id}",
+        "task": "A recall and where its batches went",
+        "call": "GET /drug-recalls/{recall_id}",
+        "is_action": false,
+        "permissions": [
+          "pharmacy.recall.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "drug_recalls::POST /drug-recalls/{recall_id}/remove-stock",
+        "task": "Remove the recalled stock left",
+        "call": "POST /drug-recalls/{recall_id}/remove-stock",
+        "is_action": true,
+        "permissions": [
+          "pharmacy.recall.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "drug_recalls::PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+        "task": "Record a contact with a patient of a recall",
+        "call": "PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+        "is_action": true,
+        "permissions": [
+          "pharmacy.recall.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "drug_recalls::POST /drug-recalls/{recall_id}/close",
+        "task": "Close a recall",
+        "call": "POST /drug-recalls/{recall_id}/close",
+        "is_action": true,
+        "permissions": [
+          "pharmacy.recall.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "drug_recalls::POST /drug-recalls/{recall_id}/cancel",
+        "task": "Cancel a recall opened by mistake",
+        "call": "POST /drug-recalls/{recall_id}/cancel",
+        "is_action": true,
+        "permissions": [
+          "pharmacy.recall.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "drug_recalls::GET /drugs/{drug_id}/stock-status",
+        "task": "Drug stock with batches in FEFO order",
+        "call": "GET /drugs/{drug_id}/stock-status",
+        "is_action": false,
+        "permissions": [
+          "pharmacy.formulary.view",
+          "pharmacy.stock.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "drug_recalls::GET /drugs/search",
+        "task": "Formulary search with live stock colour",
+        "call": "GET /drugs/search",
+        "is_action": false,
+        "permissions": [
+          "pharmacy.formulary.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      }
+    ],
+    "rules_to_explain": [
+      "Open: the medicine, the batches (from GET /drugs/{drug_id}/stock-status, or all_batches), the source and reference (the DRAP alert), the class, the reason, contact_patients. The batches are blocked at once everywhere; the wards and the pharmacy are alerted.",
+      "Detail: per batch what is left in the pharmacy and on each ward and what was dispensed, given and used in theatre; the people who received it with their phone numbers. 'Remove stock' writes off every unit left (the note: returned to the supplier or destroyed). Record each contact (Contacted, Unreachable, NotNeeded with a note).",
+      "Close when can_close (RECALL_NOT_COMPLETE shows what is left). Opened by mistake: Cancel (the batches are released).",
+      "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id drug_recalls (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+    ],
+    "updates_by_itself_on": [
+      "pharmacy.recall.updated"
+    ],
+    "errors_the_user_can_meet": [
+      {
+        "code": "BATCH_RECALLED",
+        "message": "This batch is recalled: it cannot be dispensed, sent to a ward, used in theatre or given.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "RECALL_NOT_COMPLETE",
+        "message": "The recall cannot close yet: stock of the batches is left, or patients are still to be contacted.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "RECALL_STATE_INVALID",
+        "message": "The recall cannot change that way.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "message": "A referenced record does not exist.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "STOCK_BATCH_MISMATCH",
+        "message": "The batch does not belong to this item.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "message": "The request is invalid.",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "sections": [
+      "Purpose and audience",
+      "Step by step (one per task, where to click)",
+      "Every control and its effects",
+      "States and feedback",
+      "Messages, mistakes and recovery",
+      "Language and visual examples",
+      "Related help and delivery"
+    ],
+    "requirement_ids": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "delivery": "F1 and contextual screen Help",
+    "requirements": [
+      {
+        "id": "S1",
+        "title": "Purpose and audience",
+        "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+      },
+      {
+        "id": "S2",
+        "title": "Step by step (one per task, where to click)",
+        "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+      },
+      {
+        "id": "S3",
+        "title": "Every control and its effects",
+        "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+      },
+      {
+        "id": "S4",
+        "title": "States and feedback",
+        "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+      },
+      {
+        "id": "S5",
+        "title": "Messages, mistakes and recovery",
+        "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+      },
+      {
+        "id": "S6",
+        "title": "Language and visual examples",
+        "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+      },
+      {
+        "id": "S7",
+        "title": "Related help and delivery",
+        "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+      }
+    ],
+    "workspace_guide": "get_handbook_outline('pharmacy_admin')"
+  },
+  "workflows": [
+    {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
+    }
+  ],
+  "scenarios": [],
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "examples": {
+    "POST /drug-recalls": {
+      "request": {
+        "path": "/api/v1/drug-recalls",
+        "body": {
+          "drug_id": 1,
+          "batch_ids": [
+            1
+          ],
+          "source": "DRAP",
+          "reference": "DRAP alert 12/2026",
+          "recall_class": "ClassII",
+          "reason": "Particulate matter in vials",
+          "contact_patients": true
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"recall_id\": 1, \"recall_number\": \"RCL-2026-0001\", \"drug_id\": 1, \"source\": \"DRAP\", \"reference\": \"DRAP alert 12/2026\", \"recall_class\": \"ClassII\", \"reason\": \"Particulate matter in vials\", \"contact_patients\": true, \"status\": \"Open\", \"opened_by\": 11, \"opened_at\": \"2026-09-30T15:03:29.138586+00:00\", \"stock_removed_by\": null, \"stock_removed_at\": null, \"closed_by\": null, \"closed_at\": null, \"closing_note\": null, \"cancelled_by\": null, \"cancelled_at\": null, \"cancel_reason\": null, \"row_version\": 1, \"drug_name\": \"Ceftriaxone 1g\", \"drug_code\": \"CEF\", \"opened_by_name\": \"ua7a3486c32\", \"batch_numbers\": [\"CEF-1\"], \"stock_left\": 17.0, \"patients_to_contact\": 2, \"batches\": [{\"batch_id\": 1, \"batch_no\": \"CEF-1\", \"expiry_date\": \"2098-01-01\", \"qty_received\": 20.0, \"pharmacy_qty\": 14.0, \"ward_qty\": 3.0, \"dispensed_qty\": 2.0, \"administered_qty\": 1.0, \"theatre_qty\": 0}], \"ward_stock\": [{\"ward_id\": 2, \"ward_name\": \"General Ward\", \"batch_id\": 1, \"batch_no\": \"CEF-1\", \"qty\": 3.0}], \"patients\": [{\"recall_patient_id\": 1, \"recall_id\": 1, \"patient_id\": 1, \"walkin_name\": null, \"walkin_mobile\": null, \"quantity\": 2.0, \"first_received_at\": \"2026-09-30T15:03:26.965997+00:00\", \"last_received_at\": \"2026-09-30T15:03:26.965997+00:00\", \"sources\": [{\"at\": \"2026-09-30T15:03:26.965997+00:00\", \"id\": 1, \"qty\": 2.0, \"kind\": \"Dispensed\"}], \"outcome\": \"ToContact\", \"note\": null, \"updated_by\": null, \"updated_at\": null, \"row_version\": 1, \"patient_name\": \"Ali Khan\", \"mrn\": \"MRN-2026-000001\", \"mobile…"
+      }
+    },
+    "GET /drug-recalls": {
+      "request": {
+        "path": "/api/v1/drug-recalls"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "recall_id": 1,
+              "recall_number": "RCL-2026-0001",
+              "drug_id": 1,
+              "source": "DRAP",
+              "reference": "DRAP alert 12/2026",
+              "recall_class": "ClassII",
+              "reason": "Particulate matter in vials",
+              "contact_patients": true,
+              "status": "Closed",
+              "opened_by": 11,
+              "opened_at": "2026-09-30T15:03:29.138586+00:00",
+              "stock_removed_by": 11,
+              "stock_removed_at": "2026-09-30T15:03:29.847140+00:00",
+              "closed_by": 11,
+              "closed_at": "2026-09-30T15:03:30.222822+00:00",
+              "closing_note": "Stock returned, patients informed",
+              "cancelled_by": null,
+              "cancelled_at": null,
+              "cancel_reason": null,
+              "row_version": 3,
+              "drug_name": "Ceftriaxone 1g",
+              "drug_code": "CEF",
+              "opened_by_name": "ua7a3486c32",
+              "batch_numbers": [
+                "CEF-1"
+              ],
+              "stock_left": 0,
+              "patients_to_contact": 0
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T15:03:30.325564+00:00"
+          },
+          "request_id": "fc87670ab78d464082f914c781774723"
+        }
+      }
+    },
+    "GET /drug-recalls/{recall_id}": {
+      "request": {
+        "path": "/api/v1/drug-recalls/1"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"recall_id\": 1, \"recall_number\": \"RCL-2026-0001\", \"drug_id\": 1, \"source\": \"DRAP\", \"reference\": \"DRAP alert 12/2026\", \"recall_class\": \"ClassII\", \"reason\": \"Particulate matter in vials\", \"contact_patients\": true, \"status\": \"Closed\", \"opened_by\": 11, \"opened_at\": \"2026-09-30T15:03:29.138586+00:00\", \"stock_removed_by\": 11, \"stock_removed_at\": \"2026-09-30T15:03:29.847140+00:00\", \"closed_by\": 11, \"closed_at\": \"2026-09-30T15:03:30.222822+00:00\", \"closing_note\": \"Stock returned, patients informed\", \"cancelled_by\": null, \"cancelled_at\": null, \"cancel_reason\": null, \"row_version\": 3, \"drug_name\": \"Ceftriaxone 1g\", \"drug_code\": \"CEF\", \"opened_by_name\": \"ua7a3486c32\", \"batch_numbers\": [\"CEF-1\"], \"stock_left\": 0.0, \"patients_to_contact\": 0, \"batches\": [{\"batch_id\": 1, \"batch_no\": \"CEF-1\", \"expiry_date\": \"2098-01-01\", \"qty_received\": 20.0, \"pharmacy_qty\": 0.0, \"ward_qty\": 0.0, \"dispensed_qty\": 2.0, \"administered_qty\": 1.0, \"theatre_qty\": 0}], \"ward_stock\": [], \"patients\": [{\"recall_patient_id\": 1, \"recall_id\": 1, \"patient_id\": 1, \"walkin_name\": null, \"walkin_mobile\": null, \"quantity\": 2.0, \"first_received_at\": \"2026-09-30T15:03:26.965997+00:00\", \"last_received_at\": \"2026-09-30T15:03:26.965997+00:00\", \"sources\": [{\"at\": \"2026-09-30T15:03:26.965997+00:00\", \"id\": 1, \"qty\": 2.0, \"kind\": \"Dispensed\"}], \"outcome\": \"Contacted\", \"note\": \"Told by telephone: no reaction; come back if a rash appears\", \"updated_by\": 11, \"updated_at\": \"2026-09-30T15:03:30.040953+00:00\"…"
+      }
+    },
+    "POST /drug-recalls/{recall_id}/remove-stock": {
+      "request": {
+        "path": "/api/v1/drug-recalls/1/remove-stock",
+        "body": {
+          "note": "Returned to the supplier"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"recall_id\": 1, \"recall_number\": \"RCL-2026-0001\", \"drug_id\": 1, \"source\": \"DRAP\", \"reference\": \"DRAP alert 12/2026\", \"recall_class\": \"ClassII\", \"reason\": \"Particulate matter in vials\", \"contact_patients\": true, \"status\": \"Open\", \"opened_by\": 11, \"opened_at\": \"2026-09-30T15:03:29.138586+00:00\", \"stock_removed_by\": 11, \"stock_removed_at\": \"2026-09-30T15:03:29.847140+00:00\", \"closed_by\": null, \"closed_at\": null, \"closing_note\": null, \"cancelled_by\": null, \"cancelled_at\": null, \"cancel_reason\": null, \"row_version\": 2, \"drug_name\": \"Ceftriaxone 1g\", \"drug_code\": \"CEF\", \"opened_by_name\": \"ua7a3486c32\", \"batch_numbers\": [\"CEF-1\"], \"stock_left\": 0.0, \"patients_to_contact\": 2, \"batches\": [{\"batch_id\": 1, \"batch_no\": \"CEF-1\", \"expiry_date\": \"2098-01-01\", \"qty_received\": 20.0, \"pharmacy_qty\": 0.0, \"ward_qty\": 0.0, \"dispensed_qty\": 2.0, \"administered_qty\": 1.0, \"theatre_qty\": 0}], \"ward_stock\": [], \"patients\": [{\"recall_patient_id\": 1, \"recall_id\": 1, \"patient_id\": 1, \"walkin_name\": null, \"walkin_mobile\": null, \"quantity\": 2.0, \"first_received_at\": \"2026-09-30T15:03:26.965997+00:00\", \"last_received_at\": \"2026-09-30T15:03:26.965997+00:00\", \"sources\": [{\"at\": \"2026-09-30T15:03:26.965997+00:00\", \"id\": 1, \"qty\": 2.0, \"kind\": \"Dispensed\"}], \"outcome\": \"ToContact\", \"note\": null, \"updated_by\": null, \"updated_at\": null, \"row_version\": 1, \"patient_name\": \"Ali Khan\", \"mrn\": \"MRN-2026-000001\", \"mobile\": \"03003153345\", \"updated_by_name\": null}, {\"recall_patient_id\":…"
+      }
+    },
+    "PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}": {
+      "request": {
+        "path": "/api/v1/drug-recalls/1/patients/1",
+        "body": {
+          "outcome": "Contacted",
+          "note": "Told by telephone: no reaction; come back if a rash appears"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"recall_id\": 1, \"recall_number\": \"RCL-2026-0001\", \"drug_id\": 1, \"source\": \"DRAP\", \"reference\": \"DRAP alert 12/2026\", \"recall_class\": \"ClassII\", \"reason\": \"Particulate matter in vials\", \"contact_patients\": true, \"status\": \"Open\", \"opened_by\": 11, \"opened_at\": \"2026-09-30T15:03:29.138586+00:00\", \"stock_removed_by\": 11, \"stock_removed_at\": \"2026-09-30T15:03:29.847140+00:00\", \"closed_by\": null, \"closed_at\": null, \"closing_note\": null, \"cancelled_by\": null, \"cancelled_at\": null, \"cancel_reason\": null, \"row_version\": 2, \"drug_name\": \"Ceftriaxone 1g\", \"drug_code\": \"CEF\", \"opened_by_name\": \"ua7a3486c32\", \"batch_numbers\": [\"CEF-1\"], \"stock_left\": 0.0, \"patients_to_contact\": 1, \"batches\": [{\"batch_id\": 1, \"batch_no\": \"CEF-1\", \"expiry_date\": \"2098-01-01\", \"qty_received\": 20.0, \"pharmacy_qty\": 0.0, \"ward_qty\": 0.0, \"dispensed_qty\": 2.0, \"administered_qty\": 1.0, \"theatre_qty\": 0}], \"ward_stock\": [], \"patients\": [{\"recall_patient_id\": 2, \"recall_id\": 1, \"patient_id\": 2, \"walkin_name\": null, \"walkin_mobile\": null, \"quantity\": 1.0, \"first_received_at\": \"2026-09-30T15:03:28.982018+00:00\", \"last_received_at\": \"2026-09-30T15:03:28.982018+00:00\", \"sources\": [{\"at\": \"2026-09-30T15:03:28.982018+00:00\", \"id\": 1, \"qty\": 1.0, \"kind\": \"Administered\"}], \"outcome\": \"ToContact\", \"note\": null, \"updated_by\": null, \"updated_at\": null, \"row_version\": 1, \"patient_name\": \"Ali Khan\", \"mrn\": \"MRN-2026-000002\", \"mobile\": \"03001798456\", \"updated_by_name\": null}, {\"recall_patient_i…"
+      }
+    },
+    "POST /drug-recalls/{recall_id}/close": {
+      "request": {
+        "path": "/api/v1/drug-recalls/1/close",
+        "body": {
+          "note": "Stock returned, patients informed"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"recall_id\": 1, \"recall_number\": \"RCL-2026-0001\", \"drug_id\": 1, \"source\": \"DRAP\", \"reference\": \"DRAP alert 12/2026\", \"recall_class\": \"ClassII\", \"reason\": \"Particulate matter in vials\", \"contact_patients\": true, \"status\": \"Closed\", \"opened_by\": 11, \"opened_at\": \"2026-09-30T15:03:29.138586+00:00\", \"stock_removed_by\": 11, \"stock_removed_at\": \"2026-09-30T15:03:29.847140+00:00\", \"closed_by\": 11, \"closed_at\": \"2026-09-30T15:03:30.222822+00:00\", \"closing_note\": \"Stock returned, patients informed\", \"cancelled_by\": null, \"cancelled_at\": null, \"cancel_reason\": null, \"row_version\": 3, \"drug_name\": \"Ceftriaxone 1g\", \"drug_code\": \"CEF\", \"opened_by_name\": \"ua7a3486c32\", \"batch_numbers\": [\"CEF-1\"], \"stock_left\": 0.0, \"patients_to_contact\": 0, \"batches\": [{\"batch_id\": 1, \"batch_no\": \"CEF-1\", \"expiry_date\": \"2098-01-01\", \"qty_received\": 20.0, \"pharmacy_qty\": 0.0, \"ward_qty\": 0.0, \"dispensed_qty\": 2.0, \"administered_qty\": 1.0, \"theatre_qty\": 0}], \"ward_stock\": [], \"patients\": [{\"recall_patient_id\": 1, \"recall_id\": 1, \"patient_id\": 1, \"walkin_name\": null, \"walkin_mobile\": null, \"quantity\": 2.0, \"first_received_at\": \"2026-09-30T15:03:26.965997+00:00\", \"last_received_at\": \"2026-09-30T15:03:26.965997+00:00\", \"sources\": [{\"at\": \"2026-09-30T15:03:26.965997+00:00\", \"id\": 1, \"qty\": 2.0, \"kind\": \"Dispensed\"}], \"outcome\": \"Contacted\", \"note\": \"Told by telephone: no reaction; come back if a rash appears\", \"updated_by\": 11, \"updated_at\": \"2026-09-30T15:03:30.040953+00:00\"…"
+      }
+    },
+    "POST /drug-recalls/{recall_id}/cancel": {
+      "request": {
+        "path": "/api/v1/drug-recalls/2/cancel",
+        "body": {
+          "reason": "Wrong batch number keyed"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "recall_id": 2,
+            "recall_number": "RCL-2026-0002",
+            "drug_id": 1,
+            "source": "DRAP",
+            "reference": "DRAP alert 12/2026",
+            "recall_class": "ClassII",
+            "reason": "Particulate matter in vials",
+            "contact_patients": false,
+            "status": "Cancelled",
+            "opened_by": 11,
+            "opened_at": "2026-09-30T15:03:30.429949+00:00",
+            "stock_removed_by": null,
+            "stock_removed_at": null,
+            "closed_by": null,
+            "closed_at": null,
+            "closing_note": null,
+            "cancelled_by": 11,
+            "cancelled_at": "2026-09-30T15:03:30.522593+00:00",
+            "cancel_reason": "Wrong batch number keyed",
+            "row_version": 2,
+            "drug_name": "Ceftriaxone 1g",
+            "drug_code": "CEF",
+            "opened_by_name": "ua7a3486c32",
+            "batch_numbers": [
+              "CEF-2"
+            ],
+            "stock_left": 18,
+            "patients_to_contact": 0,
+            "batches": [
+              {
+                "batch_id": 2,
+                "batch_no": "CEF-2",
+                "expiry_date": "2099-01-01",
+                "qty_received": 20,
+                "pharmacy_qty": 18,
+                "ward_qty": 0,
+                "dispensed_qty": 2,
+                "administered_qty": 0,
+                "theatre_qty": 0
+              }
+            ],
+            "ward_stock": [],
+            "patients": [],
+            "can_close": false
+          },
+          "meta": {
+            "server_time": "2026-09-30T15:03:30.559869+00:00"
+          },
+          "request_id": "7797aeac8477413eb958b225832d429d"
+        }
+      }
+    },
+    "GET /drugs/{drug_id}/stock-status": {
+      "request": {
+        "path": "/api/v1/drugs/1/stock-status"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "drug_id": 1,
+            "code": "AMX-500",
+            "name": "Amoxicillin 500mg",
+            "generic_name": null,
+            "strength": null,
+            "form": "Capsule",
+            "unit": "unit",
+            "schedule": "ScheduleH",
+            "is_otc_allowed": false,
+            "barcode": null,
+            "low_stock_threshold": 0,
+            "is_active": true,
+            "high_alert_category": null,
+            "is_restricted": false,
+            "lasa_with": [],
+            "qty_available": 15,
+            "next_expiry": "2098-01-01",
+            "stock_status": "InStock",
+            "batches": [
+              {
+                "batch_id": 2,
+                "batch_no": "EARLY",
+                "expiry_date": "2098-01-01",
+                "qty_available": 5,
+                "unit_cost": 10,
+                "retail_price": 20,
+                "received_at": "2026-09-30T15:28:51.746963+00:00",
+                "is_expired": false
+              },
+              {
+                "batch_id": 1,
+                "batch_no": "LATE",
+                "expiry_date": "2099-01-01",
+                "qty_available": 10,
+                "unit_cost": 10,
+                "retail_price": 20,
+                "received_at": "2026-09-30T15:28:51.689915+00:00",
+                "is_expired": false
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-30T15:28:52.014186+00:00"
+          },
+          "request_id": "a7701fa19daf4458a570a6d5f88f0bb4"
+        }
+      }
+    },
+    "GET /drugs/search": {
+      "request": {
+        "path": "/api/v1/drugs/search",
+        "query": {
+          "q": "Insulin"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "drug_id": 3,
+              "code": "INSN",
+              "name": "Insulin NPH",
+              "generic_name": null,
+              "strength": null,
+              "form": "Injection",
+              "unit": "unit",
+              "schedule": "HospitalOnly",
+              "is_otc_allowed": false,
+              "barcode": "8931440574755",
+              "low_stock_threshold": 0,
+              "is_active": true,
+              "high_alert_category": null,
+              "is_restricted": false,
+              "lasa_with": [
+                "Insulin regular"
+              ],
+              "qty_available": 50,
+              "next_expiry": "2099-01-01",
+              "stock_status": "InStock"
+            },
+            {
+              "drug_id": 2,
+              "code": "INSR",
+              "name": "Insulin regular",
+              "generic_name": null,
+              "strength": null,
+              "form": "Injection",
+              "unit": "unit",
+              "schedule": "HospitalOnly",
+              "is_otc_allowed": false,
+              "barcode": "8991682543668",
+              "low_stock_threshold": 0,
+              "is_active": true,
+              "high_alert_category": "Insulin",
+              "is_restricted": false,
+              "lasa_with": [
+                "Insulin NPH"
+              ],
+              "qty_available": 50,
+              "next_expiry": "2099-01-01",
+              "stock_status": "InStock"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T15:01:45.066819+00:00"
+          },
+          "request_id": "3c9f279059e64b359f9c572408414e0b"
+        }
+      }
+    }
+  },
+  "schemas": {
+    "BatchAvailabilityOut": {
+      "properties": {
+        "batch_id": {
+          "type": "integer",
+          "title": "Batch Id"
+        },
+        "batch_no": {
+          "type": "string",
+          "title": "Batch No"
+        },
+        "expiry_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Expiry Date"
+        },
+        "qty_available": {
+          "type": "number",
+          "title": "Qty Available"
+        },
+        "unit_cost": {
+          "type": "number",
+          "title": "Unit Cost"
+        },
+        "retail_price": {
+          "type": "number",
+          "title": "Retail Price"
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Received At"
+        },
+        "is_expired": {
+          "type": "boolean",
+          "title": "Is Expired"
+        }
+      },
+      "type": "object",
+      "required": [
+        "batch_id",
+        "batch_no",
+        "expiry_date",
+        "qty_available",
+        "unit_cost",
+        "retail_price",
+        "received_at",
+        "is_expired"
+      ],
+      "title": "BatchAvailabilityOut"
+    },
+    "DrugStockDetailOut": {
+      "properties": {
+        "drug_id": {
+          "type": "integer",
+          "title": "Drug Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "generic_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Generic Name"
+        },
+        "strength": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Strength"
+        },
+        "form": {
+          "type": "string",
+          "enum": [
+            "Tablet",
+            "Capsule",
+            "Syrup",
+            "Suspension",
+            "Injection",
+            "Infusion",
+            "Cream",
+            "Ointment",
+            "Drops",
+            "Inhaler",
+            "Suppository",
+            "Powder",
+            "Consumable",
+            "Device",
+            "Other"
+          ],
+          "title": "Form"
+        },
+        "unit": {
+          "type": "string",
+          "title": "Unit"
+        },
+        "schedule": {
+          "type": "string",
+          "enum": [
+            "OTC",
+            "ScheduleG",
+            "ScheduleH",
+            "ScheduleX",
+            "HospitalOnly"
+          ],
+          "title": "Schedule"
+        },
+        "is_otc_allowed": {
+          "type": "boolean",
+          "title": "Is Otc Allowed"
+        },
+        "barcode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode"
+        },
+        "low_stock_threshold": {
+          "type": "number",
+          "title": "Low Stock Threshold"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "high_alert_category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ConcentratedElectrolyte",
+                "Chemotherapy",
+                "Anticoagulant",
+                "Insulin",
+                "Opioid",
+                "Sedative",
+                "NeuromuscularBlocker",
+                "Inotrope",
+                "Thrombolytic",
+                "Psychotropic",
+                "HighCost",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "High Alert Category",
+          "description": "Set: a high-alert medicine (MSDS 56): show it in red; a second person checks it when dispensed and given"
+        },
+        "is_restricted": {
+          "type": "boolean",
+          "title": "Is Restricted",
+          "description": "Prescribed only with the RestrictedPrescribing privilege (MSDS 52)"
+        },
+        "lasa_with": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Lasa With",
+          "description": "Medicines it looks or sounds like: warn when one is picked"
+        },
+        "qty_available": {
+          "type": "number",
+          "title": "Qty Available",
+          "description": "Non-expired stock"
+        },
+        "next_expiry": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Expiry"
+        },
+        "stock_status": {
+          "type": "string",
+          "enum": [
+            "InStock",
+            "Low",
+            "OutOfStock"
+          ],
+          "title": "Stock Status",
+          "description": "OutOfStock: show the drug greyed out"
+        },
+        "batches": {
+          "items": {
+            "$ref": "#/components/schemas/BatchAvailabilityOut"
+          },
+          "type": "array",
+          "title": "Batches",
+          "description": "Batches in stock, earliest expiry first (FEFO order)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "drug_id",
+        "code",
+        "name",
+        "generic_name",
+        "strength",
+        "form",
+        "unit",
+        "schedule",
+        "is_otc_allowed",
+        "barcode",
+        "low_stock_threshold",
+        "is_active",
+        "high_alert_category",
+        "is_restricted",
+        "lasa_with",
+        "qty_available",
+        "next_expiry",
+        "stock_status",
+        "batches"
+      ],
+      "title": "DrugStockDetailOut"
+    },
+    "DrugStockOut": {
+      "properties": {
+        "drug_id": {
+          "type": "integer",
+          "title": "Drug Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "generic_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Generic Name"
+        },
+        "strength": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Strength"
+        },
+        "form": {
+          "type": "string",
+          "enum": [
+            "Tablet",
+            "Capsule",
+            "Syrup",
+            "Suspension",
+            "Injection",
+            "Infusion",
+            "Cream",
+            "Ointment",
+            "Drops",
+            "Inhaler",
+            "Suppository",
+            "Powder",
+            "Consumable",
+            "Device",
+            "Other"
+          ],
+          "title": "Form"
+        },
+        "unit": {
+          "type": "string",
+          "title": "Unit"
+        },
+        "schedule": {
+          "type": "string",
+          "enum": [
+            "OTC",
+            "ScheduleG",
+            "ScheduleH",
+            "ScheduleX",
+            "HospitalOnly"
+          ],
+          "title": "Schedule"
+        },
+        "is_otc_allowed": {
+          "type": "boolean",
+          "title": "Is Otc Allowed"
+        },
+        "barcode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode"
+        },
+        "low_stock_threshold": {
+          "type": "number",
+          "title": "Low Stock Threshold"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "high_alert_category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ConcentratedElectrolyte",
+                "Chemotherapy",
+                "Anticoagulant",
+                "Insulin",
+                "Opioid",
+                "Sedative",
+                "NeuromuscularBlocker",
+                "Inotrope",
+                "Thrombolytic",
+                "Psychotropic",
+                "HighCost",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "High Alert Category",
+          "description": "Set: a high-alert medicine (MSDS 56): show it in red; a second person checks it when dispensed and given"
+        },
+        "is_restricted": {
+          "type": "boolean",
+          "title": "Is Restricted",
+          "description": "Prescribed only with the RestrictedPrescribing privilege (MSDS 52)"
+        },
+        "lasa_with": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Lasa With",
+          "description": "Medicines it looks or sounds like: warn when one is picked"
+        },
+        "qty_available": {
+          "type": "number",
+          "title": "Qty Available",
+          "description": "Non-expired stock"
+        },
+        "next_expiry": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Expiry"
+        },
+        "stock_status": {
+          "type": "string",
+          "enum": [
+            "InStock",
+            "Low",
+            "OutOfStock"
+          ],
+          "title": "Stock Status",
+          "description": "OutOfStock: show the drug greyed out"
+        }
+      },
+      "type": "object",
+      "required": [
+        "drug_id",
+        "code",
+        "name",
+        "generic_name",
+        "strength",
+        "form",
+        "unit",
+        "schedule",
+        "is_otc_allowed",
+        "barcode",
+        "low_stock_threshold",
+        "is_active",
+        "high_alert_category",
+        "is_restricted",
+        "lasa_with",
+        "qty_available",
+        "next_expiry",
+        "stock_status"
+      ],
+      "title": "DrugStockOut",
+      "description": "A drug with its live stock (view v_drug_stock): what e-prescription search shows."
+    },
+    "Envelope_DrugStockDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/DrugStockDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[DrugStockDetailOut]"
+    },
+    "Envelope_RecallDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/RecallDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[RecallDetailOut]"
+    },
+    "Envelope_list_DrugStockOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/DrugStockOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[DrugStockOut]]"
+    },
+    "Envelope_list_RecallOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/RecallOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[RecallOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "MedicationReasonIn": {
+      "properties": {
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "title": "MedicationReasonIn"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "RecallBatchOut": {
+      "properties": {
+        "batch_id": {
+          "type": "integer",
+          "title": "Batch Id"
+        },
+        "batch_no": {
+          "type": "string",
+          "title": "Batch No"
+        },
+        "expiry_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Expiry Date"
+        },
+        "qty_received": {
+          "type": "number",
+          "title": "Qty Received"
+        },
+        "pharmacy_qty": {
+          "type": "number",
+          "title": "Pharmacy Qty",
+          "description": "Left in the pharmacy"
+        },
+        "ward_qty": {
+          "type": "number",
+          "title": "Ward Qty",
+          "description": "Left on the wards"
+        },
+        "dispensed_qty": {
+          "type": "number",
+          "title": "Dispensed Qty"
+        },
+        "administered_qty": {
+          "type": "number",
+          "title": "Administered Qty",
+          "description": "Given from ward stock"
+        },
+        "theatre_qty": {
+          "type": "number",
+          "title": "Theatre Qty",
+          "description": "Used in theatre"
+        }
+      },
+      "type": "object",
+      "required": [
+        "batch_id",
+        "batch_no",
+        "expiry_date",
+        "qty_received",
+        "pharmacy_qty",
+        "ward_qty",
+        "dispensed_qty",
+        "administered_qty",
+        "theatre_qty"
+      ],
+      "title": "RecallBatchOut"
+    },
+    "RecallContactIn": {
+      "properties": {
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "Contacted",
+            "Unreachable",
+            "NotNeeded"
+          ],
+          "title": "Outcome"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Note",
+          "description": "Who was reached and what they were told, or why not"
+        }
+      },
+      "type": "object",
+      "required": [
+        "outcome",
+        "note"
+      ],
+      "title": "RecallContactIn"
+    },
+    "RecallDetailOut": {
+      "properties": {
+        "recall_id": {
+          "type": "integer",
+          "title": "Recall Id"
+        },
+        "recall_number": {
+          "type": "string",
+          "title": "Recall Number"
+        },
+        "drug_id": {
+          "type": "integer",
+          "title": "Drug Id"
+        },
+        "drug_name": {
+          "type": "string",
+          "title": "Drug Name"
+        },
+        "drug_code": {
+          "type": "string",
+          "title": "Drug Code"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "DRAP",
+            "Manufacturer",
+            "Supplier",
+            "Internal"
+          ],
+          "title": "Source"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference"
+        },
+        "recall_class": {
+          "type": "string",
+          "enum": [
+            "ClassI",
+            "ClassII",
+            "ClassIII"
+          ],
+          "title": "Recall Class"
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason"
+        },
+        "contact_patients": {
+          "type": "boolean",
+          "title": "Contact Patients"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Open",
+            "Closed",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "opened_by": {
+          "type": "integer",
+          "title": "Opened By"
+        },
+        "opened_by_name": {
+          "type": "string",
+          "title": "Opened By Name"
+        },
+        "opened_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Opened At"
+        },
+        "stock_removed_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Stock Removed By"
+        },
+        "stock_removed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Stock Removed At"
+        },
+        "closed_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Closed By"
+        },
+        "closed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Closed At"
+        },
+        "closing_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Closing Note"
+        },
+        "cancelled_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled By"
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled At"
+        },
+        "cancel_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancel Reason"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "batch_numbers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Batch Numbers"
+        },
+        "stock_left": {
+          "type": "number",
+          "title": "Stock Left",
+          "description": "Units of the recalled batches still in the pharmacy and on the wards"
+        },
+        "patients_to_contact": {
+          "type": "integer",
+          "title": "Patients To Contact"
+        },
+        "batches": {
+          "items": {
+            "$ref": "#/components/schemas/RecallBatchOut"
+          },
+          "type": "array",
+          "title": "Batches"
+        },
+        "ward_stock": {
+          "items": {
+            "$ref": "#/components/schemas/RecallWardStockOut"
+          },
+          "type": "array",
+          "title": "Ward Stock",
+          "description": "The wards still holding the batches"
+        },
+        "patients": {
+          "items": {
+            "$ref": "#/components/schemas/RecallPatientOut"
+          },
+          "type": "array",
+          "title": "Patients"
+        },
+        "can_close": {
+          "type": "boolean",
+          "title": "Can Close",
+          "description": "No stock left and nobody still to contact"
+        }
+      },
+      "type": "object",
+      "required": [
+        "recall_id",
+        "recall_number",
+        "drug_id",
+        "drug_name",
+        "drug_code",
+        "source",
+        "reference",
+        "recall_class",
+        "reason",
+        "contact_patients",
+        "status",
+        "opened_by",
+        "opened_by_name",
+        "opened_at",
+        "stock_removed_by",
+        "stock_removed_at",
+        "closed_by",
+        "closed_at",
+        "closing_note",
+        "cancelled_by",
+        "cancelled_at",
+        "cancel_reason",
+        "row_version",
+        "batch_numbers",
+        "stock_left",
+        "patients_to_contact",
+        "batches",
+        "ward_stock",
+        "patients",
+        "can_close"
+      ],
+      "title": "RecallDetailOut"
+    },
+    "RecallIn": {
+      "properties": {
+        "drug_id": {
+          "type": "integer",
+          "title": "Drug Id",
+          "description": "The recalled medicine (GET /drugs/search)"
+        },
+        "batch_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Batch Ids",
+          "description": "The recalled batches of the medicine"
+        },
+        "all_batches": {
+          "type": "boolean",
+          "title": "All Batches",
+          "description": "Recall every batch of the medicine",
+          "default": false
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "DRAP",
+            "Manufacturer",
+            "Supplier",
+            "Internal"
+          ],
+          "title": "Source"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference",
+          "description": "The DRAP alert or the supplier's letter"
+        },
+        "recall_class": {
+          "type": "string",
+          "enum": [
+            "ClassI",
+            "ClassII",
+            "ClassIII"
+          ],
+          "title": "Recall Class",
+          "description": "ClassI: serious harm possible (contact every patient); ClassII: temporary harm; ClassIII: unlikely harm"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Reason"
+        },
+        "contact_patients": {
+          "type": "boolean",
+          "title": "Contact Patients",
+          "description": "The recall reaches patients: list and contact everyone who received it"
+        }
+      },
+      "type": "object",
+      "required": [
+        "drug_id",
+        "source",
+        "recall_class",
+        "reason",
+        "contact_patients"
+      ],
+      "title": "RecallIn"
+    },
+    "RecallNoteIn": {
+      "properties": {
+        "note": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Note"
+        }
+      },
+      "type": "object",
+      "required": [
+        "note"
+      ],
+      "title": "RecallNoteIn"
+    },
+    "RecallOut": {
+      "properties": {
+        "recall_id": {
+          "type": "integer",
+          "title": "Recall Id"
+        },
+        "recall_number": {
+          "type": "string",
+          "title": "Recall Number"
+        },
+        "drug_id": {
+          "type": "integer",
+          "title": "Drug Id"
+        },
+        "drug_name": {
+          "type": "string",
+          "title": "Drug Name"
+        },
+        "drug_code": {
+          "type": "string",
+          "title": "Drug Code"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "DRAP",
+            "Manufacturer",
+            "Supplier",
+            "Internal"
+          ],
+          "title": "Source"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference"
+        },
+        "recall_class": {
+          "type": "string",
+          "enum": [
+            "ClassI",
+            "ClassII",
+            "ClassIII"
+          ],
+          "title": "Recall Class"
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason"
+        },
+        "contact_patients": {
+          "type": "boolean",
+          "title": "Contact Patients"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Open",
+            "Closed",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "opened_by": {
+          "type": "integer",
+          "title": "Opened By"
+        },
+        "opened_by_name": {
+          "type": "string",
+          "title": "Opened By Name"
+        },
+        "opened_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Opened At"
+        },
+        "stock_removed_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Stock Removed By"
+        },
+        "stock_removed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Stock Removed At"
+        },
+        "closed_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Closed By"
+        },
+        "closed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Closed At"
+        },
+        "closing_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Closing Note"
+        },
+        "cancelled_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled By"
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled At"
+        },
+        "cancel_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancel Reason"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "batch_numbers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Batch Numbers"
+        },
+        "stock_left": {
+          "type": "number",
+          "title": "Stock Left",
+          "description": "Units of the recalled batches still in the pharmacy and on the wards"
+        },
+        "patients_to_contact": {
+          "type": "integer",
+          "title": "Patients To Contact"
+        }
+      },
+      "type": "object",
+      "required": [
+        "recall_id",
+        "recall_number",
+        "drug_id",
+        "drug_name",
+        "drug_code",
+        "source",
+        "reference",
+        "recall_class",
+        "reason",
+        "contact_patients",
+        "status",
+        "opened_by",
+        "opened_by_name",
+        "opened_at",
+        "stock_removed_by",
+        "stock_removed_at",
+        "closed_by",
+        "closed_at",
+        "closing_note",
+        "cancelled_by",
+        "cancelled_at",
+        "cancel_reason",
+        "row_version",
+        "batch_numbers",
+        "stock_left",
+        "patients_to_contact"
+      ],
+      "title": "RecallOut"
+    },
+    "RecallPatientOut": {
+      "properties": {
+        "recall_patient_id": {
+          "type": "integer",
+          "title": "Recall Patient Id"
+        },
+        "recall_id": {
+          "type": "integer",
+          "title": "Recall Id"
+        },
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id"
+        },
+        "patient_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Name"
+        },
+        "mrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mrn"
+        },
+        "mobile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mobile"
+        },
+        "walkin_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Walkin Name"
+        },
+        "walkin_mobile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Walkin Mobile"
+        },
+        "quantity": {
+          "type": "number",
+          "title": "Quantity"
+        },
+        "first_received_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "First Received At"
+        },
+        "last_received_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Last Received At"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/components/schemas/RecallSourceOut"
+          },
+          "type": "array",
+          "title": "Sources"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "ToContact",
+            "Contacted",
+            "Unreachable",
+            "NotNeeded"
+          ],
+          "title": "Outcome"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        },
+        "updated_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Updated By"
+        },
+        "updated_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Updated By Name"
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Updated At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "recall_patient_id",
+        "recall_id",
+        "patient_id",
+        "patient_name",
+        "mrn",
+        "mobile",
+        "walkin_name",
+        "walkin_mobile",
+        "quantity",
+        "first_received_at",
+        "last_received_at",
+        "sources",
+        "outcome",
+        "note",
+        "updated_by",
+        "updated_by_name",
+        "updated_at",
+        "row_version"
+      ],
+      "title": "RecallPatientOut",
+      "description": "Someone who received a recalled batch: a patient, or a named walk-in customer or staff member."
+    },
+    "RecallSourceOut": {
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Dispensed",
+            "Administered",
+            "Theatre"
+          ],
+          "title": "Kind"
+        },
+        "id": {
+          "type": "integer",
+          "title": "Id",
+          "description": "The dispensation, the MAR dose or the theatre consumable"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At"
+        },
+        "qty": {
+          "type": "number",
+          "title": "Qty"
+        }
+      },
+      "type": "object",
+      "required": [
+        "kind",
+        "id",
+        "at",
+        "qty"
+      ],
+      "title": "RecallSourceOut"
+    },
+    "RecallWardStockOut": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "ward_name": {
+          "type": "string",
+          "title": "Ward Name"
+        },
+        "batch_id": {
+          "type": "integer",
+          "title": "Batch Id"
+        },
+        "batch_no": {
+          "type": "string",
+          "title": "Batch No"
+        },
+        "qty": {
+          "type": "number",
+          "title": "Qty"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id",
+        "ward_name",
+        "batch_id",
+        "batch_no",
+        "qty"
+      ],
+      "title": "RecallWardStockOut"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
+}

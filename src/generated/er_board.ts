@@ -2,6 +2,12 @@
 // api(): the helper from get_guide("envelope-and-errors"). Types come from the declared request and response models.
 import { api } from "./api";
 
+const withQuery = (path: string, q?: Record<string, unknown>) => {
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
+  return s ? `${path}?${s}` : path;
+};
+
 /** The open ER visits: not triaged yet first, then by triage level and arrival (never by arrival alone). */
 export interface ErBoardOut {
   visits: ErVisitOut[];
@@ -136,7 +142,7 @@ export interface ErStaffOnDutyOut {
 }
 
 export interface ErArrivalIn {
-  /** An unknown patient: POST /patients/trauma first */
+  /** An unknown patient: POST /patients/trauma first; a known one: GET /patients/search */
   patient_id: number;
   /** Default: now */
   arrived_at?: string | null;
@@ -329,6 +335,50 @@ export interface MergedProfileOut {
   temp_identifier: string | null;
 }
 
+/** A person the search found, always as their master record (merged profiles are never hits of their own). */
+export interface PatientSearchHitOut {
+  patient_id: number;
+  /** The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download */
+  photo_document_id: number | null;
+  mrn: string;
+  registration_type: "Regular" | "LabOnly" | "TraumaTemp" | "Merged";
+  full_name: string;
+  father_or_husband_name: string | null;
+  gender: "male" | "female" | "other" | "unknown" | null;
+  dob: string | null;
+  age_years: number | null;
+  /** When age_years was recorded (the age grows from that date) */
+  age_recorded_on: string | null;
+  mobile: string | null;
+  cnic: string | null;
+  /** The Universal Patient Medical Record Number when one was recorded (optional) */
+  upmrn: string | null;
+  address: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  blood_group: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | "Unknown" | null;
+  allergies: string | null;
+  billing_category: "Cash" | "Panel";
+  panel_id: number | null;
+  panel_name: string | null;
+  panel_member_no: string | null;
+  /** Unknown-trauma label, e.g. "Unknown Male 3" */
+  temp_identifier: string | null;
+  merged_into_id: number | null;
+  linked_employee_id: number | null;
+  is_deceased: boolean;
+  /** The death record (GET /deaths/{death_id}) when the death is recorded */
+  death_id: number | null;
+  death_at: string | null;
+  /** Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked) */
+  mlc_numbers: string[];
+  created_at: string;
+  row_version: number;
+  outstanding: OutstandingBannerOut;
+  /** The profile merged into this record that the search matched when this record itself did not (an old slip's MRN, a trauma label such as "Unknown Male 3", a duplicate's name or numbers): say "Found by MRN-…, merged into this record". Null when this record matched */
+  matched_merged_profile: MergedProfileOut | null;
+}
+
 /** The ER board: open visits by triage level — GET /api/v1/er/board (who may call: holders of er.visit.view). */
 export function board(): Promise<ErBoardOut> {
   return api<ErBoardOut>("GET", `/er/board`, undefined);
@@ -352,4 +402,9 @@ export function getVisit(er_visit_id: number): Promise<ErVisitDetailOut> {
 /** Create a temporary trauma profile ('Unknown Male 1') — POST /api/v1/patients/trauma (who may call: holders of ipd.admission.code_red or patient.create). */
 export function trauma(body: TraumaCreate): Promise<PatientDetailOut> {
   return api<PatientDetailOut>("POST", `/patients/trauma`, body, { idempotent: true });
+}
+
+/** Returning-patient lookup by name / phone / CNIC / UPMRN / MRN — GET /api/v1/patients/search (who may call: holders of patient.search). */
+export function searchPatients(query: { q: string; limit?: number }): Promise<PatientSearchHitOut[]> {
+  return api<PatientSearchHitOut[]>("GET", withQuery(`/patients/search`, query), undefined);
 }

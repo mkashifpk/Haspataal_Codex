@@ -1,0 +1,501 @@
+{
+  "screen_id": "surgical_record_surgeon",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "examples": {
+    "GET /ot/clinical-worklist": {
+      "request": {
+        "path": "/api/v1/ot/clinical-worklist",
+        "query": {
+          "mine": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "booking_id": 1,
+              "booking_number": "OT-2026-00001",
+              "status": "Cleaning",
+              "booking_type": "Scheduled",
+              "procedure_name": "Appendectomy",
+              "anesthesia_type": "General",
+              "scheduled_start": "2026-10-01T09:00:00+00:00",
+              "actual_start": "2026-09-30T09:04:27.990684+00:00",
+              "actual_end": "2026-09-30T09:04:28.126713+00:00",
+              "primary_surgeon_id": 12,
+              "surgeon_name": "Dr Tariq",
+              "ot_name": "Main OT 1",
+              "patient_id": 2,
+              "mrn": "MRN-2026-000002",
+              "patient_name": "Ali Khan",
+              "needs_anaesthetist": true,
+              "anaesthesia_decision": "Fit",
+              "anaesthetist_id": 17,
+              "parts": [
+                {
+                  "part": "PreOpNote",
+                  "label": "Pre-operative note",
+                  "state": "Final"
+                },
+                {
+                  "part": "PreAnaesthesia",
+                  "label": "Pre-anaesthesia assessment",
+                  "state": "Final"
+                },
+                {
+                  "part": "SignIn",
+                  "label": "Sign in",
+                  "state": "Final"
+                }
+              ],
+              "next_step": null
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T09:04:28.386268+00:00"
+          },
+          "request_id": "f39e46d40d17427280146fef0d8c86c0"
+        }
+      }
+    },
+    "GET /ot/bookings/{booking_id}/surgical-record": {
+      "request": {
+        "path": "/api/v1/ot/bookings/1/surgical-record"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"booking\": {\"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"status\": \"Scheduled\", \"booking_type\": \"Scheduled\", \"procedure_name\": \"Appendectomy\", \"anesthesia_type\": \"General\", \"patient_id\": 1, \"admission_id\": null, \"primary_surgeon_id\": 7, \"surgeon_name\": \"Dr Tariq\", \"ot_id\": 1, \"ot_name\": \"Main OT 1\", \"scheduled_start\": \"2026-10-01T09:00:00+00:00\", \"scheduled_end\": \"2026-10-01T10:30:00+00:00\", \"actual_start\": null, \"actual_end\": null, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"admission_number\": null, \"needs_anaesthetist\": true}, \"parts\": [{\"part\": \"PreOpNote\", \"label\": \"Pre-operative note\", \"state\": \"Draft\"}, {\"part\": \"OperationConsent\", \"label\": \"Consent to the operation\", \"state\": \"Missing\"}, {\"part\": \"PreAnaesthesia\", \"label\": \"Pre-anaesthesia assessment\", \"state\": \"Final\"}], \"next_step\": \"Take the patient's consent to the operation\", \"pre_op_note\": {\"booking_id\": 1, \"history_examination\": \"Right iliac fossa pain for 2 days, fever; tender at McBurney's point, guarding\", \"provisional_diagnosis\": \"Acute appendicitis\", \"icd_codes\": [], \"icd_terms\": [], \"operation_plan\": \"Open appendicectomy\", \"laterality\": \"Right\", \"recorded_at\": \"2026-09-30T09:54:24.367340+00:00\", \"author_stamp\": {\"at\": \"2026-09-30T09:54:24.36734+00:00\", \"name\": \"Dr Tariq\", \"text\": \"Dr Tariq, Doctor, PMDC PMDC-49102, 30-Sep-2026 14:54\", \"user_id\": 7, \"designation\": \"Doctor\", \"employee_id\": 7, \"registration\": \"PMDC PMDC-491…"
+      }
+    },
+    "PUT /ot/bookings/{booking_id}/pre-op-note": {
+      "request": {
+        "path": "/api/v1/ot/bookings/1/pre-op-note",
+        "body": {
+          "history_examination": "Right iliac fossa pain for 2 days, fever; tender at McBurney's point, guarding",
+          "provisional_diagnosis": "Acute appendicitis",
+          "operation_plan": "Open appendicectomy",
+          "laterality": "Right"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"booking\": {\"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"status\": \"Scheduled\", \"booking_type\": \"Scheduled\", \"procedure_name\": \"Appendectomy\", \"anesthesia_type\": null, \"patient_id\": 1, \"admission_id\": null, \"primary_surgeon_id\": 7, \"surgeon_name\": \"Dr Tariq\", \"ot_id\": 1, \"ot_name\": \"Main OT 1\", \"scheduled_start\": \"2026-10-01T09:00:00+00:00\", \"scheduled_end\": \"2026-10-01T10:30:00+00:00\", \"actual_start\": null, \"actual_end\": null, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"admission_number\": null, \"needs_anaesthetist\": true}, \"parts\": [{\"part\": \"PreOpNote\", \"label\": \"Pre-operative note\", \"state\": \"Draft\"}, {\"part\": \"OperationConsent\", \"label\": \"Consent to the operation\", \"state\": \"Final\"}, {\"part\": \"PreAnaesthesia\", \"label\": \"Pre-anaesthesia assessment\", \"state\": \"Missing\"}], \"next_step\": \"Assess the patient for anaesthesia and sign the assessment\", \"pre_op_note\": {\"booking_id\": 1, \"history_examination\": \"Right iliac fossa pain for 2 days, fever; tender at McBurney's point, guarding\", \"provisional_diagnosis\": \"Acute appendicitis\", \"icd_codes\": [], \"icd_terms\": [], \"operation_plan\": \"Open appendicectomy\", \"laterality\": \"Right\", \"recorded_at\": \"2026-09-30T09:54:24.367340+00:00\", \"author_stamp\": {\"at\": \"2026-09-30T09:54:24.36734+00:00\", \"name\": \"Dr Tariq\", \"text\": \"Dr Tariq, Doctor, PMDC PMDC-49102, 30-Sep-2026 14:54\", \"user_id\": 7, \"designation\": \"Doctor\", \"employee_id\": 7, \"registration\": \"PMD…"
+      }
+    },
+    "PUT /ot/bookings/{booking_id}/operative-note": {
+      "request": {
+        "path": "/api/v1/ot/bookings/1/operative-note",
+        "body": {
+          "incision": "Lanz"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"booking\": {\"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"status\": \"Cleaning\", \"booking_type\": \"Scheduled\", \"procedure_name\": \"Appendectomy\", \"anesthesia_type\": \"General\", \"patient_id\": 2, \"admission_id\": 1, \"primary_surgeon_id\": 12, \"surgeon_name\": \"Dr Tariq\", \"ot_id\": 1, \"ot_name\": \"Main OT 1\", \"scheduled_start\": \"2026-10-02T09:00:00+00:00\", \"scheduled_end\": \"2026-10-02T10:30:00+00:00\", \"actual_start\": \"2026-10-01T07:35:40.254788+00:00\", \"actual_end\": \"2026-10-01T07:35:40.471587+00:00\", \"mrn\": \"MRN-2026-000002\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"admission_number\": \"ADM-2026-00001\", \"needs_anaesthetist\": true}, \"parts\": [{\"part\": \"PreOpNote\", \"label\": \"Pre-operative note\", \"state\": \"Final\"}, {\"part\": \"OperationConsent\", \"label\": \"Consent to the operation\", \"state\": \"Final\"}, {\"part\": \"PreAnaesthesia\", \"label\": \"Pre-anaesthesia assessment\", \"state\": \"Final\"}], \"next_step\": \"Complete and sign the anaesthesia record\", \"pre_op_note\": {\"booking_id\": 1, \"history_examination\": \"Right iliac fossa pain for 2 days, fever; tender at McBurney's point, guarding\", \"provisional_diagnosis\": \"Acute appendicitis\", \"icd_codes\": [], \"icd_terms\": [], \"operation_plan\": \"Open appendicectomy\", \"laterality\": \"Right\", \"recorded_at\": \"2026-10-01T07:35:39.882264+00:00\", \"author_stamp\": {\"at\": \"2026-10-01T07:35:39.882264+00:00\", \"name\": \"Dr Tariq\", \"text\": \"Dr Tariq, Doctor, PMDC PMDC-58063, 01-Oct-2026 12:35\", \"user_id\": 12, \"design…"
+      }
+    },
+    "POST /ot/bookings/{booking_id}/operative-note/sign": {
+      "request": {
+        "path": "/api/v1/ot/bookings/1/operative-note/sign",
+        "body": {}
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"booking\": {\"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"status\": \"Cleaning\", \"booking_type\": \"Scheduled\", \"procedure_name\": \"Appendectomy\", \"anesthesia_type\": \"General\", \"patient_id\": 2, \"admission_id\": 1, \"primary_surgeon_id\": 12, \"surgeon_name\": \"Dr Tariq\", \"ot_id\": 1, \"ot_name\": \"Main OT 1\", \"scheduled_start\": \"2026-10-02T09:00:00+00:00\", \"scheduled_end\": \"2026-10-02T10:30:00+00:00\", \"actual_start\": \"2026-10-01T07:35:40.254788+00:00\", \"actual_end\": \"2026-10-01T07:35:40.471587+00:00\", \"mrn\": \"MRN-2026-000002\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"admission_number\": \"ADM-2026-00001\", \"needs_anaesthetist\": true}, \"parts\": [{\"part\": \"PreOpNote\", \"label\": \"Pre-operative note\", \"state\": \"Final\"}, {\"part\": \"OperationConsent\", \"label\": \"Consent to the operation\", \"state\": \"Final\"}, {\"part\": \"PreAnaesthesia\", \"label\": \"Pre-anaesthesia assessment\", \"state\": \"Final\"}], \"next_step\": \"Complete and sign the anaesthesia record\", \"pre_op_note\": {\"booking_id\": 1, \"history_examination\": \"Right iliac fossa pain for 2 days, fever; tender at McBurney's point, guarding\", \"provisional_diagnosis\": \"Acute appendicitis\", \"icd_codes\": [], \"icd_terms\": [], \"operation_plan\": \"Open appendicectomy\", \"laterality\": \"Right\", \"recorded_at\": \"2026-10-01T07:35:39.882264+00:00\", \"author_stamp\": {\"at\": \"2026-10-01T07:35:39.882264+00:00\", \"name\": \"Dr Tariq\", \"text\": \"Dr Tariq, Doctor, PMDC PMDC-58063, 01-Oct-2026 12:35\", \"user_id\": 12, \"design…"
+      }
+    },
+    "GET /ot/bookings/{booking_id}/surgical-record/print-payload": {
+      "request": {
+        "path": "/api/v1/ot/bookings/1/surgical-record/print-payload"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"document_type\": \"surgical_record\", \"printer_role\": \"document\", \"paper_width_mm\": 210, \"fields\": {\"hospital\": {\"name\": \"Haspataal Hospital\", \"address\": \"\", \"phone\": \"\", \"phc_number\": \"\", \"issue_line\": \"Issued 14-Oct-2026 16:34; this copy printed 14-Oct-2026 16:34\"}, \"record\": {\"booking\": {\"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"status\": \"Cleaning\", \"booking_type\": \"Scheduled\", \"procedure_name\": \"Appendectomy\", \"anesthesia_type\": \"General\", \"patient_id\": 2, \"admission_id\": 1, \"primary_surgeon_id\": 12, \"surgeon_name\": \"Dr Tariq\", \"ot_id\": 1, \"ot_name\": \"Main OT 1\", \"scheduled_start\": \"2026-10-15T09:00:00+00:00\", \"scheduled_end\": \"2026-10-15T10:30:00+00:00\", \"actual_start\": \"2026-10-14T11:34:39.839818+00:00\", \"actual_end\": \"2026-10-14T11:34:40.073842+00:00\", \"mrn\": \"MRN-2026-000002\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"admission_number\": \"ADM-2026-00001\", \"needs_anaesthetist\": true}, \"parts\": [{\"part\": \"PreOpNote\", \"label\": \"Pre-operative note\", \"state\": \"Final\"}, {\"part\": \"OperationConsent\", \"label\": \"Consent to the operation\", \"state\": \"Final\"}, {\"part\": \"PreAnaesthesia\", \"label\": \"Pre-anaesthesia assessment\", \"state\": \"Final\"}], \"next_step\": null, \"pre_op_note\": {\"booking_id\": 1, \"history_examination\": \"Right iliac fossa pain for 2 days, fever; tender at McBurney's point, guarding\", \"provisional_diagnosis\": \"Acute appendicitis\", \"icd_codes\": [], \"icd_terms\": [], \"operation_plan\": \"Open appendicectomy\",…"
+      }
+    },
+    "GET /ot/bookings/{booking_id}/surgical-record/pdf": {
+      "request": {
+        "path": "/api/v1/ot/bookings/1/surgical-record/pdf"
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/pdf",
+        "bytes": 9649
+      }
+    },
+    "POST /ot/bookings/{booking_id}/corrections": {
+      "request": {
+        "path": "/api/v1/ot/bookings/1/corrections",
+        "body": {
+          "record": "Recovery",
+          "correction_text": "Pain score at arrival was 4, not 3",
+          "correction_reason": "Charting slip"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"booking\": {\"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"status\": \"Cleaning\", \"booking_type\": \"Scheduled\", \"procedure_name\": \"Appendectomy\", \"anesthesia_type\": \"General\", \"patient_id\": 2, \"admission_id\": 1, \"primary_surgeon_id\": 12, \"surgeon_name\": \"Dr Tariq\", \"ot_id\": 1, \"ot_name\": \"Main OT 1\", \"scheduled_start\": \"2026-10-02T09:00:00+00:00\", \"scheduled_end\": \"2026-10-02T10:30:00+00:00\", \"actual_start\": \"2026-10-01T07:35:40.254788+00:00\", \"actual_end\": \"2026-10-01T07:35:40.471587+00:00\", \"mrn\": \"MRN-2026-000002\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"admission_number\": \"ADM-2026-00001\", \"needs_anaesthetist\": true}, \"parts\": [{\"part\": \"PreOpNote\", \"label\": \"Pre-operative note\", \"state\": \"Final\"}, {\"part\": \"OperationConsent\", \"label\": \"Consent to the operation\", \"state\": \"Final\"}, {\"part\": \"PreAnaesthesia\", \"label\": \"Pre-anaesthesia assessment\", \"state\": \"Final\"}], \"next_step\": null, \"pre_op_note\": {\"booking_id\": 1, \"history_examination\": \"Right iliac fossa pain for 2 days, fever; tender at McBurney's point, guarding\", \"provisional_diagnosis\": \"Acute appendicitis\", \"icd_codes\": [], \"icd_terms\": [], \"operation_plan\": \"Open appendicectomy\", \"laterality\": \"Right\", \"recorded_at\": \"2026-10-01T07:35:39.882264+00:00\", \"author_stamp\": {\"at\": \"2026-10-01T07:35:39.882264+00:00\", \"name\": \"Dr Tariq\", \"text\": \"Dr Tariq, Doctor, PMDC PMDC-58063, 01-Oct-2026 12:35\", \"user_id\": 12, \"designation\": \"Doctor\", \"employee_id\": 12, \"…"
+      }
+    },
+    "POST /incidents": {
+      "request": {
+        "path": "/api/v1/incidents",
+        "body": {
+          "type_code": "DELAY_IN_CARE",
+          "occurred_at": "2026-10-01T07:11:25.324724+00:00",
+          "affected": "Patient",
+          "patient_id": 1,
+          "description": "OPD queue held for a VIP for two hours; a waiting patient's review was delayed",
+          "immediate_action": "Queue order restored"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"incident_id\": 1, \"incident_number\": \"INC-2026-00001\", \"type_code\": \"DELAY_IN_CARE\", \"type_name\": \"Delay or failure in treatment or monitoring\", \"area\": \"Clinical\", \"kind\": \"Incident\", \"harm\": \"NoHarm\", \"is_sentinel\": false, \"sentinel_override\": null, \"occurred_at\": \"2026-10-01T07:11:25.324724+00:00\", \"department_id\": null, \"department_name\": null, \"ward_id\": null, \"ward_name\": null, \"location\": null, \"affected\": \"Patient\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"admission_id\": null, \"admission_number\": null, \"employee_id\": null, \"employee_name\": null, \"booking_id\": null, \"booking_number\": null, \"procedure_name\": null, \"ot_phase\": null, \"drug_id\": null, \"drug_name\": null, \"medication_stage\": null, \"high_alert\": false, \"death_id\": null, \"death_number\": null, \"description\": \"OPD queue held for a VIP for two hours; a waiting patient's review was delayed\", \"immediate_action\": \"Queue order restored\", \"screening_key\": null, \"reporter_confidential\": false, \"reported_by\": 6, \"reported_by_name\": \"Complaints Officer\", \"reported_at\": \"2026-10-01T07:11:25.566626+00:00\", \"report_stamp\": {\"at\": \"2026-10-01T07:11:25.566626+00:00\", \"name\": \"Complaints Officer\", \"text\": \"Complaints Officer, Officer, 01-Oct-2026 12:11\", \"user_id\": 6, \"designation\": \"Officer\", \"employee_id\": 6, \"registration\": null}, \"status\": \"Reported\", \"reviewed_at\": null, \"reviewed_by_name\": null, \"review_note\": null, \"investigator_user_id\": null, \"investigat…"
+      }
+    },
+    "GET /icd/codes": {
+      "request": {
+        "path": "/api/v1/icd/codes",
+        "query": {
+          "q": "pneumonia"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "code_system": "ICD-11",
+            "release_label": "2026-01",
+            "items": [
+              {
+                "code": "CA40",
+                "kind": "category",
+                "title": "Pneumonia",
+                "uri": "http://id.who.int/icd/release/11/mms/142052508",
+                "chapter": "12",
+                "parent_code": "BlockL1-CA4",
+                "depth": 2,
+                "is_leaf": false,
+                "is_residual": false,
+                "parent_title": "Lung infections"
+              },
+              {
+                "code": "CA40.20",
+                "kind": "category",
+                "title": "Pneumonia due to pneumocystis",
+                "uri": "http://id.who.int/icd/release/11/mms/1229452918",
+                "chapter": "12",
+                "parent_code": "CA40.2",
+                "depth": 4,
+                "is_leaf": true,
+                "is_residual": false,
+                "parent_title": "Fungal pneumonia"
+              },
+              {
+                "code": "CA40.10",
+                "kind": "category",
+                "title": "Pneumonia due to Adenovirus",
+                "uri": "http://id.who.int/icd/release/11/mms/1912319301",
+                "chapter": "12",
+                "parent_code": "CA40.1",
+                "depth": 4,
+                "is_leaf": true,
+                "is_residual": false,
+                "parent_title": "Viral pneumonia"
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-29T03:46:49.443872+00:00"
+          },
+          "request_id": "10800413b3f3436fa4e2fc04674bbe93"
+        }
+      }
+    },
+    "GET /consent-forms": {
+      "request": {
+        "path": "/api/v1/consent-forms"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"form_id\": 1, \"code\": \"GENERAL\", \"category\": \"General\", \"title\": \"General consent for admission and treatment\", \"situations\": \"Every admission: at the admission desk, or as soon as the patient or the person deciding for them can sign (MSDS 72).\", \"taken_by\": \"AnyStaff\", \"requires_witness\": false, \"sort_order\": 10, \"is_active\": true, \"row_version\": 1, \"texts\": [{\"body\": \"I agree to be admitted to this hospital and to receive the examinations, tests, nursing care and treatment my doctors consider necessary. An operation, anaesthesia, a blood transfusion or another risky procedure will be explained to me separately and done only with my separate consent.\\nThe need for my admission and the expected length and cost of my stay, written below, were explained to me. I und…\", \"heading\": \"General consent for admission and treatment\", \"language\": \"English\", \"direction\": \"ltr\", \"updated_at\": \"2026-09-30T09:51:16.583175+00:00\", \"row_version\": 1}, {\"body\": \"میں اس ہسپتال میں داخل ہونے اور اپنے ڈاکٹروں کی تجویز کردہ ضروری معائنوں، ٹیسٹوں، نرسنگ نگہداشت اور علاج پر رضامند ہوں۔ کوئی آپریشن، بے ہوشی، خون لگانا یا کوئی اور خطرے والا طبی عمل مجھے الگ سے سمجھایا جائے گا اور میری الگ رضامندی کے بغیر نہیں کیا جائے گا۔\\nمیرے داخلے کی ضرورت، اندازاً قیام کی مدت اور خرچ، جو نیچے درج ہیں، مجھے سمجھا دیے گئے ہیں۔ میں سمجھتا/سمجھتی ہوں کہ یہ اندازے ہیں جو میری حالت …\", \"heading\": \"داخلے اور علاج کے لیے عمومی رضامندی\", \"language\": \"Urdu\", \"direction\": \"rtl\", \"updated_at\"…"
+      }
+    },
+    "GET /consent-decision-makers": {
+      "request": {
+        "path": "/api/v1/consent-decision-makers"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "relationship": "Guardian",
+              "description": "A guardian appointed by a court",
+              "adult_priority": 1,
+              "minor_priority": 2,
+              "row_version": 1
+            },
+            {
+              "relationship": "Attorney",
+              "description": "A person the patient appointed in writing to decide for them",
+              "adult_priority": 2,
+              "minor_priority": null,
+              "row_version": 1
+            },
+            {
+              "relationship": "Spouse",
+              "description": "The husband or wife",
+              "adult_priority": 3,
+              "minor_priority": null,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T09:54:29.983436+00:00"
+          },
+          "request_id": "363124e5b80c4cb9a8a50b7a5efe7e26"
+        }
+      }
+    },
+    "POST /consents": {
+      "request": {
+        "path": "/api/v1/consents",
+        "body": {
+          "form_code": "GENERAL",
+          "language": "Urdu",
+          "admission_id": 1,
+          "admission_need": "Pneumonia needing IV antibiotics and oxygen",
+          "estimated_days": 5,
+          "estimated_cost": "60000"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"consent_id\": 1, \"consent_number\": \"CN-2026-000001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"father_or_husband_name\": null, \"patient_age\": 40, \"form_id\": 1, \"form_code\": \"GENERAL\", \"category\": \"General\", \"taken_by\": \"AnyStaff\", \"requires_witness\": false, \"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"booking_id\": null, \"booking_number\": null, \"er_visit_id\": null, \"er_number\": null, \"ticket_id\": null, \"ticket_number\": null, \"status\": \"Draft\", \"language\": \"Urdu\", \"form_title\": \"داخلے اور علاج کے لیے عمومی رضامندی\", \"form_body\": \"میں اس ہسپتال میں داخل ہونے اور اپنے ڈاکٹروں کی تجویز کردہ ضروری معائنوں، ٹیسٹوں، نرسنگ نگہداشت اور علاج پر رضامند ہوں۔ کوئی آپریشن، بے ہوشی، خون لگانا یا کوئی اور خطرے والا طبی عمل مجھے الگ سے سمجھایا جائے گا اور میری الگ رضامندی کے بغیر نہیں کیا جائے گا۔\\nمیرے داخلے کی ضرورت، اندازاً قیام کی مدت اور خرچ، جو نیچے درج ہیں، مجھے سمجھا دیے گئے ہیں۔ میں سمجھتا/سمجھتی ہوں کہ یہ اندازے ہیں جو میری حالت …\", \"procedure_name\": null, \"performer_id\": null, \"performer_name\": null, \"risks\": null, \"benefits\": null, \"alternatives\": null, \"admission_need\": \"Pneumonia needing IV antibiotics and oxygen\", \"estimated_days\": 5, \"estimated_cost\": 60000.0, \"interpreter_name\": null, \"read_to_patient\": false, \"questions_answers\": null, \"understanding_confirmed\": false, \"mode\": null, \"patient_capable\": null, \"incapacity_reason\": null, \"signer\": null, \"signer_name\": null, \"signer_relat…"
+      }
+    },
+    "GET /consents/{consent_id}": {
+      "request": {
+        "path": "/api/v1/consents/1"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"consent_id\": 1, \"consent_number\": \"CN-2026-000001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"father_or_husband_name\": null, \"patient_age\": 40, \"form_id\": 1, \"form_code\": \"GENERAL\", \"category\": \"General\", \"taken_by\": \"AnyStaff\", \"requires_witness\": false, \"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"booking_id\": null, \"booking_number\": null, \"er_visit_id\": null, \"er_number\": null, \"ticket_id\": null, \"ticket_number\": null, \"status\": \"Given\", \"language\": \"English\", \"form_title\": \"General consent for admission and treatment\", \"form_body\": \"I agree to be admitted to this hospital and to receive the examinations, tests, nursing care and treatment my doctors consider necessary. An operation, anaesthesia, a blood transfusion or another risky procedure will be explained to me separately and done only with my separate consent.\\nThe need for my admission and the expected length and cost of my stay, written below, were explained to me. I und…\", \"procedure_name\": null, \"performer_id\": null, \"performer_name\": null, \"risks\": null, \"benefits\": null, \"alternatives\": null, \"admission_need\": \"Fever and productive cough for 5 days, SpO2 91% on air\", \"estimated_days\": 5, \"estimated_cost\": 60000.0, \"interpreter_name\": null, \"read_to_patient\": true, \"questions_answers\": \"None asked\", \"understanding_confirmed\": true, \"mode\": \"Signed\", \"patient_capable\": true, \"incapacity_reason\": null, \"signer\": \"Patient…"
+      }
+    },
+    "PATCH /consents/{consent_id}": {
+      "request": {
+        "path": "/api/v1/consents/1",
+        "body": {
+          "estimated_days": 5,
+          "estimated_cost": "60000",
+          "language": "English",
+          "expected_version": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"consent_id\": 1, \"consent_number\": \"CN-2026-000001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"father_or_husband_name\": null, \"patient_age\": 40, \"form_id\": 1, \"form_code\": \"GENERAL\", \"category\": \"General\", \"taken_by\": \"AnyStaff\", \"requires_witness\": false, \"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"booking_id\": null, \"booking_number\": null, \"er_visit_id\": null, \"er_number\": null, \"ticket_id\": null, \"ticket_number\": null, \"status\": \"Draft\", \"language\": \"English\", \"form_title\": \"General consent for admission and treatment\", \"form_body\": \"I agree to be admitted to this hospital and to receive the examinations, tests, nursing care and treatment my doctors consider necessary. An operation, anaesthesia, a blood transfusion or another risky procedure will be explained to me separately and done only with my separate consent.\\nThe need for my admission and the expected length and cost of my stay, written below, were explained to me. I und…\", \"procedure_name\": null, \"performer_id\": null, \"performer_name\": null, \"risks\": null, \"benefits\": null, \"alternatives\": null, \"admission_need\": \"Fever and productive cough for 5 days, SpO2 91% on air\", \"estimated_days\": 5, \"estimated_cost\": 60000.0, \"interpreter_name\": null, \"read_to_patient\": false, \"questions_answers\": null, \"understanding_confirmed\": false, \"mode\": null, \"patient_capable\": null, \"incapacity_reason\": null, \"signer\": null, \"signer_name…"
+      }
+    },
+    "GET /consents/{consent_id}/print-payload": {
+      "request": {
+        "path": "/api/v1/consents/1/print-payload"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"document_type\": \"consent_form\", \"printer_role\": \"document\", \"paper_width_mm\": 210, \"fields\": {\"hospital\": {\"name\": \"Haspataal Hospital\", \"address\": \"\", \"phone\": \"\", \"phc_number\": \"\", \"issue_line\": \"\"}, \"consent\": {\"consent_id\": 1, \"consent_number\": \"CN-2026-000001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"father_or_husband_name\": null, \"patient_age\": 40, \"form_id\": 1, \"form_code\": \"GENERAL\", \"category\": \"General\", \"taken_by\": \"AnyStaff\", \"requires_witness\": false, \"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"booking_id\": null, \"booking_number\": null, \"er_visit_id\": null, \"er_number\": null, \"ticket_id\": null, \"ticket_number\": null, \"status\": \"Draft\", \"language\": \"Urdu\", \"form_title\": \"داخلے اور علاج کے لیے عمومی رضامندی\", \"form_body\": \"میں اس ہسپتال میں داخل ہونے اور اپنے ڈاکٹروں کی تجویز کردہ ضروری معائنوں، ٹیسٹوں، نرسنگ نگہداشت اور علاج پر رضامند ہوں۔ کوئی آپریشن، بے ہوشی، خون لگانا یا کوئی اور خطرے والا طبی عمل مجھے الگ سے سمجھایا جائے گا اور میری الگ رضامندی کے بغیر نہیں کیا جائے گا۔\\nمیرے داخلے کی ضرورت، اندازاً قیام کی مدت اور خرچ، جو نیچے درج ہیں، مجھے سمجھا دیے گئے ہیں۔ میں سمجھتا/سمجھتی ہوں کہ یہ اندازے ہیں جو میری حالت …\", \"procedure_name\": null, \"performer_id\": null, \"performer_name\": null, \"risks\": null, \"benefits\": null, \"alternatives\": null, \"admission_need\": \"Fever and productive cough for 5 days, SpO2 91% on air\", \"estimated_days\": null, \"estimated_cost\": null, \"in…"
+      }
+    },
+    "GET /consents/{consent_id}/pdf": {
+      "request": {
+        "path": "/api/v1/consents/1/pdf"
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/pdf",
+        "bytes": 3675
+      }
+    },
+    "POST /consents/{consent_id}/sign": {
+      "request": {
+        "path": "/api/v1/consents/1/sign",
+        "body": {
+          "signer": "Patient",
+          "questions_answers": "None asked",
+          "understanding_confirmed": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"consent_id\": 1, \"consent_number\": \"CN-2026-000001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"father_or_husband_name\": null, \"patient_age\": 40, \"form_id\": 1, \"form_code\": \"GENERAL\", \"category\": \"General\", \"taken_by\": \"AnyStaff\", \"requires_witness\": false, \"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"booking_id\": null, \"booking_number\": null, \"er_visit_id\": null, \"er_number\": null, \"ticket_id\": null, \"ticket_number\": null, \"status\": \"Given\", \"language\": \"Urdu\", \"form_title\": \"داخلے اور علاج کے لیے عمومی رضامندی\", \"form_body\": \"میں اس ہسپتال میں داخل ہونے اور اپنے ڈاکٹروں کی تجویز کردہ ضروری معائنوں، ٹیسٹوں، نرسنگ نگہداشت اور علاج پر رضامند ہوں۔ کوئی آپریشن، بے ہوشی، خون لگانا یا کوئی اور خطرے والا طبی عمل مجھے الگ سے سمجھایا جائے گا اور میری الگ رضامندی کے بغیر نہیں کیا جائے گا۔\\nمیرے داخلے کی ضرورت، اندازاً قیام کی مدت اور خرچ، جو نیچے درج ہیں، مجھے سمجھا دیے گئے ہیں۔ میں سمجھتا/سمجھتی ہوں کہ یہ اندازے ہیں جو میری حالت …\", \"procedure_name\": null, \"performer_id\": null, \"performer_name\": null, \"risks\": null, \"benefits\": null, \"alternatives\": null, \"admission_need\": \"Pneumonia needing IV antibiotics and oxygen\", \"estimated_days\": 5, \"estimated_cost\": 60000.0, \"interpreter_name\": null, \"read_to_patient\": false, \"questions_answers\": \"None asked\", \"understanding_confirmed\": true, \"mode\": \"Signed\", \"patient_capable\": true, \"incapacity_reason\": null, \"signer\": \"Patient\", \"signer_name\": \"Al…"
+      }
+    },
+    "POST /consents/{consent_id}/refuse": {
+      "request": {
+        "path": "/api/v1/consents/6/refuse",
+        "body": {
+          "mode": "VerbalRefusal",
+          "signer": "Patient",
+          "refusal_reason": "Afraid of bleeding",
+          "witness_name": "Staff Nurse Rubina"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"consent_id\": 6, \"consent_number\": \"CN-2026-000006\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"father_or_husband_name\": null, \"patient_age\": 40, \"form_id\": 8, \"form_code\": \"HIGH_RISK\", \"category\": \"HighRiskTreatment\", \"taken_by\": \"Doctor\", \"requires_witness\": false, \"admission_id\": null, \"admission_number\": null, \"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"er_visit_id\": null, \"er_number\": null, \"ticket_id\": null, \"ticket_number\": null, \"status\": \"Refused\", \"language\": \"English\", \"form_title\": \"Consent for a high-risk treatment\", \"form_body\": \"The doctor named below explained to me the treatment written below: why it is recommended, its expected benefits, its serious risks and side effects, how I will be watched during it, the other options, and what may happen without it.\\nI had the chance to ask questions and my questions were answered.\\nI agree to this treatment, and I will report any new symptom at once.\", \"procedure_name\": \"Thrombolysis\", \"performer_id\": 7, \"performer_name\": \"Dr Tariq\", \"risks\": \"Bleeding, wound infection, injury to nearby organs\", \"benefits\": \"Treats the condition\", \"alternatives\": \"Treatment without an operation; watchful waiting\", \"admission_need\": null, \"estimated_days\": null, \"estimated_cost\": null, \"interpreter_name\": null, \"read_to_patient\": false, \"questions_answers\": null, \"understanding_confirmed\": false, \"mode\": \"VerbalRefusal\", \"patient_capable\": true, \"…"
+      }
+    },
+    "POST /consents/{consent_id}/withdraw": {
+      "request": {
+        "path": "/api/v1/consents/1/withdraw",
+        "body": {
+          "reason": "The patient wants a second opinion first"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"consent_id\": 1, \"consent_number\": \"CN-2026-000001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"father_or_husband_name\": null, \"patient_age\": 40, \"form_id\": 2, \"form_code\": \"OPERATION\", \"category\": \"Procedure\", \"taken_by\": \"Doctor\", \"requires_witness\": false, \"admission_id\": null, \"admission_number\": null, \"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"er_visit_id\": null, \"er_number\": null, \"ticket_id\": null, \"ticket_number\": null, \"status\": \"Withdrawn\", \"language\": \"English\", \"form_title\": \"Consent for an operation\", \"form_body\": \"The doctor named below explained to me, in words I understand, the operation written below: why it is needed, what will be done, who will do it, its expected benefits, its risks (including rare but serious ones), the other treatments available, and what may happen without it.\\nI had the chance to ask questions and my questions were answered.\\nI agree to this operation. I also agree to any further pr…\", \"procedure_name\": \"Appendectomy\", \"performer_id\": 7, \"performer_name\": \"Dr Tariq and the surgical team\", \"risks\": \"Bleeding, wound infection, injury to nearby organs\", \"benefits\": \"Treats the condition\", \"alternatives\": \"Treatment without an operation; watchful waiting\", \"admission_need\": null, \"estimated_days\": null, \"estimated_cost\": null, \"interpreter_name\": null, \"read_to_patient\": false, \"questions_answers\": \"None asked\", \"understanding_confirmed\": true, \"mode…"
+      }
+    },
+    "POST /consents/{consent_id}/cancel": {
+      "request": {
+        "path": "/api/v1/consents/7/cancel",
+        "body": {
+          "reason": "Wrong form"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"consent_id\": 7, \"consent_number\": \"CN-2026-000007\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"father_or_husband_name\": null, \"patient_age\": 40, \"form_id\": 5, \"form_code\": \"PROCEDURE\", \"category\": \"Procedure\", \"taken_by\": \"Doctor\", \"requires_witness\": false, \"admission_id\": null, \"admission_number\": null, \"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"er_visit_id\": null, \"er_number\": null, \"ticket_id\": null, \"ticket_number\": null, \"status\": \"Cancelled\", \"language\": \"English\", \"form_title\": \"Consent for an invasive procedure\", \"form_body\": \"The doctor named below explained to me, in words I understand, the procedure written below: why it is needed, how it is done, who will do it, its expected benefits, its risks, the other options, and what may happen without it.\\nI had the chance to ask questions and my questions were answered.\\nI agree to this procedure, and to the local anaesthetic or sedation it needs. I understand that no result c…\", \"procedure_name\": \"Appendectomy\", \"performer_id\": 7, \"performer_name\": \"Dr Tariq and the surgical team\", \"risks\": null, \"benefits\": null, \"alternatives\": null, \"admission_need\": null, \"estimated_days\": null, \"estimated_cost\": null, \"interpreter_name\": null, \"read_to_patient\": false, \"questions_answers\": null, \"understanding_confirmed\": false, \"mode\": null, \"patient_capable\": null, \"incapacity_reason\": null, \"signer\": null, \"signer_name\": null, \"signer_rela…"
+      }
+    },
+    "POST /consents/{consent_id}/scan": {
+      "request": {
+        "path": "/api/v1/consents/1/scan",
+        "body": {
+          "document_id": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"consent_id\": 1, \"consent_number\": \"CN-2026-000001\", \"patient_id\": 3, \"mrn\": \"MRN-2026-000003\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"father_or_husband_name\": null, \"patient_age\": 40, \"form_id\": 1, \"form_code\": \"GENERAL\", \"category\": \"General\", \"taken_by\": \"AnyStaff\", \"requires_witness\": false, \"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"booking_id\": null, \"booking_number\": null, \"er_visit_id\": null, \"er_number\": null, \"ticket_id\": null, \"ticket_number\": null, \"status\": \"Given\", \"language\": \"Urdu\", \"form_title\": \"داخلے اور علاج کے لیے عمومی رضامندی\", \"form_body\": \"میں اس ہسپتال میں داخل ہونے اور اپنے ڈاکٹروں کی تجویز کردہ ضروری معائنوں، ٹیسٹوں، نرسنگ نگہداشت اور علاج پر رضامند ہوں۔ کوئی آپریشن، بے ہوشی، خون لگانا یا کوئی اور خطرے والا طبی عمل مجھے الگ سے سمجھایا جائے گا اور میری الگ رضامندی کے بغیر نہیں کیا جائے گا۔\\nمیرے داخلے کی ضرورت، اندازاً قیام کی مدت اور خرچ، جو نیچے درج ہیں، مجھے سمجھا دیے گئے ہیں۔ میں سمجھتا/سمجھتی ہوں کہ یہ اندازے ہیں جو میری حالت …\", \"procedure_name\": null, \"performer_id\": null, \"performer_name\": null, \"risks\": null, \"benefits\": null, \"alternatives\": null, \"admission_need\": \"Pneumonia needing IV antibiotics and oxygen\", \"estimated_days\": 5, \"estimated_cost\": 60000.0, \"interpreter_name\": null, \"read_to_patient\": false, \"questions_answers\": \"None asked\", \"understanding_confirmed\": true, \"mode\": \"Signed\", \"patient_capable\": true, \"incapacity_reason\": null, \"signer\": \"Patient\", \"signer_name\": \"Al…"
+      }
+    },
+    "POST /patients/{patient_id}/documents": {
+      "request": {
+        "path": "/api/v1/patients/1/documents",
+        "multipart": {
+          "file": "<file>",
+          "doc_type": "CNIC"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "document_id": 1,
+            "patient_id": 1,
+            "doc_type": "CNIC",
+            "title": null,
+            "content_type": "application/pdf",
+            "size_bytes": 31,
+            "is_outside": false,
+            "source_facility": null,
+            "document_date": null,
+            "uploaded_at": "2026-10-13T11:27:11.017375+00:00"
+          },
+          "meta": {
+            "server_time": "2026-10-13T11:27:11.028856+00:00"
+          },
+          "request_id": "16803b23adfa4ca89f6674d80ff160a0"
+        }
+      }
+    },
+    "GET /staff/lookup": {
+      "request": {
+        "path": "/api/v1/staff/lookup",
+        "query": {
+          "q": "sana look"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "employee_id": 2,
+              "emp_number": "EMP-2026-0002",
+              "full_name": "Sana Lookuptest",
+              "designation": "Officer",
+              "department_name": null,
+              "license_type": "PNC",
+              "user_id": 2,
+              "registration": "PNC PNC-31852"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-11-05T01:52:33.483546+00:00"
+          },
+          "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
+        }
+      }
+    }
+  },
+  "unknowns": []
+}

@@ -50,6 +50,7 @@ export interface DrugOut {
 }
 
 export interface BatchIn {
+  /** The medicine (GET /drugs/search) */
   drug_id: number;
   batch_no: string;
   expiry_date: string;
@@ -229,7 +230,7 @@ export interface SupplierReturnIn {
   reason: "Expired" | "NearExpiry" | "Recall" | "Damaged" | "Excess" | "WrongSupply" | "Other";
   /** The supplier; default the supplier of the batch's invoice (required for a batch received without one) */
   vendor_id?: number | null;
-  /** Required with reason Recall: the open recall of this batch */
+  /** Required with reason Recall: the open recall of this batch (GET /drug-recalls) */
   recall_id?: number | null;
   /** What the supplier agreed, the courier, anything to know */
   note: string;
@@ -269,6 +270,63 @@ export interface SupplierReturnOut {
   decided_by_name: string | null;
   decided_at: string | null;
   decision_note: string | null;
+}
+
+export interface RecallOut {
+  recall_id: number;
+  recall_number: string;
+  drug_id: number;
+  drug_name: string;
+  drug_code: string;
+  source: "DRAP" | "Manufacturer" | "Supplier" | "Internal";
+  reference: string | null;
+  recall_class: "ClassI" | "ClassII" | "ClassIII";
+  reason: string;
+  contact_patients: boolean;
+  status: "Open" | "Closed" | "Cancelled";
+  opened_by: number;
+  opened_by_name: string;
+  opened_at: string;
+  stock_removed_by: number | null;
+  stock_removed_at: string | null;
+  closed_by: number | null;
+  closed_at: string | null;
+  closing_note: string | null;
+  cancelled_by: number | null;
+  cancelled_at: string | null;
+  cancel_reason: string | null;
+  row_version: number;
+  batch_numbers: string[];
+  /** Units of the recalled batches still in the pharmacy and on the wards */
+  stock_left: number;
+  patients_to_contact: number;
+}
+
+/** A drug with its live stock (view v_drug_stock): what e-prescription search shows. */
+export interface DrugStockOut {
+  drug_id: number;
+  code: string;
+  name: string;
+  generic_name: string | null;
+  strength: string | null;
+  form: "Tablet" | "Capsule" | "Syrup" | "Suspension" | "Injection" | "Infusion" | "Cream" | "Ointment" | "Drops" | "Inhaler" | "Suppository" | "Powder" | "Consumable" | "Device" | "Other";
+  unit: string;
+  schedule: "OTC" | "ScheduleG" | "ScheduleH" | "ScheduleX" | "HospitalOnly";
+  is_otc_allowed: boolean;
+  barcode: string | null;
+  low_stock_threshold: number;
+  is_active: boolean;
+  /** Set: a high-alert medicine (MSDS 56): show it in red; a second person checks it when dispensed and given */
+  high_alert_category: "ConcentratedElectrolyte" | "Chemotherapy" | "Anticoagulant" | "Insulin" | "Opioid" | "Sedative" | "NeuromuscularBlocker" | "Inotrope" | "Thrombolytic" | "Psychotropic" | "HighCost" | "Other" | null;
+  /** Prescribed only with the RestrictedPrescribing privilege (MSDS 52) */
+  is_restricted: boolean;
+  /** Medicines it looks or sounds like: warn when one is picked */
+  lasa_with: string[];
+  /** Non-expired stock */
+  qty_available: number;
+  next_expiry: string | null;
+  /** OutOfStock: show the drug greyed out */
+  stock_status: "InStock" | "Low" | "OutOfStock";
 }
 
 /** Add a formulary drug — POST /api/v1/pharmacy-admin/drugs (who may call: holders of pharmacy.drug.manage). */
@@ -312,7 +370,7 @@ export function profit(query?: { date_from?: string | null; date_to?: string | n
 }
 
 /** Vendors — GET /api/v1/finance/vendors (who may call: any logged-in user). */
-export function vendors(query?: { vendor_type?: string | null }): Promise<VendorOut[]> {
+export function vendors(query?: { vendor_type?: "PharmacySupplier" | "ReagentSupplier" | "EquipmentSupplier" | "UtilityProvider" | "Contractor" | "Other" | null }): Promise<VendorOut[]> {
   return api<VendorOut[]>("GET", withQuery(`/finance/vendors`, query), undefined);
 }
 
@@ -334,4 +392,14 @@ export function getReturn(return_id: number): Promise<SupplierReturnOut> {
 /** The return note that goes with the goods (PDF) — GET /api/v1/pharmacy-admin/supplier-returns/{return_id}/pdf (who may call: holders of pharmacy.supplier_return.record or finance.supplier_credit.confirm). */
 export function returnNote(return_id: number): Promise<unknown> {
   return api<unknown>("GET", `/pharmacy-admin/supplier-returns/${return_id}/pdf`, undefined);
+}
+
+/** The recall register — GET /api/v1/drug-recalls (who may call: holders of pharmacy.recall.view). */
+export function listRecalls(query?: { status?: "Open" | "Closed" | "Cancelled" | null; drug_id?: number | null }): Promise<RecallOut[]> {
+  return api<RecallOut[]>("GET", withQuery(`/drug-recalls`, query), undefined);
+}
+
+/** Formulary search with live stock colour — GET /api/v1/drugs/search (who may call: holders of pharmacy.formulary.view). */
+export function searchDrugs(query?: { q?: string; limit?: number }): Promise<DrugStockOut[]> {
+  return api<DrugStockOut[]>("GET", withQuery(`/drugs/search`, query), undefined);
 }

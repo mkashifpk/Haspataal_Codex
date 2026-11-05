@@ -234,13 +234,15 @@ export async function session(name, account = "demo.doctor") {
     throw e;
   }
 }
-export async function capture(s, id) {
+export async function capture(s, id, verifyLayout = async () => {}) {
   for (const language of ["en", "ur"]) {
     await s.prefs({ language, theme: "Light", ui_scale_pct: 100 });
     await expect(s.p.locator("html")).toHaveAttribute("lang", language);
+    await verifyLayout();
     await s.p.screenshot({ path: `public/handbook/${id}-${language}.png` });
     for (const theme of ["Light", "DarkHighContrast"]) {
       await s.prefs({ language, theme, ui_scale_pct: 250 });
+      await verifyLayout();
       await expect
         .poll(() =>
           s.p.evaluate(

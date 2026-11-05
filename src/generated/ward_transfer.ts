@@ -88,7 +88,7 @@ export function listTransfers(admission_id: number): Promise<AdmissionTransferOu
   return api<AdmissionTransferOut[]>("GET", `/admissions/${admission_id}/transfers`, undefined);
 }
 
-/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view or cssd.operate or infection.control.manage). */
+/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record). */
 export function bedMatrix(query?: { include_beds?: boolean }): Promise<BedMatrixOut> {
   return api<BedMatrixOut>("GET", withQuery(`/beds/matrix`, query), undefined);
 }

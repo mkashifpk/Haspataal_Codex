@@ -403,12 +403,64 @@
       "idempotency_key": false,
       "errors": [
         {
+          "code": "PATIENT_CNIC_EXISTS",
+          "http_status": 409,
+          "message": "A patient with this CNIC already exists.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "PATIENT_TYPE_TRANSITION_INVALID",
+          "http_status": 422,
+          "message": "Registration type change not allowed.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "PATIENT_UPMRN_EXISTS",
+          "http_status": 409,
+          "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "constraint"
+          ],
+          "details_from": "POST /api/v1/patients"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        },
+        {
           "code": "VERSION_CONFLICT",
           "http_status": 409,
           "message": "The record was changed by someone else; reload and try again.",
           "retryable": false,
           "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [
@@ -522,6 +574,14 @@
             "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
           },
           {
+            "pointer": "/upmrn",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$",
+            "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
+          },
+          {
             "pointer": "/father_or_husband_name",
             "type": "string",
             "required": false,
@@ -582,7 +642,8 @@
             "pointer": "/panel_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The panel (GET /finance/panels)"
           },
           {
             "pointer": "/panel_member_no",
@@ -612,7 +673,7 @@
     },
     {
       "endpoint": "GET /patients/search",
-      "summary": "Returning-patient lookup by name / phone / CNIC / MRN",
+      "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
       "access": {
         "authentication": "user",
         "permissions": [
@@ -666,6 +727,18 @@
             "required"
           ],
           "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -783,7 +856,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "patient_id",
@@ -869,7 +955,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "patient_id",
@@ -2427,6 +2526,18 @@
           ],
           "title": "Cnic"
         },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+        },
         "address": {
           "anyOf": [
             {
@@ -2643,6 +2754,7 @@
         "age_recorded_on",
         "mobile",
         "cnic",
+        "upmrn",
         "address",
         "emergency_contact_name",
         "emergency_contact_phone",
@@ -2883,6 +2995,18 @@
           ],
           "title": "Cnic"
         },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+        },
         "address": {
           "anyOf": [
             {
@@ -3071,6 +3195,17 @@
         },
         "outstanding": {
           "$ref": "#/components/schemas/OutstandingBannerOut"
+        },
+        "matched_merged_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/MergedProfileOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The profile merged into this record that the search matched when this record itself did not (an old slip's MRN, a trauma label such as \"Unknown Male 3\", a duplicate's name or numbers): say \"Found by MRN-…, merged into this record\". Null when this record matched"
         }
       },
       "type": "object",
@@ -3087,6 +3222,7 @@
         "age_recorded_on",
         "mobile",
         "cnic",
+        "upmrn",
         "address",
         "emergency_contact_name",
         "emergency_contact_phone",
@@ -3105,9 +3241,11 @@
         "mlc_numbers",
         "created_at",
         "row_version",
-        "outstanding"
+        "outstanding",
+        "matched_merged_profile"
       ],
-      "title": "PatientSearchHitOut"
+      "title": "PatientSearchHitOut",
+      "description": "A person the search found, always as their master record (merged profiles are never hits of their own)."
     },
     "PatientUpdate": {
       "properties": {
@@ -3200,6 +3338,19 @@
             }
           ],
           "title": "Cnic"
+        },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
         },
         "father_or_husband_name": {
           "anyOf": [
@@ -3302,7 +3453,8 @@
               "type": "null"
             }
           ],
-          "title": "Panel Id"
+          "title": "Panel Id",
+          "description": "The panel (GET /finance/panels)"
         },
         "panel_member_no": {
           "anyOf": [

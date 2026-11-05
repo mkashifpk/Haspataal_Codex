@@ -1,7 +1,7 @@
 {
   "screen_id": "cssd_stock",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -233,9 +233,15 @@
       }
     ],
     "related_workflows": [
+      "complaints",
       "cost-estimates-and-tariff",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "incidents-and-sentinel-events",
       "infection-control",
-      "inpatient-and-discharge"
+      "inpatient-and-discharge",
+      "medication-safety"
     ],
     "service": {
       "services": [
@@ -302,97 +308,97 @@
         "id": "ep:GET /cssd/packs",
         "label": "GET /cssd/packs",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /cssd/packs/issue",
         "label": "POST /cssd/packs/issue",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /cssd/packs/{pack_code}",
         "label": "GET /cssd/packs/{pack_code}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /beds/matrix",
         "label": "GET /beds/matrix",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /ot/theaters",
         "label": "GET /ot/theaters",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:cssd.cycle.updated",
         "label": "cssd.cycle.updated",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:613c123950",
         "label": "Stock = GET /cssd/packs?status=Available, soonest expiry first (expiring_soon in amber: issue first).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:3834d11044",
         "label": "Issue: scan the labels into a basket, choose the ward or the theatre, POST /cssd/packs/issue (all or nothing: CSSD_PACK_UNUSABLE names the pack).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:30768e8506",
         "label": "Expired packs are marked by the worker every hour: collect them for reprocessing.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:5298373f7d",
         "label": "Issue to: a ward from GET /beds/matrix?include_beds=false (by name; the CSSD sees no patient names) or a theatre from GET /ot/theaters; never a typed id.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:56077b4ba3",
         "label": "Exists for the service cssd (work): show it as GET /establishment views.screens says for screen_id cssd_stock (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
         "label": "Test plan passed",
         "points": 4,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -422,13 +428,13 @@
         "id": "q:character",
         "label": "Design principles applied",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:editor",
         "label": "Editor's pass",
         "points": 2,
-        "claimed": false
+        "claimed": true
       }
     ],
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
@@ -886,10 +892,16 @@
         "permissions": [
           "ipd.bed.view",
           "cssd.operate",
-          "infection.control.manage"
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
         ],
         "permissions_mode": "any",
-        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record",
         "roles_allowed": [
           "admissions_officer",
           "anaesthetist",
@@ -900,9 +912,14 @@
           "head_nurse",
           "hospital_admin",
           "hospital_director",
+          "hr_admin",
           "ipc_nurse",
+          "maintenance_admin",
           "ops_admin",
           "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
           "receptionist",
           "super_admin",
           "surgeon",
@@ -1014,10 +1031,11 @@
         "authentication": "user",
         "permissions": [
           "ot.status.view",
-          "cssd.operate"
+          "cssd.operate",
+          "facility.equipment.manage"
         ],
         "permissions_mode": "any",
-        "who": "holders of ot.status.view or cssd.operate",
+        "who": "holders of ot.status.view or cssd.operate or facility.equipment.manage",
         "roles_allowed": [
           "admissions_officer",
           "anaesthetist",
@@ -1029,6 +1047,8 @@
           "hospital_admin",
           "hospital_director",
           "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
           "ot_admin",
           "ot_nurse",
           "owner",
@@ -1399,6 +1419,10 @@
       "ot_nurse",
       "ward_nurse",
       "head_nurse",
+      "pharmacist",
+      "pharmacy_admin",
+      "hr_admin",
+      "maintenance_admin",
       "ops_admin",
       "quality_officer"
     ],
@@ -1510,7 +1534,7 @@
             "billing_admin",
             "cashier",
             "employee_self",
-            "hr_admin"
+            "lab_admin"
           ],
           "expect": "403 FORBIDDEN"
         },
@@ -1529,9 +1553,14 @@
           "head_nurse",
           "hospital_admin",
           "hospital_director",
+          "hr_admin",
           "ipc_nurse",
+          "maintenance_admin",
           "ops_admin",
           "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
           "receptionist",
           "super_admin",
           "surgeon",
@@ -1567,6 +1596,8 @@
           "hospital_admin",
           "hospital_director",
           "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
           "ot_admin",
           "ot_nurse",
           "owner",
@@ -1638,8 +1669,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -1669,11 +1700,209 @@
     ],
     "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
   },
+  "handbook": {
+    "page": "screens/cssd_stock",
+    "screen_id": "cssd_stock",
+    "title": "Sterile stock and issue",
+    "purpose": "The sterile packs in stock by expiry, and their issue to the wards and theatres.",
+    "tasks": [
+      {
+        "id": "cssd_stock::GET /cssd/packs",
+        "task": "Sterile packs (the stock)",
+        "call": "GET /cssd/packs",
+        "is_action": false,
+        "permissions": [
+          "cssd.view",
+          "cssd.operate",
+          "cssd.manage",
+          "cssd.pack.use"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "cssd_stock::POST /cssd/packs/issue",
+        "task": "Issue sterile packs to a ward or theatre",
+        "call": "POST /cssd/packs/issue",
+        "is_action": true,
+        "permissions": [
+          "cssd.operate"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "cssd_stock::GET /cssd/packs/{pack_code}",
+        "task": "One sterile pack (scan its label)",
+        "call": "GET /cssd/packs/{pack_code}",
+        "is_action": false,
+        "permissions": [
+          "cssd.view",
+          "cssd.operate",
+          "cssd.manage",
+          "cssd.pack.use"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "cssd_stock::GET /beds/matrix",
+        "task": "Live bed matrix (counts per ward + optional bed list)",
+        "call": "GET /beds/matrix",
+        "is_action": false,
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "cssd_stock::GET /ot/theaters",
+        "task": "All theaters (incl. out-of-service)",
+        "call": "GET /ot/theaters",
+        "is_action": false,
+        "permissions": [
+          "ot.status.view",
+          "cssd.operate",
+          "facility.equipment.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      }
+    ],
+    "rules_to_explain": [
+      "Stock = GET /cssd/packs?status=Available, soonest expiry first (expiring_soon in amber: issue first).",
+      "Issue: scan the labels into a basket, choose the ward or the theatre, POST /cssd/packs/issue (all or nothing: CSSD_PACK_UNUSABLE names the pack).",
+      "Expired packs are marked by the worker every hour: collect them for reprocessing.",
+      "Issue to: a ward from GET /beds/matrix?include_beds=false (by name; the CSSD sees no patient names) or a theatre from GET /ot/theaters; never a typed id.",
+      "Exists for the service cssd (work): show it as GET /establishment views.screens says for screen_id cssd_stock (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+    ],
+    "updates_by_itself_on": [
+      "cssd.cycle.updated"
+    ],
+    "errors_the_user_can_meet": [
+      {
+        "code": "BED_NO_LONGER_AVAILABLE",
+        "message": "Bed was reserved by another terminal.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "CSSD_PACK_UNUSABLE",
+        "message": "This sterile pack cannot be issued or used: it is not available, it has expired, failed or been recalled. Do not use it.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "message": "A referenced record does not exist.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "message": "The request is invalid.",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "sections": [
+      "Purpose and audience",
+      "Step by step (one per task, where to click)",
+      "Every control and its effects",
+      "States and feedback",
+      "Messages, mistakes and recovery",
+      "Language and visual examples",
+      "Related help and delivery"
+    ],
+    "requirement_ids": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "delivery": "F1 and contextual screen Help",
+    "requirements": [
+      {
+        "id": "S1",
+        "title": "Purpose and audience",
+        "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+      },
+      {
+        "id": "S2",
+        "title": "Step by step (one per task, where to click)",
+        "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+      },
+      {
+        "id": "S3",
+        "title": "Every control and its effects",
+        "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+      },
+      {
+        "id": "S4",
+        "title": "States and feedback",
+        "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+      },
+      {
+        "id": "S5",
+        "title": "Messages, mistakes and recovery",
+        "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+      },
+      {
+        "id": "S6",
+        "title": "Language and visual examples",
+        "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+      },
+      {
+        "id": "S7",
+        "title": "Related help and delivery",
+        "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+      }
+    ],
+    "workspace_guide": "get_handbook_outline('cssd')"
+  },
   "workflows": [
+    {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
     {
       "slug": "cost-estimates-and-tariff",
       "title": "Cost estimates, the tariff and ward transfers (MSDS)",
       "recipe": "get_workflow_recipe('cost-estimates-and-tariff')"
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
+    },
+    {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "facility-compliance-equipment-drills",
+      "title": "Licences, equipment maintenance and mock drills (MSDS)",
+      "recipe": "get_workflow_recipe('facility-compliance-equipment-drills')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
     },
     {
       "slug": "infection-control",
@@ -1684,40 +1913,52 @@
       "slug": "inpatient-and-discharge",
       "title": "Admission, beds, nursing & discharge",
       "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
     }
   ],
   "scenarios": [],
-  "unknowns": [
+  "decisions": [
     {
-      "what": "decision H02",
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
       "owner": [
         "vendor"
       ],
       "affects": [
         "every screen in Urdu"
-      ]
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
     },
     {
-      "what": "decision H03",
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
       "owner": [
         "vendor",
         "clinical_lead"
       ],
       "affects": [
         "every screen"
-      ]
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
     },
     {
-      "what": "decision H04",
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
       "owner": [
         "vendor"
       ],
       "affects": [
         "every screen with money"
-      ]
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
     },
     {
-      "what": "decision H08",
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
       "owner": [
         "vendor",
         "translator",
@@ -1725,30 +1966,36 @@
       ],
       "affects": [
         "every screen in Urdu"
-      ]
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
     },
     {
-      "what": "decision H09",
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
       "owner": [
         "vendor",
         "frontend_lead"
       ],
       "affects": [
         "every screen"
-      ]
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
     },
     {
-      "what": "decision H10",
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
       "owner": [
         "clinical_lead",
         "vendor"
       ],
       "affects": [
         "every screen with realtime events"
-      ]
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
     },
     {
-      "what": "decision H12",
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
       "owner": [
         "vendor",
         "backend"
@@ -1757,7 +2004,1167 @@
         "my_cash_shift",
         "registration",
         "every screen that prints"
-      ]
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "examples": {
+    "GET /cssd/packs": {
+      "request": {
+        "path": "/api/v1/cssd/packs",
+        "query": {
+          "ot_id": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"pack_id\": 6, \"pack_code\": \"SP-2026-000006\", \"set_type_id\": 5, \"set_code\": \"DRESSING\", \"set_name\": \"Dressing pack\", \"cycle_id\": 3, \"cycle_number\": \"STC-2026-00003\", \"cycle_status\": \"Released\", \"sterilized_on\": \"2026-08-31\", \"expires_on\": \"2026-09-30\", \"status\": \"Expired\", \"issued_at\": \"2026-10-01T07:20:18.207707+00:00\", \"issued_by_name\": \"CSSD Tech Bilal\", \"issued_to_ward_id\": null, \"issued_to_ward_name\": null, \"issued_to_ot_id\": 1, \"issued_to_ot_name\": \"Main OT 1\", \"used_at\": null, \"used_by_name\": null, \"patient_id\": null, \"mrn\": null, \"patient_name\": null, \"booking_id\": null, \"booking_number\": null, \"admission_id\": null, \"admission_number\": null, \"row_version\": 5, \"expiring_soon\": false}, {\"pack_id\": 4, \"pack_code\": \"SP-2026-000004\", \"set_type_id\": 1, \"set_code\": \"GEN-MAJOR\", \"set_name\": \"General surgery major set\", \"cycle_id\": 3, \"cycle_number\": \"STC-2026-00003\", \"cycle_status\": \"Released\", \"sterilized_on\": \"2026-10-01\", \"expires_on\": \"2026-10-31\", \"status\": \"Used\", \"issued_at\": \"2026-10-01T07:20:18.207707+00:00\", \"issued_by_name\": \"CSSD Tech Bilal\", \"issued_to_ward_id\": null, \"issued_to_ward_name\": null, \"issued_to_ot_id\": 1, \"issued_to_ot_name\": \"Main OT 1\", \"used_at\": \"2026-10-01T07:20:18.262730+00:00\", \"used_by_name\": \"ucac391ff96\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"admission_id\": null, \"admission_number\": null, \"row_version\": 4, \"expiring_soon\":…"
+      }
+    },
+    "POST /cssd/packs/issue": {
+      "request": {
+        "path": "/api/v1/cssd/packs/issue",
+        "body": {
+          "pack_codes": [
+            "SP-2026-000004",
+            "SP-2026-000005",
+            "SP-2026-000006"
+          ],
+          "ot_id": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"pack_id\": 4, \"pack_code\": \"SP-2026-000004\", \"set_type_id\": 1, \"set_code\": \"GEN-MAJOR\", \"set_name\": \"General surgery major set\", \"cycle_id\": 3, \"cycle_number\": \"STC-2026-00003\", \"cycle_status\": \"Released\", \"sterilized_on\": \"2026-10-01\", \"expires_on\": \"2026-10-31\", \"status\": \"Issued\", \"issued_at\": \"2026-10-01T07:20:18.207707+00:00\", \"issued_by_name\": \"CSSD Tech Bilal\", \"issued_to_ward_id\": null, \"issued_to_ward_name\": null, \"issued_to_ot_id\": 1, \"issued_to_ot_name\": \"Main OT 1\", \"used_at\": null, \"used_by_name\": null, \"patient_id\": null, \"mrn\": null, \"patient_name\": null, \"booking_id\": null, \"booking_number\": null, \"admission_id\": null, \"admission_number\": null, \"row_version\": 3, \"expiring_soon\": false}, {\"pack_id\": 5, \"pack_code\": \"SP-2026-000005\", \"set_type_id\": 1, \"set_code\": \"GEN-MAJOR\", \"set_name\": \"General surgery major set\", \"cycle_id\": 3, \"cycle_number\": \"STC-2026-00003\", \"cycle_status\": \"Released\", \"sterilized_on\": \"2026-10-01\", \"expires_on\": \"2026-10-31\", \"status\": \"Issued\", \"issued_at\": \"2026-10-01T07:20:18.207707+00:00\", \"issued_by_name\": \"CSSD Tech Bilal\", \"issued_to_ward_id\": null, \"issued_to_ward_name\": null, \"issued_to_ot_id\": 1, \"issued_to_ot_name\": \"Main OT 1\", \"used_at\": null, \"used_by_name\": null, \"patient_id\": null, \"mrn\": null, \"patient_name\": null, \"booking_id\": null, \"booking_number\": null, \"admission_id\": null, \"admission_number\": null, \"row_version\": 3, \"expiring_soon\": false}, {\"pack_id\": 6, \"pack_code\": \"SP-2026-000…"
+      }
+    },
+    "GET /cssd/packs/{pack_code}": {
+      "request": {
+        "path": "/api/v1/cssd/packs/SP-2026-000004"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "pack_id": 4,
+            "pack_code": "SP-2026-000004",
+            "set_type_id": 1,
+            "set_code": "GEN-MAJOR",
+            "set_name": "General surgery major set",
+            "cycle_id": 3,
+            "cycle_number": "STC-2026-00003",
+            "cycle_status": "Released",
+            "sterilized_on": "2026-10-01",
+            "expires_on": "2026-10-31",
+            "status": "Used",
+            "issued_at": "2026-10-01T07:20:18.207707+00:00",
+            "issued_by_name": "CSSD Tech Bilal",
+            "issued_to_ward_id": null,
+            "issued_to_ward_name": null,
+            "issued_to_ot_id": 1,
+            "issued_to_ot_name": "Main OT 1",
+            "used_at": "2026-10-01T07:20:18.262730+00:00",
+            "used_by_name": "ucac391ff96",
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ali Khan",
+            "booking_id": 1,
+            "booking_number": "OT-2026-00001",
+            "admission_id": null,
+            "admission_number": null,
+            "row_version": 4,
+            "expiring_soon": false
+          },
+          "meta": {
+            "server_time": "2026-10-01T07:20:18.280597+00:00"
+          },
+          "request_id": "7257b9666e404195956466fd8157d7ad"
+        }
+      }
+    },
+    "GET /beds/matrix": {
+      "request": {
+        "path": "/api/v1/beds/matrix"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "wards": [
+              {
+                "ward_id": 2,
+                "code": "GW",
+                "name": "General Ward",
+                "ward_type": "General",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 0,
+                "reserved": 0,
+                "occupied": 1,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 1,
+                "code": "ICU",
+                "name": "ICU",
+                "ward_type": "ICU",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 1,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              }
+            ],
+            "summary": {
+              "General Ward": 0,
+              "ICU": 1
+            },
+            "beds": [
+              {
+                "bed_id": 1,
+                "ward_id": 1,
+                "label": "ICU-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 2,
+                "ward_id": 2,
+                "label": "GW-1",
+                "current_state": "Occupied",
+                "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": 1,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": "Admitted",
+                "is_overflow": false,
+                "discharge_blocked_on": null
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:22.967241+00:00"
+          },
+          "request_id": "802131a929b14db0a0c8033474e8d271"
+        }
+      }
+    },
+    "GET /ot/theaters": {
+      "request": {
+        "path": "/api/v1/ot/theaters"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "ot_id": 1,
+              "code": "OT1",
+              "name": "Main OT 1",
+              "theater_type": "General",
+              "current_state": "Available",
+              "state_changed_at": "2026-09-27T17:42:59.374678+00:00",
+              "is_active": true,
+              "row_version": 1
+            },
+            {
+              "ot_id": 2,
+              "code": "OT2",
+              "name": "Main OT 2",
+              "theater_type": "General",
+              "current_state": "Available",
+              "state_changed_at": "2026-09-27T17:42:59.400594+00:00",
+              "is_active": true,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:42:59.704771+00:00"
+          },
+          "request_id": "e1c02615e32f4a8c8e379580ecef7d2d"
+        }
+      }
+    }
+  },
+  "schemas": {
+    "BedMatrixBedOut": {
+      "properties": {
+        "bed_id": {
+          "type": "integer",
+          "title": "Bed Id"
+        },
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "current_state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "Reserved",
+            "Occupied",
+            "Dirty",
+            "Cleaning",
+            "OutOfService"
+          ],
+          "title": "Current State"
+        },
+        "state_changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Changed At"
+        },
+        "is_overflow_allowed": {
+          "type": "boolean",
+          "title": "Is Overflow Allowed"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "patient_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Name",
+          "description": "Only with with_patients=true"
+        },
+        "mrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mrn",
+          "description": "Only with with_patients=true"
+        },
+        "admission_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "AdmissionPending",
+                "Waitlisted",
+                "BedReserved",
+                "CodeRedActive",
+                "Admitted",
+                "DischargeInProgress",
+                "Discharged",
+                "Cancelled"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Status"
+        },
+        "is_overflow": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Is Overflow"
+        },
+        "discharge_blocked_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharge Blocked On",
+          "description": "The discharge stage the patient in this bed waits for"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bed_id",
+        "ward_id",
+        "label",
+        "current_state",
+        "state_changed_at",
+        "is_overflow_allowed",
+        "admission_id",
+        "patient_name",
+        "mrn",
+        "admission_status",
+        "is_overflow",
+        "discharge_blocked_on"
+      ],
+      "title": "BedMatrixBedOut"
+    },
+    "BedMatrixOut": {
+      "properties": {
+        "wards": {
+          "items": {
+            "$ref": "#/components/schemas/WardOccupancyOut"
+          },
+          "type": "array",
+          "title": "Wards"
+        },
+        "summary": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "type": "object",
+          "title": "Summary",
+          "description": "Ward name -> available beds"
+        },
+        "beds": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/components/schemas/BedMatrixBedOut"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Beds",
+          "description": "Only with include_beds=true"
+        }
+      },
+      "type": "object",
+      "required": [
+        "wards",
+        "summary"
+      ],
+      "title": "BedMatrixOut"
+    },
+    "Envelope_BedMatrixOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/BedMatrixOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[BedMatrixOut]"
+    },
+    "Envelope_PackOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PackOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PackOut]"
+    },
+    "Envelope_list_PackOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PackOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PackOut]]"
+    },
+    "Envelope_list_TheaterOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/TheaterOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[TheaterOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "PackIssueIn": {
+      "properties": {
+        "pack_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 200,
+          "minItems": 1,
+          "title": "Pack Codes"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "ot_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "pack_codes"
+      ],
+      "title": "PackIssueIn"
+    },
+    "PackOut": {
+      "properties": {
+        "pack_id": {
+          "type": "integer",
+          "title": "Pack Id"
+        },
+        "pack_code": {
+          "type": "string",
+          "title": "Pack Code"
+        },
+        "set_type_id": {
+          "type": "integer",
+          "title": "Set Type Id"
+        },
+        "set_code": {
+          "type": "string",
+          "title": "Set Code"
+        },
+        "set_name": {
+          "type": "string",
+          "title": "Set Name"
+        },
+        "cycle_id": {
+          "type": "integer",
+          "title": "Cycle Id"
+        },
+        "cycle_number": {
+          "type": "string",
+          "title": "Cycle Number"
+        },
+        "cycle_status": {
+          "type": "string",
+          "enum": [
+            "Running",
+            "Quarantined",
+            "Released",
+            "Failed",
+            "Recalled"
+          ],
+          "title": "Cycle Status"
+        },
+        "sterilized_on": {
+          "type": "string",
+          "format": "date",
+          "title": "Sterilized On"
+        },
+        "expires_on": {
+          "type": "string",
+          "format": "date",
+          "title": "Expires On"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Quarantined",
+            "Available",
+            "Issued",
+            "Used",
+            "Expired",
+            "Failed",
+            "Recalled"
+          ],
+          "title": "Status"
+        },
+        "issued_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued At"
+        },
+        "issued_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued By Name"
+        },
+        "issued_to_ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued To Ward Id"
+        },
+        "issued_to_ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued To Ward Name"
+        },
+        "issued_to_ot_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued To Ot Id"
+        },
+        "issued_to_ot_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued To Ot Name"
+        },
+        "used_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Used At"
+        },
+        "used_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Used By Name"
+        },
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Name"
+        },
+        "booking_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Number"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "expiring_soon": {
+          "type": "boolean",
+          "title": "Expiring Soon",
+          "description": "Expires within cssd_expiry_alert_days: use it first"
+        }
+      },
+      "type": "object",
+      "required": [
+        "pack_id",
+        "pack_code",
+        "set_type_id",
+        "set_code",
+        "set_name",
+        "cycle_id",
+        "cycle_number",
+        "cycle_status",
+        "sterilized_on",
+        "expires_on",
+        "status",
+        "issued_at",
+        "issued_by_name",
+        "issued_to_ward_id",
+        "issued_to_ward_name",
+        "issued_to_ot_id",
+        "issued_to_ot_name",
+        "used_at",
+        "used_by_name",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "booking_id",
+        "booking_number",
+        "admission_id",
+        "admission_number",
+        "row_version",
+        "expiring_soon"
+      ],
+      "title": "PackOut"
+    },
+    "TheaterOut": {
+      "properties": {
+        "ot_id": {
+          "type": "integer",
+          "title": "Ot Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "theater_type": {
+          "type": "string",
+          "title": "Theater Type"
+        },
+        "current_state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "EmergencyHold",
+            "InSurgery",
+            "CleaningPrep",
+            "OutOfService"
+          ],
+          "title": "Current State"
+        },
+        "state_changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Changed At"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ot_id",
+        "code",
+        "name",
+        "theater_type",
+        "current_state",
+        "state_changed_at",
+        "is_active",
+        "row_version"
+      ],
+      "title": "TheaterOut"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    },
+    "WardOccupancyOut": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "ward_type": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Private",
+            "SemiPrivate",
+            "ICU",
+            "CCU",
+            "NICU",
+            "Surgical",
+            "Pediatric",
+            "Maternity",
+            "Emergency",
+            "Isolation",
+            "Other"
+          ],
+          "title": "Ward Type"
+        },
+        "gender_restriction": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "any"
+          ],
+          "title": "Gender Restriction"
+        },
+        "total_beds": {
+          "type": "integer",
+          "title": "Total Beds"
+        },
+        "available": {
+          "type": "integer",
+          "title": "Available"
+        },
+        "reserved": {
+          "type": "integer",
+          "title": "Reserved"
+        },
+        "occupied": {
+          "type": "integer",
+          "title": "Occupied"
+        },
+        "turnover": {
+          "type": "integer",
+          "title": "Turnover",
+          "description": "Beds being cleaned or waiting for discharge clearance"
+        },
+        "out_of_service": {
+          "type": "integer",
+          "title": "Out Of Service"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id",
+        "code",
+        "name",
+        "ward_type",
+        "gender_restriction",
+        "total_beds",
+        "available",
+        "reserved",
+        "occupied",
+        "turnover",
+        "out_of_service"
+      ],
+      "title": "WardOccupancyOut",
+      "description": "A ward's bed counts (view v_bed_matrix)."
+    }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
     },
     {
       "what": "decision H18",
@@ -1765,9 +3172,11 @@
         "vendor",
         "frontend_lead"
       ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
       "affects": [
         "every table in Urdu"
-      ]
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
     },
     {
       "what": "decision H19",
@@ -1775,9 +3184,11 @@
         "clinical_lead",
         "backend"
       ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
       "affects": [
         "every screen with a patient banner"
-      ]
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
     },
     {
       "what": "decision H20",
@@ -1785,9 +3196,11 @@
         "vendor",
         "hospital"
       ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
       "affects": [
         "every form"
-      ]
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
     },
     {
       "what": "decision H22",
@@ -1795,9 +3208,11 @@
         "hospital",
         "vendor"
       ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
       "affects": [
         "every screen that prints"
-      ]
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
     },
     {
       "what": "decision H24",
@@ -1805,16 +3220,11 @@
         "vendor",
         "clinical_lead"
       ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
       "affects": [
         "every screen"
-      ]
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
     }
-  ],
-  "omitted_sections": [
-    "handbook",
-    "decisions",
-    "examples",
-    "schemas"
-  ],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type."
+  ]
 }

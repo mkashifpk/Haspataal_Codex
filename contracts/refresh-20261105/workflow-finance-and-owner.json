@@ -1,0 +1,213 @@
+{
+  "slug": "finance-and-owner",
+  "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+  "summary": "Drawer-per-counter shifts with verified cash drops, AP/AR, live P&L from the ledger, heuristic risk review.",
+  "order": 99,
+  "workflow": "§7.1–§7.5",
+  "workspaces": [
+    "finance_cashier",
+    "finance_accountant",
+    "billing_admin",
+    "owner_dashboard"
+  ],
+  "file": "finance-and-owner.md",
+  "markdown": "# Finance, owner dashboards & risk\n\n## Shift-based cash (§7.1)\n\n1. Counter staff: `POST /finance/cash-shifts/open {\"node\": \"MainReception\", \"opening_float\": 5000}` — every\n   cash movement (registration, lab/pharmacy payment, refunds) goes through **your** open shift.\n   **The float is part of the drawer.** It is issued from the main vault and is the drawer's first entry\n   (`OpeningFloat` in `GET /finance/cash-shifts/{id}/transactions` and in `by_type`), so `expected_cash` starts at\n   the float: 5000 before the first sale, 6000 after a cash sale of 1000, 4000 after a cash refund of 1000 with no sale.\n   Show `expected_cash` as the server gives it; never add or subtract the float yourself. A payout bigger than the\n   drawer holds, float included: `INSUFFICIENT_DRAWER_CASH`.\n   The node is the PC's counter (`GET /terminals/whoami` `cash_node`). The pharmacy's cash goes only into a shift\n   at the Pharmacy Counter (decisions 51): the pharmacists open theirs from the Pharmacy workspace, where My cash shift\n   is listed too, and check it with `GET /finance/cash-shifts/mine?node=PharmacyCounter`\n   ([the pharmacy's cash drawer](clinical-and-prescriptions.md)).\n2. End of shift: the cashier counts **everything in the drawer, the float included**:\n   `POST /finance/cash-shifts/{id}/close {\"declared_cash\"}` → `PendingCollection`. The answer's `declared_variance`\n   (declared minus expected) shows a difference at once: a drawer of 5000 float and no movement declared as 0 is\n   −5000, never a clean close.\n3. Accountant counts the whole drawer, float included: `POST /finance/cash-shifts/{id}/cash-drop {\"counted_cash\", \"note\"}`.\n   All of it goes to the main vault (the next shift is issued a fresh float), and the shift's `expected_cash` reads 0\n   from then on; `cash_drop.expected_cash` and `cash_drop.variance` keep what was compared, and `declared_variance`\n   still compares the cashier's count with what the drawer held at the close.\n   At or above `large_cash_settlement_threshold` (in `GET /meta/settings`: show the fields before the first attempt) a\n   **second, different approver** must co-sign (`second_approver_username/password`) or the drop waits in `/approvals`. Variances post to *Cash\n   over/short* and are flagged. You can't verify your own drop.\n\n## Accounts payable (§5.5, §6.9, §8.1)\n\nWork orders, utility bills, visiting-consultant commissions and supplier invoices create payables.\n`GET /finance/ap/queue` → hand over cash/bank → `POST /finance/ap/{ap_id}/settle {\"method\": \"Cash\", \"cash_source\": \"Vault\"}`\n(amount defaults to the open balance). Settling closes the source (work order → Paid, commission → Paid).\n\n**Credit notes for stock returned to suppliers** (decisions 47). The pharmacy admin returns stock to a supplier; the\naccountant (never the same person: `DUAL_CONTROL_SAME_PERSON`) then deals with the supplier's answer:\n\n1. `GET /pharmacy-admin/supplier-returns?status=Returned`: the returns awaiting a credit note, each with\n   `value_at_cost`.\n2. The credit note arrives: `POST /finance/supplier-returns/{return_id}/credit {\"credit_note_no\": \"CN-2231\",\n   \"credit_note_date\": \"2026-10-20\", \"credit_amount\": 3800}`. A credit below the value at cost leaves the difference as\n   a write-off. The supplier gives nothing: `POST /finance/supplier-returns/{return_id}/refuse {\"note\": \"…\"}` writes\n   the claim off. Either one only once (`SUPPLIER_RETURN_STATE_INVALID` after).\n3. The credit pays that supplier's bills: `POST /finance/ap/{ap_id}/settle {\"method\": \"SupplierCredit\",\n   \"supplier_return_id\": 12, \"amount\": 3800}`. No money moves; `credit_left` goes down\n   (`SUPPLIER_CREDIT_UNAVAILABLE` for another supplier's bill, a return not credited, or more than is left).\n\n## Receivables / Udhaar (§1.9)\n\n`GET /finance/ar/outstanding`, `GET /finance/ar/aging`, collect `POST /finance/ar/{id}/settle`, write off\n(owner) `POST /finance/ar/{id}/write-off`.\n\nThe screen belongs to the cashier's workspace, and the Owner's workspace also uses it (`also_uses` of\n`GET /meta/workspaces`): the Owner and the Hospital Admin open it from their own workspace, where `GET /meta/handbook`\nlists it with the tasks they may do (the lists, the invoice and the write-off; never collecting or settling, which needs\na cash shift). Put it in their workspace's navigation from that answer, as for any other screen.\n\n## Prices & policies (§7.2)\n\nService catalogue, panels & panel discounts, per-role/user discount ceilings\n(`PUT /finance/discount-policies`), consultant contracts. Prices are snapshotted into every\nticket/invoice line — changing a price never alters history.\nA service's department from `GET /admin/departments`; a ceiling for one user names them from `GET /staff/lookup` (their\n`user_id`).\n\n## Owner dashboard (§7.4)\n\n* `GET /reports/pnl-flash?date_from&date_to` (default **today**, live): income per stream (OPD, IPD,\n  pharmacy, lab, imaging, OT, rooms), discounts/refunds, expenses by category (COGS, commissions,\n  utilities, repairs…), payroll **run-rate**, net profit, cash collected, open AR/AP.\n* `GET /reports/pnl-trend?days=30` for charts; `GET /reports/patient-volume` — **Visited** (tickets) vs\n  **Examined**, per doctor and hospital-wide (attrition = paid but never seen).\n  Visited counts tickets whose fee was settled; `issued_unpaid` counts the ones never paid.\n* Ledger: `GET /finance/gl/trial-balance`, `GET /finance/gl/ledger`.\n* Holiday calendar (Hospital Admin, shared with HR): `GET /holidays`, `POST /holidays`, `PATCH /holidays/{id}`\n  (screen `holiday_calendar_admin`). Fixed-schedule staff are off, paid, on a holiday; rostered staff work. Details:\n  [HR, provisioning, attendance, leave & payroll](hr-and-payroll.md).\n\n## Risk & compliance (§7.5)\n\n`GET /risk/summary`, `GET /risk/findings`, review `POST /risk/findings/{id}/review {\"status\": \"Resolved\", \"note\"}`.\nFindings are heuristics for human review — word them as \"flagged for review\". Rules include\nvoided-but-examined (critical), clinical edits after death/discharge, orphaned pharmacy deductions,\nrapid re-routes without notes, excessive voids/refunds (waivers excluded), discount abuse, unreconciled\ncash, unapproved charity, OT settlement gaps and payments without ledger postings.",
+  "steps": [
+    {
+      "heading": "Shift-based cash (§7.1)",
+      "anchor": "shift-based-cash-7-1",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/cash-shifts/open",
+          "summary": "Open my cash shift at a counter"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/cash-shifts/{shift_id}/transactions",
+          "summary": "Drawer ledger of a shift"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/terminals/whoami",
+          "summary": "Identify this terminal (location + mapped printers) — works before login"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/cash-shifts/mine",
+          "summary": "My open shift (if any)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/cash-shifts/{shift_id}/close",
+          "summary": "Close shift → PendingCollection"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/cash-shifts/{shift_id}/cash-drop",
+          "summary": "Accountant: Approve Cash Drop (dual control for large amounts)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/meta/settings",
+          "summary": "Non-sensitive hospital settings for UI display"
+        }
+      ]
+    },
+    {
+      "heading": "Accounts payable (§5.5, §6.9, §8.1)",
+      "anchor": "accounts-payable-5-5-6-9-8-1",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/ap/queue",
+          "summary": "Accounts Payable queue"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/ap/{ap_id}/settle",
+          "summary": "Settle Payment (vendor / contractor / visiting consultant)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/pharmacy-admin/supplier-returns",
+          "summary": "Returns to suppliers, newest first"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/supplier-returns/{return_id}/credit",
+          "summary": "Confirm the supplier's credit note for a return"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/supplier-returns/{return_id}/refuse",
+          "summary": "Record that the supplier gives no credit for a return"
+        }
+      ]
+    },
+    {
+      "heading": "Receivables / Udhaar (§1.9)",
+      "anchor": "receivables-udhaar-1-9",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/ar/outstanding",
+          "summary": "Outstanding Patient Dues queue (with age of debt)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/ar/aging",
+          "summary": "Receivables aging buckets"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/ar/{ar_id}/settle",
+          "summary": "Settle Debt (patient returns to pay)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/ar/{ar_id}/write-off",
+          "summary": "Write off a receivable"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/meta/workspaces",
+          "summary": "UI workspaces and the screens each should contain"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/meta/handbook",
+          "summary": "The end-user handbook's outline for the logged-in employee (only what they may use)"
+        }
+      ]
+    },
+    {
+      "heading": "Prices & policies (§7.2)",
+      "anchor": "prices-policies-7-2",
+      "calls": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/finance/discount-policies",
+          "summary": "Set a role's or user's discount ceiling (replaces the active one)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        }
+      ]
+    },
+    {
+      "heading": "Owner dashboard (§7.4)",
+      "anchor": "owner-dashboard-7-4",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/reports/pnl-flash",
+          "summary": "Live P&L flash (today by default): income streams vs overheads"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/reports/pnl-trend",
+          "summary": "Daily net income vs expenses for a chart (max 92 days)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/reports/patient-volume",
+          "summary": "\"Visited\" (tickets sold) vs \"Examined\" per doctor and hospital-wide"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/gl/trial-balance",
+          "summary": "Trial balance"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/gl/ledger",
+          "summary": "General ledger entries"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/holidays",
+          "summary": "Public holidays of a year (or a date range)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/holidays",
+          "summary": "Add public holidays (all or nothing)"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/holidays/{holiday_id}",
+          "summary": "Rename, move or withdraw a public holiday"
+        }
+      ]
+    },
+    {
+      "heading": "Risk & compliance (§7.5)",
+      "anchor": "risk-compliance-7-5",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/risk/summary",
+          "summary": "Open findings by rule and severity (heuristic scores, for human review)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/risk/findings",
+          "summary": "Flagged-for-review list (not accusations)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/risk/findings/{risk_event_id}/review",
+          "summary": "Record the human review outcome"
+        }
+      ]
+    }
+  ]
+}

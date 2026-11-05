@@ -345,6 +345,7 @@
     },
     {
       "endpoint": "GET /lab/requisitions/{requisition_id}",
+      "summary": "Requisition with items, samples, results and bill status",
       "access": {
         "authentication": "user",
         "permissions": [
@@ -367,6 +368,22 @@
           "ward_nurse"
         ]
       },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "requisition_id",
@@ -379,301 +396,36 @@
           }
         }
       ],
+      "request_body": null,
       "responses": {
-        "title": "Envelope[LabRequisitionDetailOut]",
-        "properties": {
-          "data": {
-            "title": "LabRequisitionDetailOut",
-            "properties": {
-              "requisition_id": {
-                "type": "integer",
-                "title": "Requisition Id"
-              },
-              "requisition_number": {
-                "type": "string",
-                "title": "Requisition Number"
-              },
-              "patient_id": {
-                "type": "integer",
-                "title": "Patient Id"
-              },
-              "ticket_id": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Ticket Id"
-              },
-              "admission_id": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Admission Id"
-              },
-              "requester_type": {
-                "type": "string",
-                "enum": [
-                  "Doctor",
-                  "Receptionist",
-                  "LabAdmin",
-                  "System"
-                ],
-                "title": "Requester Type"
-              },
-              "requester_user_id": {
-                "type": "integer",
-                "title": "Requester User Id"
-              },
-              "requester_doctor_id": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Requester Doctor Id"
-              },
-              "is_lab_only_walkin": {
-                "type": "boolean",
-                "title": "Is Lab Only Walkin"
-              },
-              "priority": {
-                "type": "string",
-                "enum": [
-                  "Routine",
-                  "Urgent",
-                  "STAT"
-                ],
-                "title": "Priority"
-              },
-              "clinical_notes": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Clinical Notes"
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "Pending",
-                  "InProgress",
-                  "Completed",
-                  "Cancelled"
-                ],
-                "title": "Status"
-              },
-              "cancel_reason": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Cancel Reason"
-              },
-              "ordered_at": {
-                "type": "string",
-                "format": "date-time",
-                "title": "Ordered At"
-              },
-              "row_version": {
-                "type": "integer",
-                "title": "Row Version"
-              },
-              "patient_name": {
-                "type": "string",
-                "title": "Patient Name"
-              },
-              "mrn": {
-                "type": "string",
-                "title": "Mrn"
-              },
-              "gender": {
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "enum": [
-                      "male",
-                      "female",
-                      "other",
-                      "unknown"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Gender"
-              },
-              "age_years": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Age Years"
-              },
-              "dob": {
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "format": "date"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Dob"
-              },
-              "doctor_name": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Doctor Name"
-              },
-              "items": {
-                "items": {
-                  "$ref": "#/components/schemas/RequisitionItemOut"
-                },
-                "type": "array",
-                "title": "Items"
-              },
-              "results": {
-                "items": {
-                  "$ref": "#/components/schemas/RequisitionResultOut"
-                },
-                "type": "array",
-                "title": "Results"
-              },
-              "invoice": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/LabInvoiceStatusOut"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LabRequisitionDetailOut_"
               }
-            },
-            "type": "object",
-            "required": [
-              "requisition_id",
-              "requisition_number",
-              "patient_id",
-              "ticket_id",
-              "admission_id",
-              "requester_type",
-              "requester_user_id",
-              "requester_doctor_id",
-              "is_lab_only_walkin",
-              "priority",
-              "clinical_notes",
-              "status",
-              "cancel_reason",
-              "ordered_at",
-              "row_version",
-              "patient_name",
-              "mrn",
-              "gender",
-              "age_years",
-              "dob",
-              "doctor_name",
-              "items",
-              "results",
-              "invoice"
-            ],
-            "description": "A requisition with its tests, samples, results (only published ones for the ordering doctor) and bill."
-          },
-          "meta": {
-            "title": "Meta",
-            "properties": {
-              "server_time": {
-                "type": "string",
-                "title": "Server Time",
-                "description": "Server clock (UTC). Use it to detect terminal clock skew."
-              },
-              "page": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Page"
-              },
-              "page_size": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Page Size"
-              },
-              "total_count": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Total Count"
-              },
-              "next_cursor": {
-                "title": "Next Cursor"
-              }
-            },
-            "type": "object",
-            "required": [
-              "server_time"
-            ]
-          },
-          "request_id": {
-            "type": "string",
-            "title": "Request Id"
+            }
           }
         },
-        "type": "object",
-        "required": [
-          "data",
-          "meta",
-          "request_id"
-        ]
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
       },
-      "description": "Doctors/nurses (without `lab.requisition.view`) only see **Published** results, and a critical value still\nunverified after `lab_critical_release_minutes` (`provisionally_released_at` set, status `PendingVerification`:\nshow it as 'Pending verification', audit F-23).\n\n**Required permission:** `lab.requisition.view OR lab.result.view`\n\n**Required permission:** `lab.requisition.view OR lab.result.view`"
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
     }
   ]
 }

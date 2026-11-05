@@ -1,0 +1,230 @@
+{
+  "slug": "deaths-and-medico-legal-cases",
+  "title": "Deaths and medico-legal cases (MSDS)",
+  "summary": "The medico-legal case register with the police intimation and evidence, the death record with the WHO cause-of-death certificate and the handover of the body, the clinical autopsy, the death register and the mortality statistics.",
+  "order": 99,
+  "workflow": "MSDS IMS 153, 154; indicators 15-16, 20, 103, 105, 106",
+  "workspaces": [
+    "doctor",
+    "triage",
+    "ward_nurse",
+    "owner_dashboard",
+    "quality"
+  ],
+  "file": "deaths-and-medico-legal-cases.md",
+  "markdown": "# Deaths and medico-legal cases (MSDS)\n\nThe Punjab Healthcare Commission's Minimum Service Delivery Standards (MSDS) check:\n\n* that every death record holds a **signed death certificate with the cause, date and time of death** (IMS 153);\n* when a clinical autopsy was done, the whole trail: the requisition, the certificate that the death is not\n  medico-legal, the next of kin's consent, the order to the prosector and the report (IMS 154);\n* that the emergency department lists its **medico-legal case types**, keeps the **contact list of the police\n  stations** and of the hospitals doing medico-legal reports, and can show the **record of reported cases**\n  (indicators 15 vi, 16);\n* that the record of a death includes the **handing over of the body**, and of a body **received dead** the date and\n  time (indicator 20);\n* that mortality is monitored (103 d, 105 vi) and unexpected and maternal deaths are reviewed as **sentinel events**\n  (106).\n\nWho does what:\n\n* **Doctors** (`death.record`, `mlc.case.manage`): record the death, write and certify the cause, ask for an autopsy,\n  open and keep medico-legal cases. Only a doctor registered with the PMDC records or certifies a death\n  (`DEATH_CERTIFIER_NOT_DOCTOR`).\n* **Emergency and ward nurses** (`mlc.case.manage` for triage, `death.body.release`): open cases and inform the police,\n  hand over the body.\n* **The head of the hospital** (Owner or Hospital Admin: `death.autopsy.authorize`, `mlc.setup.manage`): authorize\n  clinical autopsies, keep the case types and the contact list.\n* **Owner, Hospital Admin, Quality Officer** (`death.register.view`, `mlc.register.view`): the registers and the\n  statistics.\n\n## 1. The medico-legal setup (once, then as it changes)\n\n* Case types: `GET /mlc/case-types` (seeded with the usual ones: road traffic accident, assault, firearm, burns,\n  electric shock, poisoning, attempted suicide, sexual assault, suspected child abuse, fall, workplace accident,\n  drowning, unconscious, unidentified, brought dead, other). Add the hospital's own with `POST /mlc/case-types`,\n  rename or retire with `PATCH /mlc/case-types/{case_type_id}`.\n* Contact list: `POST /mlc/contacts {\"contact_type\": \"PoliceStation\", \"name\": \"Police Station Civil Lines\", \"phone\":\n  \"042-...\"}` and the hospital designated for medico-legal reports and post-mortems (`\"contact_type\": \"MlrHospital\"`);\n  `GET /mlc/contacts`, `PATCH /mlc/contacts/{contact_id}` (`is_active: false` retires one; nothing is deleted).\n\n## 2. A medico-legal case (emergency department)\n\n1. An unknown patient first gets a trauma profile (`POST /patients/trauma`).\n2. `POST /mlc/cases {\"patient_id\", \"ticket_id\", \"case_type_id\", \"brought_by\": \"Relatives\", \"alleged_history\": \"...\",\n   \"history_given_by\": \"the patient's brother\"}` gives the MLC number (`MLC-2026-00001`). Write the history as told,\n   not as judged. **Brought by the police:** send `\"brought_by\": \"Police\"` with `police_station_id` (and their FIR or\n   diary number in `police_reference`): the intimation is recorded at once.\n3. Otherwise inform the police at once and record it:\n   `POST /mlc/cases/{mlc_id}/police-intimation {\"police_station_id\", \"informed_how\": \"Phone\", \"informed_to\": \"Duty officer\n   ASI Aslam\", \"police_reference\": \"DD No. 17\"}`. It is recorded once and never changes (`MLC_POLICE_ALREADY_INFORMED`).\n   An open case with no intimation after `mlc_police_intimation_minutes` (60) alerts the doctor and the administrators\n   (notification category `mlc_police_intimation`; `police_intimation_overdue` in the lists).\n4. Print the intimation letter for the police station: `GET /mlc/cases/{mlc_id}/print-payload` (A4).\n5. Evidence handed to the police, one sealed item at a time, each signed for:\n   `POST /mlc/cases/{mlc_id}/evidence {\"description\", \"seal_number\", \"handed_to\": \"ASI Aslam, belt 2231\", \"receipt_reference\"}`.\n6. The examination and the medico-legal report (MLR): `PATCH /mlc/cases/{mlc_id}` with `examination_findings` and\n   `mlr_status`: `IssuedHere` (the number and date; upload the copy as a `MedicoLegalReport` document and send its\n   `mlr_document_id`), `Referred` (`referred_to_id`: the designated hospital) or `NotRequired` (`mlr_note`: why).\n   Upload it with `POST /patients/{patient_id}/documents` (`doc_type` MedicoLegalReport): its answer is the\n   `mlr_document_id`.\n7. `POST /mlc/cases/{mlc_id}/close {\"note\"}`: refused until the police were informed and the report is settled\n   (`MLC_NOT_READY_TO_CLOSE`, `details.missing`). A closed case is final.\n\nThe patient's record is marked: `GET /patients/{patient_id}` returns `mlc_numbers` (show a red MEDICO-LEGAL banner),\nthe death certificate prints the MLC number at the top, the record review shows it to the reviewer. The register:\n`GET /mlc/cases` (filters: status, dates, case type, police station, patient, `overdue`).\n\n## 3. Recording a death\n\n`POST /patients/{patient_id}/death {\"death_at\": \"...\", \"terminal_event\": \"...\", \"resuscitation_attempted\": true}` by the\ndoctor who confirms it. An admitted patient's death is always `Inpatient` and belongs to the current admission\n(another setting: `DEATH_SETTING_INVALID`); otherwise `setting` is `Emergency` by default; send `Outpatient`, or\n`BroughtDead` with `arrived_at` (when the body was received). The time of death is never in the future\n(`DEATH_TIME_INVALID`). The medico-legal case of the stay or visit, or the patient's only open case, is linked by itself unless\n`mlc_id` is sent. From now on the patient is deceased (`is_deceased`, `death_id`, `death_at` on the patient): screens\nreload on `death.recorded`, and any later clinical entry is flagged for review. The patient's open ER visit closes\nas `Died` (or `BroughtDead`); a body brought dead that nobody registered at the ER desk is added to the ER register\n([emergency department](emergency-department.md)).\nA death in the emergency department or the OPD names that visit's `ticket_id` (the visit the doctor has open); an\ninpatient's death needs none.\n\n## 4. The cause-of-death certificate (WHO form)\n\n`GET /deaths/{death_id}` returns the record, the patient (`pregnancy_applies`, `infant_applies`: which parts of the\nform to show), `suggested` (the diagnoses of the stay with their ICD codes and `icd_terms`; the last operation of the four weeks\nbefore death) and `missing`. Save as the doctor writes: `PUT /deaths/{death_id}` (only the fields sent change; send\n`row_version` as `expected_version`):\n\n* **Part I**, the chain of events: `cause_a` (the condition leading directly to death), `cause_b` (what (a) was due\n  to), `cause_c`, `cause_d`, each with `_interval` (onset to death) and `_icd` (ICD-11 or ICD-10, from the ICD picker: [ICD coding](icd-coding.md)). The lowest line filled is the\n  underlying cause (`underlying_cause`, `underlying_icd`, `underlying_term`); every code comes back in `icd_terms`. A line needs the one above it.\n* **Part II**: `other_conditions` and `other_conditions_icd`.\n* `manner` (Disease, Accident, IntentionalSelfHarm, Assault, LegalIntervention, War, PendingInvestigation,\n  CouldNotBeDetermined); for an injury or poisoning `external_cause` (how; the agent), `external_cause_date`,\n  `external_cause_place`.\n* `surgery_within_4_weeks` (with `surgery_date`, `surgery_reason`), `expected_death` (false: an unexpected death).\n* A woman of 10-54: `pregnancy_status` and `pregnancy_contributed` (maternal death surveillance). A baby under one year:\n  `multiple_pregnancy`, `hours_survived`, `birth_weight_grams`, `gestation_weeks`, `mother_age_years`,\n  `maternal_conditions`, as far as known.\n\n`POST /deaths/{death_id}/certify` checks what is required (`DEATH_CERTIFICATE_INCOMPLETE`, `details.missing`) and\nstamps the doctor's name, designation and PMDC number. An unexpected or a maternal death notifies the Quality Officer\nas a sentinel event (category `sentinel_event`). A certified record never changes: `POST /deaths/{death_id}/corrections\n{\"field\": \"time\", \"correction_text\", \"correction_reason\"}`. A death left uncertified after `death_certificate_due_hours`\n(12) reminds the doctor (category `death_certificate_due`).\n\nPrint on A4: `GET /deaths/{death_id}/print-payload` (or the PDF, `GET /deaths/{death_id}/pdf`).\n\nAn inpatient death then continues as a discharge: the discharge summary with outcome `Died` (it needs the certified\ndeath of this admission, `DISCHARGE_SUMMARY_DEATH_NOT_CERTIFIED`, and no other outcome can be signed,\n`DISCHARGE_SUMMARY_PATIENT_DIED`), then `POST /admissions/{admission_id}/discharge` and the usual clearance stages.\n\n## 5. Handing over the body\n\n`GET /deaths?status=Certified&body_released=false` lists the bodies still in the hospital (`status=Draft`: the\ncertificates not written yet). `POST /deaths/{death_id}/body-release {\"released_to\": \"NextOfKin\", \"receiver_name\",\n\"receiver_relationship\", \"receiver_id_number\": \"35202-...\", \"receiver_phone\"}`, once, after certification\n(`DEATH_RECORD_NOT_CERTIFIED`, `BODY_ALREADY_RELEASED`). A medico-legal death is released against the police letter or\ndiary number (`police_reference`, `BODY_RELEASE_POLICE_REFERENCE_REQUIRED`), usually to the police for the post-mortem.\nPrint the certificate afterwards: it carries the handover with signature lines.\n\n## 6. Clinical autopsy (MSDS 154)\n\nNever for a medico-legal death (`AUTOPSY_MEDICO_LEGAL`): the police order the post-mortem.\n\n1. The doctor: `POST /deaths/{death_id}/autopsy {\"request_reasons\": \"the doubts and questions\"}`; the head of the\n   hospital is notified (category `autopsy_request`).\n2. The head of the hospital, never the doctor who asked (`AUTOPSY_SELF_AUTHORIZED`):\n   `POST /deaths/{death_id}/autopsy/authorize {\"certify_not_medico_legal\": true, \"consent_given_by\", \"consent_relationship\",\n   \"consent_extent\": \"full or limited, organs or tissue kept\", \"prosector_name\"}`; print the order for the prosector with\n   `GET /deaths/{death_id}/print-payload?document=autopsy_order`.\n3. `POST /deaths/{death_id}/autopsy/report {\"performed_at\", \"findings\", \"correlation\": \"Confirmed\", \"correlation_note\"}`\n   (upload the signed report as an `AutopsyReport` document first and send `report_document_id`).\n   Upload the signed report first with `POST /patients/{patient_id}/documents` (`doc_type` AutopsyReport) and send its\n   id as `report_document_id`.\n4. Declined or not needed: `POST /deaths/{death_id}/autopsy/cancel {\"reason\"}`.\n\n## 7. The death register and the mortality statistics\n\n* `GET /deaths` (filters: dates, setting, status, `medico_legal`, `body_released`, patient): one line per death with the\n  underlying cause, manner, MLC number, certifier, handover and autopsy status.\n* `GET /deaths/statistics?date_from=...&date_to=...` (default: this month): gross and net death rates, deaths within 24\n  and 48 hours of admission, post-operative deaths and deaths within 48 hours of an operation (the screen for\n  anaesthesia-related deaths, MSDS 103 d), brought dead, medico-legal, maternal, neonatal and infant deaths,\n  uncertified deaths and the median time to certification, autopsies, deaths by setting, manner and department, the\n  top underlying causes by ICD category (with its title), and `review_list`: the deaths the mortality meeting looks at first.\n\nThe medical record review checks every sampled record that ends in a death for its certificate (checklist item\n`DEATH_CERTIFICATE`) and the autopsy trail (`AUTOPSY_REPORT`).\n\n## Open questions (for the hospital, not guessed)\n\n* Which cases count as medico-legal, and whether this hospital issues medico-legal reports itself or refers them, are\n  the hospital's SOP (MSDS 16): the lists are editable, the defaults are only a start.\n* Death registration with the union council (NADRA) is done by the family with the printed certificate; there is no\n  electronic link.",
+  "steps": [
+    {
+      "heading": "1. The medico-legal setup (once, then as it changes)",
+      "anchor": "1-the-medico-legal-setup-once-then-as-it-changes",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/mlc/case-types",
+          "summary": "Medico-legal case types"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mlc/case-types",
+          "summary": "Add a medico-legal case type"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/mlc/case-types/{case_type_id}",
+          "summary": "Rename, reorder or retire a medico-legal case type"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mlc/contacts",
+          "summary": "Add a contact: police station, MLR hospital, referral hospital, rescue, ambulance, ..."
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/mlc/contacts",
+          "summary": "Police stations and MLR hospitals (contact list)"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/mlc/contacts/{contact_id}",
+          "summary": "Update or retire a contact"
+        }
+      ]
+    },
+    {
+      "heading": "2. A medico-legal case (emergency department)",
+      "anchor": "2-a-medico-legal-case-emergency-department",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/trauma",
+          "summary": "Create a temporary trauma profile ('Unknown Male 1')"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mlc/cases",
+          "summary": "Open a medico-legal case"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mlc/cases/{mlc_id}/police-intimation",
+          "summary": "Record that the police were informed"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/mlc/cases/{mlc_id}/print-payload",
+          "summary": "The intimation to the police station (A4)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mlc/cases/{mlc_id}/evidence",
+          "summary": "Record evidence handed to the police"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/mlc/cases/{mlc_id}",
+          "summary": "Update an open medico-legal case"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/documents",
+          "summary": "Upload a patient document (PDF/JPEG/PNG)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mlc/cases/{mlc_id}/close",
+          "summary": "Close a medico-legal case"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/{patient_id}",
+          "summary": "Patient profile (+ outstanding banner, merged profiles)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/mlc/cases",
+          "summary": "The medico-legal case register"
+        }
+      ]
+    },
+    {
+      "heading": "3. Recording a death",
+      "anchor": "3-recording-a-death",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/death",
+          "summary": "Record a death"
+        }
+      ]
+    },
+    {
+      "heading": "4. The cause-of-death certificate (WHO form)",
+      "anchor": "4-the-cause-of-death-certificate-who-form",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/deaths/{death_id}",
+          "summary": "A death record with its certificate"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/deaths/{death_id}",
+          "summary": "Write the cause-of-death certificate (draft)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deaths/{death_id}/certify",
+          "summary": "Certify the cause of death (final)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deaths/{death_id}/corrections",
+          "summary": "Append a correction to a certified death record"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/deaths/{death_id}/print-payload",
+          "summary": "Printable death certificate, or the order for a clinical autopsy"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/deaths/{death_id}/pdf",
+          "summary": "The death certificate or the autopsy order as a PDF"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/discharge",
+          "summary": "Doctor: Discharge (Clinical Discharge stage)"
+        }
+      ]
+    },
+    {
+      "heading": "5. Handing over the body",
+      "anchor": "5-handing-over-the-body",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/deaths",
+          "summary": "The death register"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deaths/{death_id}/body-release",
+          "summary": "Hand over the body"
+        }
+      ]
+    },
+    {
+      "heading": "6. Clinical autopsy (MSDS 154)",
+      "anchor": "6-clinical-autopsy-msds-154",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/deaths/{death_id}/autopsy",
+          "summary": "Ask for a clinical autopsy"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deaths/{death_id}/autopsy/authorize",
+          "summary": "Authorize the clinical autopsy: non-medico-legal certificate, consent, order to the prosector"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/deaths/{death_id}/print-payload",
+          "summary": "Printable death certificate, or the order for a clinical autopsy"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deaths/{death_id}/autopsy/report",
+          "summary": "Record the autopsy report"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/documents",
+          "summary": "Upload a patient document (PDF/JPEG/PNG)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deaths/{death_id}/autopsy/cancel",
+          "summary": "Cancel the autopsy request"
+        }
+      ]
+    },
+    {
+      "heading": "7. The death register and the mortality statistics",
+      "anchor": "7-the-death-register-and-the-mortality-statistics",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/deaths",
+          "summary": "The death register"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/deaths/statistics",
+          "summary": "Mortality statistics for a period"
+        }
+      ]
+    }
+  ]
+}

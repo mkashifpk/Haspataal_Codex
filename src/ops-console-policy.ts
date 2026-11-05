@@ -17,7 +17,7 @@ export interface SessionInfo {
 export interface Establishment {
   services?: Array<{ code: string; status: string }>;
   views?: {
-    screens?: string[];
+    screens?: Array<{ screen_id: string; view: string }>;
     [key: string]: any;
   };
   [key: string]: any;
@@ -34,6 +34,17 @@ export interface OpsConsoleCapabilityView {
   reason?: string;
 }
 
+export const DISCHARGE_STAGE_PERMISSIONS = {
+  OpsCleaning: "ipd.discharge.clear_cleaning",
+  PharmacyClearance: "ipd.discharge.clear_pharmacy",
+  NursingMARVerification: "ipd.discharge.clear_nursing",
+  BillingSettlement: "ipd.discharge.clear_billing",
+} as const;
+
+export function canClearOpsDischargeStage(session: SessionInfo | null, stage: keyof typeof DISCHARGE_STAGE_PERMISSIONS): boolean {
+  return session?.permissions?.includes(DISCHARGE_STAGE_PERMISSIONS[stage]) ?? false;
+}
+
 /**
  * Resolves capability view based on permissions and establishment profile.
  */
@@ -41,7 +52,7 @@ export function getOpsConsoleCapabilityView(
   session: SessionInfo | null,
   establishment?: Establishment | null
 ): OpsConsoleCapabilityView {
-  if (!session || !session.roles) {
+  if (!session) {
     return {
       mode: "hidden",
       canManageWorkOrders: false,
@@ -54,9 +65,8 @@ export function getOpsConsoleCapabilityView(
     };
   }
 
-  // Check establishment service capability gate if present
-  const opsService = establishment?.services?.find((s: any) => s.code === "ops" || s.code === "maintenance");
-  if (opsService && opsService.status === "Inactive") {
+  const screenView = establishment?.views?.screens?.find(s => s.screen_id === "ops_console")?.view;
+  if (screenView === "hidden") {
     return {
       mode: "hidden",
       canManageWorkOrders: false,
@@ -65,29 +75,26 @@ export function getOpsConsoleCapabilityView(
       canClearDischarge: false,
       canMarkBedCleaned: false,
       canViewFeed: false,
-      reason: "Facility operations service is currently inactive in this facility",
+      reason: "Facility operations is hidden by the server's current screen view",
     };
   }
 
   const permissions = session.permissions || [];
-  const roles = session.roles || [];
-
-  const isOpsAdmin = roles.includes("ops_admin") || roles.includes("super_admin") || roles.includes("maintenance_admin");
-  const canManageWorkOrders = isOpsAdmin || permissions.includes("ops.workorder.manage");
-  const canManageAssets = isOpsAdmin || permissions.includes("ops.asset.manage");
-  const canRecordUtilities = isOpsAdmin || permissions.includes("ops.utility.record");
-  const canClearDischarge = isOpsAdmin || permissions.includes("ipd.discharge.clear");
-  const canMarkBedCleaned = isOpsAdmin || permissions.includes("ipd.bed.mark_cleaned");
-  const canViewFeed = isOpsAdmin || permissions.includes("ops.feed.view");
+  const writable = screenView !== "records";
+  const canManageWorkOrders = writable && permissions.includes("ops.workorder.manage");
+  const canManageAssets = writable && permissions.includes("ops.asset.manage");
+  const canRecordUtilities = writable && permissions.includes("ops.utility.record");
+  const canClearDischarge = writable && Object.values(DISCHARGE_STAGE_PERMISSIONS).some(p => permissions.includes(p));
+  const canMarkBedCleaned = writable && permissions.includes("ipd.bed.mark_cleaned");
+  const canViewFeed = permissions.includes("ops.feed.view");
 
   const canView =
-    isOpsAdmin ||
     canManageWorkOrders ||
     canManageAssets ||
     canRecordUtilities ||
-    canViewFeed ||
+    canViewFeed || canClearDischarge || canMarkBedCleaned ||
     permissions.includes("ops.workorder.report") ||
-    permissions.includes("ops.asset.view");
+    permissions.some(p => ["ops.asset.view", "ops.workorder.manage", "ops.asset.manage", "ops.utility.record", "cssd.manage"].includes(p));
 
   if (!canView) {
     return {
@@ -102,10 +109,10 @@ export function getOpsConsoleCapabilityView(
     };
   }
 
-  if (isOpsAdmin || canManageWorkOrders) {
+  if (canManageWorkOrders || canManageAssets || canRecordUtilities || canClearDischarge || canMarkBedCleaned) {
     return {
       mode: "full",
-      canManageWorkOrders: true,
+      canManageWorkOrders,
       canManageAssets,
       canRecordUtilities,
       canClearDischarge,

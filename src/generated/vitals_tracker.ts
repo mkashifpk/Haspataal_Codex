@@ -14,6 +14,7 @@ export interface FlowsheetOut {
   nursing_notes: FlowsheetNoteOut[];
   schedule: VitalsScheduleOut | null;
   next_vitals_due_at: string | null;
+  /** The vitals are overdue on an Admitted or CodeRedActive admission, the same ones vitals.due is sent for: false once the clinical discharge has started */
   is_overdue: boolean;
 }
 

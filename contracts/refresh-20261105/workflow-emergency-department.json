@@ -1,0 +1,251 @@
+{
+  "slug": "emergency-department",
+  "title": "The emergency department (MSDS)",
+  "summary": "The ER register, triage by clinical need with the hospital's written algorithm, the medico-legal checklist, the ER board with its waiting times, how each patient left, the staff on duty and on call, the triage scale and the ER statistics.",
+  "order": 99,
+  "workflow": "MSDS AAC indicators 15-20",
+  "workspaces": [
+    "triage",
+    "doctor",
+    "reception",
+    "admissions",
+    "quality",
+    "owner_dashboard"
+  ],
+  "file": "emergency-department.md",
+  "markdown": "# The emergency department (MSDS)\n\nThe Punjab Healthcare Commission's Minimum Service Delivery Standards (MSDS) check that the emergency department:\n\n* triages every patient by **clinical need, from a written algorithm**, never first come, first served or by the\n  ambulance (indicators 15 v, 18);\n* classes every emergency as **medico-legal or not**, and handles medico-legal cases by its SOP (15 ii, 16);\n* has **waiting-time SOPs** for the patient waiting for the doctor, under observation, waiting for admission, with no\n  bed, and waiting for a referral (15 iii);\n* shows **who is on duty, and the consultants on call** (17 iii);\n* records for every patient **how they left**: admitted (when, to which department), discharged (when, the condition,\n  the follow-up advice), referred (the reason, when, the receiving hospital), left against medical advice, discharged on\n  request (the signed statement), left without being seen (when the absence was noticed), died (the death certificate),\n  received dead (when) (20).\n\nWho does what:\n\n* **Triage nurses** (`er.visit.register`, `er.triage.record`, `er.visit.manage`): register arrivals, triage, answer the\n  medico-legal checklist, move patients between stages, record departures, Code Red.\n* **ER doctors** (the same, from the doctor workspace): see the board, call patients in, write the ER note, admit,\n  refer, discharge.\n* **Reception and the admissions desk** (`er.visit.view`, reception also `er.visit.register`): the board; emergency\n  tickets.\n* **Quality Officer, Owner, Hospital Admin** (`er.triage.configure`, `er.statistics.view`): the triage scale (the\n  written algorithm), the ER register, the statistics.\n\n## 1. The ER visit: one per emergency arrival\n\nEvery emergency patient has one **ER visit**: an ER register number (`ER-2026-000042`), the arrival, the triage, the\nstage, the medico-legal checklist and, at the end, the departure. It opens:\n\n* when reception issues an emergency ticket: `POST /reception/registrations` with `source` `Emergency` (the dues block\n  and payment before the queue are skipped as before);\n* on a Code Red: `POST /admissions/code-red` (below);\n* at the ER desk before anything else, when triage comes first or a body is brought in: an unknown patient gets a\n  trauma profile (`POST /patients/trauma`), then `POST /er/visits` (`patient_id`, optional `arrival_mode`,\n  `referred_from`, `presenting_complaint`). A ticket issued later for the patient joins this visit.\n  A known patient from `GET /patients/search`.\n\nA patient has one open visit at a time (`ER_VISIT_OPEN` with `details.er_visit_id`: open that one).\n\nIdentify every emergency patient with a wristband (`POST /wristbands {\"er_visit_id\"}`, MSDS AAC 30), and write down a\ndoctor's verbal order for an ER patient with `POST /prescriptions/verbal` (the visit's `ticket_id`); see\n[medication safety](medication-safety.md).\n\nConsents in the ER ([consent](consent.md)): an emergency procedure or transfusion takes its informed consent\n(`POST /consents` with the `er_visit_id`); when the patient cannot decide and nobody can be reached, the doctor records\nthe emergency note instead (`mode: EmergencyNote`, with a second doctor). An emergency admission needs its general\nconsent before the clinical discharge.\n\n## 2. The ER board\n\n`GET /er/board` lists the patients in the ER now: **not triaged yet first** (by arrival), then **by triage level and\narrival**. Each row carries the stage, the minutes in the ER and in the stage, the colour of the level, the\nmedico-legal case (`mlc_number`) and `flags`:\n\n| Flag | Meaning (targets: settings `er_*`, and each level's target time) |\n|---|---|\n| `TriageOverdue` | not triaged `er_triage_target_minutes` (10) after arrival |\n| `DoctorOverdue` | not seen by a doctor within the level's target time after triage |\n| `ObservationTooLong` | under observation longer than `er_observation_max_hours` (6) |\n| `AdmissionWaitTooLong` | still in the ER `er_admission_wait_minutes` (120) after the decision to admit |\n| `ReferralWaitTooLong` | still in the ER `er_referral_wait_minutes` (60) after the decision to refer |\n| `MlcNotOpened` | classed medico-legal, no case opened after `er_mlc_open_minutes` (30) |\n| `MedicoLegalUndecided` | the medico-legal checklist is not answered yet (after a Code Red) |\n\nRefresh on `er.visit.updated` (priority high when a patient becomes level 1; how to present it is open decision H10:\nmeanwhile update the board and at most show a dismissible notice). Each missed target also\nreaches the inbox of the ER staff once (`notification.created`, category `er_wait`; a late admission also the\nadmissions desk), from the worker job `er.alerts`.\n\n`GET /er/on-duty` shows, from the duty roster, the staff on duty in the `Emergency` duty area now and every on-call\nduty with the mobile number to call (MSDS 17 iii). Planners roster them as usual (duty area `Emergency`, `is_on_call`).\n\n## 3. Triage by the hospital's algorithm\n\nThe triage screen reads `GET /er/triage-scale`: five levels (name, colour, target time from triage to the doctor) and\nper level the **danger signs** the nurse ticks and the **vital-sign limits** the system checks (adult or child limits:\nbelow `child_age_years`, setting `er_child_age_years`).\n\n`POST /er/visits/{er_visit_id}/triage`:\n\n```json\n{\"presenting_complaint\": \"Short of breath since morning\", \"heart_rate\": 125, \"respiratory_rate\": 26,\n \"bp_systolic\": 118, \"spo2\": 88, \"temp_c\": \"37.8\", \"gcs\": 15, \"pain_score\": 3,\n \"signs\": [], \"is_medico_legal\": false}\n```\n\n* The **suggested level** is the most urgent level any ticked sign or vital-sign limit meets (none: level 5). Here\n  oxygen saturation below 92 % (level 2) and pulse above 110 (level 3) apply: level 2.\n* `assigned_level` another than the suggested one needs `override_reason`; without it: `VALIDATION_ERROR` with\n  `details.suggested_level` and `details.matched` (show them and ask for the reason). Both levels stay on the record.\n* **The medico-legal checklist** is required on every triage: `is_medico_legal`, with `mlc_case_type_id`\n  (`GET /mlc/case-types`) when yes. Then open the case at once: `POST /mlc/cases` with the ticket (see the\n  [deaths and medico-legal cases](deaths-and-medico-legal-cases.md) playbook); the board shows its MLC number.\n  Brought by the police: the station from `GET /mlc/contacts`.\n* The first triage moves the visit to `Triaged`; the ER doctor's queue (`GET /opd-queues/me`) is ordered by the level.\n* Re-triage (the same call) when the condition changes or the wait passes the target. Every triage is kept with the\n  nurse's stamp and the signs and limits that applied (`GET /er/visits/{er_visit_id}` → `triages`).\n\n## 4. Through the visit\n\n| Stage | How it is reached |\n|---|---|\n| `Arrived` | the visit opened |\n| `Triaged` | the first triage |\n| `InTreatment` | the doctor called the patient in (`POST /opd-queues/{queue_id}/call`), finalized the ER note, or `POST /er/visits/{er_visit_id}/stage` `{\"stage\": \"InTreatment\"}` |\n| `Observation` | `POST /er/visits/{er_visit_id}/stage` `{\"stage\": \"Observation\", \"note\": \"IV fluids, reassess at 2 pm\"}` |\n| `AwaitingReferral` | `POST /er/visits/{er_visit_id}/stage` `{\"stage\": \"AwaitingReferral\", \"note\": \"Needs primary angioplasty\"}` |\n| `AwaitingAdmission` | the doctor admits: `POST /admissions` with the emergency `ticket_id` (or a Code Red) |\n| `AwaitingBed` | no bed: `POST /admissions/{admission_id}/waitlist`; back to `AwaitingAdmission` when a bed is reserved |\n| `Departed` | below |\n\nA move the stage machine does not allow: `ER_STAGE_INVALID`. Every change of stage is logged with its time, author and\nnote (`stages` in the visit): the waiting times.\n\n**Code Red** from the ER: `POST /admissions/code-red` with the visit's `er_visit_id` (default: the patient's open visit,\nor a new one). The Code Red is recorded on the visit as triage level 1 by whoever pressed the button, and the visit\nwaits for the admission. Send `is_medico_legal` and `mlc_case_type_id` when known; else answer the checklist later with\n`POST /er/visits/{er_visit_id}/medico-legal` (also to correct it; not \"no\" while a medico-legal case is open).\nPressed on an ER visit, send that visit's `patient_id` and `er_visit_id` (`GET /er/visits/{er_visit_id}`); an\nunidentified patient sends neither and gets a temporary identity.\n\n**Documents the patient brings** (outside reports, referral letters, an ID copy): the triage nurse or the doctor\nattaches them during the visit, `POST /patients/{patient_id}/documents` (multipart: the file, `doc_type`, and for a\nreport from elsewhere `is_outside`, `source_facility`, `document_date`); `GET /patients/{patient_id}/documents` lists\nthem and `GET /patient-documents/{document_id}/download` opens one (each download is logged as a patient-data read).\n\n## 5. The departure (MSDS 20)\n\n`POST /er/visits/{er_visit_id}/depart`, by disposition:\n\n| `disposition` | Required |\n|---|---|\n| `Discharged` | `condition_at_departure`, `follow_up_advice` |\n| `Referred` | `condition_at_departure`, `referral_reason`, `referred_to` (the receiving hospital) |\n| `LAMA` | `statement_signed_by` (who signed the statement), or `absence_noticed_at` |\n| `DischargedOnRequest` | `statement_signed_by` |\n| `LeftWithoutBeingSeen` | `absence_noticed_at`; not after a doctor saw the patient (then LAMA) |\n| `Admitted` | nothing: recorded by itself when the admission admits the patient (here: link `admission_id`) |\n| `Died`, `BroughtDead` | nothing: recorded by itself with the death record (`POST /patients/{patient_id}/death`); a body brought dead that nobody registered is added to the ER register then |\n\n`departed_at` defaults to now. The departure is final (`ER_VISIT_DEPARTED` afterwards) and carries the stamp of whoever\nrecorded it. The emergency ticket completes when the ER note is finalized (before or after the departure); a patient\nwho left before being seen has the ticket deferred. Completing an emergency ticket before the departure is recorded:\n`ER_VISIT_OPEN`.\n\n## 6. The triage scale (Quality Officer, administrators)\n\nThe scale ships as a **starting algorithm written for Haspataal** (not a copy of a licensed triage system): the\nemergency consultant reviews and adapts it, then prints it as the hospital's written triage algorithm\n(`GET /er/triage-scale/print-payload`, or `GET /er/triage-scale/pdf`) and signs it.\n\n* `PATCH /er/triage-scale/levels/{level}`: name, colour, target time, description.\n* `POST /er/triage-scale/signs`: a `Sign` (`level`, `label`, `age_group`) or a `VitalSign` limit (also `vital`,\n  `comparison`, `threshold`; blood glucose in mg/dL).\n* `PATCH /er/triage-scale/signs/{discriminator_id}`: change it, or retire it with `is_active` false (triages already\n  recorded keep what they used). `GET /er/triage-scale?include_inactive=true` shows retired rows.\n\n## 7. The ER register and the statistics\n\n* `GET /er/visits` (`date_from`, `date_to`, `disposition`, `triage_level`, `open_only`, `patient_id`): the ER register,\n  newest first: what the surveyor samples for indicator 20. `GET /er/visits/{er_visit_id}`: one visit in full.\n* `GET /er/statistics` (default: this month): visits, time to triage and the share within the target, per level the\n  time to the doctor and the share within its target, levels changed from the suggestion, patients seen before triage,\n  the waiting times of MSDS 15 iii (median, 90th percentile, longest: arrival to doctor, observation, decision to admit\n  to leaving, no bed, decision to refer to leaving, length of stay), how patients left, the medico-legal checklist and\n  cases opened.",
+  "steps": [
+    {
+      "heading": "1. The ER visit: one per emergency arrival",
+      "anchor": "1-the-er-visit-one-per-emergency-arrival",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/reception/registrations",
+          "summary": "Register + OPD slip + payment + queue token (atomic)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/code-red",
+          "summary": "CODE RED / Emergency Admit (one click)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/trauma",
+          "summary": "Create a temporary trauma profile ('Unknown Male 1')"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/er/visits",
+          "summary": "Register an arrival in the emergency department"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/wristbands",
+          "summary": "Print an identity wristband"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/verbal",
+          "summary": "Write down a verbal or telephone order"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/consents",
+          "summary": "Prepare a consent form"
+        }
+      ]
+    },
+    {
+      "heading": "2. The ER board",
+      "anchor": "2-the-er-board",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/er/board",
+          "summary": "The ER board: open visits by triage level"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/er/on-duty",
+          "summary": "Staff on duty in the ER and consultants on call"
+        }
+      ]
+    },
+    {
+      "heading": "3. Triage by the hospital's algorithm",
+      "anchor": "3-triage-by-the-hospital-s-algorithm",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/er/triage-scale",
+          "summary": "The triage scale and its algorithm"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/er/visits/{er_visit_id}/triage",
+          "summary": "Triage (or re-triage) the patient"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/mlc/case-types",
+          "summary": "Medico-legal case types"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mlc/cases",
+          "summary": "Open a medico-legal case"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/mlc/contacts",
+          "summary": "Police stations and MLR hospitals (contact list)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/opd-queues/me",
+          "summary": "Doctor: my live queue"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/er/visits/{er_visit_id}",
+          "summary": "One ER visit"
+        }
+      ]
+    },
+    {
+      "heading": "4. Through the visit",
+      "anchor": "4-through-the-visit",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-queues/{queue_id}/call",
+          "summary": "Doctor calls the patient in (InConsultation)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/er/visits/{er_visit_id}/stage",
+          "summary": "Move the patient to treatment, observation or waiting for a referral"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions",
+          "summary": "Doctor: Admit Patient (→ Admission_Pending)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/waitlist",
+          "summary": "No bed: add to the ward waitlist"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/code-red",
+          "summary": "CODE RED / Emergency Admit (one click)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/er/visits/{er_visit_id}/medico-legal",
+          "summary": "Answer or correct the medico-legal checklist"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/er/visits/{er_visit_id}",
+          "summary": "One ER visit"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/documents",
+          "summary": "Upload a patient document (PDF/JPEG/PNG)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/{patient_id}/documents",
+          "summary": "List patient documents"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patient-documents/{document_id}/download",
+          "summary": "Download a patient document"
+        }
+      ]
+    },
+    {
+      "heading": "5. The departure (MSDS 20)",
+      "anchor": "5-the-departure-msds-20",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/er/visits/{er_visit_id}/depart",
+          "summary": "Record how the patient left the emergency department"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/death",
+          "summary": "Record a death"
+        }
+      ]
+    },
+    {
+      "heading": "6. The triage scale (Quality Officer, administrators)",
+      "anchor": "6-the-triage-scale-quality-officer-administrators",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/er/triage-scale/print-payload",
+          "summary": "The written triage algorithm (A4)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/er/triage-scale/pdf",
+          "summary": "The written triage algorithm as a PDF"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/er/triage-scale/levels/{level}",
+          "summary": "Change a triage level"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/er/triage-scale/signs",
+          "summary": "Add a danger sign or a vital-sign limit"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/er/triage-scale/signs/{discriminator_id}",
+          "summary": "Change or retire a danger sign or vital-sign limit"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/er/triage-scale",
+          "summary": "The triage scale and its algorithm"
+        }
+      ]
+    },
+    {
+      "heading": "7. The ER register and the statistics",
+      "anchor": "7-the-er-register-and-the-statistics",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/er/visits",
+          "summary": "The ER register (emergency log book)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/er/visits/{er_visit_id}",
+          "summary": "One ER visit"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/er/statistics",
+          "summary": "Emergency department statistics"
+        }
+      ]
+    }
+  ]
+}

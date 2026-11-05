@@ -1,0 +1,1204 @@
+{
+  "screen": "lab_admin",
+  "title": "Lab administration",
+  "cases": [
+    {
+      "id": "case:GET /lab/tests",
+      "call": "GET /api/v1/lab/tests",
+      "summary": "Active lab test catalogue (for the ordering picker)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "receptionist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/tests",
+            "query": {
+              "q": "Vitamin"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "test_id": 3,
+                  "code": "VITD",
+                  "name": "Vitamin D",
+                  "section": "Biochemistry",
+                  "sample_type": "Blood",
+                  "price": 3500,
+                  "turnaround_minutes": null,
+                  "emergency_turnaround_minutes": null,
+                  "availability": "SendOut",
+                  "send_out_partner_id": 1,
+                  "send_out_partner_name": "City Reference Laboratory",
+                  "available_24h": false,
+                  "notifiable_disease": null,
+                  "is_active": true,
+                  "row_version": 1,
+                  "metric_schema": [
+                    {
+                      "key": "vitd",
+                      "ref": {
+                        "default": [
+                          30,
+                          100
+                        ]
+                      },
+                      "type": "number",
+                      "unit": "ng/mL",
+                      "label": "25-OH vitamin D",
+                      "required": true
+                    }
+                  ]
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:02:52.094403+00:00"
+              },
+              "request_id": "38924faef3f943f7b883e6717d06e91e"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /lab/tests",
+      "call": "POST /api/v1/lab/tests",
+      "summary": "Add a test with its metric schema",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/tests",
+            "body": {
+              "code": "CBC",
+              "name": "Complete Blood Count",
+              "section": "Hematology",
+              "metric_schema": [
+                {
+                  "key": "hb",
+                  "label": "Hemoglobin",
+                  "unit": "g/dL",
+                  "type": "number",
+                  "ref": {
+                    "male": [
+                      13.5,
+                      17.5
+                    ],
+                    "female": [
+                      12,
+                      15.5
+                    ],
+                    "default": [
+                      12,
+                      17.5
+                    ]
+                  },
+                  "critical": {
+                    "low": 7,
+                    "high": 20
+                  }
+                },
+                {
+                  "key": "wbc",
+                  "label": "WBC",
+                  "unit": "10^9/L",
+                  "type": "number",
+                  "ref": {
+                    "default": [
+                      4,
+                      11
+                    ]
+                  }
+                },
+                {
+                  "key": "comment",
+                  "label": "Comment",
+                  "type": "text",
+                  "required": false
+                }
+              ],
+              "price": 800
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "test_id": 1,
+                "code": "CBC",
+                "name": "Complete Blood Count",
+                "section": "Hematology",
+                "sample_type": "Blood",
+                "metric_schema_jsonb": [
+                  {
+                    "key": "hb",
+                    "ref": {
+                      "male": [
+                        13.5,
+                        17.5
+                      ],
+                      "female": [
+                        12,
+                        15.5
+                      ],
+                      "default": [
+                        12,
+                        17.5
+                      ]
+                    },
+                    "type": "number",
+                    "unit": "g/dL",
+                    "label": "Hemoglobin",
+                    "critical": {
+                      "low": 7,
+                      "high": 20
+                    },
+                    "required": true
+                  },
+                  {
+                    "key": "wbc",
+                    "ref": {
+                      "default": [
+                        4,
+                        11
+                      ]
+                    },
+                    "type": "number",
+                    "unit": "10^9/L",
+                    "label": "WBC",
+                    "required": true
+                  },
+                  {
+                    "key": "comment",
+                    "type": "text",
+                    "label": "Comment",
+                    "required": false
+                  }
+                ],
+                "price": 800,
+                "turnaround_minutes": null,
+                "emergency_turnaround_minutes": null,
+                "availability": "InHouse",
+                "send_out_partner_id": null,
+                "available_24h": false,
+                "notifiable_disease": null,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:44.782547+00:00"
+              },
+              "request_id": "055569ae21374f51974f68434de5ed2a"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DIAGNOSTIC_PARTNER_INVALID",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:PATCH /lab/tests/{test_id}",
+      "call": "PATCH /api/v1/lab/tests/{test_id}",
+      "summary": "Edit a test (not its price)",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/tests/1",
+            "body": {
+              "name": "CBC (5-part)",
+              "turnaround_minutes": 90,
+              "row_version": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "test_id": 1,
+                "code": "CBC",
+                "name": "CBC (5-part)",
+                "section": "Hematology",
+                "sample_type": "Blood",
+                "metric_schema_jsonb": [
+                  {
+                    "key": "hb",
+                    "ref": {
+                      "male": [
+                        13.5,
+                        17.5
+                      ],
+                      "female": [
+                        12,
+                        15.5
+                      ],
+                      "default": [
+                        12,
+                        17.5
+                      ]
+                    },
+                    "type": "number",
+                    "unit": "g/dL",
+                    "label": "Hemoglobin",
+                    "critical": {
+                      "low": 7,
+                      "high": 20
+                    },
+                    "required": true
+                  },
+                  {
+                    "key": "wbc",
+                    "ref": {
+                      "default": [
+                        4,
+                        11
+                      ]
+                    },
+                    "type": "number",
+                    "unit": "10^9/L",
+                    "label": "WBC",
+                    "required": true
+                  },
+                  {
+                    "key": "comment",
+                    "type": "text",
+                    "label": "Comment",
+                    "required": false
+                  }
+                ],
+                "price": 800,
+                "turnaround_minutes": 90,
+                "emergency_turnaround_minutes": null,
+                "availability": "InHouse",
+                "send_out_partner_id": null,
+                "available_24h": false,
+                "notifiable_disease": null,
+                "is_active": true,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-30T20:12:00.293707+00:00"
+              },
+              "request_id": "a2fdda2a22e248bc9444ffe15d66987c"
+            }
+          },
+          "errors_seen": [
+            "NOT_FOUND",
+            "VERSION_CONFLICT"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DIAGNOSTIC_PARTNER_INVALID",
+        "NOT_FOUND",
+        "VALIDATION_ERROR",
+        "VERSION_CONFLICT"
+      ]
+    },
+    {
+      "id": "case:PUT /lab/tests/{test_id}/price",
+      "call": "PUT /api/v1/lab/tests/{test_id}/price",
+      "summary": "Set a test price (Lab Admin; history kept)",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/tests/1/price",
+            "body": {
+              "price": 950,
+              "reason": "new supplier rates"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "test_id": 1,
+                "code": "CBC",
+                "name": "Complete Blood Count",
+                "price": 950
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:39:37.795310+00:00"
+              },
+              "request_id": "ce09c88f228042989a82971038a1e007"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/tests/{test_id}/bom",
+      "call": "GET /api/v1/lab/tests/{test_id}/bom",
+      "summary": "Reagent bill-of-materials of a test",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/tests/1/bom"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "lab_test_reagent_id": 1,
+                  "reagent_id": 1,
+                  "code": "HBR",
+                  "name": "Hb reagent",
+                  "unit": "ml",
+                  "qty_per_test": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:39:42.785671+00:00"
+              },
+              "request_id": "83947965469544e5810eb4cd44f31c13"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:PUT /lab/tests/{test_id}/bom",
+      "call": "PUT /api/v1/lab/tests/{test_id}/bom",
+      "summary": "Replace the reagent BOM of a test",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/tests/1/bom",
+            "body": {
+              "lines": [
+                {
+                  "reagent_id": 1,
+                  "qty_per_test": 2
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "lab_test_reagent_id": 1,
+                  "reagent_id": 1,
+                  "code": "HBR",
+                  "name": "Hb reagent",
+                  "unit": "ml",
+                  "qty_per_test": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:39:01.578872+00:00"
+              },
+              "request_id": "304f8abf816845ce97a151eda758745a"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/reagents",
+      "call": "GET /api/v1/lab/reagents",
+      "summary": "Reagents with live stock (FEFO-eligible) and next expiry",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/reagents"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "reagent_id": 1,
+                  "code": "HBR",
+                  "name": "Hb reagent",
+                  "unit": "ml",
+                  "low_stock_threshold": 5,
+                  "qty_available": 90,
+                  "next_expiry": "2099-01-01"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:39:42.883826+00:00"
+              },
+              "request_id": "e4746feb33ba4f5cb85b981d7c429069"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /lab/reagents",
+      "call": "POST /api/v1/lab/reagents",
+      "summary": "Add a reagent",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/reagents",
+            "body": {
+              "code": "HBR",
+              "name": "Hb reagent",
+              "unit": "ml",
+              "low_stock_threshold": 5
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "reagent_id": 1,
+                "code": "HBR",
+                "name": "Hb reagent",
+                "unit": "ml",
+                "low_stock_threshold": 5,
+                "near_expiry_alert_days": 90,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:39:01.525848+00:00"
+              },
+              "request_id": "ae6d78f2049c4a81bda08758c2f8164f"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /lab/reagent-batches",
+      "call": "POST /api/v1/lab/reagent-batches",
+      "summary": "Receive a reagent batch (stock in)",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/reagent-batches",
+            "body": {
+              "reagent_id": 1,
+              "batch_no": "R1",
+              "expiry_date": "2099-01-01",
+              "qty_received": 100,
+              "total_cost": 5000
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "reagent_batch_id": 1,
+                "reagent_id": 1,
+                "batch_no": "R1",
+                "expiry_date": "2099-01-01",
+                "qty_received": 100,
+                "total_cost": 5000,
+                "unit_cost": 50,
+                "vendor_invoice_id": null,
+                "received_by": 6,
+                "received_at": "2026-09-27T17:39:01.529806+00:00",
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:39:01.567683+00:00"
+              },
+              "request_id": "53242443cee04b9eb080ef3406556eb4"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /lab/reagent-adjustments",
+      "call": "POST /api/v1/lab/reagent-adjustments",
+      "summary": "Write off reagent stock (expiry / damage / count adjustment)",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/reagent-adjustments",
+            "body": {
+              "reagent_batch_id": 1,
+              "qty": 10,
+              "reason": "Damage",
+              "note": "vial broke"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "movement_id": 2,
+                "reagent_id": 1,
+                "reagent_batch_id": 1,
+                "qty": 10,
+                "direction": "Out",
+                "reason": "Damage",
+                "lab_requisition_item_id": null,
+                "vendor_invoice_id": null,
+                "adjustment_reason": "vial broke",
+                "by_user": 6,
+                "at": "2026-09-27T17:39:42.844210+00:00"
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:39:42.874744+00:00"
+              },
+              "request_id": "2069b3fbd0e04a4ca5283de2cf4ac444"
+            }
+          },
+          "errors_seen": [
+            "INSUFFICIENT_STOCK"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "INSUFFICIENT_STOCK",
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /lab/dashboard",
+      "call": "GET /api/v1/lab/dashboard",
+      "summary": "Lab profit: revenue − reagent COGS, contractor share",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/dashboard"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "gross_revenue": 0,
+                "reagent_cogs": 0,
+                "net_profit": 0,
+                "hospital_share_pct": 100,
+                "hospital_share": 0,
+                "contractor_share": 0,
+                "by_test": [],
+                "reruns": 0
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:39:42.826876+00:00"
+              },
+              "request_id": "83fe87982e10437abd7e0b80fd620713"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:PUT /lab/contractor",
+      "call": "PUT /api/v1/lab/contractor",
+      "summary": "Set the lab revenue-share agreement from a date",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/contractor",
+            "body": {
+              "hospital_share_pct": 70,
+              "contractor_vendor_id": 1,
+              "effective_from": "2026-01-01"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "setting_id": 1,
+                "contractor_employee_id": null,
+                "contractor_vendor_id": 1,
+                "hospital_share_pct": 70,
+                "contractor_share_pct": 30,
+                "effective_from": "2026-01-01",
+                "effective_to": null,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:39:42.911753+00:00"
+              },
+              "request_id": "44068b7a225b42e8af40304363538ce4"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /staff/lookup",
+      "call": "GET /api/v1/staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/staff/lookup",
+            "query": {
+              "q": "sana look"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 2,
+                  "emp_number": "EMP-2026-0002",
+                  "full_name": "Sana Lookuptest",
+                  "designation": "Officer",
+                  "department_name": null,
+                  "license_type": "PNC",
+                  "user_id": 2,
+                  "registration": "PNC PNC-31852"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-11-05T01:52:33.483546+00:00"
+              },
+              "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
+            }
+          },
+          "errors_seen": [
+            "UNAUTHENTICATED",
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "UNAUTHENTICATED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /finance/vendors",
+      "call": "GET /api/v1/finance/vendors",
+      "summary": "Vendors",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/vendors",
+            "query": {
+              "vendor_type": "PharmacySupplier"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "vendor_id": 1,
+                  "name": "MedSupply",
+                  "vendor_type": "PharmacySupplier",
+                  "contact_name": null,
+                  "phone": "0421234567",
+                  "address": null,
+                  "tax_number": null,
+                  "cnic": null,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:36:41.047443+00:00"
+              },
+              "request_id": "0376c42d633d406db3283d3c1b66acaf"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /diagnostic-partners",
+      "call": "GET /api/v1/diagnostic-partners",
+      "summary": "Partner laboratories and imaging centres",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/diagnostic-partners",
+            "query": {
+              "services": "Lab"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "partner_id": 1,
+                  "name": "City Reference Laboratory",
+                  "services": "Lab",
+                  "phc_registration": "PHC-R-123",
+                  "accreditation": "PNAC ISO 15189",
+                  "pnra_licence": null,
+                  "mou_reference": "MOU-1",
+                  "mou_valid_from": "2026-09-01",
+                  "mou_valid_until": "2027-07-28",
+                  "turnaround_hours": 48,
+                  "quality_note": null,
+                  "contact": null,
+                  "address": null,
+                  "is_active": true,
+                  "row_version": 3,
+                  "mou_expired": false,
+                  "tests_sent_out": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:02:52.680109+00:00"
+              },
+              "request_id": "59c031ca9932490794cc0f09ba7a33fe"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /pharmacy-admin/vendor-invoices",
+      "call": "GET /api/v1/pharmacy-admin/vendor-invoices",
+      "summary": "Supplier invoices and amounts owed",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "owner",
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/vendor-invoices",
+            "query": {
+              "module": "Pharmacy"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "vendor_invoice_id": 1,
+                  "vendor_id": 1,
+                  "invoice_no": "MS-1001",
+                  "invoice_type": "Purchase",
+                  "module": "Pharmacy",
+                  "total_cost": 12000,
+                  "paid_amount": 0,
+                  "status": "Pending",
+                  "invoice_date": "2026-09-27",
+                  "due_date": null,
+                  "received_by": 6,
+                  "received_at": "2026-09-27T17:43:44.743903+00:00",
+                  "notes": null,
+                  "row_version": 1,
+                  "vendor_name": "MedSupply",
+                  "balance": 12000
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:43:44.777720+00:00"
+              },
+              "request_id": "6fc5ef4e7ab2479d9d36e09e31bcfbd7"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinical_specialist"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/reagents/{reagent_id}/batches",
+      "call": "GET /api/v1/lab/reagents/{reagent_id}/batches",
+      "summary": "A reagent's batches with stock, the first to expire first",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/reagents/1/batches"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "reagent_batch_id": 1,
+                  "reagent_id": 1,
+                  "batch_no": "R1",
+                  "expiry_date": "2099-01-01",
+                  "qty_received": 100,
+                  "qty_available": 100,
+                  "unit_cost": 50,
+                  "received_at": "2026-11-05T01:52:33.422008+00:00",
+                  "is_expired": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-11-05T01:52:33.967945+00:00"
+              },
+              "request_id": "d8117b8621604702857cc466f83e5b25"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "NOT_FOUND"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_admin].view = full (laboratory or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "setup",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_admin].view = setup (laboratory or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in the daily menus: reach it from Facility settings (a preview's prerequisites link to it) to set the service up before switching it on."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/lab_admin",
+  "workspace_guide": "get_handbook_outline('lab_admin')",
+  "realtime": [
+    {
+      "event": "lab.reagent.low_stock",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "A metric schema editor builds metric_schema (key, label, unit, ref ranges, critical: low/high for a number, values for a text metric such as Positive).",
+    "Per test (MSDS AAC 1, 4-6): turnaround_minutes (routine) and emergency_turnaround_minutes (Urgent, STAT; empty: the hospital defaults), availability InHouse or SendOut with send_out_partner_id (GET /diagnostic-partners?services=Lab), available_24h for the basic tests, notifiable_disease for a test whose positive result is a priority disease.",
+    "Exists for the service laboratory or outsourced_diagnostics (setup): show it as GET /establishment views.screens says for screen_id lab_admin (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

@@ -23,8 +23,10 @@ import {
   dequeueOfflineScan,
   playOutcomeAudio,
   BADGE_STATION_ERROR_MESSAGES,
+  shouldQueueStationScan,
+  type KioskDisplayOutcome,
 } from "../badge-station-kiosk-policy";
-import { setStationKey } from "../bridge";
+import { call, setStationKey } from "../bridge";
 
 interface BadgeStationKioskProps {
   onOpenHelp?: () => void;
@@ -36,21 +38,10 @@ const STORAGE_KEY_OFFLINE_QUEUE = "haspataal_station_offline_queue";
 export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp }) => {
   // Locale & Setup State
   const [lang, setLang] = useState<"en" | "ur">("en");
-  const [stationConfig, setStationConfig] = useState<StationConfig>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_CONFIG);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.station_key) setStationKey(parsed.station_key);
-        return parsed;
-      }
-    } catch {
-      // Fall through
-    }
-    return { station_id: "W2-KIOSK", station_key: "station_secret_key_demo" };
-  });
+  const [stationConfig, setStationConfig] = useState<StationConfig>({ station_id: "", station_key: "" });
+  const [loadingConfig, setLoadingConfig] = useState(true);
 
-  const [setupModalOpen, setSetupModalOpen] = useState(false);
+  const [setupModalOpen, setSetupModalOpen] = useState(!stationConfig.station_id || !stationConfig.station_key);
   const [tempStationId, setTempStationId] = useState(stationConfig.station_id);
   const [tempStationKey, setTempStationKey] = useState(stationConfig.station_key);
   const [setupErrors, setSetupErrors] = useState<string[]>([]);
@@ -70,7 +61,7 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
 
   // Flash Outcome State (rule:2554916922)
   const [flashOutcome, setFlashOutcome] = useState<{
-    outcome: BadgeScanResultOut["outcome"];
+    outcome: KioskDisplayOutcome;
     scan_id?: number;
     detail?: string | null;
   } | null>(null);
@@ -89,17 +80,49 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
   });
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [syncingQueue, setSyncingQueue] = useState(false);
+  const syncFlightRef = useRef(false);
+  const scanFlightRef = useRef(false);
+  const queueRef = useRef(offlineQueue);
   const [queueDrawerOpen, setQueueDrawerOpen] = useState(false);
 
   // Submission In-flight state
   const [submitting, setSubmitting] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
 
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        let config = await call<StationConfig | null>("station-config-load");
+        const legacy = localStorage.getItem(STORAGE_KEY_CONFIG);
+        if (!config && legacy) {
+          config = JSON.parse(legacy);
+          await call("station-config-save", config);
+        }
+        // Remove the legacy plaintext only after native storage is confirmed.
+        if (config && legacy) localStorage.removeItem(STORAGE_KEY_CONFIG);
+        if (active && config) {
+          setStationConfig(config);
+          setSetupModalOpen(false);
+        }
+      } catch (error) {
+        if (active) setGeneralError(error instanceof Error ? error.message : "Station configuration could not be loaded.");
+      } finally {
+        if (active) setLoadingConfig(false);
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => () => {
+    clearTimeout(flashTimerRef.current);
+    clearInterval(countdownIntervalRef.current);
+  }, []);
+
   // Keep stationKey synchronized in bridge
   useEffect(() => {
-    if (stationConfig.station_key) {
-      setStationKey(stationConfig.station_key);
-    }
+    setStationKey(stationConfig.station_key || null);
+    return () => setStationKey(null);
   }, [stationConfig.station_key]);
 
   // Online / offline window listeners
@@ -108,24 +131,33 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
     const handleOffline = () => setIsOnline(false);
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
+    const unsubscribe = window.terminal?.subscribe(event => {
+      if (event.type === "connection") setIsOnline(event.connected);
+    });
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      unsubscribe?.();
     };
   }, []);
 
-  // Persist offline queue
-  useEffect(() => {
+  // Commit durably before reporting a locally queued scan. Retain original event IDs.
+  const persistQueue = (next: ScanIn[]) => {
     try {
-      localStorage.setItem(STORAGE_KEY_OFFLINE_QUEUE, JSON.stringify(offlineQueue));
+      localStorage.setItem(STORAGE_KEY_OFFLINE_QUEUE, JSON.stringify(next));
+      queueRef.current = next;
+      setOfflineQueue(next);
+      return true;
     } catch {
-      // Ignore storage errors
+      setGeneralError(lang === "ur" ? "اسکین محفوظ نہیں ہوا۔ آپریٹر سے رابطہ کریں اور دوبارہ اسکین کریں۔" : "Scan could not be saved locally. Contact the operator and scan again.");
+      return false;
     }
-  }, [offlineQueue]);
+  };
 
   // Load Station Profile
   const loadProfile = useCallback(async () => {
-    if (!stationConfig.station_id) return;
+    setProfile(null);
+    if (!stationConfig.station_id || !stationConfig.station_key) return;
     setLoadingProfile(true);
     setProfileError(null);
     try {
@@ -142,7 +174,7 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
     } finally {
       setLoadingProfile(false);
     }
-  }, [stationConfig.station_id, lang]);
+  }, [stationConfig.station_id, stationConfig.station_key, lang]);
 
   useEffect(() => {
     loadProfile();
@@ -191,7 +223,7 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
 
   // Flash outcome 3s countdown & auto-dismiss (rule:2554916922)
   const triggerFlashOutcome = useCallback(
-    (outcome: BadgeScanResultOut["outcome"], scanId?: number, detail?: string | null) => {
+    (outcome: KioskDisplayOutcome, scanId?: number, detail?: string | null) => {
       setFlashOutcome({ outcome, scan_id: scanId, detail });
       setCountdownSeconds(3);
 
@@ -222,6 +254,11 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
 
   // Submit scan payload to server (or enqueue offline if server fails)
   const submitScan = async (badgeCode: string, bedCode?: string | null) => {
+    if (scanFlightRef.current || syncFlightRef.current) {
+      setGeneralError(lang === "ur" ? "پچھلا اسکین جاری ہے۔ دوبارہ اسکین کریں۔" : "Previous scan is still pending. Please scan again.");
+      return;
+    }
+    scanFlightRef.current = true;
     setSubmitting(true);
     setGeneralError(null);
 
@@ -236,9 +273,9 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
 
     if (!isOnline) {
       // Offline mode: queue locally
-      setOfflineQueue((prev) => enqueueOfflineScan(payload, prev));
-      triggerFlashOutcome("AttendanceIn", undefined, "Offline queued for sync");
+      if (persistQueue(enqueueOfflineScan(payload, queueRef.current))) triggerFlashOutcome("Queued");
       setSubmitting(false);
+      scanFlightRef.current = false;
       return;
     }
 
@@ -252,9 +289,8 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
     } catch (err: any) {
       const code = err?.response?.error?.code || err?.code;
       // If network or server error, queue offline per rule:438ca845ec
-      if (code === "OFFLINE" || !navigator.onLine || err?.name === "TypeError" || err?.status >= 500) {
-        setOfflineQueue((prev) => enqueueOfflineScan(payload, prev));
-        triggerFlashOutcome("AttendanceIn", undefined, "Offline queued: server unreachable");
+      if (shouldQueueStationScan(err)) {
+        if (persistQueue(enqueueOfflineScan(payload, queueRef.current))) triggerFlashOutcome("Queued");
       } else {
         const errorMsg =
           BADGE_STATION_ERROR_MESSAGES[code]?.[lang] ||
@@ -266,11 +302,13 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
       }
     } finally {
       setSubmitting(false);
+      scanFlightRef.current = false;
     }
   };
 
   // Handle incoming scan (from USB scanner or manual entry)
   const handleScanCode = (scannedCode: string) => {
+    if (!profile || setupModalOpen || loadingProfile) return;
     const code = scannedCode.trim();
     if (!code) return;
 
@@ -322,28 +360,38 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
 
   // Sync offline queue items (rule:438ca845ec)
   const syncOfflineQueue = async () => {
-    if (offlineQueue.length === 0 || syncingQueue) return;
+    if (queueRef.current.length === 0 || syncFlightRef.current || scanFlightRef.current) return;
+    syncFlightRef.current = true;
     setSyncingQueue(true);
     setGeneralError(null);
 
-    const pending = [...offlineQueue];
+    const pending = [...queueRef.current];
     for (const item of pending) {
+      if (item.station_id !== stationConfig.station_id) {
+        setGeneralError(lang === "ur" ? "قطار میں دوسرے اسٹیشن کے اسکین ہیں۔ اصل اسٹیشن بحال کریں۔" : "Queue contains scans for another station. Restore its original configuration before syncing.");
+        break;
+      }
       try {
-        await scanBadgeStationsScans(item);
-        setOfflineQueue((prev) => dequeueOfflineScan(item.gateway_event_id!, prev));
+        const result = await scanBadgeStationsScans(item);
+        if (!persistQueue(dequeueOfflineScan(item.gateway_event_id!, queueRef.current))) break;
+        triggerFlashOutcome(result.outcome, result.scan_id, result.detail);
+        if (formatScanOutcome(result.outcome).isRed) break;
       } catch (err: any) {
-        // If still unreachable, halt sync loop
-        if (err?.code === "OFFLINE" || !navigator.onLine) {
-          break;
-        }
+        setGeneralError(err?.response?.error?.message || err?.message || "Sync failed. Pending scans have been retained.");
+        break;
       }
     }
+    syncFlightRef.current = false;
     setSyncingQueue(false);
-    loadProfile();
   };
 
+  // Reconnect retries use the saved payload and original gateway_event_id.
+  useEffect(() => {
+    if (isOnline && stationConfig.station_key) void syncOfflineQueue();
+  }, [isOnline, stationConfig.station_id, stationConfig.station_key]);
+
   // Save station setup (rule:f98f89a7b6)
-  const handleSaveSetup = () => {
+  const handleSaveSetup = async () => {
     const { valid, errors } = validateStationSetup(tempStationId, tempStationKey);
     if (!valid) {
       setSetupErrors(errors);
@@ -353,16 +401,16 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
       station_id: tempStationId.trim(),
       station_key: tempStationKey.trim(),
     };
+    try {
+      await call("station-config-save", newConfig);
+    } catch (error) {
+      setSetupErrors([error instanceof Error ? error.message : "Station configuration could not be saved."]);
+      return;
+    }
     setStationConfig(newConfig);
     setStationKey(newConfig.station_key);
-    try {
-      localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(newConfig));
-    } catch {
-      // Ignore
-    }
     setSetupModalOpen(false);
     setSetupErrors([]);
-    loadProfile();
   };
 
   // Format outcome styling
@@ -1093,6 +1141,7 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
               </button>
               <button
                 onClick={handleSaveSetup}
+                disabled={loadingConfig}
                 data-help="badge_station_kiosk.setup_save_button"
                 style={{
                   backgroundColor: "#0284c7",
@@ -1207,7 +1256,8 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <button
-                onClick={() => setOfflineQueue([])}
+                disabled={offlineQueue.length > 0}
+                title={lang === "ur" ? "غیر تصدیق شدہ اسکین حذف نہیں ہو سکتے۔ پہلے ہم آہنگ کریں۔" : "Unconfirmed scans cannot be discarded. Sync them first."}
                 data-help="badge_station_kiosk.queue_clear_button"
                 style={{
                   backgroundColor: "#ef4444",
@@ -1219,7 +1269,7 @@ export const BadgeStationKiosk: React.FC<BadgeStationKioskProps> = ({ onOpenHelp
                   cursor: "pointer",
                 }}
               >
-                {lang === "ur" ? "کیو صاف کریں" : "Clear Queue"}
+                {lang === "ur" ? "زیر التوا اسکین محفوظ ہیں" : "Pending scans retained"}
               </button>
               <button
                 onClick={syncOfflineQueue}

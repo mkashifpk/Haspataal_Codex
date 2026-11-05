@@ -118,6 +118,7 @@ export interface SettlementParticipantOut {
 export interface ConsumableIn {
   /** Scanned barcode of a formulary item (pharmacy stock, FEFO) */
   barcode?: string | null;
+  /** A formulary item without its barcode (GET /drugs/search) */
   drug_id?: number | null;
   qty: number | string;
   /** Non-stock items (e.g. vendor implant): description + costs */
@@ -150,6 +151,33 @@ export interface OtReasonIn {
   reason: string;
 }
 
+/** A drug with its live stock (view v_drug_stock): what e-prescription search shows. */
+export interface DrugStockOut {
+  drug_id: number;
+  code: string;
+  name: string;
+  generic_name: string | null;
+  strength: string | null;
+  form: "Tablet" | "Capsule" | "Syrup" | "Suspension" | "Injection" | "Infusion" | "Cream" | "Ointment" | "Drops" | "Inhaler" | "Suppository" | "Powder" | "Consumable" | "Device" | "Other";
+  unit: string;
+  schedule: "OTC" | "ScheduleG" | "ScheduleH" | "ScheduleX" | "HospitalOnly";
+  is_otc_allowed: boolean;
+  barcode: string | null;
+  low_stock_threshold: number;
+  is_active: boolean;
+  /** Set: a high-alert medicine (MSDS 56): show it in red; a second person checks it when dispensed and given */
+  high_alert_category: "ConcentratedElectrolyte" | "Chemotherapy" | "Anticoagulant" | "Insulin" | "Opioid" | "Sedative" | "NeuromuscularBlocker" | "Inotrope" | "Thrombolytic" | "Psychotropic" | "HighCost" | "Other" | null;
+  /** Prescribed only with the RestrictedPrescribing privilege (MSDS 52) */
+  is_restricted: boolean;
+  /** Medicines it looks or sounds like: warn when one is picked */
+  lasa_with: string[];
+  /** Non-expired stock */
+  qty_available: number;
+  next_expiry: string | null;
+  /** OutOfStock: show the drug greyed out */
+  stock_status: "InStock" | "Low" | "OutOfStock";
+}
+
 /** Bookings (mine=true for a surgeon's own list) — GET /api/v1/ot/bookings (who may call: holders of ot.booking.view or ot.booking.manage). */
 export function listBookings(query?: { mine?: boolean; status?: "Requested" | "Scheduled" | "InProgress" | "Cleaning" | "Completed" | "Cancelled" | "EmergencyHold" | null; limit?: number }): Promise<OtBookingListItemOut[]> {
   return api<OtBookingListItemOut[]>("GET", withQuery(`/ot/bookings`, query), undefined);
@@ -168,4 +196,9 @@ export function addConsumable(booking_id: number, body: ConsumableIn): Promise<C
 /** Undo a mistaken scan (mirrored reversal row) — POST /api/v1/ot/consumables/{consumable_id}/reverse (who may call: holders of ot.consumable.record). */
 export function reverseConsumable(consumable_id: number, body: OtReasonIn): Promise<ConsumableOut> {
   return api<ConsumableOut>("POST", `/ot/consumables/${consumable_id}/reverse`, body, { idempotent: true });
+}
+
+/** Formulary search with live stock colour — GET /api/v1/drugs/search (who may call: holders of pharmacy.formulary.view). */
+export function searchDrugs(query?: { q?: string; limit?: number }): Promise<DrugStockOut[]> {
+  return api<DrugStockOut[]>("GET", withQuery(`/drugs/search`, query), undefined);
 }

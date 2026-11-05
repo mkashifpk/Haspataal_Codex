@@ -446,6 +446,7 @@ export type ApiErrorCode =
   | "WAIVER_REFUND_ALREADY_DISPENSED"
   | "WAIVER_REFUND_EXCEEDS_WAIVER"
   | "WARD_IN_USE"
+  | "WASTE_HANDED_OVER"
   | "WORKSPACE_NOT_ALLOWED"
   | "WORK_ORDER_STATE_INVALID"
   | "WRISTBAND_EXISTS"
@@ -577,5 +578,6 @@ export interface ApiErrorDetails {
   UNSUPPORTED_MEDIA_TYPE: { allowed?: unknown[] };
   VERSION_CONFLICT: { current_version?: number; expected_version?: number };
   WARD_IN_USE: { beds_in_use?: unknown[]; waitlisted?: number };
+  WASTE_HANDED_OVER: { waste_id?: number; manifest_number?: string; handed_over_on?: string };
   WORKSPACE_NOT_ALLOWED: { workspace?: string; allowed?: unknown[] };
 }

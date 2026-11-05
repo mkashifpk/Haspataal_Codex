@@ -1,3 +1,5 @@
+import {DirectoryPicker} from "../DirectoryPicker";
+import {bilingual as t} from '../i18n';
 /**
  * Screen 139: lab_admin
  * "Lab administration"
@@ -218,6 +220,8 @@ export const LabAdmin: React.FC<LabAdminProps> = ({
 
   // Adjustment form fields
   const [adjustBatchId, setAdjustBatchId] = useState("");
+  const [adjustReagentId,setAdjustReagentId]=useState('');
+  const [contractorVendorId,setContractorVendorId]=useState('');
   const [adjustQty, setAdjustQty] = useState("1");
   const [adjustReason, setAdjustReason] = useState<"Adjustment" | "Expiry" | "Damage">("Expiry");
   const [adjustNote, setAdjustNote] = useState("");
@@ -703,8 +707,8 @@ export const LabAdmin: React.FC<LabAdminProps> = ({
   const handleSubmitContractor = async () => {
     const payload: ContractorIn = {
       hospital_share_pct: Number(hospitalSharePct),
-      contractor_employee_id: selectedStaffId,
-      contractor_vendor_id: null,
+      contractor_employee_id: contractorVendorId ? null : selectedStaffId,
+      contractor_vendor_id: contractorVendorId ? Number(contractorVendorId) : null,
       effective_from: contractorEffectiveFrom,
     };
 
@@ -1267,6 +1271,7 @@ export const LabAdmin: React.FC<LabAdminProps> = ({
               <h3 className="text-sm font-semibold text-gray-900 border-b pb-2">
                 Configure Contractor Revenue Share Agreement | کنٹریکٹر معاہدہ ریونیو شیئرنگ
               </h3>
+              <label>{t('Or choose a contracting laboratory firm','یا معاہدہ کرنے والی لیبارٹری چنیں')}<DirectoryPicker path="/finance/vendors?vendor_type=Contractor" idField="vendor_id" value={contractorVendorId} onChange={e=>{setContractorVendorId(e.target.value);if(e.target.value)setSelectedStaffId(null);}} data-help="lab_admin.select_contractor_employee"/></label>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -1294,7 +1299,7 @@ export const LabAdmin: React.FC<LabAdminProps> = ({
                   {staffResults.length > 0 && (
                     <select
                       value={selectedStaffId || ""}
-                      onChange={(e) => setSelectedStaffId(Number(e.target.value) || null)}
+                      onChange={(e) => {setSelectedStaffId(Number(e.target.value) || null);setContractorVendorId('');}}
                       className="mt-2 px-2 py-1.5 border rounded text-xs w-full bg-white"
                       data-help="lab_admin.select_contractor_employee"
                     >
@@ -2140,14 +2145,12 @@ export const LabAdmin: React.FC<LabAdminProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">Vendor Invoice ID (Optional)</label>
-                <input
-                  type="number"
-                  placeholder="e.g. 102"
+                <DirectoryPicker
                   value={batchVendorInvoiceId}
                   onChange={(e) => setBatchVendorInvoiceId(e.target.value)}
                   className="px-3 py-1.5 border rounded text-xs w-full"
                   data-help="lab_admin.input_batch_vendor_invoice"
-                />
+                 path="/pharmacy-admin/vendor-invoices?module=Lab" idField="vendor_invoice_id" />
               </div>
             </div>
 
@@ -2193,15 +2196,9 @@ export const LabAdmin: React.FC<LabAdminProps> = ({
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Reagent Batch ID *</label>
-                <input
-                  type="number"
-                  placeholder="e.g. 1"
-                  value={adjustBatchId}
-                  onChange={(e) => setAdjustBatchId(e.target.value)}
-                  className="px-3 py-1.5 border rounded text-xs w-full"
-                  data-help="lab_admin.input_adjust_batch_id"
-                />
+                <label>{t('Reagent and batch (first to expire first)','ری ایجنٹ اور بیچ (پہلے ختم ہونے والا پہلے)')}</label>
+                <select data-help="lab_admin.input_adjust_batch_id" value={adjustReagentId} onChange={e=>{setAdjustReagentId(e.target.value);setAdjustBatchId('');}}><option value="">{t('Choose reagent','ری ایجنٹ چنیں')}</option>{reagentsList.map(r=><option key={r.reagent_id} value={r.reagent_id}>{r.name}</option>)}</select>
+                {adjustReagentId&&<DirectoryPicker path={`/lab/reagents/${adjustReagentId}/batches`} idField="reagent_batch_id" value={adjustBatchId} onChange={e=>setAdjustBatchId(e.target.value)} required data-help="lab_admin.input_adjust_batch_id"/>}
               </div>
 
               <div>

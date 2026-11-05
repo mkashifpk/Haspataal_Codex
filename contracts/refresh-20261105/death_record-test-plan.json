@@ -1,0 +1,2249 @@
+{
+  "screen": "death_record",
+  "title": "Death record & certificate",
+  "cases": [
+    {
+      "id": "case:POST /patients/{patient_id}/death",
+      "call": "POST /api/v1/patients/{patient_id}/death",
+      "summary": "Record a death",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/1/death",
+            "body": {
+              "death_at": "2026-09-29T03:33:52.931281+00:00",
+              "terminal_event": "Cardiac arrest; CPR 30 min",
+              "resuscitation_attempted": true
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "death": {
+                  "death_id": 2,
+                  "death_number": "DTH-2026-00001",
+                  "patient_id": 1,
+                  "setting": "Inpatient",
+                  "admission_id": 1,
+                  "ticket_id": null,
+                  "mlc_id": null,
+                  "arrived_at": null,
+                  "death_at": "2026-09-29T03:33:52.931281+00:00",
+                  "death_at_estimated": false,
+                  "pronounced_by": 1,
+                  "pronounced_at": "2026-09-29T03:43:52.933807+00:00",
+                  "terminal_event": "Cardiac arrest; CPR 30 min",
+                  "resuscitation_attempted": true,
+                  "expected_death": null,
+                  "cause_a": null,
+                  "cause_a_interval": null,
+                  "cause_a_icd": null,
+                  "cause_b": null,
+                  "cause_b_interval": null,
+                  "cause_b_icd": null,
+                  "cause_c": null,
+                  "cause_c_interval": null,
+                  "cause_c_icd": null,
+                  "cause_d": null,
+                  "cause_d_interval": null,
+                  "cause_d_icd": null,
+                  "other_conditions": null,
+                  "other_conditions_icd": [],
+                  "manner": null,
+                  "external_cause_date": null,
+                  "external_cause": null,
+                  "external_cause_place": null,
+                  "surgery_within_4_weeks": null,
+                  "surgery_date": null,
+                  "surgery_reason": null,
+                  "pregnancy_status": null,
+                  "pregnancy_contributed": null,
+                  "multiple_pregnancy": null,
+                  "hours_survived": null,
+                  "birth_weight_grams": null,
+                  "gestation_weeks": null,
+                  "mother_age_years": null,
+                  "maternal_conditions": null,
+                  "status": "Draft",
+                  "certified_by": null,
+                  "certified_at": null,
+                  "certifier_name": null,
+                  "certifier_designation": null,
+                  "certifier_license": null,
+                  "body_released_at": null,
+                  "body_released_by": null,
+                  "body_released_to": null,
+                  "receiver_name": null,
+                  "receiver_relationship": null,
+                  "receiver_id_number": null,
+                  "receiver_phone": null,
+                  "police_reference": null,
+                  "release_note": null,
+                  "recorded_by": 1,
+                  "created_at": "2026-09-29T03:43:52.933807+00:00",
+                  "row_version": 1,
+                  "admission_number": "ADM-2026-00001",
+                  "ward_name": "General Ward",
+                  "bed_label": "GW-1",
+                  "ticket_number": null,
+                  "mlc_number": null,
+                  "mlc_status": null,
+                  "pronounced_by_name": "Dr Ahmed",
+                  "body_released_by_name": null,
+                  "icd_terms": [],
+                  "underlying_cause": null,
+                  "underlying_icd": null,
+                  "underlying_term": null
+                },
+                "patient": {
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "full_name": "Ali Khan",
+                  "father_or_husband_name": null,
+                  "gender": "male",
+                  "dob": null,
+                  "cnic": null,
+                  "address": null,
+                  "age_at_death_years": 40,
+                  "age_at_death_days": null,
+                  "pregnancy_applies": false,
+                  "infant_applies": false
+                },
+                "corrections": [],
+                "autopsy": null,
+                "suggested": {
+                  "conditions": [
+                    {
+                      "text": "Community-acquired pneumonia",
+                      "icd_codes": [],
+                      "icd_terms": []
+                    }
+                  ],
+                  "surgery": null
+                },
+                "missing": [
+                  "cause_a",
+                  "manner",
+                  "expected_death"
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:43:52.979657+00:00"
+              },
+              "request_id": "42a14a029ec04588aa15de0814529386"
+            }
+          },
+          "errors_seen": [
+            "DEATH_SETTING_INVALID",
+            "DEATH_TIME_INVALID",
+            "FORBIDDEN",
+            "PATIENT_ALREADY_DECEASED",
+            "PATIENT_MERGED_CANNOT_TRANSACT",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "death.recorded",
+            "er.visit.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DEATH_ADMISSION_NOT_ACTIVE",
+        "DEATH_CERTIFIER_NOT_DOCTOR",
+        "DEATH_SETTING_INVALID",
+        "DEATH_TIME_INVALID",
+        "FORBIDDEN",
+        "ICD_CODE_UNKNOWN",
+        "PATIENT_ALREADY_DECEASED",
+        "PATIENT_MERGED_CANNOT_TRANSACT",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /deaths/{death_id}",
+      "call": "GET /api/v1/deaths/{death_id}",
+      "summary": "A death record with its certificate",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/deaths/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "death": {
+                  "death_id": 1,
+                  "death_number": "DTH-2026-00001",
+                  "patient_id": 2,
+                  "setting": "BroughtDead",
+                  "admission_id": null,
+                  "ticket_id": null,
+                  "mlc_id": 1,
+                  "arrived_at": "2026-09-29T03:30:03.763630+00:00",
+                  "death_at": "2026-09-29T03:30:03.763630+00:00",
+                  "death_at_estimated": true,
+                  "pronounced_by": 1,
+                  "pronounced_at": "2026-09-29T03:50:03.796345+00:00",
+                  "terminal_event": null,
+                  "resuscitation_attempted": null,
+                  "expected_death": false,
+                  "cause_a": "Unknown cause (brought dead)",
+                  "cause_a_interval": null,
+                  "cause_a_icd": "MH14",
+                  "cause_b": null,
+                  "cause_b_interval": null,
+                  "cause_b_icd": null,
+                  "cause_c": null,
+                  "cause_c_interval": null,
+                  "cause_c_icd": null,
+                  "cause_d": null,
+                  "cause_d_interval": null,
+                  "cause_d_icd": null,
+                  "other_conditions": null,
+                  "other_conditions_icd": [],
+                  "manner": "PendingInvestigation",
+                  "external_cause_date": null,
+                  "external_cause": null,
+                  "external_cause_place": null,
+                  "surgery_within_4_weeks": false,
+                  "surgery_date": null,
+                  "surgery_reason": null,
+                  "pregnancy_status": null,
+                  "pregnancy_contributed": null,
+                  "multiple_pregnancy": null,
+                  "hours_survived": null,
+                  "birth_weight_grams": null,
+                  "gestation_weeks": null,
+                  "mother_age_years": null,
+                  "maternal_conditions": null,
+                  "status": "Certified",
+                  "certified_by": 1,
+                  "certified_at": "2026-09-29T03:50:03.840962+00:00",
+                  "certifier_name": "Dr Ahmed",
+                  "certifier_designation": "Doctor",
+                  "certifier_license": "PMDC PMDC-11199",
+                  "body_released_at": "2026-09-29T03:50:03.906406+00:00",
+                  "body_released_by": 8,
+                  "body_released_to": "Police",
+                  "receiver_name": "SI Tariq",
+                  "receiver_relationship": null,
+                  "receiver_id_number": null,
+                  "receiver_phone": null,
+                  "police_reference": "Letter 88/PS Civil Lines",
+                  "release_note": "For the post-mortem at the DHQ",
+                  "recorded_by": 1,
+                  "created_at": "2026-09-29T03:50:03.796345+00:00",
+                  "row_version": 4,
+                  "admission_number": null,
+                  "ward_name": null,
+                  "bed_label": null,
+                  "ticket_number": null,
+                  "mlc_number": "MLC-2026-00001",
+                  "mlc_status": "Open",
+                  "pronounced_by_name": "Dr Ahmed",
+                  "body_released_by_name": "u6045f42f1a",
+                  "icd_terms": [
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/178135136",
+                      "code": "MH14",
+                      "title": "Other ill-defined or unspecified causes of mortality",
+                      "system": "ICD-11"
+                    }
+                  ],
+                  "underlying_cause": "Unknown cause (brought dead)",
+                  "underlying_icd": "MH14",
+                  "underlying_term": {
+                    "uri": "http://id.who.int/icd/release/11/mms/178135136",
+                    "code": "MH14",
+                    "title": "Other ill-defined or unspecified causes of mortality",
+                    "system": "ICD-11"
+                  }
+                },
+                "patient": {
+                  "patient_id": 2,
+                  "mrn": "MRN-2026-000002",
+                  "full_name": "Ali Khan",
+                  "father_or_husband_name": null,
+                  "gender": "male",
+                  "dob": null,
+                  "cnic": null,
+                  "address": null,
+                  "age_at_death_years": 40,
+                  "age_at_death_days": null,
+                  "pregnancy_applies": false,
+                  "infant_applies": false
+                },
+                "corrections": [],
+                "autopsy": null,
+                "suggested": {
+                  "conditions": [],
+                  "surgery": null
+                },
+                "missing": []
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:50:04.109041+00:00"
+              },
+              "request_id": "ce01740b0e4c45c096995e1438182f39"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:PUT /deaths/{death_id}",
+      "call": "PUT /api/v1/deaths/{death_id}",
+      "summary": "Write the cause-of-death certificate (draft)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/deaths/2",
+            "body": {
+              "cause_a": "Septic shock",
+              "cause_a_interval": "2 days",
+              "cause_a_icd": "1g41",
+              "cause_b": "Right lower lobe pneumonia",
+              "cause_b_interval": "6 days",
+              "cause_b_icd": "CA40.Z",
+              "other_conditions": "Type 2 diabetes mellitus",
+              "other_conditions_icd": [
+                "5A11"
+              ],
+              "manner": "Disease",
+              "expected_death": true,
+              "surgery_within_4_weeks": false,
+              "expected_version": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "death": {
+                  "death_id": 2,
+                  "death_number": "DTH-2026-00001",
+                  "patient_id": 1,
+                  "setting": "Inpatient",
+                  "admission_id": 1,
+                  "ticket_id": null,
+                  "mlc_id": null,
+                  "arrived_at": null,
+                  "death_at": "2026-09-29T03:33:52.931281+00:00",
+                  "death_at_estimated": false,
+                  "pronounced_by": 1,
+                  "pronounced_at": "2026-09-29T03:43:52.933807+00:00",
+                  "terminal_event": "Cardiac arrest; CPR 30 min",
+                  "resuscitation_attempted": true,
+                  "expected_death": true,
+                  "cause_a": "Septic shock",
+                  "cause_a_interval": "2 days",
+                  "cause_a_icd": "1G41",
+                  "cause_b": "Right lower lobe pneumonia",
+                  "cause_b_interval": "6 days",
+                  "cause_b_icd": "CA40.Z",
+                  "cause_c": null,
+                  "cause_c_interval": null,
+                  "cause_c_icd": null,
+                  "cause_d": null,
+                  "cause_d_interval": null,
+                  "cause_d_icd": null,
+                  "other_conditions": "Type 2 diabetes mellitus",
+                  "other_conditions_icd": [
+                    "5A11"
+                  ],
+                  "manner": "Disease",
+                  "external_cause_date": null,
+                  "external_cause": null,
+                  "external_cause_place": null,
+                  "surgery_within_4_weeks": false,
+                  "surgery_date": null,
+                  "surgery_reason": null,
+                  "pregnancy_status": null,
+                  "pregnancy_contributed": null,
+                  "multiple_pregnancy": null,
+                  "hours_survived": null,
+                  "birth_weight_grams": null,
+                  "gestation_weeks": null,
+                  "mother_age_years": null,
+                  "maternal_conditions": null,
+                  "status": "Draft",
+                  "certified_by": null,
+                  "certified_at": null,
+                  "certifier_name": null,
+                  "certifier_designation": null,
+                  "certifier_license": null,
+                  "body_released_at": null,
+                  "body_released_by": null,
+                  "body_released_to": null,
+                  "receiver_name": null,
+                  "receiver_relationship": null,
+                  "receiver_id_number": null,
+                  "receiver_phone": null,
+                  "police_reference": null,
+                  "release_note": null,
+                  "recorded_by": 1,
+                  "created_at": "2026-09-29T03:43:52.933807+00:00",
+                  "row_version": 2,
+                  "admission_number": "ADM-2026-00001",
+                  "ward_name": "General Ward",
+                  "bed_label": "GW-1",
+                  "ticket_number": null,
+                  "mlc_number": null,
+                  "mlc_status": null,
+                  "pronounced_by_name": "Dr Ahmed",
+                  "body_released_by_name": null,
+                  "icd_terms": [
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/1683090852",
+                      "code": "1G41",
+                      "title": "Sepsis with septic shock",
+                      "system": "ICD-11"
+                    },
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                      "code": "CA40.Z",
+                      "title": "Pneumonia, organism unspecified",
+                      "system": "ICD-11"
+                    },
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/119724091",
+                      "code": "5A11",
+                      "title": "Type 2 diabetes mellitus",
+                      "system": "ICD-11"
+                    }
+                  ],
+                  "underlying_cause": "Right lower lobe pneumonia",
+                  "underlying_icd": "CA40.Z",
+                  "underlying_term": {
+                    "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                    "code": "CA40.Z",
+                    "title": "Pneumonia, organism unspecified",
+                    "system": "ICD-11"
+                  }
+                },
+                "patient": {
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "full_name": "Ali Khan",
+                  "father_or_husband_name": null,
+                  "gender": "male",
+                  "dob": null,
+                  "cnic": null,
+                  "address": null,
+                  "age_at_death_years": 40,
+                  "age_at_death_days": null,
+                  "pregnancy_applies": false,
+                  "infant_applies": false
+                },
+                "corrections": [],
+                "autopsy": null,
+                "suggested": {
+                  "conditions": [
+                    {
+                      "text": "Community-acquired pneumonia",
+                      "icd_codes": [],
+                      "icd_terms": []
+                    }
+                  ],
+                  "surgery": null
+                },
+                "missing": []
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:43:53.045076+00:00"
+              },
+              "request_id": "0efa08a5863446baa4935e2ee17016eb"
+            }
+          },
+          "errors_seen": [
+            "DEATH_RECORD_FINAL",
+            "DEATH_TIME_INVALID",
+            "VALIDATION_ERROR",
+            "VERSION_CONFLICT"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DEATH_RECORD_FINAL",
+        "DEATH_TIME_INVALID",
+        "ICD_CODE_UNKNOWN",
+        "VALIDATION_ERROR",
+        "VERSION_CONFLICT"
+      ],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    },
+    {
+      "id": "case:POST /deaths/{death_id}/certify",
+      "call": "POST /api/v1/deaths/{death_id}/certify",
+      "summary": "Certify the cause of death (final)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/deaths/2/certify",
+            "body": {}
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "death": {
+                  "death_id": 2,
+                  "death_number": "DTH-2026-00001",
+                  "patient_id": 1,
+                  "setting": "Inpatient",
+                  "admission_id": 1,
+                  "ticket_id": null,
+                  "mlc_id": null,
+                  "arrived_at": null,
+                  "death_at": "2026-09-29T03:33:52.931281+00:00",
+                  "death_at_estimated": false,
+                  "pronounced_by": 1,
+                  "pronounced_at": "2026-09-29T03:43:52.933807+00:00",
+                  "terminal_event": "Cardiac arrest; CPR 30 min",
+                  "resuscitation_attempted": true,
+                  "expected_death": true,
+                  "cause_a": "Septic shock",
+                  "cause_a_interval": "2 days",
+                  "cause_a_icd": "1G41",
+                  "cause_b": "Right lower lobe pneumonia",
+                  "cause_b_interval": "6 days",
+                  "cause_b_icd": "CA40.Z",
+                  "cause_c": null,
+                  "cause_c_interval": null,
+                  "cause_c_icd": null,
+                  "cause_d": null,
+                  "cause_d_interval": null,
+                  "cause_d_icd": null,
+                  "other_conditions": "Type 2 diabetes mellitus",
+                  "other_conditions_icd": [
+                    "5A11"
+                  ],
+                  "manner": "Disease",
+                  "external_cause_date": null,
+                  "external_cause": null,
+                  "external_cause_place": null,
+                  "surgery_within_4_weeks": false,
+                  "surgery_date": null,
+                  "surgery_reason": null,
+                  "pregnancy_status": null,
+                  "pregnancy_contributed": null,
+                  "multiple_pregnancy": null,
+                  "hours_survived": null,
+                  "birth_weight_grams": null,
+                  "gestation_weeks": null,
+                  "mother_age_years": null,
+                  "maternal_conditions": null,
+                  "status": "Certified",
+                  "certified_by": 1,
+                  "certified_at": "2026-09-29T03:43:53.113388+00:00",
+                  "certifier_name": "Dr Ahmed",
+                  "certifier_designation": "Doctor",
+                  "certifier_license": "PMDC PMDC-16770",
+                  "body_released_at": null,
+                  "body_released_by": null,
+                  "body_released_to": null,
+                  "receiver_name": null,
+                  "receiver_relationship": null,
+                  "receiver_id_number": null,
+                  "receiver_phone": null,
+                  "police_reference": null,
+                  "release_note": null,
+                  "recorded_by": 1,
+                  "created_at": "2026-09-29T03:43:52.933807+00:00",
+                  "row_version": 3,
+                  "admission_number": "ADM-2026-00001",
+                  "ward_name": "General Ward",
+                  "bed_label": "GW-1",
+                  "ticket_number": null,
+                  "mlc_number": null,
+                  "mlc_status": null,
+                  "pronounced_by_name": "Dr Ahmed",
+                  "body_released_by_name": null,
+                  "icd_terms": [
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/1683090852",
+                      "code": "1G41",
+                      "title": "Sepsis with septic shock",
+                      "system": "ICD-11"
+                    },
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                      "code": "CA40.Z",
+                      "title": "Pneumonia, organism unspecified",
+                      "system": "ICD-11"
+                    },
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/119724091",
+                      "code": "5A11",
+                      "title": "Type 2 diabetes mellitus",
+                      "system": "ICD-11"
+                    }
+                  ],
+                  "underlying_cause": "Right lower lobe pneumonia",
+                  "underlying_icd": "CA40.Z",
+                  "underlying_term": {
+                    "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                    "code": "CA40.Z",
+                    "title": "Pneumonia, organism unspecified",
+                    "system": "ICD-11"
+                  }
+                },
+                "patient": {
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "full_name": "Ali Khan",
+                  "father_or_husband_name": null,
+                  "gender": "male",
+                  "dob": null,
+                  "cnic": null,
+                  "address": null,
+                  "age_at_death_years": 40,
+                  "age_at_death_days": null,
+                  "pregnancy_applies": false,
+                  "infant_applies": false
+                },
+                "corrections": [],
+                "autopsy": null,
+                "suggested": {
+                  "conditions": [
+                    {
+                      "text": "Community-acquired pneumonia",
+                      "icd_codes": [],
+                      "icd_terms": []
+                    }
+                  ],
+                  "surgery": null
+                },
+                "missing": []
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:43:53.125054+00:00"
+              },
+              "request_id": "30c506c9fb084620a37fcf6a6337a761"
+            }
+          },
+          "errors_seen": [
+            "DEATH_CERTIFICATE_INCOMPLETE",
+            "DEATH_CERTIFIER_NOT_DOCTOR"
+          ],
+          "events_emitted": [
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DEATH_CERTIFICATE_INCOMPLETE",
+        "DEATH_CERTIFIER_NOT_DOCTOR",
+        "DEATH_RECORD_FINAL",
+        "VALIDATION_ERROR"
+      ],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    },
+    {
+      "id": "case:POST /deaths/{death_id}/corrections",
+      "call": "POST /api/v1/deaths/{death_id}/corrections",
+      "summary": "Append a correction to a certified death record",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/deaths/2/corrections",
+            "body": {
+              "field": "time",
+              "correction_text": "Time of death 02:10, not 02:00",
+              "correction_reason": "Monitor clock was slow"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "death": {
+                  "death_id": 2,
+                  "death_number": "DTH-2026-00001",
+                  "patient_id": 1,
+                  "setting": "Inpatient",
+                  "admission_id": 1,
+                  "ticket_id": null,
+                  "mlc_id": null,
+                  "arrived_at": null,
+                  "death_at": "2026-09-29T03:33:52.931281+00:00",
+                  "death_at_estimated": false,
+                  "pronounced_by": 1,
+                  "pronounced_at": "2026-09-29T03:43:52.933807+00:00",
+                  "terminal_event": "Cardiac arrest; CPR 30 min",
+                  "resuscitation_attempted": true,
+                  "expected_death": true,
+                  "cause_a": "Septic shock",
+                  "cause_a_interval": "2 days",
+                  "cause_a_icd": "1G41",
+                  "cause_b": "Right lower lobe pneumonia",
+                  "cause_b_interval": "6 days",
+                  "cause_b_icd": "CA40.Z",
+                  "cause_c": null,
+                  "cause_c_interval": null,
+                  "cause_c_icd": null,
+                  "cause_d": null,
+                  "cause_d_interval": null,
+                  "cause_d_icd": null,
+                  "other_conditions": "Type 2 diabetes mellitus",
+                  "other_conditions_icd": [
+                    "5A11"
+                  ],
+                  "manner": "Disease",
+                  "external_cause_date": null,
+                  "external_cause": null,
+                  "external_cause_place": null,
+                  "surgery_within_4_weeks": false,
+                  "surgery_date": null,
+                  "surgery_reason": null,
+                  "pregnancy_status": null,
+                  "pregnancy_contributed": null,
+                  "multiple_pregnancy": null,
+                  "hours_survived": null,
+                  "birth_weight_grams": null,
+                  "gestation_weeks": null,
+                  "mother_age_years": null,
+                  "maternal_conditions": null,
+                  "status": "Certified",
+                  "certified_by": 1,
+                  "certified_at": "2026-09-29T03:43:53.113388+00:00",
+                  "certifier_name": "Dr Ahmed",
+                  "certifier_designation": "Doctor",
+                  "certifier_license": "PMDC PMDC-16770",
+                  "body_released_at": null,
+                  "body_released_by": null,
+                  "body_released_to": null,
+                  "receiver_name": null,
+                  "receiver_relationship": null,
+                  "receiver_id_number": null,
+                  "receiver_phone": null,
+                  "police_reference": null,
+                  "release_note": null,
+                  "recorded_by": 1,
+                  "created_at": "2026-09-29T03:43:52.933807+00:00",
+                  "row_version": 3,
+                  "admission_number": "ADM-2026-00001",
+                  "ward_name": "General Ward",
+                  "bed_label": "GW-1",
+                  "ticket_number": null,
+                  "mlc_number": null,
+                  "mlc_status": null,
+                  "pronounced_by_name": "Dr Ahmed",
+                  "body_released_by_name": null,
+                  "icd_terms": [
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/1683090852",
+                      "code": "1G41",
+                      "title": "Sepsis with septic shock",
+                      "system": "ICD-11"
+                    },
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                      "code": "CA40.Z",
+                      "title": "Pneumonia, organism unspecified",
+                      "system": "ICD-11"
+                    },
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/119724091",
+                      "code": "5A11",
+                      "title": "Type 2 diabetes mellitus",
+                      "system": "ICD-11"
+                    }
+                  ],
+                  "underlying_cause": "Right lower lobe pneumonia",
+                  "underlying_icd": "CA40.Z",
+                  "underlying_term": {
+                    "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                    "code": "CA40.Z",
+                    "title": "Pneumonia, organism unspecified",
+                    "system": "ICD-11"
+                  }
+                },
+                "patient": {
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "full_name": "Ali Khan",
+                  "father_or_husband_name": null,
+                  "gender": "male",
+                  "dob": null,
+                  "cnic": null,
+                  "address": null,
+                  "age_at_death_years": 40,
+                  "age_at_death_days": null,
+                  "pregnancy_applies": false,
+                  "infant_applies": false
+                },
+                "corrections": [
+                  {
+                    "correction_id": 1,
+                    "field": "time",
+                    "correction_text": "Time of death 02:10, not 02:00",
+                    "correction_reason": "Monitor clock was slow",
+                    "corrected_by_name": "Dr Ahmed",
+                    "created_at": "2026-09-29T03:43:53.153880+00:00"
+                  }
+                ],
+                "autopsy": null,
+                "suggested": {
+                  "conditions": [
+                    {
+                      "text": "Community-acquired pneumonia",
+                      "icd_codes": [],
+                      "icd_terms": []
+                    }
+                  ],
+                  "surgery": null
+                },
+                "missing": []
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:43:53.164197+00:00"
+              },
+              "request_id": "cc02a020075f4254b14d1afedd3724ba"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DEATH_RECORD_NOT_CERTIFIED",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /deaths/{death_id}/print-payload",
+      "call": "GET /api/v1/deaths/{death_id}/print-payload",
+      "summary": "Printable death certificate, or the order for a clinical autopsy",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/deaths/2/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "death_certificate",
+                "printer_role": "document",
+                "paper_width_mm": 210,
+                "fields": {
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": "",
+                    "phc_number": "",
+                    "issue_line": "Issued 14-Oct-2026 15:37; this copy printed 14-Oct-2026 15:37"
+                  },
+                  "title": "DEATH CERTIFICATE",
+                  "certificate_number": "DTH-2026-00001",
+                  "death": {
+                    "death_id": 2,
+                    "death_number": "DTH-2026-00001",
+                    "patient_id": 1,
+                    "setting": "Inpatient",
+                    "admission_id": 1,
+                    "ticket_id": null,
+                    "mlc_id": null,
+                    "arrived_at": null,
+                    "death_at": "2026-10-14T10:27:26.938602+00:00",
+                    "death_at_estimated": false,
+                    "pronounced_by": 1,
+                    "pronounced_at": "2026-10-14T10:37:26.941356+00:00",
+                    "terminal_event": "Cardiac arrest; CPR 30 min",
+                    "resuscitation_attempted": true,
+                    "expected_death": true,
+                    "cause_a": "Septic shock",
+                    "cause_a_interval": "2 days",
+                    "cause_a_icd": "1G41",
+                    "cause_b": "Right lower lobe pneumonia",
+                    "cause_b_interval": "6 days",
+                    "cause_b_icd": "CA40.Z",
+                    "cause_c": null,
+                    "cause_c_interval": null,
+                    "cause_c_icd": null,
+                    "cause_d": null,
+                    "cause_d_interval": null,
+                    "cause_d_icd": null,
+                    "other_conditions": "Type 2 diabetes mellitus",
+                    "other_conditions_icd": [
+                      "5A11"
+                    ],
+                    "manner": "Disease",
+                    "external_cause_date": null,
+                    "external_cause": null,
+                    "external_cause_place": null,
+                    "surgery_within_4_weeks": false,
+                    "surgery_date": null,
+                    "surgery_reason": null,
+                    "pregnancy_status": null,
+                    "pregnancy_contributed": null,
+                    "multiple_pregnancy": null,
+                    "hours_survived": null,
+                    "birth_weight_grams": null,
+                    "gestation_weeks": null,
+                    "mother_age_years": null,
+                    "maternal_conditions": null,
+                    "status": "Certified",
+                    "certified_by": 1,
+                    "certified_at": "2026-10-14T10:37:27.085852+00:00",
+                    "certifier_name": "Dr Ahmed",
+                    "certifier_designation": "Doctor",
+                    "certifier_license": "PMDC PMDC-31499",
+                    "body_released_at": "2026-10-14T10:37:27.144637+00:00",
+                    "body_released_by": 7,
+                    "body_released_to": "NextOfKin",
+                    "receiver_name": "Muhammad Khan",
+                    "receiver_relationship": "Brother",
+                    "receiver_id_number": "35202-1234567-1",
+                    "receiver_phone": "0300-1112223",
+                    "police_reference": null,
+                    "release_note": null,
+                    "recorded_by": 1,
+                    "created_at": "2026-10-14T10:37:26.941356+00:00",
+                    "row_version": 4,
+                    "admission_number": "ADM-2026-00001",
+                    "ward_name": "General Ward",
+                    "bed_label": "GW-1",
+                    "ticket_number": null,
+                    "mlc_number": null,
+                    "mlc_status": null,
+                    "pronounced_by_name": "Dr Ahmed",
+                    "body_released_by_name": "ud128e8212b",
+                    "icd_terms": [
+                      {
+                        "uri": "http://id.who.int/icd/release/11/mms/1683090852",
+                        "code": "1G41",
+                        "title": "Sepsis with septic shock",
+                        "system": "ICD-11"
+                      },
+                      {
+                        "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                        "code": "CA40.Z",
+                        "title": "Pneumonia, organism unspecified",
+                        "system": "ICD-11"
+                      },
+                      {
+                        "uri": "http://id.who.int/icd/release/11/mms/119724091",
+                        "code": "5A11",
+                        "title": "Type 2 diabetes mellitus",
+                        "system": "ICD-11"
+                      }
+                    ],
+                    "underlying_cause": "Right lower lobe pneumonia",
+                    "underlying_icd": "CA40.Z",
+                    "underlying_term": {
+                      "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                      "code": "CA40.Z",
+                      "title": "Pneumonia, organism unspecified",
+                      "system": "ICD-11"
+                    }
+                  },
+                  "patient": {
+                    "patient_id": 1,
+                    "mrn": "MRN-2026-000001",
+                    "full_name": "Ali Khan",
+                    "father_or_husband_name": null,
+                    "gender": "male",
+                    "dob": null,
+                    "cnic": null,
+                    "address": null,
+                    "age_at_death_years": 40,
+                    "age_at_death_days": null,
+                    "pregnancy_applies": false,
+                    "infant_applies": false
+                  },
+                  "corrections": [
+                    {
+                      "correction_id": 1,
+                      "field": "time",
+                      "correction_text": "Time of death 02:10, not 02:00",
+                      "correction_reason": "Monitor clock was slow",
+                      "corrected_by_name": "Dr Ahmed",
+                      "created_at": "2026-10-14T10:37:27.121097+00:00"
+                    }
+                  ],
+                  "autopsy": null
+                },
+                "text": "                                    Haspataal Hospital\n                                 Issued 14-Oct-2026 15:37\n                           this copy printed 14-Oct-2026 15:37\n                          MEDICAL CERTIFICATE OF CAUSE OF DEATH\n                                Certificate DTH-2026-00001\n------------------------------------------------------------------------------------------\nName      …",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"56.920mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"116\" height=\"116\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m1 0h5m1 0h3m1 0h7m-25 1h1m5 0h1m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m2 0h2m1 0h1m5 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h3m2 0h4m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m2 0h1m1 0h2m1 0h1m3 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m2 0h1m4 0h3m1 0…",
+                "pdf_url": "/api/v1/deaths/2/pdf?document=certificate"
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:37:27.177801+00:00"
+              },
+              "request_id": "f4dab5e0b54d46458e756fa7f8951ad8"
+            }
+          },
+          "errors_seen": [
+            "AUTOPSY_TRANSITION_INVALID"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "AUTOPSY_TRANSITION_INVALID",
+        "DEATH_RECORD_NOT_CERTIFIED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /deaths/{death_id}/pdf",
+      "call": "GET /api/v1/deaths/{death_id}/pdf",
+      "summary": "The death certificate or the autopsy order as a PDF",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/deaths/2/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 3544
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "AUTOPSY_TRANSITION_INVALID",
+        "DEATH_RECORD_NOT_CERTIFIED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /deaths/{death_id}/autopsy",
+      "call": "POST /api/v1/deaths/{death_id}/autopsy",
+      "summary": "Ask for a clinical autopsy",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/deaths/1/autopsy",
+            "body": {
+              "request_reasons": "Was it amniotic fluid embolism or a coagulopathy? The bleeding did not respond to treatment."
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "death": {
+                  "death_id": 1,
+                  "death_number": "DTH-2026-00001",
+                  "patient_id": 1,
+                  "setting": "Emergency",
+                  "admission_id": null,
+                  "ticket_id": 1,
+                  "mlc_id": null,
+                  "arrived_at": null,
+                  "death_at": "2026-09-29T03:43:58.535888+00:00",
+                  "death_at_estimated": false,
+                  "pronounced_by": 1,
+                  "pronounced_at": "2026-09-29T03:43:58.541729+00:00",
+                  "terminal_event": null,
+                  "resuscitation_attempted": null,
+                  "expected_death": false,
+                  "cause_a": "Postpartum haemorrhage",
+                  "cause_a_interval": "2 days",
+                  "cause_a_icd": "JA43.1",
+                  "cause_b": null,
+                  "cause_b_interval": null,
+                  "cause_b_icd": null,
+                  "cause_c": null,
+                  "cause_c_interval": null,
+                  "cause_c_icd": null,
+                  "cause_d": null,
+                  "cause_d_interval": null,
+                  "cause_d_icd": null,
+                  "other_conditions": "Type 2 diabetes mellitus",
+                  "other_conditions_icd": [
+                    "5A11"
+                  ],
+                  "manner": "Disease",
+                  "external_cause_date": null,
+                  "external_cause": null,
+                  "external_cause_place": null,
+                  "surgery_within_4_weeks": false,
+                  "surgery_date": null,
+                  "surgery_reason": null,
+                  "pregnancy_status": "Within42Days",
+                  "pregnancy_contributed": "Yes",
+                  "multiple_pregnancy": null,
+                  "hours_survived": null,
+                  "birth_weight_grams": null,
+                  "gestation_weeks": null,
+                  "mother_age_years": null,
+                  "maternal_conditions": null,
+                  "status": "Certified",
+                  "certified_by": 1,
+                  "certified_at": "2026-09-29T03:43:58.626353+00:00",
+                  "certifier_name": "Dr Ahmed",
+                  "certifier_designation": "Doctor",
+                  "certifier_license": "PMDC PMDC-40328",
+                  "body_released_at": null,
+                  "body_released_by": null,
+                  "body_released_to": null,
+                  "receiver_name": null,
+                  "receiver_relationship": null,
+                  "receiver_id_number": null,
+                  "receiver_phone": null,
+                  "police_reference": null,
+                  "release_note": null,
+                  "recorded_by": 1,
+                  "created_at": "2026-09-29T03:43:58.541729+00:00",
+                  "row_version": 3,
+                  "admission_number": null,
+                  "ward_name": null,
+                  "bed_label": null,
+                  "ticket_number": "OPD-2026-000001",
+                  "mlc_number": null,
+                  "mlc_status": null,
+                  "pronounced_by_name": "Dr Ahmed",
+                  "body_released_by_name": null,
+                  "icd_terms": [
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/1531859332",
+                      "code": "JA43.1",
+                      "title": "Other immediate postpartum haemorrhage",
+                      "system": "ICD-11"
+                    },
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/119724091",
+                      "code": "5A11",
+                      "title": "Type 2 diabetes mellitus",
+                      "system": "ICD-11"
+                    }
+                  ],
+                  "underlying_cause": "Postpartum haemorrhage",
+                  "underlying_icd": "JA43.1",
+                  "underlying_term": {
+                    "uri": "http://id.who.int/icd/release/11/mms/1531859332",
+                    "code": "JA43.1",
+                    "title": "Other immediate postpartum haemorrhage",
+                    "system": "ICD-11"
+                  }
+                },
+                "patient": {
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "full_name": "Amina Bibi",
+                  "father_or_husband_name": null,
+                  "gender": "female",
+                  "dob": null,
+                  "cnic": null,
+                  "address": null,
+                  "age_at_death_years": 30,
+                  "age_at_death_days": null,
+                  "pregnancy_applies": true,
+                  "infant_applies": false
+                },
+                "corrections": [],
+                "autopsy": {
+                  "autopsy_id": 1,
+                  "death_id": 1,
+                  "status": "Requested",
+                  "requested_by": 7,
+                  "requested_by_name": "Dr Director",
+                  "requested_at": "2026-09-29T03:43:58.719800+00:00",
+                  "request_reasons": "Was it amniotic fluid embolism or a coagulopathy? The bleeding did not respond to treatment.",
+                  "consent_given_by": null,
+                  "consent_relationship": null,
+                  "consent_id_number": null,
+                  "consent_extent": null,
+                  "consent_document_id": null,
+                  "not_medico_legal_certified": false,
+                  "authorized_by": null,
+                  "authorized_by_name": null,
+                  "authorized_at": null,
+                  "prosector_name": null,
+                  "order_note": null,
+                  "performed_at": null,
+                  "findings": null,
+                  "correlation": null,
+                  "correlation_note": null,
+                  "report_document_id": null,
+                  "reported_by": null,
+                  "reported_by_name": null,
+                  "reported_at": null,
+                  "cancel_reason": null,
+                  "cancelled_at": null,
+                  "row_version": 1
+                },
+                "suggested": {
+                  "conditions": [],
+                  "surgery": null
+                },
+                "missing": []
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:43:58.728381+00:00"
+              },
+              "request_id": "fedc21a04df1432698f5888b4baf9758"
+            }
+          },
+          "errors_seen": [
+            "AUTOPSY_EXISTS",
+            "AUTOPSY_MEDICO_LEGAL"
+          ],
+          "events_emitted": [
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "AUTOPSY_EXISTS",
+        "AUTOPSY_MEDICO_LEGAL",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /deaths/{death_id}/autopsy/report",
+      "call": "POST /api/v1/deaths/{death_id}/autopsy/report",
+      "summary": "Record the autopsy report",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/deaths/1/autopsy/report",
+            "body": {
+              "performed_at": "2026-09-29T03:43:58.783730+00:00",
+              "findings": "Amniotic fluid embolism: squames in the pulmonary vessels",
+              "correlation": "MajorDiscrepancy",
+              "correlation_note": "Treated as atonic haemorrhage; the cause was an embolism"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "death": {
+                  "death_id": 1,
+                  "death_number": "DTH-2026-00001",
+                  "patient_id": 1,
+                  "setting": "Emergency",
+                  "admission_id": null,
+                  "ticket_id": 1,
+                  "mlc_id": null,
+                  "arrived_at": null,
+                  "death_at": "2026-09-29T03:43:58.535888+00:00",
+                  "death_at_estimated": false,
+                  "pronounced_by": 1,
+                  "pronounced_at": "2026-09-29T03:43:58.541729+00:00",
+                  "terminal_event": null,
+                  "resuscitation_attempted": null,
+                  "expected_death": false,
+                  "cause_a": "Postpartum haemorrhage",
+                  "cause_a_interval": "2 days",
+                  "cause_a_icd": "JA43.1",
+                  "cause_b": null,
+                  "cause_b_interval": null,
+                  "cause_b_icd": null,
+                  "cause_c": null,
+                  "cause_c_interval": null,
+                  "cause_c_icd": null,
+                  "cause_d": null,
+                  "cause_d_interval": null,
+                  "cause_d_icd": null,
+                  "other_conditions": "Type 2 diabetes mellitus",
+                  "other_conditions_icd": [
+                    "5A11"
+                  ],
+                  "manner": "Disease",
+                  "external_cause_date": null,
+                  "external_cause": null,
+                  "external_cause_place": null,
+                  "surgery_within_4_weeks": false,
+                  "surgery_date": null,
+                  "surgery_reason": null,
+                  "pregnancy_status": "Within42Days",
+                  "pregnancy_contributed": "Yes",
+                  "multiple_pregnancy": null,
+                  "hours_survived": null,
+                  "birth_weight_grams": null,
+                  "gestation_weeks": null,
+                  "mother_age_years": null,
+                  "maternal_conditions": null,
+                  "status": "Certified",
+                  "certified_by": 1,
+                  "certified_at": "2026-09-29T03:43:58.626353+00:00",
+                  "certifier_name": "Dr Ahmed",
+                  "certifier_designation": "Doctor",
+                  "certifier_license": "PMDC PMDC-40328",
+                  "body_released_at": null,
+                  "body_released_by": null,
+                  "body_released_to": null,
+                  "receiver_name": null,
+                  "receiver_relationship": null,
+                  "receiver_id_number": null,
+                  "receiver_phone": null,
+                  "police_reference": null,
+                  "release_note": null,
+                  "recorded_by": 1,
+                  "created_at": "2026-09-29T03:43:58.541729+00:00",
+                  "row_version": 3,
+                  "admission_number": null,
+                  "ward_name": null,
+                  "bed_label": null,
+                  "ticket_number": "OPD-2026-000001",
+                  "mlc_number": null,
+                  "mlc_status": null,
+                  "pronounced_by_name": "Dr Ahmed",
+                  "body_released_by_name": null,
+                  "icd_terms": [
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/1531859332",
+                      "code": "JA43.1",
+                      "title": "Other immediate postpartum haemorrhage",
+                      "system": "ICD-11"
+                    },
+                    {
+                      "uri": "http://id.who.int/icd/release/11/mms/119724091",
+                      "code": "5A11",
+                      "title": "Type 2 diabetes mellitus",
+                      "system": "ICD-11"
+                    }
+                  ],
+                  "underlying_cause": "Postpartum haemorrhage",
+                  "underlying_icd": "JA43.1",
+                  "underlying_term": {
+                    "uri": "http://id.who.int/icd/release/11/mms/1531859332",
+                    "code": "JA43.1",
+                    "title": "Other immediate postpartum haemorrhage",
+                    "system": "ICD-11"
+                  }
+                },
+                "patient": {
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "full_name": "Amina Bibi",
+                  "father_or_husband_name": null,
+                  "gender": "female",
+                  "dob": null,
+                  "cnic": null,
+                  "address": null,
+                  "age_at_death_years": 30,
+                  "age_at_death_days": null,
+                  "pregnancy_applies": true,
+                  "infant_applies": false
+                },
+                "corrections": [],
+                "autopsy": {
+                  "autopsy_id": 1,
+                  "death_id": 1,
+                  "status": "Reported",
+                  "requested_by": 7,
+                  "requested_by_name": "Dr Director",
+                  "requested_at": "2026-09-29T03:43:58.719800+00:00",
+                  "request_reasons": "Was it amniotic fluid embolism or a coagulopathy? The bleeding did not respond to treatment.",
+                  "consent_given_by": "Bilal Ahmed",
+                  "consent_relationship": "Husband",
+                  "consent_id_number": "35202-7654321-3",
+                  "consent_extent": "Full autopsy; uterus and blood samples kept for histology",
+                  "consent_document_id": null,
+                  "not_medico_legal_certified": true,
+                  "authorized_by": 6,
+                  "authorized_by_name": "u39389b8e41",
+                  "authorized_at": "2026-09-29T03:43:58.747237+00:00",
+                  "prosector_name": "Dr Pathologist, Department of Pathology",
+                  "order_note": "Within 12 hours",
+                  "performed_at": "2026-09-29T03:43:58.783730+00:00",
+                  "findings": "Amniotic fluid embolism: squames in the pulmonary vessels",
+                  "correlation": "MajorDiscrepancy",
+                  "correlation_note": "Treated as atonic haemorrhage; the cause was an embolism",
+                  "report_document_id": null,
+                  "reported_by": 1,
+                  "reported_by_name": "Dr Ahmed",
+                  "reported_at": "2026-09-29T03:43:58.786114+00:00",
+                  "cancel_reason": null,
+                  "cancelled_at": null,
+                  "row_version": 3
+                },
+                "suggested": {
+                  "conditions": [],
+                  "surgery": null
+                },
+                "missing": []
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:43:58.790536+00:00"
+              },
+              "request_id": "261c010af9064af0b0cfa51c46f356cc"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "AUTOPSY_TRANSITION_INVALID",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /deaths/{death_id}/autopsy/cancel",
+      "call": "POST /api/v1/deaths/{death_id}/autopsy/cancel",
+      "summary": "Cancel the autopsy request",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/deaths/1/autopsy/cancel",
+            "body": {
+              "reason": "The family declined"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "death": {
+                  "death_id": 1,
+                  "death_number": "DTH-2026-00001",
+                  "patient_id": 1,
+                  "setting": "Outpatient",
+                  "admission_id": null,
+                  "ticket_id": null,
+                  "mlc_id": null,
+                  "arrived_at": null,
+                  "death_at": "2026-09-29T03:44:03.857973+00:00",
+                  "death_at_estimated": false,
+                  "pronounced_by": 1,
+                  "pronounced_at": "2026-09-29T03:44:03.865067+00:00",
+                  "terminal_event": null,
+                  "resuscitation_attempted": null,
+                  "expected_death": null,
+                  "cause_a": null,
+                  "cause_a_interval": null,
+                  "cause_a_icd": null,
+                  "cause_b": null,
+                  "cause_b_interval": null,
+                  "cause_b_icd": null,
+                  "cause_c": null,
+                  "cause_c_interval": null,
+                  "cause_c_icd": null,
+                  "cause_d": null,
+                  "cause_d_interval": null,
+                  "cause_d_icd": null,
+                  "other_conditions": null,
+                  "other_conditions_icd": [],
+                  "manner": null,
+                  "external_cause_date": null,
+                  "external_cause": null,
+                  "external_cause_place": null,
+                  "surgery_within_4_weeks": null,
+                  "surgery_date": null,
+                  "surgery_reason": null,
+                  "pregnancy_status": null,
+                  "pregnancy_contributed": null,
+                  "multiple_pregnancy": null,
+                  "hours_survived": null,
+                  "birth_weight_grams": null,
+                  "gestation_weeks": null,
+                  "mother_age_years": null,
+                  "maternal_conditions": null,
+                  "status": "Draft",
+                  "certified_by": null,
+                  "certified_at": null,
+                  "certifier_name": null,
+                  "certifier_designation": null,
+                  "certifier_license": null,
+                  "body_released_at": null,
+                  "body_released_by": null,
+                  "body_released_to": null,
+                  "receiver_name": null,
+                  "receiver_relationship": null,
+                  "receiver_id_number": null,
+                  "receiver_phone": null,
+                  "police_reference": null,
+                  "release_note": null,
+                  "recorded_by": 1,
+                  "created_at": "2026-09-29T03:44:03.865067+00:00",
+                  "row_version": 1,
+                  "admission_number": null,
+                  "ward_name": null,
+                  "bed_label": null,
+                  "ticket_number": null,
+                  "mlc_number": null,
+                  "mlc_status": null,
+                  "pronounced_by_name": "Dr Ahmed",
+                  "body_released_by_name": null,
+                  "icd_terms": [],
+                  "underlying_cause": null,
+                  "underlying_icd": null,
+                  "underlying_term": null
+                },
+                "patient": {
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "full_name": "Ali Khan",
+                  "father_or_husband_name": null,
+                  "gender": "male",
+                  "dob": null,
+                  "cnic": null,
+                  "address": null,
+                  "age_at_death_years": 40,
+                  "age_at_death_days": null,
+                  "pregnancy_applies": false,
+                  "infant_applies": false
+                },
+                "corrections": [],
+                "autopsy": {
+                  "autopsy_id": 1,
+                  "death_id": 1,
+                  "status": "Cancelled",
+                  "requested_by": 1,
+                  "requested_by_name": "Dr Ahmed",
+                  "requested_at": "2026-09-29T03:44:03.935605+00:00",
+                  "request_reasons": "Sudden death in the OPD",
+                  "consent_given_by": null,
+                  "consent_relationship": null,
+                  "consent_id_number": null,
+                  "consent_extent": null,
+                  "consent_document_id": null,
+                  "not_medico_legal_certified": false,
+                  "authorized_by": null,
+                  "authorized_by_name": null,
+                  "authorized_at": null,
+                  "prosector_name": null,
+                  "order_note": null,
+                  "performed_at": null,
+                  "findings": null,
+                  "correlation": null,
+                  "correlation_note": null,
+                  "report_document_id": null,
+                  "reported_by": null,
+                  "reported_by_name": null,
+                  "reported_at": null,
+                  "cancel_reason": "The family declined",
+                  "cancelled_at": "2026-09-29T03:44:03.954716+00:00",
+                  "row_version": 2
+                },
+                "suggested": {
+                  "conditions": [],
+                  "surgery": null
+                },
+                "missing": [
+                  "cause_a",
+                  "manner",
+                  "expected_death"
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:44:03.966783+00:00"
+              },
+              "request_id": "2a288750e48447658c2b57bfb7982db8"
+            }
+          },
+          "errors_seen": [
+            "AUTOPSY_TRANSITION_INVALID"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "AUTOPSY_TRANSITION_INVALID",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /deaths",
+      "call": "GET /api/v1/deaths",
+      "summary": "The death register",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/deaths",
+            "query": {
+              "status": "Certified",
+              "body_released": "true"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "death_id": 2,
+                  "death_number": "DTH-2026-00001",
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "gender": "male",
+                  "setting": "Inpatient",
+                  "death_at": "2026-09-29T03:33:52.931281+00:00",
+                  "status": "Certified",
+                  "admission_number": "ADM-2026-00001",
+                  "ward_name": "General Ward",
+                  "department_name": "General Medicine",
+                  "underlying_cause": "Right lower lobe pneumonia",
+                  "underlying_icd": "CA40.Z",
+                  "underlying_term": {
+                    "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                    "code": "CA40.Z",
+                    "title": "Pneumonia, organism unspecified",
+                    "system": "ICD-11"
+                  },
+                  "manner": "Disease",
+                  "expected_death": true,
+                  "mlc_number": null,
+                  "certifier_name": "Dr Ahmed",
+                  "certified_at": "2026-09-29T03:43:53.113388+00:00",
+                  "body_released_at": "2026-09-29T03:43:53.172919+00:00",
+                  "body_released_to": "NextOfKin",
+                  "autopsy_status": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-29T03:43:53.327714+00:00"
+              },
+              "request_id": "783124927a68481e8da2a8e1d5c6e07b"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /icd/codes",
+      "call": "GET /api/v1/icd/codes",
+      "summary": "ICD picker: search codes by code or words",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/icd/codes",
+            "query": {
+              "q": "pneumonia"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "code_system": "ICD-11",
+                "release_label": "2026-01",
+                "items": [
+                  {
+                    "code": "CA40",
+                    "kind": "category",
+                    "title": "Pneumonia",
+                    "uri": "http://id.who.int/icd/release/11/mms/142052508",
+                    "chapter": "12",
+                    "parent_code": "BlockL1-CA4",
+                    "depth": 2,
+                    "is_leaf": false,
+                    "is_residual": false,
+                    "parent_title": "Lung infections"
+                  },
+                  {
+                    "code": "CA40.20",
+                    "kind": "category",
+                    "title": "Pneumonia due to pneumocystis",
+                    "uri": "http://id.who.int/icd/release/11/mms/1229452918",
+                    "chapter": "12",
+                    "parent_code": "CA40.2",
+                    "depth": 4,
+                    "is_leaf": true,
+                    "is_residual": false,
+                    "parent_title": "Fungal pneumonia"
+                  },
+                  {
+                    "code": "CA40.10",
+                    "kind": "category",
+                    "title": "Pneumonia due to Adenovirus",
+                    "uri": "http://id.who.int/icd/release/11/mms/1912319301",
+                    "chapter": "12",
+                    "parent_code": "CA40.1",
+                    "depth": 4,
+                    "is_leaf": true,
+                    "is_residual": false,
+                    "parent_title": "Viral pneumonia"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:46:49.443872+00:00"
+              },
+              "request_id": "10800413b3f3436fa4e2fc04674bbe93"
+            }
+          },
+          "errors_seen": [
+            "ICD_SYSTEM_NOT_LOADED",
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ICD_SYSTEM_NOT_LOADED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /icd/browse",
+      "call": "GET /api/v1/icd/browse",
+      "summary": "ICD picker: browse chapters, blocks, categories",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/icd/browse"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "code_system": "ICD-11",
+                "release_label": "2026-01",
+                "parent": null,
+                "items": [
+                  {
+                    "code": "01",
+                    "kind": "chapter",
+                    "title": "Certain infectious or parasitic diseases",
+                    "uri": "http://id.who.int/icd/release/11/mms/1435254666",
+                    "chapter": "01",
+                    "parent_code": null,
+                    "depth": 0,
+                    "is_leaf": false,
+                    "is_residual": false
+                  },
+                  {
+                    "code": "02",
+                    "kind": "chapter",
+                    "title": "Neoplasms",
+                    "uri": "http://id.who.int/icd/release/11/mms/1630407678",
+                    "chapter": "02",
+                    "parent_code": null,
+                    "depth": 0,
+                    "is_leaf": false,
+                    "is_residual": false
+                  },
+                  {
+                    "code": "03",
+                    "kind": "chapter",
+                    "title": "Diseases of the blood or blood-forming organs",
+                    "uri": "http://id.who.int/icd/release/11/mms/1766440644",
+                    "chapter": "03",
+                    "parent_code": null,
+                    "depth": 0,
+                    "is_leaf": false,
+                    "is_residual": false
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:46:49.483384+00:00"
+              },
+              "request_id": "68c2df8ee44340d29c4b73f89d76249e"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ICD_SYSTEM_NOT_LOADED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /icd/codes/{code}",
+      "call": "GET /api/v1/icd/codes/{code}",
+      "summary": "One ICD code with its place in the tree",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/icd/codes/ca40.z"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "code": "CA40.Z",
+                "kind": "category",
+                "title": "Pneumonia, organism unspecified",
+                "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                "chapter": "12",
+                "parent_code": "CA40",
+                "depth": 3,
+                "is_leaf": true,
+                "is_residual": true,
+                "ancestors": [
+                  {
+                    "code": "12",
+                    "kind": "chapter",
+                    "title": "Diseases of the respiratory system",
+                    "uri": "http://id.who.int/icd/release/11/mms/197934298"
+                  },
+                  {
+                    "code": "BlockL1-CA4",
+                    "kind": "block",
+                    "title": "Lung infections",
+                    "uri": "http://id.who.int/icd/release/11/mms/915779102"
+                  },
+                  {
+                    "code": "CA40",
+                    "kind": "category",
+                    "title": "Pneumonia",
+                    "uri": "http://id.who.int/icd/release/11/mms/142052508"
+                  }
+                ],
+                "children": [],
+                "code_system": "ICD-11",
+                "release_label": "2026-01"
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:46:49.498656+00:00"
+              },
+              "request_id": "65656096cdd249db821123957d9de9fe"
+            }
+          },
+          "errors_seen": [
+            "NOT_FOUND"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ICD_SYSTEM_NOT_LOADED",
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /icd/releases",
+      "call": "GET /api/v1/icd/releases",
+      "summary": "The ICD code lists loaded",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/icd/releases"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "coding_system": "ICD-11",
+                "releases": [
+                  {
+                    "release_id": 1,
+                    "code_system": "ICD-11",
+                    "release_label": "2026-01",
+                    "language": "en",
+                    "source": "Bundled",
+                    "source_file": "SimpleTabulation-ICD-11-MMS-en.zip",
+                    "source_sha256": "f1356588f40953a83e3af2b662deab47c5e269f944d1ea4ed0cfeb2007c7cd39",
+                    "licence_note": "WHO ICD-11 MMS 2026-01 (en). International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO).",
+                    "code_count": 18505,
+                    "is_active": true,
+                    "loaded_by": null,
+                    "loaded_by_name": null,
+                    "loaded_at": "2026-09-29T03:41:19.034744+00:00",
+                    "row_version": 2
+                  }
+                ],
+                "icd11_citation": "International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO)."
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:46:49.427434+00:00"
+              },
+              "request_id": "a8f189dcef0743a3bae69666cb0aed9c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /patients/{patient_id}/documents",
+      "call": "POST /api/v1/patients/{patient_id}/documents",
+      "summary": "Upload a patient document (PDF/JPEG/PNG)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/1/documents",
+            "multipart": {
+              "file": "<file>",
+              "doc_type": "CNIC"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "document_id": 1,
+                "patient_id": 1,
+                "doc_type": "CNIC",
+                "title": null,
+                "content_type": "application/pdf",
+                "size_bytes": 31,
+                "is_outside": false,
+                "source_facility": null,
+                "document_date": null,
+                "uploaded_at": "2026-10-13T11:27:11.017375+00:00"
+              },
+              "meta": {
+                "server_time": "2026-10-13T11:27:11.028856+00:00"
+              },
+              "request_id": "16803b23adfa4ca89f6674d80ff160a0"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "IDEMPOTENCY_CONFLICT",
+            "NOT_FOUND",
+            "PAYLOAD_TOO_LARGE",
+            "UNSUPPORTED_MEDIA_TYPE",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "IDEMPOTENCY_CONFLICT",
+        "NOT_FOUND",
+        "PAYLOAD_TOO_LARGE",
+        "UNSUPPORTED_MEDIA_TYPE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/death_record",
+  "workspace_guide": "get_handbook_outline('doctor')",
+  "realtime": [
+    {
+      "event": "death.recorded",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "'Record death' on the patient (ward, emergency, OPD, brought dead): POST /patients/{patient_id}/death at once, with the time of death (and, brought dead, when the body arrived). The patient is deceased from then on: reload the open screens on death.recorded; new clinical entries are flagged for review.",
+    "Lay the certificate out like the WHO form: Part I lines (a) 'due to' (b) 'due to' (c) 'due to' (d), each with the interval and the ICD code (from the ICD picker); the lowest line filled is the underlying cause (show it). Part II below. Then manner; external cause (only for Accident, IntentionalSelfHarm, Assault, LegalIntervention, War); surgery in the last 4 weeks (pre-fill from suggested.surgery); pregnancy (only when patient.pregnancy_applies); the baby's part (only when patient.infant_applies).",
+    "Offer suggested.conditions as chips the doctor puts on a line; never fill a line silently.",
+    "Autosave with PUT (row_version as expected_version). 'Certify' shows DEATH_CERTIFICATE_INCOMPLETE's details.missing; afterwards there is no Edit, only 'Add correction' (reason required).",
+    "A medico-legal death (death.mlc_number) carries a red MEDICO-LEGAL banner and never offers a clinical autopsy.",
+    "Print the certificate on A4 (print-payload or pdf_url) for the family and the union council.",
+    "An inpatient death continues with the discharge summary (outcome Died) and the discharge: the bed goes through the usual clearance stages."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

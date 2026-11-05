@@ -1,0 +1,3216 @@
+{
+  "screen_id": "consents_ward",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "schemas": {
+    "AuthorStampOut": {
+      "properties": {
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation",
+          "description": "Designation and specialty, e.g. \"Medical Officer, General Medicine\""
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "Council registration, e.g. \"PMDC 12345-P\" or \"PNC 67890\""
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At",
+          "description": "When the entry was signed, reported or verified"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "The printed line: name, designation, registration, date and time"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "user_id",
+        "name",
+        "designation",
+        "registration",
+        "at",
+        "text"
+      ],
+      "title": "AuthorStampOut",
+      "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
+    },
+    "Body_upload_document_api_v1_patients__patient_id__documents_post": {
+      "properties": {
+        "file": {
+          "type": "string",
+          "contentMediaType": "application/octet-stream",
+          "title": "File"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title",
+          "description": "What it is, e.g. 'CBC' or 'Chest X-ray report'"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought from another hospital, laboratory or clinic",
+          "default": false
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "Who issued the outside document (required with is_outside)"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document"
+        }
+      },
+      "type": "object",
+      "required": [
+        "file",
+        "doc_type"
+      ],
+      "title": "Body_upload_document_api_v1_patients__patient_id__documents_post"
+    },
+    "ConsentBriefOut": {
+      "properties": {
+        "consent_id": {
+          "type": "integer",
+          "title": "Consent Id"
+        },
+        "consent_number": {
+          "type": "string",
+          "title": "Consent Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "form_code": {
+          "type": "string",
+          "title": "Form Code"
+        },
+        "form_title": {
+          "type": "string",
+          "title": "Form Title"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Procedure",
+            "Anaesthesia",
+            "Transfusion",
+            "HighRiskTreatment",
+            "AgainstMedicalAdvice",
+            "Other"
+          ],
+          "title": "Category"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Given",
+            "Refused",
+            "Withdrawn",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "English",
+            "Urdu",
+            "Punjabi",
+            "Saraiki",
+            "Pashto",
+            "Sindhi",
+            "Balochi"
+          ],
+          "title": "Language"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "booking_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Number"
+        },
+        "procedure_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Procedure Name"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Signed",
+                "EmergencyNote",
+                "VerbalRefusal"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mode"
+        },
+        "signer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Patient",
+                "DecisionMaker"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer"
+        },
+        "signer_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Name"
+        },
+        "signer_relationship": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Guardian",
+                "Attorney",
+                "Spouse",
+                "Child",
+                "Parent",
+                "Sibling",
+                "OtherRelative",
+                "CareProvider"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Relationship"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided At"
+        },
+        "obtained_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Obtained By Name"
+        },
+        "document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Id"
+        },
+        "scanned_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scanned At"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "consent_id",
+        "consent_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "form_code",
+        "form_title",
+        "category",
+        "status",
+        "language",
+        "admission_id",
+        "admission_number",
+        "booking_id",
+        "booking_number",
+        "procedure_name",
+        "mode",
+        "signer",
+        "signer_name",
+        "signer_relationship",
+        "decided_at",
+        "obtained_by_name",
+        "document_id",
+        "scanned_at",
+        "created_at"
+      ],
+      "title": "ConsentBriefOut"
+    },
+    "ConsentFormOut": {
+      "properties": {
+        "form_id": {
+          "type": "integer",
+          "title": "Form Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Procedure",
+            "Anaesthesia",
+            "Transfusion",
+            "HighRiskTreatment",
+            "AgainstMedicalAdvice",
+            "Other"
+          ],
+          "title": "Category"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "situations": {
+          "type": "string",
+          "title": "Situations",
+          "description": "When it is needed (the policy's list, MSDS 73 i)"
+        },
+        "taken_by": {
+          "type": "string",
+          "enum": [
+            "AnyStaff",
+            "Doctor",
+            "Anaesthetist"
+          ],
+          "title": "Taken By",
+          "description": "AnyStaff; Doctor: registered with the PMDC; Anaesthetist: a doctor of the anaesthesia team"
+        },
+        "requires_witness": {
+          "type": "boolean",
+          "title": "Requires Witness"
+        },
+        "sort_order": {
+          "type": "integer",
+          "title": "Sort Order"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "texts": {
+          "items": {
+            "$ref": "#/components/schemas/ConsentFormTextOut"
+          },
+          "type": "array",
+          "title": "Texts",
+          "description": "English first, then the other languages"
+        }
+      },
+      "type": "object",
+      "required": [
+        "form_id",
+        "code",
+        "category",
+        "title",
+        "situations",
+        "taken_by",
+        "requires_witness",
+        "sort_order",
+        "is_active",
+        "row_version",
+        "texts"
+      ],
+      "title": "ConsentFormOut"
+    },
+    "ConsentFormTextOut": {
+      "properties": {
+        "language": {
+          "type": "string",
+          "enum": [
+            "English",
+            "Urdu",
+            "Punjabi",
+            "Saraiki",
+            "Pashto",
+            "Sindhi",
+            "Balochi"
+          ],
+          "title": "Language"
+        },
+        "heading": {
+          "type": "string",
+          "title": "Heading"
+        },
+        "body": {
+          "type": "string",
+          "title": "Body",
+          "description": "The declaration, one paragraph per line"
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "ltr",
+            "rtl"
+          ],
+          "title": "Direction",
+          "description": "rtl: print right to left (Urdu and Pakistan's other languages but English)"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Updated At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "language",
+        "heading",
+        "body",
+        "direction",
+        "updated_at",
+        "row_version"
+      ],
+      "title": "ConsentFormTextOut"
+    },
+    "ConsentIn": {
+      "properties": {
+        "procedure_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Procedure Name",
+          "examples": [
+            "Open appendicectomy"
+          ]
+        },
+        "performer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Performer Id",
+          "description": "The employee who performs it (fills performer_name) (GET /staff/lookup)"
+        },
+        "performer_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Performer Name",
+          "examples": [
+            "Dr Ahmed and the surgical team"
+          ]
+        },
+        "risks": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Risks",
+          "examples": [
+            "Wound infection, bleeding, injury to the bowel, a hernia at the scar later; rarely a second operation"
+          ]
+        },
+        "benefits": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Benefits",
+          "examples": [
+            "Removes the inflamed appendix before it bursts"
+          ]
+        },
+        "alternatives": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Alternatives",
+          "examples": [
+            "Antibiotics alone (the appendicitis may come back); laparoscopic operation"
+          ]
+        },
+        "admission_need": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Need",
+          "description": "General consent: why the patient is admitted"
+        },
+        "estimated_days": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Estimated Days",
+          "description": "General consent: the estimated stay"
+        },
+        "estimated_cost": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Estimated Cost",
+          "description": "General consent: the estimated cost (PKR)"
+        },
+        "form_code": {
+          "type": "string",
+          "title": "Form Code",
+          "description": "The form of the hospital's list (GET /consent-forms)",
+          "examples": [
+            "OPERATION"
+          ]
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "English",
+            "Urdu",
+            "Punjabi",
+            "Saraiki",
+            "Pashto",
+            "Sindhi",
+            "Balochi"
+          ],
+          "title": "Language",
+          "description": "The language the patient understands; the form must have a text in it"
+        },
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id",
+          "description": "Default: the patient of the admission, operation or visit"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id",
+          "description": "Required for the general consent; default: the operation's"
+        },
+        "booking_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Id",
+          "description": "The operation (consents to the operation and to its anaesthesia)"
+        },
+        "er_visit_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Er Visit Id"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id",
+          "description": "An OPD visit (a procedure in the clinic)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "form_code",
+        "language"
+      ],
+      "title": "ConsentIn"
+    },
+    "ConsentLineOut": {
+      "properties": {
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "value": {
+          "type": "string",
+          "title": "Value"
+        }
+      },
+      "type": "object",
+      "required": [
+        "label",
+        "value"
+      ],
+      "title": "ConsentLineOut"
+    },
+    "ConsentOut": {
+      "properties": {
+        "consent_id": {
+          "type": "integer",
+          "title": "Consent Id"
+        },
+        "consent_number": {
+          "type": "string",
+          "title": "Consent Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "father_or_husband_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Father Or Husband Name"
+        },
+        "patient_age": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Age",
+          "description": "Today, in years (null: not known)"
+        },
+        "form_id": {
+          "type": "integer",
+          "title": "Form Id"
+        },
+        "form_code": {
+          "type": "string",
+          "title": "Form Code"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Procedure",
+            "Anaesthesia",
+            "Transfusion",
+            "HighRiskTreatment",
+            "AgainstMedicalAdvice",
+            "Other"
+          ],
+          "title": "Category"
+        },
+        "taken_by": {
+          "type": "string",
+          "enum": [
+            "AnyStaff",
+            "Doctor",
+            "Anaesthetist"
+          ],
+          "title": "Taken By"
+        },
+        "requires_witness": {
+          "type": "boolean",
+          "title": "Requires Witness"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "booking_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Number"
+        },
+        "er_visit_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Er Visit Id"
+        },
+        "er_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Er Number"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id"
+        },
+        "ticket_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Number"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Given",
+            "Refused",
+            "Withdrawn",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "English",
+            "Urdu",
+            "Punjabi",
+            "Saraiki",
+            "Pashto",
+            "Sindhi",
+            "Balochi"
+          ],
+          "title": "Language"
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "ltr",
+            "rtl"
+          ],
+          "title": "Direction"
+        },
+        "form_title": {
+          "type": "string",
+          "title": "Form Title",
+          "description": "The heading as printed for this patient"
+        },
+        "form_body": {
+          "type": "string",
+          "title": "Form Body",
+          "description": "The text as printed for this patient (later changes of the form never alter it)"
+        },
+        "procedure_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Procedure Name"
+        },
+        "performer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Performer Id"
+        },
+        "performer_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Performer Name"
+        },
+        "risks": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Risks"
+        },
+        "benefits": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Benefits"
+        },
+        "alternatives": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Alternatives"
+        },
+        "admission_need": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Need"
+        },
+        "estimated_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Estimated Days"
+        },
+        "estimated_cost": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Estimated Cost"
+        },
+        "interpreter_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Interpreter Name"
+        },
+        "read_to_patient": {
+          "type": "boolean",
+          "title": "Read To Patient"
+        },
+        "questions_answers": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Questions Answers"
+        },
+        "understanding_confirmed": {
+          "type": "boolean",
+          "title": "Understanding Confirmed"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Signed",
+                "EmergencyNote",
+                "VerbalRefusal"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mode"
+        },
+        "patient_capable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Capable"
+        },
+        "incapacity_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Minor",
+                "Unconscious",
+                "Confused",
+                "MentalIllness",
+                "Sedated",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Incapacity Reason"
+        },
+        "signer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Patient",
+                "DecisionMaker"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer"
+        },
+        "signer_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Name"
+        },
+        "signer_relationship": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Guardian",
+                "Attorney",
+                "Spouse",
+                "Child",
+                "Parent",
+                "Sibling",
+                "OtherRelative",
+                "CareProvider"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Relationship"
+        },
+        "signer_cnic": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Cnic"
+        },
+        "signer_phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Phone"
+        },
+        "signer_mark": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Signature",
+                "ThumbImpression"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Mark"
+        },
+        "witness_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Witness Name"
+        },
+        "witness_role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Witness Role"
+        },
+        "emergency_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Note"
+        },
+        "second_doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Doctor Id"
+        },
+        "second_doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Doctor Name"
+        },
+        "refusal_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Refusal Reason"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided At"
+        },
+        "obtained_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The professional who explained and took it (MSDS 74 iii)"
+        },
+        "document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Id",
+          "description": "The scan of the signed form (a patient document)"
+        },
+        "scanned_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scanned At"
+        },
+        "withdrawn_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Withdrawn At"
+        },
+        "withdrawal_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Withdrawal Reason"
+        },
+        "withdrawal_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled At"
+        },
+        "cancel_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancel Reason"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "created_by_name": {
+          "type": "string",
+          "title": "Created By Name"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "missing": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Missing",
+          "description": "A draft: what the explanation still lacks before the decision"
+        },
+        "who_decides": {
+          "$ref": "#/components/schemas/WhoDecidesOut",
+          "description": "Who may sign for this patient today; a decision dated earlier (decided_at) is checked on its own date"
+        }
+      },
+      "type": "object",
+      "required": [
+        "consent_id",
+        "consent_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "gender",
+        "father_or_husband_name",
+        "patient_age",
+        "form_id",
+        "form_code",
+        "category",
+        "taken_by",
+        "requires_witness",
+        "admission_id",
+        "admission_number",
+        "booking_id",
+        "booking_number",
+        "er_visit_id",
+        "er_number",
+        "ticket_id",
+        "ticket_number",
+        "status",
+        "language",
+        "direction",
+        "form_title",
+        "form_body",
+        "procedure_name",
+        "performer_id",
+        "performer_name",
+        "risks",
+        "benefits",
+        "alternatives",
+        "admission_need",
+        "estimated_days",
+        "estimated_cost",
+        "interpreter_name",
+        "read_to_patient",
+        "questions_answers",
+        "understanding_confirmed",
+        "mode",
+        "patient_capable",
+        "incapacity_reason",
+        "signer",
+        "signer_name",
+        "signer_relationship",
+        "signer_cnic",
+        "signer_phone",
+        "signer_mark",
+        "witness_name",
+        "witness_role",
+        "emergency_note",
+        "second_doctor_id",
+        "second_doctor_name",
+        "refusal_reason",
+        "decided_at",
+        "obtained_stamp",
+        "document_id",
+        "scanned_at",
+        "withdrawn_at",
+        "withdrawal_reason",
+        "withdrawal_stamp",
+        "cancelled_at",
+        "cancel_reason",
+        "created_at",
+        "created_by_name",
+        "row_version",
+        "missing",
+        "who_decides"
+      ],
+      "title": "ConsentOut"
+    },
+    "ConsentPrintFieldsOut": {
+      "properties": {
+        "hospital": {
+          "$ref": "#/components/schemas/HospitalHeaderOut"
+        },
+        "consent": {
+          "$ref": "#/components/schemas/ConsentOut"
+        },
+        "explained": {
+          "items": {
+            "$ref": "#/components/schemas/ConsentLineOut"
+          },
+          "type": "array",
+          "title": "Explained",
+          "description": "What the professional explained (blank lines where empty)"
+        },
+        "decision": {
+          "items": {
+            "$ref": "#/components/schemas/ConsentLineOut"
+          },
+          "type": "array",
+          "title": "Decision",
+          "description": "The recorded decision; empty for a draft"
+        },
+        "signature_lines": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Signature Lines",
+          "description": "A draft: the lines to sign on paper"
+        }
+      },
+      "type": "object",
+      "required": [
+        "hospital",
+        "consent",
+        "explained",
+        "decision",
+        "signature_lines"
+      ],
+      "title": "ConsentPrintFieldsOut"
+    },
+    "ConsentReasonIn": {
+      "properties": {
+        "reason": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "title": "ConsentReasonIn"
+    },
+    "ConsentRefuseIn": {
+      "properties": {
+        "signer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Patient",
+                "DecisionMaker"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer",
+          "description": "Patient, or DecisionMaker when the patient cannot decide"
+        },
+        "signer_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Name",
+          "description": "Default for the patient: their name"
+        },
+        "signer_relationship": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Guardian",
+                "Attorney",
+                "Spouse",
+                "Child",
+                "Parent",
+                "Sibling",
+                "OtherRelative",
+                "CareProvider"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Relationship",
+          "description": "A decision maker: one the policy allows for this patient (GET /consent-decision-makers)"
+        },
+        "signer_cnic": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Cnic",
+          "examples": [
+            "35202-1234567-1"
+          ]
+        },
+        "signer_phone": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Phone"
+        },
+        "incapacity_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Minor",
+                "Unconscious",
+                "Confused",
+                "MentalIllness",
+                "Sedated",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Incapacity Reason",
+          "description": "Why the patient cannot decide (a decision maker or the emergency note)"
+        },
+        "witness_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Witness Name",
+          "description": "Required for a thumb impression, a verbal refusal and the forms that say so"
+        },
+        "witness_role": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Witness Role",
+          "examples": [
+            "Staff nurse"
+          ]
+        },
+        "interpreter_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Interpreter Name"
+        },
+        "read_to_patient": {
+          "type": "boolean",
+          "title": "Read To Patient",
+          "description": "The text was read aloud (the patient cannot read it)",
+          "default": false
+        },
+        "questions_answers": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Questions Answers",
+          "description": "The questions asked and the answers given; \"None asked\" (required when signed)",
+          "examples": [
+            "None asked"
+          ]
+        },
+        "understanding_confirmed": {
+          "type": "boolean",
+          "title": "Understanding Confirmed",
+          "description": "The patient (or decision maker) explained it back in their own words (required when signed)",
+          "default": false
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided At",
+          "description": "When it was signed; default now, never in the future"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Version"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "Signed",
+            "VerbalRefusal"
+          ],
+          "title": "Mode",
+          "description": "VerbalRefusal: refused and would not sign (a witness is required)",
+          "default": "Signed"
+        },
+        "signer_mark": {
+          "type": "string",
+          "enum": [
+            "Signature",
+            "ThumbImpression"
+          ],
+          "title": "Signer Mark",
+          "default": "Signature"
+        },
+        "refusal_reason": {
+          "type": "string",
+          "maxLength": 2000,
+          "minLength": 3,
+          "title": "Refusal Reason",
+          "description": "The reason, in the patient's words"
+        }
+      },
+      "type": "object",
+      "required": [
+        "refusal_reason"
+      ],
+      "title": "ConsentRefuseIn"
+    },
+    "ConsentScanIn": {
+      "properties": {
+        "document_id": {
+          "type": "integer",
+          "title": "Document Id",
+          "description": "A patient document of type Consent: POST /patients/{patient_id}/documents"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_id"
+      ],
+      "title": "ConsentScanIn"
+    },
+    "ConsentSignIn": {
+      "properties": {
+        "signer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Patient",
+                "DecisionMaker"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer",
+          "description": "Patient, or DecisionMaker when the patient cannot decide"
+        },
+        "signer_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Name",
+          "description": "Default for the patient: their name"
+        },
+        "signer_relationship": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Guardian",
+                "Attorney",
+                "Spouse",
+                "Child",
+                "Parent",
+                "Sibling",
+                "OtherRelative",
+                "CareProvider"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Relationship",
+          "description": "A decision maker: one the policy allows for this patient (GET /consent-decision-makers)"
+        },
+        "signer_cnic": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Cnic",
+          "examples": [
+            "35202-1234567-1"
+          ]
+        },
+        "signer_phone": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Phone"
+        },
+        "incapacity_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Minor",
+                "Unconscious",
+                "Confused",
+                "MentalIllness",
+                "Sedated",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Incapacity Reason",
+          "description": "Why the patient cannot decide (a decision maker or the emergency note)"
+        },
+        "witness_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Witness Name",
+          "description": "Required for a thumb impression, a verbal refusal and the forms that say so"
+        },
+        "witness_role": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Witness Role",
+          "examples": [
+            "Staff nurse"
+          ]
+        },
+        "interpreter_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Interpreter Name"
+        },
+        "read_to_patient": {
+          "type": "boolean",
+          "title": "Read To Patient",
+          "description": "The text was read aloud (the patient cannot read it)",
+          "default": false
+        },
+        "questions_answers": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Questions Answers",
+          "description": "The questions asked and the answers given; \"None asked\" (required when signed)",
+          "examples": [
+            "None asked"
+          ]
+        },
+        "understanding_confirmed": {
+          "type": "boolean",
+          "title": "Understanding Confirmed",
+          "description": "The patient (or decision maker) explained it back in their own words (required when signed)",
+          "default": false
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided At",
+          "description": "When it was signed; default now, never in the future"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Version"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "Signed",
+            "EmergencyNote"
+          ],
+          "title": "Mode",
+          "description": "EmergencyNote: nobody could consent and the treatment could not wait (a doctor writes it)",
+          "default": "Signed"
+        },
+        "signer_mark": {
+          "type": "string",
+          "enum": [
+            "Signature",
+            "ThumbImpression"
+          ],
+          "title": "Signer Mark",
+          "default": "Signature"
+        },
+        "emergency_note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Note",
+          "description": "Why the treatment could not wait and nobody could consent"
+        },
+        "second_doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Doctor Id",
+          "description": "The second registered doctor who concurs with the emergency note (setting consent_emergency_second_doctor): an employee_id from GET /staff/lookup?license_type=PMDC"
+        }
+      },
+      "type": "object",
+      "title": "ConsentSignIn"
+    },
+    "ConsentUpdateIn": {
+      "properties": {
+        "procedure_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Procedure Name",
+          "examples": [
+            "Open appendicectomy"
+          ]
+        },
+        "performer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Performer Id",
+          "description": "The employee who performs it (fills performer_name) (GET /staff/lookup)"
+        },
+        "performer_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Performer Name",
+          "examples": [
+            "Dr Ahmed and the surgical team"
+          ]
+        },
+        "risks": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Risks",
+          "examples": [
+            "Wound infection, bleeding, injury to the bowel, a hernia at the scar later; rarely a second operation"
+          ]
+        },
+        "benefits": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Benefits",
+          "examples": [
+            "Removes the inflamed appendix before it bursts"
+          ]
+        },
+        "alternatives": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Alternatives",
+          "examples": [
+            "Antibiotics alone (the appendicitis may come back); laparoscopic operation"
+          ]
+        },
+        "admission_need": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Need",
+          "description": "General consent: why the patient is admitted"
+        },
+        "estimated_days": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Estimated Days",
+          "description": "General consent: the estimated stay"
+        },
+        "estimated_cost": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Estimated Cost",
+          "description": "General consent: the estimated cost (PKR)"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "English",
+                "Urdu",
+                "Punjabi",
+                "Saraiki",
+                "Pashto",
+                "Sindhi",
+                "Balochi"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Language",
+          "description": "Changing it prints the form's text in the new language"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Version"
+        }
+      },
+      "type": "object",
+      "title": "ConsentUpdateIn"
+    },
+    "ConsentWorklistItemOut": {
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "GeneralConsent",
+            "OperationConsent",
+            "AnaesthesiaConsent",
+            "Scan"
+          ],
+          "title": "Kind",
+          "description": "GeneralConsent: an admission without it; OperationConsent / AnaesthesiaConsent: an operation not signed in without it; Scan: a signed form not scanned into the record yet"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "booking_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Number"
+        },
+        "procedure_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Procedure Name"
+        },
+        "due_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Due At",
+          "description": "The admission, the operation's start, or the scan deadline"
+        },
+        "overdue": {
+          "type": "boolean",
+          "title": "Overdue"
+        },
+        "consent_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consent Id",
+          "description": "The draft already prepared, or the consent to scan"
+        },
+        "consent_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consent Number"
+        }
+      },
+      "type": "object",
+      "required": [
+        "kind",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "admission_id",
+        "admission_number",
+        "booking_id",
+        "booking_number",
+        "procedure_name",
+        "due_at",
+        "overdue",
+        "consent_id",
+        "consent_number"
+      ],
+      "title": "ConsentWorklistItemOut"
+    },
+    "DecisionMakerChoiceOut": {
+      "properties": {
+        "relationship": {
+          "type": "string",
+          "enum": [
+            "Guardian",
+            "Attorney",
+            "Spouse",
+            "Child",
+            "Parent",
+            "Sibling",
+            "OtherRelative",
+            "CareProvider"
+          ],
+          "title": "Relationship"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "priority": {
+          "type": "integer",
+          "title": "Priority",
+          "description": "The order to ask for this patient, the lowest first"
+        }
+      },
+      "type": "object",
+      "required": [
+        "relationship",
+        "description",
+        "priority"
+      ],
+      "title": "DecisionMakerChoiceOut"
+    },
+    "DecisionMakerOut": {
+      "properties": {
+        "relationship": {
+          "type": "string",
+          "enum": [
+            "Guardian",
+            "Attorney",
+            "Spouse",
+            "Child",
+            "Parent",
+            "Sibling",
+            "OtherRelative",
+            "CareProvider"
+          ],
+          "title": "Relationship"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "adult_priority": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Adult Priority",
+          "description": "The order asked for an adult patient; null: may not decide"
+        },
+        "minor_priority": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Minor Priority",
+          "description": "The order asked for a child; null: may not decide"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "relationship",
+        "description",
+        "adult_priority",
+        "minor_priority",
+        "row_version"
+      ],
+      "title": "DecisionMakerOut"
+    },
+    "Envelope_ConsentOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/ConsentOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[ConsentOut]"
+    },
+    "Envelope_PatientDocumentUploadOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PatientDocumentUploadOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PatientDocumentUploadOut]"
+    },
+    "Envelope_PrintOut_ConsentPrintFieldsOut__": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PrintOut_ConsentPrintFieldsOut_"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PrintOut[ConsentPrintFieldsOut]]"
+    },
+    "Envelope_list_ConsentBriefOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/ConsentBriefOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[ConsentBriefOut]]"
+    },
+    "Envelope_list_ConsentFormOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/ConsentFormOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[ConsentFormOut]]"
+    },
+    "Envelope_list_ConsentWorklistItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/ConsentWorklistItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[ConsentWorklistItemOut]]"
+    },
+    "Envelope_list_DecisionMakerOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/DecisionMakerOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[DecisionMakerOut]]"
+    },
+    "Envelope_list_StaffLookupOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/StaffLookupOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[StaffLookupOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "HospitalHeaderOut": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "address": {
+          "type": "string",
+          "title": "Address"
+        },
+        "phone": {
+          "type": "string",
+          "title": "Phone"
+        },
+        "phc_number": {
+          "type": "string",
+          "title": "Phc Number",
+          "description": "The Punjab Healthcare Commission registration / licence number (GET /msds/profile); empty until an admin confirms it"
+        },
+        "issue_line": {
+          "type": "string",
+          "title": "Issue Line",
+          "description": "An issued document: 'Issued <when>; this copy printed <when>', with '(reprint)' an hour or more later; print it under the PHC number. Empty for a report of now"
+        }
+      },
+      "type": "object",
+      "required": [
+        "name",
+        "address",
+        "phone",
+        "phc_number",
+        "issue_line"
+      ],
+      "title": "HospitalHeaderOut"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "PatientDocumentUploadOut": {
+      "properties": {
+        "document_id": {
+          "type": "integer",
+          "title": "Document Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "application/pdf",
+            "image/jpeg",
+            "image/png"
+          ],
+          "title": "Content Type"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "title": "Size Bytes"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought by the patient from another hospital, laboratory or clinic: show it labelled as an outside document, never as a result of this hospital"
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "The hospital, laboratory or clinic that issued an outside document"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document (the test, the report, the visit)"
+        },
+        "uploaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Uploaded At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_id",
+        "patient_id",
+        "doc_type",
+        "title",
+        "content_type",
+        "size_bytes",
+        "is_outside",
+        "source_facility",
+        "document_date",
+        "uploaded_at"
+      ],
+      "title": "PatientDocumentUploadOut",
+      "description": "The stored document (download it with GET /patient-documents/{document_id}/download)."
+    },
+    "PrintOut_ConsentPrintFieldsOut_": {
+      "properties": {
+        "document_type": {
+          "type": "string",
+          "enum": [
+            "autopsy_order",
+            "bed_labels",
+            "blood_component_label",
+            "blood_donation_labels",
+            "clinical_note",
+            "complaint_letter",
+            "complaints_notice",
+            "consent_form",
+            "cost_estimate",
+            "cssd_labels",
+            "death_certificate",
+            "discharge_summary",
+            "dispensing_label",
+            "dose_label",
+            "id_card",
+            "imaging_report",
+            "lab_label",
+            "lab_report",
+            "mlc_intimation",
+            "opd_slip",
+            "pharmacy_receipt",
+            "prescription",
+            "referral_slip",
+            "send_out_manifest",
+            "surgical_record",
+            "triage_algorithm",
+            "wristband"
+          ],
+          "title": "Document Type"
+        },
+        "printer_role": {
+          "type": "string",
+          "enum": [
+            "receipt",
+            "label",
+            "document",
+            "card"
+          ],
+          "title": "Printer Role",
+          "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+        },
+        "paper_width_mm": {
+          "type": "integer",
+          "title": "Paper Width Mm"
+        },
+        "fields": {
+          "$ref": "#/components/schemas/ConsentPrintFieldsOut",
+          "description": "The document's data, for frontends that render their own layout"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Text",
+          "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+        },
+        "barcode_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode Svg"
+        },
+        "qr_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Qr Svg"
+        },
+        "pdf_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pdf Url"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_type",
+        "printer_role",
+        "paper_width_mm",
+        "fields",
+        "text",
+        "barcode_svg",
+        "qr_svg",
+        "pdf_url"
+      ],
+      "title": "PrintOut[ConsentPrintFieldsOut]"
+    },
+    "StaffLookupOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id",
+          "description": "The id a form's staff field takes (contrast_doctor_id, employee_id, ...)"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "license_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "PMDC",
+                "PNC",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "License Type",
+          "description": "The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none"
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id",
+          "description": "Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "department_name",
+        "license_type",
+        "registration",
+        "user_id"
+      ],
+      "title": "StaffLookupOut",
+      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    },
+    "WhoDecidesOut": {
+      "properties": {
+        "adult_age": {
+          "type": "integer",
+          "title": "Adult Age",
+          "description": "The age of consent in years (setting consent_adult_age)"
+        },
+        "patient_is_minor": {
+          "type": "boolean",
+          "title": "Patient Is Minor",
+          "description": "patient_age is known and below adult_age. An unknown age counts as an adult, as the database's check does"
+        },
+        "patient_may_sign": {
+          "type": "boolean",
+          "title": "Patient May Sign",
+          "description": "false for a minor: a decision maker signs (signer DecisionMaker); signer Patient answers CONSENT_SIGNER_INVALID"
+        },
+        "decision_makers": {
+          "items": {
+            "$ref": "#/components/schemas/DecisionMakerChoiceOut"
+          },
+          "type": "array",
+          "title": "Decision Makers",
+          "description": "The relationships allowed to decide for this patient, in the order to ask; any other signer_relationship answers CONSENT_SIGNER_INVALID"
+        },
+        "emergency_second_doctor": {
+          "type": "boolean",
+          "title": "Emergency Second Doctor",
+          "description": "mode EmergencyNote needs second_doctor_id: a doctor registered with the PMDC other than the caller (setting consent_emergency_second_doctor; GET /staff/lookup?license_type=PMDC)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "adult_age",
+        "patient_is_minor",
+        "patient_may_sign",
+        "decision_makers",
+        "emergency_second_doctor"
+      ],
+      "title": "WhoDecidesOut",
+      "description": "Who may decide for this patient today, by the hospital's consent policy (MSDS 75): the rule the decision is\nchecked with, so a frontend never classifies the patient or hardcodes the age of consent (backend issue #39)."
+    }
+  },
+  "unknowns": []
+}

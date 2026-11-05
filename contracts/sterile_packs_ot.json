@@ -1,7 +1,7 @@
 {
   "screen_id": "sterile_packs_ot",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -230,7 +230,9 @@
       }
     ],
     "related_workflows": [
-      "infection-control"
+      "infection-control",
+      "inpatient-and-discharge",
+      "surgical-care"
     ],
     "service": {
       "services": [
@@ -254,7 +256,7 @@
     "workspace": "ot_nurse",
     "phase": "P6",
     "position": 123,
-    "points": 48,
+    "points": 51,
     "capabilities": [
       "realtime",
       "f1_help",
@@ -283,23 +285,29 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 48,
+    "points": 51,
     "items": [
       {
         "id": "ep:POST /cssd/packs/use",
         "label": "POST /cssd/packs/use",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /cssd/packs/{pack_code}",
         "label": "GET /cssd/packs/{pack_code}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /cssd/packs",
         "label": "GET /cssd/packs",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /ot/clinical-worklist",
+        "label": "GET /ot/clinical-worklist",
         "points": 3,
         "claimed": false
       },
@@ -307,61 +315,61 @@
         "id": "ev:cssd.cycle.updated",
         "label": "cssd.cycle.updated",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:d8f4d7af47",
         "label": "Scan the pack's label as it is opened (POST /cssd/packs/use with the booking_id in the theatre, the admission_id on the ward): a recall then finds the patient (MSDS IPC 92).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:5eabbbecca",
         "label": "CSSD_PACK_UNUSABLE: the pack has expired, failed or been recalled: do NOT use it, take another and send it back. Show expires_on in red when expiring_soon (GET /cssd/packs/{pack_code}).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:4357be8acb",
         "label": "cssd.cycle.updated with status Recalled (critical): list the ward's or theatre's packs of that load (GET /cssd/packs?status=Recalled&ward_id=…) and return them.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:26e45f89a1",
         "label": "Exists for the service cssd (work): show it as GET /establishment views.screens says for screen_id sterile_packs_ot (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
         "label": "Test plan passed",
         "points": 4,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -391,13 +399,13 @@
         "id": "q:character",
         "label": "Design principles applied",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:editor",
         "label": "Editor's pass",
         "points": 2,
-        "claimed": false
+        "claimed": true
       }
     ],
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
@@ -514,14 +522,14 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "The operation (the theatre)"
+            "description": "The operation (the theatre) (GET /ot/clinical-worklist)"
           },
           {
             "pointer": "/admission_id",
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "A procedure on the ward"
+            "description": "A procedure on the ward (GET /ipd/my-beds)"
           }
         ],
         "cross_field_rules": {
@@ -850,6 +858,137 @@
         ],
         "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
       }
+    },
+    {
+      "endpoint": "GET /ot/clinical-worklist",
+      "summary": "Operations whose surgical record needs work",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ot.clinical.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of ot.clinical.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "mine",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Mine"
+          }
+        },
+        {
+          "name": "days",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 60,
+            "minimum": 0,
+            "default": 7,
+            "title": "Days"
+          }
+        },
+        {
+          "name": "admission_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admission Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_SurgicalWorklistItemOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "mine",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "days",
+            "required": false,
+            "type": "integer",
+            "default": 7,
+            "minimum": 0,
+            "maximum": 60
+          },
+          {
+            "name": "admission_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": null
+      }
     }
   ],
   "realtime": {
@@ -869,7 +1008,8 @@
           "POST /cssd/cycles/{cycle_id}/results"
         ],
         "refresh": [
-          "GET /cssd/packs"
+          "GET /cssd/packs",
+          "GET /ot/clinical-worklist"
         ]
       }
     ],
@@ -960,6 +1100,102 @@
           "Recalled"
         ]
       }
+    },
+    {
+      "values": [
+        "Scheduled",
+        "Emergency",
+        "CodeRed"
+      ],
+      "column": "ot_bookings.booking_type",
+      "used_at": "GET /ot/clinical-worklist[].booking_type",
+      "labels": {
+        "Scheduled": "Scheduled",
+        "Emergency": "Emergency",
+        "CodeRed": "Code red"
+      }
+    },
+    {
+      "values": [
+        "Requested",
+        "Scheduled",
+        "InProgress",
+        "Cleaning",
+        "Completed",
+        "Cancelled",
+        "EmergencyHold"
+      ],
+      "column": "ot_bookings.status",
+      "used_at": "GET /ot/clinical-worklist[].status",
+      "labels": {
+        "Requested": "Requested",
+        "Scheduled": "Scheduled",
+        "InProgress": "In progress",
+        "Cleaning": "Cleaning",
+        "Completed": "Completed",
+        "Cancelled": "Cancelled",
+        "EmergencyHold": "Emergency hold"
+      }
+    },
+    {
+      "values": [
+        "Fit",
+        "FitWithConditions",
+        "NotFit",
+        "Deferred"
+      ],
+      "column": "ot_pre_anaesthesia.decision",
+      "used_at": "GET /ot/clinical-worklist[].anaesthesia_decision",
+      "labels": {
+        "Fit": "Fit",
+        "FitWithConditions": "Fit with conditions",
+        "NotFit": "Not fit",
+        "Deferred": "Deferred"
+      }
+    },
+    {
+      "values": [
+        "Missing",
+        "Draft",
+        "Final",
+        "NotNeeded"
+      ],
+      "column": null,
+      "used_at": "GET /ot/clinical-worklist[].parts[].state",
+      "labels": {
+        "Missing": "Missing",
+        "Draft": "Draft",
+        "Final": "Final",
+        "NotNeeded": "Not needed"
+      }
+    },
+    {
+      "values": [
+        "PreOpNote",
+        "OperationConsent",
+        "PreAnaesthesia",
+        "AnaesthesiaConsent",
+        "SignIn",
+        "TimeOut",
+        "SignOut",
+        "AnaesthesiaRecord",
+        "OperativeNote",
+        "Recovery"
+      ],
+      "column": null,
+      "used_at": "GET /ot/clinical-worklist[].parts[].part",
+      "labels": {
+        "PreOpNote": "Pre op note",
+        "OperationConsent": "Operation consent",
+        "PreAnaesthesia": "Pre anaesthesia",
+        "AnaesthesiaConsent": "Anaesthesia consent",
+        "SignIn": "Sign in",
+        "TimeOut": "Time out",
+        "SignOut": "Sign out",
+        "AnaesthesiaRecord": "Anaesthesia record",
+        "OperativeNote": "Operative note",
+        "Recovery": "Recovery"
+      }
     }
   ],
   "states": [
@@ -1006,12 +1242,10 @@
     "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
   },
   "same_component_as": [
-    "sterile_packs_ot_admin",
-    "sterile_packs_ward"
+    "sterile_packs_ot_admin"
   ],
   "roles": {
     "full": [
-      "triage_nurse",
       "ot_admin",
       "ot_nurse",
       "ward_nurse",
@@ -1022,12 +1256,16 @@
       "hospital_admin",
       "hospital_director",
       "clinic_director",
+      "triage_nurse",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "anaesthetist",
       "quality_officer",
       "ipc_nurse",
       "cssd_technician"
     ],
     "page_for": [
-      "triage_nurse",
       "ot_admin",
       "ot_nurse",
       "ward_nurse",
@@ -1129,6 +1367,34 @@
           "triage_nurse",
           "ward_nurse"
         ]
+      },
+      {
+        "id": "case:GET /ot/clinical-worklist",
+        "call": "GET /api/v1/ot/clinical-worklist",
+        "summary": "Operations whose surgical record needs work",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
       }
     ],
     "service_cases": [
@@ -1190,8 +1456,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -1263,6 +1529,17 @@
           "cssd.pack.use"
         ],
         "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "sterile_packs_ot::GET /ot/clinical-worklist",
+        "task": "Operations whose surgical record needs work",
+        "call": "GET /ot/clinical-worklist",
+        "is_action": false,
+        "permissions": [
+          "ot.clinical.view"
+        ],
+        "permissions_mode": "all",
         "access": null
       }
     ],
@@ -1355,9 +1632,166 @@
       "slug": "infection-control",
       "title": "Infection prevention and control (MSDS)",
       "recipe": "get_workflow_recipe('infection-control')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "surgical-care",
+      "title": "Surgical care (MSDS)",
+      "recipe": "get_workflow_recipe('surgical-care')"
     }
   ],
   "scenarios": [],
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
   "examples": {
     "POST /cssd/packs/use": {
       "request": {
@@ -1462,6 +1896,781 @@
         "status": 200,
         "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"pack_id\": 6, \"pack_code\": \"SP-2026-000006\", \"set_type_id\": 5, \"set_code\": \"DRESSING\", \"set_name\": \"Dressing pack\", \"cycle_id\": 3, \"cycle_number\": \"STC-2026-00003\", \"cycle_status\": \"Released\", \"sterilized_on\": \"2026-08-31\", \"expires_on\": \"2026-09-30\", \"status\": \"Expired\", \"issued_at\": \"2026-10-01T07:20:18.207707+00:00\", \"issued_by_name\": \"CSSD Tech Bilal\", \"issued_to_ward_id\": null, \"issued_to_ward_name\": null, \"issued_to_ot_id\": 1, \"issued_to_ot_name\": \"Main OT 1\", \"used_at\": null, \"used_by_name\": null, \"patient_id\": null, \"mrn\": null, \"patient_name\": null, \"booking_id\": null, \"booking_number\": null, \"admission_id\": null, \"admission_number\": null, \"row_version\": 5, \"expiring_soon\": false}, {\"pack_id\": 4, \"pack_code\": \"SP-2026-000004\", \"set_type_id\": 1, \"set_code\": \"GEN-MAJOR\", \"set_name\": \"General surgery major set\", \"cycle_id\": 3, \"cycle_number\": \"STC-2026-00003\", \"cycle_status\": \"Released\", \"sterilized_on\": \"2026-10-01\", \"expires_on\": \"2026-10-31\", \"status\": \"Used\", \"issued_at\": \"2026-10-01T07:20:18.207707+00:00\", \"issued_by_name\": \"CSSD Tech Bilal\", \"issued_to_ward_id\": null, \"issued_to_ward_name\": null, \"issued_to_ot_id\": 1, \"issued_to_ot_name\": \"Main OT 1\", \"used_at\": \"2026-10-01T07:20:18.262730+00:00\", \"used_by_name\": \"ucac391ff96\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"admission_id\": null, \"admission_number\": null, \"row_version\": 4, \"expiring_soon\":…"
       }
+    },
+    "GET /ot/clinical-worklist": {
+      "request": {
+        "path": "/api/v1/ot/clinical-worklist",
+        "query": {
+          "mine": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "booking_id": 1,
+              "booking_number": "OT-2026-00001",
+              "status": "Cleaning",
+              "booking_type": "Scheduled",
+              "procedure_name": "Appendectomy",
+              "anesthesia_type": "General",
+              "scheduled_start": "2026-10-01T09:00:00+00:00",
+              "actual_start": "2026-09-30T09:04:27.990684+00:00",
+              "actual_end": "2026-09-30T09:04:28.126713+00:00",
+              "primary_surgeon_id": 12,
+              "surgeon_name": "Dr Tariq",
+              "ot_name": "Main OT 1",
+              "patient_id": 2,
+              "mrn": "MRN-2026-000002",
+              "patient_name": "Ali Khan",
+              "needs_anaesthetist": true,
+              "anaesthesia_decision": "Fit",
+              "anaesthetist_id": 17,
+              "parts": [
+                {
+                  "part": "PreOpNote",
+                  "label": "Pre-operative note",
+                  "state": "Final"
+                },
+                {
+                  "part": "PreAnaesthesia",
+                  "label": "Pre-anaesthesia assessment",
+                  "state": "Final"
+                },
+                {
+                  "part": "SignIn",
+                  "label": "Sign in",
+                  "state": "Final"
+                }
+              ],
+              "next_step": null
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T09:04:28.386268+00:00"
+          },
+          "request_id": "f39e46d40d17427280146fef0d8c86c0"
+        }
+      }
+    }
+  },
+  "schemas": {
+    "Envelope_PackOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PackOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PackOut]"
+    },
+    "Envelope_list_PackOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PackOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PackOut]]"
+    },
+    "Envelope_list_SurgicalWorklistItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/SurgicalWorklistItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[SurgicalWorklistItemOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "PackOut": {
+      "properties": {
+        "pack_id": {
+          "type": "integer",
+          "title": "Pack Id"
+        },
+        "pack_code": {
+          "type": "string",
+          "title": "Pack Code"
+        },
+        "set_type_id": {
+          "type": "integer",
+          "title": "Set Type Id"
+        },
+        "set_code": {
+          "type": "string",
+          "title": "Set Code"
+        },
+        "set_name": {
+          "type": "string",
+          "title": "Set Name"
+        },
+        "cycle_id": {
+          "type": "integer",
+          "title": "Cycle Id"
+        },
+        "cycle_number": {
+          "type": "string",
+          "title": "Cycle Number"
+        },
+        "cycle_status": {
+          "type": "string",
+          "enum": [
+            "Running",
+            "Quarantined",
+            "Released",
+            "Failed",
+            "Recalled"
+          ],
+          "title": "Cycle Status"
+        },
+        "sterilized_on": {
+          "type": "string",
+          "format": "date",
+          "title": "Sterilized On"
+        },
+        "expires_on": {
+          "type": "string",
+          "format": "date",
+          "title": "Expires On"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Quarantined",
+            "Available",
+            "Issued",
+            "Used",
+            "Expired",
+            "Failed",
+            "Recalled"
+          ],
+          "title": "Status"
+        },
+        "issued_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued At"
+        },
+        "issued_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued By Name"
+        },
+        "issued_to_ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued To Ward Id"
+        },
+        "issued_to_ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued To Ward Name"
+        },
+        "issued_to_ot_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued To Ot Id"
+        },
+        "issued_to_ot_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Issued To Ot Name"
+        },
+        "used_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Used At"
+        },
+        "used_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Used By Name"
+        },
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Name"
+        },
+        "booking_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Number"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "expiring_soon": {
+          "type": "boolean",
+          "title": "Expiring Soon",
+          "description": "Expires within cssd_expiry_alert_days: use it first"
+        }
+      },
+      "type": "object",
+      "required": [
+        "pack_id",
+        "pack_code",
+        "set_type_id",
+        "set_code",
+        "set_name",
+        "cycle_id",
+        "cycle_number",
+        "cycle_status",
+        "sterilized_on",
+        "expires_on",
+        "status",
+        "issued_at",
+        "issued_by_name",
+        "issued_to_ward_id",
+        "issued_to_ward_name",
+        "issued_to_ot_id",
+        "issued_to_ot_name",
+        "used_at",
+        "used_by_name",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "booking_id",
+        "booking_number",
+        "admission_id",
+        "admission_number",
+        "row_version",
+        "expiring_soon"
+      ],
+      "title": "PackOut"
+    },
+    "PackUseIn": {
+      "properties": {
+        "pack_code": {
+          "type": "string",
+          "title": "Pack Code"
+        },
+        "booking_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Id",
+          "description": "The operation (the theatre) (GET /ot/clinical-worklist)"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id",
+          "description": "A procedure on the ward (GET /ipd/my-beds)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "pack_code"
+      ],
+      "title": "PackUseIn"
+    },
+    "RecordPartOut": {
+      "properties": {
+        "part": {
+          "type": "string",
+          "enum": [
+            "PreOpNote",
+            "OperationConsent",
+            "PreAnaesthesia",
+            "AnaesthesiaConsent",
+            "SignIn",
+            "TimeOut",
+            "SignOut",
+            "AnaesthesiaRecord",
+            "OperativeNote",
+            "Recovery"
+          ],
+          "title": "Part"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "Missing",
+            "Draft",
+            "Final",
+            "NotNeeded"
+          ],
+          "title": "State"
+        }
+      },
+      "type": "object",
+      "required": [
+        "part",
+        "label",
+        "state"
+      ],
+      "title": "RecordPartOut"
+    },
+    "SurgicalWorklistItemOut": {
+      "properties": {
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "type": "string",
+          "title": "Booking Number"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Requested",
+            "Scheduled",
+            "InProgress",
+            "Cleaning",
+            "Completed",
+            "Cancelled",
+            "EmergencyHold"
+          ],
+          "title": "Status"
+        },
+        "booking_type": {
+          "type": "string",
+          "enum": [
+            "Scheduled",
+            "Emergency",
+            "CodeRed"
+          ],
+          "title": "Booking Type"
+        },
+        "procedure_name": {
+          "type": "string",
+          "title": "Procedure Name"
+        },
+        "anesthesia_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anesthesia Type"
+        },
+        "scheduled_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled Start"
+        },
+        "actual_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual Start"
+        },
+        "actual_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual End"
+        },
+        "primary_surgeon_id": {
+          "type": "integer",
+          "title": "Primary Surgeon Id"
+        },
+        "surgeon_name": {
+          "type": "string",
+          "title": "Surgeon Name"
+        },
+        "ot_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Name"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "needs_anaesthetist": {
+          "type": "boolean",
+          "title": "Needs Anaesthetist"
+        },
+        "anaesthesia_decision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Fit",
+                "FitWithConditions",
+                "NotFit",
+                "Deferred"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anaesthesia Decision"
+        },
+        "anaesthetist_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anaesthetist Id"
+        },
+        "parts": {
+          "items": {
+            "$ref": "#/components/schemas/RecordPartOut"
+          },
+          "type": "array",
+          "title": "Parts"
+        },
+        "next_step": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Step"
+        }
+      },
+      "type": "object",
+      "required": [
+        "booking_id",
+        "booking_number",
+        "status",
+        "booking_type",
+        "procedure_name",
+        "anesthesia_type",
+        "scheduled_start",
+        "actual_start",
+        "actual_end",
+        "primary_surgeon_id",
+        "surgeon_name",
+        "ot_name",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "needs_anaesthetist",
+        "anaesthesia_decision",
+        "anaesthetist_id",
+        "parts",
+        "next_step"
+      ],
+      "title": "SurgicalWorklistItemOut"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
     }
   },
   "unknowns": [
@@ -1470,9 +2679,11 @@
       "owner": [
         "vendor"
       ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
       "affects": [
         "every screen in Urdu"
-      ]
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
     },
     {
       "what": "decision H03",
@@ -1480,18 +2691,22 @@
         "vendor",
         "clinical_lead"
       ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
       "affects": [
         "every screen"
-      ]
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
     },
     {
       "what": "decision H04",
       "owner": [
         "vendor"
       ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
       "affects": [
         "every screen with money"
-      ]
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
     },
     {
       "what": "decision H08",
@@ -1500,9 +2715,11 @@
         "translator",
         "clinical_lead"
       ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
       "affects": [
         "every screen in Urdu"
-      ]
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
     },
     {
       "what": "decision H09",
@@ -1510,9 +2727,11 @@
         "vendor",
         "frontend_lead"
       ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
       "affects": [
         "every screen"
-      ]
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
     },
     {
       "what": "decision H10",
@@ -1520,9 +2739,11 @@
         "clinical_lead",
         "vendor"
       ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
       "affects": [
         "every screen with realtime events"
-      ]
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
     },
     {
       "what": "decision H12",
@@ -1530,11 +2751,13 @@
         "vendor",
         "backend"
       ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
       "affects": [
         "my_cash_shift",
         "registration",
         "every screen that prints"
-      ]
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
     },
     {
       "what": "decision H18",
@@ -1542,9 +2765,11 @@
         "vendor",
         "frontend_lead"
       ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
       "affects": [
         "every table in Urdu"
-      ]
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
     },
     {
       "what": "decision H19",
@@ -1552,9 +2777,11 @@
         "clinical_lead",
         "backend"
       ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
       "affects": [
         "every screen with a patient banner"
-      ]
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
     },
     {
       "what": "decision H20",
@@ -1562,9 +2789,11 @@
         "vendor",
         "hospital"
       ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
       "affects": [
         "every form"
-      ]
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
     },
     {
       "what": "decision H22",
@@ -1572,9 +2801,11 @@
         "hospital",
         "vendor"
       ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
       "affects": [
         "every screen that prints"
-      ]
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
     },
     {
       "what": "decision H24",
@@ -1582,14 +2813,11 @@
         "vendor",
         "clinical_lead"
       ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
       "affects": [
         "every screen"
-      ]
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
     }
-  ],
-  "omitted_sections": [
-    "decisions",
-    "schemas"
-  ],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type."
+  ]
 }

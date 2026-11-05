@@ -1,7 +1,7 @@
 {
   "screen_id": "drug_recalls",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -253,7 +253,10 @@
       }
     ],
     "related_workflows": [
-      "medication-safety"
+      "clinical-and-prescriptions",
+      "incidents-and-sentinel-events",
+      "medication-safety",
+      "operating-theater"
     ],
     "service": {
       "services": [
@@ -277,7 +280,7 @@
     "workspace": "pharmacy_admin",
     "phase": "P7",
     "position": 137,
-    "points": 63,
+    "points": 66,
     "capabilities": [
       "realtime",
       "idempotent_writes",
@@ -322,6 +325,13 @@
         "ordering": false
       },
       {
+        "from": "pharmacy_admin",
+        "to": "drug_recalls",
+        "kind": "data_candidate",
+        "evidence": "it reads drug-recalls, which POST /drug-recalls on drug_recalls creates",
+        "ordering": false
+      },
+      {
         "from": "verbal_orders_er",
         "to": "drug_recalls",
         "kind": "data",
@@ -347,53 +357,59 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 63,
+    "points": 66,
     "items": [
       {
         "id": "ep:POST /drug-recalls",
         "label": "POST /drug-recalls",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /drug-recalls",
         "label": "GET /drug-recalls",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /drug-recalls/{recall_id}",
         "label": "GET /drug-recalls/{recall_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /drug-recalls/{recall_id}/remove-stock",
         "label": "POST /drug-recalls/{recall_id}/remove-stock",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
         "label": "PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /drug-recalls/{recall_id}/close",
         "label": "POST /drug-recalls/{recall_id}/close",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /drug-recalls/{recall_id}/cancel",
         "label": "POST /drug-recalls/{recall_id}/cancel",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /drugs/{drug_id}/stock-status",
         "label": "GET /drugs/{drug_id}/stock-status",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /drugs/search",
+        "label": "GET /drugs/search",
         "points": 3,
         "claimed": false
       },
@@ -401,61 +417,61 @@
         "id": "ev:pharmacy.recall.updated",
         "label": "pharmacy.recall.updated",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:fe2af7a43c",
         "label": "Open: the medicine, the batches (from GET /drugs/{drug_id}/stock-status, or all_batches), the source and reference (the DRAP alert), the class, the reason, contact_patients. The batches are blocked at once everywhere; the wards and the pharmacy are alerted.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:6e16f97bd1",
         "label": "Detail: per batch what is left in the pharmacy and on each ward and what was dispensed, given and used in theatre; the people who received it with their phone numbers. 'Remove stock' writes off every unit left (the note: returned to the supplier or destroyed). Record each contact (Contacted, Unreachable, NotNeeded with a note).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:2b020bd53b",
         "label": "Close when can_close (RECALL_NOT_COMPLETE shows what is left). Opened by mistake: Cancel (the batches are released).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:0bdb1f574d",
         "label": "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id drug_recalls (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
         "label": "Test plan passed",
         "points": 4,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -485,13 +501,13 @@
         "id": "q:character",
         "label": "Design principles applied",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:editor",
         "label": "Editor's pass",
         "points": 2,
-        "claimed": false
+        "claimed": true
       }
     ],
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
@@ -652,7 +668,8 @@
             "pointer": "/drug_id",
             "type": "integer",
             "required": true,
-            "nullable": false
+            "nullable": false,
+            "description": "The recalled medicine (GET /drugs/search)"
           },
           {
             "pointer": "/batch_ids",
@@ -1505,6 +1522,7 @@
           "ot_nurse",
           "pharmacist",
           "pharmacy_admin",
+          "quality_officer",
           "surgeon",
           "triage_nurse",
           "ward_nurse"
@@ -1582,6 +1600,134 @@
         "filters": [],
         "note": null
       }
+    },
+    {
+      "endpoint": "GET /drugs/search",
+      "summary": "Formulary search with live stock colour",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.formulary.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of pharmacy.formulary.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "maxLength": 100,
+            "default": "",
+            "title": "Q"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "default": 30,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DrugStockOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": false,
+            "type": "string",
+            "default": ""
+          }
+        ],
+        "filters": [],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
     }
   ],
   "realtime": {
@@ -1606,7 +1752,8 @@
         "refresh": [
           "GET /drug-recalls",
           "GET /drug-recalls/{recall_id}",
-          "GET /drugs/{drug_id}/stock-status"
+          "GET /drugs/{drug_id}/stock-status",
+          "GET /drugs/search"
         ]
       }
     ],
@@ -2196,6 +2343,40 @@
           "ot_nurse",
           "pharmacist",
           "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /drugs/search",
+        "call": "GET /api/v1/drugs/search",
+        "summary": "Formulary search with live stock colour",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
           "surgeon",
           "triage_nurse",
           "ward_nurse"
@@ -2261,8 +2442,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -2385,6 +2566,17 @@
         ],
         "permissions_mode": "any",
         "access": null
+      },
+      {
+        "id": "drug_recalls::GET /drugs/search",
+        "task": "Formulary search with live stock colour",
+        "call": "GET /drugs/search",
+        "is_action": false,
+        "permissions": [
+          "pharmacy.formulary.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
       }
     ],
     "rules_to_explain": [
@@ -2498,9 +2690,24 @@
   },
   "workflows": [
     {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
       "slug": "medication-safety",
       "title": "Medication safety (MSDS)",
       "recipe": "get_workflow_recipe('medication-safety')"
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
     }
   ],
   "scenarios": [],
@@ -2707,7 +2914,7 @@
               "batch_numbers": [
                 "CEF-1"
               ],
-              "stock_left": 0.0,
+              "stock_left": 0,
               "patients_to_contact": 0
             }
           ],
@@ -2801,17 +3008,17 @@
             "batch_numbers": [
               "CEF-2"
             ],
-            "stock_left": 18.0,
+            "stock_left": 18,
             "patients_to_contact": 0,
             "batches": [
               {
                 "batch_id": 2,
                 "batch_no": "CEF-2",
                 "expiry_date": "2099-01-01",
-                "qty_received": 20.0,
-                "pharmacy_qty": 18.0,
+                "qty_received": 20,
+                "pharmacy_qty": 18,
                 "ward_qty": 0,
-                "dispensed_qty": 2.0,
+                "dispensed_qty": 2,
                 "administered_qty": 0,
                 "theatre_qty": 0
               }
@@ -2845,12 +3052,12 @@
             "schedule": "ScheduleH",
             "is_otc_allowed": false,
             "barcode": null,
-            "low_stock_threshold": 0.0,
+            "low_stock_threshold": 0,
             "is_active": true,
             "high_alert_category": null,
             "is_restricted": false,
             "lasa_with": [],
-            "qty_available": 15.0,
+            "qty_available": 15,
             "next_expiry": "2098-01-01",
             "stock_status": "InStock",
             "batches": [
@@ -2858,9 +3065,9 @@
                 "batch_id": 2,
                 "batch_no": "EARLY",
                 "expiry_date": "2098-01-01",
-                "qty_available": 5.0,
-                "unit_cost": 10.0,
-                "retail_price": 20.0,
+                "qty_available": 5,
+                "unit_cost": 10,
+                "retail_price": 20,
                 "received_at": "2026-09-30T15:28:51.746963+00:00",
                 "is_expired": false
               },
@@ -2868,9 +3075,9 @@
                 "batch_id": 1,
                 "batch_no": "LATE",
                 "expiry_date": "2099-01-01",
-                "qty_available": 10.0,
-                "unit_cost": 10.0,
-                "retail_price": 20.0,
+                "qty_available": 10,
+                "unit_cost": 10,
+                "retail_price": 20,
                 "received_at": "2026-09-30T15:28:51.689915+00:00",
                 "is_expired": false
               }
@@ -2880,6 +3087,69 @@
             "server_time": "2026-09-30T15:28:52.014186+00:00"
           },
           "request_id": "a7701fa19daf4458a570a6d5f88f0bb4"
+        }
+      }
+    },
+    "GET /drugs/search": {
+      "request": {
+        "path": "/api/v1/drugs/search",
+        "query": {
+          "q": "Insulin"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "drug_id": 3,
+              "code": "INSN",
+              "name": "Insulin NPH",
+              "generic_name": null,
+              "strength": null,
+              "form": "Injection",
+              "unit": "unit",
+              "schedule": "HospitalOnly",
+              "is_otc_allowed": false,
+              "barcode": "8931440574755",
+              "low_stock_threshold": 0,
+              "is_active": true,
+              "high_alert_category": null,
+              "is_restricted": false,
+              "lasa_with": [
+                "Insulin regular"
+              ],
+              "qty_available": 50,
+              "next_expiry": "2099-01-01",
+              "stock_status": "InStock"
+            },
+            {
+              "drug_id": 2,
+              "code": "INSR",
+              "name": "Insulin regular",
+              "generic_name": null,
+              "strength": null,
+              "form": "Injection",
+              "unit": "unit",
+              "schedule": "HospitalOnly",
+              "is_otc_allowed": false,
+              "barcode": "8991682543668",
+              "low_stock_threshold": 0,
+              "is_active": true,
+              "high_alert_category": "Insulin",
+              "is_restricted": false,
+              "lasa_with": [
+                "Insulin NPH"
+              ],
+              "qty_available": 50,
+              "next_expiry": "2099-01-01",
+              "stock_status": "InStock"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T15:01:45.066819+00:00"
+          },
+          "request_id": "3c9f279059e64b359f9c572408414e0b"
         }
       }
     }
@@ -3129,6 +3399,192 @@
       ],
       "title": "DrugStockDetailOut"
     },
+    "DrugStockOut": {
+      "properties": {
+        "drug_id": {
+          "type": "integer",
+          "title": "Drug Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "generic_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Generic Name"
+        },
+        "strength": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Strength"
+        },
+        "form": {
+          "type": "string",
+          "enum": [
+            "Tablet",
+            "Capsule",
+            "Syrup",
+            "Suspension",
+            "Injection",
+            "Infusion",
+            "Cream",
+            "Ointment",
+            "Drops",
+            "Inhaler",
+            "Suppository",
+            "Powder",
+            "Consumable",
+            "Device",
+            "Other"
+          ],
+          "title": "Form"
+        },
+        "unit": {
+          "type": "string",
+          "title": "Unit"
+        },
+        "schedule": {
+          "type": "string",
+          "enum": [
+            "OTC",
+            "ScheduleG",
+            "ScheduleH",
+            "ScheduleX",
+            "HospitalOnly"
+          ],
+          "title": "Schedule"
+        },
+        "is_otc_allowed": {
+          "type": "boolean",
+          "title": "Is Otc Allowed"
+        },
+        "barcode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode"
+        },
+        "low_stock_threshold": {
+          "type": "number",
+          "title": "Low Stock Threshold"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "high_alert_category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ConcentratedElectrolyte",
+                "Chemotherapy",
+                "Anticoagulant",
+                "Insulin",
+                "Opioid",
+                "Sedative",
+                "NeuromuscularBlocker",
+                "Inotrope",
+                "Thrombolytic",
+                "Psychotropic",
+                "HighCost",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "High Alert Category",
+          "description": "Set: a high-alert medicine (MSDS 56): show it in red; a second person checks it when dispensed and given"
+        },
+        "is_restricted": {
+          "type": "boolean",
+          "title": "Is Restricted",
+          "description": "Prescribed only with the RestrictedPrescribing privilege (MSDS 52)"
+        },
+        "lasa_with": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Lasa With",
+          "description": "Medicines it looks or sounds like: warn when one is picked"
+        },
+        "qty_available": {
+          "type": "number",
+          "title": "Qty Available",
+          "description": "Non-expired stock"
+        },
+        "next_expiry": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Expiry"
+        },
+        "stock_status": {
+          "type": "string",
+          "enum": [
+            "InStock",
+            "Low",
+            "OutOfStock"
+          ],
+          "title": "Stock Status",
+          "description": "OutOfStock: show the drug greyed out"
+        }
+      },
+      "type": "object",
+      "required": [
+        "drug_id",
+        "code",
+        "name",
+        "generic_name",
+        "strength",
+        "form",
+        "unit",
+        "schedule",
+        "is_otc_allowed",
+        "barcode",
+        "low_stock_threshold",
+        "is_active",
+        "high_alert_category",
+        "is_restricted",
+        "lasa_with",
+        "qty_available",
+        "next_expiry",
+        "stock_status"
+      ],
+      "title": "DrugStockOut",
+      "description": "A drug with its live stock (view v_drug_stock): what e-prescription search shows."
+    },
     "Envelope_DrugStockDetailOut_": {
       "properties": {
         "data": {
@@ -3170,6 +3626,31 @@
         "request_id"
       ],
       "title": "Envelope[RecallDetailOut]"
+    },
+    "Envelope_list_DrugStockOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/DrugStockOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[DrugStockOut]]"
     },
     "Envelope_list_RecallOut__": {
       "properties": {
@@ -3618,7 +4099,8 @@
       "properties": {
         "drug_id": {
           "type": "integer",
-          "title": "Drug Id"
+          "title": "Drug Id",
+          "description": "The recalled medicine (GET /drugs/search)"
         },
         "batch_ids": {
           "anyOf": [

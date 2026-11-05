@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 /**
  * Screen 135: pharmacy_admin
  * "Pharmacy inventory, formulary & procurement"
@@ -1416,14 +1417,13 @@ export const PharmacyAdmin: React.FC<PharmacyAdminProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">Drug ID *</label>
-                  <input
-                    type="number"
+                  <DirectoryPicker
                     data-help="pharmacy_admin.batch_drug_id_input"
                     value={batchForm.drug_id}
                     onChange={(e) => setBatchForm({ ...batchForm, drug_id: Number(e.target.value) })}
                     required
                     className="w-full px-3 py-1.5 border border-gray-300 rounded font-mono"
-                  />
+                   path="/drugs/search" idField="drug_id" search />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">Batch Number *</label>
@@ -1859,15 +1859,14 @@ export const PharmacyAdmin: React.FC<PharmacyAdminProps> = ({
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
                     Recall ID {returnForm.reason === "Recall" ? "*" : "(Only for Recall)"}
                   </label>
-                  <input
-                    type="number"
+                  <DirectoryPicker
                     data-help="pharmacy_admin.return_recall_id_input"
                     value={returnForm.recall_id || ""}
                     disabled={returnForm.reason !== "Recall"}
                     onChange={(e) => setReturnForm({ ...returnForm, recall_id: e.target.value ? Number(e.target.value) : null })}
                     placeholder={returnForm.reason === "Recall" ? "e.g. 101" : "Disabled unless Recall"}
                     className="w-full px-3 py-1.5 border border-gray-300 rounded disabled:bg-gray-100 font-mono"
-                  />
+                   path="/drug-recalls" idField="recall_id" />
                 </div>
               </div>
 

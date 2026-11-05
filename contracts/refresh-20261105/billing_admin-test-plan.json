@@ -1,0 +1,734 @@
+{
+  "screen": "billing_admin",
+  "title": "Price & policy management",
+  "cases": [
+    {
+      "id": "case:GET /finance/service-catalog",
+      "call": "GET /api/v1/finance/service-catalog",
+      "summary": "Hospital service prices (lab prices live in the lab catalogue)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/service-catalog",
+            "query": {
+              "category": "Imaging"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "service_id": 1,
+                  "code": "XRAY-CHEST",
+                  "name": "Chest X-ray",
+                  "category": "Imaging",
+                  "department_id": null,
+                  "doctor_id": null,
+                  "default_price": 1800,
+                  "is_active": true,
+                  "row_version": 2,
+                  "department_name": null,
+                  "doctor_name": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:36:31.736009+00:00"
+              },
+              "request_id": "0fa665ef7ed648b384ec51bc04d07331"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /finance/service-catalog",
+      "call": "POST /api/v1/finance/service-catalog",
+      "summary": "Add a priced service",
+      "happy_path": {
+        "as_one_of": [
+          "billing_admin",
+          "hospital_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/service-catalog",
+            "body": {
+              "code": "xray-chest",
+              "name": "Chest X-ray",
+              "category": "Imaging",
+              "default_price": 1500
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "service_id": 1,
+                "code": "XRAY-CHEST",
+                "name": "Chest X-ray",
+                "category": "Imaging",
+                "department_id": null,
+                "doctor_id": null,
+                "default_price": 1500,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:31.708515+00:00"
+              },
+              "request_id": "5c438e5b828148b8a01d9af2f47dd9cc"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:PATCH /finance/service-catalog/{service_id}",
+      "call": "PATCH /api/v1/finance/service-catalog/{service_id}",
+      "summary": "Change a price / deactivate (versioned history kept)",
+      "happy_path": {
+        "as_one_of": [
+          "billing_admin",
+          "hospital_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/service-catalog/1",
+            "body": {
+              "default_price": 1800,
+              "expected_version": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "service_id": 1,
+                "code": "XRAY-CHEST",
+                "name": "Chest X-ray",
+                "category": "Imaging",
+                "department_id": null,
+                "doctor_id": null,
+                "default_price": 1800,
+                "is_active": true,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:31.719666+00:00"
+              },
+              "request_id": "9ca921e0a5cf4483b01bdd8d816747dc"
+            }
+          },
+          "errors_seen": [
+            "NOT_FOUND",
+            "VERSION_CONFLICT"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR",
+        "VERSION_CONFLICT"
+      ],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    },
+    {
+      "id": "case:GET /finance/panels",
+      "call": "GET /api/v1/finance/panels",
+      "summary": "Panels (Sehat Sahulat, Zakat, corporate ...)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/panels"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "panel_id": 1,
+                  "code": "SEHAT",
+                  "name": "Sehat Sahulat",
+                  "panel_type": "SehatSahulat",
+                  "discount_pct": 10,
+                  "is_credit_panel": false,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:36:36.431439+00:00"
+              },
+              "request_id": "6c7c15b5aab44317b856c85dbd02d341"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /finance/panels",
+      "call": "POST /api/v1/finance/panels",
+      "summary": "Create a panel",
+      "happy_path": {
+        "as_one_of": [
+          "billing_admin",
+          "hospital_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/panels",
+            "body": {
+              "code": "sehat",
+              "name": "Sehat Sahulat",
+              "panel_type": "SehatSahulat",
+              "discount_pct": 10
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "panel_id": 1,
+                "code": "SEHAT",
+                "name": "Sehat Sahulat",
+                "panel_type": "SehatSahulat",
+                "discount_pct": 10,
+                "is_credit_panel": false,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:36.424245+00:00"
+              },
+              "request_id": "14d476397be84afb9c24e6e1043fbefb"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /finance/panel-discounts",
+      "call": "POST /api/v1/finance/panel-discounts",
+      "summary": "Effective-dated panel discount (overlaps rejected)",
+      "happy_path": {
+        "as_one_of": [
+          "billing_admin",
+          "hospital_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/panel-discounts",
+            "body": {
+              "panel_id": 1,
+              "discount_pct": 20,
+              "effective_from": "2026-01-01",
+              "effective_to": "2026-12-31"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "panel_discount_id": 1,
+                "panel_id": 1,
+                "service_id": null,
+                "discount_pct": 20,
+                "effective_from": "2026-01-01",
+                "effective_to": "2026-12-31",
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:36.441256+00:00"
+              },
+              "request_id": "9c21a55b0a3c4ca893b8b5882a02139b"
+            }
+          },
+          "errors_seen": [
+            "TEMPORAL_OVERLAP"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "TEMPORAL_OVERLAP",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /finance/discount-policies",
+      "call": "GET /api/v1/finance/discount-policies",
+      "summary": "Discount ceilings",
+      "happy_path": {
+        "as_one_of": [
+          "billing_admin",
+          "hospital_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/discount-policies"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "policy_id": 2,
+                  "role_code": "cashier",
+                  "user_id": null,
+                  "max_discount_pct": 5,
+                  "max_discount_amount": null,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "policy_id": 4,
+                  "role_code": "receptionist",
+                  "user_id": null,
+                  "max_discount_pct": 20,
+                  "max_discount_amount": null,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:36:36.469987+00:00"
+              },
+              "request_id": "3c3a6f8d28e04c4db218e0d21d5e9de3"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /finance/discount-policies",
+      "call": "PUT /api/v1/finance/discount-policies",
+      "summary": "Set a role's or user's discount ceiling (replaces the active one)",
+      "happy_path": {
+        "as_one_of": [
+          "billing_admin",
+          "hospital_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/discount-policies",
+            "body": {
+              "role_code": "receptionist",
+              "max_discount_pct": 15
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "policy_id": 3,
+                "role_code": "receptionist",
+                "user_id": null,
+                "max_discount_pct": 15,
+                "max_discount_amount": null,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:36.457612+00:00"
+              },
+              "request_id": "45b393825b4f43289e8894322bccc29a"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /finance/consultant-contracts",
+      "call": "GET /api/v1/finance/consultant-contracts",
+      "summary": "Commission contracts",
+      "happy_path": {
+        "as_one_of": [
+          "billing_admin",
+          "hospital_admin",
+          "ot_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/consultant-contracts",
+            "query": {
+              "employee_id": 2
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "contract_id": 2,
+                  "employee_id": 2,
+                  "rule_type": "FixedFee",
+                  "terms_jsonb": {
+                    "amount": 5000
+                  },
+                  "effective_from": "2026-06-01",
+                  "effective_to": null,
+                  "notes": null,
+                  "decided_by": 1,
+                  "decided_at": "2026-09-27T17:36:36.486935+00:00",
+                  "row_version": 1,
+                  "employee_name": "Staff 16466",
+                  "employment_type": "Visiting"
+                },
+                {
+                  "contract_id": 1,
+                  "employee_id": 2,
+                  "rule_type": "PercentGross",
+                  "terms_jsonb": {
+                    "percentage": 30
+                  },
+                  "effective_from": "2026-01-01",
+                  "effective_to": "2026-05-31",
+                  "notes": null,
+                  "decided_by": 1,
+                  "decided_at": "2026-09-27T17:36:36.474536+00:00",
+                  "row_version": 2,
+                  "employee_name": "Staff 16466",
+                  "employment_type": "Visiting"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:36:36.498232+00:00"
+              },
+              "request_id": "6fb4c0da4d964485a2502b1ed8571a49"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /finance/consultant-contracts",
+      "call": "POST /api/v1/finance/consultant-contracts",
+      "summary": "One-time commission rule per consultant (workflow §5.5)",
+      "happy_path": {
+        "as_one_of": [
+          "billing_admin",
+          "hospital_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/consultant-contracts",
+            "body": {
+              "employee_id": 2,
+              "rule_type": "PercentGross",
+              "percentage": 30,
+              "effective_from": "2026-01-01"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "contract_id": 1,
+                "employee_id": 2,
+                "rule_type": "PercentGross",
+                "terms_jsonb": {
+                  "percentage": 30
+                },
+                "effective_from": "2026-01-01",
+                "effective_to": null,
+                "notes": null,
+                "decided_by": 1,
+                "decided_at": "2026-09-27T17:36:36.474536+00:00",
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:36.482828+00:00"
+              },
+              "request_id": "24b4bfbf318540d8a20b35b58d8fabb8"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /staff/lookup",
+      "call": "GET /api/v1/staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/staff/lookup",
+            "query": {
+              "q": "sana look"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 2,
+                  "emp_number": "EMP-2026-0002",
+                  "full_name": "Sana Lookuptest",
+                  "designation": "Officer",
+                  "department_name": null,
+                  "license_type": "PNC",
+                  "user_id": 2,
+                  "registration": "PNC PNC-31852"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-11-05T01:52:33.483546+00:00"
+              },
+              "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
+            }
+          },
+          "errors_seen": [
+            "UNAUTHENTICATED",
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "UNAUTHENTICATED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /admin/departments",
+      "call": "GET /api/v1/admin/departments",
+      "summary": "Departments",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/departments"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "department_id": 1,
+                  "code": "CARD",
+                  "name": "Cardiology & Vascular",
+                  "is_clinical": true,
+                  "is_active": true,
+                  "row_version": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.417658+00:00"
+              },
+              "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/billing_admin",
+  "workspace_guide": "get_handbook_outline('billing_admin')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Price changes never alter issued tickets/invoices (prices are snapshotted)."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

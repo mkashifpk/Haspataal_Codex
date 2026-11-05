@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 import { useEffect, useState, useMemo } from "react";
 import {
   Empty,
@@ -822,15 +823,13 @@ export function ERBoard({
                     <div className="col-12">
                       <Field label={t("Patient ID", "مریض کا آئی ڈی")}>
                         <div className="input-group">
-                          <input
-                            type="number"
+                          <DirectoryPicker
                             className="form-control"
                             data-help="er_board.arrival_patient_id_input"
                             value={arrivalPatientId}
                             onChange={(e) => setArrivalPatientId(e.target.value)}
-                            placeholder="e.g. 42"
                             required
-                          />
+                           path="/patients/search" idField="patient_id" search />
                           {canTrauma && (
                             <button
                               type="button"

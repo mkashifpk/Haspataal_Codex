@@ -1,7 +1,7 @@
 {
   "screen_id": "ot_consumables_nurse",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -224,6 +224,9 @@
       }
     ],
     "related_workflows": [
+      "clinical-and-prescriptions",
+      "incidents-and-sentinel-events",
+      "medication-safety",
       "operating-theater"
     ],
     "service": {
@@ -248,7 +251,7 @@
     "workspace": "ot_nurse",
     "phase": "P6",
     "position": 121,
-    "points": 47,
+    "points": 50,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -310,29 +313,35 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 47,
+    "points": 50,
     "items": [
       {
         "id": "ep:GET /ot/bookings",
         "label": "GET /ot/bookings",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /ot/bookings/{booking_id}",
         "label": "GET /ot/bookings/{booking_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /ot/bookings/{booking_id}/consumables",
         "label": "POST /ot/bookings/{booking_id}/consumables",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /ot/consumables/{consumable_id}/reverse",
         "label": "POST /ot/consumables/{consumable_id}/reverse",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /drugs/search",
+        "label": "GET /drugs/search",
         "points": 3,
         "claimed": false
       },
@@ -340,49 +349,49 @@
         "id": "ev:ot.booking.updated",
         "label": "ot.booking.updated",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:0a80234be9",
         "label": "Mistaken scans are reversed with a reason (never deleted).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:77e2100829",
         "label": "Exists for the service surgery (work): show it as GET /establishment views.screens says for screen_id ot_consumables_nurse (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
         "label": "Test plan passed",
         "points": 4,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -412,13 +421,13 @@
         "id": "q:character",
         "label": "Design principles applied",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:editor",
         "label": "Editor's pass",
         "points": 2,
-        "claimed": false
+        "claimed": true
       }
     ],
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
@@ -787,7 +796,8 @@
             "pointer": "/drug_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "A formulary item without its barcode (GET /drugs/search)"
           },
           {
             "pointer": "/qty",
@@ -981,6 +991,134 @@
         "prints": false,
         "related_state_machine": null
       }
+    },
+    {
+      "endpoint": "GET /drugs/search",
+      "summary": "Formulary search with live stock colour",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.formulary.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of pharmacy.formulary.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "maxLength": 100,
+            "default": "",
+            "title": "Q"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "default": 30,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DrugStockOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": false,
+            "type": "string",
+            "default": ""
+          }
+        ],
+        "filters": [],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
     }
   ],
   "realtime": {
@@ -1006,7 +1144,8 @@
         ],
         "refresh": [
           "GET /ot/bookings",
-          "GET /ot/bookings/{booking_id}"
+          "GET /ot/bookings/{booking_id}",
+          "GET /drugs/search"
         ]
       }
     ],
@@ -1089,6 +1228,94 @@
   "value_lists": [
     {
       "values": [
+        "Tablet",
+        "Capsule",
+        "Syrup",
+        "Suspension",
+        "Injection",
+        "Infusion",
+        "Cream",
+        "Ointment",
+        "Drops",
+        "Inhaler",
+        "Suppository",
+        "Powder",
+        "Consumable",
+        "Device",
+        "Other"
+      ],
+      "column": "drugs.form",
+      "used_at": "GET /drugs/search[].form",
+      "labels": {
+        "Tablet": "Tablet",
+        "Capsule": "Capsule",
+        "Syrup": "Syrup",
+        "Suspension": "Suspension",
+        "Injection": "Injection",
+        "Infusion": "Infusion",
+        "Cream": "Cream",
+        "Ointment": "Ointment",
+        "Drops": "Drops",
+        "Inhaler": "Inhaler",
+        "Suppository": "Suppository",
+        "Powder": "Powder",
+        "Consumable": "Consumable",
+        "Device": "Device",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "ConcentratedElectrolyte",
+        "Chemotherapy",
+        "Anticoagulant",
+        "Insulin",
+        "Opioid",
+        "Sedative",
+        "NeuromuscularBlocker",
+        "Inotrope",
+        "Thrombolytic",
+        "Psychotropic",
+        "HighCost",
+        "Other"
+      ],
+      "column": "drugs.high_alert_category",
+      "used_at": "GET /drugs/search[].high_alert_category",
+      "labels": {
+        "ConcentratedElectrolyte": "Concentrated electrolyte",
+        "Chemotherapy": "Chemotherapy",
+        "Anticoagulant": "Anticoagulant",
+        "Insulin": "Insulin",
+        "Opioid": "Opioid",
+        "Sedative": "Sedative",
+        "NeuromuscularBlocker": "Neuromuscular blocker",
+        "Inotrope": "Inotrope",
+        "Thrombolytic": "Thrombolytic",
+        "Psychotropic": "Psychotropic",
+        "HighCost": "High cost",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "OTC",
+        "ScheduleG",
+        "ScheduleH",
+        "ScheduleX",
+        "HospitalOnly"
+      ],
+      "column": "drugs.schedule",
+      "used_at": "GET /drugs/search[].schedule",
+      "labels": {
+        "OTC": "OTC",
+        "ScheduleG": "Schedule G",
+        "ScheduleH": "Schedule H",
+        "ScheduleX": "Schedule X",
+        "HospitalOnly": "Hospital only"
+      }
+    },
+    {
+      "values": [
         "Scheduled",
         "Emergency",
         "CodeRed"
@@ -1166,6 +1393,20 @@
         "Finalized": "Finalized",
         "Cancelled": "Cancelled"
       }
+    },
+    {
+      "values": [
+        "InStock",
+        "Low",
+        "OutOfStock"
+      ],
+      "column": null,
+      "used_at": "GET /drugs/search[].stock_status",
+      "labels": {
+        "InStock": "In stock",
+        "Low": "Low",
+        "OutOfStock": "Out of stock"
+      }
     }
   ],
   "states": [
@@ -1207,6 +1448,7 @@
       "ur": "او ٹی نرسنگ"
     },
     "error_messages": {
+      "FORBIDDEN": "You do not have permission to do this.",
       "OT_BOOKING_NOT_ACTIVE": "The surgery is not active.",
       "OT_CONSUMABLE_REVERSAL_INVALID": "Invalid consumable reversal.",
       "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
@@ -1224,10 +1466,16 @@
       "ot_nurse"
     ],
     "partial": [
+      "triage_nurse",
       "doctor",
       "clinical_specialist",
       "surgeon",
-      "anaesthetist"
+      "anaesthetist",
+      "ward_nurse",
+      "head_nurse",
+      "pharmacist",
+      "pharmacy_admin",
+      "quality_officer"
     ],
     "page_for": [
       "ot_admin",
@@ -1340,6 +1588,39 @@
           "ot_admin",
           "ot_nurse"
         ]
+      },
+      {
+        "id": "case:GET /drugs/search",
+        "call": "GET /api/v1/drugs/search",
+        "summary": "Formulary search with live stock colour",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
       }
     ],
     "service_cases": [
@@ -1401,8 +1682,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -1480,6 +1761,17 @@
         ],
         "permissions_mode": "all",
         "access": null
+      },
+      {
+        "id": "ot_consumables_nurse::GET /drugs/search",
+        "task": "Formulary search with live stock colour",
+        "call": "GET /drugs/search",
+        "is_action": false,
+        "permissions": [
+          "pharmacy.formulary.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
       }
     ],
     "rules_to_explain": [
@@ -1490,6 +1782,11 @@
       "ot.booking.updated"
     ],
     "errors_the_user_can_meet": [
+      {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
       {
         "code": "OT_BOOKING_NOT_ACTIVE",
         "message": "The surgery is not active.",
@@ -1571,17 +1868,1937 @@
   },
   "workflows": [
     {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
+    },
+    {
       "slug": "operating-theater",
       "title": "Operating theater",
       "recipe": "get_workflow_recipe('operating-theater')"
     }
   ],
   "scenarios": [],
-  "unknowns": [],
-  "omitted_sections": [
-    "decisions",
-    "examples",
-    "schemas"
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
   ],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type."
+  "examples": {
+    "GET /ot/bookings": {
+      "request": {
+        "path": "/api/v1/ot/bookings",
+        "query": {
+          "mine": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "booking_id": 1,
+              "booking_number": "OT-2026-00001",
+              "status": "Requested",
+              "booking_type": "Scheduled",
+              "procedure_name": "Appendectomy",
+              "ot_id": null,
+              "ot_name": null,
+              "scheduled_start": null,
+              "scheduled_end": null,
+              "patient_name": "Ali Khan",
+              "mrn": "MRN-2026-000001",
+              "surgeon_name": "Dr Tariq",
+              "is_settled": false
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:42:59.860722+00:00"
+          },
+          "request_id": "06c687418d12467191ba257b564bc251"
+        }
+      }
+    },
+    "GET /ot/bookings/{booking_id}": {
+      "request": {
+        "path": "/api/v1/ot/bookings/2"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "booking_id": 2,
+            "booking_number": "OT-2026-00002",
+            "ot_id": 2,
+            "patient_id": 2,
+            "admission_id": 1,
+            "primary_surgeon_id": 11,
+            "procedure_name": "Laparotomy",
+            "service_id": null,
+            "procedure_price": null,
+            "procedure_discount_amount": 0,
+            "booking_type": "CodeRed",
+            "priority": 100,
+            "emergency_reason": "Code Red",
+            "anesthesia_type": null,
+            "preferred_start": null,
+            "scheduled_start": "2026-09-27T17:42:54.754221+00:00",
+            "scheduled_end": "2026-09-27T19:42:54.754221+00:00",
+            "actual_start": null,
+            "actual_end": null,
+            "cleaning_completed_at": null,
+            "status": "EmergencyHold",
+            "notes": "Code Red",
+            "cancel_reason": null,
+            "requested_by": 11,
+            "assigned_by": 11,
+            "created_at": "2026-09-27T17:42:54.754221+00:00",
+            "row_version": 1,
+            "patient_name": "Unknown Male 1",
+            "mrn": "MRN-2026-000002",
+            "surgeon_name": "ER Doctor",
+            "ot_name": "Main OT 2",
+            "consumables": [],
+            "settlement": null
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:42:54.819547+00:00"
+          },
+          "request_id": "4d583d6f81004062a915f503bf69e9c3"
+        }
+      }
+    },
+    "POST /ot/bookings/{booking_id}/consumables": {
+      "request": {
+        "path": "/api/v1/ot/bookings/1/consumables",
+        "body": {
+          "barcode": "8901234567890",
+          "qty": 4
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": [
+            {
+              "ot_consumable_id": 1,
+              "booking_id": 1,
+              "drug_id": 1,
+              "drug_batch_id": 1,
+              "asset_id": null,
+              "description": "Suture 2-0",
+              "qty": 4,
+              "unit_cost": 10,
+              "line_cost": 40,
+              "unit_retail": 25,
+              "line_revenue": 100,
+              "is_reversal": false,
+              "reverses_consumable_id": null,
+              "scanned_by": 9,
+              "scanned_at": "2026-09-27T17:42:37.454610+00:00"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:42:37.475428+00:00"
+          },
+          "request_id": "a814483cb8374d699f31783708412c47"
+        }
+      }
+    },
+    "POST /ot/consumables/{consumable_id}/reverse": {
+      "request": {
+        "path": "/api/v1/ot/consumables/2/reverse",
+        "body": {
+          "reason": "scanned twice"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "ot_consumable_id": 3,
+            "booking_id": 1,
+            "drug_id": 1,
+            "drug_batch_id": 1,
+            "asset_id": null,
+            "description": "REVERSAL: Suture 2-0 (scanned twice)",
+            "qty": 1,
+            "unit_cost": 10,
+            "line_cost": 10,
+            "unit_retail": 25,
+            "line_revenue": 25,
+            "is_reversal": true,
+            "reverses_consumable_id": 2,
+            "scanned_by": 9,
+            "scanned_at": "2026-09-27T17:42:37.489394+00:00"
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:42:37.495509+00:00"
+          },
+          "request_id": "847f9921d1ce41bf8064776269a5cd60"
+        }
+      }
+    },
+    "GET /drugs/search": {
+      "request": {
+        "path": "/api/v1/drugs/search",
+        "query": {
+          "q": "Insulin"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "drug_id": 3,
+              "code": "INSN",
+              "name": "Insulin NPH",
+              "generic_name": null,
+              "strength": null,
+              "form": "Injection",
+              "unit": "unit",
+              "schedule": "HospitalOnly",
+              "is_otc_allowed": false,
+              "barcode": "8931440574755",
+              "low_stock_threshold": 0,
+              "is_active": true,
+              "high_alert_category": null,
+              "is_restricted": false,
+              "lasa_with": [
+                "Insulin regular"
+              ],
+              "qty_available": 50,
+              "next_expiry": "2099-01-01",
+              "stock_status": "InStock"
+            },
+            {
+              "drug_id": 2,
+              "code": "INSR",
+              "name": "Insulin regular",
+              "generic_name": null,
+              "strength": null,
+              "form": "Injection",
+              "unit": "unit",
+              "schedule": "HospitalOnly",
+              "is_otc_allowed": false,
+              "barcode": "8991682543668",
+              "low_stock_threshold": 0,
+              "is_active": true,
+              "high_alert_category": "Insulin",
+              "is_restricted": false,
+              "lasa_with": [
+                "Insulin NPH"
+              ],
+              "qty_available": 50,
+              "next_expiry": "2099-01-01",
+              "stock_status": "InStock"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T15:01:45.066819+00:00"
+          },
+          "request_id": "3c9f279059e64b359f9c572408414e0b"
+        }
+      }
+    }
+  },
+  "schemas": {
+    "BookingConsumableOut": {
+      "properties": {
+        "ot_consumable_id": {
+          "type": "integer",
+          "title": "Ot Consumable Id"
+        },
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "drug_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Id"
+        },
+        "drug_batch_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Batch Id"
+        },
+        "asset_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Asset Id"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "qty": {
+          "type": "number",
+          "title": "Qty"
+        },
+        "unit_cost": {
+          "type": "number",
+          "title": "Unit Cost"
+        },
+        "line_cost": {
+          "type": "number",
+          "title": "Line Cost"
+        },
+        "unit_retail": {
+          "type": "number",
+          "title": "Unit Retail"
+        },
+        "line_revenue": {
+          "type": "number",
+          "title": "Line Revenue"
+        },
+        "is_reversal": {
+          "type": "boolean",
+          "title": "Is Reversal"
+        },
+        "reverses_consumable_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reverses Consumable Id"
+        },
+        "scanned_by": {
+          "type": "integer",
+          "title": "Scanned By"
+        },
+        "scanned_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Scanned At"
+        },
+        "drug_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Code"
+        },
+        "batch_no": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Batch No"
+        },
+        "scanned_by_name": {
+          "type": "string",
+          "title": "Scanned By Name"
+        },
+        "is_reversed": {
+          "type": "boolean",
+          "title": "Is Reversed"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ot_consumable_id",
+        "booking_id",
+        "drug_id",
+        "drug_batch_id",
+        "asset_id",
+        "description",
+        "qty",
+        "unit_cost",
+        "line_cost",
+        "unit_retail",
+        "line_revenue",
+        "is_reversal",
+        "reverses_consumable_id",
+        "scanned_by",
+        "scanned_at",
+        "drug_code",
+        "batch_no",
+        "scanned_by_name",
+        "is_reversed"
+      ],
+      "title": "BookingConsumableOut"
+    },
+    "ConsumableIn": {
+      "properties": {
+        "barcode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode",
+          "description": "Scanned barcode of a formulary item (pharmacy stock, FEFO)"
+        },
+        "drug_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Id",
+          "description": "A formulary item without its barcode (GET /drugs/search)"
+        },
+        "qty": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            }
+          ],
+          "title": "Qty"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description",
+          "description": "Non-stock items (e.g. vendor implant): description + costs"
+        },
+        "asset_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Asset Id"
+        },
+        "unit_cost": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit Cost"
+        },
+        "unit_retail": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit Retail"
+        }
+      },
+      "type": "object",
+      "required": [
+        "qty"
+      ],
+      "title": "ConsumableIn"
+    },
+    "ConsumableOut": {
+      "properties": {
+        "ot_consumable_id": {
+          "type": "integer",
+          "title": "Ot Consumable Id"
+        },
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "drug_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Id"
+        },
+        "drug_batch_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Batch Id"
+        },
+        "asset_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Asset Id"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "qty": {
+          "type": "number",
+          "title": "Qty"
+        },
+        "unit_cost": {
+          "type": "number",
+          "title": "Unit Cost"
+        },
+        "line_cost": {
+          "type": "number",
+          "title": "Line Cost"
+        },
+        "unit_retail": {
+          "type": "number",
+          "title": "Unit Retail"
+        },
+        "line_revenue": {
+          "type": "number",
+          "title": "Line Revenue"
+        },
+        "is_reversal": {
+          "type": "boolean",
+          "title": "Is Reversal"
+        },
+        "reverses_consumable_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reverses Consumable Id"
+        },
+        "scanned_by": {
+          "type": "integer",
+          "title": "Scanned By"
+        },
+        "scanned_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Scanned At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ot_consumable_id",
+        "booking_id",
+        "drug_id",
+        "drug_batch_id",
+        "asset_id",
+        "description",
+        "qty",
+        "unit_cost",
+        "line_cost",
+        "unit_retail",
+        "line_revenue",
+        "is_reversal",
+        "reverses_consumable_id",
+        "scanned_by",
+        "scanned_at"
+      ],
+      "title": "ConsumableOut",
+      "description": "A consumable scanned into a surgery (or its reversal row; rows are never edited)."
+    },
+    "DrugStockOut": {
+      "properties": {
+        "drug_id": {
+          "type": "integer",
+          "title": "Drug Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "generic_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Generic Name"
+        },
+        "strength": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Strength"
+        },
+        "form": {
+          "type": "string",
+          "enum": [
+            "Tablet",
+            "Capsule",
+            "Syrup",
+            "Suspension",
+            "Injection",
+            "Infusion",
+            "Cream",
+            "Ointment",
+            "Drops",
+            "Inhaler",
+            "Suppository",
+            "Powder",
+            "Consumable",
+            "Device",
+            "Other"
+          ],
+          "title": "Form"
+        },
+        "unit": {
+          "type": "string",
+          "title": "Unit"
+        },
+        "schedule": {
+          "type": "string",
+          "enum": [
+            "OTC",
+            "ScheduleG",
+            "ScheduleH",
+            "ScheduleX",
+            "HospitalOnly"
+          ],
+          "title": "Schedule"
+        },
+        "is_otc_allowed": {
+          "type": "boolean",
+          "title": "Is Otc Allowed"
+        },
+        "barcode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode"
+        },
+        "low_stock_threshold": {
+          "type": "number",
+          "title": "Low Stock Threshold"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "high_alert_category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ConcentratedElectrolyte",
+                "Chemotherapy",
+                "Anticoagulant",
+                "Insulin",
+                "Opioid",
+                "Sedative",
+                "NeuromuscularBlocker",
+                "Inotrope",
+                "Thrombolytic",
+                "Psychotropic",
+                "HighCost",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "High Alert Category",
+          "description": "Set: a high-alert medicine (MSDS 56): show it in red; a second person checks it when dispensed and given"
+        },
+        "is_restricted": {
+          "type": "boolean",
+          "title": "Is Restricted",
+          "description": "Prescribed only with the RestrictedPrescribing privilege (MSDS 52)"
+        },
+        "lasa_with": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Lasa With",
+          "description": "Medicines it looks or sounds like: warn when one is picked"
+        },
+        "qty_available": {
+          "type": "number",
+          "title": "Qty Available",
+          "description": "Non-expired stock"
+        },
+        "next_expiry": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Expiry"
+        },
+        "stock_status": {
+          "type": "string",
+          "enum": [
+            "InStock",
+            "Low",
+            "OutOfStock"
+          ],
+          "title": "Stock Status",
+          "description": "OutOfStock: show the drug greyed out"
+        }
+      },
+      "type": "object",
+      "required": [
+        "drug_id",
+        "code",
+        "name",
+        "generic_name",
+        "strength",
+        "form",
+        "unit",
+        "schedule",
+        "is_otc_allowed",
+        "barcode",
+        "low_stock_threshold",
+        "is_active",
+        "high_alert_category",
+        "is_restricted",
+        "lasa_with",
+        "qty_available",
+        "next_expiry",
+        "stock_status"
+      ],
+      "title": "DrugStockOut",
+      "description": "A drug with its live stock (view v_drug_stock): what e-prescription search shows."
+    },
+    "Envelope_ConsumableOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/ConsumableOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[ConsumableOut]"
+    },
+    "Envelope_OtBookingDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/OtBookingDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[OtBookingDetailOut]"
+    },
+    "Envelope_list_ConsumableOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/ConsumableOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[ConsumableOut]]"
+    },
+    "Envelope_list_DrugStockOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/DrugStockOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[DrugStockOut]]"
+    },
+    "Envelope_list_OtBookingListItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/OtBookingListItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[OtBookingListItemOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "OtBookingDetailOut": {
+      "properties": {
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "type": "string",
+          "title": "Booking Number"
+        },
+        "ot_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Id",
+          "description": "Null until a theater is assigned"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "primary_surgeon_id": {
+          "type": "integer",
+          "title": "Primary Surgeon Id"
+        },
+        "procedure_name": {
+          "type": "string",
+          "title": "Procedure Name"
+        },
+        "service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Service Id"
+        },
+        "procedure_price": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Procedure Price"
+        },
+        "procedure_discount_amount": {
+          "type": "number",
+          "title": "Procedure Discount Amount"
+        },
+        "booking_type": {
+          "type": "string",
+          "enum": [
+            "Scheduled",
+            "Emergency",
+            "CodeRed"
+          ],
+          "title": "Booking Type"
+        },
+        "priority": {
+          "type": "integer",
+          "title": "Priority"
+        },
+        "emergency_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Reason"
+        },
+        "anesthesia_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anesthesia Type"
+        },
+        "preferred_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Preferred Start"
+        },
+        "scheduled_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled Start"
+        },
+        "scheduled_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled End"
+        },
+        "actual_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual Start"
+        },
+        "actual_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual End"
+        },
+        "cleaning_completed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cleaning Completed At"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Requested",
+            "Scheduled",
+            "InProgress",
+            "Cleaning",
+            "Completed",
+            "Cancelled",
+            "EmergencyHold"
+          ],
+          "title": "Status"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "cancel_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancel Reason"
+        },
+        "requested_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested By"
+        },
+        "assigned_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Assigned By"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "surgeon_name": {
+          "type": "string",
+          "title": "Surgeon Name"
+        },
+        "ot_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Name"
+        },
+        "consumables": {
+          "items": {
+            "$ref": "#/components/schemas/BookingConsumableOut"
+          },
+          "type": "array",
+          "title": "Consumables"
+        },
+        "settlement": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/SettlementOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Set once the surgery is finalized"
+        }
+      },
+      "type": "object",
+      "required": [
+        "booking_id",
+        "booking_number",
+        "ot_id",
+        "patient_id",
+        "admission_id",
+        "primary_surgeon_id",
+        "procedure_name",
+        "service_id",
+        "procedure_price",
+        "procedure_discount_amount",
+        "booking_type",
+        "priority",
+        "emergency_reason",
+        "anesthesia_type",
+        "preferred_start",
+        "scheduled_start",
+        "scheduled_end",
+        "actual_start",
+        "actual_end",
+        "cleaning_completed_at",
+        "status",
+        "notes",
+        "cancel_reason",
+        "requested_by",
+        "assigned_by",
+        "created_at",
+        "row_version",
+        "patient_name",
+        "mrn",
+        "surgeon_name",
+        "ot_name",
+        "consumables",
+        "settlement"
+      ],
+      "title": "OtBookingDetailOut"
+    },
+    "OtBookingListItemOut": {
+      "properties": {
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "type": "string",
+          "title": "Booking Number"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Requested",
+            "Scheduled",
+            "InProgress",
+            "Cleaning",
+            "Completed",
+            "Cancelled",
+            "EmergencyHold"
+          ],
+          "title": "Status"
+        },
+        "booking_type": {
+          "type": "string",
+          "enum": [
+            "Scheduled",
+            "Emergency",
+            "CodeRed"
+          ],
+          "title": "Booking Type"
+        },
+        "procedure_name": {
+          "type": "string",
+          "title": "Procedure Name"
+        },
+        "ot_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Id"
+        },
+        "ot_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Name"
+        },
+        "scheduled_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled Start"
+        },
+        "scheduled_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled End"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "surgeon_name": {
+          "type": "string",
+          "title": "Surgeon Name"
+        },
+        "is_settled": {
+          "type": "boolean",
+          "title": "Is Settled"
+        }
+      },
+      "type": "object",
+      "required": [
+        "booking_id",
+        "booking_number",
+        "status",
+        "booking_type",
+        "procedure_name",
+        "ot_id",
+        "ot_name",
+        "scheduled_start",
+        "scheduled_end",
+        "patient_name",
+        "mrn",
+        "surgeon_name",
+        "is_settled"
+      ],
+      "title": "OtBookingListItemOut"
+    },
+    "OtReasonIn": {
+      "properties": {
+        "reason": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "title": "OtReasonIn"
+    },
+    "SettlementOut": {
+      "properties": {
+        "settlement_id": {
+          "type": "integer",
+          "title": "Settlement Id"
+        },
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "invoice_id": {
+          "type": "integer",
+          "title": "Invoice Id"
+        },
+        "procedure_revenue": {
+          "type": "number",
+          "title": "Procedure Revenue"
+        },
+        "consumables_revenue": {
+          "type": "number",
+          "title": "Consumables Revenue"
+        },
+        "gross_revenue": {
+          "type": "number",
+          "title": "Gross Revenue"
+        },
+        "consumables_cost": {
+          "type": "number",
+          "title": "Consumables Cost"
+        },
+        "net_profit": {
+          "type": "number",
+          "title": "Net Profit"
+        },
+        "total_commissions": {
+          "type": "number",
+          "title": "Total Commissions"
+        },
+        "is_commission_cap_override": {
+          "type": "boolean",
+          "title": "Is Commission Cap Override"
+        },
+        "commission_cap_override_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Commission Cap Override Reason"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Finalized",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "finalized_by": {
+          "type": "integer",
+          "title": "Finalized By"
+        },
+        "finalized_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Finalized At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/components/schemas/SettlementParticipantOut"
+          },
+          "type": "array",
+          "title": "Participants"
+        }
+      },
+      "type": "object",
+      "required": [
+        "settlement_id",
+        "booking_id",
+        "invoice_id",
+        "procedure_revenue",
+        "consumables_revenue",
+        "gross_revenue",
+        "consumables_cost",
+        "net_profit",
+        "total_commissions",
+        "is_commission_cap_override",
+        "commission_cap_override_reason",
+        "status",
+        "finalized_by",
+        "finalized_at",
+        "row_version",
+        "participants"
+      ],
+      "title": "SettlementOut"
+    },
+    "SettlementParticipantOut": {
+      "properties": {
+        "participant_id": {
+          "type": "integer",
+          "title": "Participant Id"
+        },
+        "settlement_id": {
+          "type": "integer",
+          "title": "Settlement Id"
+        },
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "role_in_ot": {
+          "type": "string",
+          "enum": [
+            "PrimarySurgeon",
+            "AssistantSurgeon",
+            "Anesthetist",
+            "ScrubNurse",
+            "CirculatingNurse",
+            "Other"
+          ],
+          "title": "Role In Ot"
+        },
+        "staff_type": {
+          "type": "string",
+          "enum": [
+            "Regular",
+            "Visiting"
+          ],
+          "title": "Staff Type"
+        },
+        "contract_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Contract Id"
+        },
+        "commission_amount": {
+          "type": "number",
+          "title": "Commission Amount"
+        },
+        "commission_basis": {
+          "type": "string",
+          "title": "Commission Basis"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "participant_id",
+        "settlement_id",
+        "employee_id",
+        "role_in_ot",
+        "staff_type",
+        "contract_id",
+        "commission_amount",
+        "commission_basis",
+        "full_name"
+      ],
+      "title": "SettlementParticipantOut"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
 }

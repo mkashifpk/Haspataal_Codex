@@ -1,0 +1,202 @@
+{
+  "slug": "consent",
+  "title": "Consent (MSDS)",
+  "summary": "The consent register - the general consent of every admission, the informed consents of operations, anaesthesia, transfusions, procedures and high-risk treatments in the patient's language, who decides for a patient who cannot, the doctor's emergency note, refusals and withdrawals, the scan of the signed form, and the written consent policy.",
+  "order": 99,
+  "workflow": "MSDS PRE indicators 72-75, COP 35 and 43, AAC 23",
+  "workspaces": [
+    "admissions",
+    "ward_nurse",
+    "triage",
+    "doctor",
+    "anaesthesia",
+    "quality",
+    "owner_dashboard"
+  ],
+  "file": "consent.md",
+  "markdown": "# Consent (MSDS)\n\nThe Punjab Healthcare Commission's Minimum Service Delivery Standards (MSDS) check consent in every sampled record, and\nscore the indicator \"not met\" for a single record without it (\"a medico-legal issue\"):\n\n* a **general consent** when the patient is admitted (72): the need for admission, the estimated stay and cost, the\n  hospital's rules, the patient's duty to disclose, sharing with the health authorities where the law requires it;\n* the hospital's **list of situations** that need a specific informed consent (73): anaesthesia, surgery, sterilization,\n  termination of pregnancy, high-risk medicines...;\n* each **informed consent** states the risks, benefits and alternatives, who will perform it and what it is, **in a\n  language the patient understands**, signed by the patient or the next of kin **and by the professional** (74); its\n  wording suits **every level of understanding** (35);\n* a written **policy on who consents** for a patient who cannot (75), and its use;\n* the consents to **anaesthesia** (35) and to the **operation** (43), taken by a qualified member of the team before it;\n* the consent to a **transfusion** (AAC 23): a signed form, or the physician's note when an unconscious patient has\n  nobody with them.\n\nWho does what:\n\n* **The admission desk** (`admissions_officer`), **ward and ER nurses** (`ward_nurse`, `triage_nurse`): the general\n  consent (`consent.record`). The admission desk and ward nurses scan signed forms (`patient.document.upload`); in the\n  ER the doctor or the admission desk uploads the scan.\n* **Doctors** (`doctor`, `surgeon`, `anaesthetist`...): the informed consents. The database accepts an informed consent\n  only from a doctor registered with the PMDC, and the consent to anaesthesia only from a doctor of the anaesthesia team\n  (a pre-anaesthesia or anaesthesia clinical privilege, see [Surgical care](surgical-care.md)).\n* **Quality Officer, Owner** (`consent.configure`, `consent.statistics.view`): the forms and their texts, the decision\n  makers, the written policy, the register and the statistics.\n\nEvery consent is a row of the register with its number (`CN-2026-000123`), the text **as printed** in the language\nchosen, what was explained, the decision and the stamp of who took it. States: `Draft` → `Given` | `Refused` |\n`Cancelled`; `Given` → `Withdrawn` (not once its operation has started). A decided consent is final. Refresh screens on\n`consent.updated`; the surgical record also receives `ot.clinical.updated` with `record: \"Consent\"`.\n\n## 1. The policy (once, then yearly)\n\n1. `GET /consent-forms?include_inactive=false`: the situations and their forms. Each form has a `category` (`General`,\n   `Procedure`, `Anaesthesia`, `Transfusion`, `HighRiskTreatment`, `AgainstMedicalAdvice`, `Other`), `situations` (when\n   it is needed), `taken_by` (`AnyStaff`, `Doctor`, `Anaesthetist`), `requires_witness`, and `texts`: the heading and\n   the declaration per language with its `direction` (`rtl` for Urdu and Pakistan's other languages but English). The\n   seed ships nine forms in **English and Urdu** in plain words (general consent, operation, anaesthesia, transfusion,\n   invasive procedure, sterilization, termination of pregnancy, high-risk treatment, leaving against advice) as a\n   starting point: the hospital adapts them and has its legal adviser approve them.\n2. `POST /consent-forms {\"code\", \"category\", \"title\", \"situations\", \"taken_by\", \"requires_witness\", \"sort_order\",\n   \"texts\": [{\"language\", \"heading\", \"body\"}]}` adds a situation; `PATCH /consent-forms/{form_id}` changes it or retires\n   it (`is_active: false`); `PUT /consent-forms/{form_id}/texts/{language} {\"heading\", \"body\", \"expected_version\"?}`\n   adds or rewrites a language (Punjabi, Saraiki, Pashto, Sindhi, Balochi). Consents already prepared keep the text they\n   were printed with.\n3. `GET /consent-decision-makers`: who decides for a patient who cannot, in order, for an adult (`adult_priority`) and\n   for a child (`minor_priority`); null means \"may not decide for that patient\". Seeded from MSDS 74 ii: a court-appointed\n   guardian, a person the patient appointed in writing, the spouse, an adult child, a parent, an adult brother or sister,\n   another adult relative, the care provider (for a child: a parent first). `PATCH /consent-decision-makers/{relationship}\n   {\"description\"?, \"adult_priority\"?, \"minor_priority\"?, \"expected_version\"?}` changes the order.\n4. The rules are settings (`PUT /admin/settings/{key}`): `consent_adult_age` (18: the age of consent),\n   `consent_valid_days` (30: an operation's consents older than this are taken again), `consent_scan_hours` (24: the\n   signed paper is scanned within), `consent_emergency_second_doctor` (true: the emergency note needs a second doctor).\n   The screens that take a consent never read these settings: each consent's `who_decides` (section 4) applies them to\n   its patient.\n5. `GET /consent-policy/pdf`: the written policy (MSDS 73 i, 75 i): the situations with their forms and languages, who\n   decides for an adult and for a child, the rules, with lines for the medical director's approval.\n\n## 2. What is still to do\n\n`GET /consent-worklist?days=7&mine=false` lists, oldest first (`due_at`, `overdue`):\n\n* `GeneralConsent`: an admission (reserved, Code Red or admitted) without its general consent;\n* `OperationConsent`, `AnaesthesiaConsent`: an operation not signed in yet (coming up within `days`) without the\n  consent to it or, with an anaesthetist, to the anaesthesia;\n* `Scan`: a signed form not scanned into the record (`due_at` = the signature + `consent_scan_hours`).\n\n`consent_id` is the draft already prepared (or the consent to scan). `mine`: the caller's admissions and operations\n(an anaesthetist: every operation needing an anaesthesia consent) and the forms they took.\n\n## 3. Preparing the form\n\n1. Pick the form and the **language the patient understands** (only the form's `texts`).\n2. `POST /consents {\"form_code\", \"language\", \"admission_id\"? | \"booking_id\"? | \"er_visit_id\"? | \"ticket_id\"? |\n   \"patient_id\"?, \"procedure_name\"?, \"performer_id\"?, \"performer_name\"?, \"risks\"?, \"benefits\"?, \"alternatives\"?,\n   \"admission_need\"?, \"estimated_days\"?, \"estimated_cost\"?}` with an `Idempotency-Key` header. The patient comes from the\n   admission, operation or visit. A general consent needs `admission_id`. Prefilled:\n   * the operation (`OPERATION`, category `Procedure`): the procedure and the surgeon (\"Dr X and the surgical team\");\n   * the anaesthesia: \"General anaesthesia for ...\" from the assessment's planned technique, and its anaesthetist;\n   * the general consent: the need for admission from the admission's reason.\n   `CONSENT_TEXT_MISSING` (`details.available`): no text in that language.\n   * The performer (`performer_id`) from `GET /staff/lookup`; the same on `PATCH /consents/{consent_id}`.\n3. The draft's `missing` lists what the explanation still lacks: for an informed consent the procedure, who performs it,\n   the risks, the benefits, the alternatives; for the general consent the need, the estimated stay (days) and cost.\n   `PATCH /consents/{consent_id}` with the fields (and `language`: the form is printed again in it) completes it.\n4. **Print it**: `GET /consents/{consent_id}/print-payload` (A4, `printer_role` `document`). `fields.consent` has the\n   heading and the text as printed (`form_title`, `form_body`, one paragraph per line) and `direction`;\n   `fields.explained` what was explained (blank lines where empty); `fields.signature_lines` the lines to sign;\n   `barcode_svg` the consent number (for matching the scan). **The terminal prints Urdu**: lay out right-to-left\n   languages yourself from `fields`, in the Nastaliq font bundled with the app (`dir=\"rtl\"`, the consent number and\n   CNIC in `<bdi>`); for them `text` and `pdf_url` are null, and `GET /consents/{consent_id}/pdf` answers\n   `CONSENT_PDF_UNAVAILABLE`, since the server prints Latin-script languages only. The guide \"Printing & hardware\"\n   (Urdu and right-to-left printouts) has the details. English prints from `text` or `pdf_url` too.\n5. **Explain it** in words the patient understands; read it aloud when they cannot read; use an interpreter when\n   needed; answer their questions; ask them to say it back in their own words. Have the paper signed or thumb-printed,\n   with the witness when the form or a thumb impression needs one.\n\n## 4. Recording the decision\n\n**Given**: `POST /consents/{consent_id}/sign` with\nThe emergency note's second doctor (`second_doctor_id`) from `GET /staff/lookup?license_type=PMDC`.\n\n* `signer`: `Patient` (their name by default), or `DecisionMaker` when the patient cannot decide, with\n  `signer_relationship` (one `GET /consent-decision-makers` allows for this patient: `adult_priority` for an adult,\n  `minor_priority` for a child), `signer_name`, `signer_cnic`, `signer_phone`, and `incapacity_reason` (`Minor`,\n  `Unconscious`, `Confused`, `MentalIllness`, `Sedated`, `Other`);\n* who that may be comes with the consent itself (`GET /consents/{consent_id}` and every answer of the consent),\n  `who_decides`: the server applies the hospital's settings to this patient, the rule the decision is checked with\n  (backend issue #39). `adult_age` (the age of consent), `patient_is_minor` (the patient's age is known and below it;\n  an unknown age counts as an adult), `patient_may_sign` (false for a minor: offer only a decision maker),\n  `decision_makers` (the relationships allowed for this patient, each with its `description` and `priority`, in the\n  order to ask: offer these and no other) and `emergency_second_doctor` (the emergency note below needs the second\n  doctor). Never classify the patient or hardcode an age on the terminal. A decision dated earlier (`decided_at`) is\n  checked on its own date;\n* `signer_mark`: `Signature` or `ThumbImpression` (then `witness_name` is required), `witness_name`, `witness_role`;\n* `interpreter_name`, `read_to_patient`, `questions_answers` (\"None asked\" is an answer) and `understanding_confirmed`\n  (both required: the evidence that the patient was informed, MSDS 35 ii, 43 iii);\n* `decided_at` (default now; a few minutes of terminal clock drift are accepted, never later), `expected_version`.\n\nThe caller is the professional who explained it: their stamp (name, designation, PMDC number, date and time) is printed\non the consent (`obtained_stamp`, MSDS 74 iii, 147).\n\n**The emergency note** (MSDS AAC 23 ii, COP 43): when the patient cannot decide, nobody can be reached and the\ntreatment cannot wait, the doctor signs with `{\"mode\": \"EmergencyNote\", \"incapacity_reason\", \"emergency_note\",\n\"second_doctor_id\"}`: why it could not wait, and a second doctor registered with the PMDC (not the caller) who concurs\n(setting `consent_emergency_second_doctor`), picked with `GET /staff/lookup?q=…&license_type=PMDC`.\n\n**Refused** (an informed refusal): `POST /consents/{consent_id}/refuse` with the same signer fields and\n`refusal_reason`, the reason in the patient's words; `mode: VerbalRefusal` when they refuse but will not sign (a witness\nis required). For a patient leaving the hospital against advice use the form `AGAINST_ADVICE` and record it as given.\n\nErrors: `CONSENT_INCOMPLETE` (`details.missing`: mark those fields), `CONSENT_SIGNER_INVALID` (a child deciding alone, a\nrelationship the policy does not allow, with `details.allowed`; the second doctor missing or the caller),\n`CONSENT_TAKER_NOT_AUTHORIZED` (not a registered doctor; anaesthesia: not the anaesthesia team),\n`CONSENT_STATE_INVALID` (already decided), `VALIDATION_ERROR` (a date in the future).\n\n## 5. After the decision\n\n1. **Scan the signed paper** (MSDS 74 ii: the signatures on file): upload it (or a photo, or the signature pad's image)\n   as a patient document of type `Consent`: `POST /patients/{patient_id}/documents` (multipart: `file`,\n   `doc_type=Consent`, `title`: the consent number), then `POST /consents/{consent_id}/scan {\"document_id\"}`. A later\n   scan replaces it; the history keeps both. An emergency note needs no scan.\n2. **Withdraw**: `POST /consents/{consent_id}/withdraw {\"reason\"}`: the patient changed their mind (or it was recorded in\n   error); not once its operation has started (`CONSENT_STATE_INVALID`). Take a new consent if the treatment goes ahead.\n   A **transfusion** consent withdrawn cancels at once every open blood request it covered; a unit already out stays on\n   its request, the database refuses to issue or start blood on it (`BLOOD_CONSENT_REQUIRED`), and\n   `blood.consent.withdrawn` tells the ward and the blood bank (see [blood transfusion](blood-transfusion.md)).\n3. **Cancel a draft** entered in error (wrong form or patient): `POST /consents/{consent_id}/cancel {\"reason\"}`.\n\nA decided consent is never edited (`CONSENT_STATE_INVALID`, also in the database).\n\n## 6. Where the system requires them\n\n* **The sign in of an operation** (`POST /ot/bookings/{booking_id}/safety-checks` with `SignIn`): the consent to the\n  operation and, with an anaesthetist, to the anaesthesia, given within `consent_valid_days`, or `CONSENT_REQUIRED`.\n  The surgical record shows them (`consents`, the parts `OperationConsent` and `AnaesthesiaConsent`, `next_step`).\n* **The clinical discharge** (`POST /admissions/{admission_id}/discharge`): the general consent of the admission,\n  given, refused or the emergency note, or `CONSENT_REQUIRED` (MSDS 72: every inpatient record holds it).\n* **The medical record review** checks every sampled stay: `ADM_GENERAL_CONSENT` (given and scanned, or the emergency\n  note) and `ADM_CONSENT` (each operation's consents given before its sign in and scanned; a transfusion the operative\n  note records has its consent). See [Medical record review](medical-record-review.md).\n\n## 7. The register and the statistics\n\n* `GET /consents?patient_id&admission_id&booking_id&status&category&date_from&date_to&unscanned&limit`: newest first\n  (the dates filter on the decision). `unscanned=true`: signed forms whose paper is not in the record.\n* `GET /consents/{consent_id}`: everything, with the text as printed (logged as a patient-data access).\n* `GET /consent-statistics?date_from&date_to` (`consent.statistics.view`): `measures`, each with `applicable`, `met`,\n  `pct` and its MSDS reference: discharged admissions with the general consent (72), operations with the consent to the\n  operation before the sign in (43) and to the anaesthesia (35), signed forms scanned (74 ii); then `by_category`\n  (given, refused, withdrawn), `by_language`, `by_decider` (`Patient`, each relationship, `EmergencyNote`),\n  `thumb_impressions`, `with_interpreter`, `read_aloud`.",
+  "steps": [
+    {
+      "heading": "1. The policy (once, then yearly)",
+      "anchor": "1-the-policy-once-then-yearly",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/consent-forms",
+          "summary": "The situations that need a consent, with their forms"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/consent-forms",
+          "summary": "Add a consent form"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/consent-forms/{form_id}",
+          "summary": "Change or retire a consent form"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/consent-forms/{form_id}/texts/{language}",
+          "summary": "Write the text of a consent form in a language"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/consent-decision-makers",
+          "summary": "Who decides for a patient who cannot"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/consent-decision-makers/{relationship}",
+          "summary": "Change who decides for a patient who cannot"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/settings/{key}",
+          "summary": "Change a policy setting (type-checked, audited)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/consent-policy/pdf",
+          "summary": "The written consent policy as a PDF"
+        }
+      ]
+    },
+    {
+      "heading": "2. What is still to do",
+      "anchor": "2-what-is-still-to-do",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/consent-worklist",
+          "summary": "Consents still to take or to scan"
+        }
+      ]
+    },
+    {
+      "heading": "3. Preparing the form",
+      "anchor": "3-preparing-the-form",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/consents",
+          "summary": "Prepare a consent form"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/consents/{consent_id}",
+          "summary": "Edit a prepared consent"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/consents/{consent_id}/print-payload",
+          "summary": "The consent form (A4)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/consents/{consent_id}/pdf",
+          "summary": "The consent form as a PDF"
+        }
+      ]
+    },
+    {
+      "heading": "4. Recording the decision",
+      "anchor": "4-recording-the-decision",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/consents/{consent_id}/sign",
+          "summary": "Record a consent as given"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/consent-decision-makers",
+          "summary": "Who decides for a patient who cannot"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/consents/{consent_id}",
+          "summary": "A consent"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/consents/{consent_id}/refuse",
+          "summary": "Record an informed refusal"
+        }
+      ]
+    },
+    {
+      "heading": "5. After the decision",
+      "anchor": "5-after-the-decision",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/documents",
+          "summary": "Upload a patient document (PDF/JPEG/PNG)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/consents/{consent_id}/scan",
+          "summary": "Attach the scan of the signed form"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/consents/{consent_id}/withdraw",
+          "summary": "Withdraw a given consent"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/consents/{consent_id}/cancel",
+          "summary": "Cancel a prepared consent"
+        }
+      ]
+    },
+    {
+      "heading": "6. Where the system requires them",
+      "anchor": "6-where-the-system-requires-them",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/safety-checks",
+          "summary": "Record a pause of the surgical safety checklist"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/discharge",
+          "summary": "Doctor: Discharge (Clinical Discharge stage)"
+        }
+      ]
+    },
+    {
+      "heading": "7. The register and the statistics",
+      "anchor": "7-the-register-and-the-statistics",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/consents",
+          "summary": "The consent register"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/consents/{consent_id}",
+          "summary": "A consent"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/consent-statistics",
+          "summary": "Consent statistics"
+        }
+      ]
+    }
+  ]
+}

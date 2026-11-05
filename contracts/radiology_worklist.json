@@ -1,7 +1,7 @@
 {
   "screen_id": "radiology_worklist",
-  "contract_fingerprint": "5f8bd8feecd1d68f7841",
-  "knowledge_revision": "893766fb0e066973",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "5980e5c3b1817f4e",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "radiology",
       "purpose": "Orders to perform with the checks before the examination; link PACS studies; write reports.",
@@ -268,10 +268,13 @@
     "related_workflows": [
       "blood-transfusion",
       "clinical-and-prescriptions",
+      "complaints",
       "consent",
       "diagnostic-services",
       "duty-rosters-and-attendance",
       "facility-and-it",
+      "finance-and-owner",
+      "hr-and-payroll",
       "incidents-and-sentinel-events",
       "inpatient-and-discharge",
       "laboratory-and-radiology",
@@ -807,6 +810,18 @@
           "details_from": "POST /api/v1/imaging/orders/{order_id}/status"
         },
         {
+          "code": "INVOICE_HAS_PAYMENTS",
+          "http_status": 409,
+          "message": "An invoice with payments cannot be cancelled; refund it instead.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/opd-tickets/{ticket_id}/void"
+        },
+        {
           "code": "PATIENT_IDENTITY_MISMATCH",
           "http_status": 409,
           "message": "The wristband scanned is not this patient's: stop and check who the patient is.",
@@ -1045,6 +1060,18 @@
           ],
           "details_fields": [],
           "details_from": "POST /api/v1/imaging/orders/{order_id}/report"
+        },
+        {
+          "code": "IMAGING_SAFETY_CHECK_REQUIRED",
+          "http_status": 422,
+          "message": "A check before or during the examination is missing: the site and side confirmed, the pregnancy question, or the doctor present for contrast.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/imaging/orders/{order_id}/status"
         },
         {
           "code": "IMAGING_STUDY_NOT_FOUND",
@@ -2192,7 +2219,7 @@
     {
       "call": "POST /imaging/orders/{order_id}/report",
       "emits": "critical_result.updated",
-      "audience": "permission diagnostics.critical.communicate; the requesting doctor; on escalation also diagnostics.critical.escalation",
+      "audience": "permissions diagnostics.critical.communicate, diagnostics.critical.view; the requesting doctor; on escalation also diagnostics.critical.escalation",
       "reaches_screens": [
         "critical_results_doctor",
         "critical_results_ward",
@@ -2645,6 +2672,7 @@
       "IMAGING_REPORT_NOT_READY": "The study is not reported yet.",
       "IMAGING_SAFETY_CHECK_REQUIRED": "A check before or during the examination is missing: the site and side confirmed, the pregnancy question, or the doctor present for contrast.",
       "IMAGING_STUDY_NOT_FOUND": "The PACS has no such study (yet).",
+      "INVOICE_HAS_PAYMENTS": "An invoice with payments cannot be cancelled; refund it instead.",
       "NOT_FOUND": "The requested resource was not found.",
       "ORTHANC_UNAVAILABLE": "The PACS server is unavailable.",
       "PACS_NOT_CONFIGURED": "This server has no PACS (Orthanc) set up, so no study can be linked.",
@@ -2741,6 +2769,7 @@
           "FORBIDDEN",
           "IMAGING_ORDER_STATE_INVALID",
           "IMAGING_SAFETY_CHECK_REQUIRED",
+          "INVOICE_HAS_PAYMENTS",
           "PATIENT_IDENTITY_MISMATCH",
           "PATIENT_IDENTITY_REQUIRED",
           "VALIDATION_ERROR"
@@ -2767,6 +2796,7 @@
         },
         "errors_to_handle": [
           "IMAGING_ORDER_STATE_INVALID",
+          "IMAGING_SAFETY_CHECK_REQUIRED",
           "IMAGING_STUDY_NOT_FOUND",
           "NOT_FOUND",
           "ORTHANC_UNAVAILABLE",
@@ -3246,6 +3276,11 @@
         "ui_action": "Say 'not found'; refresh the list."
       },
       {
+        "code": "INVOICE_HAS_PAYMENTS",
+        "message": "An invoice with payments cannot be cancelled; refund it instead.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
         "code": "NOT_FOUND",
         "message": "The requested resource was not found.",
         "ui_action": "Say 'not found'; refresh the list."
@@ -3351,6 +3386,11 @@
       "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
     },
     {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
+    {
       "slug": "consent",
       "title": "Consent (MSDS)",
       "recipe": "get_workflow_recipe('consent')"
@@ -3369,6 +3409,16 @@
       "slug": "facility-and-it",
       "title": "Facility operations, badge stations & IT administration",
       "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
+      "slug": "hr-and-payroll",
+      "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
+      "recipe": "get_workflow_recipe('hr-and-payroll')"
     },
     {
       "slug": "incidents-and-sentinel-events",
@@ -3910,13 +3960,14 @@
               "designation": "Officer",
               "department_name": null,
               "license_type": "PNC",
-              "registration": "PNC PNC-8403"
+              "user_id": 2,
+              "registration": "PNC PNC-31852"
             }
           ],
           "meta": {
-            "server_time": "2026-10-27T15:29:53.668901+00:00"
+            "server_time": "2026-11-05T01:52:33.483546+00:00"
           },
-          "request_id": "4e2ee3a40faa41c195bc2aa08edaa30b"
+          "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
         }
       }
     }
@@ -6725,6 +6776,18 @@
           ],
           "title": "Registration",
           "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id",
+          "description": "Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62)"
         }
       },
       "type": "object",
@@ -6735,7 +6798,8 @@
         "designation",
         "department_name",
         "license_type",
-        "registration"
+        "registration",
+        "user_id"
       ],
       "title": "StaffLookupOut",
       "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."

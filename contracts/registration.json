@@ -1,7 +1,7 @@
 {
   "screen_id": "registration",
-  "contract_fingerprint": "14824af5c60c05148994",
-  "knowledge_revision": "9250bafb1794ac12",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "5980e5c3b1817f4e",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "reception",
       "purpose": "One atomic call: patient → OPD ticket → invoice → payment → queue token → print payload.",
@@ -263,19 +263,30 @@
       }
     ],
     "related_workflows": [
+      "blood-center",
+      "clinic-quality-and-education",
       "clinical-and-prescriptions",
+      "complaints",
       "consent",
+      "cost-estimates-and-tariff",
+      "deaths-and-medico-legal-cases",
       "diagnostic-services",
       "duty-rosters-and-attendance",
       "emergency-department",
       "facility-and-it",
       "facility-profile-and-services",
+      "finance-and-owner",
+      "hr-and-payroll",
       "incidents-and-sentinel-events",
+      "infection-control",
       "inpatient-and-discharge",
       "laboratory-and-radiology",
+      "medication-safety",
       "opd-reception",
       "operating-theater",
-      "personnel-records"
+      "personnel-records",
+      "phc-inspection",
+      "refunds-waivers-credit"
     ]
   },
   "rules_in_force": null,
@@ -285,7 +296,7 @@
     "workspace": "reception",
     "phase": "P2",
     "position": 14,
-    "points": 82,
+    "points": 88,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -350,7 +361,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 82,
+    "points": 88,
     "items": [
       {
         "id": "ep:POST /patients/{patient_id}/documents",
@@ -416,6 +427,18 @@
         "id": "ep:GET /opd-queues/doctors",
         "label": "GET /opd-queues/doctors",
         "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /finance/panels",
+        "label": "GET /finance/panels",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /patients/search",
+        "label": "GET /patients/search",
+        "points": 3,
         "claimed": false
       },
       {
@@ -470,7 +493,7 @@
         "id": "rule:5dd63f4d3b",
         "label": "The doctor: from GET /opd-queues/doctors (by department, with how many wait), or the department alone; a colleague who sees no OPD queue answers VALIDATION_ERROR (details.field doctor_id). A patient sent to the wrong doctor is re-routed by that doctor: the dashboard moves the patient by itself (opd.queue.updated).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:937add537d",
@@ -1197,7 +1220,8 @@
             "pointer": "/panel_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The panel (GET /finance/panels)"
           },
           {
             "pointer": "/panel_member_no",
@@ -1321,6 +1345,18 @@
           "code": "INVOICE_LOCKED",
           "http_status": 409,
           "message": "The invoice is locked pending approval.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "INVOICE_NOT_PAYABLE",
+          "http_status": 409,
+          "message": "This invoice cannot take payments.",
           "retryable": false,
           "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
           "source": [
@@ -1711,7 +1747,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "Existing patient (from /patients/search)"
+            "description": "Existing patient (GET /patients/search)"
           },
           {
             "pointer": "/new_patient/full_name",
@@ -1770,7 +1806,8 @@
             "pointer": "/new_patient/panel_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The panel (GET /finance/panels)"
           },
           {
             "pointer": "/new_patient/panel_member_no",
@@ -2499,6 +2536,184 @@
         ],
         "note": null
       }
+    },
+    {
+      "endpoint": "GET /finance/panels",
+      "summary": "Panels (Sehat Sahulat, Zakat, corporate ...)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_PanelOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /patients/search",
+      "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "patient.search"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of patient.search",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "lab_technician",
+          "lab_verifier",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "title": "Q"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 1,
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_PatientSearchHitOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 100
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": true,
+            "type": "string",
+            "min_length": 2
+          }
+        ],
+        "filters": [],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
     }
   ],
   "realtime": {
@@ -2534,7 +2749,9 @@
           "GET /opd-tickets/{ticket_id}/print-payload",
           "GET /opd-queues/reception-dashboard",
           "GET /staff/lookup",
-          "GET /opd-queues/doctors"
+          "GET /opd-queues/doctors",
+          "GET /finance/panels",
+          "GET /patients/search"
         ]
       }
     ],
@@ -2930,6 +3147,24 @@
     },
     {
       "values": [
+        "SehatSahulat",
+        "Zakat",
+        "GovernmentEmployee",
+        "Corporate",
+        "Other"
+      ],
+      "column": "panels.panel_type",
+      "used_at": "GET /finance/panels[].panel_type",
+      "labels": {
+        "SehatSahulat": "Sehat sahulat",
+        "Zakat": "Zakat",
+        "GovernmentEmployee": "Government employee",
+        "Corporate": "Corporate",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
         "application/pdf",
         "image/jpeg",
         "image/png"
@@ -3276,6 +3511,7 @@
       "FORBIDDEN": "You do not have permission to do this.",
       "IDEMPOTENCY_CONFLICT": "Idempotency-Key was reused with a different request body.",
       "INVOICE_LOCKED": "The invoice is locked pending approval.",
+      "INVOICE_NOT_PAYABLE": "This invoice cannot take payments.",
       "LAB_ONLY_QUEUE_FORBIDDEN": "Lab-only walk-in patients cannot enter doctor queues.",
       "NOT_FOUND": "The requested resource was not found.",
       "OVERPAYMENT": "The payment exceeds the balance due.",
@@ -3319,10 +3555,19 @@
       "doctor",
       "clinical_specialist",
       "surgeon",
+      "ot_admin",
       "anaesthetist",
+      "ot_nurse",
       "ward_nurse",
       "head_nurse",
-      "pharmacist"
+      "pharmacist",
+      "lab_technician",
+      "lab_verifier",
+      "radiographer",
+      "radiologist",
+      "zakat_officer",
+      "quality_officer",
+      "ipc_nurse"
     ],
     "page_for": [
       "receptionist"
@@ -3472,6 +3717,7 @@
         },
         "errors_to_handle": [
           "INVOICE_LOCKED",
+          "INVOICE_NOT_PAYABLE",
           "OVERPAYMENT",
           "SHIFT_NOT_OPEN",
           "TICKET_NOT_ACTIVE",
@@ -3628,6 +3874,66 @@
           "surgeon",
           "triage_nurse"
         ]
+      },
+      {
+        "id": "case:GET /finance/panels",
+        "call": "GET /api/v1/finance/panels",
+        "summary": "Panels (Sehat Sahulat, Zakat, corporate ...)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /patients/search",
+        "call": "GET /api/v1/patients/search",
+        "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
+        "denied": {
+          "as_one_of": [
+            "cssd_technician",
+            "employee_self",
+            "hr_admin",
+            "lab_admin",
+            "maintenance_admin"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "lab_technician",
+          "lab_verifier",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ]
       }
     ],
     "service_cases": [
@@ -3709,239 +4015,6 @@
     ],
     "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
   },
-  "workflows": [
-    {
-      "slug": "clinical-and-prescriptions",
-      "title": "Consultation, e-prescriptions & pharmacy dispensing",
-      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
-    },
-    {
-      "slug": "consent",
-      "title": "Consent (MSDS)",
-      "recipe": "get_workflow_recipe('consent')"
-    },
-    {
-      "slug": "diagnostic-services",
-      "title": "Diagnostic services quality (MSDS)",
-      "recipe": "get_workflow_recipe('diagnostic-services')"
-    },
-    {
-      "slug": "duty-rosters-and-attendance",
-      "title": "Duty rosters, roll call, badges & attendance",
-      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
-    },
-    {
-      "slug": "emergency-department",
-      "title": "The emergency department (MSDS)",
-      "recipe": "get_workflow_recipe('emergency-department')"
-    },
-    {
-      "slug": "facility-and-it",
-      "title": "Facility operations, badge stations & IT administration",
-      "recipe": "get_workflow_recipe('facility-and-it')"
-    },
-    {
-      "slug": "facility-profile-and-services",
-      "title": "Facility settings: the PHC profile and the clinical services",
-      "recipe": "get_workflow_recipe('facility-profile-and-services')"
-    },
-    {
-      "slug": "incidents-and-sentinel-events",
-      "title": "Incidents, sentinel events and the action register (MSDS)",
-      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
-    },
-    {
-      "slug": "inpatient-and-discharge",
-      "title": "Admission, beds, nursing & discharge",
-      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
-    },
-    {
-      "slug": "laboratory-and-radiology",
-      "title": "Laboratory & radiology",
-      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
-    },
-    {
-      "slug": "opd-reception",
-      "title": "OPD reception, queues & re-routing",
-      "recipe": "get_workflow_recipe('opd-reception')"
-    },
-    {
-      "slug": "operating-theater",
-      "title": "Operating theater",
-      "recipe": "get_workflow_recipe('operating-theater')"
-    },
-    {
-      "slug": "personnel-records",
-      "title": "Personnel records (MSDS)",
-      "recipe": "get_workflow_recipe('personnel-records')"
-    }
-  ],
-  "scenarios": [
-    {
-      "scenario": "opd.new_patient_paid",
-      "title": "A new patient registered and paid in cash",
-      "state": "success with the slip to print",
-      "open_as": "demo.reception"
-    },
-    {
-      "scenario": "opd.unpaid_slip",
-      "title": "A slip issued without payment",
-      "state": "pay later",
-      "open_as": "demo.reception"
-    },
-    {
-      "scenario": "opd.discount_over_ceiling",
-      "title": "A discount above the receptionist's ceiling",
-      "state": "DISCOUNT_CEILING_EXCEEDED and the waiver offer",
-      "open_as": "demo.reception"
-    },
-    {
-      "scenario": "opd.double_click",
-      "title": "A double click on Register",
-      "state": "a double submit creates one effect",
-      "open_as": "demo.reception"
-    }
-  ],
-  "unknowns": [
-    {
-      "what": "decision H02",
-      "owner": [
-        "vendor"
-      ],
-      "affects": [
-        "every screen in Urdu"
-      ]
-    },
-    {
-      "what": "decision H03",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen"
-      ]
-    },
-    {
-      "what": "decision H04",
-      "owner": [
-        "vendor"
-      ],
-      "affects": [
-        "every screen with money"
-      ]
-    },
-    {
-      "what": "decision H08",
-      "owner": [
-        "vendor",
-        "translator",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen in Urdu"
-      ]
-    },
-    {
-      "what": "decision H09",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "affects": [
-        "every screen"
-      ]
-    },
-    {
-      "what": "decision H10",
-      "owner": [
-        "clinical_lead",
-        "vendor"
-      ],
-      "affects": [
-        "every screen with realtime events"
-      ]
-    },
-    {
-      "what": "decision H12",
-      "owner": [
-        "vendor",
-        "backend"
-      ],
-      "affects": [
-        "my_cash_shift",
-        "registration",
-        "every screen that prints"
-      ]
-    },
-    {
-      "what": "decision H17",
-      "owner": [
-        "vendor",
-        "hospital"
-      ],
-      "affects": [
-        "patient_search",
-        "registration"
-      ]
-    },
-    {
-      "what": "decision H18",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "affects": [
-        "every table in Urdu"
-      ]
-    },
-    {
-      "what": "decision H19",
-      "owner": [
-        "clinical_lead",
-        "backend"
-      ],
-      "affects": [
-        "every screen with a patient banner"
-      ]
-    },
-    {
-      "what": "decision H20",
-      "owner": [
-        "vendor",
-        "hospital"
-      ],
-      "affects": [
-        "every form"
-      ]
-    },
-    {
-      "what": "decision H22",
-      "owner": [
-        "hospital",
-        "vendor"
-      ],
-      "affects": [
-        "every screen that prints"
-      ]
-    },
-    {
-      "what": "decision H24",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen"
-      ]
-    }
-  ],
-  "omitted_sections": [
-    "decisions",
-    "examples",
-    "schemas"
-  ],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
   "handbook": {
     "page": "screens/registration",
     "screen_id": "registration",
@@ -4065,6 +4138,26 @@
         ],
         "permissions_mode": "any",
         "access": null
+      },
+      {
+        "id": "registration::GET /finance/panels",
+        "task": "Panels (Sehat Sahulat, Zakat, corporate ...)",
+        "call": "GET /finance/panels",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "registration::GET /patients/search",
+        "task": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
+        "call": "GET /patients/search",
+        "is_action": false,
+        "permissions": [
+          "patient.search"
+        ],
+        "permissions_mode": "all",
+        "access": null
       }
     ],
     "rules_to_explain": [
@@ -4110,6 +4203,11 @@
       {
         "code": "INVOICE_LOCKED",
         "message": "The invoice is locked pending approval.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "INVOICE_NOT_PAYABLE",
+        "message": "This invoice cannot take payments.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
       },
       {
@@ -4241,6 +4339,154 @@
     ],
     "workspace_guide": "get_handbook_outline('reception')"
   },
+  "workflows": [
+    {
+      "slug": "blood-center",
+      "title": "Blood center",
+      "recipe": "get_workflow_recipe('blood-center')"
+    },
+    {
+      "slug": "clinic-quality-and-education",
+      "title": "QA rounds, patient feedback and health education",
+      "recipe": "get_workflow_recipe('clinic-quality-and-education')"
+    },
+    {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
+    {
+      "slug": "consent",
+      "title": "Consent (MSDS)",
+      "recipe": "get_workflow_recipe('consent')"
+    },
+    {
+      "slug": "cost-estimates-and-tariff",
+      "title": "Cost estimates, the tariff and ward transfers (MSDS)",
+      "recipe": "get_workflow_recipe('cost-estimates-and-tariff')"
+    },
+    {
+      "slug": "deaths-and-medico-legal-cases",
+      "title": "Deaths and medico-legal cases (MSDS)",
+      "recipe": "get_workflow_recipe('deaths-and-medico-legal-cases')"
+    },
+    {
+      "slug": "diagnostic-services",
+      "title": "Diagnostic services quality (MSDS)",
+      "recipe": "get_workflow_recipe('diagnostic-services')"
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
+    },
+    {
+      "slug": "emergency-department",
+      "title": "The emergency department (MSDS)",
+      "recipe": "get_workflow_recipe('emergency-department')"
+    },
+    {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "facility-profile-and-services",
+      "title": "Facility settings: the PHC profile and the clinical services",
+      "recipe": "get_workflow_recipe('facility-profile-and-services')"
+    },
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
+      "slug": "hr-and-payroll",
+      "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
+      "recipe": "get_workflow_recipe('hr-and-payroll')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "recipe": "get_workflow_recipe('infection-control')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "laboratory-and-radiology",
+      "title": "Laboratory & radiology",
+      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
+    },
+    {
+      "slug": "opd-reception",
+      "title": "OPD reception, queues & re-routing",
+      "recipe": "get_workflow_recipe('opd-reception')"
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
+    },
+    {
+      "slug": "personnel-records",
+      "title": "Personnel records (MSDS)",
+      "recipe": "get_workflow_recipe('personnel-records')"
+    },
+    {
+      "slug": "phc-inspection",
+      "title": "PHC inspection: category, readiness, the inspection pack, the web portal (CPSA) documents and the inspector's login",
+      "recipe": "get_workflow_recipe('phc-inspection')"
+    },
+    {
+      "slug": "refunds-waivers-credit",
+      "title": "Refunds, VIP waivers & credit (Udhaar)",
+      "recipe": "get_workflow_recipe('refunds-waivers-credit')"
+    }
+  ],
+  "scenarios": [
+    {
+      "scenario": "opd.new_patient_paid",
+      "title": "A new patient registered and paid in cash",
+      "state": "success with the slip to print",
+      "open_as": "demo.reception"
+    },
+    {
+      "scenario": "opd.unpaid_slip",
+      "title": "A slip issued without payment",
+      "state": "pay later",
+      "open_as": "demo.reception"
+    },
+    {
+      "scenario": "opd.discount_over_ceiling",
+      "title": "A discount above the receptionist's ceiling",
+      "state": "DISCOUNT_CEILING_EXCEEDED and the waiver offer",
+      "open_as": "demo.reception"
+    },
+    {
+      "scenario": "opd.double_click",
+      "title": "A double click on Register",
+      "state": "a double submit creates one effect",
+      "open_as": "demo.reception"
+    }
+  ],
   "decisions": [
     {
       "id": "H02",
@@ -4682,13 +4928,14 @@
               "designation": "Officer",
               "department_name": null,
               "license_type": "PNC",
-              "registration": "PNC PNC-8403"
+              "user_id": 2,
+              "registration": "PNC PNC-31852"
             }
           ],
           "meta": {
-            "server_time": "2026-10-27T15:29:53.668901+00:00"
+            "server_time": "2026-11-05T01:52:33.483546+00:00"
           },
-          "request_id": "4e2ee3a40faa41c195bc2aa08edaa30b"
+          "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
         }
       }
     },
@@ -4725,8 +4972,255 @@
           "request_id": "f888a058d90c470cb28eeb2f0f660954"
         }
       }
+    },
+    "GET /finance/panels": {
+      "request": {
+        "path": "/api/v1/finance/panels"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "panel_id": 1,
+              "code": "SEHAT",
+              "name": "Sehat Sahulat",
+              "panel_type": "SehatSahulat",
+              "discount_pct": 10,
+              "is_credit_panel": false,
+              "is_active": true,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:36:36.431439+00:00"
+          },
+          "request_id": "6c7c15b5aab44317b856c85dbd02d341"
+        }
+      }
+    },
+    "GET /patients/search": {
+      "request": {
+        "path": "/api/v1/patients/search",
+        "query": {
+          "q": "MRN-2026-000001"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "patient_id": 1,
+              "mrn": "MRN-2026-000001",
+              "registration_type": "Regular",
+              "full_name": "Ali Khan",
+              "father_or_husband_name": null,
+              "gender": "male",
+              "dob": null,
+              "age_years": 40,
+              "age_recorded_on": "2026-10-24",
+              "mobile": "03004648043",
+              "cnic": null,
+              "upmrn": null,
+              "address": null,
+              "emergency_contact_name": null,
+              "emergency_contact_phone": null,
+              "blood_group": null,
+              "allergies": null,
+              "billing_category": "Cash",
+              "panel_id": null,
+              "panel_name": null,
+              "panel_member_no": null,
+              "temp_identifier": null,
+              "merged_into_id": null,
+              "linked_employee_id": null,
+              "is_deceased": false,
+              "created_at": "2026-10-24T10:22:47.211654+00:00",
+              "row_version": 1,
+              "death_id": null,
+              "death_at": null,
+              "photo_document_id": null,
+              "mlc_numbers": [],
+              "matched_merged_profile": null,
+              "outstanding": {
+                "has_outstanding_ar": true,
+                "outstanding_ar_balance": 600,
+                "ar_block_applies": true,
+                "banner_text": "OUTSTANDING BALANCE: RS. 600.00"
+              }
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-24T10:22:47.821541+00:00"
+          },
+          "request_id": "4d98edf634a347f1a9685ccd268ae47f"
+        }
+      }
     }
   },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H17",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "How a CNIC is masked on screen.",
+      "affects": [
+        "patient_search",
+        "registration"
+      ],
+      "meanwhile": "Shown in full to users who may see the patient, as the API returns it."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "omitted_sections": [],
+  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
   "schemas": {
     "ApprovalSummaryOut": {
       "properties": {
@@ -5046,6 +5540,31 @@
       ],
       "title": "Envelope[list[OpdDoctorOut]]"
     },
+    "Envelope_list_PanelOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PanelOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PanelOut]]"
+    },
     "Envelope_list_PatientDocumentOut__": {
       "properties": {
         "data": {
@@ -5070,6 +5589,31 @@
         "request_id"
       ],
       "title": "Envelope[list[PatientDocumentOut]]"
+    },
+    "Envelope_list_PatientSearchHitOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PatientSearchHitOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PatientSearchHitOut]]"
     },
     "Envelope_list_ServiceListItemOut__": {
       "properties": {
@@ -6750,6 +7294,61 @@
       "title": "OutstandingBannerOut",
       "description": "Outstanding dues of the patient's whole merge chain (workflow sections 1.2 and 1.9)."
     },
+    "PanelOut": {
+      "properties": {
+        "panel_id": {
+          "type": "integer",
+          "title": "Panel Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "panel_type": {
+          "type": "string",
+          "enum": [
+            "SehatSahulat",
+            "Zakat",
+            "GovernmentEmployee",
+            "Corporate",
+            "Other"
+          ],
+          "title": "Panel Type"
+        },
+        "discount_pct": {
+          "type": "number",
+          "title": "Discount Pct"
+        },
+        "is_credit_panel": {
+          "type": "boolean",
+          "title": "Is Credit Panel"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "panel_id",
+        "code",
+        "name",
+        "panel_type",
+        "discount_pct",
+        "is_credit_panel",
+        "is_active",
+        "row_version"
+      ],
+      "title": "PanelOut"
+    },
     "PatientCreate": {
       "properties": {
         "full_name": {
@@ -6822,7 +7421,8 @@
               "type": "null"
             }
           ],
-          "title": "Panel Id"
+          "title": "Panel Id",
+          "description": "The panel (GET /finance/panels)"
         },
         "panel_member_no": {
           "anyOf": [
@@ -7571,6 +8171,380 @@
       "title": "PatientDocumentUploadOut",
       "description": "The stored document (download it with GET /patient-documents/{document_id}/download)."
     },
+    "PatientSearchHitOut": {
+      "properties": {
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "photo_document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Photo Document Id",
+          "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "registration_type": {
+          "type": "string",
+          "enum": [
+            "Regular",
+            "LabOnly",
+            "TraumaTemp",
+            "Merged"
+          ],
+          "title": "Registration Type"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "father_or_husband_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Father Or Husband Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "age_recorded_on": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Recorded On",
+          "description": "When age_years was recorded (the age grows from that date)"
+        },
+        "mobile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mobile"
+        },
+        "cnic": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cnic"
+        },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "emergency_contact_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Name"
+        },
+        "emergency_contact_phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Phone"
+        },
+        "blood_group": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Group"
+        },
+        "allergies": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Allergies"
+        },
+        "billing_category": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Panel"
+          ],
+          "title": "Billing Category"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "panel_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Name"
+        },
+        "panel_member_no": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Member No"
+        },
+        "temp_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp Identifier",
+          "description": "Unknown-trauma label, e.g. \"Unknown Male 3\""
+        },
+        "merged_into_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Merged Into Id"
+        },
+        "linked_employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Linked Employee Id"
+        },
+        "is_deceased": {
+          "type": "boolean",
+          "title": "Is Deceased"
+        },
+        "death_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Death Id",
+          "description": "The death record (GET /deaths/{death_id}) when the death is recorded"
+        },
+        "death_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Death At"
+        },
+        "mlc_numbers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Mlc Numbers",
+          "description": "Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked)"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "outstanding": {
+          "$ref": "#/components/schemas/OutstandingBannerOut"
+        },
+        "matched_merged_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/MergedProfileOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The profile merged into this record that the search matched when this record itself did not (an old slip's MRN, a trauma label such as \"Unknown Male 3\", a duplicate's name or numbers): say \"Found by MRN-…, merged into this record\". Null when this record matched"
+        }
+      },
+      "type": "object",
+      "required": [
+        "patient_id",
+        "photo_document_id",
+        "mrn",
+        "registration_type",
+        "full_name",
+        "father_or_husband_name",
+        "gender",
+        "dob",
+        "age_years",
+        "age_recorded_on",
+        "mobile",
+        "cnic",
+        "upmrn",
+        "address",
+        "emergency_contact_name",
+        "emergency_contact_phone",
+        "blood_group",
+        "allergies",
+        "billing_category",
+        "panel_id",
+        "panel_name",
+        "panel_member_no",
+        "temp_identifier",
+        "merged_into_id",
+        "linked_employee_id",
+        "is_deceased",
+        "death_id",
+        "death_at",
+        "mlc_numbers",
+        "created_at",
+        "row_version",
+        "outstanding",
+        "matched_merged_profile"
+      ],
+      "title": "PatientSearchHitOut",
+      "description": "A person the search found, always as their master record (merged profiles are never hits of their own)."
+    },
     "PaymentIn": {
       "properties": {
         "method": {
@@ -8060,7 +9034,7 @@
             }
           ],
           "title": "Patient Id",
-          "description": "Existing patient (from /patients/search)"
+          "description": "Existing patient (GET /patients/search)"
         },
         "new_patient": {
           "anyOf": [
@@ -8809,6 +9783,18 @@
           ],
           "title": "Registration",
           "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id",
+          "description": "Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62)"
         }
       },
       "type": "object",
@@ -8819,7 +9805,8 @@
         "designation",
         "department_name",
         "license_type",
-        "registration"
+        "registration",
+        "user_id"
       ],
       "title": "StaffLookupOut",
       "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."

@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { EstablishmentOut } from "../generated/facility_profile";
 import {
@@ -95,6 +96,8 @@ export const OTScheduling: React.FC<OTSchedulingProps> = ({
 
   // Form states: New Booking
   const [newBookingPatientId, setNewBookingPatientId] = useState<number>(0);
+  const [bookingSurgeon,setBookingSurgeon]=useState('');
+  const [bookingService,setBookingService]=useState('');
   const [newBookingProcedure, setNewBookingProcedure] = useState<string>("");
   const [newBookingType, setNewBookingType] = useState<"Scheduled" | "Emergency" | "CodeRed">("Scheduled");
   const [newBookingEmergencyReason, setNewBookingEmergencyReason] = useState<string>("");
@@ -103,6 +106,7 @@ export const OTScheduling: React.FC<OTSchedulingProps> = ({
 
   // Form states: Schedule Booking
   const [scheduleOtId, setScheduleOtId] = useState<number>(0);
+  const [scheduleSurgeon,setScheduleSurgeon]=useState('');
   const [scheduleStart, setScheduleStart] = useState<string>("");
   const [scheduleDurationMinutes, setScheduleDurationMinutes] = useState<number>(60);
   const [slotConflict, setSlotConflict] = useState<SlotCheckResult | null>(null);
@@ -194,6 +198,8 @@ export const OTScheduling: React.FC<OTSchedulingProps> = ({
 
     const payload: BookingIn = {
       patient_id: Number(newBookingPatientId),
+      primary_surgeon_id:bookingSurgeon?Number(bookingSurgeon):null,
+      service_id:bookingService?Number(bookingService):null,
       procedure_name: newBookingProcedure.trim(),
       booking_type: newBookingType,
       emergency_reason:
@@ -236,6 +242,7 @@ export const OTScheduling: React.FC<OTSchedulingProps> = ({
 
     const payload: OtScheduleIn = {
       ot_id: Number(scheduleOtId),
+      primary_surgeon_id:scheduleSurgeon?Number(scheduleSurgeon):null,
       scheduled_start: new Date(scheduleStart).toISOString(),
       duration_minutes: Number(scheduleDurationMinutes),
       anesthesia_type: newBookingAnesthesia,
@@ -832,16 +839,16 @@ export const OTScheduling: React.FC<OTSchedulingProps> = ({
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-gray-700">Patient ID / مریض کا نمبر:</label>
-                <input
-                  type="number"
+                <DirectoryPicker
                   data-help="ot_scheduling.patient_id_input"
                   value={newBookingPatientId || ""}
                   onChange={(e) => setNewBookingPatientId(Number(e.target.value))}
-                  placeholder="e.g. 1"
                   className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-white"
-                />
+                 path="/patients/search" idField="patient_id" search />
               </div>
 
+              <label>Surgeon / سرجن<DirectoryPicker path="/staff/lookup?license_type=PMDC" idField="employee_id" search value={bookingSurgeon} onChange={e=>setBookingSurgeon(e.target.value)} data-help="ot_scheduling.procedure_name_input"/></label>
+              <label>OT service / تھیٹر خدمت<DirectoryPicker path="/finance/service-catalog?category=OT" idField="service_id" value={bookingService} onChange={e=>setBookingService(e.target.value)} data-help="ot_scheduling.procedure_name_input"/></label>
               <div>
                 <label className="block text-xs font-semibold text-gray-700">Procedure Name / طریقہ کار:</label>
                 <input
@@ -976,6 +983,7 @@ export const OTScheduling: React.FC<OTSchedulingProps> = ({
               </div>
 
               <div>
+                <label>Surgeon / سرجن<DirectoryPicker path="/staff/lookup?license_type=PMDC" idField="employee_id" search value={scheduleSurgeon} onChange={e=>setScheduleSurgeon(e.target.value)} data-help="ot_scheduling.slot_theater_select"/></label>
                 <label className="block text-xs font-semibold text-gray-700">Scheduled Start Time / تاریخ و وقت:</label>
                 <input
                   type="datetime-local"

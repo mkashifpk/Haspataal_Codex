@@ -872,6 +872,15 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       await refreshAddresses();
       return { ok: true, data: state() };
     }
+    if (action === 'station-config-load' || action === 'station-config-save') {
+      const { saveStationConfig, loadStationConfig } = require('./station-config.cjs');
+      const file = path.join(app.getPath('userData'), 'station-config.enc');
+      if (action === 'station-config-save') {
+        saveStationConfig(file, args, safeStorage);
+        return { ok: true, data: null };
+      }
+      return { ok: true, data: loadStationConfig(file, safeStorage) };
+    }
     if (action === "api") {
       if (
         /^\/(auth\/(login|refresh|logout|change-password)|settings\/me\/change-password)(\?|$)/.test(
@@ -880,15 +889,23 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       )
         throw new Error("Use the dedicated session action");
       const requestActor = auth?.user.user_id;
-      const response = await api(
+      const { stationHeaders, isStationNetworkFailure } = require('./station-security.cjs');
+      let response;
+      try {
+      response = await api(
         args.method,
         args.path,
         args.body,
         windows.get(win.id),
         args.key,
         false,
-        args.headers,
+        stationHeaders(args.path, args.headers),
       );
+      } catch (error) {
+        if (args.path === '/badge-stations/scans' && isStationNetworkFailure(error))
+          return { ok: false, error: { code: 'OFFLINE', message: 'Station scan outcome is unconfirmed. Retain the original gateway event ID for retry.' } };
+        throw error;
+      }
       return response;
     }
     if (action === 'print-dose-label') {
@@ -902,6 +919,30 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
       if(actor!==auth?.user.user_id)throw Error('The session changed before label printing');
       return {ok:true,data:await require('./opd-print.cjs').printSlip(payload,terminal.data,{owner:win,pdf:false})};
+    }
+    if (action === "compliance-scan") {
+      if (!Number.isSafeInteger(args.documentId) || args.documentId <= 0) throw new Error('Select an actual compliance entry');
+      const scanPath=`/facility/compliance-documents/${args.documentId}/scan`;
+      const op=matchOperation('GET',scanPath);
+      if(!auth || !op || !permissionAllows(op,auth.user))throw new Error('You do not have permission to view this scan');
+      if(Date.now()>auth.expires-60000)await refresh();
+      const actorSession=auth;
+      const r=await raw('GET',scanPath,undefined,windows.get(win.id),undefined,true);
+      if(actorSession!==auth)throw new Error('The session changed during scan download');
+      if(r.status!==200){try{r.body=JSON.parse(r.bytes.toString('utf8'))}catch{}return errorResult(r);}
+      const scan=require('./compliance-files.cjs').checkedScan(r.bytes,r.headers['content-type']);
+      if(args.save){
+        const target=await dialog.showSaveDialog(win,{defaultPath:`Compliance-${args.documentId}.${scan.extension}`,filters:[{name:scan.type==='application/pdf'?'PDF':'Image',extensions:[scan.extension]}]});
+        if(actorSession!==auth || !permissionAllows(op,auth?.user))throw new Error('The session or permission changed before saving');
+        if(!target.canceled)fs.writeFileSync(target.filePath,r.bytes);
+        return {ok:true,data:{saved:!target.canceled,type:scan.type}};
+      }
+      const viewer=new BrowserWindow({width:1050,height:850,parent:win,webPreferences:{sandbox:true,contextIsolation:true,nodeIntegration:false,plugins:scan.type==='application/pdf'}});
+      clinicalViewers.add(viewer);viewer.once('closed',()=>clinicalViewers.delete(viewer));
+      viewer.webContents.setWindowOpenHandler(()=>({action:'deny'}));
+      viewer.webContents.on('will-navigate',e=>e.preventDefault());
+      try{await viewer.loadURL(`data:${scan.type};base64,${r.bytes.toString('base64')}`);}catch{if(!viewer.isDestroyed())viewer.destroy();throw new Error('The scan preview could not open. Save the same scan instead.');}
+      return {ok:true,data:{opened:true,type:scan.type}};
     }
     if (action === "patient-file") {
       if (!Number.isSafeInteger(args.documentId) || args.documentId <= 0)
@@ -1168,7 +1209,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return await api("GET", "/meta/handbook", undefined, undefined);
     }
     if (action === "clinical-pdf") {
-      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/(?:consents|cost-estimates)\/[1-9]\d*\/pdf|\/admissions\/[1-9]\d*\/discharge-summary\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
+      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/(?:consents|cost-estimates)\/[1-9]\d*\/pdf|\/admissions\/[1-9]\d*\/discharge-summary\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf|\/facility\/equipment\/plan\/pdf|\/facility\/compliance-documents\/register\/pdf|\/facility\/drills\/[1-9]\d*\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
       const op=matchOperation("GET",args.path);
       if(!op || !auth || !permissionAllows(op,auth.user)) throw new Error("You do not have permission to download this document");
       if(Date.now()>auth.expires-60000)await refresh();
@@ -1191,7 +1232,8 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         }
         return{ok:true,data:{opened:true}};
       }
-      const selected=await dialog.showSaveDialog(win,{defaultPath:args.path === '/diagnostics/services/pdf' ? 'Haspataal-diagnostic-services.pdf' : args.path === '/diagnostics/imaging-policy/pdf' ? 'Haspataal-imaging-policy.pdf' : `Clinical-document-${args.path.split("/")[args.path.startsWith("/imaging/orders/") ? 3 : 2]}.pdf`,filters:[{name:"PDF",extensions:["pdf"]}]});
+      const selected=await dialog.showSaveDialog(win,{defaultPath:args.path.startsWith('/facility/drills/') ? 'Haspataal-drill-'+args.path.split('/')[3]+'.pdf' : args.path === '/diagnostics/services/pdf' ? 'Haspataal-diagnostic-services.pdf' : args.path === '/diagnostics/imaging-policy/pdf' ? 'Haspataal-imaging-policy.pdf' : `Clinical-document-${args.path.split("/")[args.path.startsWith("/imaging/orders/") ? 3 : 2]}.pdf`,filters:[{name:"PDF",extensions:["pdf"]}]});
+      if(requestSession!==auth || !permissionAllows(op,auth?.user))throw new Error("The session or permission changed before saving the PDF");
       if(!selected.canceled)fs.writeFileSync(selected.filePath,r.bytes);
       return {ok:true,data:{saved:!selected.canceled}};
     }
@@ -1395,6 +1437,8 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       const filenames = {
         "/incidents/sentinel-list/pdf": "Haspataal-what-to-report.pdf",
         "/tariff/pdf": "Haspataal-tariff.pdf",
+        "/facility/equipment/plan/pdf": "Haspataal-equipment-plan.pdf",
+        "/facility/compliance-documents/register/pdf": "Haspataal-compliance-register.pdf",
       };
       if (!Object.hasOwn(filenames, args.path))
         throw new Error("Download not permitted");
@@ -1402,6 +1446,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       if (!op || !permissionAllows(op, auth?.user))
         throw new Error("You do not have permission to download this document");
       if (auth && Date.now() > auth.expires - 60000) await refresh();
+      const downloadSession = auth;
       let r = await raw(
         "GET",
         args.path,
@@ -1425,6 +1470,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
           return errorResult(r);
         }
       }
+      if (auth !== downloadSession || !permissionAllows(op, auth?.user)) throw new Error("The account or its download permission changed. Download again from the current account.");
       if (
         String(r.headers["content-type"]).split(";")[0] !== "application/pdf" ||
         !r.bytes.subarray(0, 5).equals(Buffer.from("%PDF-"))
@@ -1434,6 +1480,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         defaultPath: filenames[args.path],
         filters: [{ name: "PDF", extensions: ["pdf"] }],
       });
+      if (auth !== downloadSession || !permissionAllows(op, auth?.user)) throw new Error("The account or download permission changed before saving.");
       if (!result.canceled) fs.writeFileSync(result.filePath, r.bytes);
       return { ok: true, data: { saved: !result.canceled } };
     }

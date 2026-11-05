@@ -1,3 +1,4 @@
+import {ConsentScanUpload} from "./ConsentScanUpload";
 import { useEffect, useState } from "react";
 import { api, ApiError, call } from "../bridge";
 import { bilingual as t, tr } from "../i18n";
@@ -206,6 +207,7 @@ function PrescriptionEditor({
     [own, setOwn] = useState<rx.PrescriptionDetailOut[]>([]),
     [error, setError] = useState<unknown>(),
     [printNotice, setPrintNotice] = useState("");
+  const [scanPending,setScanPending]=useState(false);
   const [action, setAction] = useState<"cancel" | "handover">(),
     [reason, setReason] = useState(""),
     [handed, setHanded] = useState<"" | "Patient" | "Attendant">(""),
@@ -281,7 +283,7 @@ function PrescriptionEditor({
     !!ctx.patient.merged_into_id ||
     ctx.ticket.is_clinical_locked ||
     ctx.ticket.approval_lock !== "None" ||
-    write.blocked;
+    (write.blocked||scanPending);
   const current =
     record.data &&
     !record.loading &&
@@ -552,7 +554,7 @@ function PrescriptionEditor({
     lineErrors.some((line: {line?:number;missing?:unknown}) =>
       line.line === index + 1 && Array.isArray(line.missing) && line.missing.includes(field));
   function closeAction() {
-    if (write.blocked) return;
+    if (write.blocked||scanPending) return;
     if (
       actionDirty &&
       !window.confirm(
@@ -707,7 +709,7 @@ function PrescriptionEditor({
     ),
   ];
   return (
-    <section data-write-pending={write.blocked ? "true" : "false"}>
+    <section data-write-pending={write.blocked||scanPending ? "true" : "false"}>
       <ErrorBox error={error} verbatim />
       <p role="status">{printNotice}</p>
       {!action && <ClinicalWriteFeedback write={write} />}
@@ -1324,7 +1326,7 @@ function PrescriptionEditor({
                 )
           }
           onClose={closeAction}
-          closable={!write.blocked}
+          closable={!(write.blocked||scanPending)}
         >
           <p>
             {ctx.patient.full_name} ·{" "}
@@ -1333,6 +1335,7 @@ function PrescriptionEditor({
             </bdi>
           </p>
           <section data-unsaved={actionDirty ? "true" : "false"}>
+            {action==="handover"&&copy==="Scan"&&<ConsentScanUpload patientId={ctx.patient.patient_id} consentNumber={record.data?.prescription_number??"Signed prescription"} docType="Prescription" disabled={write.blocked} onPending={setScanPending} onUploaded={v=>{setDocumentId(String(v.document_id));setActionDirty(true);void docs.reload();}}/>}
             <fieldset disabled={disabled} onChange={() => setActionDirty(true)}>
               {action === "cancel" ? (
                 <Field label={t("Cancellation reason", "منسوخی کی وجہ")}>

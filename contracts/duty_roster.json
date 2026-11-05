@@ -1,7 +1,7 @@
 {
   "screen_id": "duty_roster",
-  "contract_fingerprint": "14824af5c60c05148994",
-  "knowledge_revision": "9250bafb1794ac12",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "5980e5c3b1817f4e",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "head_nurse",
       "purpose": "Plan duties by shift: nurses onto wards, zones and beds (drag & drop).",
@@ -290,12 +290,22 @@
       }
     ],
     "related_workflows": [
+      "clinic-quality-and-education",
+      "complaints",
       "cost-estimates-and-tariff",
       "duty-rosters-and-attendance",
       "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "finance-and-owner",
       "hr-and-payroll",
+      "incidents-and-sentinel-events",
       "infection-control",
-      "inpatient-and-discharge"
+      "inpatient-and-discharge",
+      "medical-record-review",
+      "medication-safety",
+      "personnel-records",
+      "phc-interview-prep",
+      "quality-indicators-and-committees"
     ]
   },
   "rules_in_force": null,
@@ -305,7 +315,7 @@
     "workspace": "head_nurse",
     "phase": "P4",
     "position": 49,
-    "points": 91,
+    "points": 94,
     "capabilities": [
       "realtime",
       "idempotent_writes",
@@ -313,7 +323,16 @@
       "f1_help",
       "zoom"
     ],
-    "depends_on": [],
+    "depends_on": [
+      {
+        "from": "duty_roster",
+        "to": "it_console",
+        "kind": "data_candidate",
+        "evidence": "it reads admin/departments, which POST /admin/departments on it_console creates",
+        "ordering": false,
+        "forward": true
+      }
+    ],
     "needed_by": [
       {
         "from": "roll_call",
@@ -327,7 +346,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 91,
+    "points": 94,
     "items": [
       {
         "id": "ep:GET /rosters",
@@ -339,7 +358,7 @@
         "id": "ep:GET /rosters/staff",
         "label": "GET /rosters/staff",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /rosters",
@@ -357,7 +376,7 @@
         "id": "ep:POST /rosters/{roster_id}/cancel",
         "label": "POST /rosters/{roster_id}/cancel",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /rosters/copy",
@@ -398,6 +417,12 @@
       {
         "id": "ep:GET /beds/matrix",
         "label": "GET /beds/matrix",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /admin/departments",
+        "label": "GET /admin/departments",
         "points": 3,
         "claimed": false
       },
@@ -1459,13 +1484,15 @@
             "pointer": "/ward_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The ward (GET /beds/matrix?include_beds=false)"
           },
           {
             "pointer": "/department_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The department (GET /admin/departments)"
           },
           {
             "pointer": "/zone_label",
@@ -1859,13 +1886,15 @@
             "pointer": "/ward_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The ward (GET /beds/matrix?include_beds=false)"
           },
           {
             "pointer": "/department_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The department (GET /admin/departments)"
           },
           {
             "pointer": "/staff_category",
@@ -2832,10 +2861,16 @@
         "permissions": [
           "ipd.bed.view",
           "cssd.operate",
-          "infection.control.manage"
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
         ],
         "permissions_mode": "any",
-        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record",
         "roles_allowed": [
           "admissions_officer",
           "anaesthetist",
@@ -2846,9 +2881,14 @@
           "head_nurse",
           "hospital_admin",
           "hospital_director",
+          "hr_admin",
           "ipc_nurse",
+          "maintenance_admin",
           "ops_admin",
           "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
           "receptionist",
           "super_admin",
           "surgeon",
@@ -2952,6 +2992,40 @@
         ],
         "note": null
       }
+    },
+    {
+      "endpoint": "GET /admin/departments",
+      "summary": "Departments",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DepartmentOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
     }
   ],
   "realtime": {
@@ -2981,7 +3055,8 @@
           "GET /rosters/staff",
           "GET /rosters/week",
           "GET /rosters/swaps",
-          "GET /beds/matrix"
+          "GET /beds/matrix",
+          "GET /admin/departments"
         ]
       },
       {
@@ -3002,7 +3077,8 @@
           "GET /rosters/staff",
           "GET /rosters/week",
           "GET /rosters/swaps",
-          "GET /beds/matrix"
+          "GET /beds/matrix",
+          "GET /admin/departments"
         ]
       }
     ],
@@ -3628,6 +3704,7 @@
   "roles": {
     "full": [
       "head_nurse",
+      "hr_admin",
       "ops_admin"
     ],
     "partial": [
@@ -3644,12 +3721,16 @@
       "surgeon",
       "anaesthetist",
       "ward_nurse",
-      "hr_admin",
+      "pharmacist",
+      "pharmacy_admin",
+      "maintenance_admin",
+      "quality_officer",
       "ipc_nurse",
       "cssd_technician"
     ],
     "page_for": [
       "head_nurse",
+      "hr_admin",
       "ops_admin"
     ],
     "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
@@ -3974,7 +4055,7 @@
             "billing_admin",
             "cashier",
             "employee_self",
-            "hr_admin"
+            "lab_admin"
           ],
           "expect": "403 FORBIDDEN"
         },
@@ -3993,14 +4074,32 @@
           "head_nurse",
           "hospital_admin",
           "hospital_director",
+          "hr_admin",
           "ipc_nurse",
+          "maintenance_admin",
           "ops_admin",
           "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
           "receptionist",
           "super_admin",
           "surgeon",
           "triage_nurse",
           "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /admin/departments",
+        "call": "GET /api/v1/admin/departments",
+        "summary": "Departments",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
         ]
       }
     ],
@@ -4242,10 +4341,25 @@
         "permissions": [
           "ipd.bed.view",
           "cssd.operate",
-          "infection.control.manage"
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
         ],
         "permissions_mode": "any",
         "access": null
+      },
+      {
+        "id": "duty_roster::GET /admin/departments",
+        "task": "Departments",
+        "call": "GET /admin/departments",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
       }
     ],
     "rules_to_explain": [
@@ -4407,6 +4521,16 @@
   },
   "workflows": [
     {
+      "slug": "clinic-quality-and-education",
+      "title": "QA rounds, patient feedback and health education",
+      "recipe": "get_workflow_recipe('clinic-quality-and-education')"
+    },
+    {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
+    {
       "slug": "cost-estimates-and-tariff",
       "title": "Cost estimates, the tariff and ward transfers (MSDS)",
       "recipe": "get_workflow_recipe('cost-estimates-and-tariff')"
@@ -4422,9 +4546,24 @@
       "recipe": "get_workflow_recipe('facility-and-it')"
     },
     {
+      "slug": "facility-compliance-equipment-drills",
+      "title": "Licences, equipment maintenance and mock drills (MSDS)",
+      "recipe": "get_workflow_recipe('facility-compliance-equipment-drills')"
+    },
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
       "slug": "hr-and-payroll",
       "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
       "recipe": "get_workflow_recipe('hr-and-payroll')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
     },
     {
       "slug": "infection-control",
@@ -4435,6 +4574,31 @@
       "slug": "inpatient-and-discharge",
       "title": "Admission, beds, nursing & discharge",
       "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "medical-record-review",
+      "title": "Medical record review (MSDS IMS-3)",
+      "recipe": "get_workflow_recipe('medical-record-review')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
+    },
+    {
+      "slug": "personnel-records",
+      "title": "Personnel records (MSDS)",
+      "recipe": "get_workflow_recipe('personnel-records')"
+    },
+    {
+      "slug": "phc-interview-prep",
+      "title": "PHC inspection interviews: daily practice, mock interviews, model answers and readiness",
+      "recipe": "get_workflow_recipe('phc-interview-prep')"
+    },
+    {
+      "slug": "quality-indicators-and-committees",
+      "title": "Clinical quality indicators and committees (MSDS)",
+      "recipe": "get_workflow_recipe('quality-indicators-and-committees')"
     }
   ],
   "scenarios": [],
@@ -4995,6 +5159,30 @@
           "request_id": "802131a929b14db0a0c8033474e8d271"
         }
       }
+    },
+    "GET /admin/departments": {
+      "request": {
+        "path": "/api/v1/admin/departments"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "department_id": 1,
+              "code": "CARD",
+              "name": "Cardiology & Vascular",
+              "is_clinical": true,
+              "is_active": true,
+              "row_version": 2
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:34:24.417658+00:00"
+          },
+          "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+        }
+      }
     }
   },
   "schemas": {
@@ -5197,7 +5385,8 @@
               "type": "null"
             }
           ],
-          "title": "Ward Id"
+          "title": "Ward Id",
+          "description": "The ward (GET /beds/matrix?include_beds=false)"
         },
         "department_id": {
           "anyOf": [
@@ -5208,7 +5397,8 @@
               "type": "null"
             }
           ],
-          "title": "Department Id"
+          "title": "Department Id",
+          "description": "The department (GET /admin/departments)"
         },
         "staff_category": {
           "anyOf": [
@@ -5280,6 +5470,44 @@
         "reason"
       ],
       "title": "CopySkippedOut"
+    },
+    "DepartmentOut": {
+      "properties": {
+        "department_id": {
+          "type": "integer",
+          "title": "Department Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "is_clinical": {
+          "type": "boolean",
+          "title": "Is Clinical"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "department_id",
+        "code",
+        "name",
+        "is_clinical",
+        "is_active",
+        "row_version"
+      ],
+      "title": "DepartmentOut"
     },
     "DutySwapOut": {
       "properties": {
@@ -5703,7 +5931,8 @@
               "type": "null"
             }
           ],
-          "title": "Ward Id"
+          "title": "Ward Id",
+          "description": "The ward (GET /beds/matrix?include_beds=false)"
         },
         "department_id": {
           "anyOf": [
@@ -5714,7 +5943,8 @@
               "type": "null"
             }
           ],
-          "title": "Department Id"
+          "title": "Department Id",
+          "description": "The department (GET /admin/departments)"
         },
         "zone_label": {
           "anyOf": [
@@ -5916,6 +6146,31 @@
         "request_id"
       ],
       "title": "Envelope[RosterWeekOut]"
+    },
+    "Envelope_list_DepartmentOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/DepartmentOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[DepartmentOut]]"
     },
     "Envelope_list_DutySwapOut__": {
       "properties": {
@@ -7013,11 +7268,151 @@
       "description": "One person's roster week."
     }
   },
-  "unknowns": [],
-  "omitted_sections": [
-    "decisions",
-    "examples",
-    "schemas"
-  ],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type."
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
 }

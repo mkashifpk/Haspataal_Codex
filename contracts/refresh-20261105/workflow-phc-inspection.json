@@ -1,0 +1,266 @@
+{
+  "slug": "phc-inspection",
+  "title": "PHC inspection: category, readiness, the inspection pack, the web portal (CPSA) documents and the inspector's login",
+  "summary": "The establishment's Punjab Healthcare Commission category (a clinic, or Category II C, II B, II A or I), suggested from the beds and recorded by an admin in the facility settings with the PHC number every printout carries; the readiness for an inspection indicator by indicator with the hospital's own assessment; the inspection pack of policies, registers and reports as PDFs, one per click or one combined PDF by the user's preference (never a ZIP); who may write in the medical record and the written IMS policy; the web portal's 20 Critical Patient Safety Areas with the PHC's templates as published and every document filled from the records (PDF, Excel for the CPSA 1 lists), the declaration pre-filled, the uploads recorded and the services declared; the PHC inspector's read-only guest login for the days of the inspection.",
+  "order": 99,
+  "workflow": "MSDS: all chapters; IMS 144-162 (Category II A 36-45, II B 26-31); the PHC web portal's CPSA guidelines (June 2022)",
+  "workspaces": [
+    "owner_dashboard",
+    "quality",
+    "inspection"
+  ],
+  "file": "phc-inspection.md",
+  "markdown": "# PHC inspection: category, readiness, the inspection pack, the web portal (CPSA) documents and the inspector's login\n\n| MSDS | What the surveyor checks | Haspataal |\n|---|---|---|\n| All chapters | The category's standards met, with evidence | The **indicator catalogue** of each framework (Clinic 47, II C 118, II B 122, II A 152, I 162) with its red/yellow grade, each with the inspection documents that evidence it; the **readiness** view |\n| IMS 145, II A 37, II B 27 | A written policy on who may write in the record; the authorization on a set format | The **IMS policy** and the list of **authorized personnel** with their registration and digital stamp, printed from the permissions the server enforces |\n| IMS 144, 148 (Category II annex) | Every record identified; a register of the records | The **patient's record register** in the format of the Category II manuals' annex |\n| IMS 150 | Procedures in the record: provider, procedure, findings, specimens, condition at the end | The **procedure note** (see [clinical notes](clinical-and-prescriptions.md)) |\n| IMS 156-162 | The record review and its report | The **surveyor's report as a PDF** (see [medical record review](medical-record-review.md)) |\n| The HCE web portal (CPSA 1-20) | The documents the hospital uploads to the Commission's portal: SOPs with attendance sheets, registers, notifications, licences, the declaration | The **CPSA documents screen**: the PHC's own templates as published, each document **filled from the records** in one click (PDF; the four lists of CPSA 1 also in the PHC's Excel), the **declaration** (Annexure A) on the PHC's form, answering \"Yes\" only from evidence and confirmed row by row by a named person, the record of uploads, the services declared |\n| The inspection days | The inspectors read the evidence on site | The **PHC inspector's read-only guest login** (role `phc_inspector`): the category, the indicators, the inspection pack and the CPSA documents; nothing of the hospital's own; every register read is logged |\n\nWho: **Hospital Admin / Owner** (`msds.view`, `msds.assess`, `establishment.manage`); **Quality Officer** (`msds.view`,\n`msds.assess`). Every inspection document also needs the permission of its own endpoint (the pack never shows a\ndocument its reader could not open anyway).\n\n## 1. The PHC category (Hospital Admin)\n\n1. `GET /msds/profile`: the recorded category (null until recorded: Clinic, IIC, IIB, IIA or I) with the PHC number,\n   the date it took effect and the licence in the compliance register, and `suggestion`: what the beds suggest by the\n   PHC's bands (I: more than 50, II A: 31-50 (the PHC manuals say 31-49; a 50-bed hospital is suggested II A), II B:\n   16-30, II C: up to 15; no beds suggest nothing, which a clinic is), ward by ward; emergency wards are listed but not\n   counted. `needs_confirmation` true: offer the facility settings, pre-filled with the suggestion.\n2. Recording or changing the category is an establishment change, previewed and applied together with the services it\n   permits (a clinic runs no indoor service): see [facility settings](facility-profile-and-services.md)\n   (`POST /establishment/changes/preview`, then `POST /establishment/changes`). The licence comes from the compliance\n   register (`GET /facility/compliance-documents?category=Hospital`, kind Licence or Registration, see [licences,\n   equipment and drills](facility-compliance-equipment-drills.md)). A category other than the suggestion needs the\n   profile's `reason` (`MSDS_CATEGORY_REASON_REQUIRED`): the licence decides, never the bed count. From then on every\n   printout carries \"PHC Reg./Licence No. PHC/LHR/0123, Category II B\" under the establishment's name (print payloads:\n   `fields.hospital.phc_number`).\n3. History: `GET /msds/category-confirmations` (each recorded category with its effective date). The worker (job\n   msds.alerts) reminds the admins monthly while nothing is recorded, and once when the beds counted later suggest\n   another band; it never changes the category itself.\n\n## 2. Readiness and the hospital's own assessment (Quality Officer)\n\n1. The indicators: `GET /msds/indicators?category=IIB&area=IMS` (category defaults to the confirmed one; without one:\n   `MSDS_CATEGORY_NOT_CONFIRMED`). Each has a short label in Haspataal's words (the PHC's wording is in its manual), the\n   `coverage` (OverDelivers, Delivers, Partly, NotYet, Outside), which is the vendor's self-assessment (`rating_basis`), what the software covers (`software`: complete, partial, none), whether the surveyor also checks something on site (`on_site_evidence`: needed, none) and the inspection `documents` that evidence it.\n2. The readiness: `GET /msds/readiness?date_from=&date_to=` (default: the last 90 days). Each indicator is Ready\n   (green), Attention (amber: due soon, partly covered), NotReady (red: overdue, expired, missing, with `reason`),\n   SelfAssess (grey: outside the software or not covered yet) or NotApplicable; an indicator that needs on-site\n   evidence is at best Attention until the hospital's own assessment says Compliant; so is one whose documents read no\n   record (`documents[].measured` false: \"Not measured\", a policy or a register printed as it is), because the surveyor\n   samples the records; an indicator the manual applies \"where provided\" is NotApplicable while that service is not run;\n   the counts by chapter; the checks of every document (`documents`). `ready_pct` is Haspataal's estimate, not the PHC's score. `score` sums the\n   establishment's own latest scores on the manuals' 0-10 scale against 10 per applicable indicator; an indicator\n   without a score is unscored, never zero. For the frameworks whose minimums were read from the manual (Clinic, II C,\n   II B and II A: a red indicator needs 10, a yellow one 8; `score.thresholds_known`), `red_below` and `yellow_below`\n   list the indicators short of them. Each indicator carries its `grade` (Red or Yellow, from the manual's scoring\n   matrices; Category I's red and yellow banners are also its `phc_type`). Every framework's indicators also carry the\n   `outcomes` their scoring names, the `sample` the surveyor takes and the `survey_page`: show the sample next to the\n   assessment, and offer only Compliant (10) or NotCompliant (0) when `outcomes` has no `PartiallyMet` (the server\n   refuses anything else with `VALIDATION_ERROR`, `details.allowed_scores`). `outcomes` is null only for Category I\n   indicator 63, whose manual prints no scoring: any score is accepted there.\n3. Record the hospital's own assessment, above all of what the software cannot check (the sign board, the space, the\n   staffing): `POST /msds/self-assessments`\n   ```json\n   { \"category\": \"IIB\", \"indicator\": 1, \"status\": \"Compliant\", \"score\": 9, \"evidence_document_id\": 57 }\n   ```\n   The score is optional, 0-10 (leave it out when not scored: no score is not zero). A note is required unless\n   Compliant (what is missing, or why NotApplicable; a service the establishment does not run never makes an indicator\n   NotApplicable by itself: a person decides). The assessment can lower an evidenced state, never raise it. Each\n   assessment stays with its framework: after a change of profile the earlier ones keep their own and the new\n   framework's indicators need assessing. History: `GET /msds/self-assessments?category=IIB&indicator=1`.\n4. Who may write in the medical record: `GET /msds/authorized-personnel` (from the permissions the server enforces; a\n   clinician without a council registration shows `registration` null: fix it in HR).\n\n## 3. The inspection pack (PDFs only)\n\n1. `GET /msds/inspection-pack?date_from=&date_to=`: the documents of the category in the order of its chapters, the\n   self-assessment first; each with `indicators`, `state` and `detail`, `allowed` and its `pdf_url`.\n2. Follow `download_mode`, the user's preference (`PUT /settings/me {\"pdf_download\": \"Separate\" | \"Combined\"}`):\n   * **Separate** (default): a *Download* button per document: `GET /msds/inspection-pack/documents/{key}/pdf`, one\n     click = one PDF.\n   * **Combined**: one button: `POST /msds/inspection-pack/exports` (the pack's `category`, `date_from`, `date_to`;\n     the answer's `combined_export_url`) starts a background build and answers `Queued`; show \"Preparing…\" and, on\n     `msds.pack_export.ready` (or `GET /msds/inspection-pack/exports/{export_id}`), the download button:\n     `GET /msds/inspection-pack/exports/{export_id}/pdf` (status `Failed`: show `error`). One PDF with a contents page\n     (page numbers, the indicators of each document), every document the user may open from a new page; kept for a day.\n   Never a ZIP.\n3. A document the user may not open (`allowed` false) shows greyed with `required_permissions`; its download answers\n   `FORBIDDEN`; the combined PDF leaves it out and says so. A document that cannot be printed yet answers\n   `MSDS_DOCUMENT_UNAVAILABLE` with `details.reason` (no record review closed yet); in the combined PDF its page says why.\n4. The documents (keys): `msds_self_assessment`, `ims_policy`, `authorized_personnel`, `patient_record_register`,\n   `record_review_report`, `coded_statistics`, `mortality_statistics`, `lab_policy`, `imaging_policy`,\n   `diagnostic_services`, `turnaround_evidence`, `critical_results_register`, `triage_algorithm`, `er_statistics`,\n   `mlc_register`, `theatre_policy`, `surgical_statistics`, `medication_policy`, `high_alert_list`,\n   `medication_statistics`, `storage_register`, `consent_policy`, `consent_statistics`, `tariff`, `pricing_policy`, `estimate_statistics`,\n   `complaints_procedure`, `complaints_register`, `infection_control_report`, `sterilization_procedure`,\n   `sterilization_log`, `quality_indicators_report`, `committee_meetings`, `sentinel_events_list`, `incident_register`,\n   `action_register`, `compliance_register`, `equipment_plan`, `drill_coverage`, `appraisal_system`,\n   `training_compliance`, `personnel_file_completeness`. The registers and reports print for the period; the policies\n   as of today. A document that names patients is logged like any read of a record.\n5. **The patient register of a long period** (FAC-022): `patient_record_register` prints the whole period asked (up to\n   366 days). A busy period prints in parts of at most 2,000 entries: `GET /msds/patient-register?date_from=&date_to=`\n   answers `entries`, `part_rows` and `parts` (each with `entries`, `first_at`, `last_at` and its `pdf_url`,\n   `GET /msds/patient-register/pdf?date_from=&date_to=&part=`). Part 1 is the pack's document; offer every part.\n6. **Selected records** for the surveyor's sample: pick up to 25 patients (`GET /patients/search`), then\n   `GET /msds/selected-records/pdf?patient_id=12&patient_id=40&date_from=&date_to=`: for each patient, the\n   identification, then within the period the notes (vitals, examination consent, ICD codes, signature) and their\n   corrections, emergency\n   visits, prescriptions with their directions, laboratory results, imaging reports, consents, external referrals,\n   health education, operations and procedures, admissions with the discharge summary, the nursing observations, notes\n   and care plans with their corrections and revisions, the medication administration record with its corrections,\n   home visits, preventive-programme enrolments and services, emergency triage, ward transfers, the detailed surgical\n   record (pre-operative note to recovery, with corrections) and the list of documents on file. After each patient's\n   clinical record come **copies of the retained documents** of the period (uploaded PDFs page by page, scans one per\n   page; a consent of the period brings its scan even if it was uploaded later). The optional patient photo is never\n   included. A merged duplicate identity prints under its own original MRN. Each patient printed is logged as a read of\n   their record. The PDF is built whole or not at all:\n   * `EXPORT_TOO_LARGE`: more than 3,000 table rows (`details`: the patient and the section), or more than 32 MiB of\n     stored files, 40 million scanned pixels, 500 PDF pages or 64 MiB of output: offer a shorter period or a smaller\n     sample;\n   * `MSDS_DOCUMENT_UNAVAILABLE` with `details.document_id` and `details.reason`: a stored file is missing, differs from\n     its recorded size or SHA-256, or is an unreadable or encrypted PDF. Show which document, and ask IT to restore it\n     from the backup (`hospital-IT-manuals/backup-and-recovery.md`); never offer a packet without it.\n\n   Both exports need `msds.view`: the PHC inspector's guest login does not get them.\n\n## 4. The PHC web portal: the Critical Patient Safety Areas (Quality Officer)\n\nThe Commission's HCE web portal asks every hospital to upload, for 20 Critical Patient Safety Areas (CPSA), the documents of\nits revised guidelines (June 2022): SOPs in the PHC's template with the staff training attendance sheet, registers, committee\nnotifications, licences and MOUs, the four staff and services lists \"only in MS Excel format\", and the signed declaration\n(Annexure A) that each is available, the staff trained, implemented and uploaded. Haspataal bundles the PHC's own files and\nfills each document from the records; the hospital reviews, adapts, signs and uploads. The head of the establishment signs\nthe declaration under the PHC Act's false-information clause, so Haspataal answers \"Yes\" only from evidence in the records\nand a named person confirms or corrects every answer before it is signed (the adversarial audit of 2026-10-18, F-4-01).\n\n1. `GET /phc/cpsa?date_from=&date_to=` (default: the last 90 days, at most 366): the 20 `areas`, each with its documents:\n   `key`, the PHC's `number` and `title`, `kind` (Format, Policy, Register, Notification, Upload, Guideline), the\n   `declaration` rows it answers, `training_code` (the requirement whose sessions print as the attendance sheet), `phi`,\n   and the links `template_url` (the PHC's Word, Excel or PDF file as published; null when the PHC gives none),\n   `pdf_url` (filled from the records) and `xlsx_url` (the four lists of CPSA 1). Each document's `status` is the records'\n   answer with a reason: `available` (evidence only: a policy or SOP is Haspataal's draft until the hospital's signed\n   version is uploaded or a person confirms it; a notification needs its committee or role holder with members and terms\n   of reference, and approved minutes where the PHC's row asks for them; a register needs entries in the period; the PHC's\n   standee and charter need a recorded display; a licence or MOU needs a valid entry in the compliance register),\n   `trained` (a session against its requirement in the last 12 months), `implemented` (activity in the period that shows\n   the rule at work; nothing recorded is false), `uploaded` (the latest recorded upload). `applies` false: the document\n   belongs to a service the establishment does not run, and the first three answers are null (not applicable). Each\n   document's `rows` are its declaration rows: for Available, Staff trained and Implemented the `value` the declaration\n   prints, the `records` answer, the `reason`, `fixed` (the PHC pre-prints NA) and `confirmation` (who answered, when,\n   why and where the evidence is; null until a person confirms it). `counts` are the progress to a signed declaration,\n   `declaration_rows_confirmed` of `declaration_rows` included.\n2. Download: `GET /phc/cpsa/guidelines` (the PHC's \"Guidelines for CPSAs\"); `GET /phc/cpsa/documents/{key}/template`\n   (the PHC's file as it is); `GET /phc/cpsa/documents/{key}/pdf` (the filled document: the PHC's header block with the\n   hospital and its PHC number, the content, the prepared / reviewed / approved lines, the attendance sheets);\n   `GET /phc/cpsa/documents/{key}/xlsx` (`services_list`, `consultants_list`, `doctors_24_7`, `nurses_24_7` written cell\n   by cell into the PHC's own workbook). Follow `download_mode` as for the inspection pack: Separate = a button per\n   document; Combined = one button for `combined_pdf_url` (`GET /phc/cpsa/pdf`, every filled document with a contents\n   page). Never a ZIP. A document that cannot be filled answers `CPSA_DOCUMENT_UNAVAILABLE` with `details.reason` (no record\n   review closed yet; nothing to fill: download the PHC's file). A register naming patients, and the staff lists with\n   CNICs, are logged like any read of a record.\n3. Confirm or correct each answer (`msds.cpsa.manage`), one column of one row at a time: `POST /phc/cpsa/declaration/answers`\n   ```json\n   { \"document_key\": \"fire_drill_report\", \"row_no\": 1, \"question\": \"Available\", \"answer\": \"Yes\",\n     \"reason\": \"The drill of 3 October was signed by the MS\", \"evidence\": \"Drill report D-0004, MS office file 7\" }\n   ```\n   A \"Yes\" names where its evidence is kept (`evidence`, else `VALIDATION_ERROR`); a column the PHC pre-prints NA, or a\n   row the document does not have, answers `VALIDATION_ERROR`; an unknown document `REFERENCE_NOT_FOUND`. `answer` null\n   withdraws your answer (the records' answer counts again). The answer is the row as it now reads. History, newest\n   first: `GET /phc/cpsa/declaration/answers?document_key=fire_drill_report`.\n4. The declaration: `GET /phc/cpsa/documents/declaration/pdf` (also `declaration_pdf_url`): Annexure A on the PHC's own\n   form (read from the Commission's template): the header with the beds, the rows in the PHC's order numbered by CPSA,\n   the NA cells the PHC prints, the Commission's declaration paragraph and both signature blocks (the MS / CEO /\n   Administrator, and the owners when they are not the applicant). An answer no person has confirmed prints with * and\n   the page says how many remain; an annex for the establishment's own file says where each answer comes from. Warn\n   before the download while `declaration_rows_confirmed` < `declaration_rows`.\n5. Record an upload (`msds.cpsa.manage`): `POST /phc/cpsa/uploads`\n   ```json\n   { \"document_key\": \"er_sops\", \"uploaded_on\": \"2026-10-04\", \"portal_reference\": \"ER-SOPs-v3.pdf\" }\n   ```\n   History: `GET /phc/cpsa/uploads?document_key=er_sops`. The latest upload of each document counts.\n6. The services the hospital provides (CPSA 1.2, Annexure B): `GET /phc/services` lists every service of the PHC's list by\n   group (Medical and Allied, Surgical and Allied, Laboratory, Imaging), `declared` or not, with the hospital's own\n   \"Others\" lines; `PUT /phc/services` replaces the declaration (history kept):\n   ```json\n   { \"items\": [ { \"service_name\": \"General Medicine\", \"remarks\": \"Round the clock\" },\n                { \"service_name\": \"Travel vaccination clinic\", \"is_listed\": false, \"group_name\": \"MedicalAndAllied\" } ] }\n   ```\n   A listed name must be spelled as the PHC's list spells it (`VALIDATION_ERROR` otherwise). The filled Excel and PDF of\n   the list follow the declaration at once.\n7. What feeds the documents, so the quality officer fixes the red reasons at the source: training sessions\n   (`POST /personnel/training-sessions` with the document's `training_code`: ER_SOPS, TRANSFUSION_SOPS, OT_SOPS,\n   SURGERY_SOPS, ANAESTHESIA_SOPS, CQI_PLAN, RECORD_POLICY, COMPLAINTS_POLICY, LAB_SOPS, IMAGING_SOPS, IPC_BASICS,\n   FIRE_SAFETY, WASTE_HANDLING, MEDICATION_SAFETY), the compliance register (licences, MOUs, plans and certificates with\n   their scans), the committees' members and minutes (QIC, IPCC, HWMC, ICT, OTMC, PTC, MRC), the Infection Control Nurse and\n   Quality Officer roles and their job descriptions, mock drills, the medicine storage log\n   ([medication safety](medication-safety.md) section 12), the equipment register (an item's theatre: `ot_id`), the\n   services run (Facility settings), the settings `hospital_head_employee_id`, `hospital_district`, `hospital_tehsil`,\n   `hospital_gps`.\n\n## 5. The PHC inspector's read-only login (Hospital Admin, Owner)\n\nThe inspectors read the evidence on site on a guest login that exists only for the days of the inspection and sees only\nwhat the Commission asks for.\n\n1. Create it (`msds.inspector.manage`): `POST /msds/inspector-accounts`\n   ```json\n   { \"inspector_name\": \"Dr Saima Rauf\", \"designation\": \"Expert Surveyor\", \"reference\": \"PHC/INSP/2026/0417\",\n     \"valid_until\": \"2026-10-16\" }\n   ```\n   `valid_from` defaults to today; the access lasts to the end of `valid_until`, at most the setting\n   `inspector_access_max_days` (30; `INSPECTOR_ACCESS_TOO_LONG`). The answer carries `username` (`phc.<name>`) and\n   `temporary_password` **once**: show it in a copy box and hand it over in person; it is never stored in clear and never\n   shown again. The account is a guest (no employee) with the one role `phc_inspector` and the one permission `msds.inspect`.\n2. What the inspector can do: log in and land in the `inspection` workspace; `GET /msds/profile`, `GET /msds/indicators`,\n   `GET /msds/authorized-personnel`, the inspection pack (`GET /msds/inspection-pack` and its PDFs: the hospital's internal\n   preparation, the self-assessment and the training and personnel-file gap lists, is left out for them), the CPSA documents\n   (`GET /phc/cpsa`, the templates, the filled PDFs and Excel, `GET /phc/services`). Everything else answers `FORBIDDEN`:\n   patients, money, staff files, the readiness and self-assessments, the uploads' record, every write except building the\n   combined inspection pack (`POST /msds/inspection-pack/exports`). Every download of a\n   register that names patients is logged.\n3. Watch and end: `GET /msds/inspector-accounts` (the current logins; `include_closed` for the history: state Active,\n   NotYetValid, Expired or Revoked, the last login, the documents read); `GET /msds/inspector-accounts/{id}/activity`\n   (every login attempt and every register downloaded, newest first); `POST /msds/inspector-accounts/{id}/revoke`\n   `{\"reason\": ...}` ends the access at once (the sessions are cut; `INSPECTOR_ACCOUNT_CLOSED` when already closed). The\n   day after `valid_until` the login answers `ACCOUNT_EXPIRED` and the worker (job msds.alerts) deactivates the account.\n\n## 6. The staff's interviews\n\nThe surveyors also question staff: 72 compliance requirements say Interview. The staff rehearse those questions in English or Urdu, supervisors run mock interviews and the quality officer reads the readiness: see [PHC inspection interviews](phc-interview-prep.md). None of it is shown to the PHC's inspector.\n\n## Settings\n\n| Key | Default | Meaning |\n|---|---|---|\n| `inspector_access_max_days` | 30 | the longest access an inspector's guest login may be given |\n| `hospital_head_employee_id` | 0 | the employee who heads the hospital: the PHC asks for their appointment letter and highest degree (CPSA 1.1) |\n| `hospital_district`, `hospital_tehsil`, `hospital_gps` | empty | the geographical location the web portal asks for (CPSA 19) |\n\nEvery framework's indicators also return `scoring_criteria` (the verified scoring paragraphs; null for Category I 63)\nand `percent_thresholds`. Show the paragraphs with the sample and PDF page: the meaning of 20% or 80% depends on that\nindicator. Both the API and PostgreSQL refuse partial scores where the manual has only fully/not met outcomes, and\nrefuse a score contradicting those outcomes (Compliant 10, NotCompliant 0). A justified NotApplicable has no numeric\nscore. Leaving the score empty never means zero.",
+  "steps": [
+    {
+      "heading": "1. The PHC category (Hospital Admin)",
+      "anchor": "1-the-phc-category-hospital-admin",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/profile",
+          "summary": "The PHC category: as confirmed, and what the beds suggest"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/establishment/changes/preview",
+          "summary": "Preview a change of profile or services (nothing is saved)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/establishment/changes",
+          "summary": "Apply a change of profile or services"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/compliance-documents",
+          "summary": "The compliance register"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/category-confirmations",
+          "summary": "Every recorded PHC category, newest first"
+        }
+      ]
+    },
+    {
+      "heading": "2. Readiness and the hospital's own assessment (Quality Officer)",
+      "anchor": "2-readiness-and-the-hospital-s-own-assessment-quality-officer",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/indicators",
+          "summary": "The MSDS indicators of a category"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/readiness",
+          "summary": "Readiness for an inspection"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/msds/self-assessments",
+          "summary": "Record the hospital's own assessment of an indicator"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/self-assessments",
+          "summary": "The hospital's assessments (history, newest first)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/authorized-personnel",
+          "summary": "Who may write in the medical record (MSDS IMS 145)"
+        }
+      ]
+    },
+    {
+      "heading": "3. The inspection pack (PDFs only)",
+      "anchor": "3-the-inspection-pack-pdfs-only",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/inspection-pack",
+          "summary": "The inspection documents of the category, with their readiness and download links"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/settings/me",
+          "summary": "Update my preferences (only the fields you send)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/inspection-pack/documents/{key}/pdf",
+          "summary": "One inspection document (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/msds/inspection-pack/exports",
+          "summary": "Build the whole inspection pack as one PDF, in the background"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/inspection-pack/exports/{export_id}",
+          "summary": "A combined inspection pack being built: Queued, Ready or Failed"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/inspection-pack/exports/{export_id}/pdf",
+          "summary": "The combined inspection pack (PDF), once Ready"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/patient-register",
+          "summary": "The patient's record register of a period: its size and its parts"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/patient-register/pdf",
+          "summary": "One part of the patient's record register (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/selected-records/pdf",
+          "summary": "The records of selected patients for a period (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "4. The PHC web portal: the Critical Patient Safety Areas (Quality Officer)",
+      "anchor": "4-the-phc-web-portal-the-critical-patient-safety-areas-quality-officer",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/cpsa",
+          "summary": "The PHC web portal's 20 Critical Patient Safety Areas and every document they require"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/cpsa/guidelines",
+          "summary": "The PHC's 'Guidelines for CPSAs' (Word), as published"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/cpsa/documents/{key}/template",
+          "summary": "The PHC's own template or guideline for a document, as published"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/cpsa/documents/{key}/pdf",
+          "summary": "A CPSA document filled from the records (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/cpsa/documents/{key}/xlsx",
+          "summary": "A CPSA 1 list filled into the PHC's Excel format"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/cpsa/pdf",
+          "summary": "Every filled CPSA document as one PDF"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/phc/cpsa/declaration/answers",
+          "summary": "Confirm or correct one answer of the PHC declaration (Annexure A), with the reason"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/cpsa/declaration/answers",
+          "summary": "The answers people gave on the declaration, newest first"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/phc/cpsa/uploads",
+          "summary": "Record that a document was uploaded on the HCE web portal"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/cpsa/uploads",
+          "summary": "The record of uploads, newest first"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/services",
+          "summary": "The PHC's services list with what the hospital declares"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/phc/services",
+          "summary": "Declare the services the hospital provides"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/training-sessions",
+          "summary": "Record a training session and who attended"
+        }
+      ]
+    },
+    {
+      "heading": "5. The PHC inspector's read-only login (Hospital Admin, Owner)",
+      "anchor": "5-the-phc-inspector-s-read-only-login-hospital-admin-owner",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/msds/inspector-accounts",
+          "summary": "Give a PHC inspector a read-only login for the days of the inspection (password shown ONCE)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/profile",
+          "summary": "The PHC category: as confirmed, and what the beds suggest"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/indicators",
+          "summary": "The MSDS indicators of a category"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/authorized-personnel",
+          "summary": "Who may write in the medical record (MSDS IMS 145)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/inspection-pack",
+          "summary": "The inspection documents of the category, with their readiness and download links"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/cpsa",
+          "summary": "The PHC web portal's 20 Critical Patient Safety Areas and every document they require"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/phc/services",
+          "summary": "The PHC's services list with what the hospital declares"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/msds/inspection-pack/exports",
+          "summary": "Build the whole inspection pack as one PDF, in the background"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/inspector-accounts",
+          "summary": "The PHC inspectors' logins (the current ones; include_closed for the history)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/inspector-accounts/{inspector_account_id}/activity",
+          "summary": "What an inspector did: logins and the documents they read"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/msds/inspector-accounts/{inspector_account_id}/revoke",
+          "summary": "End an inspector's access now"
+        }
+      ]
+    }
+  ]
+}

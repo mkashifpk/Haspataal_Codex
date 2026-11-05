@@ -1,0 +1,1091 @@
+{
+  "screen": "cssd_setup",
+  "title": "Sterile supply: sets, sterilizers, recalls",
+  "cases": [
+    {
+      "id": "case:GET /cssd/set-types",
+      "call": "GET /api/v1/cssd/set-types",
+      "summary": "The sets and packs the CSSD sterilizes",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "cssd_technician",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ot_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cssd/set-types"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "set_type_id": 3,
+                  "code": "LSCS",
+                  "name": "Caesarean section set",
+                  "kind": "InstrumentSet",
+                  "method": "Steam",
+                  "shelf_life_days": 30,
+                  "contains_implant": false,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "set_type_id": 5,
+                  "code": "DRESSING",
+                  "name": "Dressing pack",
+                  "kind": "Pack",
+                  "method": "Steam",
+                  "shelf_life_days": 30,
+                  "contains_implant": false,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "set_type_id": 1,
+                  "code": "GEN-MAJOR",
+                  "name": "General surgery major set",
+                  "kind": "InstrumentSet",
+                  "method": "Steam",
+                  "shelf_life_days": 30,
+                  "contains_implant": false,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:20:18.021883+00:00"
+              },
+              "request_id": "be6078c9fa624f58811e6f9b926284fc"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /cssd/set-types",
+      "call": "POST /api/v1/cssd/set-types",
+      "summary": "Add a set or pack",
+      "happy_path": {
+        "as_one_of": [
+          "ipc_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cssd/set-types",
+            "body": {
+              "code": "ENT-MAJOR",
+              "name": "ENT major set",
+              "kind": "InstrumentSet",
+              "shelf_life_days": 60
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "set_type_id": 9,
+                "code": "ENT-MAJOR",
+                "name": "ENT major set",
+                "kind": "InstrumentSet",
+                "method": "Steam",
+                "shelf_life_days": 60,
+                "contains_implant": false,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:20:18.436749+00:00"
+              },
+              "request_id": "7391226dc6704587bc19391fcf4fcf3d"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "CSSD_SET_EXISTS",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:PATCH /cssd/set-types/{set_type_id}",
+      "call": "PATCH /api/v1/cssd/set-types/{set_type_id}",
+      "summary": "Change or retire a set",
+      "happy_path": {
+        "as_one_of": [
+          "ipc_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cssd/set-types/9",
+            "body": {
+              "is_active": false,
+              "expected_version": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "set_type_id": 9,
+                "code": "ENT-MAJOR",
+                "name": "ENT major set",
+                "kind": "InstrumentSet",
+                "method": "Steam",
+                "shelf_life_days": 60,
+                "contains_implant": false,
+                "is_active": false,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:20:18.444696+00:00"
+              },
+              "request_id": "8d08858b12394dc29f75ebb0b71c6ec1"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    },
+    {
+      "id": "case:GET /cssd/sterilizers",
+      "call": "GET /api/v1/cssd/sterilizers",
+      "summary": "The sterilizers",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "cssd_technician",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ot_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cssd/sterilizers"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "sterilizer_id": 1,
+                  "name": "Autoclave 1",
+                  "method": "Steam",
+                  "asset_id": null,
+                  "asset_tag": null,
+                  "location": "CSSD clean side",
+                  "is_active": true,
+                  "row_version": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:20:18.459125+00:00"
+              },
+              "request_id": "597e451720364247a509adec340bd0d2"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /cssd/sterilizers",
+      "call": "POST /api/v1/cssd/sterilizers",
+      "summary": "Add a sterilizer",
+      "happy_path": {
+        "as_one_of": [
+          "ipc_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cssd/sterilizers",
+            "body": {
+              "name": "Autoclave 1",
+              "method": "Steam"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "sterilizer_id": 1,
+                "name": "Autoclave 1",
+                "method": "Steam",
+                "asset_id": null,
+                "asset_tag": null,
+                "location": null,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:20:18.011009+00:00"
+              },
+              "request_id": "a6037a4a13524cce8f92a9ab8b9f2125"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "STERILIZER_EXISTS",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:PATCH /cssd/sterilizers/{sterilizer_id}",
+      "call": "PATCH /api/v1/cssd/sterilizers/{sterilizer_id}",
+      "summary": "Change or retire a sterilizer",
+      "happy_path": {
+        "as_one_of": [
+          "ipc_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cssd/sterilizers/1",
+            "body": {
+              "location": "CSSD clean side"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "sterilizer_id": 1,
+                "name": "Autoclave 1",
+                "method": "Steam",
+                "asset_id": null,
+                "asset_tag": null,
+                "location": "CSSD clean side",
+                "is_active": true,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:20:18.453182+00:00"
+              },
+              "request_id": "85015587fadf4f788eec746250c969d0"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    },
+    {
+      "id": "case:GET /cssd/cycles",
+      "call": "GET /api/v1/cssd/cycles",
+      "summary": "The sterilization cycles",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "cssd_technician",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ot_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cssd/cycles",
+            "query": {
+              "sterilizer_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "cycle_id": 7,
+                  "cycle_number": "STC-2026-00007",
+                  "sterilizer_id": 1,
+                  "sterilizer_name": "Autoclave 1",
+                  "method": "Steam",
+                  "cycle_type": "BiologicalTest",
+                  "started_at": "2026-10-01T07:20:18.353237+00:00",
+                  "ended_at": "2026-10-01T07:20:18.363103+00:00",
+                  "operator_user_id": 12,
+                  "operator_name": "CSSD Tech Bilal",
+                  "temperature_c": null,
+                  "pressure_kpa": null,
+                  "exposure_minutes": null,
+                  "mechanical_pass": true,
+                  "chemical_result": null,
+                  "biological_result": "Fail",
+                  "status": "Failed",
+                  "result_by_name": "CSSD Tech Bilal",
+                  "result_at": "2026-10-01T07:20:18.363103+00:00",
+                  "failure_note": "The test vial changed colour after 24 h",
+                  "recall_reason": null,
+                  "recalled_at": null,
+                  "recalled_by_name": null,
+                  "row_version": 2,
+                  "packs": 0
+                },
+                {
+                  "cycle_id": 6,
+                  "cycle_number": "STC-2026-00006",
+                  "sterilizer_id": 1,
+                  "sterilizer_name": "Autoclave 1",
+                  "method": "Steam",
+                  "cycle_type": "Load",
+                  "started_at": "2026-10-01T07:20:18.334767+00:00",
+                  "ended_at": "2026-10-01T07:20:18.345270+00:00",
+                  "operator_user_id": 12,
+                  "operator_name": "CSSD Tech Bilal",
+                  "temperature_c": 134,
+                  "pressure_kpa": 210,
+                  "exposure_minutes": 4,
+                  "mechanical_pass": true,
+                  "chemical_result": "Pass",
+                  "biological_result": "NotUsed",
+                  "status": "Released",
+                  "result_by_name": "CSSD Tech Bilal",
+                  "result_at": "2026-10-01T07:20:18.345270+00:00",
+                  "failure_note": null,
+                  "recall_reason": null,
+                  "recalled_at": null,
+                  "recalled_by_name": null,
+                  "row_version": 2,
+                  "packs": 1
+                },
+                {
+                  "cycle_id": 5,
+                  "cycle_number": "STC-2026-00005",
+                  "sterilizer_id": 1,
+                  "sterilizer_name": "Autoclave 1",
+                  "method": "Steam",
+                  "cycle_type": "Load",
+                  "started_at": "2026-10-01T07:20:18.183680+00:00",
+                  "ended_at": "2026-10-01T07:20:18.196504+00:00",
+                  "operator_user_id": 12,
+                  "operator_name": "CSSD Tech Bilal",
+                  "temperature_c": 134,
+                  "pressure_kpa": 210,
+                  "exposure_minutes": 4,
+                  "mechanical_pass": true,
+                  "chemical_result": "Fail",
+                  "biological_result": "NotUsed",
+                  "status": "Failed",
+                  "result_by_name": "CSSD Tech Bilal",
+                  "result_at": "2026-10-01T07:20:18.196504+00:00",
+                  "failure_note": "Strips did not change colour: chamber not reaching temperature; engineer called",
+                  "recall_reason": null,
+                  "recalled_at": null,
+                  "recalled_by_name": null,
+                  "row_version": 2,
+                  "packs": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:20:18.389733+00:00"
+              },
+              "request_id": "7f69732913d64520b506740562a658c9"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /cssd/cycles/{cycle_id}",
+      "call": "GET /api/v1/cssd/cycles/{cycle_id}",
+      "summary": "One cycle",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "cssd_technician",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ot_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cssd/cycles/3"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "cycle_id": 3,
+                "cycle_number": "STC-2026-00003",
+                "sterilizer_id": 1,
+                "sterilizer_name": "Autoclave 1",
+                "method": "Steam",
+                "cycle_type": "Load",
+                "started_at": "2026-10-01T07:20:18.121537+00:00",
+                "ended_at": "2026-10-01T07:20:18.133693+00:00",
+                "operator_user_id": 12,
+                "operator_name": "CSSD Tech Bilal",
+                "temperature_c": 134,
+                "pressure_kpa": 210,
+                "exposure_minutes": 4,
+                "mechanical_pass": true,
+                "chemical_result": "Pass",
+                "biological_result": "NotUsed",
+                "status": "Recalled",
+                "result_by_name": "CSSD Tech Bilal",
+                "result_at": "2026-10-01T07:20:18.133693+00:00",
+                "failure_note": null,
+                "recall_reason": "The steam supply failed on that day (engineer's report)",
+                "recalled_at": "2026-10-01T07:20:18.375410+00:00",
+                "recalled_by_name": "IPC Nurse Farah",
+                "row_version": 3,
+                "packs": 3,
+                "pack_list": [
+                  {
+                    "pack_id": 4,
+                    "pack_code": "SP-2026-000004",
+                    "set_type_id": 1,
+                    "set_code": "GEN-MAJOR",
+                    "set_name": "General surgery major set",
+                    "cycle_id": 3,
+                    "cycle_number": "STC-2026-00003",
+                    "cycle_status": "Recalled",
+                    "sterilized_on": "2026-10-01",
+                    "expires_on": "2026-10-31",
+                    "status": "Used",
+                    "issued_at": "2026-10-01T07:20:18.207707+00:00",
+                    "issued_by_name": "CSSD Tech Bilal",
+                    "issued_to_ward_id": null,
+                    "issued_to_ward_name": null,
+                    "issued_to_ot_id": 1,
+                    "issued_to_ot_name": "Main OT 1",
+                    "used_at": "2026-10-01T07:20:18.262730+00:00",
+                    "used_by_name": "ucac391ff96",
+                    "patient_id": 1,
+                    "mrn": "MRN-2026-000001",
+                    "patient_name": "Ali Khan",
+                    "booking_id": 1,
+                    "booking_number": "OT-2026-00001",
+                    "admission_id": null,
+                    "admission_number": null,
+                    "row_version": 4,
+                    "expiring_soon": false
+                  },
+                  {
+                    "pack_id": 5,
+                    "pack_code": "SP-2026-000005",
+                    "set_type_id": 1,
+                    "set_code": "GEN-MAJOR",
+                    "set_name": "General surgery major set",
+                    "cycle_id": 3,
+                    "cycle_number": "STC-2026-00003",
+                    "cycle_status": "Recalled",
+                    "sterilized_on": "2026-10-01",
+                    "expires_on": "2026-10-31",
+                    "status": "Recalled",
+                    "issued_at": "2026-10-01T07:20:18.207707+00:00",
+                    "issued_by_name": "CSSD Tech Bilal",
+                    "issued_to_ward_id": null,
+                    "issued_to_ward_name": null,
+                    "issued_to_ot_id": 1,
+                    "issued_to_ot_name": "Main OT 1",
+                    "used_at": null,
+                    "used_by_name": null,
+                    "patient_id": null,
+                    "mrn": null,
+                    "patient_name": null,
+                    "booking_id": null,
+                    "booking_number": null,
+                    "admission_id": null,
+                    "admission_number": null,
+                    "row_version": 4,
+                    "expiring_soon": false
+                  },
+                  {
+                    "pack_id": 6,
+                    "pack_code": "SP-2026-000006",
+                    "set_type_id": 5,
+                    "set_code": "DRESSING",
+                    "set_name": "Dressing pack",
+                    "cycle_id": 3,
+                    "cycle_number": "STC-2026-00003",
+                    "cycle_status": "Recalled",
+                    "sterilized_on": "2026-08-31",
+                    "expires_on": "2026-09-30",
+                    "status": "Expired",
+                    "issued_at": "2026-10-01T07:20:18.207707+00:00",
+                    "issued_by_name": "CSSD Tech Bilal",
+                    "issued_to_ward_id": null,
+                    "issued_to_ward_name": null,
+                    "issued_to_ot_id": 1,
+                    "issued_to_ot_name": "Main OT 1",
+                    "used_at": null,
+                    "used_by_name": null,
+                    "patient_id": null,
+                    "mrn": null,
+                    "patient_name": null,
+                    "booking_id": null,
+                    "booking_number": null,
+                    "admission_id": null,
+                    "admission_number": null,
+                    "row_version": 5,
+                    "expiring_soon": false
+                  }
+                ],
+                "patients_exposed": [
+                  "MRN-2026-000001"
+                ],
+                "recall_candidates": []
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:20:18.397892+00:00"
+              },
+              "request_id": "debd5e703f49442ca5d2b63a71c318c1"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /cssd/cycles/{cycle_id}/recall",
+      "call": "POST /api/v1/cssd/cycles/{cycle_id}/recall",
+      "summary": "Recall a released load (a breakdown was found)",
+      "happy_path": {
+        "as_one_of": [
+          "ipc_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cssd/cycles/3/recall",
+            "body": {
+              "reason": "The steam supply failed on that day (engineer's report)"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "cycle_id": 3,
+                "cycle_number": "STC-2026-00003",
+                "sterilizer_id": 1,
+                "sterilizer_name": "Autoclave 1",
+                "method": "Steam",
+                "cycle_type": "Load",
+                "started_at": "2026-10-01T07:20:18.121537+00:00",
+                "ended_at": "2026-10-01T07:20:18.133693+00:00",
+                "operator_user_id": 12,
+                "operator_name": "CSSD Tech Bilal",
+                "temperature_c": 134,
+                "pressure_kpa": 210,
+                "exposure_minutes": 4,
+                "mechanical_pass": true,
+                "chemical_result": "Pass",
+                "biological_result": "NotUsed",
+                "status": "Recalled",
+                "result_by_name": "CSSD Tech Bilal",
+                "result_at": "2026-10-01T07:20:18.133693+00:00",
+                "failure_note": null,
+                "recall_reason": "The steam supply failed on that day (engineer's report)",
+                "recalled_at": "2026-10-01T07:20:18.375410+00:00",
+                "recalled_by_name": "IPC Nurse Farah",
+                "row_version": 3,
+                "packs": 3,
+                "pack_list": [
+                  {
+                    "pack_id": 4,
+                    "pack_code": "SP-2026-000004",
+                    "set_type_id": 1,
+                    "set_code": "GEN-MAJOR",
+                    "set_name": "General surgery major set",
+                    "cycle_id": 3,
+                    "cycle_number": "STC-2026-00003",
+                    "cycle_status": "Recalled",
+                    "sterilized_on": "2026-10-01",
+                    "expires_on": "2026-10-31",
+                    "status": "Used",
+                    "issued_at": "2026-10-01T07:20:18.207707+00:00",
+                    "issued_by_name": "CSSD Tech Bilal",
+                    "issued_to_ward_id": null,
+                    "issued_to_ward_name": null,
+                    "issued_to_ot_id": 1,
+                    "issued_to_ot_name": "Main OT 1",
+                    "used_at": "2026-10-01T07:20:18.262730+00:00",
+                    "used_by_name": "ucac391ff96",
+                    "patient_id": 1,
+                    "mrn": "MRN-2026-000001",
+                    "patient_name": "Ali Khan",
+                    "booking_id": 1,
+                    "booking_number": "OT-2026-00001",
+                    "admission_id": null,
+                    "admission_number": null,
+                    "row_version": 4,
+                    "expiring_soon": false
+                  },
+                  {
+                    "pack_id": 5,
+                    "pack_code": "SP-2026-000005",
+                    "set_type_id": 1,
+                    "set_code": "GEN-MAJOR",
+                    "set_name": "General surgery major set",
+                    "cycle_id": 3,
+                    "cycle_number": "STC-2026-00003",
+                    "cycle_status": "Recalled",
+                    "sterilized_on": "2026-10-01",
+                    "expires_on": "2026-10-31",
+                    "status": "Recalled",
+                    "issued_at": "2026-10-01T07:20:18.207707+00:00",
+                    "issued_by_name": "CSSD Tech Bilal",
+                    "issued_to_ward_id": null,
+                    "issued_to_ward_name": null,
+                    "issued_to_ot_id": 1,
+                    "issued_to_ot_name": "Main OT 1",
+                    "used_at": null,
+                    "used_by_name": null,
+                    "patient_id": null,
+                    "mrn": null,
+                    "patient_name": null,
+                    "booking_id": null,
+                    "booking_number": null,
+                    "admission_id": null,
+                    "admission_number": null,
+                    "row_version": 4,
+                    "expiring_soon": false
+                  },
+                  {
+                    "pack_id": 6,
+                    "pack_code": "SP-2026-000006",
+                    "set_type_id": 5,
+                    "set_code": "DRESSING",
+                    "set_name": "Dressing pack",
+                    "cycle_id": 3,
+                    "cycle_number": "STC-2026-00003",
+                    "cycle_status": "Recalled",
+                    "sterilized_on": "2026-08-31",
+                    "expires_on": "2026-09-30",
+                    "status": "Expired",
+                    "issued_at": "2026-10-01T07:20:18.207707+00:00",
+                    "issued_by_name": "CSSD Tech Bilal",
+                    "issued_to_ward_id": null,
+                    "issued_to_ward_name": null,
+                    "issued_to_ot_id": 1,
+                    "issued_to_ot_name": "Main OT 1",
+                    "used_at": null,
+                    "used_by_name": null,
+                    "patient_id": null,
+                    "mrn": null,
+                    "patient_name": null,
+                    "booking_id": null,
+                    "booking_number": null,
+                    "admission_id": null,
+                    "admission_number": null,
+                    "row_version": 5,
+                    "expiring_soon": false
+                  }
+                ],
+                "patients_exposed": [
+                  "MRN-2026-000001"
+                ],
+                "recall_candidates": []
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:20:18.380821+00:00"
+              },
+              "request_id": "c5a6885c937d42ba9c92f6c1b9b9da04"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ],
+          "events_emitted": [
+            "cssd.cycle.updated",
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "CSSD_CYCLE_STATE_INVALID",
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /cssd/procedure/pdf",
+      "call": "GET /api/v1/cssd/procedure/pdf",
+      "summary": "The sterilization, validation and recall procedure (PDF)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "cssd_technician",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ot_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cssd/procedure/pdf",
+            "query": {
+              "date_from": "2026-10-01",
+              "date_to": "2026-10-01"
+            }
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 4963
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /cssd/log/pdf",
+      "call": "GET /api/v1/cssd/log/pdf",
+      "summary": "The sterilization log for a period (PDF)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "cssd_technician",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ot_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cssd/log/pdf",
+            "query": {
+              "date_from": "2026-10-01",
+              "date_to": "2026-10-01"
+            }
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 3244
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /ops/assets",
+      "call": "GET /api/v1/ops/assets",
+      "summary": "Asset monitor",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_nurse",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/ops/assets"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "asset_id": 2,
+                  "asset_tag": "GEN-01",
+                  "name": "Generator",
+                  "category": "Generator",
+                  "serial_no": null,
+                  "location": null,
+                  "department_id": null,
+                  "ward_id": null,
+                  "status": "Active",
+                  "purchase_date": null,
+                  "purchase_cost": null,
+                  "notes": null,
+                  "is_medical": false,
+                  "row_version": 1,
+                  "department_name": null,
+                  "ward_name": null,
+                  "open_work_orders": 0
+                },
+                {
+                  "asset_id": 1,
+                  "asset_tag": "VENT-01",
+                  "name": "ICU ventilator 1",
+                  "category": "Ventilator",
+                  "serial_no": null,
+                  "location": null,
+                  "department_id": null,
+                  "ward_id": null,
+                  "status": "UnderRepair",
+                  "purchase_date": null,
+                  "purchase_cost": null,
+                  "notes": null,
+                  "is_medical": false,
+                  "row_version": 2,
+                  "department_name": null,
+                  "ward_name": null,
+                  "open_work_orders": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:28:17.085438+00:00"
+              },
+              "request_id": "377a1e7be11d421f9049dc34be31344b"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=cssd_setup].view = full (cssd): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "setup",
+      "set_up": "GET /establishment answers views.screens[screen_id=cssd_setup].view = setup (cssd): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in the daily menus: reach it from Facility settings (a preview's prerequisites link to it) to set the service up before switching it on."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/cssd_setup",
+  "workspace_guide": "get_handbook_outline('infection_control')",
+  "realtime": [
+    {
+      "event": "cssd.cycle.updated",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Sets: the shelf life by packaging and whether it holds an implant; retire rather than delete.",
+    "Recall (MSDS IPC 92): from a failed BiologicalTest's recall_candidates, or any released load; the answer lists every pack, where it went and patients_exposed: follow those patients up, and report an incident.",
+    "Print the procedure for approval and the log for the committee.",
+    "Exists for the service cssd (setup): show it as GET /establishment views.screens says for screen_id cssd_setup (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

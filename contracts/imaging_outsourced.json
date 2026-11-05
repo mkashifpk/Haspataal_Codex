@@ -1,7 +1,7 @@
 {
   "screen_id": "imaging_outsourced",
-  "contract_fingerprint": "58db76bf7d59ef6d9870",
-  "knowledge_revision": "51c8fe699d47d046",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "5980e5c3b1817f4e",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "radiology",
       "purpose": "Send an examination the hospital cannot do to a partner centre, and enter its report.",
@@ -256,7 +256,7 @@
     "workspace": "radiology",
     "phase": "P3",
     "position": 47,
-    "points": 47,
+    "points": 50,
     "capabilities": [
       "patient_context",
       "idempotent_writes",
@@ -271,6 +271,14 @@
         "evidence": "it reads diagnostic-partners, which POST /diagnostic-partners on diagnostic_partners creates",
         "ordering": false,
         "forward": true
+      },
+      {
+        "from": "imaging_outsourced",
+        "to": "imaging_quality_setup",
+        "kind": "data_candidate",
+        "evidence": "it reads critical-imaging-findings, which POST /critical-imaging-findings on imaging_quality_setup creates",
+        "ordering": false,
+        "forward": false
       }
     ],
     "needed_by": [
@@ -286,7 +294,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 47,
+    "points": 50,
     "items": [
       {
         "id": "ep:GET /diagnostic-partners",
@@ -311,6 +319,12 @@
         "label": "GET /imaging/worklist",
         "points": 3,
         "claimed": true
+      },
+      {
+        "id": "ep:GET /critical-imaging-findings",
+        "label": "GET /critical-imaging-findings",
+        "points": 3,
+        "claimed": false
       },
       {
         "id": "rule:0e0c1ef86c",
@@ -429,7 +443,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "services",
@@ -554,6 +581,18 @@
           ],
           "details_fields": [],
           "details_from": "POST /api/v1/imaging/orders/{order_id}/report"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -789,7 +828,8 @@
             "pointer": "/critical_finding_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The critical finding the report names (GET /critical-imaging-findings)"
           },
           {
             "pointer": "/critical_finding_note",
@@ -830,7 +870,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "status",
@@ -936,6 +989,105 @@
               "Fluoroscopy",
               "Other"
             ]
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /critical-imaging-findings",
+      "summary": "The critical imaging findings list",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "imaging.report.enter",
+          "diagnostics.setup.manage",
+          "diagnostics.critical.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of imaging.report.enter or diagnostics.setup.manage or diagnostics.critical.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "active_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "title": "Active Only"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_CriticalFindingOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "active_only",
+            "required": false,
+            "type": "boolean",
+            "default": true
           }
         ],
         "note": null
@@ -1259,6 +1411,13 @@
       "hospital_admin",
       "hospital_director",
       "clinic_director",
+      "triage_nurse",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "anaesthetist",
+      "ward_nurse",
+      "head_nurse",
       "lab_technician",
       "lab_verifier",
       "lab_admin",
@@ -1288,7 +1447,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "clinic_director",
           "hospital_admin",
@@ -1318,7 +1479,8 @@
         },
         "errors_to_handle": [
           "DIAGNOSTIC_PARTNER_INVALID",
-          "IMAGING_ORDER_STATE_INVALID"
+          "IMAGING_ORDER_STATE_INVALID",
+          "VALIDATION_ERROR"
         ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
         "as_one_of": [
@@ -1364,10 +1526,49 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "radiographer",
           "radiologist"
+        ]
+      },
+      {
+        "id": "case:GET /critical-imaging-findings",
+        "call": "GET /api/v1/critical-imaging-findings",
+        "summary": "The critical imaging findings list",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
         ]
       }
     ],
@@ -1506,6 +1707,19 @@
           "imaging.order.update"
         ],
         "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "imaging_outsourced::GET /critical-imaging-findings",
+        "task": "The critical imaging findings list",
+        "call": "GET /critical-imaging-findings",
+        "is_action": false,
+        "permissions": [
+          "imaging.report.enter",
+          "diagnostics.setup.manage",
+          "diagnostics.critical.view"
+        ],
+        "permissions_mode": "any",
         "access": null
       }
     ],
@@ -1954,9 +2168,120 @@
           "request_id": "f70f1280c3b7434dbb8132a1ad55a00c"
         }
       }
+    },
+    "GET /critical-imaging-findings": {
+      "request": {
+        "path": "/api/v1/critical-imaging-findings"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "finding_id": 1,
+              "name": "Tension or large pneumothorax",
+              "modality": null,
+              "description": "Chest film or CT: needs decompression now",
+              "sort_order": 10,
+              "is_active": true,
+              "row_version": 1
+            },
+            {
+              "finding_id": 2,
+              "name": "Free intraperitoneal air",
+              "modality": null,
+              "description": "Pneumoperitoneum without a recent operation: a perforated viscus",
+              "sort_order": 20,
+              "is_active": true,
+              "row_version": 1
+            },
+            {
+              "finding_id": 3,
+              "name": "Intracranial haemorrhage",
+              "modality": "CT",
+              "description": "Any new extradural, subdural, subarachnoid or intracerebral bleed",
+              "sort_order": 30,
+              "is_active": true,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T20:03:01.968312+00:00"
+          },
+          "request_id": "f31771b72ce44a06adb1175a824f1513"
+        }
+      }
     }
   },
   "schemas": {
+    "CriticalFindingOut": {
+      "properties": {
+        "finding_id": {
+          "type": "integer",
+          "title": "Finding Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "modality": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "XRay",
+                "MRI",
+                "CT",
+                "Ultrasound",
+                "Doppler",
+                "Mammography",
+                "Fluoroscopy",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Modality",
+          "description": "Null: any modality"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "sort_order": {
+          "type": "integer",
+          "title": "Sort Order"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "finding_id",
+        "name",
+        "modality",
+        "description",
+        "sort_order",
+        "is_active",
+        "row_version"
+      ],
+      "title": "CriticalFindingOut"
+    },
     "Envelope_ImagingOrderOut_": {
       "properties": {
         "data": {
@@ -1977,6 +2302,31 @@
         "request_id"
       ],
       "title": "Envelope[ImagingOrderOut]"
+    },
+    "Envelope_list_CriticalFindingOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/CriticalFindingOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[CriticalFindingOut]]"
     },
     "Envelope_list_ImagingWorklistItemOut__": {
       "properties": {
@@ -2065,7 +2415,8 @@
               "type": "null"
             }
           ],
-          "title": "Critical Finding Id"
+          "title": "Critical Finding Id",
+          "description": "The critical finding the report names (GET /critical-imaging-findings)"
         },
         "critical_finding_note": {
           "anyOf": [

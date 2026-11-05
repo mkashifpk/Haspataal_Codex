@@ -13,7 +13,27 @@ import {
   enqueueOfflineScan,
   dequeueOfflineScan,
   BADGE_STATION_ERROR_MESSAGES,
+  shouldQueueStationScan,
 } from "../src/badge-station-kiosk-policy.ts";
+
+test("badge_station_kiosk: queued feedback never claims attendance, access or cleaning success", () => {
+  for (const lang of ["en", "ur"]) {
+    const queued = formatScanOutcome("Queued", lang);
+    assert.equal(queued.isGreen, false);
+    assert.equal(queued.isRed, false);
+    assert.equal(queued.tone, "warning");
+    assert.notEqual(queued.title, formatScanOutcome("AttendanceIn", lang).title);
+  }
+});
+
+test("badge_station_kiosk: secure bridge envelope distinguishes network failures from refusals", () => {
+  assert.equal(shouldQueueStationScan({ response: { error: { code: "OFFLINE" } } }), true);
+  assert.equal(shouldQueueStationScan({ response: { status: 503, error: { code: "TIMEOUT" } } }), true);
+  for (const status of [401, 403, 409, 422, 429])
+    assert.equal(shouldQueueStationScan({ response: { status, error: { code: "VALIDATION_ERROR" } } }), false);
+  assert.equal(shouldQueueStationScan(new TypeError("UI programming error")), false);
+  assert.equal(shouldQueueStationScan({ response: { error: { code: "TERMINAL_ERROR" } } }), false);
+});
 
 test("badge_station_kiosk: rule:f98f89a7b6 station setup validation and key masking", () => {
   // Invalid empty inputs

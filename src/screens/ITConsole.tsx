@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 import { useEffect, useRef, useState } from "react";
 import { api, call } from "../bridge";
 import {
@@ -1232,7 +1233,7 @@ export function AdminForm({
         }
         const reference =
           key === "department_id"
-            ? departments.map((d) => ({
+            ? departments.filter(d=>d.is_active).map((d) => ({
                 value: d.department_id,
                 label: d.name,
               }))
@@ -1247,7 +1248,7 @@ export function AdminForm({
             label={label}
             hint={raw.description ? tr(raw.description) : undefined}
           >
-            {s.type === "boolean" ? (
+            {key==='room_charge_service_id' ? <DirectoryPicker path="/finance/service-catalog?category=RoomCharge" idField="service_id" value={value??''} onChange={e=>set(key,e.target.value?Number(e.target.value):null)} data-help="settings.it.fields"/> : s.type === "boolean" ? (
               <select data-field={key}
                 data-help="settings.it.fields"
                 value={value === undefined ? "" : String(value)}

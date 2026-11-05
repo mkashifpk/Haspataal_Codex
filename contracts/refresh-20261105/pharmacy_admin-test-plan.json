@@ -1,0 +1,1052 @@
+{
+  "screen": "pharmacy_admin",
+  "title": "Pharmacy back office",
+  "cases": [
+    {
+      "id": "case:POST /pharmacy-admin/drugs",
+      "call": "POST /api/v1/pharmacy-admin/drugs",
+      "summary": "Add a formulary drug",
+      "happy_path": {
+        "as_one_of": [
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/drugs",
+            "body": {
+              "code": "SUT-1",
+              "name": "Suture 2-0",
+              "form": "Consumable",
+              "schedule": "HospitalOnly",
+              "barcode": "8901234567890"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "drug_id": 1,
+                "code": "SUT-1",
+                "name": "Suture 2-0",
+                "generic_name": null,
+                "strength": null,
+                "form": "Consumable",
+                "unit": "unit",
+                "schedule": "HospitalOnly",
+                "is_otc_allowed": false,
+                "barcode": "8901234567890",
+                "low_stock_threshold": 0,
+                "near_expiry_alert_days": 90,
+                "high_alert_category": null,
+                "is_restricted": false,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-30T14:37:13.566531+00:00"
+              },
+              "request_id": "06c2e3f343064f3395e967972ceac6a8"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /pharmacy-admin/batches",
+      "call": "POST /api/v1/pharmacy-admin/batches",
+      "summary": "Batch intake (boxes × units, invoice cost → unit cost)",
+      "happy_path": {
+        "as_one_of": [
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/batches",
+            "body": {
+              "drug_id": 1,
+              "batch_no": "C1",
+              "expiry_date": "2099-01-01",
+              "box_quantity": 1,
+              "units_per_box": 20,
+              "total_invoice_cost": 2000,
+              "retail_price": 250
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "batch_id": 1,
+                "drug_id": 1,
+                "batch_no": "C1",
+                "expiry_date": "2099-01-01",
+                "box_quantity": 1,
+                "units_per_box": 20,
+                "qty_received": 20,
+                "total_invoice_cost": 2000,
+                "unit_cost": 100,
+                "retail_price": 250,
+                "vendor_invoice_id": null,
+                "received_by": 11,
+                "received_at": "2026-09-27T17:38:29.211985+00:00",
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:38:29.227789+00:00"
+              },
+              "request_id": "1063f40f820b431e8c14d6799bba0df4"
+            }
+          },
+          "events_emitted": [
+            "pharmacy.stock.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /pharmacy-admin/batches/{batch_id}/adjust",
+      "call": "POST /api/v1/pharmacy-admin/batches/{batch_id}/adjust",
+      "summary": "Write off / adjust a batch (expiry, damage)",
+      "happy_path": {
+        "as_one_of": [
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/batches/2/adjust",
+            "body": {
+              "qty": 2,
+              "reason": "Damage",
+              "note": "strip crushed"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "movement_id": 4,
+                "drug_id": 1,
+                "batch_id": 2,
+                "qty": 2,
+                "direction": "Out",
+                "reason": "Damage",
+                "dispensation_item_id": null,
+                "ward_indent_item_id": null,
+                "ot_consumable_id": null,
+                "vendor_invoice_id": null,
+                "supplier_return_id": null,
+                "adjustment_reason": "strip crushed",
+                "by_user": 6,
+                "at": "2026-10-15T12:36:26.033719+00:00"
+              },
+              "meta": {
+                "server_time": "2026-10-15T12:36:26.038740+00:00"
+              },
+              "request_id": "f6df5d13f0df4cfd8aa1e9a1e3ee4d78"
+            }
+          },
+          "events_emitted": [
+            "pharmacy.stock.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /pharmacy-admin/vendor-invoices",
+      "call": "POST /api/v1/pharmacy-admin/vendor-invoices",
+      "summary": "Record a supplier invoice (→ Accounts Payable)",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin",
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/vendor-invoices",
+            "body": {
+              "vendor_id": 1,
+              "invoice_no": "MS-1001",
+              "total_cost": 12000
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "vendor_invoice_id": 1,
+                "vendor_id": 1,
+                "invoice_no": "MS-1001",
+                "invoice_type": "Purchase",
+                "module": "Pharmacy",
+                "total_cost": 12000,
+                "paid_amount": 0,
+                "status": "Pending",
+                "invoice_date": "2026-09-27",
+                "due_date": null,
+                "received_by": 6,
+                "received_at": "2026-09-27T17:43:44.743903+00:00",
+                "notes": null,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:43:44.768079+00:00"
+              },
+              "request_id": "aa7a9f918ae54cde86a19fac00e98ad7"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /pharmacy-admin/vendor-invoices",
+      "call": "GET /api/v1/pharmacy-admin/vendor-invoices",
+      "summary": "Supplier invoices and amounts owed",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "owner",
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/vendor-invoices",
+            "query": {
+              "module": "Pharmacy"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "vendor_invoice_id": 1,
+                  "vendor_id": 1,
+                  "invoice_no": "MS-1001",
+                  "invoice_type": "Purchase",
+                  "module": "Pharmacy",
+                  "total_cost": 12000,
+                  "paid_amount": 0,
+                  "status": "Pending",
+                  "invoice_date": "2026-09-27",
+                  "due_date": null,
+                  "received_by": 6,
+                  "received_at": "2026-09-27T17:43:44.743903+00:00",
+                  "notes": null,
+                  "row_version": 1,
+                  "vendor_name": "MedSupply",
+                  "balance": 12000
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:43:44.777720+00:00"
+              },
+              "request_id": "6fc5ef4e7ab2479d9d36e09e31bcfbd7"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinical_specialist"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /pharmacy-admin/low-stock",
+      "call": "GET /api/v1/pharmacy-admin/low-stock",
+      "summary": "Low-stock widget",
+      "happy_path": {
+        "as_one_of": [
+          "pharmacist",
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/low-stock"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "drug_id": 1,
+                  "code": "AMX-500",
+                  "name": "Amoxicillin 500mg",
+                  "qty_available": 13,
+                  "low_stock_threshold": 0,
+                  "stock_status": "InStock"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:43:44.832221+00:00"
+              },
+              "request_id": "523bed419897443bbd1556e762357e5e"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /pharmacy-admin/near-expiry",
+      "call": "GET /api/v1/pharmacy-admin/near-expiry",
+      "summary": "Near-expiry widget (money at risk)",
+      "happy_path": {
+        "as_one_of": [
+          "pharmacist",
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/near-expiry"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "batch_id": 4,
+                  "batch_no": "SOON",
+                  "drug_id": 2,
+                  "name": "Paracetamol 500mg",
+                  "expiry_date": "2026-10-17",
+                  "qty_available": 10,
+                  "days_left": 20,
+                  "money_at_risk": 20
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:43:44.826319+00:00"
+              },
+              "request_id": "8b4d3e3607a047a9b7cca671b6a0b1ac"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /pharmacy-admin/profit-dashboard",
+      "call": "GET /api/v1/pharmacy-admin/profit-dashboard",
+      "summary": "Gross revenue − COGS = net profit (live)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/profit-dashboard"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "totals": {
+                  "revenue": 20,
+                  "cogs": 8,
+                  "profit": 12
+                },
+                "by_day": [
+                  {
+                    "business_date": "2026-09-27",
+                    "revenue": 20,
+                    "cogs": 8,
+                    "profit": 12,
+                    "dispensations": 1
+                  }
+                ],
+                "by_payment_mode": [
+                  {
+                    "payment_mode": "Cash",
+                    "revenue": 20,
+                    "count": 1
+                  }
+                ],
+                "top_drugs": [
+                  {
+                    "name": "Paracetamol 500mg",
+                    "qty": 4,
+                    "profit": 12
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:43:44.907381+00:00"
+              },
+              "request_id": "ceedac9bcc624932b557345839586b47"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /finance/vendors",
+      "call": "GET /api/v1/finance/vendors",
+      "summary": "Vendors",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/vendors",
+            "query": {
+              "vendor_type": "PharmacySupplier"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "vendor_id": 1,
+                  "name": "MedSupply",
+                  "vendor_type": "PharmacySupplier",
+                  "contact_name": null,
+                  "phone": "0421234567",
+                  "address": null,
+                  "tax_number": null,
+                  "cnic": null,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:36:41.047443+00:00"
+              },
+              "request_id": "0376c42d633d406db3283d3c1b66acaf"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /pharmacy-admin/batches/{batch_id}/supplier-returns",
+      "call": "POST /api/v1/pharmacy-admin/batches/{batch_id}/supplier-returns",
+      "summary": "Return units of a batch to its supplier",
+      "happy_path": {
+        "as_one_of": [
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/batches/4/supplier-returns",
+            "body": {
+              "qty": 40,
+              "reason": "NearExpiry",
+              "note": "Collected by the distributor's rider"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "return_id": 1,
+                "return_number": "SRN-2026-00001",
+                "vendor_id": 1,
+                "batch_id": 4,
+                "drug_id": 2,
+                "qty": 40,
+                "unit_cost": 10,
+                "value_at_cost": 400,
+                "reason": "NearExpiry",
+                "recall_id": null,
+                "note": "Collected by the distributor's rider",
+                "status": "Returned",
+                "returned_at": "2026-10-15T12:48:49.593362+00:00",
+                "credit_note_no": null,
+                "credit_note_date": null,
+                "credit_amount": null,
+                "credit_applied": 0,
+                "decided_at": null,
+                "decision_note": null,
+                "vendor_name": "MedSupply",
+                "drug_name": "Paracetamol 500mg",
+                "drug_code": "PCM-500",
+                "batch_no": "RET-1",
+                "expiry_date": "2099-01-01",
+                "recall_number": null,
+                "returned_by_name": "ud08052568e",
+                "decided_by_name": null,
+                "credit_left": null
+              },
+              "meta": {
+                "server_time": "2026-10-15T12:48:49.605046+00:00"
+              },
+              "request_id": "a7f697553f2c4eb2a39ed0ef4fc08846"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "INSUFFICIENT_STOCK"
+          ],
+          "events_emitted": [
+            "pharmacy.stock.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "INSUFFICIENT_STOCK",
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /pharmacy-admin/supplier-returns",
+      "call": "GET /api/v1/pharmacy-admin/supplier-returns",
+      "summary": "Returns to suppliers, newest first",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/supplier-returns",
+            "query": {
+              "status": "Returned"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "return_id": 1,
+                  "return_number": "SRN-2026-00001",
+                  "vendor_id": 1,
+                  "batch_id": 4,
+                  "drug_id": 2,
+                  "qty": 40,
+                  "unit_cost": 10,
+                  "value_at_cost": 400,
+                  "reason": "NearExpiry",
+                  "recall_id": null,
+                  "note": "Collected by the distributor's rider",
+                  "status": "Returned",
+                  "returned_at": "2026-10-15T12:48:49.593362+00:00",
+                  "credit_note_no": null,
+                  "credit_note_date": null,
+                  "credit_amount": null,
+                  "credit_applied": 0,
+                  "decided_at": null,
+                  "decision_note": null,
+                  "vendor_name": "MedSupply",
+                  "drug_name": "Paracetamol 500mg",
+                  "drug_code": "PCM-500",
+                  "batch_no": "RET-1",
+                  "expiry_date": "2099-01-01",
+                  "recall_number": null,
+                  "returned_by_name": "ud08052568e",
+                  "decided_by_name": null,
+                  "credit_left": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-15T12:48:49.635311+00:00"
+              },
+              "request_id": "dd039b7083f64c918c2f72dbc0e5a21e"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinical_specialist"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /pharmacy-admin/supplier-returns/{return_id}",
+      "call": "GET /api/v1/pharmacy-admin/supplier-returns/{return_id}",
+      "summary": "One return to a supplier",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/supplier-returns/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "return_id": 1,
+                "return_number": "SRN-2026-00001",
+                "vendor_id": 1,
+                "batch_id": 4,
+                "drug_id": 2,
+                "qty": 40,
+                "unit_cost": 10,
+                "value_at_cost": 400,
+                "reason": "NearExpiry",
+                "recall_id": null,
+                "note": "Collected by the distributor's rider",
+                "status": "Credited",
+                "returned_at": "2026-10-15T12:48:49.593362+00:00",
+                "credit_note_no": "CN-2231",
+                "credit_note_date": "2026-10-20",
+                "credit_amount": 380,
+                "credit_applied": 300,
+                "decided_at": "2026-10-15T12:48:49.642403+00:00",
+                "decision_note": null,
+                "vendor_name": "MedSupply",
+                "drug_name": "Paracetamol 500mg",
+                "drug_code": "PCM-500",
+                "batch_no": "RET-1",
+                "expiry_date": "2099-01-01",
+                "recall_number": null,
+                "returned_by_name": "ud08052568e",
+                "decided_by_name": "uc44c01f0e1",
+                "credit_left": 80
+              },
+              "meta": {
+                "server_time": "2026-10-15T12:48:49.686944+00:00"
+              },
+              "request_id": "35710d8c681f4e76ab1c3e9c4e180072"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinical_specialist"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /pharmacy-admin/supplier-returns/{return_id}/pdf",
+      "call": "GET /api/v1/pharmacy-admin/supplier-returns/{return_id}/pdf",
+      "summary": "The return note that goes with the goods (PDF)",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "pharmacy_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/pharmacy-admin/supplier-returns/1/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 2641
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /drug-recalls",
+      "call": "GET /api/v1/drug-recalls",
+      "summary": "The recall register",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/drug-recalls"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "recall_id": 1,
+                  "recall_number": "RCL-2026-0001",
+                  "drug_id": 1,
+                  "source": "DRAP",
+                  "reference": "DRAP alert 12/2026",
+                  "recall_class": "ClassII",
+                  "reason": "Particulate matter in vials",
+                  "contact_patients": true,
+                  "status": "Closed",
+                  "opened_by": 11,
+                  "opened_at": "2026-09-30T15:03:29.138586+00:00",
+                  "stock_removed_by": 11,
+                  "stock_removed_at": "2026-09-30T15:03:29.847140+00:00",
+                  "closed_by": 11,
+                  "closed_at": "2026-09-30T15:03:30.222822+00:00",
+                  "closing_note": "Stock returned, patients informed",
+                  "cancelled_by": null,
+                  "cancelled_at": null,
+                  "cancel_reason": null,
+                  "row_version": 3,
+                  "drug_name": "Ceftriaxone 1g",
+                  "drug_code": "CEF",
+                  "opened_by_name": "ua7a3486c32",
+                  "batch_numbers": [
+                    "CEF-1"
+                  ],
+                  "stock_left": 0,
+                  "patients_to_contact": 0
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:03:30.325564+00:00"
+              },
+              "request_id": "fc87670ab78d464082f914c781774723"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /drugs/search",
+      "call": "GET /api/v1/drugs/search",
+      "summary": "Formulary search with live stock colour",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/drugs/search",
+            "query": {
+              "q": "Insulin"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "drug_id": 3,
+                  "code": "INSN",
+                  "name": "Insulin NPH",
+                  "generic_name": null,
+                  "strength": null,
+                  "form": "Injection",
+                  "unit": "unit",
+                  "schedule": "HospitalOnly",
+                  "is_otc_allowed": false,
+                  "barcode": "8931440574755",
+                  "low_stock_threshold": 0,
+                  "is_active": true,
+                  "high_alert_category": null,
+                  "is_restricted": false,
+                  "lasa_with": [
+                    "Insulin regular"
+                  ],
+                  "qty_available": 50,
+                  "next_expiry": "2099-01-01",
+                  "stock_status": "InStock"
+                },
+                {
+                  "drug_id": 2,
+                  "code": "INSR",
+                  "name": "Insulin regular",
+                  "generic_name": null,
+                  "strength": null,
+                  "form": "Injection",
+                  "unit": "unit",
+                  "schedule": "HospitalOnly",
+                  "is_otc_allowed": false,
+                  "barcode": "8991682543668",
+                  "low_stock_threshold": 0,
+                  "is_active": true,
+                  "high_alert_category": "Insulin",
+                  "is_restricted": false,
+                  "lasa_with": [
+                    "Insulin NPH"
+                  ],
+                  "qty_available": 50,
+                  "next_expiry": "2099-01-01",
+                  "stock_status": "InStock"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:01:45.066819+00:00"
+              },
+              "request_id": "3c9f279059e64b359f9c572408414e0b"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/pharmacy_admin",
+  "workspace_guide": "get_handbook_outline('pharmacy_admin')",
+  "realtime": [
+    {
+      "event": "pharmacy.low_stock",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Batch intake: boxes × units per box and total invoice cost; the server derives unit cost.",
+    "Return to the supplier (expired, near expiry, recalled, damaged, excess, wrongly supplied): from a batch, the quantity, the reason and a note (POST /pharmacy-admin/batches/{batch_id}/supplier-returns; a recalled batch with reason Recall and its recall_id), then print the return note for the goods. Show each return's status: Returned until the accountant confirms the credit note, then Credited or Refused (decisions 47).",
+    "A new drug may be high-alert (high_alert_category) or restricted (is_restricted) from the start; never both high-alert and OTC."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

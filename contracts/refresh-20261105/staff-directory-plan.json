@@ -1,0 +1,559 @@
+{
+  "screen": "staff_directory",
+  "title": "Staff directory & records",
+  "cases": [
+    {
+      "id": "case:GET /hr/employees",
+      "call": "GET /api/v1/hr/employees",
+      "summary": "Search employees",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees",
+            "query": {
+              "q": "EMP-2026-0004"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 4,
+                  "emp_number": "EMP-2026-0004",
+                  "full_name": "Sana Tariq",
+                  "designation": "Staff Nurse",
+                  "department_name": null,
+                  "employment_status": "Draft",
+                  "staff_category": "Nursing",
+                  "contract_type": "Permanent",
+                  "mobile": "03001234567",
+                  "supervisor_name": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:37:41.032128+00:00"
+              },
+              "request_id": "be41a1605ed14af988071b2bd89c46df"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /hr/employees/{employee_id}",
+      "call": "GET /api/v1/hr/employees/{employee_id}",
+      "summary": "Full profile incl. documents, qualifications, submit checklist",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees/4"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "employee_id": 4,
+                "emp_number": "EMP-2026-0004",
+                "full_name": "Sana Tariq",
+                "father_or_husband_name": null,
+                "cnic": "44193-4871435-2",
+                "dob": null,
+                "gender": "female",
+                "mobile": "03001234567",
+                "email": null,
+                "address": "House 12, Street 4, Lahore",
+                "blood_group": "B+",
+                "department_id": null,
+                "department_name": null,
+                "designation": "Staff Nurse",
+                "specialty": null,
+                "supervisor_id": null,
+                "supervisor_name": null,
+                "base_salary": 60000,
+                "contract_type": "Permanent",
+                "shift_pattern_id": null,
+                "employment_status": "Draft",
+                "staff_category": "Nursing",
+                "is_clinical_staff": true,
+                "license_type": "PNC",
+                "license_number": "PNC-99",
+                "joined_on": null,
+                "left_on": null,
+                "onboarding_step": 4,
+                "row_version": 7,
+                "created_at": "2026-09-27T17:36:57.664341+00:00",
+                "qualifications": [],
+                "documents": [
+                  {
+                    "document_id": 1,
+                    "doc_type": "CNIC",
+                    "title": null,
+                    "content_type": "application/pdf",
+                    "size_bytes": 25,
+                    "is_required": true,
+                    "is_verified": false,
+                    "uploaded_at": "2026-09-27T17:36:57.754154+00:00"
+                  },
+                  {
+                    "document_id": 2,
+                    "doc_type": "PNC",
+                    "title": null,
+                    "content_type": "application/pdf",
+                    "size_bytes": 25,
+                    "is_required": true,
+                    "is_verified": false,
+                    "uploaded_at": "2026-09-27T17:36:57.780927+00:00"
+                  }
+                ],
+                "contract": null,
+                "user": null,
+                "badges": [],
+                "schedule": {
+                  "shift_pattern_id": null,
+                  "shift_name": null,
+                  "effective_from": null,
+                  "weekly_off_days": [
+                    7
+                  ]
+                },
+                "checklist": {
+                  "ready": true,
+                  "missing": []
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:57.790733+00:00"
+              },
+              "request_id": "26056fd9bd154017a96482c3dabcd26c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /hr/org-chart",
+      "call": "GET /api/v1/hr/org-chart",
+      "summary": "Reporting hierarchy (supervisor tree)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/org-chart"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 5,
+                  "full_name": "Matron",
+                  "designation": "Officer",
+                  "supervisor_id": null,
+                  "department_name": null
+                },
+                {
+                  "employee_id": 3,
+                  "full_name": "Staff 13478",
+                  "designation": "Officer",
+                  "supervisor_id": null,
+                  "department_name": null
+                },
+                {
+                  "employee_id": 1,
+                  "full_name": "Staff 17539",
+                  "designation": "Officer",
+                  "supervisor_id": null,
+                  "department_name": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:37:41.089355+00:00"
+              },
+              "request_id": "8d79608b65ae40119db9c6c51811e56f"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /hr/employee-documents/{document_id}/download",
+      "call": "GET /api/v1/hr/employee-documents/{document_id}/download",
+      "summary": "Download an employee document",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employee-documents/1/download"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 25
+          },
+          "errors_seen": [
+            "NOT_FOUND"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /hr/employees/{employee_id}/status",
+      "call": "POST /api/v1/hr/employees/{employee_id}/status",
+      "summary": "Suspend / resign / terminate (login and badges revoked), reinstate or re-join",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees/6/status",
+            "body": {
+              "status": "Suspended",
+              "reason": "inquiry pending"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "employee_id": 6,
+                "emp_number": "EMP-2026-0006",
+                "full_name": "Nurse Report",
+                "father_or_husband_name": null,
+                "cnic": "91167-6441081-8",
+                "dob": null,
+                "gender": null,
+                "mobile": "03001234567",
+                "email": null,
+                "address": null,
+                "blood_group": null,
+                "department_id": null,
+                "department_name": null,
+                "designation": "Officer",
+                "specialty": null,
+                "supervisor_id": 5,
+                "supervisor_name": "Matron",
+                "base_salary": 100000,
+                "contract_type": "Permanent",
+                "shift_pattern_id": null,
+                "employment_status": "Suspended",
+                "staff_category": "Administrative",
+                "is_clinical_staff": false,
+                "license_type": null,
+                "license_number": null,
+                "joined_on": null,
+                "left_on": null,
+                "onboarding_step": 1,
+                "row_version": 2,
+                "created_at": "2026-09-27T17:37:41.059805+00:00",
+                "qualifications": [],
+                "documents": [],
+                "contract": null,
+                "user": null,
+                "badges": [],
+                "schedule": {
+                  "shift_pattern_id": null,
+                  "shift_name": null,
+                  "effective_from": null,
+                  "weekly_off_days": [
+                    7
+                  ]
+                },
+                "checklist": {
+                  "ready": false,
+                  "missing": [
+                    "CNIC document"
+                  ]
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:41.113180+00:00"
+              },
+              "request_id": "edcf0476f1b7466b83b16f411c3e2c6b"
+            }
+          },
+          "errors_seen": [
+            "CLINICAL_LICENSE_REQUIRED",
+            "EMPLOYEE_DOCUMENT_REQUIRED",
+            "EMPLOYEE_STATUS_INVALID",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "hr.provisioning.requested",
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "CLINICAL_LICENSE_REQUIRED",
+        "EMPLOYEE_DOCUMENT_REQUIRED",
+        "EMPLOYEE_STATUS_INVALID",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /hr/employees/{employee_id}/leave-balances",
+      "call": "GET /api/v1/hr/employees/{employee_id}/leave-balances",
+      "summary": "Leave balances of an employee",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees/5/leave-balances",
+            "query": {
+              "year": 2026
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "leave_type": "Annual",
+                  "year": 2026,
+                  "opening": 2,
+                  "accrued": 0,
+                  "carried_forward": 0,
+                  "used": 2,
+                  "available": 0
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:37:12.131418+00:00"
+              },
+              "request_id": "af4a8109b1884023b7b2a98c1edf84cd"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:PUT /hr/leave-balances",
+      "call": "PUT /api/v1/hr/leave-balances",
+      "summary": "Set a leave balance (opening / accrued / carried forward)",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/leave-balances",
+            "body": {
+              "employee_id": 5,
+              "leave_type": "Annual",
+              "year": 2026,
+              "opening": 2
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "balance_id": 1,
+                "employee_id": 5,
+                "leave_type": "Annual",
+                "year": 2026,
+                "opening": 2,
+                "accrued": 0,
+                "carried_forward": 0,
+                "used": 0,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:12.034289+00:00"
+              },
+              "request_id": "2ea80aaf6139413c914bcd642096f0b4"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/staff_directory",
+  "workspace_guide": "get_handbook_outline('hr')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Suspend / resign / terminate revokes the login and every badge at once: confirm with the reason.",
+    "Set opening, accrued and carried-forward leave per type and year; leave requests are checked against them.",
+    "Offer the status actions by employment_status: none on a Draft (finish the wizard); suspend, resign or terminate on Awaiting_IT_Provisioning, never 'Activate' (IT's login does that); suspend, resign or terminate on Active; reinstate, resign or terminate on Suspended; 're-join' on Resigned or Terminated. Show the employment_status the answer gives: someone IT never gave a login returns to Awaiting_IT_Provisioning. After a reinstatement say that IT re-enables the login and that revoked badges are issued anew. EMPLOYEE_STATUS_INVALID: show details.status and read the employee again; EMPLOYEE_DOCUMENT_REQUIRED or CLINICAL_LICENSE_REQUIRED: upload the document, then repeat."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

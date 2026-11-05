@@ -1,7 +1,7 @@
 import { tr } from "../i18n";
 import { useRef, useState } from "react";
 import * as facility from "../generated/facility_profile";
-import contract from "../../contracts/facility_profile.json";
+import contract from "../generated/facility_profile-form.json";
 import { Details, ErrorBox, Field, LoadState, useLoad } from "../components";
 import { api } from "../bridge";
 import {

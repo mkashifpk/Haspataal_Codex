@@ -27,6 +27,15 @@ export interface DualScanState {
 }
 
 export type OutcomeTone = "success" | "danger" | "warning";
+// A queued scan has no business outcome until the server confirms it.
+export type KioskDisplayOutcome = BadgeScanResultOut["outcome"] | "Queued";
+
+export function shouldQueueStationScan(error: unknown): boolean {
+  const reply = (error as { response?: { status?: number; error?: { code?: string } } })?.response;
+  // ApiError wraps the secure bridge reply; HTTP refusals are never network failures.
+  if (reply?.status) return reply.status >= 500;
+  return ["OFFLINE", "NETWORK_ERROR", "TIMEOUT"].includes(reply?.error?.code ?? "");
+}
 
 /**
  * Validate station setup configuration.
@@ -268,7 +277,7 @@ export function checkDebounce(
  * Classifies scan outcome into visual tone and bilingual label.
  */
 export function formatScanOutcome(
-  outcome: BadgeScanResultOut["outcome"],
+  outcome: KioskDisplayOutcome,
   lang: "en" | "ur" = "en",
 ): {
   tone: OutcomeTone;
@@ -278,6 +287,12 @@ export function formatScanOutcome(
   isRed: boolean;
 } {
   switch (outcome) {
+    case "Queued":
+      return {
+        tone: "warning", isGreen: false, isRed: false,
+        title: lang === "ur" ? "اسکین تصدیق کا منتظر ہے" : "Scan awaiting confirmation",
+        subtitle: lang === "ur" ? "اسکین مقامی طور پر محفوظ ہے۔ سرور کی تصدیق تک حاضری، داخلہ یا صفائی کی تصدیق نہیں ہوئی۔" : "Saved locally. Attendance, access or cleaning has not been confirmed by the server.",
+      };
     case "AttendanceIn":
       return {
         tone: "success",
@@ -307,8 +322,8 @@ export function formatScanOutcome(
         tone: "success",
         isGreen: true,
         isRed: false,
-        title: lang === "ur" ? "صفائی کا عمل جاری" : "Bed Cleaning In-Progress",
-        subtitle: lang === "ur" ? "بیڈ کی صفائی کا آغاز درج کر لیا گیا ہے۔" : "Bed cleaning commenced and logged.",
+        title: lang === "ur" ? "صفائی درج، کلیئرنس کا انتظار" : "Cleaning recorded; clearance pending",
+        subtitle: lang === "ur" ? "صفائی درج ہو گئی ہے۔ بیڈ کی دستیابی کے لیے ڈسچارج کلیئرنس باقی ہے۔" : "Cleaning is recorded. The bed still awaits discharge clearance.",
       };
     case "SecurityPass":
       return {
@@ -316,7 +331,7 @@ export function formatScanOutcome(
         isGreen: true,
         isRed: false,
         title: lang === "ur" ? "سیکیورٹی داخلہ مجاز" : "Security Pass Granted",
-        subtitle: lang === "ur" ? "دروازہ کھلا ہے، تشریف لائیں۔" : "Access authorised. Gate opened.",
+        subtitle: lang === "ur" ? "رسائی کا اسکین درج ہو گیا۔ ہسپتال کے داخلے کے طریقہ کار پر عمل کریں۔" : "Access scan recorded. Follow the facility's entry procedure.",
       };
     case "Duplicate":
       return {

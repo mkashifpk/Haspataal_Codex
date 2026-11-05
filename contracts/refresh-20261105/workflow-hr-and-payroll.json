@@ -1,0 +1,230 @@
+{
+  "slug": "hr-and-payroll",
+  "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
+  "summary": "6-step onboarding (no logins), separate IT provisioning, staff badges, attendance flags against the duty roster, weekly days off and the public holiday calendar, supervisor leave routing, one-click payroll.",
+  "order": 99,
+  "workflow": "§6.1–§6.8, §9.2",
+  "workspaces": [
+    "hr",
+    "super_admin",
+    "head_nurse",
+    "self_service",
+    "owner_dashboard"
+  ],
+  "file": "hr-and-payroll.md",
+  "markdown": "# HR, provisioning, attendance, leave & payroll\n\n## Onboarding wizard (§6.1, §6.3)\n\n| Step | Call |\n|---|---|\n| 1 Demographics (CNIC required) | `POST /hr/employees` → `emp_number` `EMP-2026-0142`, status `Draft` |\n| 2 Job & finance (department, designation, supervisor, salary, contract, shift) | `PATCH /hr/employees/{id}/steps/2` |\n| 3 Qualifications & licence (PMDC/PNC) | `PATCH …/steps/3`, `POST …/qualifications` |\n| 4 Financial config (visiting specialists) | none: the Billing Admin sets the OT split contract (decisions 56; [operating theater](operating-theater.md)); show that it is needed and who sets it |\n| 5 Document vault (multipart: `file`, `doc_type`; PDF, JPEG or PNG; the `Photo` printed on the ID card a JPEG or PNG only) | `POST /hr/employees/{id}/documents` |\n| 6 Finalize | `POST /hr/employees/{id}/submit` → `Awaiting_IT_Provisioning` |\n\nStep 2 picks the department from `GET /admin/departments` and the supervisor from `GET /staff/lookup`.\n\n`GET /hr/employees/{id}` returns `checklist {ready, missing[]}` — the DB refuses submission without a\nCNIC document (`EMPLOYEE_DOCUMENT_REQUIRED`) or, for clinical staff, a licence number + document\n(`CLINICAL_LICENSE_REQUIRED`). Step 6 **never creates a login**. Zero-interface support staff\n(sweepers, janitors, guards) go straight to `Active` and only get a staff badge\n(`POST /hr/employees/{id}/badges`: an RFID card, a QR badge printed on the ID card, or a biometric enrolment).\nID card: `GET /hr/employees/{id}/id-card` (it carries the printed badge as `badge`).\n\nEach qualification is then verified with its primary source (the HEC or the university, the PMDC or PNC register), and\nthe personnel file gathers orientation, the job description, appraisals, training, the disciplinary background and the\nhealth record: see [personnel records](personnel-records.md).\n\n## IT provisioning (§6.2)\n\nSuper Admin: `GET /admin/provisioning-queue` → `POST /admin/users {\"employee_id\", \"role_codes\": [\"clinical_specialist\", \"hospital_admin\"]}`\n→ username (suggested from the name) + **temporary password shown once**. The user must change it at\nfirst login. HR cannot call this (403); the DB refuses logins for draft profiles and zero-interface staff.\nCreating the login is the only way an awaiting profile becomes `Active`. HR changing the profile after handing it over\n(making the person clinical staff, removing the licence number) stops it with `CLINICAL_LICENSE_REQUIRED`: HR completes\nthe profile first.\n\n## Employment status (§6.2b, decisions 60)\n\nThe staff directory changes a handed-over employee's status with `POST /hr/employees/{id}/status {\"status\", \"reason\", \"left_on\"}`:\n\n| The employee is | Allowed `status` | Otherwise |\n|---|---|---|\n| `Draft` | none: finish the wizard | `EMPLOYEE_STATUS_INVALID`, `details.next_step` the submit call |\n| `Awaiting_IT_Provisioning` | `Suspended`, `Resigned`, `Terminated` | `Active`: `EMPLOYEE_STATUS_INVALID`, `details.next_step` `POST /admin/users` |\n| `Active` | `Suspended`, `Resigned`, `Terminated` | |\n| `Suspended` | `Active`, `Resigned`, `Terminated` | |\n| `Resigned`, `Terminated` | `Active` (re-joining, an appeal), or the other of the two | `Suspended`: `EMPLOYEE_STATUS_INVALID` |\n\nSuspending or a leaver deactivates the login, revokes its sessions and every badge at once. `Active` keeps the employee\nnumber and the records and clears `left_on`, and it checks the vault again (`EMPLOYEE_DOCUMENT_REQUIRED`,\n`CLINICAL_LICENSE_REQUIRED`: upload with `POST /hr/employees/{id}/documents`, then repeat). The login stays off until IT\nre-enables it (`POST /admin/users/{user_id}/active`) and revoked badges stay revoked: issue new ones\n(`POST /hr/employees/{id}/badges`). Someone IT never gave a login (not zero-interface staff) goes back to IT's queue\ninstead: the answer's `employment_status` is `Awaiting_IT_Provisioning` and IT is told (`hr.provisioning.requested`).\n\n## Attendance (§6.4)\n\nBadge scans at the staff entrance (`POST /badge-stations/scans`) become In/Out punches; where there is no\nstation, supervisors take roll call (`POST /rosters/roll-call`). The worker computes daily flags against the\nday's schedule: the **rostered** shift, else the employee's default shift (`POST /hr/employees/{id}/shift`, for\nstaff on a fixed schedule) unless it is one of their own weekly days off or a public holiday, else a rest day\n(`Present`, `Late`, `HalfDay`, `Absent`, `Leave`, `Holiday`, `Off`), and emits\n`attendance.flagged` to HR and the supervisor. Staff planned on the roster get no default shift\n(`shift_pattern_id: null`), so their rest days are not absences. A night shift's punches, including the morning\nexit, count for the evening it started. HR views `GET /hr/attendance`, corrects with\n`POST /hr/attendance/manual` (reasoned, audited). HR plans duty rosters for all staff (`roster.manage.all`):\n[Duty rosters, roll call, badges & attendance](duty-rosters-and-attendance.md).\n\n## Weekly days off and the holiday calendar (§6.4, §6.6)\n\nThe hospital works every day, Sundays included, so there is **no hospital-wide day off**: each person has their own\nweekly rest day, and the rest days rotate through the week. Staff on a fixed schedule are not expected at work on\ntheir **weekly days off** or on **public holidays**; those days are `Off` / `Holiday`, both paid (payroll deducts only\n`Absent` and half of `HalfDay`).\n\n* Weekly days off belong to the default shift and are required with it: `POST /hr/employees/{id}/shift\n  {\"shift_pattern_id\", \"effective_from\", \"weekly_off_days\": [3]}` (ISO weekdays, 1 = Monday … 7 = Sunday; `[]` = works\n  every day, see extra duty below). Onboarding does not set a shift: this call does, after step 2.\n  `GET /hr/employees/{id}` shows today's `schedule` (`shift_pattern_id` null and `weekly_off_days` [] = roster only).\n  The shift from `GET /hr/shift-patterns`.\n* Staff on the roster rest on the days they are not rostered; the planners rotate those days\n  ([duty rosters](duty-rosters-and-attendance.md): \"repeat, moving everyone's days on\", the week check).\n* The **holiday calendar** is kept by HR **and** the Hospital Admin (permission `hr.holiday.manage`; either may\n  add, rename, move or withdraw a holiday); everyone with a login reads it:\n\n| Call | What |\n|---|---|\n| `GET /holidays?year=2026` (or `date_from` / `date_to`, `include_inactive`) | the calendar |\n| `POST /holidays {\"holidays\": [{\"holiday_date\", \"name\", \"notes\"?}, …]}` | add the year's gazetted list at once: all or nothing; a taken date → `HOLIDAY_DATE_TAKEN` with `details.entry_index` |\n| `PATCH /holidays/{id} {\"expected_version\", \"name\"?, \"holiday_date\"?, \"notes\"?, \"is_active\"?}` | rename / move / withdraw (`is_active: false`); never deleted |\n\n* Nothing recurs: the Eids follow the moon, and the government's list changes, so enter each year's dates.\n* Rostered staff work as rostered on a holiday (a hospital never closes); the roster planner marks the holidays\n  (`GET /rosters/staff` → `holidays`). A person on the roster only is `Holiday` on a holiday they are not rostered.\n* Adding or changing a holiday that is today or already past recomputes that day's flags at once. A payroll run\n  already generated for the period is not changed: cancel it and generate it again.\n* Leave is counted in calendar days (`leave_days`), so a holiday or weekly day off inside a leave uses a leave\n  day, as in most Pakistani hospitals' leave rules.\n\n## Leave (§6.5)\n\nEmployee: `POST /self/leave-requests {\"leave_type\", \"from_date\", \"to_date\", \"half_day\"?}` — checked\nagainst the balance (`LEAVE_INSUFFICIENT_BALANCE`) and routed to the supervisor from step 2\n(`leave.requested` + inbox). Supervisor (Head Nurse dashboard etc.): `GET /hr/leave-requests` →\n`POST /hr/leave-requests/{id}/decision {\"decision\": \"Approved\"}`; the supervisor or HR (`hr.leave.manage`) decides,\nanyone else gets `LEAVE_NOT_YOUR_REPORT`.\n\n## Payroll (§6.6)\n\n`POST /hr/payroll-runs {\"period_start\", \"period_end\"}` → per employee\n**Base − Unpaid absences − Internal pharmacy/store credit + Accrued OT commissions + Extra duty = Net** (also a DB\nconstraint), with line items.\n\n**Extra duty** (`extra_duty_days`, `extra_duty_pay`, payslip line `ExtraDuty` with the dates): each employee is due\n`weekly_rest_days` days off per roster week (starting on `roster_week_start_day`). A **scheduled** duty (a roster entry\nor the default shift) worked beyond the week's allowance, e.g. the seventh day of a week without a rest day, is paid\nat `extra_duty_day_pay_rate` × a day's pay (base ÷ days in the period; half for a half day; 0 = not paid). Coming in\non a rest day without being rostered does not count: the roster manager rosters the person for it (HR also for a past\ndate), so every extra day paid has a named approver. An extra day is paid in the period of the date it was worked. Review → `POST …/{run_id}/finalize` (consumes credits/commissions, posts\nthe payroll journal) → `POST …/{run_id}/paid {\"method\": \"BankTransfer\"}`. Visiting consultants are paid\nper case via AP, not payroll. Employees see payslips in `GET /self/profile` / `GET /self/payslips/{id}`.",
+  "steps": [
+    {
+      "heading": "Onboarding wizard (§6.1, §6.3)",
+      "anchor": "onboarding-wizard-6-1-6-3",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees",
+          "summary": "Wizard step 1: create the profile (EMP number generated)"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/hr/employees/{employee_id}/steps/2",
+          "summary": "Wizard step 2: job taxonomy, supervisor, salary, shift"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees/{employee_id}/documents",
+          "summary": "Wizard step 5: document vault upload"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees/{employee_id}/submit",
+          "summary": "Wizard step 6: Finalize → Awaiting_IT_Provisioning (no login created)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/hr/employees/{employee_id}",
+          "summary": "Full profile incl. documents, qualifications, submit checklist"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees/{employee_id}/badges",
+          "summary": "Issue a staff badge: RFID card, printed QR badge or biometric enrolment"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/hr/employees/{employee_id}/id-card",
+          "summary": "ID card designer payload (barcode + QR of the EMP number)"
+        }
+      ]
+    },
+    {
+      "heading": "IT provisioning (§6.2)",
+      "anchor": "it-provisioning-6-2",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/provisioning-queue",
+          "summary": "Employees HR submitted, awaiting a login (pane 1)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admin/users",
+          "summary": "Provision a login (temporary password shown ONCE)"
+        }
+      ]
+    },
+    {
+      "heading": "Employment status (§6.2b, decisions 60)",
+      "anchor": "employment-status-6-2b-decisions-60",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees/{employee_id}/status",
+          "summary": "Suspend / resign / terminate (login and badges revoked), reinstate or re-join"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admin/users",
+          "summary": "Provision a login (temporary password shown ONCE)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees/{employee_id}/documents",
+          "summary": "Wizard step 5: document vault upload"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admin/users/{user_id}/active",
+          "summary": "Deactivate (sessions revoked) / reactivate + unlock"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees/{employee_id}/badges",
+          "summary": "Issue a staff badge: RFID card, printed QR badge or biometric enrolment"
+        }
+      ]
+    },
+    {
+      "heading": "Attendance (§6.4)",
+      "anchor": "attendance-6-4",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/badge-stations/scans",
+          "summary": "A badge was presented at a station (station-authenticated, no user login)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/rosters/roll-call",
+          "summary": "Mark rostered staff present (no badge station)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees/{employee_id}/shift",
+          "summary": "Set the default shift from a date (or roster-only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/hr/attendance",
+          "summary": "Daily attendance flags (Present / Late / Absent / HalfDay / Leave)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/attendance/manual",
+          "summary": "Manual punch correction (reasoned, audited)"
+        }
+      ]
+    },
+    {
+      "heading": "Weekly days off and the holiday calendar (§6.4, §6.6)",
+      "anchor": "weekly-days-off-and-the-holiday-calendar-6-4-6-6",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees/{employee_id}/shift",
+          "summary": "Set the default shift from a date (or roster-only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/hr/employees/{employee_id}",
+          "summary": "Full profile incl. documents, qualifications, submit checklist"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/hr/shift-patterns",
+          "summary": "Shift patterns"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/holidays",
+          "summary": "Public holidays of a year (or a date range)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/holidays",
+          "summary": "Add public holidays (all or nothing)"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/holidays/{holiday_id}",
+          "summary": "Rename, move or withdraw a public holiday"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/rosters/staff",
+          "summary": "Staff I may roster, with default shift and approved leave in the range"
+        }
+      ]
+    },
+    {
+      "heading": "Leave (§6.5)",
+      "anchor": "leave-6-5",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/self/leave-requests",
+          "summary": "Request leave (routes to my supervisor)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/hr/leave-requests",
+          "summary": "Leave inbox: my direct reports (HR sees all)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/leave-requests/{leave_request_id}/decision",
+          "summary": "Supervisor approves / rejects"
+        }
+      ]
+    },
+    {
+      "heading": "Payroll (§6.6)",
+      "anchor": "payroll-6-6",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/payroll-runs",
+          "summary": "Generate Payroll for a period"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/self/profile",
+          "summary": "My employee profile, payslips and attendance"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/self/payslips/{payroll_item_id}",
+          "summary": "One of my payslips"
+        }
+      ]
+    }
+  ]
+}

@@ -239,7 +239,7 @@ export function logPdf(query: { date_from: string; date_to: string }): Promise<u
   return api<unknown>("GET", withQuery(`/cssd/log/pdf`, query), undefined);
 }
 
-/** Asset monitor — GET /api/v1/ops/assets (who may call: holders of ops.asset.view or cssd.manage). */
+/** Asset monitor — GET /api/v1/ops/assets (who may call: holders of ops.asset.view or cssd.manage or ops.workorder.report). */
 export function assets(query?: { status?: string | null }): Promise<AssetMonitorOut[]> {
   return api<AssetMonitorOut[]>("GET", withQuery(`/ops/assets`, query), undefined);
 }

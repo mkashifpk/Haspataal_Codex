@@ -515,8 +515,48 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
-      "parameters": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "node",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "MainReception",
+                  "PharmacyCounter",
+                  "LabReception",
+                  "IPDBilling",
+                  "EmergencyCounter",
+                  "CashierDesk"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node"
+          }
+        }
+      ],
       "request_body": null,
       "responses": {
         "200": {
@@ -528,13 +568,37 @@
               }
             }
           }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
         }
       },
       "list": {
         "returns": "object",
         "paging": [],
         "search": [],
-        "filters": [],
+        "filters": [
+          {
+            "name": "node",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "MainReception",
+              "PharmacyCounter",
+              "LabReception",
+              "IPDBilling",
+              "EmergencyCounter",
+              "CashierDesk"
+            ]
+          }
+        ],
         "note": null
       }
     },
@@ -1693,11 +1757,13 @@
         },
         "opening_float": {
           "type": "number",
-          "title": "Opening Float"
+          "title": "Opening Float",
+          "description": "The cash the drawer started with, issued from the main vault: the drawer's first entry (OpeningFloat)"
         },
         "expected_cash": {
           "type": "number",
-          "title": "Expected Cash"
+          "title": "Expected Cash",
+          "description": "What the drawer should hold now: the opening float plus every cash movement of the shift (by_type). Count all of it at the close. 0 once the verified cash drop has taken it to the vault (cash_drop.expected_cash keeps the amount)"
         },
         "declared_cash": {
           "anyOf": [
@@ -1708,7 +1774,8 @@
               "type": "null"
             }
           ],
-          "title": "Declared Cash"
+          "title": "Declared Cash",
+          "description": "What the cashier counted in the whole drawer at the close, the float included (null while open)"
         },
         "status": {
           "type": "string",
@@ -1744,6 +1811,18 @@
         "cashier_name": {
           "type": "string",
           "title": "Cashier Name"
+        },
+        "declared_variance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Declared Variance",
+          "description": "declared_cash minus what the drawer held at the close, its float included (null until the shift is closed)"
         },
         "by_type": {
           "items": {
@@ -1784,6 +1863,7 @@
         "closed_at",
         "business_date",
         "cashier_name",
+        "declared_variance",
         "by_type",
         "non_cash",
         "cash_drop"
@@ -2043,6 +2123,7 @@
         "txn_type": {
           "type": "string",
           "enum": [
+            "OpeningFloat",
             "Sale",
             "ARCollection",
             "Refund",

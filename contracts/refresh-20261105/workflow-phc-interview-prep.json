@@ -1,0 +1,187 @@
+{
+  "slug": "phc-interview-prep",
+  "title": "PHC inspection interviews: daily practice, mock interviews, model answers and readiness",
+  "summary": "The PHC's surveyors verify 72 compliance requirements of the MSDS by questioning staff. Every member of staff rehearses the questions of their own roles, in English or Urdu (a question of the day, flashcards rated Knew / Partly / Didn't know on a spaced schedule, progress, a printed pocket guide) with model answers that quote the hospital's own settings and records; supervisors run mock interviews whose gaps in practice become corrective actions; the quality officer adapts the answers to the hospital's SOPs, marks what does not apply and reads the readiness role by role. None of it is shown to the PHC's inspector.",
+  "order": 99,
+  "workflow": "MSDS (2024 revision): the 72 compliance requirements whose Evidence includes Interview; the vendor's requests of 2026-10-08 and 2026-10-09 (Urdu)",
+  "workspaces": [
+    "*",
+    "quality",
+    "owner_dashboard"
+  ],
+  "file": "phc-interview-prep.md",
+  "markdown": "# PHC inspection interviews: daily practice, mock interviews, model answers and readiness\n\nDuring an inspection the Punjab Healthcare Commission's surveyors do not only read documents: for 72 compliance\nrequirements of the MSDS (2024 revision) the Evidence column says **Interview**, so they ask the nurse, the lab\ntechnician, the radiographer, the sanitary worker what they do. Haspataal already prints the documents those\nindicators need (the [inspection pack](phc-inspection.md)); this workflow gets the **people** ready.\n\nEvery establishment rehearses the questions of **its own manual** (the category recorded in Settings, facility): a\nclinic or a smaller hospital gets the Category I questions whose indicator its manual also has (`indicators_in_category`\nis never empty), plus its manual's own interviews where Category I has none: the Clinic manual's indicators 11 (fire and\nother emergencies), 35 (the prescription handed over) and 41 (consent before examination, VCO), and the Category II C\nmanual's 60 (emergency triage and SOPs) and 63 (the transfusion law). Those rows carry `framework` `Clinic` or `IIC`,\nno `phc_type` (a Category I notion) and their manual's `grade` (Red: full compliance, Yellow: at least 80 %). The server\nfilters by the category: never filter by framework in the app. A change of category changes the deck at once; the\nrehearsals and mock interviews already recorded stay as they were.\n\n| Who | Permission | What they do |\n|---|---|---|\n| Every member of staff | `msds.interview.practice` (every role except the PHC inspector) | rehearse the questions of their roles: question of the day, flashcards, progress, pocket guide |\n| Supervisors: head nurse, department heads, IPC nurse, quality officer, management | `msds.interview.conduct` | run mock interviews, raise corrective actions for gaps in practice, read the readiness |\n| Quality officer, Owner, Hospital Admin | `msds.interview.manage` | adapt the model answers to the hospital's SOPs, mark questions not applicable, read the readiness |\n\nThe question bank (78 questions) ships with the server: one entry for each of the 72 interview requirements and six the\nsurveyors commonly ask although the manual names another evidence (`beyond_filter`: hand hygiene, fire extinguishers,\npatient identity, access to records, sterilisation, expiry dates). Each has the question in the surveyor's words, other\nways of asking it, a model answer, the key points a good answer covers, follow-up probes, pitfalls, what to show and\nreferences. The PHC type comes from the colour of the indicator's banner in the manual: **Mandatory** (red) or\n**Operational** (yellow); show it as a word with its colour, never the colour alone.\n\n**Honesty first.** The answers describe what the hospital's SOPs say and what the staff actually do. Never present them\nas a script to memorise; under every answer show \"If a key point is not true on your ward, tell your in-charge: it is a\ngap to fix, not a line to learn.\" A gap found in a mock interview becomes a corrective action.\n\n**The hospital's own facts.** A model answer quotes the hospital's settings and records through placeholders, for\nexample \"the doctor countersigns it within {{verbal_order_countersign_hours}} hours\". The API fills them in\n(`model_answer`) and lists them (`facts`: label, value, `set`, `where` to set it); a fact not set yet prints as a\nbracketed prompt. Never fill one with an invented value.\n\n**English and Urdu.** The whole bank is in both languages: the question, its variants, the model answer (with the same\nplaceholders), the key points, the follow-ups, the pitfalls, what to show; the chapter names, the fact labels and units\n(\"24 گھنٹے\", \"10 منٹ\") and the notice under every answer too. What the PHC publishes in English stays in English: the\nrequirement's text, the indicator's label, the references and whom the surveyor asks; so do medicine names, test names\nand what the hospital typed into its records. Every read below takes `lang=en|ur`; without it the server uses the user's\nlanguage preference (`PUT /settings/me` `{\"language\": \"ur\"}`, read back in `/auth/me`), and every answer says its `lang`.\n\n| Field | Use |\n|---|---|\n| `lang` | the language the texts are in: switch the layout with it |\n| `direction` | `rtl` for Urdu: lay the card out right to left in Noto Nastaliq Urdu (bundle it in the app) |\n| `text_status` | `Original` (English), `Draft` (the Urdu bank until the vendor's native-speaker review: show \"Draft translation\" beside the answer), `Reviewed` |\n| `question_en` | the English wording a surveyor may use: show it small under the Urdu question |\n| `notice` | the honesty notice in the card's language |\n| `adapted_languages` | the languages the hospital adapted this answer in |\n\nOffer an English / اردو switch on every card (it sends `lang`); remember the user's choice with `PUT /settings/me`.\n\n## 1. Daily practice (every member of staff)\n\n1. The login card: `GET /msds/interview-prep/my-deck?limit=20`. Show `question_of_the_day` with a \"Practise\" button\n   (hide the card when it is null). `due` is the deck, the most urgent first: not known (DidNotKnow, Partly), then never\n   rehearsed (Mandatory first), then known ones due again; `counts` gives the tiles.\n2. A flashcard: `GET /msds/interview-prep/questions/{key}`. Show `question` and, on \"Ask it differently\", one of\n   `variants`. The user answers aloud or in their head, then \"Show the answer\" reveals `model_answer` and the\n   `key_points` as a checklist; `follow_ups` as \"The surveyor may ask next\", `pitfalls` as \"Avoid\", `show_me` as \"Be\n   ready to show\", and the `documents` (the inspection documents that evidence the indicator, each with its `pdf_url`).\n3. The rating: `POST /msds/interview-prep/rehearsals`\n   ```json\n   { \"question_key\": \"I-055-ii\", \"rating\": \"Partly\" }\n   ```\n   `Knew`, `Partly` or `DidNotKnow` (the user's own judgement against the key points). The answer carries `next_due`\n   (tomorrow when not known, in 3 days when partly, in 7 days when known, then doubling up to 60) and `due_left`.\n   `INTERVIEW_QUESTION_NOT_APPLICABLE`: the hospital took the question out, drop the card.\n4. Progress: `GET /msds/interview-prep/my-progress`: `ready_pct` (the share of my questions rated Knew), `streak_days`,\n   per chapter knew / partly / not known / not rehearsed, and `last_mock_interview` with its score (open it:\n   `GET /msds/interview-prep/mock-interviews/{mock_interview_id}`).\n5. Browse: `GET /msds/interview-prep/questions?mine=true` (my roles), or any role from `GET /msds/interview-prep/roles`;\n   filters `area`, `indicator`, `phc_type`, `search`. Each row has `framework`, `grade` and `indicators_in_category`,\n   the indicator's number(s) in the establishment's own PHC category (a Category II hospital or a clinic sees its\n   manual's numbers). Show `phc_type` when it is set (Category I) and the grade otherwise.\n6. The pocket guide: `GET /msds/interview-prep/pocket-guide/pdf?role=ward_nurse` (default: my first role), a PDF of the\n   role's questions with the key points and the model answers, the facts filled in, for the ward notice board and the\n   shift huddle. One click, one PDF. The PDF is English: the server's PDFs print Latin script only. The Urdu guide is a\n   print payload the app lays out and the terminal prints, as the Urdu consent forms and the complaints notice are:\n   `GET /msds/interview-prep/pocket-guide?role=ward_nurse&lang=ur`\n   ```json\n   { \"lang\": \"ur\", \"direction\": \"rtl\", \"text_status\": \"Draft\", \"role\": \"ward_nurse\", \"role_name\": \"Ward Nurse\",\n     \"hospital\": { \"name\": \"…\", \"address\": \"…\", \"phone\": \"…\", \"phc_number\": \"…\" },\n     \"title\": \"PHC معائنے کا انٹرویو: Ward Nurse کے لیے جیبی رہنما\", \"intro\": [\"…\", \"…\"], \"notice\": \"…\",\n     \"columns\": [\"اچھے جواب میں کیا ہونا چاہیے\", \"نمونہ جواب\"], \"footer\": \"…\",\n     \"questions\": [ { \"key\": \"I-055-ii\", \"indicator\": 55, \"phc_type\": \"Mandatory\", \"heading\": \"اشاریہ 55 (لازمی) · …\",\n                      \"question\": \"…\", \"key_points\": [\"…\"], \"model_answer\": \"… 24 گھنٹے کے اندر …\",\n                      \"answer_source\": \"Standard\" } ] }\n   ```\n   Print `heading`, then a two-column table (`columns`: the key points as bullets, the model answer) per question; the\n   title, the hospital and `intro` on top, `notice` and `footer` at the bottom, and \"Draft translation\" while\n   `text_status` is Draft.\n\nThe user's own mock interviews: `GET /msds/interview-prep/mock-interviews` lists only theirs unless they conduct or\nmanage mock interviews. The `msds.mock_interview.recorded` event tells them a new one was recorded.\n\n## 2. Mock interviews (supervisors)\n\n1. Pick the member of staff: `GET /msds/interview-prep/staff?role=ward_nurse&search=` (active employees with or without a\n   login: the surveyors question sanitary and kitchen staff too; `is_me` greyed, nobody examines themselves).\n2. Plan: `GET /msds/interview-prep/mock-interviews/plan?employee_id=88&role=ward_nurse&count=6`: the questions with the\n   `reason` each was picked (missed at the last mock interview, not known when rehearsed, never rehearsed: Mandatory\n   first). The examiner may swap any for another of the role (`GET /msds/interview-prep/questions?role=ward_nurse`).\n   Add `lang=ur` to put the questions in Urdu (the reasons follow): ask in the language the member of staff works in,\n   as the surveyors do.\n3. Hold it: one question at a time with its key points for the examiner (`GET /msds/interview-prep/questions/{key}`);\n   the model answer stays behind a toggle and is never shown to the person questioned.\n4. Record it once at the end: `POST /msds/interview-prep/mock-interviews` with an `Idempotency-Key`\n   ```json\n   { \"employee_id\": 88, \"role\": \"ward_nurse\", \"note\": \"Ward 3, night shift\",\n     \"items\": [\n       { \"question_key\": \"I-064-ii\", \"result\": \"Met\" },\n       { \"question_key\": \"I-084-i-j\", \"result\": \"PartlyMet\", \"note\": \"Did not know the 24-hour storage limit\" },\n       { \"question_key\": \"I-055-ii\", \"result\": \"NotMet\", \"note\": \"Verbal orders are never read back on this ward\",\n         \"action\": { \"action_type\": \"Corrective\", \"description\": \"Teach read-back of verbal orders on ward 3; audit 10 orders\",\n                     \"owner_user_id\": 41, \"due_date\": \"2026-10-31\" } } ] }\n   ```\n   A note is required unless Met (`VALIDATION_ERROR`). `action` only with PartlyMet or NotMet, and only when the answer\n   shows a gap in **practice** (the SOP is not followed, equipment is missing): it goes to the hospital's action register\n   (`GET /quality/actions?source=MockInterview`) with its owner and due date; the owner must have a login (`user_id` from\n   step 1). The answer carries the score (`score_pct`: Met 1, PartlyMet half), the items and the actions. The member of\n   staff is notified. `MOCK_INTERVIEW_SELF`: nobody examines themselves.\n   An item's action names its owner from `GET /msds/interview-prep/staff` (`user_id`) and its department from\n   `GET /admin/departments`.\n5. History: `GET /msds/interview-prep/mock-interviews?employee_id=&role=` and\n   `GET /msds/interview-prep/mock-interviews/{mock_interview_id}?lang=` (the items' questions in that language).\n\n## 3. The model answers (Quality Officer)\n\n1. The bank: `GET /msds/interview-prep/questions` (all 78; `adapted` and `applicable` flags) and\n   `GET /msds/interview-prep/questions/{key}`: `standard_answer` with its `{{placeholders}}`, `model_answer` filled, the\n   `facts` (a fact not set links to `where`, e.g. \"Setting verbal_order_countersign_hours (PUT /admin/settings/...)\"), the\n   `standard_key_points`, the `hospital_version` when there is one.\n2. Adapt an answer to the hospital's SOP: `PUT /msds/interview-prep/questions/{key}/hospital-answer`\n   ```json\n   { \"lang\": \"en\",\n     \"model_answer\": \"On our wards a verbal order is taken only in an emergency; I write it on the MAR, read it back and the doctor countersigns within {{verbal_order_countersign_hours}} hours.\",\n     \"key_points\": [\"Only in an emergency\", \"Written, read back, confirmed\", \"Countersigned within the set hours\"],\n     \"note\": \"Nursing SOP NUR-07, approved by the nursing superintendent\", \"expected_version\": null }\n   ```\n   It may quote the same facts (`VALIDATION_ERROR` with `details.facts` for an unknown one). Null answer or key points =\n   the bank's text again. Send `hospital_version.row_version` as `expected_version` (`VERSION_CONFLICT`: reload); every\n   change is kept as history.\n   **Each language on its own:** `lang` says which language the answer and the key points are in (default `en`); the\n   other language keeps its own version (`hospital_version` has `model_answer` / `key_points` for English and\n   `model_answer_ur` / `key_points_ur` for Urdu). Give the editor an English / اردو switch (`GET .../questions/{key}?lang=`).\n   When `adapted_languages` names one language only, show \"Adapted in English only: adapt the Urdu too\" (or the other\n   way round), so a nurse who rehearses in Urdu reads the hospital's SOP and not the bank's text. The Urdu bank is a draft\n   (`text_status`) until the vendor's native-speaker review: the quality officer may correct any Urdu answer here.\n3. A question that does not apply here (no imaging department, no blood bank): the same call with\n   `\"applicable\": false, \"not_applicable_reason\": \"No blood bank: blood comes from the Regional Blood Centre\"`. It leaves\n   the decks, the pocket guides and the readiness.\n4. Review every answer with the department heads before the staff rehearse: the bank's answers are a starting point\n   written from the MSDS, WHO guidance, the PNRA regulations, DRAP's recall guidelines and the Hospital Waste Management\n   Rules 2005.\n\n## 4. Readiness (Quality Officer, management, supervisors)\n\n`GET /msds/interview-prep/readiness?role=` (`msds.interview.manage` or `conduct`):\n\n* `totals`: staff, started, ready %, mock interviews in the last 90 days and their score;\n* `roles`: per role the active staff, how many started, the average ready %, `not_started` (names), the mock interviews\n  and their score; a \"Pocket guide\" button per role (`GET /msds/interview-prep/pocket-guide/pdf?role=`);\n* `weakest`: the 10 questions the staff know least (DidNotKnow, Partly, mock NotMet and PartlyMet counts): teach them in\n  the next huddle;\n* `facts_not_set`: the settings and records the answers quote that are not set yet (show first, in amber: the staff\n  would rehearse a bracketed prompt instead of the hospital's figure);\n* `adapted_in_one_language`: the answers the hospital adapted in English or Urdu only (`key`, `adapted_languages`):\n  link each to the answer editor.\n\n`lang` sets the language of the weakest questions and the fact labels. A \"Pocket guide\" button per role opens the PDF\n(English) or the Urdu payload (`GET /msds/interview-prep/pocket-guide?role=&lang=ur`).\n\nRefresh on `msds.mock_interview.recorded`. This is the hospital's internal preparation: the PHC inspector's role has no\npermission for any of it; never show it in the `inspection` workspace.\n\n## The facts the answers quote\n\nSettings (`PUT /admin/settings/{key}`): `lab_turnaround_routine_minutes`, `lab_turnaround_emergency_minutes`,\n`critical_result_communicate_minutes`, `er_triage_target_minutes`, `er_admission_wait_minutes`,\n`er_referral_wait_minutes`, `verbal_order_countersign_hours`, `mar_on_time_window_minutes`, the pharmacy temperature\nranges, `near_expiry_alert_days`, `ot_recovery_min_score`, `estimate_due_hours`, the complaint deadlines and\n`complaint_desk`, `incident_review_hours`, `sentinel_analysis_days`, `drill_interval_months`, `orientation_due_days`,\nthe appraisal intervals, `staff_rights_statement`, `hospital_mission_statement` (new: MSDS ROM 108) and\n`hospital_head_employee_id`. Records: the triage levels, the high-alert medicines and the look-alike / sound-alike pairs,\nthe sentinel event list, the last mock drill, the quality officers, the quality and waste management committees, the\npolice stations and the medico-legal case types.\n\n## Errors\n\n| Code | When | The UI |\n|---|---|---|\n| `INTERVIEW_QUESTION_UNKNOWN` | a key not in the bank | reload the list |\n| `INTERVIEW_QUESTION_NOT_APPLICABLE` | rehearsing a question the hospital took out | drop the card, refresh the deck |\n| `MOCK_INTERVIEW_SELF` | a supervisor plans or records their own mock interview | ask another supervisor |\n| `VERSION_CONFLICT` | adapting an answer someone else changed | reload, then edit again |\n| `VALIDATION_ERROR` | a note missing on PartlyMet / NotMet, an action on Met, an unknown fact in an answer, an unknown role | show `details` |\n\n## For the coding agents\n\nThe MCP tools `get_interview_prep_brief`, `list_interview_questions(role, area, indicator, lang)` and\n`get_interview_question(key, lang)` serve the same bank in English and Urdu, the facts catalogue and the rules;\n`get_screen` for `interview_practice`, `mock_interviews`, `interview_bank`, `interview_readiness`.",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/settings/me",
+          "summary": "Update my preferences (only the fields you send)"
+        }
+      ]
+    },
+    {
+      "heading": "1. Daily practice (every member of staff)",
+      "anchor": "1-daily-practice-every-member-of-staff",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/my-deck",
+          "summary": "My practice deck: the question of the day and what to rehearse now"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/questions/{key}",
+          "summary": "One question: other ways of asking, the model answer with the hospital's facts, key points, follow-ups, pitfalls, what to show"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/msds/interview-prep/rehearsals",
+          "summary": "Record how well I knew a question (Knew, Partly, DidNotKnow)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/my-progress",
+          "summary": "My readiness: questions known, chapter by chapter, my streak and my last mock interview"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "summary": "One mock interview: each answer and the actions it raised"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/questions",
+          "summary": "The PHC inspection interview questions (filter by role, chapter, indicator, type, words)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/roles",
+          "summary": "The roles and how many inspection interview questions each rehearses"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/pocket-guide/pdf",
+          "summary": "A role's pocket guide: questions, key points and model answers (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/pocket-guide",
+          "summary": "A role's pocket guide as a print payload, in English or Urdu"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/mock-interviews",
+          "summary": "Mock interviews, newest first (staff who do not conduct them see their own)"
+        }
+      ]
+    },
+    {
+      "heading": "2. Mock interviews (supervisors)",
+      "anchor": "2-mock-interviews-supervisors",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/staff",
+          "summary": "The staff to question in a mock interview (with or without a login)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/mock-interviews/plan",
+          "summary": "The questions to put in a mock interview: the member of staff's weak points first"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/questions",
+          "summary": "The PHC inspection interview questions (filter by role, chapter, indicator, type, words)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/questions/{key}",
+          "summary": "One question: other ways of asking, the model answer with the hospital's facts, key points, follow-ups, pitfalls, what to show"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/msds/interview-prep/mock-interviews",
+          "summary": "Record a mock PHC interview: each answer Met, PartlyMet or NotMet, and the actions for the gaps"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/actions",
+          "summary": "The action register (mine: the actions I own)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/mock-interviews",
+          "summary": "Mock interviews, newest first (staff who do not conduct them see their own)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "summary": "One mock interview: each answer and the actions it raised"
+        }
+      ]
+    },
+    {
+      "heading": "3. The model answers (Quality Officer)",
+      "anchor": "3-the-model-answers-quality-officer",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/questions",
+          "summary": "The PHC inspection interview questions (filter by role, chapter, indicator, type, words)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/questions/{key}",
+          "summary": "One question: other ways of asking, the model answer with the hospital's facts, key points, follow-ups, pitfalls, what to show"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/msds/interview-prep/questions/{key}/hospital-answer",
+          "summary": "Adapt a question's answer to the hospital's SOP, or mark it not applicable here"
+        }
+      ]
+    },
+    {
+      "heading": "4. Readiness (Quality Officer, management, supervisors)",
+      "anchor": "4-readiness-quality-officer-management-supervisors",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/readiness",
+          "summary": "The staff's interview readiness, role by role, and the questions they know least"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/pocket-guide/pdf",
+          "summary": "A role's pocket guide: questions, key points and model answers (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/msds/interview-prep/pocket-guide",
+          "summary": "A role's pocket guide as a print payload, in English or Urdu"
+        }
+      ]
+    },
+    {
+      "heading": "The facts the answers quote",
+      "anchor": "the-facts-the-answers-quote",
+      "calls": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/settings/{key}",
+          "summary": "Change a policy setting (type-checked, audited)"
+        }
+      ]
+    }
+  ]
+}

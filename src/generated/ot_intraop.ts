@@ -2,6 +2,12 @@
 // api(): the helper from get_guide("envelope-and-errors"). Types come from the declared request and response models.
 import { api } from "./api";
 
+const withQuery = (path: string, q?: Record<string, unknown>) => {
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
+  return s ? `${path}?${s}` : path;
+};
+
 export interface OtBookingDetailOut {
   booking_id: number;
   booking_number: string;
@@ -96,6 +102,7 @@ export interface SettlementParticipantOut {
 export interface ConsumableIn {
   /** Scanned barcode of a formulary item (pharmacy stock, FEFO) */
   barcode?: string | null;
+  /** A formulary item without its barcode (GET /drugs/search) */
   drug_id?: number | null;
   qty: number | string;
   /** Non-stock items (e.g. vendor implant): description + costs */
@@ -128,6 +135,33 @@ export interface OtReasonIn {
   reason: string;
 }
 
+/** A drug with its live stock (view v_drug_stock): what e-prescription search shows. */
+export interface DrugStockOut {
+  drug_id: number;
+  code: string;
+  name: string;
+  generic_name: string | null;
+  strength: string | null;
+  form: "Tablet" | "Capsule" | "Syrup" | "Suspension" | "Injection" | "Infusion" | "Cream" | "Ointment" | "Drops" | "Inhaler" | "Suppository" | "Powder" | "Consumable" | "Device" | "Other";
+  unit: string;
+  schedule: "OTC" | "ScheduleG" | "ScheduleH" | "ScheduleX" | "HospitalOnly";
+  is_otc_allowed: boolean;
+  barcode: string | null;
+  low_stock_threshold: number;
+  is_active: boolean;
+  /** Set: a high-alert medicine (MSDS 56): show it in red; a second person checks it when dispensed and given */
+  high_alert_category: "ConcentratedElectrolyte" | "Chemotherapy" | "Anticoagulant" | "Insulin" | "Opioid" | "Sedative" | "NeuromuscularBlocker" | "Inotrope" | "Thrombolytic" | "Psychotropic" | "HighCost" | "Other" | null;
+  /** Prescribed only with the RestrictedPrescribing privilege (MSDS 52) */
+  is_restricted: boolean;
+  /** Medicines it looks or sounds like: warn when one is picked */
+  lasa_with: string[];
+  /** Non-expired stock */
+  qty_available: number;
+  next_expiry: string | null;
+  /** OutOfStock: show the drug greyed out */
+  stock_status: "InStock" | "Low" | "OutOfStock";
+}
+
 /** Patient in theater → 🔴 In-Surgery — POST /api/v1/ot/bookings/{booking_id}/start (who may call: holders of ot.booking.manage). */
 export function startOtBookings(booking_id: number): Promise<OtBookingDetailOut> {
   return api<OtBookingDetailOut>("POST", `/ot/bookings/${booking_id}/start`, undefined);
@@ -156,4 +190,9 @@ export function completeCleaning(booking_id: number): Promise<OtBookingDetailOut
 /** Booking with consumables and settlement — GET /api/v1/ot/bookings/{booking_id} (who may call: holders of ot.booking.view or ot.booking.manage). */
 export function getBooking(booking_id: number): Promise<OtBookingDetailOut> {
   return api<OtBookingDetailOut>("GET", `/ot/bookings/${booking_id}`, undefined);
+}
+
+/** Formulary search with live stock colour — GET /api/v1/drugs/search (who may call: holders of pharmacy.formulary.view). */
+export function searchDrugs(query?: { q?: string; limit?: number }): Promise<DrugStockOut[]> {
+  return api<DrugStockOut[]>("GET", withQuery(`/drugs/search`, query), undefined);
 }

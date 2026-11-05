@@ -1,0 +1,296 @@
+{
+  "slug": "duty-rosters-and-attendance",
+  "title": "Duty rosters, roll call, badges & attendance",
+  "summary": "One duty roster for all staff with scoped planners (HR, Head Nurse, Ops), rest days rotating through a week that includes Sunday, the week check, duty swaps between colleagues, roll call where there is no badge station, attendance measured against the rostered shift, and badges that work with RFID, printed QR codes or biometrics.",
+  "order": 99,
+  "workflow": "§2.6, §6.4, §6.7, §6.8, §8.1, §8.2",
+  "workspaces": [
+    "hr",
+    "head_nurse",
+    "ops_admin",
+    "ward_nurse",
+    "self_service",
+    "super_admin",
+    "badge_station"
+  ],
+  "file": "duty-rosters-and-attendance.md",
+  "markdown": "# Duty rosters, roll call, badges & attendance\n\n## Who rosters whom\n\nOne roster covers every kind of staff. The planner is the same screen in three workspaces; the server decides\nwhom each person may see and change, by the employee's staff category:\n\n| Permission | Default role | May roster |\n|---|---|---|\n| `roster.manage.all` | HR Admin | every employee (doctors, lab, pharmacy, reception, nurses, support staff …) |\n| `roster.manage.nursing` | Head Nurse | `Nursing` staff |\n| `roster.manage.support` | Ops Admin | `SupportZeroInterface` staff (sweepers, janitors, guards) |\n| `roster.view.all` | Owner, Hospital Admin (and HR) | read-only, everyone |\n\nThe Super Admin can move these permissions to other roles in the Role Access Matrix (for example a department\nhead). Everyone with a login sees their own duties (`GET /self/roster`).\n\n## The planner (screens `duty_roster_hr`, `duty_roster`, `support_roster`)\n\n1. `GET /rosters/staff?date_from=…&date_to=…` → the people you may roster (left column) with their approved\n   `leave` in the range (grey those days out), the active `shift_patterns` (the grid's rows: Morning 08–14,\n   Evening 14–20 and Night 20–08 are seeded; HR edits them at `POST /hr/shift-patterns`) and the public\n   `holidays` in the range (mark those columns; rostering on them is allowed).\n2. `GET /rosters?date_from=…&date_to=…[&ward_id|department_id|staff_category]` → the entries (a week by\n   default, up to 62 days). Each has `row_version`, `shift_name`, `start_time`/`end_time` and `bed_ids`.\n3. Drag people onto cells, then save everything at once: `POST /rosters {entries: [...]}`. It is all or\n   nothing: on an error, `details.entry_index` names the entry to highlight.\n   * `duty_area`: `Ward` (needs `ward_id`; the Head Nurse assigns `bed_ids` — the nurse then sees them in\n     `GET /ipd/my-beds`), `Department`, `Emergency`, `OT`, `Facility` (gates, corridors, zones), `Other`.\n   * `is_on_call`, `zone_label` and `notes` are free to use. The ER shows the duties in the `Emergency` area and every\n     on-call duty of the moment (with the mobile number of whoever is on call) at `GET /er/on-duty` (MSDS 17 iii).\n   * The ward of a duty from `GET /beds/matrix?include_beds=false`, the department of a `Department` duty from\n     `GET /admin/departments` (decision 62); `PATCH /rosters/{id}` and `POST /rosters/copy` take them the same way.\n4. Change one entry: `PATCH /rosters/{id}` with only the changed fields and `expected_version` (else\n   `VERSION_CONFLICT` — reload). Remove one: `POST /rosters/{id}/cancel {reason}` (never deleted).\n5. \"Repeat last week\": `POST /rosters/copy {source_from, source_to, target_from}` → `created` and `skipped`\n   (with the reason per entry, e.g. `ROSTER_ON_LEAVE`). Show the skipped list.\n6. Keep the grid live with the `roster.changed` event. Rostered staff who have a login also get a notification.\n\n| Error | Meaning | UI |\n|---|---|---|\n| `ROSTER_OUT_OF_SCOPE` | that employee's staff category is not yours | should not happen if you only offer `/rosters/staff` |\n| `ROSTER_CONFLICT` | overlaps another duty of the same person; a night shift runs into the next morning | highlight both cells |\n| `ROSTER_ON_LEAVE` | approved leave that day | grey the day out |\n| `ROSTER_DATE_CLOSED` | a past date, and you are not HR | past columns read-only |\n| `ROSTER_EMPLOYEE_INACTIVE` | resigned / suspended / not yet submitted by HR | drop from the list |\n\nA shift that crosses midnight belongs to the date it starts, for rostering and for attendance (below).\nBack-to-back shifts (Night then Morning) are allowed; overlapping ones are not.\n\n## The hospital never closes: rotating rest days\n\nSunday is a working day like any other, usually with fewer staff. Nobody is off just because it is Sunday: each\nperson gets their weekly rest day (setting `weekly_rest_days`, 1 by default, per **roster week**, which starts on\nsetting `roster_week_start_day`, Monday by default) on a different day, and the days rotate so that Sunday duty is\nshared in turn.\n\n* **Roster-only staff** (nurses, support staff): a day without a duty is a rest day. Plan the week, then use\n  `POST /rosters/copy {source_from, source_to, target_from, \"rotate_days\": 1}` to repeat it with everyone's days\n  moved on by one: a Monday-Saturday week with Sunday off becomes Tuesday-Sunday with Monday off, so over seven\n  weeks everyone has each weekday off once. `rotate_days` 0 (the default) repeats the week as it was.\n* **Staff on a fixed schedule** (accounts, office): their default shift names **their own** weekly days off\n  (`weekly_off_days`, required: there is no hospital-wide day off). `GET /rosters/staff` shows them as\n  `default_weekly_off_days`: grey those columns. Rostering them on that day makes it a working day.\n\n### The week check (`GET /rosters/week`)\n\n`GET /rosters/week?week_of=…[&ward_id|department_id|staff_category]` (any day of the week; today by default), for the\nstaff you may see:\n\n* `staff[]`: each person's `duty_dates`, `rest_dates`, `leave_dates` and `working_days`, and `status`:\n  `NoRestDay` (more working days than the week allows: `extra_duty_days` of them are paid as extra duty, see\n  [HR and payroll](hr-and-payroll.md)), `NotRostered` (roster-only, nothing planned yet) or `Ok`.\n  `staff_without_rest_day` counts the first.\n* `days[]`: per day (`weekday` 7 = Sunday, `holiday_name`), how many are `on_duty`, `on_leave` and `resting`, and\n  per shift (`shifts[].staff`). Show it as a row under the grid: a thin Sunday shows before the week starts.\n* With `ward_id`: the staff with a duty on that ward that week, and only that ward's duties in the counts.\n\n## Duty swaps between colleagues\n\nA nurse with a personal emergency asks a colleague to work her duty (a **cover**), or to exchange duties (a\n**swap**: she works one of the colleague's duties in return). Nothing changes on the roster until the colleague\nagrees and a roster manager of their staff category approves (setting `roster_swap_needs_approval`; off = the\ncolleague's acceptance is enough). Self-service needs `self.roster.swap` (every role with a login and leave).\n\n1. The requester, on a duty that has not started: `GET /self/roster/swap-options?roster_id=…` → `colleagues`: active\n   staff of her category who are free then (no leave, no overlapping duty), same department first, each with\n   `their_duties` of the next two weeks and `you_can_work_it`.\n2. `POST /self/roster/swaps {roster_id, covering_employee_id, return_roster_id?, reason}` → status `Requested`; the\n   colleague is notified. Refusals: `FORBIDDEN` (not your duty), `SWAP_DUTY_STARTED`, `SWAP_COLLEAGUE_INELIGIBLE`\n   (`details.reason`: other_category, inactive, same_person), `ROSTER_CONFLICT` / `ROSTER_ON_LEAVE` (either of them\n   cannot work the other's duty), `SWAP_EXISTS` (one open request per duty).\n3. The colleague: `GET /self/roster/swaps` (`my_role` Colleague) → `POST /self/roster/swaps/{id}/accept {note?}` or\n   `/decline {note?}`. The requester may `POST /self/roster/swaps/{id}/cancel` until it is approved.\n4. The roster manager: `GET /rosters/swaps` (open ones; `Accepted` = waiting for you) →\n   `POST /rosters/swaps/{id}/approve {note?}` or `/reject {note}`. Approval re-checks everything, then cancels each\n   duty (\"Worked by … (duty swap n)\") and re-creates it for the other person with `swap_id`; both are notified.\n   Neither colleague decides their own swap (`SWAP_SELF_APPROVAL`, also enforced by the database).\n5. Staff without a login (sweepers, guards): the manager records the swap they agreed in person,\n   `POST /rosters/swaps {roster_id, covering_employee_id, return_roster_id?, reason}`: accepted and approved at once.\n\nA request still open when one of its duties starts expires (worker job `rosters.swap_expiry`); moving or cancelling\nthe duty on the roster withdraws it. Keep lists live with `roster.swap.updated`. Attendance follows the new duties.\nA cover leaves the requester without a duty that day, a rest day; if the hospital wants it counted, she applies for\nleave for it. The colleague's extra day may make theirs a seven-day week: paid as extra duty.\n\n## Attendance is measured against the schedule (§6.4)\n\nThe worker computes each day's flag (`Present`, `Late`, `HalfDay`, `Absent`, `Leave`, `Off`) against the\nemployee's **schedule** for that day:\n\n1. the day's duty roster entries (the earliest one sets the start time for lateness), also on a public holiday;\n2. without an entry, the employee's **default shift** (`POST /hr/employees/{id}/shift`), for staff on a fixed\n   schedule such as accounts, except on their own weekly days off (`weekly_off_days`) and public holidays;\n3. with neither, the day is a paid rest day: `Holiday` on a public holiday, else `Off`.\n\nWeekly days off and the holiday calendar (kept by HR and the Hospital Admin):\n[HR, provisioning, attendance, leave & payroll](hr-and-payroll.md).\n\nStaff planned week by week on the roster (nurses, support staff) should therefore have **no** default shift:\n`POST /hr/employees/{id}/shift {\"shift_pattern_id\": null, \"effective_from\": \"…\"}` (the days before keep the old\ndefault). Otherwise the default shift is expected on every day they are not rostered, and the rest day after a\nnight shift shows as `Absent`, which payroll deducts as an unpaid day. The planner shows each person's\n`default_shift_pattern_id` (`GET /rosters/staff`) so the screen can warn about it.\n\n### Night shifts\n\nEvery punch belongs to the **duty** it is for, not to its calendar date (`attendance_date` on each punch):\n\n* The Night shift of the 5th (20:00–08:00) owns both the 19:55 arrival and the 08:05 exit on the 6th. The flag is\n  on the 5th, with the worked time across midnight; the 6th stays a rest day.\n* A punch counts for a scheduled duty from `attendance_early_punch_minutes` (default 180) before the duty starts\n  to `attendance_late_punch_minutes` (default 360) after it ends. If it fits two duties (a night followed by a\n  morning shift), it closes the earlier one while that is still open (an odd number of punches), else it opens\n  the later one.\n* A punch with no scheduled duty around it counts on its calendar date.\n* `GET /hr/attendance/punches?employee_id=…&day=…` lists the punches of one duty date. When the automatic choice is\n  wrong (forgotten punches in a double shift, unscheduled overtime), HR names the duty of a correction:\n  `POST /hr/attendance/manual {…, \"attendance_date\": \"…\"}` (the punch's own date or the day before or after).\n* A night shift that is still running after midnight stays on screen: the nurse's `GET /ipd/my-beds` and\n  `GET /self/roster`, and the roll-call sheet.\n\nPunches come from three sources, shown in `GET /hr/attendance/punches` (`source`):\n\n| Source | How |\n|---|---|\n| `Badge` | a badge presented at a badge station (below) |\n| `RollCall` | a supervisor marked the person present (below) |\n| `Manual` | HR corrected a missed punch (`POST /hr/attendance/manual`, reason required) |\n\n## Roll call — no badge station at all (screens `roll_call`, `support_roster`, HR `attendance`)\n\n1. `GET /rosters/roll-call[?roster_date&shift_pattern_id&ward_id]` → who is rostered in your scope, with\n   `first_in` / `first_source` for those already recorded. Without `roster_date`: today's duties plus a night\n   shift from yesterday that is still running (each entry carries its own `roster_date`).\n2. Tick who is present: `POST /rosters/roll-call {roster_date, present: [{employee_id, at?}]}` → an `In` punch\n   for that duty, with source `RollCall` and you as the recorder; the duty's flag is recomputed at once. Staff who\n   already punched for that duty are skipped (a badge scan is never doubled).\n   * Open for today's duties and for a night shift that is still running (after midnight, send its\n     `roster_date`: yesterday).\n   * An earlier day's shift that has ended: HR only, with the real arrival time `at` (`ROSTER_DATE_CLOSED` for\n     others).\n   * `at` (default now) must fall within the shift, from 3 hours before it starts to 6 hours after it ends by\n     default; a future `roster_date` is refused (`VALIDATION_ERROR`).\n\nRequires `attendance.roll_call` (Head Nurse, Ops Admin, HR). Only rostered staff can be marked\n(`ROLL_CALL_NOT_ROSTERED`).\n\n## Badges and badge stations — zero-interface staff (§6.8, §8.2)\n\nSweepers, janitors and guards never log in and never use a keyboard. They present a **badge** at a **badge\nstation**. The hospital chooses the hardware; the API is identical:\n\n| Hospital has | Badge (`technology`) | Station (`device_type`) |\n|---|---|---|\n| RFID readers | RFID card; HR enters the card UID as `badge_code` | `RFIDReader` (wall reader, ESP32, vendor gateway) |\n| **No special hardware** | **`Barcode`: a QR printed on the staff ID card; the server generates the code** | **`BarcodeScanner`: any PC or tablet with a basic USB barcode scanner or its camera, running the kiosk page** |\n| Fingerprint / face terminals | `Biometric`: the device's enrolment id | `BiometricTerminal` behind a small gateway that posts scans |\n\nA hospital may mix them (one active badge per technology per person).\n\n### Setting up without RFID\n\n1. HR: `POST /hr/employees/{id}/badges {\"technology\": \"Barcode\", \"holder_type\": \"Sweeper\"}` → a code like\n   `HB7K3M9Q2XW1` (unguessable). Print the ID card again: `GET /hr/employees/{id}/id-card` carries it as\n   `badge` (`qr_svg`, `barcode_svg`). A lost card: `POST /hr/badges/{code}/revoke`, issue a new one, reprint.\n2. IT: `PUT /admin/badge-stations/{id}` with `device_type: \"BarcodeScanner\"`, then\n   `POST /admin/badge-stations/{id}/rotate-key` (the key is shown once; enter it in the kiosk's settings).\n   * Staff entrance: `action_type: \"AttendancePunch\"`.\n   * Bed cleaning: one kiosk per ward (`location_type: \"Ward\"`, `action_type: \"BedCleaned\"`, `ward_id`) and a QR\n     sticker on every bed: print them from `GET /admin/wards/{ward_id}/bed-labels`. The cleaner scans the bed's\n     sticker and their badge.\n3. The kiosk page (screen `badge_station_kiosk`, workspace `badge_station`, no login):\n   `GET /badge-stations/me?station_id=…` (header `X-Station-Key`) tells it what it does and whether it needs a\n   bed sticker (`needs_bed_code`; `dirty_beds` lists what is waiting). Each scan:\n   `POST /badge-stations/scans {station_id, badge_code, bed_code?, gateway_event_id}` → show `outcome` big and\n   green / red: `AttendanceIn`, `AttendanceOut`, `BedCleaned`, `BedCleaningRecorded`, `SecurityPass`,\n   `Duplicate`, `UnknownBadge`, `InactiveBadge`, `Rejected` (with `detail`), `NoAction`.\n\n### Where there is no station at a bed or ward\n\nThe ward nurse, head nurse or ops admin confirms the cleaning on their screen:\n`POST /beds/{bed_id}/mark-cleaned {\"cleaned_by_employee_id\": …}` (the cleaner is optional but attributes the\nwork; pick them with `GET /staff/lookup?q=`). Same rules as a scan: the bed becomes `Available`, or `BedCleaningRecorded` until discharge billing clears.\n\n## Live facility feed (Ops)\n\nEvery scan, even a rejected one, is in `GET /ops/facility-feed` and the `ops.badge.scan` event.",
+  "steps": [
+    {
+      "heading": "Who rosters whom",
+      "anchor": "who-rosters-whom",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/self/roster",
+          "summary": "My duties (two weeks from today by default)"
+        }
+      ]
+    },
+    {
+      "heading": "The planner (screens duty_roster_hr, duty_roster, support_roster)",
+      "anchor": "the-planner-screens-duty-roster-hr-duty-roster-support-roster",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rosters/staff",
+          "summary": "Staff I may roster, with default shift and approved leave in the range"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/shift-patterns",
+          "summary": "Create a shift pattern"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/rosters",
+          "summary": "Roster entries for a date range (planner grid, a week by default)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/rosters",
+          "summary": "Roster one or many duties (all or nothing)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ipd/my-beds",
+          "summary": "Ward nurse: my rostered beds this shift (doses due, last vitals)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/er/on-duty",
+          "summary": "Staff on duty in the ER and consultants on call"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/rosters/{roster_id}",
+          "summary": "Change a duty (shift, date, place, beds, on-call, notes)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/rosters/copy",
+          "summary": "Repeat a period (e.g. last week) from a later date"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/rosters/{roster_id}/cancel",
+          "summary": "Cancel a duty (reason kept; never deleted)"
+        }
+      ]
+    },
+    {
+      "heading": "The hospital never closes: rotating rest days",
+      "anchor": "the-hospital-never-closes-rotating-rest-days",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/rosters/copy",
+          "summary": "Repeat a period (e.g. last week) from a later date"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/rosters/staff",
+          "summary": "Staff I may roster, with default shift and approved leave in the range"
+        }
+      ]
+    },
+    {
+      "heading": "The week check (GET /rosters/week)",
+      "anchor": "the-week-check-get-rosters-week",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rosters/week",
+          "summary": "Week check: rest days per person, staff per day and shift"
+        }
+      ]
+    },
+    {
+      "heading": "Duty swaps between colleagues",
+      "anchor": "duty-swaps-between-colleagues",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/self/roster/swap-options",
+          "summary": "Colleagues who could work one of my duties"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/self/roster/swaps",
+          "summary": "Ask a colleague to work one of my duties (cover or swap)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/self/roster/swaps",
+          "summary": "Swap requests I made or was asked (open first)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/self/roster/swaps/{swap_id}/accept",
+          "summary": "Agree to work a colleague's duty"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/self/roster/swaps/{swap_id}/cancel",
+          "summary": "Withdraw my swap request (before approval)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/rosters/swaps",
+          "summary": "Duty swaps of the staff I roster (open ones by default)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/rosters/swaps/{swap_id}/approve",
+          "summary": "Approve a duty swap"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/rosters/swaps",
+          "summary": "Record a swap agreed on the ward (staff without a login)"
+        }
+      ]
+    },
+    {
+      "heading": "Attendance is measured against the schedule (§6.4)",
+      "anchor": "attendance-is-measured-against-the-schedule-6-4",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees/{employee_id}/shift",
+          "summary": "Set the default shift from a date (or roster-only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/rosters/staff",
+          "summary": "Staff I may roster, with default shift and approved leave in the range"
+        }
+      ]
+    },
+    {
+      "heading": "Night shifts",
+      "anchor": "night-shifts",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/hr/attendance/punches",
+          "summary": "Raw punches of one employee for one duty date"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/attendance/manual",
+          "summary": "Manual punch correction (reasoned, audited)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ipd/my-beds",
+          "summary": "Ward nurse: my rostered beds this shift (doses due, last vitals)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/self/roster",
+          "summary": "My duties (two weeks from today by default)"
+        }
+      ]
+    },
+    {
+      "heading": "Roll call — no badge station at all (screens roll_call, support_roster, HR attendance)",
+      "anchor": "roll-call-no-badge-station-at-all-screens-roll-call-support-roster-hr-attendance",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rosters/roll-call",
+          "summary": "Roll-call sheet: who is rostered today and who has arrived"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/rosters/roll-call",
+          "summary": "Mark rostered staff present (no badge station)"
+        }
+      ]
+    },
+    {
+      "heading": "Setting up without RFID",
+      "anchor": "setting-up-without-rfid",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees/{employee_id}/badges",
+          "summary": "Issue a staff badge: RFID card, printed QR badge or biometric enrolment"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/hr/employees/{employee_id}/id-card",
+          "summary": "ID card designer payload (barcode + QR of the EMP number)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/badges/{badge_code}/revoke",
+          "summary": "Revoke a lost / returned badge"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/badge-stations/{station_id}",
+          "summary": "Register / update a badge station"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admin/badge-stations/{station_id}/rotate-key",
+          "summary": "Issue a new station key (shown ONCE)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/wards/{ward_id}/bed-labels",
+          "summary": "Bed QR stickers for ward-level bed-cleaning stations (label printer)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/badge-stations/me",
+          "summary": "Kiosk screen setup: what this station does (station-authenticated)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/badge-stations/scans",
+          "summary": "A badge was presented at a station (station-authenticated, no user login)"
+        }
+      ]
+    },
+    {
+      "heading": "Where there is no station at a bed or ward",
+      "anchor": "where-there-is-no-station-at-a-bed-or-ward",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/beds/{bed_id}/mark-cleaned",
+          "summary": "Confirm a bed was cleaned (where no badge station records it)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        }
+      ]
+    },
+    {
+      "heading": "Live facility feed (Ops)",
+      "anchor": "live-facility-feed-ops",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/ops/facility-feed",
+          "summary": "Live facility feed (badge scans); poll with since_id or use WS ops.badge.scan"
+        }
+      ]
+    }
+  ]
+}

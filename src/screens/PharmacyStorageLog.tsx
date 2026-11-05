@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 /**
  * Screen 138: pharmacy_storage_log
  * "Medicine storage log"
@@ -801,10 +802,7 @@ export const PharmacyStorageLog: React.FC<PharmacyStorageLogProps> = ({
                   <label className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                     Ward ID (Null for Pharmacy)
                   </label>
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder="e.g. 1 (optional)"
+                  <DirectoryPicker
                     value={recordForm.ward_id || ""}
                     onChange={(e) =>
                       setRecordForm((prev) => ({
@@ -814,7 +812,7 @@ export const PharmacyStorageLog: React.FC<PharmacyStorageLogProps> = ({
                     }
                     className="w-full border rounded px-3 py-1.5 dark:bg-gray-800"
                     data-help="pharmacy_storage_log.ward_id_input"
-                  />
+                   path="/beds/matrix?include_beds=false" idField="ward_id" list="wards" />
                 </div>
               </div>
 

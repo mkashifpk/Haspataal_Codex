@@ -519,7 +519,7 @@ export interface DecisionMakerOut {
 
 export interface ConsentIn {
   procedure_name?: string | null;
-  /** The employee who performs it (fills performer_name) */
+  /** The employee who performs it (fills performer_name) (GET /staff/lookup) */
   performer_id?: number | null;
   performer_name?: string | null;
   risks?: string | null;
@@ -647,7 +647,7 @@ export interface DecisionMakerChoiceOut {
 
 export interface ConsentUpdateIn {
   procedure_name?: string | null;
-  /** The employee who performs it (fills performer_name) */
+  /** The employee who performs it (fills performer_name) (GET /staff/lookup) */
   performer_id?: number | null;
   performer_name?: string | null;
   risks?: string | null;
@@ -794,6 +794,22 @@ export interface PatientDocumentUploadOut {
   uploaded_at: string;
 }
 
+/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration their stamp prints, nothing else. */
+export interface StaffLookupOut {
+  /** The id a form's staff field takes (contrast_doctor_id, employee_id, ...) */
+  employee_id: number;
+  emp_number: string;
+  full_name: string;
+  designation: string;
+  department_name: string | null;
+  /** The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none */
+  license_type: "PMDC" | "PNC" | "Other" | null;
+  /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
+  registration: string | null;
+  /** Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62) */
+  user_id: number | null;
+}
+
 /** Operations whose surgical record needs work — GET /api/v1/ot/clinical-worklist (who may call: holders of ot.clinical.view). */
 export function worklistOtClinical(query?: { mine?: boolean; days?: number; admission_id?: number | null }): Promise<SurgicalWorklistItemOut[]> {
   return api<SurgicalWorklistItemOut[]>("GET", withQuery(`/ot/clinical-worklist`, query), undefined);
@@ -889,3 +905,7 @@ export function uploadDocumentPatientsDocuments(patient_id: number, body: FormDa
   return api<PatientDocumentUploadOut>("POST", `/patients/${patient_id}/documents`, body, { idempotent: true });
 }
 
+/** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
+export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
+  return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
+}

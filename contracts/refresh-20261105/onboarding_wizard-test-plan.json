@@ -1,0 +1,906 @@
+{
+  "screen": "onboarding_wizard",
+  "title": "Employee onboarding wizard",
+  "cases": [
+    {
+      "id": "case:POST /hr/employees",
+      "call": "POST /api/v1/hr/employees",
+      "summary": "Wizard step 1: create the profile (EMP number generated)",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees",
+            "body": {
+              "full_name": "Sana Tariq",
+              "cnic": "44193-4871435-2",
+              "mobile": "03001234567",
+              "gender": "female",
+              "blood_group": "B+",
+              "staff_category": "Nursing"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "employee_id": 4,
+                "emp_number": "EMP-2026-0004",
+                "full_name": "Sana Tariq",
+                "father_or_husband_name": null,
+                "cnic": "44193-4871435-2",
+                "dob": null,
+                "gender": "female",
+                "mobile": "03001234567",
+                "email": null,
+                "address": null,
+                "blood_group": "B+",
+                "department_id": null,
+                "department_name": null,
+                "designation": "To be assigned",
+                "specialty": null,
+                "supervisor_id": null,
+                "supervisor_name": null,
+                "base_salary": 0,
+                "contract_type": "Permanent",
+                "shift_pattern_id": null,
+                "employment_status": "Draft",
+                "staff_category": "Nursing",
+                "is_clinical_staff": false,
+                "license_type": null,
+                "license_number": null,
+                "joined_on": null,
+                "left_on": null,
+                "onboarding_step": 1,
+                "row_version": 1,
+                "created_at": "2026-09-27T17:36:57.664341+00:00",
+                "qualifications": [],
+                "documents": [],
+                "contract": null,
+                "user": null,
+                "badges": [],
+                "schedule": {
+                  "shift_pattern_id": null,
+                  "shift_name": null,
+                  "effective_from": null,
+                  "weekly_off_days": [
+                    7
+                  ]
+                },
+                "checklist": {
+                  "ready": false,
+                  "missing": [
+                    "CNIC document"
+                  ]
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:57.714481+00:00"
+              },
+              "request_id": "44e489121a384d02a6364f5956ca7120"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:PATCH /hr/employees/{employee_id}/steps/1",
+      "call": "PATCH /api/v1/hr/employees/{employee_id}/steps/1",
+      "summary": "Wizard step 1: demographics",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees/4/steps/1",
+            "body": {
+              "address": "House 12, Street 4, Lahore"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "employee_id": 4,
+                "emp_number": "EMP-2026-0004",
+                "full_name": "Sana Tariq",
+                "father_or_husband_name": null,
+                "cnic": "44193-4871435-2",
+                "dob": null,
+                "gender": "female",
+                "mobile": "03001234567",
+                "email": null,
+                "address": "House 12, Street 4, Lahore",
+                "blood_group": "B+",
+                "department_id": null,
+                "department_name": null,
+                "designation": "To be assigned",
+                "specialty": null,
+                "supervisor_id": null,
+                "supervisor_name": null,
+                "base_salary": 0,
+                "contract_type": "Permanent",
+                "shift_pattern_id": null,
+                "employment_status": "Draft",
+                "staff_category": "Nursing",
+                "is_clinical_staff": false,
+                "license_type": null,
+                "license_number": null,
+                "joined_on": null,
+                "left_on": null,
+                "onboarding_step": 2,
+                "row_version": 3,
+                "created_at": "2026-09-27T17:36:57.664341+00:00",
+                "qualifications": [],
+                "documents": [],
+                "contract": null,
+                "user": null,
+                "badges": [],
+                "schedule": {
+                  "shift_pattern_id": null,
+                  "shift_name": null,
+                  "effective_from": null,
+                  "weekly_off_days": [
+                    7
+                  ]
+                },
+                "checklist": {
+                  "ready": false,
+                  "missing": [
+                    "CNIC document"
+                  ]
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:57.729485+00:00"
+              },
+              "request_id": "fa354b7218f648c0ada15996523234a7"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:PATCH /hr/employees/{employee_id}/steps/2",
+      "call": "PATCH /api/v1/hr/employees/{employee_id}/steps/2",
+      "summary": "Wizard step 2: job taxonomy, supervisor, salary, shift",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees/4/steps/2",
+            "body": {
+              "designation": "Staff Nurse",
+              "base_salary": 60000,
+              "supervisor_id": null,
+              "is_clinical_staff": true
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "employee_id": 4,
+                "emp_number": "EMP-2026-0004",
+                "full_name": "Sana Tariq",
+                "father_or_husband_name": null,
+                "cnic": "44193-4871435-2",
+                "dob": null,
+                "gender": "female",
+                "mobile": "03001234567",
+                "email": null,
+                "address": "House 12, Street 4, Lahore",
+                "blood_group": "B+",
+                "department_id": null,
+                "department_name": null,
+                "designation": "Staff Nurse",
+                "specialty": null,
+                "supervisor_id": null,
+                "supervisor_name": null,
+                "base_salary": 60000,
+                "contract_type": "Permanent",
+                "shift_pattern_id": null,
+                "employment_status": "Draft",
+                "staff_category": "Nursing",
+                "is_clinical_staff": true,
+                "license_type": null,
+                "license_number": null,
+                "joined_on": null,
+                "left_on": null,
+                "onboarding_step": 3,
+                "row_version": 5,
+                "created_at": "2026-09-27T17:36:57.664341+00:00",
+                "qualifications": [],
+                "documents": [],
+                "contract": null,
+                "user": null,
+                "badges": [],
+                "schedule": {
+                  "shift_pattern_id": null,
+                  "shift_name": null,
+                  "effective_from": null,
+                  "weekly_off_days": [
+                    7
+                  ]
+                },
+                "checklist": {
+                  "ready": false,
+                  "missing": [
+                    "CNIC document",
+                    "PMDC/PNC licence number",
+                    "PMDC/PNC licence document"
+                  ]
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:57.741624+00:00"
+              },
+              "request_id": "4f04645f066048dc8d5025967fd31d87"
+            }
+          },
+          "errors_seen": [
+            "CYCLE_DETECTED"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "CYCLE_DETECTED",
+        "VALIDATION_ERROR",
+        "ZERO_INTERFACE_STAFF_NO_LOGIN"
+      ]
+    },
+    {
+      "id": "case:PATCH /hr/employees/{employee_id}/steps/3",
+      "call": "PATCH /api/v1/hr/employees/{employee_id}/steps/3",
+      "summary": "Wizard step 3: licence (PMDC/PNC) — qualifications via /qualifications",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees/4/steps/3",
+            "body": {
+              "license_type": "PNC",
+              "license_number": "PNC-99"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "employee_id": 4,
+                "emp_number": "EMP-2026-0004",
+                "full_name": "Sana Tariq",
+                "father_or_husband_name": null,
+                "cnic": "44193-4871435-2",
+                "dob": null,
+                "gender": "female",
+                "mobile": "03001234567",
+                "email": null,
+                "address": "House 12, Street 4, Lahore",
+                "blood_group": "B+",
+                "department_id": null,
+                "department_name": null,
+                "designation": "Staff Nurse",
+                "specialty": null,
+                "supervisor_id": null,
+                "supervisor_name": null,
+                "base_salary": 60000,
+                "contract_type": "Permanent",
+                "shift_pattern_id": null,
+                "employment_status": "Draft",
+                "staff_category": "Nursing",
+                "is_clinical_staff": true,
+                "license_type": "PNC",
+                "license_number": "PNC-99",
+                "joined_on": null,
+                "left_on": null,
+                "onboarding_step": 4,
+                "row_version": 7,
+                "created_at": "2026-09-27T17:36:57.664341+00:00",
+                "qualifications": [],
+                "documents": [
+                  {
+                    "document_id": 1,
+                    "doc_type": "CNIC",
+                    "title": null,
+                    "content_type": "application/pdf",
+                    "size_bytes": 25,
+                    "is_required": true,
+                    "is_verified": false,
+                    "uploaded_at": "2026-09-27T17:36:57.754154+00:00"
+                  }
+                ],
+                "contract": null,
+                "user": null,
+                "badges": [],
+                "schedule": {
+                  "shift_pattern_id": null,
+                  "shift_name": null,
+                  "effective_from": null,
+                  "weekly_off_days": [
+                    7
+                  ]
+                },
+                "checklist": {
+                  "ready": false,
+                  "missing": [
+                    "PMDC/PNC licence document"
+                  ]
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:57.775005+00:00"
+              },
+              "request_id": "f4c2f8853b59452c869d5841f090c95c"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /hr/employees/{employee_id}/qualifications",
+      "call": "POST /api/v1/hr/employees/{employee_id}/qualifications",
+      "summary": "Add education / experience / licence",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees/4/qualifications",
+            "body": {
+              "qualification_type": "Education",
+              "title": "BSc Nursing",
+              "year": 2019
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "qualification_id": 1,
+                "employee_id": 4,
+                "qualification_type": "Education",
+                "title": "BSc Nursing",
+                "institution": null,
+                "year": 2019,
+                "license_number": null,
+                "license_expiry": null,
+                "notes": null,
+                "verification_status": "Pending",
+                "verified_with": null,
+                "verification_ref": null,
+                "verified_on": null,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:18:17.148612+00:00"
+              },
+              "request_id": "a59cf1c8453d4ff08b1f00d384006e65"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /hr/employees/{employee_id}/documents",
+      "call": "POST /api/v1/hr/employees/{employee_id}/documents",
+      "summary": "Wizard step 5: document vault upload",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees/4/documents",
+            "multipart": {
+              "file": "<file>",
+              "doc_type": "CNIC"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "document_id": 1,
+                "employee_id": 4,
+                "doc_type": "CNIC",
+                "title": null,
+                "content_type": "application/pdf",
+                "size_bytes": 25,
+                "uploaded_at": "2026-09-27T17:36:57.754154+00:00"
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:57.759099+00:00"
+              },
+              "request_id": "331b6b29ace347278405c4cf7e3d1797"
+            }
+          },
+          "errors_seen": [
+            "IDEMPOTENCY_CONFLICT",
+            "NOT_FOUND",
+            "UNSUPPORTED_MEDIA_TYPE"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "IDEMPOTENCY_CONFLICT",
+        "NOT_FOUND",
+        "PAYLOAD_TOO_LARGE",
+        "UNSUPPORTED_MEDIA_TYPE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /hr/employees/{employee_id}/submit",
+      "call": "POST /api/v1/hr/employees/{employee_id}/submit",
+      "summary": "Wizard step 6: Finalize → Awaiting_IT_Provisioning (no login created)",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees/4/submit"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "employee_id": 4,
+                "emp_number": "EMP-2026-0004",
+                "full_name": "Sana Tariq",
+                "father_or_husband_name": null,
+                "cnic": "44193-4871435-2",
+                "dob": null,
+                "gender": "female",
+                "mobile": "03001234567",
+                "email": null,
+                "address": "House 12, Street 4, Lahore",
+                "blood_group": "B+",
+                "department_id": null,
+                "department_name": null,
+                "designation": "Staff Nurse",
+                "specialty": null,
+                "supervisor_id": null,
+                "supervisor_name": null,
+                "base_salary": 60000,
+                "contract_type": "Permanent",
+                "shift_pattern_id": null,
+                "employment_status": "Awaiting_IT_Provisioning",
+                "staff_category": "Nursing",
+                "is_clinical_staff": true,
+                "license_type": "PNC",
+                "license_number": "PNC-99",
+                "joined_on": "2026-09-27",
+                "left_on": null,
+                "onboarding_step": 6,
+                "row_version": 8,
+                "created_at": "2026-09-27T17:36:57.664341+00:00",
+                "qualifications": [],
+                "documents": [
+                  {
+                    "document_id": 1,
+                    "doc_type": "CNIC",
+                    "title": null,
+                    "content_type": "application/pdf",
+                    "size_bytes": 25,
+                    "is_required": true,
+                    "is_verified": false,
+                    "uploaded_at": "2026-09-27T17:36:57.754154+00:00"
+                  },
+                  {
+                    "document_id": 2,
+                    "doc_type": "PNC",
+                    "title": null,
+                    "content_type": "application/pdf",
+                    "size_bytes": 25,
+                    "is_required": true,
+                    "is_verified": false,
+                    "uploaded_at": "2026-09-27T17:36:57.780927+00:00"
+                  }
+                ],
+                "contract": null,
+                "user": null,
+                "badges": [],
+                "schedule": {
+                  "shift_pattern_id": null,
+                  "shift_name": null,
+                  "effective_from": null,
+                  "weekly_off_days": [
+                    7
+                  ]
+                },
+                "checklist": {
+                  "ready": true,
+                  "missing": []
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:57.856490+00:00"
+              },
+              "request_id": "bb9413c6b73c40f286b9cd087d2ff866"
+            }
+          },
+          "errors_seen": [
+            "CLINICAL_LICENSE_REQUIRED",
+            "EMPLOYEE_DOCUMENT_REQUIRED"
+          ],
+          "events_emitted": [
+            "hr.provisioning.requested",
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "CLINICAL_LICENSE_REQUIRED",
+        "EMPLOYEE_ALREADY_SUBMITTED",
+        "EMPLOYEE_DOCUMENT_REQUIRED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /hr/employees/{employee_id}",
+      "call": "GET /api/v1/hr/employees/{employee_id}",
+      "summary": "Full profile incl. documents, qualifications, submit checklist",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees/4"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "employee_id": 4,
+                "emp_number": "EMP-2026-0004",
+                "full_name": "Sana Tariq",
+                "father_or_husband_name": null,
+                "cnic": "44193-4871435-2",
+                "dob": null,
+                "gender": "female",
+                "mobile": "03001234567",
+                "email": null,
+                "address": "House 12, Street 4, Lahore",
+                "blood_group": "B+",
+                "department_id": null,
+                "department_name": null,
+                "designation": "Staff Nurse",
+                "specialty": null,
+                "supervisor_id": null,
+                "supervisor_name": null,
+                "base_salary": 60000,
+                "contract_type": "Permanent",
+                "shift_pattern_id": null,
+                "employment_status": "Draft",
+                "staff_category": "Nursing",
+                "is_clinical_staff": true,
+                "license_type": "PNC",
+                "license_number": "PNC-99",
+                "joined_on": null,
+                "left_on": null,
+                "onboarding_step": 4,
+                "row_version": 7,
+                "created_at": "2026-09-27T17:36:57.664341+00:00",
+                "qualifications": [],
+                "documents": [
+                  {
+                    "document_id": 1,
+                    "doc_type": "CNIC",
+                    "title": null,
+                    "content_type": "application/pdf",
+                    "size_bytes": 25,
+                    "is_required": true,
+                    "is_verified": false,
+                    "uploaded_at": "2026-09-27T17:36:57.754154+00:00"
+                  },
+                  {
+                    "document_id": 2,
+                    "doc_type": "PNC",
+                    "title": null,
+                    "content_type": "application/pdf",
+                    "size_bytes": 25,
+                    "is_required": true,
+                    "is_verified": false,
+                    "uploaded_at": "2026-09-27T17:36:57.780927+00:00"
+                  }
+                ],
+                "contract": null,
+                "user": null,
+                "badges": [],
+                "schedule": {
+                  "shift_pattern_id": null,
+                  "shift_name": null,
+                  "effective_from": null,
+                  "weekly_off_days": [
+                    7
+                  ]
+                },
+                "checklist": {
+                  "ready": true,
+                  "missing": []
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:57.790733+00:00"
+              },
+              "request_id": "26056fd9bd154017a96482c3dabcd26c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /admin/departments",
+      "call": "GET /api/v1/admin/departments",
+      "summary": "Departments",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/departments"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "department_id": 1,
+                  "code": "CARD",
+                  "name": "Cardiology & Vascular",
+                  "is_clinical": true,
+                  "is_active": true,
+                  "row_version": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.417658+00:00"
+              },
+              "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /staff/lookup",
+      "call": "GET /api/v1/staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/staff/lookup",
+            "query": {
+              "q": "sana look"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 2,
+                  "emp_number": "EMP-2026-0002",
+                  "full_name": "Sana Lookuptest",
+                  "designation": "Officer",
+                  "department_name": null,
+                  "license_type": "PNC",
+                  "user_id": 2,
+                  "registration": "PNC PNC-31852"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-11-05T01:52:33.483546+00:00"
+              },
+              "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
+            }
+          },
+          "errors_seen": [
+            "UNAUTHENTICATED",
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "UNAUTHENTICATED",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/onboarding_wizard",
+  "workspace_guide": "get_handbook_outline('hr')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Step 6 never creates a login — it hands over to IT (status Awaiting_IT_Provisioning).",
+    "Grey out Submit until GET /hr/employees/{id}.checklist.ready is true.",
+    "Upload files as multipart/form-data (file + doc_type + optional title); only paths are stored in the DB.",
+    "Documents are PDF, JPEG or PNG; the Photo (printed on the ID card) is a JPEG or PNG only, at most 16 megapixels (UNSUPPORTED_MEDIA_TYPE, VALIDATION_ERROR for a damaged image).",
+    "Step 4, financial config (a Visiting contract): the OT split contract is set by the Billing Admin on Price & policy management (decisions 56). Say that it is needed and who sets it; the wizard never sends it."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

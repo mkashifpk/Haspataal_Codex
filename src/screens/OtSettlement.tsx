@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { EstablishmentOut } from "../generated/facility_profile";
 import {
@@ -10,9 +11,9 @@ import {
   finalizeOtBookings,
   contracts,
   lookupStaff,
-  getBookingDetail,
-  listBookings,
 } from "../generated/ot_settlement";
+import {getBooking as getBookingDetail} from '../generated/ot_intraop';
+import {listBookings, type OtBookingListItemOut} from '../generated/ot_scheduling';
 import {
   getOtSettlementCapabilityView,
   canViewOtSettlement,
@@ -67,7 +68,7 @@ export const OtSettlement: React.FC<OtSettlementProps> = ({
   const canFinalize = canFinalizeSettlement(userRoles);
 
   // Bookings list state
-  const [bookings, setBookings] = useState<OtBookingDetailOut[]>([]);
+  const [bookings, setBookings] = useState<OtBookingListItemOut[]>([]);
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
   const [bookingDetail, setBookingDetail] = useState<OtBookingDetailOut | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -107,9 +108,9 @@ export const OtSettlement: React.FC<OtSettlementProps> = ({
   const refreshBookings = useCallback(async () => {
     setLoadingBookings(true);
     try {
-      const q: { status?: string } = {};
+      const q: NonNullable<Parameters<typeof listBookings>[0]> = {};
       if (statusFilter !== "All") {
-        q.status = statusFilter;
+        q.status = statusFilter as typeof q.status;
       }
       const data = await listBookings(q);
       const list = Array.isArray(data) ? data : [];
@@ -166,13 +167,10 @@ export const OtSettlement: React.FC<OtSettlementProps> = ({
           setParticipants([]);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (!active) return;
-        // Fallback to item from list if available
-        const found = bookings.find((b) => b.booking_id === selectedBookingId);
-        if (found) {
-          setBookingDetail(found);
-        }
+        setBookingDetail(null);
+        setPreviewError(error instanceof Error ? error.message : String(error));
       });
 
     return () => {
@@ -942,14 +940,12 @@ export const OtSettlement: React.FC<OtSettlementProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <input
-                type="text"
+              <DirectoryPicker
                 data-help="ot_settlement.contracts_filter"
                 value={contractEmployeeFilter}
                 onChange={(e) => setContractEmployeeFilter(e.target.value)}
-                placeholder="Filter by staff Employee ID..."
                 className="text-xs border border-slate-300 rounded p-2 w-48"
-              />
+               path="/staff/lookup" idField="employee_id" search />
               <button
                 data-help="ot_settlement.contracts_search_btn"
                 onClick={handleViewContracts}

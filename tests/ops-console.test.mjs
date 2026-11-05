@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   getOpsConsoleCapabilityView,
+  canClearOpsDischargeStage,
   evaluatePayableRouting,
   validateAssignForm,
   validateCompleteForm,
@@ -23,7 +24,7 @@ test("ops_console: getOpsConsoleCapabilityView resolves capability modes correct
   // Inactive service
   const inactiveView = getOpsConsoleCapabilityView(
     { roles: ["ops_admin"], permissions: ["ops.workorder.manage"] },
-    { services: [{ code: "ops", status: "Inactive" }] }
+    { views: { screens: [{ screen_id: "ops_console", view: "hidden" }] } }
   );
   assert.equal(inactiveView.mode, "hidden");
 
@@ -35,7 +36,7 @@ test("ops_console: getOpsConsoleCapabilityView resolves capability modes correct
   assert.equal(adminView.mode, "full");
   assert.equal(adminView.canManageWorkOrders, true);
   assert.equal(adminView.canManageAssets, true);
-  assert.equal(adminView.canRecordUtilities, true);
+  assert.equal(adminView.canRecordUtilities, false);
 
   // Maintenance Admin
   const maintView = getOpsConsoleCapabilityView({
@@ -58,6 +59,25 @@ test("ops_console: getOpsConsoleCapabilityView resolves capability modes correct
     permissions: ["billing.read"],
   });
   assert.equal(unauth.mode, "hidden");
+});
+
+test("ops_console: role names grant nothing and clearance stages use separate permissions", () => {
+  for (const role of ["ops_admin", "super_admin", "maintenance_admin"]) {
+    assert.equal(getOpsConsoleCapabilityView({ roles: [role], permissions: [] }).mode, "hidden");
+  }
+  const utilityOnly = getOpsConsoleCapabilityView({ permissions: ["ops.utility.record"] });
+  assert.equal(utilityOnly.canRecordUtilities, true);
+  assert.equal(utilityOnly.canManageWorkOrders, false);
+  assert.equal(utilityOnly.canManageAssets, false);
+  const cleaning = { permissions: ["ipd.discharge.clear_cleaning"] };
+  assert.equal(getOpsConsoleCapabilityView(cleaning).canClearDischarge, true);
+  assert.equal(canClearOpsDischargeStage(cleaning, "OpsCleaning"), true);
+  assert.equal(canClearOpsDischargeStage(cleaning, "BillingSettlement"), false);
+  assert.equal(canClearOpsDischargeStage({ roles: ["ops_admin"], permissions: ["ipd.discharge.clear"] }, "OpsCleaning"), false);
+  const records = getOpsConsoleCapabilityView({ permissions: ["ops.workorder.manage", "ops.asset.manage"] }, { views: { screens: [{ screen_id: "ops_console", view: "records" }] } });
+  assert.equal(records.mode, "records");
+  assert.equal(records.canManageWorkOrders, false);
+  assert.equal(records.canManageAssets, false);
 });
 
 test("ops_console: rule:a7fc19b5fc contractor work routes to AP while ops cannot settle", () => {

@@ -1,7 +1,7 @@
 {
   "screen_id": "doctor_inpatients",
-  "contract_fingerprint": "14824af5c60c05148994",
-  "knowledge_revision": "9250bafb1794ac12",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "5980e5c3b1817f4e",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "doctor",
       "purpose": "My admitted patients, flowsheet, MAR, discharge initiation.",
@@ -268,12 +268,15 @@
     ],
     "related_workflows": [
       "clinical-and-prescriptions",
+      "complaints",
       "consent",
       "deaths-and-medico-legal-cases",
       "diagnostic-services",
       "duty-rosters-and-attendance",
       "emergency-department",
       "facility-and-it",
+      "finance-and-owner",
+      "hr-and-payroll",
       "incidents-and-sentinel-events",
       "inpatient-and-discharge",
       "laboratory-and-radiology",
@@ -396,25 +399,25 @@
         "id": "ep:GET /ipd/treating-doctors",
         "label": "GET /ipd/treating-doctors",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /admissions/{admission_id}/treating-doctor",
         "label": "GET /admissions/{admission_id}/treating-doctor",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /admissions/{admission_id}/treating-doctor",
         "label": "POST /admissions/{admission_id}/treating-doctor",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /staff/lookup",
         "label": "GET /staff/lookup",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:admission.discharge.stage_changed",
@@ -432,13 +435,13 @@
         "id": "ev:vitals.due",
         "label": "vitals.due",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:admission.doctor_changed",
         "label": "admission.doctor_changed",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:c14c8af7df",
@@ -474,19 +477,19 @@
         "id": "rule:921b51e312",
         "label": "My patients are the admissions whose primary_doctor_id is mine. A Code Red without a doctor (primary_doctor_id null: a triage nurse pressed it) shows to every doctor under 'Waiting for a doctor' with its 'Record reason and diagnosis' task: recording them makes you its doctor. Never show the person who pressed Code Red as the doctor.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:cb4d2eec4e",
         "label": "vitals.due for one of my patients: mark its vitals due or overdue (overdue_minutes) and re-read GET /admissions/{admission_id}/flowsheet (is_overdue) when it is open; the server decides due and overdue, and the nurse records them (no recording here).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:b0e5f32dc8",
         "label": "'Hand over to another doctor' on my patient: the doctor (GET /staff/lookup?license_type=PMDC) and the reason, then POST /admissions/{admission_id}/treating-doctor with an Idempotency-Key; it takes effect at once and the patient leaves my rounds (admission.doctor_changed). 'Take this patient' on a Code Red waiting for a doctor (GET /ipd/treating-doctors?waiting=true) names me. Show who looked after the patient before (GET /admissions/{admission_id}/treating-doctor: changes). TREATING_DOCTOR_ONLY: the patient is another doctor's; ask them, or the Hospital Admin while they are away.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:2bd622ce2e",
@@ -2826,208 +2829,6 @@
     ],
     "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
   },
-  "workflows": [
-    {
-      "slug": "clinical-and-prescriptions",
-      "title": "Consultation, e-prescriptions & pharmacy dispensing",
-      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
-    },
-    {
-      "slug": "consent",
-      "title": "Consent (MSDS)",
-      "recipe": "get_workflow_recipe('consent')"
-    },
-    {
-      "slug": "deaths-and-medico-legal-cases",
-      "title": "Deaths and medico-legal cases (MSDS)",
-      "recipe": "get_workflow_recipe('deaths-and-medico-legal-cases')"
-    },
-    {
-      "slug": "diagnostic-services",
-      "title": "Diagnostic services quality (MSDS)",
-      "recipe": "get_workflow_recipe('diagnostic-services')"
-    },
-    {
-      "slug": "duty-rosters-and-attendance",
-      "title": "Duty rosters, roll call, badges & attendance",
-      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
-    },
-    {
-      "slug": "emergency-department",
-      "title": "The emergency department (MSDS)",
-      "recipe": "get_workflow_recipe('emergency-department')"
-    },
-    {
-      "slug": "facility-and-it",
-      "title": "Facility operations, badge stations & IT administration",
-      "recipe": "get_workflow_recipe('facility-and-it')"
-    },
-    {
-      "slug": "incidents-and-sentinel-events",
-      "title": "Incidents, sentinel events and the action register (MSDS)",
-      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
-    },
-    {
-      "slug": "inpatient-and-discharge",
-      "title": "Admission, beds, nursing & discharge",
-      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
-    },
-    {
-      "slug": "laboratory-and-radiology",
-      "title": "Laboratory & radiology",
-      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
-    },
-    {
-      "slug": "medication-safety",
-      "title": "Medication safety (MSDS)",
-      "recipe": "get_workflow_recipe('medication-safety')"
-    },
-    {
-      "slug": "opd-reception",
-      "title": "OPD reception, queues & re-routing",
-      "recipe": "get_workflow_recipe('opd-reception')"
-    },
-    {
-      "slug": "operating-theater",
-      "title": "Operating theater",
-      "recipe": "get_workflow_recipe('operating-theater')"
-    },
-    {
-      "slug": "personnel-records",
-      "title": "Personnel records (MSDS)",
-      "recipe": "get_workflow_recipe('personnel-records')"
-    }
-  ],
-  "scenarios": [],
-  "unknowns": [
-    {
-      "what": "decision H02",
-      "owner": [
-        "vendor"
-      ],
-      "affects": [
-        "every screen in Urdu"
-      ]
-    },
-    {
-      "what": "decision H03",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen"
-      ]
-    },
-    {
-      "what": "decision H04",
-      "owner": [
-        "vendor"
-      ],
-      "affects": [
-        "every screen with money"
-      ]
-    },
-    {
-      "what": "decision H08",
-      "owner": [
-        "vendor",
-        "translator",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen in Urdu"
-      ]
-    },
-    {
-      "what": "decision H09",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "affects": [
-        "every screen"
-      ]
-    },
-    {
-      "what": "decision H10",
-      "owner": [
-        "clinical_lead",
-        "vendor"
-      ],
-      "affects": [
-        "every screen with realtime events"
-      ]
-    },
-    {
-      "what": "decision H12",
-      "owner": [
-        "vendor",
-        "backend"
-      ],
-      "affects": [
-        "my_cash_shift",
-        "registration",
-        "every screen that prints"
-      ]
-    },
-    {
-      "what": "decision H18",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "affects": [
-        "every table in Urdu"
-      ]
-    },
-    {
-      "what": "decision H19",
-      "owner": [
-        "clinical_lead",
-        "backend"
-      ],
-      "affects": [
-        "every screen with a patient banner"
-      ]
-    },
-    {
-      "what": "decision H20",
-      "owner": [
-        "vendor",
-        "hospital"
-      ],
-      "affects": [
-        "every form"
-      ]
-    },
-    {
-      "what": "decision H22",
-      "owner": [
-        "hospital",
-        "vendor"
-      ],
-      "affects": [
-        "every screen that prints"
-      ]
-    },
-    {
-      "what": "decision H24",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen"
-      ]
-    }
-  ],
-  "omitted_sections": [
-    "decisions",
-    "examples",
-    "schemas"
-  ],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
   "test_plan": {
     "screen": "doctor_inpatients",
     "title": "Inpatient rounds & discharge",
@@ -3806,6 +3607,94 @@
     ],
     "workspace_guide": "get_handbook_outline('doctor')"
   },
+  "workflows": [
+    {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
+    {
+      "slug": "consent",
+      "title": "Consent (MSDS)",
+      "recipe": "get_workflow_recipe('consent')"
+    },
+    {
+      "slug": "deaths-and-medico-legal-cases",
+      "title": "Deaths and medico-legal cases (MSDS)",
+      "recipe": "get_workflow_recipe('deaths-and-medico-legal-cases')"
+    },
+    {
+      "slug": "diagnostic-services",
+      "title": "Diagnostic services quality (MSDS)",
+      "recipe": "get_workflow_recipe('diagnostic-services')"
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
+    },
+    {
+      "slug": "emergency-department",
+      "title": "The emergency department (MSDS)",
+      "recipe": "get_workflow_recipe('emergency-department')"
+    },
+    {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
+      "slug": "hr-and-payroll",
+      "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
+      "recipe": "get_workflow_recipe('hr-and-payroll')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "laboratory-and-radiology",
+      "title": "Laboratory & radiology",
+      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
+    },
+    {
+      "slug": "opd-reception",
+      "title": "OPD reception, queues & re-routing",
+      "recipe": "get_workflow_recipe('opd-reception')"
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
+    },
+    {
+      "slug": "personnel-records",
+      "title": "Personnel records (MSDS)",
+      "recipe": "get_workflow_recipe('personnel-records')"
+    }
+  ],
+  "scenarios": [],
   "decisions": [
     {
       "id": "H02",
@@ -4387,13 +4276,14 @@
               "designation": "Officer",
               "department_name": null,
               "license_type": "PNC",
-              "registration": "PNC PNC-8403"
+              "user_id": 2,
+              "registration": "PNC PNC-31852"
             }
           ],
           "meta": {
-            "server_time": "2026-10-27T15:29:53.668901+00:00"
+            "server_time": "2026-11-05T01:52:33.483546+00:00"
           },
-          "request_id": "4e2ee3a40faa41c195bc2aa08edaa30b"
+          "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
         }
       }
     }
@@ -6040,7 +5930,8 @@
         },
         "is_overdue": {
           "type": "boolean",
-          "title": "Is Overdue"
+          "title": "Is Overdue",
+          "description": "The vitals are overdue on an Admitted or CodeRedActive admission, the same ones vitals.due is sent for: false once the clinical discharge has started"
         }
       },
       "type": "object",
@@ -6888,6 +6779,18 @@
           ],
           "title": "Registration",
           "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id",
+          "description": "Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62)"
         }
       },
       "type": "object",
@@ -6898,7 +6801,8 @@
         "designation",
         "department_name",
         "license_type",
-        "registration"
+        "registration",
+        "user_id"
       ],
       "title": "StaffLookupOut",
       "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."
@@ -7301,5 +7205,152 @@
       ],
       "title": "VitalsScheduleOut"
     }
-  }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
 }

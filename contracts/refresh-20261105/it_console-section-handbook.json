@@ -1,0 +1,724 @@
+{
+  "screen_id": "it_console",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook": {
+    "page": "screens/it_console",
+    "screen_id": "it_console",
+    "title": "Super Admin (IT)",
+    "purpose": "Provisioning queue | role matrix | terminals/printers/badge stations | server health | kill switch.",
+    "tasks": [
+      {
+        "id": "it_console::GET /admin/users/{user_id}",
+        "task": "User with roles, lockout and session info",
+        "call": "GET /admin/users/{user_id}",
+        "is_action": false,
+        "permissions": [
+          "admin.user.manage",
+          "admin.user.provision"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/users/{user_id}/revoke-sessions",
+        "task": "Log a user out everywhere",
+        "call": "POST /admin/users/{user_id}/revoke-sessions",
+        "is_action": true,
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/login-events",
+        "task": "Login successes / failures (security review)",
+        "call": "GET /admin/login-events",
+        "is_action": false,
+        "permissions": [
+          "admin.audit.view",
+          "admin.user.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/departments",
+        "task": "Departments",
+        "call": "GET /admin/departments",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "it_console::PUT /admin/departments/{department_id}",
+        "task": "Update a department",
+        "call": "PUT /admin/departments/{department_id}",
+        "is_action": true,
+        "permissions": [
+          "admin.department.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/wards/{ward_id}",
+        "task": "Update a ward",
+        "call": "PUT /admin/wards/{ward_id}",
+        "is_action": true,
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/printers/{printer_id}",
+        "task": "Update a printer",
+        "call": "PUT /admin/printers/{printer_id}",
+        "is_action": true,
+        "permissions": [
+          "admin.printer.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/terminals/{terminal_id}",
+        "task": "Update a terminal mapping",
+        "call": "PUT /admin/terminals/{terminal_id}",
+        "is_action": true,
+        "permissions": [
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /meta/roles",
+        "task": "Roles with their default workspace and permissions",
+        "call": "GET /meta/roles",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "it_console::GET /meta/permissions",
+        "task": "Permission catalogue",
+        "call": "GET /meta/permissions",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "it_console::GET /admin/provisioning-queue",
+        "task": "Employees HR submitted, awaiting a login (pane 1)",
+        "call": "GET /admin/provisioning-queue",
+        "is_action": false,
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/users",
+        "task": "Provision a login (temporary password shown ONCE)",
+        "call": "POST /admin/users",
+        "is_action": true,
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/users",
+        "task": "Search users",
+        "call": "GET /admin/users",
+        "is_action": false,
+        "permissions": [
+          "admin.user.manage",
+          "admin.user.provision"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/users/{user_id}/roles",
+        "task": "Replace a user's roles (effective on the next request)",
+        "call": "PUT /admin/users/{user_id}/roles",
+        "is_action": true,
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/users/{user_id}/reset-password",
+        "task": "Issue a new temporary password (all sessions end)",
+        "call": "POST /admin/users/{user_id}/reset-password",
+        "is_action": true,
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/users/{user_id}/active",
+        "task": "Deactivate (sessions revoked) / reactivate + unlock",
+        "call": "POST /admin/users/{user_id}/active",
+        "is_action": true,
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/role-matrix",
+        "task": "Roles × permissions (pane 2)",
+        "call": "GET /admin/role-matrix",
+        "is_action": false,
+        "permissions": [
+          "admin.roles.view",
+          "admin.role_matrix.update"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/roles/{role_code}/permissions",
+        "task": "Replace a role's permissions (pushed live to all sessions)",
+        "call": "PUT /admin/roles/{role_code}/permissions",
+        "is_action": true,
+        "permissions": [
+          "admin.role_matrix.update"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/terminals",
+        "task": "Terminal → location / printers / cash node mapping",
+        "call": "GET /admin/terminals",
+        "is_action": false,
+        "permissions": [
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/terminals",
+        "task": "Map a terminal (by MAC) to a location and its printers",
+        "call": "POST /admin/terminals",
+        "is_action": true,
+        "permissions": [
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/printers",
+        "task": "Printers",
+        "call": "GET /admin/printers",
+        "is_action": false,
+        "permissions": [
+          "admin.printer.manage",
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/printers",
+        "task": "Add a printer",
+        "call": "POST /admin/printers",
+        "is_action": true,
+        "permissions": [
+          "admin.printer.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/badge-stations",
+        "task": "Badge stations: RFID readers, barcode-scanner kiosks, biometric terminals (last seen)",
+        "call": "GET /admin/badge-stations",
+        "is_action": false,
+        "permissions": [
+          "admin.badge_station.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/badge-stations/{station_id}",
+        "task": "Register / update a badge station",
+        "call": "PUT /admin/badge-stations/{station_id}",
+        "is_action": true,
+        "permissions": [
+          "admin.badge_station.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/badge-stations/{station_id}/rotate-key",
+        "task": "Issue a new station key (shown ONCE)",
+        "call": "POST /admin/badge-stations/{station_id}/rotate-key",
+        "is_action": true,
+        "permissions": [
+          "admin.badge_station.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/wards/{ward_id}/bed-labels",
+        "task": "Bed QR stickers for ward-level bed-cleaning stations (label printer)",
+        "call": "GET /admin/wards/{ward_id}/bed-labels",
+        "is_action": false,
+        "permissions": [
+          "admin.badge_station.manage",
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/server-health",
+        "task": "CPU/RAM, DB pool, last backup, worker heartbeat (pane 4, read-only)",
+        "call": "GET /admin/server-health",
+        "is_action": false,
+        "permissions": [
+          "admin.server_health.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/settings",
+        "task": "Hospital policy settings",
+        "call": "GET /admin/settings",
+        "is_action": false,
+        "permissions": [
+          "admin.settings.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/settings/{key}",
+        "task": "Change a policy setting (type-checked, audited)",
+        "call": "PUT /admin/settings/{key}",
+        "is_action": true,
+        "permissions": [
+          "admin.settings.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/maintenance",
+        "task": "Maintenance mode on/off (non-admins get 503 MAINTENANCE)",
+        "call": "PUT /admin/maintenance",
+        "is_action": true,
+        "permissions": [
+          "admin.maintenance.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/kill-switch",
+        "task": "FORCE GLOBAL TOKEN EXPIRY — every session in the hospital ends (emergency)",
+        "call": "POST /admin/kill-switch",
+        "is_action": true,
+        "permissions": [
+          "admin.kill_switch"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/departments",
+        "task": "Add a department",
+        "call": "POST /admin/departments",
+        "is_action": true,
+        "permissions": [
+          "admin.department.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/wards",
+        "task": "Add a ward",
+        "call": "POST /admin/wards",
+        "is_action": true,
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/wards/{ward_id}/beds",
+        "task": "Add beds to a ward (bulk)",
+        "call": "POST /admin/wards/{ward_id}/beds",
+        "is_action": true,
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/wards",
+        "task": "Wards, open and closed",
+        "call": "GET /admin/wards",
+        "is_action": false,
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /ot/theaters",
+        "task": "Provision an operating theater (Super Admin)",
+        "call": "POST /ot/theaters",
+        "is_action": true,
+        "permissions": [
+          "ot.theater.provision"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /icd/releases",
+        "task": "The ICD code lists loaded",
+        "call": "GET /icd/releases",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "it_console::POST /icd/releases",
+        "task": "Load an ICD code list (the hospital's licensed ICD-10, or a newer WHO ICD-11 release)",
+        "call": "POST /icd/releases",
+        "is_action": true,
+        "permissions": [
+          "icd.release.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /icd/releases/{release_id}/activate",
+        "task": "Make a release the active list of its classification",
+        "call": "POST /icd/releases/{release_id}/activate",
+        "is_action": true,
+        "permissions": [
+          "icd.release.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/first-owner",
+        "task": "Whether this installation still needs its first Owner",
+        "call": "GET /admin/first-owner",
+        "is_action": false,
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/first-owner",
+        "task": "Create the installation's first Owner (once; temporary password shown ONCE)",
+        "call": "POST /admin/first-owner",
+        "is_action": true,
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/change-requests",
+        "task": "Request a control-setting or privileged-access change (applied at once for an Owner)",
+        "call": "POST /admin/change-requests",
+        "is_action": true,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "admin.settings.manage for a setting, admin.user.manage for a user's roles, admin.role_matrix.update for a role's permissions (the service checks)"
+      },
+      {
+        "id": "it_console::GET /admin/change-requests",
+        "task": "Control-setting and privileged-access change requests",
+        "call": "GET /admin/change-requests",
+        "is_action": false,
+        "permissions": [
+          "admin.settings.manage",
+          "admin.user.manage",
+          "admin.role_matrix.update",
+          "approval.policy_change.approve",
+          "approval.privileged_access.approve"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/change-requests/{change_request_id}",
+        "task": "One control-setting or privileged-access change request",
+        "call": "GET /admin/change-requests/{change_request_id}",
+        "is_action": false,
+        "permissions": [
+          "admin.settings.manage",
+          "admin.user.manage",
+          "admin.role_matrix.update",
+          "approval.policy_change.approve",
+          "approval.privileged_access.approve"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /finance/service-catalog",
+        "task": "Hospital service prices (lab prices live in the lab catalogue)",
+        "call": "GET /finance/service-catalog",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      }
+    ],
+    "rules_to_explain": [
+      "Go-live: while GET /admin/first-owner says needed, the console opens on 'Create the first Owner' (POST /admin/first-owner: name, CNIC, mobile, and the roles besides owner, usually hr_admin; in a small clinic also the owner's clinical role). It is offered once: FIRST_OWNER_EXISTS afterwards, and the step disappears. Print the temporary password slip for the Owner; tell them their personnel file still needs the CNIC copy.",
+      "Temporary passwords and station keys are shown ONCE — offer print/copy, never store them client-side.",
+      "No RFID hardware: register BarcodeScanner stations (a PC or tablet with a USB scanner or camera running the badge-station kiosk page); for ward cleaning kiosks print the bed QR stickers (bed-labels).",
+      "Kill switch: big red button, typed confirmation 'FORCE GLOBAL LOGOUT', clearly marked emergency-only.",
+      "ICD code lists: load the hospital's licensed WHO ICD-10 file here or in the Quality workspace (icd_code_lists); the WHO ICD-11 list ships with the server and updates with it.",
+      "Control settings (is_control) and privileged roles (owner, hospital admin, billing admin, accountant, the directors) are an Owner's: an Owner's own change applies at once; IT's goes to POST /admin/change-requests and waits for an Owner in the approvals queue (PolicyChange, PrivilegedAccess); show the request as pending, never as done. Nobody changes their own roles (SELF_ROLE_CHANGE_FORBIDDEN); the last Owner keeps the role (LAST_OWNER). Maintenance mode is IT's (admin.maintenance.manage).",
+      "Terminal cash_node: map every PC where the pharmacy takes cash (dispensing, OTC) to PharmacyCounter; the pharmacy's cash goes into no other counter's drawer. A PC shared by the reception and the pharmacy is mapped PharmacyCounter: the reception's cash may go into that drawer too.",
+      "Wards: list them with GET /admin/wards (open and closed) and edit with PUT /admin/wards/{ward_id}, every field sent. Closing a ward (is_active false) takes its beds off the bed matrix until it is reopened; offer it only when beds_in_use is empty and waitlisted is 0, and on WARD_IN_USE show details.beds_in_use and details.waitlisted (decisions 55)."
+    ],
+    "updates_by_itself_on": [
+      "hr.provisioning.requested"
+    ],
+    "errors_the_user_can_meet": [
+      {
+        "code": "CLINICAL_LICENSE_REQUIRED",
+        "message": "Clinical staff need a PMDC/PNC licence number and document.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "DEMO_ACCOUNT_PROTECTED",
+        "message": "DEV servers only: a demo account is shared by every developer, so its password, roles and active state stay as seeded. Use a user of your own.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "EMPLOYEE_ALREADY_HAS_ACCOUNT",
+        "message": "The employee already has an active login.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "EMPLOYEE_NOT_READY_FOR_PROVISIONING",
+        "message": "HR must submit the employee profile first.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "FIRST_OWNER_EXISTS",
+        "message": "The first Owner exists already: new owners come through HR and IT.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "ICD_IMPORT_INVALID",
+        "message": "The file is not a code list of this classification.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "ICD_RELEASE_EXISTS",
+        "message": "This release of the classification is already loaded.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "ICD_SYSTEM_NOT_LOADED",
+        "message": "No code list of this classification is loaded (ICD-10: load the hospital's licensed WHO file first).",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "LAST_OWNER",
+        "message": "The last active Owner keeps the Owner role.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "POLICY_CHANGE_APPROVAL_REQUIRED",
+        "message": "This is a control setting: an Owner changes it or approves the change (POST /admin/change-requests).",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+        "message": "Privileged access is granted by an Owner or with an Owner's approval (POST /admin/change-requests).",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "message": "A referenced record does not exist.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "SELF_ROLE_CHANGE_FORBIDDEN",
+        "message": "Nobody changes their own roles.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "message": "The request is invalid.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "WARD_IN_USE",
+        "message": "The ward still has patients in its beds or on its waitlist: move or discharge them first.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "ZERO_INTERFACE_STAFF_NO_LOGIN",
+        "message": "Support staff use a badge at badge stations and never receive logins.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      }
+    ],
+    "sections": [
+      "Purpose and audience",
+      "Step by step (one per task, where to click)",
+      "Every control and its effects",
+      "States and feedback",
+      "Messages, mistakes and recovery",
+      "Language and visual examples",
+      "Related help and delivery"
+    ],
+    "requirement_ids": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "delivery": "F1 and contextual screen Help",
+    "requirements": [
+      {
+        "id": "S1",
+        "title": "Purpose and audience",
+        "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+      },
+      {
+        "id": "S2",
+        "title": "Step by step (one per task, where to click)",
+        "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+      },
+      {
+        "id": "S3",
+        "title": "Every control and its effects",
+        "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+      },
+      {
+        "id": "S4",
+        "title": "States and feedback",
+        "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+      },
+      {
+        "id": "S5",
+        "title": "Messages, mistakes and recovery",
+        "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+      },
+      {
+        "id": "S6",
+        "title": "Language and visual examples",
+        "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+      },
+      {
+        "id": "S7",
+        "title": "Related help and delivery",
+        "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+      }
+    ],
+    "workspace_guide": "get_handbook_outline('super_admin')"
+  },
+  "unknowns": []
+}

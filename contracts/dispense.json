@@ -1,7 +1,7 @@
 {
   "screen_id": "dispense",
-  "contract_fingerprint": "14824af5c60c05148994",
-  "knowledge_revision": "9250bafb1794ac12",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "5980e5c3b1817f4e",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "pharmacy",
       "purpose": "Dispense Now (partial allowed); server picks batches FEFO; take payment.",
@@ -299,7 +299,7 @@
     "workspace": "pharmacy",
     "phase": "P3",
     "position": 32,
-    "points": 73,
+    "points": 76,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -361,7 +361,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 73,
+    "points": 76,
     "items": [
       {
         "id": "ep:GET /admissions/{admission_id}/discharge-status",
@@ -398,6 +398,12 @@
         "label": "GET /finance/cash-shifts/mine",
         "points": 3,
         "claimed": true
+      },
+      {
+        "id": "ep:GET /prescriptions/{prescription_id}",
+        "label": "GET /prescriptions/{prescription_id}",
+        "points": 3,
+        "claimed": false
       },
       {
         "id": "ev:pharmacy.stock.updated",
@@ -1495,6 +1501,100 @@
         ],
         "note": null
       }
+    },
+    {
+      "endpoint": "GET /prescriptions/{prescription_id}",
+      "summary": "Prescription with remaining quantities and stock per line",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "prescription.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of prescription.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "pharmacist",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "prescription_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Prescription Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_PrescriptionDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
     }
   ],
   "realtime": {
@@ -1779,6 +1879,38 @@
     },
     {
       "values": [
+        "ConcentratedElectrolyte",
+        "Chemotherapy",
+        "Anticoagulant",
+        "Insulin",
+        "Opioid",
+        "Sedative",
+        "NeuromuscularBlocker",
+        "Inotrope",
+        "Thrombolytic",
+        "Psychotropic",
+        "HighCost",
+        "Other"
+      ],
+      "column": "drugs.high_alert_category",
+      "used_at": "GET /prescriptions/{prescription_id}.items[].high_alert_category",
+      "labels": {
+        "ConcentratedElectrolyte": "Concentrated electrolyte",
+        "Chemotherapy": "Chemotherapy",
+        "Anticoagulant": "Anticoagulant",
+        "Insulin": "Insulin",
+        "Opioid": "Opioid",
+        "Sedative": "Sedative",
+        "NeuromuscularBlocker": "Neuromuscular blocker",
+        "Inotrope": "Inotrope",
+        "Thrombolytic": "Thrombolytic",
+        "Psychotropic": "Psychotropic",
+        "HighCost": "High cost",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
         "Consultation",
         "Service",
         "Drug",
@@ -1913,6 +2045,237 @@
         "Refund": "Refund",
         "WaiverDispensation": "Waiver dispensation",
         "ARCollection": "AR collection"
+      }
+    },
+    {
+      "values": [
+        "Electronic",
+        "CarbonCopy",
+        "Scan"
+      ],
+      "column": "prescription_handovers.copy_kept",
+      "used_at": "GET /prescriptions/{prescription_id}.handovers[].copy_kept",
+      "labels": {
+        "Electronic": "Electronic",
+        "CarbonCopy": "Carbon copy",
+        "Scan": "Scan"
+      }
+    },
+    {
+      "values": [
+        "Patient",
+        "Attendant"
+      ],
+      "column": "prescription_handovers.handed_to",
+      "used_at": "GET /prescriptions/{prescription_id}.handovers[].handed_to",
+      "labels": {
+        "Patient": "Patient",
+        "Attendant": "Attendant"
+      }
+    },
+    {
+      "values": [
+        "OD",
+        "BD",
+        "TDS",
+        "QID",
+        "Q4H",
+        "Q6H",
+        "Q8H",
+        "Q12H",
+        "HS",
+        "STAT",
+        "PRN",
+        "Other"
+      ],
+      "column": "prescription_items.frequency_code",
+      "used_at": "GET /prescriptions/{prescription_id}.items[].frequency_code",
+      "labels": {
+        "OD": "OD",
+        "BD": "BD",
+        "TDS": "TDS",
+        "QID": "QID",
+        "Q4H": "Q 4 H",
+        "Q6H": "Q 6 H",
+        "Q8H": "Q 8 H",
+        "Q12H": "Q 12 H",
+        "HS": "HS",
+        "STAT": "STAT",
+        "PRN": "PRN",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Active",
+        "Stopped",
+        "Cancelled",
+        "FullyDispensed"
+      ],
+      "column": "prescription_items.item_status",
+      "used_at": "GET /prescriptions/{prescription_id}.items[].item_status",
+      "labels": {
+        "Active": "Active",
+        "Stopped": "Stopped",
+        "Cancelled": "Cancelled",
+        "FullyDispensed": "Fully dispensed"
+      }
+    },
+    {
+      "values": [
+        "Oral",
+        "IV",
+        "IM",
+        "SC",
+        "Topical",
+        "Inhaled",
+        "PR",
+        "SL",
+        "Ophthalmic",
+        "Otic",
+        "Nasal",
+        "Other"
+      ],
+      "column": "prescription_items.route",
+      "used_at": "GET /prescriptions/{prescription_id}.items[].route",
+      "labels": {
+        "Oral": "Oral",
+        "IV": "IV",
+        "IM": "IM",
+        "SC": "SC",
+        "Topical": "Topical",
+        "Inhaled": "Inhaled",
+        "PR": "PR",
+        "SL": "SL",
+        "Ophthalmic": "Ophthalmic",
+        "Otic": "Otic",
+        "Nasal": "Nasal",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "ConfirmedAsWritten",
+        "Changed"
+      ],
+      "column": "prescription_queries.outcome",
+      "used_at": "GET /prescriptions/{prescription_id}.queries[].outcome",
+      "labels": {
+        "ConfirmedAsWritten": "Confirmed as written",
+        "Changed": "Changed"
+      }
+    },
+    {
+      "values": [
+        "Unclear",
+        "DoseOrFrequency",
+        "Allergy",
+        "Interaction",
+        "Duplicate",
+        "ChildDose",
+        "Restricted",
+        "WrongPatient",
+        "Other"
+      ],
+      "column": "prescription_queries.reason",
+      "used_at": "GET /prescriptions/{prescription_id}.queries[].reason",
+      "labels": {
+        "Unclear": "Unclear",
+        "DoseOrFrequency": "Dose or frequency",
+        "Allergy": "Allergy",
+        "Interaction": "Interaction",
+        "Duplicate": "Duplicate",
+        "ChildDose": "Child dose",
+        "Restricted": "Restricted",
+        "WrongPatient": "Wrong patient",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Open",
+        "Answered",
+        "Withdrawn"
+      ],
+      "column": "prescription_queries.status",
+      "used_at": "GET /prescriptions/{prescription_id}.queries[].status",
+      "labels": {
+        "Open": "Open",
+        "Answered": "Answered",
+        "Withdrawn": "Withdrawn"
+      },
+      "state_machine": "prescription_query",
+      "final_states": [
+        "Answered",
+        "Withdrawn"
+      ],
+      "transitions": {
+        "Open": [
+          "Answered",
+          "Withdrawn"
+        ]
+      }
+    },
+    {
+      "values": [
+        "HospitalPharmacy",
+        "ExternalMarket"
+      ],
+      "column": "prescriptions.destination",
+      "used_at": "GET /prescriptions/{prescription_id}.destination",
+      "labels": {
+        "HospitalPharmacy": "Hospital pharmacy",
+        "ExternalMarket": "External market"
+      }
+    },
+    {
+      "values": [
+        "Written",
+        "Verbal",
+        "Telephone"
+      ],
+      "column": "prescriptions.order_mode",
+      "used_at": "GET /prescriptions/{prescription_id}.order_mode",
+      "labels": {
+        "Written": "Written",
+        "Verbal": "Verbal",
+        "Telephone": "Telephone"
+      }
+    },
+    {
+      "values": [
+        "OPD",
+        "IPD",
+        "CodeRed",
+        "ER"
+      ],
+      "column": "prescriptions.source",
+      "used_at": "GET /prescriptions/{prescription_id}.source",
+      "labels": {
+        "OPD": "OPD",
+        "IPD": "IPD",
+        "CodeRed": "Code red",
+        "ER": "ER"
+      }
+    },
+    {
+      "values": [
+        "Active",
+        "PartiallyDispensed",
+        "FullyDispensed",
+        "Cancelled",
+        "Replaced",
+        "ExternalPrinted"
+      ],
+      "column": "prescriptions.status",
+      "used_at": "GET /prescriptions/{prescription_id}.status",
+      "labels": {
+        "Active": "Active",
+        "PartiallyDispensed": "Partially dispensed",
+        "FullyDispensed": "Fully dispensed",
+        "Cancelled": "Cancelled",
+        "Replaced": "Replaced",
+        "ExternalPrinted": "External printed"
       }
     },
     {
@@ -2314,6 +2677,34 @@
           "pharmacist",
           "receptionist"
         ]
+      },
+      {
+        "id": "case:GET /prescriptions/{prescription_id}",
+        "call": "GET /api/v1/prescriptions/{prescription_id}",
+        "summary": "Prescription with remaining quantities and stock per line",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "pharmacist",
+          "surgeon",
+          "ward_nurse"
+        ]
       }
     ],
     "service_cases": [
@@ -2493,6 +2884,17 @@
         "is_action": false,
         "permissions": [
           "finance.shift.operate"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "dispense::GET /prescriptions/{prescription_id}",
+        "task": "Prescription with remaining quantities and stock per line",
+        "call": "GET /prescriptions/{prescription_id}",
+        "is_action": false,
+        "permissions": [
+          "prescription.view"
         ],
         "permissions_mode": "all",
         "access": null
@@ -3026,6 +3428,15 @@
           },
           "request_id": "097c3bb071834c53b6d6b143a18491fb"
         }
+      }
+    },
+    "GET /prescriptions/{prescription_id}": {
+      "request": {
+        "path": "/api/v1/prescriptions/1"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"prescription_id\": 1, \"prescription_number\": \"RX-2026-000001\", \"patient_id\": 1, \"prescriber_id\": 1, \"ticket_id\": null, \"admission_id\": 1, \"encounter_id\": null, \"source\": \"IPD\", \"destination\": \"HospitalPharmacy\", \"status\": \"FullyDispensed\", \"is_content_locked\": false, \"replaced_by_id\": null, \"notes\": null, \"cancelled_at\": null, \"cancel_reason\": null, \"external_printed_at\": null, \"order_mode\": \"Written\", \"received_by\": null, \"read_back\": false, \"countersigned_by\": null, \"countersigned_at\": null, \"countersign_alerted_at\": null, \"created_by\": 1, \"created_at\": \"2026-10-14T02:30:59.172751+00:00\", \"row_version\": 2, \"patient_name\": \"Ali Khan\", \"mrn\": \"MRN-2026-000001\", \"prescriber_name\": \"Dr Ahmed\", \"prescriber_stamp\": {\"at\": \"2026-10-14T02:30:59.172751+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-51922, 14-Oct-2026 07:30\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-51922\"}, \"received_by_name\": null, \"items\": [{\"prescription_item_id\": 1, \"prescription_id\": 1, \"drug_id\": 1, \"is_external\": false, \"external_drug_name\": null, \"external_strength\": null, \"external_form\": null, \"qty_prescribed\": 4.0, \"qty_dispensed\": 4.0, \"dose_text\": \"10 mmol\", \"route\": \"IV\", \"frequency_code\": \"BD\", \"interval_hours\": 12, \"duration_days\": 2, \"instructions\": \"in 500 ml normal saline over 4 hours\", \"start_at\": \"2026-10-14T02:25:59.170206+00:00\", \"end_at\": null, \"is_prn\": false, \"is_stat\": false, \"self_administration…"
       }
     }
   },
@@ -4737,6 +5148,27 @@
       ],
       "title": "Envelope[DispensationResultOut]"
     },
+    "Envelope_PrescriptionDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PrescriptionDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PrescriptionDetailOut]"
+    },
     "Envelope_PrintOut_PharmacyReceiptFieldsOut__": {
       "properties": {
         "data": {
@@ -5343,6 +5775,1204 @@
       ],
       "title": "PharmacyReceiptFieldsOut"
     },
+    "PrescriptionDetailOut": {
+      "properties": {
+        "prescription_id": {
+          "type": "integer",
+          "title": "Prescription Id"
+        },
+        "prescription_number": {
+          "type": "string",
+          "title": "Prescription Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "prescriber_id": {
+          "type": "integer",
+          "title": "Prescriber Id"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "encounter_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Encounter Id"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "CodeRed",
+            "ER"
+          ],
+          "title": "Source"
+        },
+        "destination": {
+          "type": "string",
+          "enum": [
+            "HospitalPharmacy",
+            "ExternalMarket"
+          ],
+          "title": "Destination"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Active",
+            "PartiallyDispensed",
+            "FullyDispensed",
+            "Cancelled",
+            "Replaced",
+            "ExternalPrinted"
+          ],
+          "title": "Status"
+        },
+        "is_content_locked": {
+          "type": "boolean",
+          "title": "Is Content Locked"
+        },
+        "replaced_by_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Replaced By Id"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled At"
+        },
+        "cancel_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancel Reason"
+        },
+        "external_printed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Printed At"
+        },
+        "order_mode": {
+          "type": "string",
+          "enum": [
+            "Written",
+            "Verbal",
+            "Telephone"
+          ],
+          "title": "Order Mode",
+          "description": "Verbal / Telephone: written down by `received_by` for the prescriber, who countersigns it (MSDS 55)"
+        },
+        "received_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Received By"
+        },
+        "received_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Received By Name"
+        },
+        "read_back": {
+          "type": "boolean",
+          "title": "Read Back"
+        },
+        "countersigned_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Countersigned By"
+        },
+        "countersigned_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Countersigned At"
+        },
+        "countersign_alerted_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Countersign Alerted At",
+          "description": "When the prescriber was reminded of a late countersignature"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created By"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "prescriber_name": {
+          "type": "string",
+          "title": "Prescriber Name"
+        },
+        "prescriber_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut",
+          "description": "The prescriber when prescribing (MSDS 147; printed on the slip)"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/components/schemas/PrescriptionItemOut"
+          },
+          "type": "array",
+          "title": "Items"
+        },
+        "dispensations": {
+          "items": {
+            "$ref": "#/components/schemas/PrescriptionDispensationOut"
+          },
+          "type": "array",
+          "title": "Dispensations"
+        },
+        "queries": {
+          "items": {
+            "$ref": "#/components/schemas/PrescriptionQueryOut"
+          },
+          "type": "array",
+          "title": "Queries",
+          "description": "The pharmacist's queries on the order, open ones first"
+        },
+        "handovers": {
+          "items": {
+            "$ref": "#/components/schemas/PrescriptionHandoverOut"
+          },
+          "type": "array",
+          "title": "Handovers",
+          "description": "Each time the slip was handed over (none: not yet)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "prescription_id",
+        "prescription_number",
+        "patient_id",
+        "prescriber_id",
+        "ticket_id",
+        "admission_id",
+        "encounter_id",
+        "source",
+        "destination",
+        "status",
+        "is_content_locked",
+        "replaced_by_id",
+        "notes",
+        "cancelled_at",
+        "cancel_reason",
+        "external_printed_at",
+        "order_mode",
+        "received_by",
+        "received_by_name",
+        "read_back",
+        "countersigned_by",
+        "countersigned_at",
+        "countersign_alerted_at",
+        "created_by",
+        "created_at",
+        "row_version",
+        "patient_name",
+        "mrn",
+        "prescriber_name",
+        "prescriber_stamp",
+        "items",
+        "dispensations",
+        "queries",
+        "handovers"
+      ],
+      "title": "PrescriptionDetailOut"
+    },
+    "PrescriptionDispensationOut": {
+      "properties": {
+        "dispensation_id": {
+          "type": "integer",
+          "title": "Dispensation Id"
+        },
+        "payment_mode": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Card",
+            "PanelCredit",
+            "IPDBill",
+            "StaffPayrollDeduction",
+            "CharityZakat",
+            "SocialWelfare"
+          ],
+          "title": "Payment Mode"
+        },
+        "total_amount": {
+          "type": "number",
+          "title": "Total Amount"
+        },
+        "dispensed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Dispensed At"
+        },
+        "dispensed_by": {
+          "type": "integer",
+          "title": "Dispensed By"
+        },
+        "checked_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Checked By",
+          "description": "The second person who checked a high-alert medicine"
+        }
+      },
+      "type": "object",
+      "required": [
+        "dispensation_id",
+        "payment_mode",
+        "total_amount",
+        "dispensed_at",
+        "dispensed_by",
+        "checked_by"
+      ],
+      "title": "PrescriptionDispensationOut"
+    },
+    "PrescriptionHandoverOut": {
+      "properties": {
+        "handover_id": {
+          "type": "integer",
+          "title": "Handover Id"
+        },
+        "handed_to": {
+          "type": "string",
+          "enum": [
+            "Patient",
+            "Attendant"
+          ],
+          "title": "Handed To"
+        },
+        "attendant_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Attendant Name"
+        },
+        "copy_kept": {
+          "type": "string",
+          "enum": [
+            "Electronic",
+            "CarbonCopy",
+            "Scan"
+          ],
+          "title": "Copy Kept"
+        },
+        "document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Id",
+          "description": "The scan of the signed copy in the patient's documents"
+        },
+        "handed_by": {
+          "type": "integer",
+          "title": "Handed By"
+        },
+        "handed_by_name": {
+          "type": "string",
+          "title": "Handed By Name"
+        },
+        "handed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Handed At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "handover_id",
+        "handed_to",
+        "attendant_name",
+        "copy_kept",
+        "document_id",
+        "handed_by",
+        "handed_by_name",
+        "handed_at"
+      ],
+      "title": "PrescriptionHandoverOut",
+      "description": "The slip handed over and the copy kept (the clinic manual, indicator 35)."
+    },
+    "PrescriptionItemOut": {
+      "properties": {
+        "prescription_item_id": {
+          "type": "integer",
+          "title": "Prescription Item Id"
+        },
+        "prescription_id": {
+          "type": "integer",
+          "title": "Prescription Id"
+        },
+        "drug_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Id",
+          "description": "Null for an external (local market) drug"
+        },
+        "is_external": {
+          "type": "boolean",
+          "title": "Is External"
+        },
+        "external_drug_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Drug Name"
+        },
+        "external_strength": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Strength"
+        },
+        "external_form": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Form"
+        },
+        "qty_prescribed": {
+          "type": "number",
+          "title": "Qty Prescribed"
+        },
+        "qty_dispensed": {
+          "type": "number",
+          "title": "Qty Dispensed"
+        },
+        "dose_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dose Text"
+        },
+        "route": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Oral",
+                "IV",
+                "IM",
+                "SC",
+                "Topical",
+                "Inhaled",
+                "PR",
+                "SL",
+                "Ophthalmic",
+                "Otic",
+                "Nasal",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Route"
+        },
+        "frequency_code": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "OD",
+                "BD",
+                "TDS",
+                "QID",
+                "Q4H",
+                "Q6H",
+                "Q8H",
+                "Q12H",
+                "HS",
+                "STAT",
+                "PRN",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Frequency Code"
+        },
+        "interval_hours": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Interval Hours"
+        },
+        "duration_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duration Days"
+        },
+        "instructions": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Instructions"
+        },
+        "start_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Start At"
+        },
+        "end_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "End At"
+        },
+        "is_prn": {
+          "type": "boolean",
+          "title": "Is Prn"
+        },
+        "is_stat": {
+          "type": "boolean",
+          "title": "Is Stat"
+        },
+        "self_administration": {
+          "type": "boolean",
+          "title": "Self Administration",
+          "description": "The doctor allowed the patient to take it themselves (MSDS 70)"
+        },
+        "item_status": {
+          "type": "string",
+          "enum": [
+            "Active",
+            "Stopped",
+            "Cancelled",
+            "FullyDispensed"
+          ],
+          "title": "Item Status"
+        },
+        "stopped_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Stopped At"
+        },
+        "stopped_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Stopped By"
+        },
+        "stop_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Stop Reason"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "drug_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Name"
+        },
+        "strength": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Strength"
+        },
+        "form": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Tablet",
+                "Capsule",
+                "Syrup",
+                "Suspension",
+                "Injection",
+                "Infusion",
+                "Cream",
+                "Ointment",
+                "Drops",
+                "Inhaler",
+                "Suppository",
+                "Powder",
+                "Consumable",
+                "Device",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Form"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "qty_available": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Qty Available",
+          "description": "Live pharmacy stock of the drug"
+        },
+        "stock_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Stock Status"
+        },
+        "qty_remaining": {
+          "type": "number",
+          "title": "Qty Remaining"
+        },
+        "high_alert_category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ConcentratedElectrolyte",
+                "Chemotherapy",
+                "Anticoagulant",
+                "Insulin",
+                "Opioid",
+                "Sedative",
+                "NeuromuscularBlocker",
+                "Inotrope",
+                "Thrombolytic",
+                "Psychotropic",
+                "HighCost",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "High Alert Category"
+        },
+        "is_restricted": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Is Restricted"
+        },
+        "lasa_with": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Lasa With",
+          "description": "Medicines it looks or sounds like"
+        }
+      },
+      "type": "object",
+      "required": [
+        "prescription_item_id",
+        "prescription_id",
+        "drug_id",
+        "is_external",
+        "external_drug_name",
+        "external_strength",
+        "external_form",
+        "qty_prescribed",
+        "qty_dispensed",
+        "dose_text",
+        "route",
+        "frequency_code",
+        "interval_hours",
+        "duration_days",
+        "instructions",
+        "start_at",
+        "end_at",
+        "is_prn",
+        "is_stat",
+        "self_administration",
+        "item_status",
+        "stopped_at",
+        "stopped_by",
+        "stop_reason",
+        "row_version",
+        "drug_name",
+        "strength",
+        "form",
+        "unit",
+        "qty_available",
+        "stock_status",
+        "qty_remaining",
+        "high_alert_category",
+        "is_restricted",
+        "lasa_with"
+      ],
+      "title": "PrescriptionItemOut"
+    },
+    "PrescriptionQueryOut": {
+      "properties": {
+        "query_id": {
+          "type": "integer",
+          "title": "Query Id"
+        },
+        "prescription_id": {
+          "type": "integer",
+          "title": "Prescription Id"
+        },
+        "prescription_item_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Prescription Item Id",
+          "description": "Null: about the whole prescription"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "Unclear",
+            "DoseOrFrequency",
+            "Allergy",
+            "Interaction",
+            "Duplicate",
+            "ChildDose",
+            "Restricted",
+            "WrongPatient",
+            "Other"
+          ],
+          "title": "Reason"
+        },
+        "question": {
+          "type": "string",
+          "title": "Question"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Open",
+            "Answered",
+            "Withdrawn"
+          ],
+          "title": "Status"
+        },
+        "raised_by": {
+          "type": "integer",
+          "title": "Raised By"
+        },
+        "raised_by_name": {
+          "type": "string",
+          "title": "Raised By Name"
+        },
+        "raised_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Raised At"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ConfirmedAsWritten",
+                "Changed"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Outcome"
+        },
+        "answer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Answer"
+        },
+        "answered_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Answered By"
+        },
+        "answered_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Answered By Name"
+        },
+        "answered_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Answered At"
+        },
+        "answer_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The doctor who answered (MSDS 147)"
+        },
+        "withdrawn_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Withdrawn By"
+        },
+        "withdrawn_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Withdrawn At"
+        },
+        "withdraw_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Withdraw Reason"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "prescription_number": {
+          "type": "string",
+          "title": "Prescription Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id"
+        },
+        "prescriber_id": {
+          "type": "integer",
+          "title": "Prescriber Id"
+        },
+        "prescriber_name": {
+          "type": "string",
+          "title": "Prescriber Name"
+        },
+        "drug_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Name",
+          "description": "The queried line's medicine (null for the whole prescription)"
+        },
+        "dose_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dose Text"
+        },
+        "route": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Oral",
+                "IV",
+                "IM",
+                "SC",
+                "Topical",
+                "Inhaled",
+                "PR",
+                "SL",
+                "Ophthalmic",
+                "Otic",
+                "Nasal",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Route"
+        },
+        "frequency_code": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "OD",
+                "BD",
+                "TDS",
+                "QID",
+                "Q4H",
+                "Q6H",
+                "Q8H",
+                "Q12H",
+                "HS",
+                "STAT",
+                "PRN",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Frequency Code"
+        }
+      },
+      "type": "object",
+      "required": [
+        "query_id",
+        "prescription_id",
+        "prescription_item_id",
+        "reason",
+        "question",
+        "status",
+        "raised_by",
+        "raised_by_name",
+        "raised_at",
+        "outcome",
+        "answer",
+        "answered_by",
+        "answered_by_name",
+        "answered_at",
+        "answer_stamp",
+        "withdrawn_by",
+        "withdrawn_at",
+        "withdraw_reason",
+        "row_version",
+        "prescription_number",
+        "patient_id",
+        "patient_name",
+        "mrn",
+        "admission_id",
+        "ticket_id",
+        "prescriber_id",
+        "prescriber_name",
+        "drug_name",
+        "dose_text",
+        "route",
+        "frequency_code"
+      ],
+      "title": "PrescriptionQueryOut",
+      "description": "The pharmacist's query on an order (MSDS 51 iv), with the order it is about."
+    },
     "PrintOut_DispensingLabelFieldsOut_": {
       "properties": {
         "document_type": {
@@ -5855,9 +7485,5 @@
       ],
       "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
     }
-  ],
-  "omitted_sections": [
-    "schemas"
-  ],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type."
+  ]
 }

@@ -63,7 +63,7 @@ export interface AttendanceSummaryOut {
 }
 
 export interface ShiftAssignIn {
-  /** The fixed default shift; null = the employee works to the duty roster only (a day without a roster entry is a rest day) */
+  /** The fixed default shift; null = the employee works to the duty roster only (a day without a roster entry is a rest day) (GET /hr/shift-patterns) */
   shift_pattern_id: number | null;
   effective_from: string;
   /** With a default shift, required: the ISO weekdays this person is off (1 = Monday … 7 = Sunday). A hospital never closes, so each person has their own; [] = works every day (the day beyond the weekly allowance is paid as extra duty) */
@@ -154,6 +154,18 @@ export interface RollCallSkippedOut {
   reason: string;
 }
 
+export interface ShiftPatternOut {
+  shift_pattern_id: number;
+  name: string;
+  start_time: string;
+  /** Earlier than start_time for a night shift */
+  end_time: string;
+  grace_minutes: number;
+  half_day_after_minutes: number;
+  is_active: boolean;
+  row_version: number;
+}
+
 /** Daily attendance flags (Present / Late / Absent / HalfDay / Leave) — GET /api/v1/hr/attendance (who may call: holders of hr.attendance.view). */
 export function attendance(query?: { date_from?: string | null; date_to?: string | null; employee_id?: number | null; department_id?: number | null }): Promise<AttendanceDayOut[]> {
   return api<AttendanceDayOut[]>("GET", withQuery(`/hr/attendance`, query), undefined);
@@ -192,4 +204,9 @@ export function rollCallSheet(query?: { roster_date?: string | null; shift_patte
 /** Mark rostered staff present (no badge station) — POST /api/v1/rosters/roll-call (who may call: holders of attendance.roll_call). */
 export function takeRollCall(body: RollCallIn): Promise<RollCallOut> {
   return api<RollCallOut>("POST", `/rosters/roll-call`, body, { idempotent: true });
+}
+
+/** Shift patterns — GET /api/v1/hr/shift-patterns (who may call: holders of hr.employee.view or hr.shift.manage). */
+export function shiftPatterns(): Promise<ShiftPatternOut[]> {
+  return api<ShiftPatternOut[]>("GET", `/hr/shift-patterns`, undefined);
 }

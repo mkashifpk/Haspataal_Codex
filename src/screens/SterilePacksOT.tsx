@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import type { EstablishmentOut } from "../generated/facility_profile";
 import {
-  usePack,
+  use as usePack,
   getPack,
   listPacks,
   PackOut,
   PackUseIn,
 } from "../generated/sterile_packs_ot";
-import { listBookings, OtBookingListItemOut } from "../generated/ot_consumables_nurse";
+import {worklistOtClinical, type SurgicalWorklistItemOut} from '../generated/sterile_packs_ot';
 import {
   getSterilePacksScreenView,
   canUsePack,
@@ -53,7 +53,7 @@ export const SterilePacksOT: React.FC<SterilePacksOTProps> = ({
   const canView = useMemo(() => canViewPacks(currentUser), [currentUser]);
 
   // Surgical cases queue for context
-  const [bookings, setBookings] = useState<OtBookingListItemOut[]>([]);
+  const [bookings, setBookings] = useState<SurgicalWorklistItemOut[]>([]);
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
   const [caseSearch, setCaseSearch] = useState("");
 
@@ -82,7 +82,7 @@ export const SterilePacksOT: React.FC<SterilePacksOTProps> = ({
   // Fetch active surgical cases
   const loadBookings = useCallback(async () => {
     try {
-      const data = await listBookings({ status: undefined, limit: 100 });
+      const data = await worklistOtClinical();
       setBookings(data);
       if (data.length > 0 && !selectedBookingId) {
         // Default to first active InProgress or Scheduled booking

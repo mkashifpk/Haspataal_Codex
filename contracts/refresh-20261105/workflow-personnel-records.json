@@ -1,0 +1,308 @@
+{
+  "slug": "personnel-records",
+  "title": "Personnel records (MSDS)",
+  "summary": "The personnel file of every member of staff - orientation in three parts, the job description signed by them and the in-charge, credentials verified with their primary source, the mandatory training and its compliance, performance appraisals on schedule (probation, annual, ad hoc) with development, the disciplinary background and the staff health record (confidential) - with the completeness report the surveyor samples, and each member of staff's own view.",
+  "order": 99,
+  "workflow": "MSDS HRM 130-143",
+  "workspaces": [
+    "*",
+    "hr",
+    "head_nurse",
+    "doctor",
+    "infection_control",
+    "quality",
+    "owner_dashboard"
+  ],
+  "file": "personnel-records.md",
+  "markdown": "# Personnel records (MSDS)\n\nThe HR master data (the onboarding wizard, qualifications, documents, payroll) is in [HR and payroll](hr-and-payroll.md).\nThis playbook covers what the MSDS inspects in the personnel files.\n\n| MSDS | What is checked | Haspataal |\n|---|---|---|\n| HRM 130, 131, 133 | Orientation to the hospital, the department and the job; patients' rights for all | **Orientation topics** (11 seeded, three parts), each recorded with who conducted it; `oriented_pct`, `patient_rights_pct` |\n| HRM 132 | A job description signed by the member of staff and the in-charge; staff rights communicated | **Job descriptions** per post, issued (frozen with the staff rights statement), both signatures |\n| HRM 134-137 | A documented appraisal system, explained at induction, used for development, on time (over 90 %) | The **appraisal system** PDF; **appraisals** on the schedule, rated on administrative and performance criteria, a development plan below Satisfactory, `on_time_pct` |\n| HRM 138-141 | A complete file for all: qualifications, in-service training, disciplinary background, health, every evaluation | The **personnel file** and its **completeness** report; **training** history; **disciplinary cases**; the **health record** |\n| HRM 142, 143 | Credentials verified with the primary source; education, registration, training, experience documented and current | **Verification** of each qualification; registrations expiring alerted |\n\nWho: **HR** (`personnel.view`, `personnel.manage`, `personnel.training.record`, `personnel.appraise`,\n`personnel.discipline.manage`, `personnel.health.manage`); **supervisors** (`personnel.appraise`: head nurse,\nconsultants, section heads) appraise their own staff; **infection control nurse** (`personnel.training.record`,\n`personnel.health.manage`); **Quality Officer** (`personnel.view`, `personnel.training.record`); **owner**\n(`personnel.view`, `personnel.appraise`, `personnel.discipline.manage`); **everyone**: their own record.\n\n## 1. Orientation (HR)\n\n1. The topics: `GET /personnel/orientation-topics`; adapt one: `PUT /personnel/orientation-topics/{code}`.\n2. Record what was covered: `POST /personnel/employees/{employee_id}/orientation`\n   `{\"topic_codes\": [\"MISSION\", \"PATIENT_RIGHTS\", \"APPRAISAL\"], \"completed_on\": \"2026-10-01\", \"employee_signed\": true}`\n   (you are recorded as the one who conducted it).\n3. Who is oriented: `GET /personnel/orientation?department_id=&incomplete_only=true` (overdue after\n   `orientation_due_days`; the worker reminds HR).\n\n## 2. Job descriptions (HR)\n\n1. Per post: `GET /personnel/job-descriptions`, `POST /personnel/job-descriptions {\"title\", \"purpose\",\n   \"responsibilities\", \"reports_to\", \"qualifications\", \"appraisal_criteria\"}`, `PUT /personnel/job-descriptions/{jd_id}`.\n   The department from `GET /admin/departments`.\n2. Issue one: `POST /personnel/employees/{employee_id}/job-description {\"jd_id\", \"issued_on\"}` (frozen with the staff\n   rights statement; the previous one is superseded); print it: `GET /personnel/employee-job-descriptions/{assignment_id}/pdf`.\n3. Record both signatures from the paper: `POST /personnel/employee-job-descriptions/{assignment_id}/sign\n   {\"employee_signed_on\", \"incharge_user_id\", \"incharge_signed_on\"}` (the in-charge is someone else).\n   The in-charge who signed (`incharge_user_id`) from `GET /staff/lookup` (their `user_id`).\n\n## 3. Credentials (HR)\n\n1. Qualifications are added in the HR wizard (`POST /hr/employees/{employee_id}/qualifications`).\n2. `GET /personnel/credentials?state=Unverified` (or Expiring, Expired); verify each with its source:\n   `POST /personnel/qualifications/{qualification_id}/verify {\"outcome\": \"Verified\", \"verified_with\": \"PMDC online\n   register\", \"verification_ref\": \"screenshot 12-09\", \"verified_on\": \"2026-10-01\"}`. Final (`QUALIFICATION_VERIFIED`);\n   a renewed registration is a new qualification. A **Failed** verification alerts HR and the management at once.\n3. The worker warns HR and the member of staff of a registration expiring within `credential_expiry_alert_days`.\n\n## 4. Training\n\n1. The mandatory training: `GET /personnel/training-requirements`; adapt: `PUT /personnel/training-requirements/{code}`.\n2. A session (HR, infection control, quality, safety): `POST /personnel/training-sessions`\n   ```json\n   { \"title\": \"Hand hygiene and protective equipment\", \"requirement_code\": \"IPC_BASICS\", \"category\": \"InfectionControl\",\n     \"held_on\": \"2026-10-01\", \"hours\": 2, \"trainer\": \"IPC nurse\",\n     \"attendees\": [{\"employee_id\": 101, \"passed\": true}, {\"employee_id\": 87}] }\n   ```\n   Attendees from `GET /facility/staff`. Correct it with the reason: `PUT /personnel/training-sessions/{session_id}`;\n   `GET /personnel/training-sessions`, `GET /personnel/training-sessions/{session_id}`.\n   The department from `GET /admin/departments`.\n3. An individual record (an external course, a BLS certificate with `valid_until`, the training an appraisal asked\n   for with `appraisal_id`): `POST /personnel/employees/{employee_id}/trainings`.\n   The appraisal from `GET /personnel/appraisals?employee_id=`.\n4. Who is due: `GET /personnel/training-compliance?requirement_code=&overdue_only=true` (Current, Overdue, Never).\n\n## 5. Appraisals (supervisors, HR)\n\n1. The schedule: `GET /personnel/appraisals/schedule?days=30` (a supervisor sees their own staff; `kind` Probation or\n   Annual, `draft_id`, `overdue` after `appraisal_grace_days`; the worker reminds the supervisor and HR once).\n2. Start it (a member of staff not on the schedule: `GET /staff/lookup?q=`):\n   `POST /personnel/appraisals {\"employee_id\", \"kind\": \"Probation\", \"period_from\", \"period_to\"}` (the kind the\n   schedule says; an ad hoc one gives its `reason`; HR may prepare it for the supervisor with `appraiser_user_id`).\n   The answer carries the hospital's `criteria` for the form.\n   HR names the appraiser from `GET /staff/lookup` (their `user_id`); a supervisor's own appraisal leaves it out.\n3. Write it: `PUT /personnel/appraisals/{appraisal_id}`\n   ```json\n   { \"period_from\": \"2026-06-23\", \"period_to\": \"2026-10-01\",\n     \"ratings\": [{\"criterion\": \"Punctuality and attendance\", \"kind\": \"Administrative\", \"rating\": 4},\n                 {\"criterion\": \"Job knowledge and skills\", \"kind\": \"Performance\", \"rating\": 2, \"comment\": \"IV cannulation\"}],\n     \"overall_rating\": \"NeedsImprovement\", \"development_needs\": \"IV cannulation\",\n     \"development_plan\": \"Two weeks of supervised cannulation in the ER, then a skills check\" }\n   ```\n4. Sign (the appraiser only): `POST /personnel/appraisals/{appraisal_id}/sign` (`APPRAISAL_INCOMPLETE` lists what is\n   missing); then frozen. A draft started by mistake: `POST /personnel/appraisals/{appraisal_id}/cancel {\"reason\"}`.\n5. The member of staff reads it (`GET /personnel/appraisals/{appraisal_id}`, `GET /personnel/appraisals/{appraisal_id}/pdf`)\n   and acknowledges with comments: `POST /personnel/appraisals/{appraisal_id}/acknowledge {\"acknowledged_on\",\n   \"employee_comments\"}` (themselves, or HR from the signed paper).\n6. HR: `GET /personnel/appraisals?employee_id=&kind=&status=` (`mine=true` for an appraiser) and\n   `GET /personnel/appraisals/statistics` (`on_time_pct`, development planned and trained). The written system for\n   everyone: `GET /personnel/appraisal-policy/pdf`.\n\n## 6. The confidential parts (HR; health also infection control)\n\n1. Disciplinary cases: `POST /personnel/employees/{employee_id}/disciplinary-cases {\"occurred_on\", \"allegation\",\n   \"incident_id\"?, \"complaint_id\"?}`, then `POST /personnel/disciplinary-cases/{case_id}/decide {\"outcome\": \"Decided\",\n   \"employee_response\", \"action\": \"WrittenWarning\", \"note\", \"decided_on\"}` (no action without their response:\n   `DISCIPLINARY_NOT_HEARD`), or `{\"outcome\": \"Dropped\", \"note\", \"decided_on\"}`; `GET /personnel/disciplinary-cases`.\n2. Health: `POST /personnel/employees/{employee_id}/health {\"kind\": \"HepatitisBVaccine\", \"done_on\", \"dose\": 1,\n   \"next_due\"}` (a medical needs `fit_for_duty`); `GET /personnel/employees/{employee_id}/health`; who is due:\n   `GET /personnel/health/due` (no pre-employment medical, hepatitis B incomplete for staff exposed to blood, a dose due).\n\n## 7. The file and its completeness (HR, quality, owner)\n\n1. `GET /personnel/completeness?department_id=&incomplete_only=true`: every active member of staff with what the file\n   lacks, `complete_pct`, the orientation summary.\n2. One file: `GET /personnel/employees/{employee_id}/file` (the disciplinary and health parts are null without their\n   permission); for the surveyor: `GET /personnel/employees/{employee_id}/file/pdf`.\n\n## 8. My own record (every workspace)\n\n`GET /personnel/me`: my orientation, my job description as signed, my signed appraisals to read, comment and\nacknowledge, my training.",
+  "steps": [
+    {
+      "heading": "1. Orientation (HR)",
+      "anchor": "1-orientation-hr",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/orientation-topics",
+          "summary": "Orientation topics"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/personnel/orientation-topics/{code}",
+          "summary": "Adapt an orientation topic"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/employees/{employee_id}/orientation",
+          "summary": "Record the topics covered with a member of staff"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/orientation",
+          "summary": "Who is oriented"
+        }
+      ]
+    },
+    {
+      "heading": "2. Job descriptions (HR)",
+      "anchor": "2-job-descriptions-hr",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/job-descriptions",
+          "summary": "Job descriptions"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/job-descriptions",
+          "summary": "Write a job description for a post"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/personnel/job-descriptions/{jd_id}",
+          "summary": "Change a job description"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/employees/{employee_id}/job-description",
+          "summary": "Issue a job description to a member of staff"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/employee-job-descriptions/{assignment_id}/pdf",
+          "summary": "The job description to sign (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/employee-job-descriptions/{assignment_id}/sign",
+          "summary": "Record the signatures"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        }
+      ]
+    },
+    {
+      "heading": "3. Credentials (HR)",
+      "anchor": "3-credentials-hr",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/hr/employees/{employee_id}/qualifications",
+          "summary": "Add education / experience / licence"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/credentials",
+          "summary": "Credentials and their verification"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/qualifications/{qualification_id}/verify",
+          "summary": "Record the primary-source verification"
+        }
+      ]
+    },
+    {
+      "heading": "4. Training",
+      "anchor": "4-training",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/training-requirements",
+          "summary": "The mandatory training"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/personnel/training-requirements/{code}",
+          "summary": "Adapt a mandatory training"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/training-sessions",
+          "summary": "Record a training session and who attended"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/staff",
+          "summary": "Pick a member of staff"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/personnel/training-sessions/{session_id}",
+          "summary": "Correct a training session"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/training-sessions",
+          "summary": "Training sessions"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/training-sessions/{session_id}",
+          "summary": "One training session with its attendees"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/employees/{employee_id}/trainings",
+          "summary": "Record an individual training"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/appraisals",
+          "summary": "Appraisals"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/training-compliance",
+          "summary": "Who needs which mandatory training"
+        }
+      ]
+    },
+    {
+      "heading": "5. Appraisals (supervisors, HR)",
+      "anchor": "5-appraisals-supervisors-hr",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/appraisals/schedule",
+          "summary": "Appraisals due"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/appraisals",
+          "summary": "Start an appraisal (draft)"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/personnel/appraisals/{appraisal_id}",
+          "summary": "Write the appraisal"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/appraisals/{appraisal_id}/sign",
+          "summary": "Sign the appraisal"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/appraisals/{appraisal_id}/cancel",
+          "summary": "Cancel a draft appraisal"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/appraisals/{appraisal_id}",
+          "summary": "One appraisal"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/appraisals/{appraisal_id}/pdf",
+          "summary": "The appraisal (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/appraisals/{appraisal_id}/acknowledge",
+          "summary": "The member of staff's comments and acknowledgement"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/appraisals",
+          "summary": "Appraisals"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/appraisals/statistics",
+          "summary": "Appraisals on time; development"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/appraisal-policy/pdf",
+          "summary": "The performance appraisal system (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "6. The confidential parts (HR; health also infection control)",
+      "anchor": "6-the-confidential-parts-hr-health-also-infection-control",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/employees/{employee_id}/disciplinary-cases",
+          "summary": "Open a disciplinary case"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/disciplinary-cases/{case_id}/decide",
+          "summary": "Decide or drop a case"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/disciplinary-cases",
+          "summary": "Disciplinary cases (confidential)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/personnel/employees/{employee_id}/health",
+          "summary": "Record a medical, a screening or a vaccination"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/employees/{employee_id}/health",
+          "summary": "The staff health record (confidential)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/health/due",
+          "summary": "Medicals and vaccinations due"
+        }
+      ]
+    },
+    {
+      "heading": "7. The file and its completeness (HR, quality, owner)",
+      "anchor": "7-the-file-and-its-completeness-hr-quality-owner",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/completeness",
+          "summary": "What the personnel files lack"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/employees/{employee_id}/file",
+          "summary": "The personnel file"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/employees/{employee_id}/file/pdf",
+          "summary": "The personnel file (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "8. My own record (every workspace)",
+      "anchor": "8-my-own-record-every-workspace",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/personnel/me",
+          "summary": "My personnel record"
+        }
+      ]
+    }
+  ]
+}

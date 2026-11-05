@@ -1448,6 +1448,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
                 <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
                   {isUrdu ? "مقام / کمرہ / وارڈ:" : "Location / Room / Ward:"}
                 </label>
+                <DirectoryPicker path="/ops/assets" idField="asset_id" value={issueForm.asset_id??''} onChange={e=>setIssueForm({...issueForm,asset_id:e.target.value?Number(e.target.value):null})} data-help="self_service.issue_input_location"/>
                 <input
                   type="text"
                   data-help="self_service.issue_input_location"
@@ -1501,3 +1502,4 @@ export const SelfService: React.FC<SelfServiceProps> = ({
     </div>
   );
 };
+import {DirectoryPicker} from '../DirectoryPicker';

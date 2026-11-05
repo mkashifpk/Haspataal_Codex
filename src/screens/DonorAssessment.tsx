@@ -646,7 +646,7 @@ export function DonorAssessment({
 
       {/* TAB 1: ASSESS DONOR */}
       {activeTab === "assess" && (
-        <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: "1.25rem" }}>
+        <div className="donor-assessment-layout" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: "1.25rem" }}>
           {/* Left Column: Search & Donor Profile */}
           <div>
             {/* Search Card */}

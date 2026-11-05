@@ -1,0 +1,239 @@
+{
+  "schemas": {
+    "IncidentIn": {
+      "properties": {
+        "type_code": {
+          "type": "string",
+          "title": "Type Code",
+          "description": "From GET /incident-types"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Incident",
+            "NearMiss"
+          ],
+          "title": "Kind",
+          "description": "NearMiss: caught before it reached anyone",
+          "default": "Incident"
+        },
+        "harm": {
+          "type": "string",
+          "enum": [
+            "NoHarm",
+            "Mild",
+            "Moderate",
+            "Severe",
+            "Death"
+          ],
+          "title": "Harm",
+          "default": "NoHarm"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Occurred At"
+        },
+        "affected": {
+          "type": "string",
+          "enum": [
+            "Patient",
+            "Staff",
+            "Visitor",
+            "None"
+          ],
+          "title": "Affected"
+        },
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id",
+          "description": "The patient (GET /patients/search)"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id",
+          "description": "The admission it happened in (the patient follows from it) (GET /admissions)"
+        },
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id",
+          "description": "The staff member harmed (affected Staff)"
+        },
+        "booking_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Id",
+          "description": "A theatre adverse event: the operation (with ot_phase) (GET /ot/bookings)"
+        },
+        "ot_phase": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "BeforeInduction",
+                "Induction",
+                "Maintenance",
+                "Emergence",
+                "Recovery",
+                "AfterRecovery"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Phase"
+        },
+        "drug_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Id",
+          "description": "A medication error or an adverse drug reaction: the medicine (GET /drugs/search)"
+        },
+        "medication_stage": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Prescribing",
+                "Transcribing",
+                "Dispensing",
+                "Administration",
+                "Monitoring"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Medication Stage"
+        },
+        "death_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Death Id",
+          "description": "An unexpected death: the death record (GET /deaths?patient_id=)"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id",
+          "description": "The department (GET /admin/departments)"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id",
+          "description": "The ward (GET /beds/matrix?include_beds=false)"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Location",
+          "examples": [
+            "Bed 12, near the nursing station"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 8000,
+          "minLength": 10,
+          "title": "Description",
+          "description": "What happened: facts, not opinions or blame"
+        },
+        "immediate_action": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Immediate Action",
+          "description": "What was done at once for the person and to make the place safe"
+        },
+        "screening_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Screening Key",
+          "description": "Reporting what the screening list found (GET /incident-screening)"
+        },
+        "reporter_confidential": {
+          "type": "boolean",
+          "title": "Reporter Confidential",
+          "description": "Only the incident managers see who reported it",
+          "default": false
+        }
+      },
+      "type": "object",
+      "required": [
+        "type_code",
+        "occurred_at",
+        "affected",
+        "description",
+        "immediate_action"
+      ],
+      "title": "IncidentIn"
+    }
+  }
+}

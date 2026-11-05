@@ -1,7 +1,7 @@
 {
   "screen_id": "lab_admin",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -266,13 +266,19 @@
     ],
     "related_workflows": [
       "clinical-and-prescriptions",
+      "complaints",
       "consent",
       "diagnostic-services",
       "duty-rosters-and-attendance",
       "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "finance-and-owner",
+      "hr-and-payroll",
       "incidents-and-sentinel-events",
+      "infection-control",
       "inpatient-and-discharge",
       "laboratory-and-radiology",
+      "medication-safety",
       "opd-reception",
       "operating-theater",
       "personnel-records"
@@ -300,14 +306,39 @@
     "workspace": "lab_admin",
     "phase": "P7",
     "position": 139,
-    "points": 76,
+    "points": 88,
     "capabilities": [
       "realtime",
       "idempotent_writes",
       "f1_help",
       "zoom"
     ],
-    "depends_on": [],
+    "depends_on": [
+      {
+        "from": "lab_admin",
+        "to": "accountant_cockpit",
+        "kind": "data_candidate",
+        "evidence": "it reads finance/vendors, which POST /finance/vendors on accountant_cockpit creates",
+        "ordering": false,
+        "forward": false
+      },
+      {
+        "from": "lab_admin",
+        "to": "diagnostic_partners",
+        "kind": "data_candidate",
+        "evidence": "it reads diagnostic-partners, which POST /diagnostic-partners on diagnostic_partners creates",
+        "ordering": false,
+        "forward": false
+      },
+      {
+        "from": "lab_admin",
+        "to": "pharmacy_admin",
+        "kind": "data_candidate",
+        "evidence": "it reads pharmacy-admin/vendor-invoices, which POST /pharmacy-admin/vendor-invoices on pharmacy_admin creates",
+        "ordering": false,
+        "forward": false
+      }
+    ],
     "needed_by": [
       {
         "from": "lab_only_walkin",
@@ -328,83 +359,107 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 76,
+    "points": 88,
     "items": [
       {
         "id": "ep:GET /lab/tests",
         "label": "GET /lab/tests",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /lab/tests",
         "label": "POST /lab/tests",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PATCH /lab/tests/{test_id}",
         "label": "PATCH /lab/tests/{test_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PUT /lab/tests/{test_id}/price",
         "label": "PUT /lab/tests/{test_id}/price",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /lab/tests/{test_id}/bom",
         "label": "GET /lab/tests/{test_id}/bom",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PUT /lab/tests/{test_id}/bom",
         "label": "PUT /lab/tests/{test_id}/bom",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /lab/reagents",
         "label": "GET /lab/reagents",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /lab/reagents",
         "label": "POST /lab/reagents",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /lab/reagent-batches",
         "label": "POST /lab/reagent-batches",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /lab/reagent-adjustments",
         "label": "POST /lab/reagent-adjustments",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /lab/dashboard",
         "label": "GET /lab/dashboard",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PUT /lab/contractor",
         "label": "PUT /lab/contractor",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /staff/lookup",
         "label": "GET /staff/lookup",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /finance/vendors",
+        "label": "GET /finance/vendors",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /diagnostic-partners",
+        "label": "GET /diagnostic-partners",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /pharmacy-admin/vendor-invoices",
+        "label": "GET /pharmacy-admin/vendor-invoices",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /lab/reagents/{reagent_id}/batches",
+        "label": "GET /lab/reagents/{reagent_id}/batches",
         "points": 3,
         "claimed": false
       },
@@ -412,55 +467,55 @@
         "id": "ev:lab.reagent.low_stock",
         "label": "lab.reagent.low_stock",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:26ecdbf976",
         "label": "A metric schema editor builds metric_schema (key, label, unit, ref ranges, critical: low/high for a number, values for a text metric such as Positive).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:c8be844050",
         "label": "Per test (MSDS AAC 1, 4-6): turnaround_minutes (routine) and emergency_turnaround_minutes (Urgent, STAT; empty: the hospital defaults), availability InHouse or SendOut with send_out_partner_id (GET /diagnostic-partners?services=Lab), available_24h for the basic tests, notifiable_disease for a test whose positive result is a priority disease.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:0f8b607b2c",
         "label": "Exists for the service laboratory or outsourced_diagnostics (setup): show it as GET /establishment views.screens says for screen_id lab_admin (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
         "label": "Test plan passed",
         "points": 4,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -490,13 +545,13 @@
         "id": "q:character",
         "label": "Design principles applied",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:editor",
         "label": "Editor's pass",
         "points": 2,
-        "claimed": false
+        "claimed": true
       }
     ],
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
@@ -746,7 +801,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "exclusive_minimum": 0.0,
+            "exclusive_minimum": 0,
             "description": "Routine orders: from the sample's receipt to the published result (MSDS AAC 4)"
           },
           {
@@ -754,7 +809,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "exclusive_minimum": 0.0,
+            "exclusive_minimum": 0,
             "description": "Urgent and STAT orders (MSDS AAC 4); none: the setting lab_turnaround_emergency_minutes"
           },
           {
@@ -953,14 +1008,14 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "exclusive_minimum": 0.0
+            "exclusive_minimum": 0
           },
           {
             "pointer": "/emergency_turnaround_minutes",
             "type": "integer",
             "required": false,
             "nullable": true,
-            "exclusive_minimum": 0.0
+            "exclusive_minimum": 0
           },
           {
             "pointer": "/availability",
@@ -976,7 +1031,8 @@
             "pointer": "/send_out_partner_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "SendOut: the partner laboratory (GET /diagnostic-partners)"
           },
           {
             "pointer": "/available_24h",
@@ -1471,7 +1527,7 @@
             "required": false,
             "nullable": false,
             "default": 90,
-            "minimum": 0.0
+            "minimum": 0
           }
         ],
         "cross_field_rules": {},
@@ -1610,7 +1666,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "Supplier invoice (see /pharmacy/vendor-invoices, module=Lab)"
+            "description": "Supplier invoice (GET /pharmacy-admin/vendor-invoices, module=Lab)"
           }
         ],
         "cross_field_rules": {},
@@ -1744,7 +1800,8 @@
             "pointer": "/reagent_batch_id",
             "type": "integer",
             "required": true,
-            "nullable": false
+            "nullable": false,
+            "description": "The batch to write off (GET /lab/reagents/{reagent_id}/batches)"
           },
           {
             "pointer": "/qty",
@@ -1976,13 +2033,15 @@
             "pointer": "/contractor_employee_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "A contracting pathologist (GET /staff/lookup)"
           },
           {
             "pointer": "/contractor_vendor_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "A contracting laboratory firm (GET /finance/vendors)"
           },
           {
             "pointer": "/effective_from",
@@ -2174,6 +2233,447 @@
         ],
         "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
       }
+    },
+    {
+      "endpoint": "GET /finance/vendors",
+      "summary": "Vendors",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "vendor_type",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "PharmacySupplier",
+                  "ReagentSupplier",
+                  "EquipmentSupplier",
+                  "UtilityProvider",
+                  "Contractor",
+                  "Other"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vendor Type"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_VendorOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "vendor_type",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PharmacySupplier",
+              "ReagentSupplier",
+              "EquipmentSupplier",
+              "UtilityProvider",
+              "Contractor",
+              "Other"
+            ]
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /diagnostic-partners",
+      "summary": "Partner laboratories and imaging centres",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "diagnostics.setup.manage",
+          "diagnostics.quality.view",
+          "lab.sendout.manage",
+          "imaging.order.update",
+          "lab.test.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of diagnostics.setup.manage or diagnostics.quality.view or lab.sendout.manage or imaging.order.update or lab.test.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "services",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Lab",
+                  "Imaging"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Services"
+          }
+        },
+        {
+          "name": "active_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "title": "Active Only"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_PartnerOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "services",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Lab",
+              "Imaging"
+            ]
+          },
+          {
+            "name": "active_only",
+            "required": false,
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /pharmacy-admin/vendor-invoices",
+      "summary": "Supplier invoices and amounts owed",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.vendor_invoice.manage",
+          "finance.ap.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of pharmacy.vendor_invoice.manage or finance.ap.view",
+        "roles_allowed": [
+          "accountant",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "owner",
+          "pharmacy_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "module",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_VendorInvoiceListOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "module",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /lab/reagents/{reagent_id}/batches",
+      "summary": "A reagent's batches with stock, the first to expire first",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "lab.reagent.manage",
+          "lab.bom.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of lab.reagent.manage or lab.bom.manage",
+        "roles_allowed": [
+          "lab_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "reagent_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Reagent Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_ReagentBatchStockOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
     }
   ],
   "realtime": {
@@ -2193,7 +2693,11 @@
           "GET /lab/tests",
           "GET /lab/reagents",
           "GET /lab/dashboard",
-          "GET /staff/lookup"
+          "GET /staff/lookup",
+          "GET /finance/vendors",
+          "GET /diagnostic-partners",
+          "GET /pharmacy-admin/vendor-invoices",
+          "GET /lab/reagents/{reagent_id}/batches"
         ]
       }
     ],
@@ -2202,6 +2706,20 @@
   "handoffs": [],
   "patient_context": null,
   "value_lists": [
+    {
+      "values": [
+        "Lab",
+        "Imaging",
+        "Both"
+      ],
+      "column": "diagnostic_partners.services",
+      "used_at": "GET /diagnostic-partners[].services",
+      "labels": {
+        "Lab": "Lab",
+        "Imaging": "Imaging",
+        "Both": "Both"
+      }
+    },
     {
       "values": [
         "PMDC",
@@ -2246,6 +2764,80 @@
       "labels": {
         "InHouse": "In house",
         "SendOut": "Send out"
+      }
+    },
+    {
+      "values": [
+        "Purchase",
+        "Return",
+        "CreditNote",
+        "Service",
+        "Utility",
+        "Other"
+      ],
+      "column": "vendor_invoices.invoice_type",
+      "used_at": "GET /pharmacy-admin/vendor-invoices[].invoice_type",
+      "labels": {
+        "Purchase": "Purchase",
+        "Return": "Return",
+        "CreditNote": "Credit note",
+        "Service": "Service",
+        "Utility": "Utility",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Pharmacy",
+        "Lab",
+        "Ops",
+        "OT",
+        "Other"
+      ],
+      "column": "vendor_invoices.module",
+      "used_at": "GET /pharmacy-admin/vendor-invoices[].module",
+      "labels": {
+        "Pharmacy": "Pharmacy",
+        "Lab": "Lab",
+        "Ops": "Ops",
+        "OT": "OT",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Pending",
+        "PartiallyPaid",
+        "Paid",
+        "Cancelled"
+      ],
+      "column": "vendor_invoices.status",
+      "used_at": "GET /pharmacy-admin/vendor-invoices[].status",
+      "labels": {
+        "Pending": "Pending",
+        "PartiallyPaid": "Partially paid",
+        "Paid": "Paid",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "PharmacySupplier",
+        "ReagentSupplier",
+        "EquipmentSupplier",
+        "UtilityProvider",
+        "Contractor",
+        "Other"
+      ],
+      "column": "vendors.vendor_type",
+      "used_at": "GET /finance/vendors[].vendor_type",
+      "labels": {
+        "PharmacySupplier": "Pharmacy supplier",
+        "ReagentSupplier": "Reagent supplier",
+        "EquipmentSupplier": "Equipment supplier",
+        "UtilityProvider": "Utility provider",
+        "Contractor": "Contractor",
+        "Other": "Other"
       }
     },
     {
@@ -2344,13 +2936,18 @@
       "hospital_admin",
       "hospital_director",
       "clinic_director",
+      "accountant",
       "receptionist",
       "doctor",
       "clinical_specialist",
       "surgeon",
       "anaesthetist",
+      "pharmacy_admin",
       "lab_technician",
-      "lab_verifier"
+      "lab_verifier",
+      "radiographer",
+      "radiologist",
+      "quality_officer"
     ],
     "page_for": [
       "lab_admin"
@@ -2648,6 +3245,101 @@
         "as_one_of": [
           "any logged-in user"
         ]
+      },
+      {
+        "id": "case:GET /finance/vendors",
+        "call": "GET /api/v1/finance/vendors",
+        "summary": "Vendors",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /diagnostic-partners",
+        "call": "GET /api/v1/diagnostic-partners",
+        "summary": "Partner laboratories and imaging centres",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist"
+        ]
+      },
+      {
+        "id": "case:GET /pharmacy-admin/vendor-invoices",
+        "call": "GET /api/v1/pharmacy-admin/vendor-invoices",
+        "summary": "Supplier invoices and amounts owed",
+        "denied": {
+          "as_one_of": [
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier",
+            "clinical_specialist"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "accountant",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "owner",
+          "pharmacy_admin"
+        ]
+      },
+      {
+        "id": "case:GET /lab/reagents/{reagent_id}/batches",
+        "call": "GET /api/v1/lab/reagents/{reagent_id}/batches",
+        "summary": "A reagent's batches with stock, the first to expire first",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "lab_admin"
+        ]
       }
     ],
     "service_cases": [
@@ -2699,8 +3391,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -2879,6 +3571,54 @@
         "permissions": [],
         "permissions_mode": "all",
         "access": "any logged-in user"
+      },
+      {
+        "id": "lab_admin::GET /finance/vendors",
+        "task": "Vendors",
+        "call": "GET /finance/vendors",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "lab_admin::GET /diagnostic-partners",
+        "task": "Partner laboratories and imaging centres",
+        "call": "GET /diagnostic-partners",
+        "is_action": false,
+        "permissions": [
+          "diagnostics.setup.manage",
+          "diagnostics.quality.view",
+          "lab.sendout.manage",
+          "imaging.order.update",
+          "lab.test.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "lab_admin::GET /pharmacy-admin/vendor-invoices",
+        "task": "Supplier invoices and amounts owed",
+        "call": "GET /pharmacy-admin/vendor-invoices",
+        "is_action": false,
+        "permissions": [
+          "pharmacy.vendor_invoice.manage",
+          "finance.ap.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "lab_admin::GET /lab/reagents/{reagent_id}/batches",
+        "task": "A reagent's batches with stock, the first to expire first",
+        "call": "GET /lab/reagents/{reagent_id}/batches",
+        "is_action": false,
+        "permissions": [
+          "lab.reagent.manage",
+          "lab.bom.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
       }
     ],
     "rules_to_explain": [
@@ -2996,6 +3736,11 @@
       "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
     },
     {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
+    {
       "slug": "consent",
       "title": "Consent (MSDS)",
       "recipe": "get_workflow_recipe('consent')"
@@ -3016,9 +3761,29 @@
       "recipe": "get_workflow_recipe('facility-and-it')"
     },
     {
+      "slug": "facility-compliance-equipment-drills",
+      "title": "Licences, equipment maintenance and mock drills (MSDS)",
+      "recipe": "get_workflow_recipe('facility-compliance-equipment-drills')"
+    },
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
+      "slug": "hr-and-payroll",
+      "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
+      "recipe": "get_workflow_recipe('hr-and-payroll')"
+    },
+    {
       "slug": "incidents-and-sentinel-events",
       "title": "Incidents, sentinel events and the action register (MSDS)",
       "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "recipe": "get_workflow_recipe('infection-control')"
     },
     {
       "slug": "inpatient-and-discharge",
@@ -3029,6 +3794,11 @@
       "slug": "laboratory-and-radiology",
       "title": "Laboratory & radiology",
       "recipe": "get_workflow_recipe('laboratory-and-radiology')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
     },
     {
       "slug": "opd-reception",
@@ -3212,7 +3982,7 @@
               "name": "Vitamin D",
               "section": "Biochemistry",
               "sample_type": "Blood",
-              "price": 3500.0,
+              "price": 3500,
               "turnaround_minutes": null,
               "emergency_turnaround_minutes": null,
               "availability": "SendOut",
@@ -3227,8 +3997,8 @@
                   "key": "vitd",
                   "ref": {
                     "default": [
-                      30.0,
-                      100.0
+                      30,
+                      100
                     ]
                   },
                   "type": "number",
@@ -3265,11 +4035,11 @@
                   17.5
                 ],
                 "female": [
-                  12.0,
+                  12,
                   15.5
                 ],
                 "default": [
-                  12.0,
+                  12,
                   17.5
                 ]
               },
@@ -3285,8 +4055,8 @@
               "type": "number",
               "ref": {
                 "default": [
-                  4.0,
-                  11.0
+                  4,
+                  11
                 ]
               }
             },
@@ -3318,11 +4088,11 @@
                     17.5
                   ],
                   "female": [
-                    12.0,
+                    12,
                     15.5
                   ],
                   "default": [
-                    12.0,
+                    12,
                     17.5
                   ]
                 },
@@ -3330,8 +4100,8 @@
                 "unit": "g/dL",
                 "label": "Hemoglobin",
                 "critical": {
-                  "low": 7.0,
-                  "high": 20.0
+                  "low": 7,
+                  "high": 20
                 },
                 "required": true
               },
@@ -3339,8 +4109,8 @@
                 "key": "wbc",
                 "ref": {
                   "default": [
-                    4.0,
-                    11.0
+                    4,
+                    11
                   ]
                 },
                 "type": "number",
@@ -3355,7 +4125,7 @@
                 "required": false
               }
             ],
-            "price": 800.0,
+            "price": 800,
             "turnaround_minutes": null,
             "emergency_turnaround_minutes": null,
             "availability": "InHouse",
@@ -3399,11 +4169,11 @@
                     17.5
                   ],
                   "female": [
-                    12.0,
+                    12,
                     15.5
                   ],
                   "default": [
-                    12.0,
+                    12,
                     17.5
                   ]
                 },
@@ -3411,8 +4181,8 @@
                 "unit": "g/dL",
                 "label": "Hemoglobin",
                 "critical": {
-                  "low": 7.0,
-                  "high": 20.0
+                  "low": 7,
+                  "high": 20
                 },
                 "required": true
               },
@@ -3420,8 +4190,8 @@
                 "key": "wbc",
                 "ref": {
                   "default": [
-                    4.0,
-                    11.0
+                    4,
+                    11
                   ]
                 },
                 "type": "number",
@@ -3436,7 +4206,7 @@
                 "required": false
               }
             ],
-            "price": 800.0,
+            "price": 800,
             "turnaround_minutes": 90,
             "emergency_turnaround_minutes": null,
             "availability": "InHouse",
@@ -3468,7 +4238,7 @@
             "test_id": 1,
             "code": "CBC",
             "name": "Complete Blood Count",
-            "price": 950.0
+            "price": 950
           },
           "meta": {
             "server_time": "2026-09-27T17:39:37.795310+00:00"
@@ -3491,7 +4261,7 @@
               "code": "HBR",
               "name": "Hb reagent",
               "unit": "ml",
-              "qty_per_test": 2.0
+              "qty_per_test": 2
             }
           ],
           "meta": {
@@ -3523,7 +4293,7 @@
               "code": "HBR",
               "name": "Hb reagent",
               "unit": "ml",
-              "qty_per_test": 2.0
+              "qty_per_test": 2
             }
           ],
           "meta": {
@@ -3546,8 +4316,8 @@
               "code": "HBR",
               "name": "Hb reagent",
               "unit": "ml",
-              "low_stock_threshold": 5.0,
-              "qty_available": 90.0,
+              "low_stock_threshold": 5,
+              "qty_available": 90,
               "next_expiry": "2099-01-01"
             }
           ],
@@ -3576,7 +4346,7 @@
             "code": "HBR",
             "name": "Hb reagent",
             "unit": "ml",
-            "low_stock_threshold": 5.0,
+            "low_stock_threshold": 5,
             "near_expiry_alert_days": 90,
             "is_active": true,
             "row_version": 1
@@ -3607,9 +4377,9 @@
             "reagent_id": 1,
             "batch_no": "R1",
             "expiry_date": "2099-01-01",
-            "qty_received": 100.0,
-            "total_cost": 5000.0,
-            "unit_cost": 50.0,
+            "qty_received": 100,
+            "total_cost": 5000,
+            "unit_cost": 50,
             "vendor_invoice_id": null,
             "received_by": 6,
             "received_at": "2026-09-27T17:39:01.529806+00:00",
@@ -3639,7 +4409,7 @@
             "movement_id": 2,
             "reagent_id": 1,
             "reagent_batch_id": 1,
-            "qty": 10.0,
+            "qty": 10,
             "direction": "Out",
             "reason": "Damage",
             "lab_requisition_item_id": null,
@@ -3664,11 +4434,11 @@
         "body": {
           "data": {
             "gross_revenue": 0,
-            "reagent_cogs": 0.0,
-            "net_profit": 0.0,
+            "reagent_cogs": 0,
+            "net_profit": 0,
             "hospital_share_pct": 100,
-            "hospital_share": 0.0,
-            "contractor_share": 0.0,
+            "hospital_share": 0,
+            "contractor_share": 0,
             "by_test": [],
             "reruns": 0
           },
@@ -3695,8 +4465,8 @@
             "setting_id": 1,
             "contractor_employee_id": null,
             "contractor_vendor_id": 1,
-            "hospital_share_pct": 70.0,
-            "contractor_share_pct": 30.0,
+            "hospital_share_pct": 70,
+            "contractor_share_pct": 30,
             "effective_from": "2026-01-01",
             "effective_to": null,
             "row_version": 1
@@ -3726,13 +4496,147 @@
               "designation": "Officer",
               "department_name": null,
               "license_type": "PNC",
-              "registration": "PNC PNC-8403"
+              "user_id": 2,
+              "registration": "PNC PNC-31852"
             }
           ],
           "meta": {
-            "server_time": "2026-10-27T15:29:53.668901+00:00"
+            "server_time": "2026-11-05T01:52:33.483546+00:00"
           },
-          "request_id": "4e2ee3a40faa41c195bc2aa08edaa30b"
+          "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
+        }
+      }
+    },
+    "GET /finance/vendors": {
+      "request": {
+        "path": "/api/v1/finance/vendors",
+        "query": {
+          "vendor_type": "PharmacySupplier"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "vendor_id": 1,
+              "name": "MedSupply",
+              "vendor_type": "PharmacySupplier",
+              "contact_name": null,
+              "phone": "0421234567",
+              "address": null,
+              "tax_number": null,
+              "cnic": null,
+              "is_active": true,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:36:41.047443+00:00"
+          },
+          "request_id": "0376c42d633d406db3283d3c1b66acaf"
+        }
+      }
+    },
+    "GET /diagnostic-partners": {
+      "request": {
+        "path": "/api/v1/diagnostic-partners",
+        "query": {
+          "services": "Lab"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "partner_id": 1,
+              "name": "City Reference Laboratory",
+              "services": "Lab",
+              "phc_registration": "PHC-R-123",
+              "accreditation": "PNAC ISO 15189",
+              "pnra_licence": null,
+              "mou_reference": "MOU-1",
+              "mou_valid_from": "2026-09-01",
+              "mou_valid_until": "2027-07-28",
+              "turnaround_hours": 48,
+              "quality_note": null,
+              "contact": null,
+              "address": null,
+              "is_active": true,
+              "row_version": 3,
+              "mou_expired": false,
+              "tests_sent_out": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T20:02:52.680109+00:00"
+          },
+          "request_id": "59c031ca9932490794cc0f09ba7a33fe"
+        }
+      }
+    },
+    "GET /pharmacy-admin/vendor-invoices": {
+      "request": {
+        "path": "/api/v1/pharmacy-admin/vendor-invoices",
+        "query": {
+          "module": "Pharmacy"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "vendor_invoice_id": 1,
+              "vendor_id": 1,
+              "invoice_no": "MS-1001",
+              "invoice_type": "Purchase",
+              "module": "Pharmacy",
+              "total_cost": 12000,
+              "paid_amount": 0,
+              "status": "Pending",
+              "invoice_date": "2026-09-27",
+              "due_date": null,
+              "received_by": 6,
+              "received_at": "2026-09-27T17:43:44.743903+00:00",
+              "notes": null,
+              "row_version": 1,
+              "vendor_name": "MedSupply",
+              "balance": 12000
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:43:44.777720+00:00"
+          },
+          "request_id": "6fc5ef4e7ab2479d9d36e09e31bcfbd7"
+        }
+      }
+    },
+    "GET /lab/reagents/{reagent_id}/batches": {
+      "request": {
+        "path": "/api/v1/lab/reagents/1/batches"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "reagent_batch_id": 1,
+              "reagent_id": 1,
+              "batch_no": "R1",
+              "expiry_date": "2099-01-01",
+              "qty_received": 100,
+              "qty_available": 100,
+              "unit_cost": 50,
+              "received_at": "2026-11-05T01:52:33.422008+00:00",
+              "is_expired": false
+            }
+          ],
+          "meta": {
+            "server_time": "2026-11-05T01:52:33.967945+00:00"
+          },
+          "request_id": "d8117b8621604702857cc466f83e5b25"
         }
       }
     }
@@ -3765,7 +4669,7 @@
           "anyOf": [
             {
               "type": "number",
-              "exclusiveMinimum": 0.0
+              "exclusiveMinimum": 0
             },
             {
               "type": "string",
@@ -3827,8 +4731,8 @@
           "anyOf": [
             {
               "type": "number",
-              "maximum": 100.0,
-              "minimum": 0.0
+              "maximum": 100,
+              "minimum": 0
             },
             {
               "type": "string",
@@ -3846,7 +4750,8 @@
               "type": "null"
             }
           ],
-          "title": "Contractor Employee Id"
+          "title": "Contractor Employee Id",
+          "description": "A contracting pathologist (GET /staff/lookup)"
         },
         "contractor_vendor_id": {
           "anyOf": [
@@ -3857,7 +4762,8 @@
               "type": "null"
             }
           ],
-          "title": "Contractor Vendor Id"
+          "title": "Contractor Vendor Id",
+          "description": "A contracting laboratory firm (GET /finance/vendors)"
         },
         "effective_from": {
           "type": "string",
@@ -4228,6 +5134,56 @@
       ],
       "title": "Envelope[list[LabTestListItemOut]]"
     },
+    "Envelope_list_PartnerOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PartnerOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PartnerOut]]"
+    },
+    "Envelope_list_ReagentBatchStockOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/ReagentBatchStockOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[ReagentBatchStockOut]]"
+    },
     "Envelope_list_ReagentStockOut__": {
       "properties": {
         "data": {
@@ -4277,6 +5233,56 @@
         "request_id"
       ],
       "title": "Envelope[list[StaffLookupOut]]"
+    },
+    "Envelope_list_VendorInvoiceListOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/VendorInvoiceListOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[VendorInvoiceListOut]]"
+    },
+    "Envelope_list_VendorOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/VendorOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[VendorOut]]"
     },
     "HTTPValidationError": {
       "properties": {
@@ -4402,7 +5408,7 @@
           "anyOf": [
             {
               "type": "number",
-              "minimum": 0.0
+              "minimum": 0
             },
             {
               "type": "string",
@@ -4416,7 +5422,7 @@
           "anyOf": [
             {
               "type": "integer",
-              "exclusiveMinimum": 0.0
+              "exclusiveMinimum": 0
             },
             {
               "type": "null"
@@ -4429,7 +5435,7 @@
           "anyOf": [
             {
               "type": "integer",
-              "exclusiveMinimum": 0.0
+              "exclusiveMinimum": 0
             },
             {
               "type": "null"
@@ -4824,7 +5830,7 @@
           "anyOf": [
             {
               "type": "integer",
-              "exclusiveMinimum": 0.0
+              "exclusiveMinimum": 0
             },
             {
               "type": "null"
@@ -4836,7 +5842,7 @@
           "anyOf": [
             {
               "type": "integer",
-              "exclusiveMinimum": 0.0
+              "exclusiveMinimum": 0
             },
             {
               "type": "null"
@@ -4868,7 +5874,8 @@
               "type": "null"
             }
           ],
-          "title": "Send Out Partner Id"
+          "title": "Send Out Partner Id",
+          "description": "SendOut: the partner laboratory (GET /diagnostic-partners)"
         },
         "available_24h": {
           "anyOf": [
@@ -5005,8 +6012,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 6.0,
-              "minimum": 0.0
+              "maximum": 6,
+              "minimum": 0
             },
             {
               "type": "null"
@@ -5146,13 +6153,185 @@
       "title": "MetricDefOut",
       "description": "One result field of a test (the test's metric schema); keys a newer catalogue adds are passed through."
     },
+    "PartnerOut": {
+      "properties": {
+        "partner_id": {
+          "type": "integer",
+          "title": "Partner Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "services": {
+          "type": "string",
+          "enum": [
+            "Lab",
+            "Imaging",
+            "Both"
+          ],
+          "title": "Services"
+        },
+        "phc_registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Phc Registration"
+        },
+        "accreditation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Accreditation"
+        },
+        "pnra_licence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pnra Licence"
+        },
+        "mou_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mou Reference"
+        },
+        "mou_valid_from": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mou Valid From"
+        },
+        "mou_valid_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mou Valid Until"
+        },
+        "turnaround_hours": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Turnaround Hours"
+        },
+        "quality_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Quality Note"
+        },
+        "contact": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Contact"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "mou_expired": {
+          "type": "boolean",
+          "title": "Mou Expired",
+          "description": "Nothing is sent to a partner whose MOU has expired"
+        },
+        "tests_sent_out": {
+          "type": "integer",
+          "title": "Tests Sent Out",
+          "description": "Active lab tests sent to this partner by default"
+        }
+      },
+      "type": "object",
+      "required": [
+        "partner_id",
+        "name",
+        "services",
+        "phc_registration",
+        "accreditation",
+        "pnra_licence",
+        "mou_reference",
+        "mou_valid_from",
+        "mou_valid_until",
+        "turnaround_hours",
+        "quality_note",
+        "contact",
+        "address",
+        "is_active",
+        "row_version",
+        "mou_expired",
+        "tests_sent_out"
+      ],
+      "title": "PartnerOut"
+    },
     "PriceIn": {
       "properties": {
         "price": {
           "anyOf": [
             {
               "type": "number",
-              "minimum": 0.0
+              "minimum": 0
             },
             {
               "type": "string",
@@ -5179,13 +6358,14 @@
       "properties": {
         "reagent_batch_id": {
           "type": "integer",
-          "title": "Reagent Batch Id"
+          "title": "Reagent Batch Id",
+          "description": "The batch to write off (GET /lab/reagents/{reagent_id}/batches)"
         },
         "qty": {
           "anyOf": [
             {
               "type": "number",
-              "exclusiveMinimum": 0.0
+              "exclusiveMinimum": 0
             },
             {
               "type": "string",
@@ -5240,7 +6420,7 @@
           "anyOf": [
             {
               "type": "number",
-              "exclusiveMinimum": 0.0
+              "exclusiveMinimum": 0
             },
             {
               "type": "string",
@@ -5253,7 +6433,7 @@
           "anyOf": [
             {
               "type": "number",
-              "minimum": 0.0
+              "minimum": 0
             },
             {
               "type": "string",
@@ -5272,7 +6452,7 @@
             }
           ],
           "title": "Vendor Invoice Id",
-          "description": "Supplier invoice (see /pharmacy/vendor-invoices, module=Lab)"
+          "description": "Supplier invoice (GET /pharmacy-admin/vendor-invoices, module=Lab)"
         }
       },
       "type": "object",
@@ -5364,6 +6544,64 @@
       ],
       "title": "ReagentBatchOut"
     },
+    "ReagentBatchStockOut": {
+      "properties": {
+        "reagent_batch_id": {
+          "type": "integer",
+          "title": "Reagent Batch Id"
+        },
+        "reagent_id": {
+          "type": "integer",
+          "title": "Reagent Id"
+        },
+        "batch_no": {
+          "type": "string",
+          "title": "Batch No"
+        },
+        "expiry_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Expiry Date"
+        },
+        "qty_received": {
+          "type": "number",
+          "title": "Qty Received"
+        },
+        "qty_available": {
+          "type": "number",
+          "title": "Qty Available",
+          "description": "What is left of the batch"
+        },
+        "unit_cost": {
+          "type": "number",
+          "title": "Unit Cost"
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Received At"
+        },
+        "is_expired": {
+          "type": "boolean",
+          "title": "Is Expired",
+          "description": "Expired by the hospital's business date: write it off with reason Expiry"
+        }
+      },
+      "type": "object",
+      "required": [
+        "reagent_batch_id",
+        "reagent_id",
+        "batch_no",
+        "expiry_date",
+        "qty_received",
+        "qty_available",
+        "unit_cost",
+        "received_at",
+        "is_expired"
+      ],
+      "title": "ReagentBatchStockOut",
+      "description": "A batch of a reagent with what is left of it (GET /lab/reagents/{reagent_id}/batches): what a write-off picks."
+    },
     "ReagentIn": {
       "properties": {
         "code": {
@@ -5391,7 +6629,7 @@
           "anyOf": [
             {
               "type": "number",
-              "minimum": 0.0
+              "minimum": 0
             },
             {
               "type": "string",
@@ -5403,7 +6641,7 @@
         },
         "near_expiry_alert_days": {
           "type": "integer",
-          "minimum": 0.0,
+          "minimum": 0,
           "title": "Near Expiry Alert Days",
           "default": 90
         }
@@ -5677,6 +6915,18 @@
           ],
           "title": "Registration",
           "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id",
+          "description": "Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62)"
         }
       },
       "type": "object",
@@ -5687,7 +6937,8 @@
         "designation",
         "department_name",
         "license_type",
-        "registration"
+        "registration",
+        "user_id"
       ],
       "title": "StaffLookupOut",
       "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."
@@ -5731,6 +6982,240 @@
         "type"
       ],
       "title": "ValidationError"
+    },
+    "VendorInvoiceListOut": {
+      "properties": {
+        "vendor_invoice_id": {
+          "type": "integer",
+          "title": "Vendor Invoice Id"
+        },
+        "vendor_id": {
+          "type": "integer",
+          "title": "Vendor Id"
+        },
+        "invoice_no": {
+          "type": "string",
+          "title": "Invoice No"
+        },
+        "invoice_type": {
+          "type": "string",
+          "enum": [
+            "Purchase",
+            "Return",
+            "CreditNote",
+            "Service",
+            "Utility",
+            "Other"
+          ],
+          "title": "Invoice Type"
+        },
+        "module": {
+          "type": "string",
+          "enum": [
+            "Pharmacy",
+            "Lab",
+            "Ops",
+            "OT",
+            "Other"
+          ],
+          "title": "Module"
+        },
+        "total_cost": {
+          "type": "number",
+          "title": "Total Cost"
+        },
+        "paid_amount": {
+          "type": "number",
+          "title": "Paid Amount"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Pending",
+            "PartiallyPaid",
+            "Paid",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "invoice_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Invoice Date"
+        },
+        "due_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Due Date"
+        },
+        "received_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Received By"
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Received At"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "vendor_name": {
+          "type": "string",
+          "title": "Vendor Name"
+        },
+        "balance": {
+          "type": "number",
+          "title": "Balance"
+        }
+      },
+      "type": "object",
+      "required": [
+        "vendor_invoice_id",
+        "vendor_id",
+        "invoice_no",
+        "invoice_type",
+        "module",
+        "total_cost",
+        "paid_amount",
+        "status",
+        "invoice_date",
+        "due_date",
+        "received_by",
+        "received_at",
+        "notes",
+        "row_version",
+        "vendor_name",
+        "balance"
+      ],
+      "title": "VendorInvoiceListOut"
+    },
+    "VendorOut": {
+      "properties": {
+        "vendor_id": {
+          "type": "integer",
+          "title": "Vendor Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "vendor_type": {
+          "type": "string",
+          "enum": [
+            "PharmacySupplier",
+            "ReagentSupplier",
+            "EquipmentSupplier",
+            "UtilityProvider",
+            "Contractor",
+            "Other"
+          ],
+          "title": "Vendor Type"
+        },
+        "contact_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Contact Name"
+        },
+        "phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Phone"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "tax_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Tax Number"
+        },
+        "cnic": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cnic"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "vendor_id",
+        "name",
+        "vendor_type",
+        "contact_name",
+        "phone",
+        "address",
+        "tax_number",
+        "cnic",
+        "is_active",
+        "row_version"
+      ],
+      "title": "VendorOut"
     }
   },
   "unknowns": [

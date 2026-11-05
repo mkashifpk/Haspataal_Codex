@@ -10,7 +10,8 @@ import {
 } from "../src/staff-directory-policy.ts";
 
 test("Staff directory capability view evaluates mode and permission gates", () => {
-  const full = getStaffDirectoryCapabilityView({});
+  const permissions=['hr.employee.view','hr.employee.update','hr.leave.manage'];
+  const full = getStaffDirectoryCapabilityView({views:{screens:[{screen_id:'staff_directory',view:'full'}]}},permissions);
   assert.equal(full.mode, "full");
   assert.equal(full.canViewDirectory, true);
   assert.equal(full.canUpdateStatus, true);
@@ -18,33 +19,36 @@ test("Staff directory capability view evaluates mode and permission gates", () =
   assert.equal(full.canViewOrgChart, true);
 
   const records = getStaffDirectoryCapabilityView({
-    views: { records_only: true, screens: ["staff_directory"] },
-  });
+    views: { screens: [{screen_id:'staff_directory',view:'records'}] },
+  },permissions);
   assert.equal(records.mode, "records");
   assert.equal(records.canUpdateStatus, false);
   assert.equal(records.canManageLeaveBalances, false);
   assert(records.noticeEn?.includes("Records Mode"));
 
   const openWork = getStaffDirectoryCapabilityView({
-    views: { open_work_only: true, screens: ["staff_directory"] },
-  });
+    views: { screens: [{screen_id:'staff_directory',view:'open_work'}] },
+  },permissions);
   assert.equal(openWork.mode, "open_work");
   assert.equal(openWork.canUpdateStatus, true);
   assert.equal(openWork.canManageLeaveBalances, false);
 
   const setup = getStaffDirectoryCapabilityView({
-    views: { setup_only: true, screens: ["staff_directory"] },
-  });
+    views: { screens: [{screen_id:'staff_directory',view:'setup'}] },
+  },permissions);
   assert.equal(setup.mode, "setup");
   assert.equal(setup.canUpdateStatus, false);
   assert.equal(setup.canManageLeaveBalances, true);
 
   const hidden = getStaffDirectoryCapabilityView({
-    views: { screens: ["other_screen"] },
-  });
+    views: { screens: [{screen_id:'staff_directory',view:'hidden'}] },
+  },permissions);
   assert.equal(hidden.mode, "hidden");
   assert.equal(hidden.canViewDirectory, false);
   assert.equal(hidden.canUpdateStatus, false);
+  assert.equal(getStaffDirectoryCapabilityView(undefined,permissions).canViewDirectory,false);
+  assert.equal(getStaffDirectoryCapabilityView({views:{screens:[]}},permissions).canViewDirectory,true);
+  assert.equal(getStaffDirectoryCapabilityView({views:{screens:[{screen_id:'staff_directory',view:'full'}]}},['hr.employee.view']).canUpdateStatus,false);
 });
 
 test("Rule rule:2cc308be05: status transitions offered strictly by current employment_status", () => {

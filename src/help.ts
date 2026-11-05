@@ -10,18 +10,517 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  waste_log_ops: {
+title: "Hospital waste log",
+titleUr: "ہسپتال کا فضلہ رجسٹر",
+purpose: "Record each measured collection once, then hand waiting collections over on one final consignment note. Read server totals and immutable records. Human journey and Urdu review remain pending.",
+purposeUr: "ہر ناپا فضلہ ایک بار درج کریں، پھر منتظر اندراج ایک حتمی رسید پر حوالے کریں۔ سرور کل و ناقابل تبدیلی ریکارڈ پڑھیں۔ انسانی سفر و اردو جائزہ باقی ہے۔",
+steps: [
+  "Open Hospital waste log. Read actual server collection and handover totals for the period. This is a waste register; never put patient information in notes. Human fresh-data and Urdu review remain pending.",
+  "Record collection starts one measured category from one area. Choose the real category, measured kg, actual bags if known and collection date. Blank date uses the hospital server’s today; blank bags means not recorded. Each saved collection is immutable.",
+  "Choose an active department by name. IT adds missing departments. Choose a ward from the authorised ward directory; IT adds missing wards. Location describes the actual room or area. Never type an internal record number.",
+  "Only when the contractor and consignment are already known at collection, add those actual details. The contractor list contains active Contractors; Finance adds a missing contractor. That note is dated the collection day and becomes final.",
+  "When pickup happens later, choose Hand over waiting collections. It lists collections still waiting, including earlier dates. Tick the complete collections covered by one actual consignment note. There is no weight entry: those weights were recorded earlier.",
+  "Choose the active contractor by name, enter the consignment note, disposal method and actual handover date (blank uses server today). Check the selected combined kg and confirm once. A collection leaves whole; bags leaving on separate days must have been weighed as separate collections.",
+  "The date cannot be in the future or before any selected collection. A refusal appears beside the date; correct it before a new reviewed action. An unknown collection refreshes the waiting picker.",
+  "Already handed over names the collection, final note and day. Refresh and inspect the log; that refused write is never retried. A consignment note cannot be edited, replaced or attached twice. Ask Operations about a recording mistake.",
+  "A lost answer holds the original collections, contractor, note, date and request identity. Keep the window open. Retry original request uses the same body and key within retention; it never creates another collection. After retention ask IT to reconcile.",
+  "The ledger and saved detail show handover day, recorder’s name and note. Waiting means no note yet. In category totals, collected kg minus handed-over kg is still waiting. Local search filters rows without recomputing the server totals.",
+  "Use period and category filters, then choose a suitable row limit. At the limit narrow the period or increase the limit before drawing conclusions. A failed read is visible; it is not an empty log or a zero total.",
+  "Cancel leaves an unsent draft only; saved collections and notes have no edit/delete action. Offline submissions are disabled. Refresh re-reads authorised records and directories. Never repair a failed read by entering the same weight twice.",
+  "F1 and visible Help explain the focused control and preserve the draft/focus. Keyboard and Settings zoom share one 100–250% state, reset 100%. Check English and Urdu at 250%; translation approval belongs to the named human reviewer."
+],
+stepsUr: [
+  "فضلہ رجسٹر کھول کر عرصے کے سرور کل پڑھیں۔ یہ فضلہ رجسٹر ہے؛ مریض کی معلومات نوٹ میں نہ دیں۔ نئے ریکارڈ اور اردو کا انسانی جائزہ باقی ہے۔",
+  "ایک جگہ کی ایک قسم کا ناپا وزن درج کریں۔ اصل قسم، کلو، معلوم تھیلے اور تاریخ چنیں۔ خالی تاریخ سرور کا آج اور خالی تھیلے درج نہیں ہیں۔ محفوظ جمع شدہ اندراج نہیں بدلتا۔",
+  "فعال شعبہ نام سے چنیں؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ مجاز فہرست سے وارڈ چنیں؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ مقام میں اصل جگہ لکھیں۔ اندرونی نمبر نہ لکھیں۔",
+  "جمع کرتے وقت اصل ٹھیکیدار اور رسید معلوم ہوں تب ہی وہ معلومات دیں۔ فہرست میں فعال ٹھیکیدار ہیں؛ مالیات غائب ٹھیکیدار درج کرتا ہے۔ رسید جمع کرنے کی تاریخ کی اور حتمی ہوتی ہے۔",
+  "بعد میں وصولی پر منتظر فضلہ حوالے کریں کھولیں۔ پرانی تاریخ سمیت منتظر اندراج آتے ہیں۔ ایک اصل رسید میں شامل مکمل اندراج نشان زد کریں۔ وزن کا خانہ نہیں؛ وزن پہلے درج ہے۔",
+  "فعال ٹھیکیدار نام سے چنیں، رسید، تلفی طریقہ اور حوالگی تاریخ دیں؛ خالی پر سرور کا آج ہے۔ منتخب کل کلو چیک کرکے ایک بار تصدیق کریں۔ مکمل مقدار حوالے ہوتی ہے؛ الگ دن جانے والے تھیلے پہلے الگ ناپ کر درج ہوں۔",
+  "تاریخ مستقبل یا کسی منتخب اندراج سے پہلے نہیں ہو سکتی۔ انکار تاریخ کے ساتھ آتا ہے؛ درست کرکے نیا جائزہ لیں۔ نامعلوم اندراج پر منتظر فہرست تازہ ہوتی ہے۔",
+  "پہلے حوالہ شدہ انکار میں اندراج، حتمی رسید اور تاریخ دیکھیں۔ رجسٹر تازہ کرکے پڑھیں؛ وہ انکار دوبارہ نہیں بھیجا جاتا۔ رسید بدل، تبدیل یا دو بار منسلک نہیں ہوتی۔ غلطی پر آپریشنز سے پوچھیں۔",
+  "جواب گم ہو تو اصل اندراج، ٹھیکیدار، رسید، تاریخ اور درخواست شناخت رکتی ہے۔ ونڈو کھلی رکھیں۔ اصل درخواست دوبارہ مدت میں وہی مواد اور کلید بھیجتی ہے؛ نیا وزن درج نہیں کرتی۔ مدت بعد آئی ٹی سے نتیجہ چیک کرائیں۔",
+  "رجسٹر و تفصیل میں حوالگی تاریخ، درج کرنے والا اور رسید دیکھیں۔ منتظر یعنی رسید نہیں۔ قسم کے کل میں جمع کلو منفی حوالہ کلو ابھی منتظر ہے۔ مقامی تلاش قطاریں چھانٹتی ہے، سرور کل نہیں بدلتی۔",
+  "عرصہ و قسم چن کر مناسب قطار حد دیں۔ حد پر عرصہ کم یا حد بڑھائیں، پھر نتیجہ نکالیں۔ پڑھنے کی خطا واضح ہے؛ اسے خالی رجسٹر یا صفر نہ سمجھیں۔",
+  "منسوخ صرف غیر ارسال مسودہ چھوڑتا ہے؛ محفوظ اندراج و رسید بدلنے یا مٹانے کا عمل نہیں۔ آف لائن ارسال بند ہے۔ تازہ کریں مجاز ریکارڈ و فہرستیں پڑھتا ہے۔ پڑھائی کی خطا کے لیے وہی وزن دوبارہ نہ لکھیں۔",
+  "F1 اور مدد متعلقہ خانے کی ہدایت کھولتے اور مسودہ و توجہ رکھتے ہیں۔ کلید و ترتیبات کا مشترک زوم100تا250فیصد اور ری سیٹ100ہے۔ دونوں زبانیں250پر چیک کریں؛ ترجمہ منظور کرنا نامزد انسان کا کام ہے۔"
+],
+faq: [
+  [
+    "Operations: do I enter the weight again at pickup?",
+    "No. Record measured collections once. At pickup select those waiting collections, choose one active contractor and attach their actual consignment note. The server sums their recorded weights."
+  ],
+  [
+    "Operations: who adds a missing contractor?",
+    "Finance adds the vendor as Contractor. Refresh the directory and choose its active named record. Never enter a database number or choose an unrelated supplier to continue."
+  ],
+  [
+    "Operations: how do I correct a final note?",
+    "The collection and attached note are immutable. Inspect the server record and request an Operations review of the error. Do not enter a replacement collection or attach a second note."
+  ],
+  [
+    "Quality Officer: what does waiting weight mean?",
+    "Read the server’s category totals: collected weight minus handed-over weight remains waiting. Inspect each record’s note, day and recorder; a filtered row count alone proves no compliance rate."
+  ],
+  [
+    "Owner or hospital leadership: why can I read but not record?",
+    "The screen follows granted permissions and facility views. Read the register and server totals; only authorised recording staff can create collections or confirm handover. IT manages access."
+  ],
+  [
+    "IT or a supervisor: what happens after a lost reply?",
+    "Keep the original window and request. Re-read the log and reconcile the named collections and note before any replacement action. An original-key replay may recover the result; no new weight is entered. No agent signs the human acceptance review."
+  ]
+],
+faqUr: [
+  [
+    "آپریشنز: وصولی پر وزن دوبارہ دوں؟",
+    "نہیں۔ ناپا فضلہ ایک بار درج کریں۔ وصولی پر منتظر اندراج، فعال ٹھیکیدار اور اصل رسید چنیں۔ سرور پہلے درج وزن جمع کرتا ہے۔"
+  ],
+  [
+    "آپریشنز: غائب ٹھیکیدار کون درج کرے؟",
+    "مالیات ٹھیکیدار درج کرتا ہے۔ فہرست تازہ کرکے فعال نام چنیں۔ اندرونی نمبر یا غیر متعلقہ فراہم کنندہ نہ دیں۔"
+  ],
+  [
+    "آپریشنز: حتمی رسید کیسے درست کروں؟",
+    "جمع شدہ اندراج و رسید نہیں بدلتے۔ اصل ریکارڈ پڑھ کر آپریشنز سے غلطی کا جائزہ لیں۔ متبادل وزن یا دوسری رسید نہ درج کریں۔"
+  ],
+  [
+    "کوالٹی افسر: منتظر وزن کیا ہے؟",
+    "سرور قسم وار جمع وزن منفی حوالہ وزن منتظر ہے۔ ہر ریکارڈ کی رسید، تاریخ اور صارف پڑھیں؛ چھنی قطار تعداد تعمیل کی شرح نہیں۔"
+  ],
+  [
+    "مالک یا انتظامیہ: صرف پڑھ سکتا ہوں؟",
+    "اسکرین اجازت و ادارے کے منظر کی پابند ہے۔ رجسٹر و کل پڑھیں؛ مجاز عملہ اندراج و حوالگی کرتا ہے۔ آئی ٹی رسائی دیتا ہے۔"
+  ],
+  [
+    "آئی ٹی یا نگران: جواب گم ہو تو؟",
+    "اصل ونڈو و درخواست رکھیں۔ رجسٹر سے منتخب اندراج و رسید چیک کرکے پھر فیصلہ کریں۔ اصل کلید سے نتیجہ مل سکتا ہے؛ نیا وزن نہیں۔ انسانی قبولیت پر ایجنٹ دستخط نہیں کرتا۔"
+  ]
+]
+},
+  mock_drills_ops: {
+  title: "Mock drills",
+  titleUr: "فرضی مشقیں",
+  purpose: "Operations staff review department/shift coverage before planning and report a drill after it was held. Done means its actual participants, roles, findings and outcome are recorded, the report is signed, and any follow-up has an accountable owner and due date. Urdu is a draft awaiting language review.",
+  purposeUr: "آپریشنز عملہ منصوبہ بندی سے پہلے شعبے اور شفٹ کی کوریج دیکھتا اور مشق ہونے کے بعد رپورٹ دیتا ہے۔ اصل شرکاء، کردار، مشاہدات اور نتیجے کا اندراج، رپورٹ پر دستخط اور فالو اپ کے ذمہ دار و آخری تاریخ اس کام کی تکمیل ہیں۔ اردو زبان کے جائزے کا منتظر مسودہ ہے۔",
+  steps: [
+    "Open Mock drills from Facility Operations. Coverage opens first: the server supplies the period, signed drill counts, morning/evening/night grid, missing departments and staff_drilled/active-staff counts. Drafts do not count. No local deadline or coverage percentage is invented.",
+    "Departments not drilled are labelled and marked red; missing shifts are written as text. Show reports opens that department’s reports since the server period began. The grid scrolls inside its panel at high zoom; it does not hide the rest of the workspace.",
+    "Drill reports: filter kind, department, Draft/Final and date range. Search scenario or report number filters the loaded list. Refresh rereads coverage, reports, selected detail and authorized staff/location choices without writing. No matches means no matching reports, not that the facility is fully drilled.",
+    "Report a drill: choose its actual kind and shift, describe the scenario (5–2000characters), link a returned department/ward or enter its area, and enter when it was held in the displayed hospital timezone. There is no fabricated current time. A fresh server-clock read prevents reporting a future drill.",
+    "Deliberately answer whether it was announced; optionally record Rescue1122/Civil Defence or the actual agency (up to200characters), response and evacuation minutes (0–600). Blank is not recorded, never zero or success. Observations may be up to8000characters; choose the actual outcome when known.",
+    "Find staff by name/badge (up to500matches per search). Add participant, choose the actual returned employee and record their role (2–200characters). Each employee appears once, at most500participants. Staff without logins may participate; action owners need logins. Remove participant affects only the unsent list.",
+    "Save draft report records the report once. Keep its confirmed drill number/ID. Complete draft sends the whole report and participant list with its original version; review retained and removed names. An unchanged hospital time preserves the original instant, including seconds.",
+    "If a concurrent edit returns VERSION_CONFLICT, the draft stays intact. Read latest report to compare current contents with Original version, then Cancel/reopen and deliberately reapply against the current version. Never silently replace the version or retry a lost PUT.",
+    "Review and sign shows a confirmation. Missing observations, outcome or participants are listed and must be completed first. Confirm and sign freezes the report, returns the server’s author stamp and includes it in coverage. A final report cannot be edited or signed as a new action.",
+    "Record follow-up action is available after signature. Choose Corrective/Preventive, describe the actual task (5–1000characters), choose a returned staff login as owner, its due date and optional department. The owner is notified and closes it with evidence in the action register; this screen shows returned state/overdue information and does not invent completion.",
+    "View / print report opens the authenticated PDF in a separate native viewer; Save report PDF saves the same document. MIME/signature and session/permission checks apply. Cancel, download or printer failure never repeats a draft, signature or action. Actual printer output still needs device review.",
+    "An unresolved write freezes fields, record selection and navigation. Idempotent create/sign/action may Retry original request with the same frozen key/body within24hours; versioned corrections require Read current result/review instead. Outside retention or uncertainty ask IT; never create a replacement to hide a lost response.",
+    "Help/F1 opens this permitted screen and field guidance without submitting; close Help to restore focus and the unsent draft. Shared Settings and Ctrl+=/Ctrl+-/Ctrl+0 control one100–250% zoom state. Cancel draft discards unsent work only and is unavailable while a write is unresolved.",
+    "There is no delete/cancel-drill endpoint here. A signed report and its participants remain historical; do not fabricate an undo. A Quality-only workspace follows its own server handbook, not an invented Operations menu. Human fresh-data/translation/editor approval remains pending."
+  ,
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too.",
+"Owner User: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Department: Departments (active only); IT adds missing departments."],
+  stepsUr: [
+    "آپریشنز سے فرضی مشقیں کھولیں۔ پہلے کوریج آتی ہے: عرصہ، دستخط شدہ تعداد، صبح، شام اور رات، باقی شعبے اور مشق کرنے والے / فعال عملے کی گنتی سرور دیتا ہے۔ مسودے شامل نہیں۔ مقامی آخری تاریخ یا فیصد فرض نہیں ہوتا۔",
+    "مشق نہ کرنے والے شعبے واضح اور سرخ نشان سے دکھتے ہیں؛ باقی شفٹیں لفظوں میں ہیں۔ رپورٹس دکھائیں اسی شعبے کی سرور عرصے والی رپورٹس کھولتا ہے۔ بڑے زوم پر جدول اپنی جگہ اسکرول ہوتا ہے۔",
+    "رپورٹس میں قسم، شعبہ، مسودہ یا حتمی اور تاریخیں چنیں۔ منظرنامہ یا نمبر کی تلاش موجودہ فہرست چھانٹتی ہے۔ تازہ کریں صرف کوریج، رپورٹس، تفصیل اور مجاز فہرستیں پڑھتا ہے۔ خالی نتیجہ مکمل کوریج کا ثبوت نہیں۔",
+    "مشق کی رپورٹ دیں: اصل قسم اور شفٹ،5سے2000حروف کا منظرنامہ، اصل شعبہ، وارڈ یا دوسری جگہ اور ہسپتال کے دکھائے وقت میں مشق کا وقت دیں۔ موجودہ وقت فرض نہیں ہوتا۔ تازہ سرور گھڑی مستقبل کی مشق لکھنے سے روکتی ہے۔",
+    "اعلان ہوا تھا یا نہیں خود جواب دیں۔ بیرونی ادارہ200حروف تک اور ردعمل یا انخلا کے0سے600منٹ اختیاری ہیں۔ خالی کا مطلب درج نہیں، صفر یا کامیابی نہیں۔ مشاہدات8000حروف تک اور اصل نتیجہ درج کریں۔",
+    "نام یا بیج سے عملہ تلاش کریں، ہر تلاش500تک نتائج۔ شریک شامل کریں، اصل ملازم چنیں اور2سے200حروف میں کردار دیں۔ ہر فرد ایک بار، زیادہ سے زیادہ500شرکاء۔ لاگ ان کے بغیر فرد بھی شریک ہو سکتا ہے؛ عمل کے ذمہ دار کا لاگ ان لازم ہے۔ ہٹانا صرف مسودے پر ہے۔",
+    "رپورٹ کا مسودہ ایک بار محفوظ کریں اور تصدیق شدہ نمبر رکھیں۔ مسودہ مکمل کریں پوری رپورٹ اور شرکاء اصل نسخے کے ساتھ بھیجتا ہے؛ برقرار اور ہٹائے نام چیک کریں۔ وقت نہ بدلنے پر اصل لمحہ اور سیکنڈ برقرار رہتے ہیں۔",
+    "دوسری ترمیم سے نسخہ بدل جائے تو مسودہ محفوظ رہتا ہے۔ تازہ رپورٹ اصل نسخے سے موازنہ کریں، پھر منسوخ اور دوبارہ کھول کر خود تبدیلی کریں۔ پرانا نسخہ خود نہیں بدلتا یا گم درستگی خود نہیں دہرائی جاتی۔",
+    "جائزہ اور دستخط تصدیق دکھاتا ہے۔ باقی مشاہدات، نتیجہ یا شرکاء پہلے مکمل کریں۔ تصدیق اور دستخط رپورٹ حتمی کرتا، سرور کی مصنف مہر دیتا اور کوریج میں شامل کرتا ہے۔ حتمی رپورٹ میں ترمیم یا نئے عمل کے طور پر دوبارہ دستخط نہیں۔",
+    "دستخط کے بعد فالو اپ عمل درج کریں۔ اصلاحی یا احتیاطی،5سے1000حروف کا اصل کام، فہرست کا لاگ ان والا ذمہ دار، آخری تاریخ اور اختیاری شعبہ چنیں۔ ذمہ دار کو اطلاع جاتی اور وہ عمل رجسٹر میں ثبوت سے مکمل کرتا ہے؛ یہاں سرور کی حالت اور تاخیر دکھتی ہے، تکمیل فرض نہیں۔",
+    "رپورٹ دیکھیں / پرنٹ کریں اصل پی ڈی ایف الگ ونڈو میں کھولتا ہے؛ محفوظ کریں وہی دستاویز رکھتا ہے۔ فائل کی قسم، شناخت، نشست اور اجازت چیک ہوتے ہیں۔ منسوخی یا پرنٹر خرابی پر مسودہ، دستخط یا عمل دوبارہ نہ بھیجیں۔ اصل پرنٹر کا جائزہ باقی ہے۔",
+    "نامعلوم نتیجے میں خانے، انتخاب اور جگہ بدلنا مقفل ہیں۔ محفوظ شناخت والے نئے مسودے، دستخط یا عمل کو24گھنٹے میں اصل کلید اور معلومات سے دہرائیں؛ درستگی پہلے موجودہ نتیجہ پڑھ کر چیک کریں۔ وقت گزرنے یا غیر یقینی حالت میں آئی ٹی سے کہیں، متبادل نہ بنائیں۔",
+    "مدد یاF1بغیر ارسال مجاز اسکرین اور خانے کی رہنمائی کھولتا ہے؛ بند کرنے پر توجہ اور مسودہ واپس ملتے ہیں۔ ترتیبات اورCtrl+=،Ctrl+-،Ctrl+0ایک100سے250فیصد زوم رکھتے ہیں۔ مسودہ منسوخ صرف غیر ارسال کام چھوڑتا ہے، نامعلوم نتیجے میں بند ہے۔",
+    "یہاں مشق حذف یا منسوخ کرنے کا راستہ نہیں۔ دستخط شدہ رپورٹ اور شرکاء تاریخ ہیں؛ فرضی واپسی نہ بنائیں۔ معیار کی ورک اسپیس اپنا سرور رہنما مانتی ہے، غیر مجاز آپریشنز مینو نہیں۔ نئے ریکارڈ، زبان اور ایڈیٹر کا انسانی جائزہ باقی ہے۔"
+  ,
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔",
+"Owner User: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔"],
+  faq: [
+    [
+      "Operations: why does the draft not improve coverage?",
+      "Only signed drills count in the server’s configured period. Complete the actual participants/roles, observations and outcome, review and sign, then reread Coverage. Staff coverage and missing shifts are returned by the server, not estimated by the browser."
+    ],
+    [
+      "Operations: how do I correct a draft after another terminal changed it?",
+      "Keep the old draft, Read latest report and compare. Cancel/reopen to use the reviewed new version, then reapply the full report and participant list. A lost PUT must be read/reconciled, never automatically replayed."
+    ],
+    [
+      "Operations: can I report attendance for staff without logins?",
+      "Yes: choose their employee record from Find staff and record their actual drill role. This records participation in the drill only. The owner of a follow-up action must have a returned user login; employee IDs and user IDs are different."
+    ],
+    [
+      "Quality: can I change a signed report or delete a test drill?",
+      "No edit/delete/undo is supported for a signed report here. It remains readable with its author stamp and participants. Follow-up actions are separate. A Quality workspace exposes only the pages returned by its own handbook; the Operations counterpart does not add an unauthorized route."
+    ],
+    [
+      "Operations: how is follow-up handed over?",
+      "After signature, record a Corrective/Preventive task with its actual owner login and due date. The backend notifies the owner. The action register owns completion/cancellation with evidence; this screen only displays the actual returned status, note and overdue flag."
+    ],
+    [
+      "All users: what if a reply or PDF is lost?",
+      "Pending requests keep original actor/key/body and lock navigation. Use original retry only where offered and within24hours; corrections require read/review. Reopen/save the same PDF after checking connection/permission; never report or sign again for printing. Human translation, fresh-data and printer checks remain pending."
+    ]
+  ,
+["How do I find a record, and who adds it if missing?","Ward: Wards; IT adds missing wards. Bed selection loads the beds too. Owner User: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Department: Departments (active only); IT adds missing departments."]],
+  faqUr: [
+    [
+      "آپریشنز: مسودے سے کوریج کیوں نہیں بڑھتی؟",
+      "سرور کے عرصے میں صرف دستخط شدہ مشق شامل ہوتی ہے۔ اصل شرکاء، کردار، مشاہدات اور نتیجہ مکمل کر کے جائزہ اور دستخط کریں، پھر کوریج پڑھیں۔ عملے اور باقی شفٹوں کی گنتی سرور کی ہے۔"
+    ],
+    [
+      "آپریشنز: دوسرے ٹرمینل کی تبدیلی کے بعد مسودہ کیسے درست کروں؟",
+      "پرانا مسودہ رکھ کر تازہ رپورٹ پڑھیں اور موازنہ کریں۔ منسوخ اور دوبارہ کھول کر نئے نسخے پر پوری رپورٹ اور فہرست خود لگائیں۔ گم درستگی پہلے پڑھ کر چیک کریں، خود نہ دہرائیں۔"
+    ],
+    [
+      "آپریشنز: لاگ ان کے بغیر فرد کی شرکت درج ہو سکتی ہے؟",
+      "ہاں، عملے سے اصل ملازم منتخب کر کے مشق کا کردار لکھیں۔ یہ صرف مشق کی شرکت ہے۔ فالو اپ کے ذمہ دار کا اصل صارف لاگ ان لازم ہے؛ ملازم اور صارف نمبر الگ ہیں۔"
+    ],
+    [
+      "معیار: دستخط شدہ رپورٹ بدل یا آزمائشی مشق حذف کر سکتا ہوں؟",
+      "یہاں دستخط شدہ رپورٹ کی ترمیم، حذف یا واپسی نہیں۔ مصنف مہر اور شرکاء کے ساتھ پڑھی جا سکتی ہے۔ فالو اپ الگ ہے۔ معیار کی ورک اسپیس صرف اپنا سرور رہنما مینو دکھاتی ہے، غیر مجاز آپریشنز راستہ نہیں۔"
+    ],
+    [
+      "آپریشنز: فالو اپ کس طرح منتقل ہوتا ہے؟",
+      "دستخط کے بعد اصل صارف ذمہ دار اور آخری تاریخ کے ساتھ اصلاحی یا احتیاطی کام دیں۔ سرور اطلاع دیتا ہے۔ ثبوت کے ساتھ تکمیل یا منسوخی عمل رجسٹر کا کام ہے؛ یہ اسکرین اصل حالت، نوٹ اور تاخیر دکھاتی ہے۔"
+    ],
+    [
+      "تمام صارفین: جواب یا پی ڈی ایف گم ہو تو؟",
+      "زیر التوا عمل اصل صارف، کلید اور معلومات رکھ کر جگہ بدلنا روکتا ہے۔ صرف دی گئی اصل دوبارہ کوشش24گھنٹے میں کریں؛ درستگی پڑھ کر چیک کریں۔ رابطہ اور اجازت چیک کر کے وہی پی ڈی ایف دوبارہ لیں؛ پرنٹ کے لیے رپورٹ یا دستخط نہ دہرائیں۔ زبان، نئے ریکارڈ اور پرنٹر کا انسانی جائزہ باقی ہے۔"
+    ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔ Owner User: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔"]]
+},
+  compliance_register_ops: {
+  title: "Licences, certificates and plans",
+  titleUr: "لائسنس، سرٹیفکیٹ اور منصوبے",
+  purpose: "Operations and Quality staff review the register at the start of a shift or before inspection. Done means the actual document, its responsible official and dates are current, a scan is attached separately, and any renewal or withdrawal has a readable history. Urdu wording is a draft awaiting language review.",
+  purposeUr: "آپریشنز اور معیار کا عملہ شفٹ کے آغاز یا معائنے سے پہلے رجسٹر دیکھتا ہے۔ اصل دستاویز، ذمہ دار عہدیدار اور تاریخوں کی درستگی، الگ اسکین اور تجدید یا واپسی کی واضح تاریخ اس کام کی تکمیل ہے۔ اردو متن زبان کے جائزے کا منتظر مسودہ ہے۔",
+  steps: [
+    "Open Licences, certificates and plans from Facility Operations. State groups use the server’s Expired, Due for renewal, Valid and No expiry values; days remaining can be negative. An empty filtered list does not prove that the facility is compliant.",
+    "Choose Kind, Category, State or Responsible official. Include renewed / withdrawn to inspect closed entries. Search title, reference or official filters the loaded list. Refresh rereads the list, selected entry and authorized lookup directories; it never writes a document.",
+    "Select an entry to read its authority, reference, issue/expiry or plan-review date, renewal lead days, official, equipment, department, notes and application receipt. Read latest entry refreshes that exact record. No date or scan is invented for an empty field.",
+    "Add entry: deliberately choose kind and category; title is3–300 characters. Licence and written-plan entries need a valid-until/review date. Optional authority/reference/note limits are200/100/2000 characters. Dates cannot end before issue. A Law can have no expiry.",
+    "Renewal lead days accepts0–365; leave it empty on a new entry to use the server default. Search officials by name/badge when needed, then select a returned person with a login. The official uses user_id, not employee_id; people without a login cannot be selected. Equipment and department choices come from actual authorized directories, including existing inactive links.",
+    "Save to register sends metadata once. Keep its confirmed entry ID. Choose a PDF, PNG or JPEG scan and Attach / replace scan only afterwards; a failed upload must never cause another entry registration. A new scan replaces the previous file for that entry. The terminal enforces its32MB multipart-request limit.",
+    "View scan opens the authenticated stored PDF/image in a separate sandboxed window. Save scan stores that same file after checking its MIME and signature. Close the viewer to return. Missing scan, cancellation or read failure does not change the register.",
+    "Correct / renewal applied retains the original version and sends only changed fields. Record Renewal applied on and the receipt reference; attach the receipt as a separate scan. An application does not extend an expired licence. Clearing an optional field is a deliberate correction.",
+    "If another terminal changed an entry, the draft stays intact. Read latest entry to compare the displayed current version with Editing original version; Cancel draft and reopen before deliberately reapplying changes. The app does not silently replace the draft or retry a stale edit.",
+    "Record renewal creates a new linked entry and closes the old one. Enter the actual new issue/expiry dates; the new scan is a separate upload to the confirmed replacement ID. Earlier entries and Open replacement follow server-supplied links. Closed records retain their history and readable scans.",
+    "Withdraw entry records why it is no longer needed (5–1000 characters). It is not deletion. Renewed/withdrawn records cannot be edited, renewed again or receive replacement scans here; open the current replacement if one exists.",
+    "An unknown result locks the draft, selection and navigation. Retry original request reuses the exact request/key within24hours only for idempotent create/renew/withdraw/upload. A correction must be read and reconciled instead. Read current result is read-only; compare the result, then use Result reviewed only when it is understood. Outside retention or uncertainty ask IT, never create a replacement.",
+    "View / print register opens the authenticated server PDF; Save register PDF saves it separately. Physical printer output needs device review. A PDF or printer failure never repeats any entry, renewal, withdrawal or upload. Files are not packaged as ZIP.",
+    "Help/F1 works in fields and during an unsent draft, then returns focus without saving. English/Urdu guidance stays available offline. Settings and Ctrl+= / Ctrl+- / Ctrl+0 share100–250% zoom. Cancel draft/Clear file selection discard only unsent work; they are unavailable while the original outcome is unresolved."
+  ,
+"Asset: Equipment by name; Maintenance adds a missing asset.",
+"Department: Departments (active only); IT adds missing departments."],
+  stepsUr: [
+    "آپریشنز سے لائسنس، سرٹیفکیٹ اور منصوبے کھولیں۔ گروپ سرور کی میعاد ختم، تجدید کا وقت، کارآمد اور بغیر میعاد حالت استعمال کرتے ہیں؛ باقی دن منفی بھی ہو سکتے ہیں۔ خالی فلٹر فہرست تعمیل کا ثبوت نہیں۔",
+    "قسم، زمرہ، حالت یا ذمہ دار عہدیدار چنیں۔ بند ریکارڈ کے لیے تجدید شدہ / واپس لیے گئے بھی شامل کریں۔ عنوان، حوالہ یا عہدیدار کی تلاش موجودہ فہرست چھانٹتی ہے۔ تازہ کریں صرف پڑھتا ہے، کوئی اندراج نہیں لکھتا۔",
+    "اندراج منتخب کر کے ادارہ، حوالہ، اجرا، میعاد یا جائزے کی تاریخ، پیشگی دن، عہدیدار، آلہ، شعبہ، نوٹ اور رسید پڑھیں۔ تازہ اندراج پڑھیں اسی ریکارڈ کو تازہ کرتا ہے۔ خالی خانے کے لیے فرضی تاریخ یا اسکین نہیں بنتا۔",
+    "نیا اندراج: قسم اور زمرہ خود چنیں؛ عنوان3سے300حروف۔ لائسنس اور تحریری منصوبے کی میعاد یا جائزے کی تاریخ لازم ہے۔ ادارہ، حوالہ اور نوٹ کی حد200،100اور2000حروف ہے۔ میعاد اجرا سے پہلے نہیں ہو سکتی۔ قانون بغیر میعاد ہو سکتا ہے۔",
+    "تجدید سے پہلے دن0سے365ہیں؛ نئے اندراج میں خالی چھوڑنے پر سرور کی ترتیب لگتی ہے۔ عہدیدار نام یا بیج سے تلاش کر کے لاگ ان والا اصل فرد چنیں۔ صارف نمبر استعمال ہوتا ہے، ملازم نمبر نہیں۔ آلہ اور شعبہ اصل مجاز فہرست سے منتخب ہوتے ہیں، سابق غیر فعال ربط بھی محفوظ رہتے ہیں۔",
+    "رجسٹر میں محفوظ کریں صرف معلومات ایک بار بھیجتا ہے۔ تصدیق شدہ نمبر رکھیں۔ اس کے بعد پی ڈی ایف، پی این جی یا جے پی جی اسکین الگ منسلک کریں؛ ناکام اپ لوڈ پر نیا اندراج نہ کریں۔ نیا اسکین پچھلی فائل بدلتا ہے۔ ٹرمینل کی کل درخواست کی حد32ایم بی ہے۔",
+    "اسکین دیکھیں مجاز محفوظ پی ڈی ایف یا تصویر الگ محفوظ ونڈو میں کھولتا ہے۔ اسکین محفوظ کریں اسی فائل کی قسم اور شناخت چیک کر کے محفوظ کرتا ہے۔ ونڈو بند کر کے واپس آئیں۔ فائل نہ ملنا، منسوخی یا پڑھائی کی خرابی رجسٹر نہیں بدلتی۔",
+    "درستگی / تجدید کی درخواست اصل نسخہ رکھ کر صرف بدلے خانے بھیجتی ہے۔ درخواست کی تاریخ اور رسید کا حوالہ درج کریں، پھر رسید الگ اپ لوڈ کریں۔ درخواست سے ختم شدہ لائسنس کی میعاد نہیں بڑھتی۔ اختیاری خانہ خالی کرنا واضح درستگی ہے۔",
+    "دوسرا ٹرمینل ریکارڈ بدل دے تو مسودہ برقرار رہتا ہے۔ تازہ اندراج پڑھ کر اصل نسخے سے موازنہ کریں؛ مسودہ منسوخ کر کے دوبارہ کھولیں اور خود تبدیلی کریں۔ پرانا مسودہ خود نہیں بدلے گا یا دوبارہ ارسال نہیں ہوگا۔",
+    "تجدید درج کریں نیا منسلک اندراج بنا کر پرانا بند کرتا ہے۔ اصل نئی اجرا اور میعاد کی تاریخ دیں؛ متبادل نمبر کی تصدیق کے بعد نیا اسکین الگ منسلک کریں۔ پہلے اندراجات اور متبادل کے ربط سرور سے آتے ہیں۔ بند تاریخ اور اسکین پڑھنے کے لیے رہتے ہیں۔",
+    "اندراج واپس لیں میں5سے1000حروف کی وجہ دیں۔ یہ حذف کرنا نہیں۔ تجدید شدہ یا واپس لیے گئے ریکارڈ میں ترمیم، دوبارہ تجدید یا نیا اسکین نہیں لگتا؛ موجودہ متبادل کھولیں۔",
+    "نامعلوم نتیجے میں مسودہ، انتخاب اور جگہ بدلنا مقفل ہیں۔ صرف اصل شناخت والے نئے اندراج، تجدید، واپسی یا اپ لوڈ کو24گھنٹے میں وہی معلومات اور کلید سے دہرائیں۔ درستگی پہلے پڑھ کر چیک کریں۔ نتیجہ سمجھ آنے کے بعد ہی جائزہ مکمل کا بٹن دبائیں۔ غیر یقینی حالت یا وقت گزرنے پر آئی ٹی سے کہیں، متبادل نہ بنائیں۔",
+    "رجسٹر دیکھیں / پرنٹ کریں اصل سرور پی ڈی ایف کھولتا ہے؛ محفوظ کرنا الگ ہے۔ اصل پرنٹر کا جائزہ باقی ہے۔ فائل یا پرنٹر کی خرابی پر اندراج، تجدید، واپسی یا اپ لوڈ نہ دہرائیں۔ زپ فائل نہیں بنتی۔",
+    "مدد یاF1خانے اور غیر محفوظ مسودے میں بھی کام کرتا اور بغیر محفوظ کیے توجہ واپس لاتا ہے۔ انگریزی اور اردو رہنمائی آف لائن بھی ملتی ہے۔ ترتیبات اورCtrl+=،Ctrl+-،Ctrl+0ایک100سے250فیصد زوم رکھتے ہیں۔ مسودہ منسوخ یا فائل ہٹائیں صرف غیر ارسال کام چھوڑتے ہیں؛ نامعلوم نتیجے میں یہ بند رہتے ہیں۔"
+  ,
+"Asset: آلات نام سے؛ دیکھ بھال شعبہ غائب اثاثہ درج کرتا ہے۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔"],
+  faq: [
+    [
+      "Operations: how do I register an actual licence and its scan?",
+      "Choose the real kind/category, dates and official, save once, read the confirmed entry, then attach the file. If the file fails, retry the attachment to that ID; do not register again. The official must be a returned staff member with a login."
+    ],
+    [
+      "Quality: does a renewal application make an expired licence valid?",
+      "No. The server still shows Expired with the application date/reference. Keep the receipt as its scan. Only the actual renewed/amended document is entered through Record renewal; its replacement has its own ID and scan."
+    ],
+    [
+      "Operations: how do I fix a stale correction?",
+      "Keep the draft, Read latest entry and compare its contents/version. Cancel and reopen to use the reviewed current version. A stale expected_version is never silently changed. A lost correction result must be read and reconciled, not automatically replayed."
+    ],
+    [
+      "Quality: where is the previous licence after renewal?",
+      "The new entry links its earlier entries; the old entry links Open replacement. Include renewed / withdrawn to search closed records. Read them and their scans; correction, renewal and upload are limited to the Current entry."
+    ],
+    [
+      "Operations: how do I withdraw a duplicate or no-longer-needed entry?",
+      "Select the exact entry and record a factual5–1000character withdrawal reason. It stays as Withdrawn with its history. Do not invent a deletion or edit a closed entry. Preserve the original key if its result is unknown."
+    ],
+    [
+      "All users: what if download, printer, network or upload fails?",
+      "Errors remain visible. Save/view the same file again after checking the connection; this does not repeat any register write. Unknown writes hold their original request. Use original retry only where offered, or read/reconcile and ask IT outside retention. Physical printer and translation/fresh-data approval still need a human review."
+    ]
+  ,
+["How do I find a record, and who adds it if missing?","Asset: Equipment by name; Maintenance adds a missing asset. Department: Departments (active only); IT adds missing departments."]],
+  faqUr: [
+    [
+      "آپریشنز: اصل لائسنس اور اسکین کیسے درج کروں؟",
+      "اصل قسم، زمرہ، تاریخیں اور عہدیدار چن کر ایک بار محفوظ کریں، تصدیق شدہ نمبر پڑھیں، پھر فائل الگ منسلک کریں۔ فائل ناکام ہو تو اسی نمبر پر اپ لوڈ درست کریں، رجسٹریشن نہ دہرائیں۔ عہدیدار فہرست کا لاگ ان والا فرد ہونا چاہیے۔"
+    ],
+    [
+      "معیار: کیا تجدید کی درخواست ختم شدہ لائسنس کو کارآمد کرتی ہے؟",
+      "نہیں۔ سرور ختم شدہ حالت کے ساتھ درخواست کی تاریخ اور حوالہ دکھاتا ہے۔ رسید اسی کا اسکین رکھیں۔ اصل نئی دستاویز ملنے پر تجدید درج کریں؛ متبادل کا اپنا نمبر اور اسکین ہوگا۔"
+    ],
+    [
+      "آپریشنز: پرانے نسخے کی درستگی کیسے حل کروں؟",
+      "مسودہ رکھ کر تازہ اندراج پڑھیں اور معلومات و نسخہ موازنہ کریں۔ منسوخ کر کے دوبارہ کھولیں تاکہ جائزہ شدہ نسخہ آئے۔ پرانا نسخہ خود نہیں بدلتا۔ گم درستگی کا نتیجہ پڑھ کر چیک کریں، خود دوبارہ نہ بھیجیں۔"
+    ],
+    [
+      "معیار: تجدید کے بعد پرانا لائسنس کہاں ہے؟",
+      "نیا ریکارڈ پہلے اندراجات اور پرانا متبادل کھولنے کا ربط دیتا ہے۔ بند ریکارڈ تلاش کرنے کے لیے تجدید شدہ / واپس لیے گئے بھی شامل کریں۔ انہیں اور اسکین کو پڑھ سکتے ہیں؛ درستگی، تجدید اور اپ لوڈ موجودہ ریکارڈ پر ہیں۔"
+    ],
+    [
+      "آپریشنز: غیر ضروری یا نقل اندراج کیسے واپس لوں؟",
+      "عین ریکارڈ منتخب کر کے اصل وجہ5سے1000حروف میں لکھیں۔ وہ واپس لیا گیا رہتا اور تاریخ محفوظ ہوتی ہے۔ فرضی حذف یا بند ریکارڈ میں ترمیم نہ کریں۔ نامعلوم نتیجے میں اصل کلید محفوظ رکھیں۔"
+    ],
+    [
+      "تمام صارفین: فائل، پرنٹر، نیٹ ورک یا اپ لوڈ ناکام ہو تو؟",
+      "خرابی واضح رہتی ہے۔ رابطہ چیک کر کے وہی فائل دوبارہ دیکھیں یا محفوظ کریں؛ رجسٹر کا عمل نہیں دہرے گا۔ نامعلوم ارسال اصل درخواست روکے رکھتا ہے۔ جہاں پیش ہو وہیں اصل دوبارہ کوشش کریں، ورنہ پڑھ کر چیک کریں اور وقت گزرنے پر آئی ٹی سے کہیں۔ اصل پرنٹر، ترجمے اور نئے ریکارڈ کے سفر کا انسانی جائزہ باقی ہے۔"
+    ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Asset: آلات نام سے؛ دیکھ بھال شعبہ غائب اثاثہ درج کرتا ہے۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔"]]
+},
+  equipment_maintenance: {
+  title: "Medical equipment and maintenance",
+  titleUr: "طبی آلات اور دیکھ بھال",
+  purpose: "Maintenance technicians and Operations staff open the schedule at the start of a shift. Done means the actual visit and its result are recorded once, the server equipment status and next due date are read back, and any certificate or written plan is available for inspection. Urdu wording is a draft awaiting language review.",
+  purposeUr: "ٹیکنیشن اور آپریشنز عملہ شفٹ کے آغاز میں شیڈول دیکھتا ہے۔ اصل وزٹ اور نتیجہ ایک بار درج کرنا، سرور سے آلے کی حالت اور اگلی تاریخ دیکھنا، اور معائنے کے لیے سرٹیفکیٹ یا منصوبہ حاصل کرنا اس کام کی تکمیل ہے۔ اردو متن زبان کے جائزے کا منتظر مسودہ ہے۔",
+  steps: [
+    "Maintenance technicians and Operations staff open the schedule at the start of a shift. Done means the actual visit and its result are recorded once, the server equipment status and next due date are read back, and any certificate or written plan is available for inspection. Urdu wording is a draft awaiting language review.",
+    "Schedule: choose 7–365 days and All, Contractor or In-House providers; search the asset tag/name/kind and Refresh. Red OVERDUE labels come from the server worklist; do not substitute a workstation-clock judgment. Record Visit uses that exact asset and plan. An empty list means no matching work, not proof that the whole facility is compliant.",
+    "Inventory: search and use Medical only, Overdue only and Include disposed. Select the actual server record to see maker/model, serial, location, theatre, warranty, service contractor, contract expiry, commissioning, plans and immutable visits. A written-off item is historical: it cannot take new plans, profile changes or visits here.",
+    "New asset, step 1: enter a unique 2–40 character tag, name and category; optionally serial, location and nonnegative purchase cost. Continue sends one asset registration. Its confirmed ID is retained for the remaining steps: an error in a later step is never a reason to register it again. Existing tags should be opened in Inventory.",
+    "Step 2: enter the actual maker/model, optional supplier chosen by name and warranty date, in-house/contractor/mixed maintenance, and the service vendor, MOU reference and expiry if known. Choose a supplier or contractor by name from the live hospital directory; its ID is sent automatically. Use Refresh staff / vendors when choices are stale. The saved asset version protects this update.",
+    "Step 3 / Add Plan: select preventive maintenance, calibration, inspection or electrical safety. Enter the OEM interval (1–1825 whole days), first due date and manual reference. Contractor work requires an active contractor chosen by name from the Contractor directory. Finance adds a missing contractor. Only one active plan of each kind is allowed; open Edit on that plan instead of adding a duplicate.",
+    "Edit Plan: change the interval, provider/vendor, OEM reference, checklist or due date; record a 5–1000 character reason. Uncheck Plan remains active to end it. The original row version is sent. VERSION_CONFLICT means someone changed it: cancel the editor, refresh/reopen, compare the new record and deliberately reapply. Never silently overwrite a newer plan.",
+    "Step 4 / Commissioning: select the actual inspection date, hospital employee from the staff picker, result and real installation findings; certificate reference is optional. No successful findings are prefilled. A commissioning entry establishes the commissioning date; it is not a substitute for required hospital approval or evidence that every test passed.",
+    "Record Visit: select the actual kind/date/result and write findings. For in-house work select the employee returned by Staff; for a contractor choose the active Contractor by name and enter the engineer name. A passing/adjusted calibration needs a certificate number; a failed calibration does not. A recorded visit is append-only: errors must be escalated for the supported correction procedure, not overwritten or deleted.",
+    "Fail takes equipment out of service. Return to Service is an explicit choice for a later passing visit, initially unchecked; re-read the server status before use. The server records the due date answered and whether the visit was on time, and advances its active plan. A local predicted status is not confirmation.",
+    "Maintenance Log: filter actual immutable visits by kind, result and date range. Read staff/contractor attribution, findings, certificate number and On time/Late/Unplanned. Statistics show server counts, grace days and percentage; the screen does not invent a pass/fail threshold.",
+    "Export Inspector Plan: authenticated native download validates the PDF before the Save dialog. Choose a PDF location or Cancel. A download or printer failure never registers an asset, adds a plan or repeats a visit. Document sets follow Settings → PDF download; never make a ZIP.",
+    "Loading, no matches, denied access and failed reads have separate messages. Use Refresh to retry a read. Disabled write actions reflect current permissions, server records-only views or a disposed asset; a role name grants no action. If the staff lookup fails, refresh it before recording an in-house visit.",
+    "Pending/unconfirmed write: keep the page open. Inputs/navigation are held. Retry original request sends the same frozen payload and original idempotency key, within its 24-hour retention. A changed payload or a new key can create another record. After retention ask IT to reconcile before any new write. Versioned updates require reading and review after a conflict.",
+    "Use F1 or Help from a field or dialog to open this control-specific page; close Help to return to the draft. English/Urdu, Light/DarkHighContrast and shared keyboard/Settings zoom 100–250% apply. Ctrl/Cmd + or = increases, - decreases and 0 resets to100%. Named human translation, fresh-data role and physical-device acceptance is still required."
+  ,
+"Supplier Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists.",
+"Service Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists.",
+"Ot: Theatres by name; ask Maintenance when one is missing.",
+"Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists.",
+"Work Order: Work orders by description for the breakdown being repaired.",
+"Department: Departments (active only); IT adds missing departments.",
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too."],
+  stepsUr: [
+    "ٹیکنیشن اور آپریشنز عملہ شفٹ کے آغاز میں شیڈول دیکھتا ہے۔ اصل وزٹ اور نتیجہ ایک بار درج کرنا، سرور سے آلے کی حالت اور اگلی تاریخ دیکھنا، اور معائنے کے لیے سرٹیفکیٹ یا منصوبہ حاصل کرنا اس کام کی تکمیل ہے۔ اردو متن زبان کے جائزے کا منتظر مسودہ ہے۔",
+    "شیڈول میں 7–365 دن، تمام کام، ٹھیکیدار یا اندرونی عملہ منتخب کریں۔ ٹیگ، نام یا قسم تلاش کر کے تازہ کریں۔ سرخ تاخیر کی حالت سرور کے ریکارڈ سے ہے۔ وزٹ اسی آلے اور منصوبے پر درج ہوتا ہے۔ خالی فہرست پورے ہسپتال کی تعمیل کی سند نہیں۔",
+    "فہرست میں تلاش، صرف طبی آلات، تاخیر اور متروک آلات کے فلٹر استعمال کریں۔ آلہ منتخب کر کے سازندہ، ماڈل، سیریل، جگہ، وارنٹی، معاہدہ، کمیشننگ، منصوبے اور وزٹ دیکھیں۔ متروک آلے پر نئے منصوبے، تبدیلی یا وزٹ نہیں ہو سکتا۔",
+    "نئے اثاثے کے پہلے مرحلے میں منفرد 2–40 حروف کا ٹیگ، نام اور زمرہ درج کریں۔ سیریل، جگہ اور غیر منفی قیمت اختیاری ہیں۔ تصدیق شدہ نمبر اگلے مراحل کے لیے محفوظ رہتا ہے؛ بعد کے مرحلے کی خرابی پر دوبارہ اندراج نہ کریں۔",
+    "دوسرے مرحلے میں اصل سازندہ، ماڈل، فراہم کنندہ، وارنٹی، اندرونی یا بیرونی دیکھ بھال اور معاہدے کا حوالہ اور آخری تاریخ درج کریں۔ فہرست سے اصل فراہم کنندہ یا ٹھیکیدار کا نام منتخب کریں؛ نمبر خود بھیجا جاتا ہے۔ فہرستیں ضرورت پر تازہ کریں۔ محفوظ ورژن تبدیلی کی حفاظت کرتا ہے۔",
+    "تیسرے مرحلے یا نئے منصوبے میں احتیاطی دیکھ بھال، کیلیبریشن، معائنہ یا برقی حفاظت منتخب کریں۔ سازندے کے مطابق 1–1825 مکمل دنوں کا وقفہ، پہلی تاریخ اور کتاب کا حوالہ درج کریں۔ بیرونی کام کے لیے ٹھیکیدار کا رجسٹر نمبر ضروری ہے۔ ایک قسم کا صرف ایک فعال منصوبہ ہو سکتا ہے۔",
+    "منصوبے میں وقفہ، ٹھیکیدار، ہدایات، جانچ فہرست یا تاریخ تبدیل کر کے 5–1000 حروف کی وجہ دیں۔ منصوبہ ختم کرنے کے لیے فعال کا نشان ہٹائیں۔ ورژن کی خرابی پر منسوخ کر کے تازہ ریکارڈ دوبارہ کھولیں، فرق دیکھیں اور ارادۃً ترمیم کریں۔",
+    "چوتھے مرحلے میں اصل تاریخ، فہرست سے کام کرنے والا ملازم، اصل نتیجہ اور تنصیب کے نتائج درج کریں۔ کامیابی کی عبارت پہلے سے نہیں بھری جاتی۔ کمیشننگ اندراج تاریخ مقرر کرتا ہے؛ یہ ہسپتال کی منظوری یا تمام ٹیسٹ کامیاب ہونے کا خودکار ثبوت نہیں۔",
+    "وزٹ میں اصل قسم، تاریخ، نتیجہ اور تفصیل درج کریں۔ اندرونی کام کے لیے فہرست سے ملازم؛ بیرونی کام کے لیے اصل ٹھیکیدار نمبر اور انجینئر کا نام دیں۔ کامیاب یا درست کردہ کیلیبریشن کا سرٹیفکیٹ ضروری ہے؛ ناکام کیلیبریشن کا نہیں۔ درج شدہ وزٹ حذف یا تبدیل نہیں ہوتا؛ غلطی پر مجاز تصحیح کے لیے رجوع کریں۔",
+    "ناکام نتیجہ آلہ استعمال سے خارج کرتا ہے۔ بعد کے کامیاب وزٹ پر دوبارہ استعمال الگ واضح انتخاب ہے، جس کا نشان ابتدا میں نہیں ہوتا۔ استعمال سے پہلے سرور کی حالت دیکھیں۔ سرور مقررہ تاریخ، بروقت تکمیل اور منصوبے کی اگلی تاریخ ریکارڈ کرتا ہے۔",
+    "رجسٹر میں قسم، نتیجے اور تاریخ سے اصل وزٹ تلاش کریں۔ کام کرنے والے، نتائج، سرٹیفکیٹ اور بروقت، تاخیر یا غیر منصوبہ بند حالت دیکھیں۔ اعداد و شمار سرور کے ہیں؛ صفحہ اپنی کامیابی کی حد مقرر نہیں کرتا۔",
+    "معائنے کا منصوبہ محفوظ کرتے وقت مجاز کنکشن پی ڈی ایف کی تصدیق کرتا ہے۔ فائل کی جگہ منتخب کریں یا منسوخ کریں۔ ڈاؤن لوڈ یا پرنٹر کی خرابی پر اثاثہ، منصوبہ یا وزٹ دوبارہ درج نہ کریں۔ دستاویزات پی ڈی ایف ہوں، زیپ نہیں۔",
+    "لوڈنگ، خالی فہرست، اجازت نہ ہونا اور ناکام پڑھائی الگ حالتیں ہیں۔ پڑھائی کے لیے تازہ کریں۔ غیر فعال کارروائیاں موجودہ اجازت، صرف ریکارڈ کے منظر یا متروک آلے کی وجہ سے ہیں؛ عہدے کا نام اجازت نہیں دیتا۔ عملے کی تلاش ناکام ہو تو پہلے تازہ کریں۔",
+    "غیر تصدیق شدہ درخواست پر صفحہ کھلا رکھیں۔ خانے اور جگہ کی تبدیلی رکے رہتے ہیں۔ اصل درخواست 24 گھنٹے کے اندر وہی مواد اور کلید استعمال کرتی ہے۔ نیا مواد یا کلید نیا ریکارڈ بنا سکتی ہے۔ مہلت کے بعد نئی کارروائی سے پہلے آئی ٹی سے تصدیق کرائیں۔",
+    "خانے یا مکالمے سے F1 یا مدد کھولیں؛ بند کرنے پر مسودے پر واپس آئیں۔ انگریزی، اردو، دونوں تھیم اور مشترک 100–250٪ زوم دستیاب ہیں۔ Ctrl/Cmd کے ساتھ + یا = اضافہ، - کمی اور 0 پر 100٪ بحال ہوتا ہے۔ زبان، نئے ریکارڈ اور آلات کا انسانی جائزہ باقی ہے۔"
+  ,
+"Supplier Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔",
+"Service Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔",
+"Ot: تھیٹر نام سے؛ غائب ہو تو دیکھ بھال شعبے سے پوچھیں۔",
+"Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔",
+"Work Order: مرمت ہونے والی خرابی کا کام تفصیل سے۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
+  faq: [
+    [
+      "Maintenance technician: what is my first job each shift?",
+      "Open Schedule, read red overdue labels, then filter In-House or Contractor. Select the real asset/plan, carry out the actual work, and record the visit once. Check the server result and next due date; an empty filtered list is not a compliance certificate."
+    ],
+    [
+      "Operations administrator: how do I onboard an item without duplicates?",
+      "Register its unique tag once, retain the returned ID, then complete specifications, OEM plan and actual commissioning. If step2–4 fails, keep the same asset. Do not start another registration to repair a plan, visit or PDF failure."
+    ],
+    [
+      "Technician: whose identity and certificate do I record?",
+      "For in-house work choose the actual employee from the server picker, not your login ID. Contractor work uses the vendor register ID and engineer name. Passing/adjusted calibration needs the real certificate reference. A failed visit takes the device out of service."
+    ],
+    [
+      "Operations administrator: how do I change or end a plan?",
+      "Open Edit, compare the saved version, change the OEM interval/provider/checklist/date and give a meaningful reason. Uncheck active to end it. A duplicate active kind is refused. On a version conflict reopen the latest record and review it before a new edit."
+    ],
+    [
+      "Both roles: can I correct/delete a recorded visit or silently return a failed device?",
+      "No editing/deletion is offered for append-only visits. Escalate an incorrect entry using the supported hospital procedure. A later actual passing visit with an explicit Return to Service choice can restore status; inspect the server response before use. Written-off equipment cannot take new work."
+    ],
+    [
+      "Both roles: what if saving or the PDF fails?",
+      "Keep an unconfirmed write frozen and retry only the original request within retention. Do not repeat confirmed registration or visits to repair a read/download. Export uses the native authenticated PDF path; Cancel simply cancels file saving. IT needs the shown backend reference for investigation."
+    ]
+  ,
+["How do I find a record, and who adds it if missing?","Supplier Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists. Service Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists. Ot: Theatres by name; ask Maintenance when one is missing. Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists. Work Order: Work orders by description for the breakdown being repaired. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
+  faqUr: [
+    [
+      "ٹیکنیشن: شفٹ کے آغاز میں کیا کروں؟",
+      "شیڈول، تاخیر اور اندرونی یا بیرونی کام دیکھیں۔ اصل آلے پر کام کر کے وزٹ ایک بار درج کریں اور سرور سے نتیجہ اور اگلی تاریخ دیکھیں۔ خالی فہرست تعمیل کی سند نہیں۔"
+    ],
+    [
+      "آپریشنز: نقل کے بغیر آلہ کیسے درج کروں؟",
+      "منفرد ٹیگ ایک بار درج کر کے اصل نمبر برقرار رکھیں۔ اسی آلے کی تفصیل، منصوبہ اور اصل کمیشننگ مکمل کریں۔ بعد کی خرابی پر نیا اندراج نہ کریں۔"
+    ],
+    [
+      "ٹیکنیشن: کس کی شناخت اور سرٹیفکیٹ دوں؟",
+      "اندرونی کام کے لیے اصل ملازم فہرست سے منتخب کریں، اپنا لاگ ان نمبر نہ دیں۔ بیرونی کام کے لیے اصل ٹھیکیدار نمبر اور انجینئر کا نام دیں۔ کامیاب کیلیبریشن کا اصل سرٹیفکیٹ دیں؛ ناکامی آلہ استعمال سے خارج کرتی ہے۔"
+    ],
+    [
+      "آپریشنز: منصوبہ کیسے بدلوں یا ختم کروں؟",
+      "ترمیم کھولیں، محفوظ ورژن دیکھیں، مطلوبہ تبدیلی اور وجہ دیں۔ ختم کرنے کے لیے فعال کا نشان ہٹائیں۔ نقل یا ورژن کی خرابی پر تازہ ریکارڈ کھول کر جائزہ لیں۔"
+    ],
+    [
+      "دونوں کردار: کیا درج شدہ وزٹ بدل سکتا ہوں یا ناکام آلہ خود واپس لا سکتا ہوں؟",
+      "درج شدہ وزٹ حذف یا تبدیل نہیں ہوتا۔ غلطی کی مجاز تصحیح کے لیے رجوع کریں۔ بعد کے اصل کامیاب وزٹ اور واضح انتخاب کے بعد سرور کی حالت دیکھیں۔ متروک آلے پر نیا کام نہیں ہوتا۔"
+    ],
+    [
+      "دونوں کردار: محفوظ کرنے یا پی ڈی ایف میں خرابی ہو تو؟",
+      "غیر تصدیق شدہ درخواست برقرار رکھ کر مہلت میں وہی درخواست دوبارہ بھیجیں۔ پڑھائی یا ڈاؤن لوڈ کی خرابی پر تصدیق شدہ اندراج یا وزٹ نہ دہرائیں۔ منسوخی صرف فائل محفوظ کرنا روکتی ہے؛ تحقیق کے لیے اصل حوالہ دیں۔"
+    ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Supplier Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔ Service Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔ Ot: تھیٹر نام سے؛ غائب ہو تو دیکھ بھال شعبے سے پوچھیں۔ Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔ Work Order: مرمت ہونے والی خرابی کا کام تفصیل سے۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]]
+},
+  equipment_maintenance_ops: {
+  title: "Medical equipment and maintenance",
+  titleUr: "طبی آلات اور دیکھ بھال",
+  purpose: "Maintenance technicians and Operations staff open the schedule at the start of a shift. Done means the actual visit and its result are recorded once, the server equipment status and next due date are read back, and any certificate or written plan is available for inspection. Urdu wording is a draft awaiting language review.",
+  purposeUr: "ٹیکنیشن اور آپریشنز عملہ شفٹ کے آغاز میں شیڈول دیکھتا ہے۔ اصل وزٹ اور نتیجہ ایک بار درج کرنا، سرور سے آلے کی حالت اور اگلی تاریخ دیکھنا، اور معائنے کے لیے سرٹیفکیٹ یا منصوبہ حاصل کرنا اس کام کی تکمیل ہے۔ اردو متن زبان کے جائزے کا منتظر مسودہ ہے۔",
+  steps: [
+    "Maintenance technicians and Operations staff open the schedule at the start of a shift. Done means the actual visit and its result are recorded once, the server equipment status and next due date are read back, and any certificate or written plan is available for inspection. Urdu wording is a draft awaiting language review.",
+    "Schedule: choose 7–365 days and All, Contractor or In-House providers; search the asset tag/name/kind and Refresh. Red OVERDUE labels come from the server worklist; do not substitute a workstation-clock judgment. Record Visit uses that exact asset and plan. An empty list means no matching work, not proof that the whole facility is compliant.",
+    "Inventory: search and use Medical only, Overdue only and Include disposed. Select the actual server record to see maker/model, serial, location, theatre, warranty, service contractor, contract expiry, commissioning, plans and immutable visits. A written-off item is historical: it cannot take new plans, profile changes or visits here.",
+    "New asset, step 1: enter a unique 2–40 character tag, name and category; optionally serial, location and nonnegative purchase cost. Continue sends one asset registration. Its confirmed ID is retained for the remaining steps: an error in a later step is never a reason to register it again. Existing tags should be opened in Inventory.",
+    "Step 2: enter the actual maker/model, optional supplier chosen by name and warranty date, in-house/contractor/mixed maintenance, and the service vendor, MOU reference and expiry if known. Choose a supplier or contractor by name from the live hospital directory; its ID is sent automatically. Use Refresh staff / vendors when choices are stale. The saved asset version protects this update.",
+    "Step 3 / Add Plan: select preventive maintenance, calibration, inspection or electrical safety. Enter the OEM interval (1–1825 whole days), first due date and manual reference. Contractor work requires an active contractor chosen by name from the Contractor directory. Finance adds a missing contractor. Only one active plan of each kind is allowed; open Edit on that plan instead of adding a duplicate.",
+    "Edit Plan: change the interval, provider/vendor, OEM reference, checklist or due date; record a 5–1000 character reason. Uncheck Plan remains active to end it. The original row version is sent. VERSION_CONFLICT means someone changed it: cancel the editor, refresh/reopen, compare the new record and deliberately reapply. Never silently overwrite a newer plan.",
+    "Step 4 / Commissioning: select the actual inspection date, hospital employee from the staff picker, result and real installation findings; certificate reference is optional. No successful findings are prefilled. A commissioning entry establishes the commissioning date; it is not a substitute for required hospital approval or evidence that every test passed.",
+    "Record Visit: select the actual kind/date/result and write findings. For in-house work select the employee returned by Staff; for a contractor choose the active Contractor by name and enter the engineer name. A passing/adjusted calibration needs a certificate number; a failed calibration does not. A recorded visit is append-only: errors must be escalated for the supported correction procedure, not overwritten or deleted.",
+    "Fail takes equipment out of service. Return to Service is an explicit choice for a later passing visit, initially unchecked; re-read the server status before use. The server records the due date answered and whether the visit was on time, and advances its active plan. A local predicted status is not confirmation.",
+    "Maintenance Log: filter actual immutable visits by kind, result and date range. Read staff/contractor attribution, findings, certificate number and On time/Late/Unplanned. Statistics show server counts, grace days and percentage; the screen does not invent a pass/fail threshold.",
+    "Export Inspector Plan: authenticated native download validates the PDF before the Save dialog. Choose a PDF location or Cancel. A download or printer failure never registers an asset, adds a plan or repeats a visit. Document sets follow Settings → PDF download; never make a ZIP.",
+    "Loading, no matches, denied access and failed reads have separate messages. Use Refresh to retry a read. Disabled write actions reflect current permissions, server records-only views or a disposed asset; a role name grants no action. If the staff lookup fails, refresh it before recording an in-house visit.",
+    "Pending/unconfirmed write: keep the page open. Inputs/navigation are held. Retry original request sends the same frozen payload and original idempotency key, within its 24-hour retention. A changed payload or a new key can create another record. After retention ask IT to reconcile before any new write. Versioned updates require reading and review after a conflict.",
+    "Use F1 or Help from a field or dialog to open this control-specific page; close Help to return to the draft. English/Urdu, Light/DarkHighContrast and shared keyboard/Settings zoom 100–250% apply. Ctrl/Cmd + or = increases, - decreases and 0 resets to100%. Named human translation, fresh-data role and physical-device acceptance is still required."
+  ,
+"Supplier Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists.",
+"Service Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists.",
+"Ot: Theatres by name; ask Maintenance when one is missing.",
+"Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists.",
+"Work Order: Work orders by description for the breakdown being repaired.",
+"Department: Departments (active only); IT adds missing departments.",
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too."],
+  stepsUr: [
+    "ٹیکنیشن اور آپریشنز عملہ شفٹ کے آغاز میں شیڈول دیکھتا ہے۔ اصل وزٹ اور نتیجہ ایک بار درج کرنا، سرور سے آلے کی حالت اور اگلی تاریخ دیکھنا، اور معائنے کے لیے سرٹیفکیٹ یا منصوبہ حاصل کرنا اس کام کی تکمیل ہے۔ اردو متن زبان کے جائزے کا منتظر مسودہ ہے۔",
+    "شیڈول میں 7–365 دن، تمام کام، ٹھیکیدار یا اندرونی عملہ منتخب کریں۔ ٹیگ، نام یا قسم تلاش کر کے تازہ کریں۔ سرخ تاخیر کی حالت سرور کے ریکارڈ سے ہے۔ وزٹ اسی آلے اور منصوبے پر درج ہوتا ہے۔ خالی فہرست پورے ہسپتال کی تعمیل کی سند نہیں۔",
+    "فہرست میں تلاش، صرف طبی آلات، تاخیر اور متروک آلات کے فلٹر استعمال کریں۔ آلہ منتخب کر کے سازندہ، ماڈل، سیریل، جگہ، وارنٹی، معاہدہ، کمیشننگ، منصوبے اور وزٹ دیکھیں۔ متروک آلے پر نئے منصوبے، تبدیلی یا وزٹ نہیں ہو سکتا۔",
+    "نئے اثاثے کے پہلے مرحلے میں منفرد 2–40 حروف کا ٹیگ، نام اور زمرہ درج کریں۔ سیریل، جگہ اور غیر منفی قیمت اختیاری ہیں۔ تصدیق شدہ نمبر اگلے مراحل کے لیے محفوظ رہتا ہے؛ بعد کے مرحلے کی خرابی پر دوبارہ اندراج نہ کریں۔",
+    "دوسرے مرحلے میں اصل سازندہ، ماڈل، فراہم کنندہ، وارنٹی، اندرونی یا بیرونی دیکھ بھال اور معاہدے کا حوالہ اور آخری تاریخ درج کریں۔ فہرست سے اصل فراہم کنندہ یا ٹھیکیدار کا نام منتخب کریں؛ نمبر خود بھیجا جاتا ہے۔ فہرستیں ضرورت پر تازہ کریں۔ محفوظ ورژن تبدیلی کی حفاظت کرتا ہے۔",
+    "تیسرے مرحلے یا نئے منصوبے میں احتیاطی دیکھ بھال، کیلیبریشن، معائنہ یا برقی حفاظت منتخب کریں۔ سازندے کے مطابق 1–1825 مکمل دنوں کا وقفہ، پہلی تاریخ اور کتاب کا حوالہ درج کریں۔ بیرونی کام کے لیے ٹھیکیدار کا رجسٹر نمبر ضروری ہے۔ ایک قسم کا صرف ایک فعال منصوبہ ہو سکتا ہے۔",
+    "منصوبے میں وقفہ، ٹھیکیدار، ہدایات، جانچ فہرست یا تاریخ تبدیل کر کے 5–1000 حروف کی وجہ دیں۔ منصوبہ ختم کرنے کے لیے فعال کا نشان ہٹائیں۔ ورژن کی خرابی پر منسوخ کر کے تازہ ریکارڈ دوبارہ کھولیں، فرق دیکھیں اور ارادۃً ترمیم کریں۔",
+    "چوتھے مرحلے میں اصل تاریخ، فہرست سے کام کرنے والا ملازم، اصل نتیجہ اور تنصیب کے نتائج درج کریں۔ کامیابی کی عبارت پہلے سے نہیں بھری جاتی۔ کمیشننگ اندراج تاریخ مقرر کرتا ہے؛ یہ ہسپتال کی منظوری یا تمام ٹیسٹ کامیاب ہونے کا خودکار ثبوت نہیں۔",
+    "وزٹ میں اصل قسم، تاریخ، نتیجہ اور تفصیل درج کریں۔ اندرونی کام کے لیے فہرست سے ملازم؛ بیرونی کام کے لیے اصل ٹھیکیدار نمبر اور انجینئر کا نام دیں۔ کامیاب یا درست کردہ کیلیبریشن کا سرٹیفکیٹ ضروری ہے؛ ناکام کیلیبریشن کا نہیں۔ درج شدہ وزٹ حذف یا تبدیل نہیں ہوتا؛ غلطی پر مجاز تصحیح کے لیے رجوع کریں۔",
+    "ناکام نتیجہ آلہ استعمال سے خارج کرتا ہے۔ بعد کے کامیاب وزٹ پر دوبارہ استعمال الگ واضح انتخاب ہے، جس کا نشان ابتدا میں نہیں ہوتا۔ استعمال سے پہلے سرور کی حالت دیکھیں۔ سرور مقررہ تاریخ، بروقت تکمیل اور منصوبے کی اگلی تاریخ ریکارڈ کرتا ہے۔",
+    "رجسٹر میں قسم، نتیجے اور تاریخ سے اصل وزٹ تلاش کریں۔ کام کرنے والے، نتائج، سرٹیفکیٹ اور بروقت، تاخیر یا غیر منصوبہ بند حالت دیکھیں۔ اعداد و شمار سرور کے ہیں؛ صفحہ اپنی کامیابی کی حد مقرر نہیں کرتا۔",
+    "معائنے کا منصوبہ محفوظ کرتے وقت مجاز کنکشن پی ڈی ایف کی تصدیق کرتا ہے۔ فائل کی جگہ منتخب کریں یا منسوخ کریں۔ ڈاؤن لوڈ یا پرنٹر کی خرابی پر اثاثہ، منصوبہ یا وزٹ دوبارہ درج نہ کریں۔ دستاویزات پی ڈی ایف ہوں، زیپ نہیں۔",
+    "لوڈنگ، خالی فہرست، اجازت نہ ہونا اور ناکام پڑھائی الگ حالتیں ہیں۔ پڑھائی کے لیے تازہ کریں۔ غیر فعال کارروائیاں موجودہ اجازت، صرف ریکارڈ کے منظر یا متروک آلے کی وجہ سے ہیں؛ عہدے کا نام اجازت نہیں دیتا۔ عملے کی تلاش ناکام ہو تو پہلے تازہ کریں۔",
+    "غیر تصدیق شدہ درخواست پر صفحہ کھلا رکھیں۔ خانے اور جگہ کی تبدیلی رکے رہتے ہیں۔ اصل درخواست 24 گھنٹے کے اندر وہی مواد اور کلید استعمال کرتی ہے۔ نیا مواد یا کلید نیا ریکارڈ بنا سکتی ہے۔ مہلت کے بعد نئی کارروائی سے پہلے آئی ٹی سے تصدیق کرائیں۔",
+    "خانے یا مکالمے سے F1 یا مدد کھولیں؛ بند کرنے پر مسودے پر واپس آئیں۔ انگریزی، اردو، دونوں تھیم اور مشترک 100–250٪ زوم دستیاب ہیں۔ Ctrl/Cmd کے ساتھ + یا = اضافہ، - کمی اور 0 پر 100٪ بحال ہوتا ہے۔ زبان، نئے ریکارڈ اور آلات کا انسانی جائزہ باقی ہے۔"
+  ,
+"Supplier Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔",
+"Service Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔",
+"Ot: تھیٹر نام سے؛ غائب ہو تو دیکھ بھال شعبے سے پوچھیں۔",
+"Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔",
+"Work Order: مرمت ہونے والی خرابی کا کام تفصیل سے۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
+  faq: [
+    [
+      "Maintenance technician: what is my first job each shift?",
+      "Open Schedule, read red overdue labels, then filter In-House or Contractor. Select the real asset/plan, carry out the actual work, and record the visit once. Check the server result and next due date; an empty filtered list is not a compliance certificate."
+    ],
+    [
+      "Operations administrator: how do I onboard an item without duplicates?",
+      "Register its unique tag once, retain the returned ID, then complete specifications, OEM plan and actual commissioning. If step2–4 fails, keep the same asset. Do not start another registration to repair a plan, visit or PDF failure."
+    ],
+    [
+      "Technician: whose identity and certificate do I record?",
+      "For in-house work choose the actual employee from the server picker, not your login ID. Contractor work uses the vendor register ID and engineer name. Passing/adjusted calibration needs the real certificate reference. A failed visit takes the device out of service."
+    ],
+    [
+      "Operations administrator: how do I change or end a plan?",
+      "Open Edit, compare the saved version, change the OEM interval/provider/checklist/date and give a meaningful reason. Uncheck active to end it. A duplicate active kind is refused. On a version conflict reopen the latest record and review it before a new edit."
+    ],
+    [
+      "Both roles: can I correct/delete a recorded visit or silently return a failed device?",
+      "No editing/deletion is offered for append-only visits. Escalate an incorrect entry using the supported hospital procedure. A later actual passing visit with an explicit Return to Service choice can restore status; inspect the server response before use. Written-off equipment cannot take new work."
+    ],
+    [
+      "Both roles: what if saving or the PDF fails?",
+      "Keep an unconfirmed write frozen and retry only the original request within retention. Do not repeat confirmed registration or visits to repair a read/download. Export uses the native authenticated PDF path; Cancel simply cancels file saving. IT needs the shown backend reference for investigation."
+    ]
+  ,
+["How do I find a record, and who adds it if missing?","Supplier Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists. Service Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists. Ot: Theatres by name; ask Maintenance when one is missing. Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists. Work Order: Work orders by description for the breakdown being repaired. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
+  faqUr: [
+    [
+      "ٹیکنیشن: شفٹ کے آغاز میں کیا کروں؟",
+      "شیڈول، تاخیر اور اندرونی یا بیرونی کام دیکھیں۔ اصل آلے پر کام کر کے وزٹ ایک بار درج کریں اور سرور سے نتیجہ اور اگلی تاریخ دیکھیں۔ خالی فہرست تعمیل کی سند نہیں۔"
+    ],
+    [
+      "آپریشنز: نقل کے بغیر آلہ کیسے درج کروں؟",
+      "منفرد ٹیگ ایک بار درج کر کے اصل نمبر برقرار رکھیں۔ اسی آلے کی تفصیل، منصوبہ اور اصل کمیشننگ مکمل کریں۔ بعد کی خرابی پر نیا اندراج نہ کریں۔"
+    ],
+    [
+      "ٹیکنیشن: کس کی شناخت اور سرٹیفکیٹ دوں؟",
+      "اندرونی کام کے لیے اصل ملازم فہرست سے منتخب کریں، اپنا لاگ ان نمبر نہ دیں۔ بیرونی کام کے لیے اصل ٹھیکیدار نمبر اور انجینئر کا نام دیں۔ کامیاب کیلیبریشن کا اصل سرٹیفکیٹ دیں؛ ناکامی آلہ استعمال سے خارج کرتی ہے۔"
+    ],
+    [
+      "آپریشنز: منصوبہ کیسے بدلوں یا ختم کروں؟",
+      "ترمیم کھولیں، محفوظ ورژن دیکھیں، مطلوبہ تبدیلی اور وجہ دیں۔ ختم کرنے کے لیے فعال کا نشان ہٹائیں۔ نقل یا ورژن کی خرابی پر تازہ ریکارڈ کھول کر جائزہ لیں۔"
+    ],
+    [
+      "دونوں کردار: کیا درج شدہ وزٹ بدل سکتا ہوں یا ناکام آلہ خود واپس لا سکتا ہوں؟",
+      "درج شدہ وزٹ حذف یا تبدیل نہیں ہوتا۔ غلطی کی مجاز تصحیح کے لیے رجوع کریں۔ بعد کے اصل کامیاب وزٹ اور واضح انتخاب کے بعد سرور کی حالت دیکھیں۔ متروک آلے پر نیا کام نہیں ہوتا۔"
+    ],
+    [
+      "دونوں کردار: محفوظ کرنے یا پی ڈی ایف میں خرابی ہو تو؟",
+      "غیر تصدیق شدہ درخواست برقرار رکھ کر مہلت میں وہی درخواست دوبارہ بھیجیں۔ پڑھائی یا ڈاؤن لوڈ کی خرابی پر تصدیق شدہ اندراج یا وزٹ نہ دہرائیں۔ منسوخی صرف فائل محفوظ کرنا روکتی ہے؛ تحقیق کے لیے اصل حوالہ دیں۔"
+    ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Supplier Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔ Service Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔ Ot: تھیٹر نام سے؛ غائب ہو تو دیکھ بھال شعبے سے پوچھیں۔ Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔ Work Order: مرمت ہونے والی خرابی کا کام تفصیل سے۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]]
+},
+
   badge_station_kiosk: {
     title: "Badge station kiosk",
     titleUr: "بیج اسٹیشن کیوسک",
     purpose: "Full-screen unattended kiosk terminal for PCs and tablets equipped with barcode or RFID scanners. Staff present their badge to punch attendance, verify security access, or confirm terminal bed cleaning without logging in or using a keyboard. (1) One-time setup: Configure once with the station id and its key (X-Station-Key); never show the key on screen (Rule rule:f98f89a7b6, GET /badge-stations/me); (2) Automatic scanner capture: A USB scanner types the code and Enter: keep an invisible input focused; or decode the camera stream (Rule rule:141cb8255f); (3) Dual scan workflow: Ward bed-cleaning stations (needs_bed_code) collect two scans (bed sticker HMS-BED-… and badge) within 60 s, then post them together (Rule rule:b2f4ebb077); (4) Big visual & audio result: Big green / red result with the outcome in words and a synthesized sound; ready for the next person after 3 s (Rule rule:2554916922); and (5) Resilient offline buffering: Queue scans with a gateway_event_id while the server is unreachable and resend them idempotently upon reconnect (Rule rule:438ca845ec, POST /badge-stations/scans).",
     purposeUr: "بارکوڈ یا RFID اسکینر سے لیس پی سی اور ٹیبلٹ کے لیے فل اسکرین کیوسک ٹرمینل۔ عملہ لاگ اِن کیے بغیر یا کی بورڈ استعمال کیے بغیر صرف اپنا بیج دکھا کر حاضری، سیکیورٹی داخلہ یا فارغ شدہ بیڈ کی صفائی کی تصدیق کر سکتا ہے۔ (1) اسٹیشن تشکیل: اسٹیشن آئی ڈی اور خفیہ کلید (X-Station-Key) کے ساتھ ایک بار تشکیل دیں، کلید کو اسکرین پر کبھی ظاہر نہ کریں (قاعدہ rule:f98f89a7b6)؛ (2) خودکار اسکینر فوکس: یو ایس بی اسکینر خودکار طور پر کوڈ ٹائپ کر کے Enter دباتا ہے، غیر مرئی ان پٹ کو فوکس رکھیں (قاعدہ rule:141cb8255f)؛ (3) دوہرا اسکین طریقہ کار: وارڈ کے بیڈ کلیننگ اسٹیشنز پر بیڈ اسٹیکر (HMS-BED-…) اور بیج دونوں کو 60 سیکنڈ کے اندر جمع کر کے سرور پر بھیجا جاتا ہے (قاعدہ rule:b2f4ebb077)؛ (4) بڑا بصری اور صوتی نتیجہ: بڑے سبز یا سرخ بینر میں نتیجہ اور آواز پیدا کی جاتی ہے، اور 3 سیکنڈ بعد اگلا شخص اسکین کر سکتا ہے (قاعدہ rule:2554916922)؛ اور (5) آف لائن تحفظ: رابطہ منقطع ہونے پر اسکینز کو منفرد ایونٹ آئی ڈی کے ساتھ مقامی طور پر محفوظ کیا جاتا ہے اور سرور بحال ہونے پر خودکار ارسال کیا جاتا ہے (قاعدہ rule:438ca845ec)۔",
     steps: [
-      "Configure Station Once (Operator): Click Setup (⚙️), enter the Station ID (e.g. W2-KIOSK, GATE-1) and Station Secret Key (X-Station-Key). The key is stored securely and masked per Rule rule:f98f89a7b6. The kiosk automatically loads the station profile (GET /badge-stations/me).",
+      "Configure Station Once (Operator): Click Setup (⚙️), enter the Station ID (e.g. W2-KIOSK, GATE-1) and Station Secret Key (X-Station-Key). The key is encrypted by Windows native storage and masked per Rule rule:f98f89a7b6. The kiosk automatically loads the station profile (GET /badge-stations/me).",
       "Present Badge to Scanner: Hold employee barcode badge or RFID card in front of the scanner. The focused scanner input captures the code and submits Enter immediately without requiring staff login (Rule rule:141cb8255f).",
       "Dual-Scan Bed Sanitization (if required): For ward bed cleaning kiosks (needs_bed_code: true), scan either the bed QR sticker (HMS-BED-…) or staff badge first. A 60-second visual countdown opens. Scan the second code within 60 seconds; both are combined and submitted together (Rule rule:b2f4ebb077).",
       "Review Instant Flash Outcome: The kiosk displays a high-contrast full-screen outcome banner (Green for AttendanceIn, AttendanceOut, BedCleaned, SecurityPass; Red for UnknownBadge, InactiveBadge, Rejected) with synthesized chime/buzz audio feedback (Rule rule:2554916922).",
       "Automatic 3-Second Reset: A 3-second countdown ring counts down, and the kiosk automatically returns to the ready state for the next staff member.",
-      "Offline Buffering & Idempotent Resync: If hospital network disconnects, scans are safely buffered in the offline queue with unique gateway_event_id. Scans can be synced manually or will resend automatically upon reconnection without duplicate entries (Rule rule:438ca845ec)."
+      "Offline Buffering & Idempotent Resync: If hospital network disconnects, scans are safely buffered in the offline queue with unique gateway_event_id. The amber awaiting-confirmation message does not confirm attendance, access or cleaning. Choose Sync Now or reconnect to retry using the original event ID (Rule rule:438ca845ec)."
     ],
     stepsUr: [
       "اسٹیشن کی تشکیل (آپریٹر): ترتیبات (⚙️) پر کلک کریں، اسٹیشن آئی ڈی اور خفیہ کلید درج کریں۔ کلید کو قاعدہ rule:f98f89a7b6 کے تحت محفوظ اور چھپا کر رکھا جاتا ہے اور پروفائل لوڈ ہو جاتی ہے۔",
@@ -29,7 +528,7 @@ export const help: Record<string, HelpPage> = {
       "بیڈ صفائی کا دوہرا اسکین: جن اسٹیشنز پر بیڈ کوڈ لازمی ہو، وہاں بیڈ کا کیو آر اسٹیکر یا عملے کا بیج پہلے اسکین کریں۔ 60 سیکنڈ کا ٹائمر شروع ہو جائے گا۔ دوسرا کوڈ 60 سیکنڈ کے اندر اسکین کریں تا کہ دونوں ساتھ جمع ہوں (قاعدہ rule:b2f4ebb077)۔",
       "فوری نتیجہ اور آواز: کیوسک بڑی اسکرین پر فوری نتیجہ دکھاتا ہے (کامیابی پر سبز اور مسترد ہونے پر سرخ) اور آواز کے ساتھ تصدیق کرتا ہے (قاعدہ rule:2554916922)۔",
       "3 سیکنڈ بعد خودکار واپسی: تین سیکنڈ کا الٹا گنتی کا ٹائمر مکمل ہونے پر اسکرین خودکار طور پر اگلے شخص کے اسکین کے لیے تیار ہو جاتی ہے۔",
-      "آف لائن کیو اور خودکار ارسال: انٹرنیٹ بند ہونے پر تمام اسکینز منفرد ایونٹ آئی ڈی کے ساتھ محفوظ رہتے ہیں اور سرور آن لائن ہونے پر بغیر کسی نقل کے خودکار ارسال ہو جاتے ہیں (قاعدہ rule:438ca845ec)۔"
+      "آف لائن کیو: اسکین مقامی براؤزر اسٹوریج میں محفوظ ہوتا ہے، یہ قطار خفیہ کردہ نہیں ہے۔ زرد پیغام حاضری یا صفائی کی تصدیق نہیں ہے۔ رابطہ بحال کریں یا Sync Now دبائیں؛ اصل ایونٹ آئی ڈی برقرار رہتی ہے (قاعدہ rule:438ca845ec)۔"
     ],
     faq: [
       [
@@ -42,7 +541,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "What happens if staff badge scans occur while the hospital network is down under Rule rule:438ca845ec?",
-        "The kiosk buffers every scan locally in its encrypted offline queue, assigning each a unique gateway_event_id and capturing the exact timestamp (scanned_at). When network connectivity is restored, the queue flushes automatically. Because the backend recognizes gateway_event_id, repeat attempts are completely idempotent and cannot cause duplicate attendance punches or double cleaning records."
+        "The kiosk saves scans in this terminal profile with their original gateway_event_id and scanned_at. The queue is local browser storage, not encrypted. An amber awaiting-confirmation message is not an attendance, access or bed-cleaning confirmation. Reconnect or choose Sync Now; a refusal remains visible and stops replay. Because the backend recognizes gateway_event_id, repeat attempts are completely idempotent and cannot cause duplicate attendance punches or double cleaning records."
       ],
       [
         "Why is an invisible focused input used for USB barcode scanners under Rule rule:141cb8255f?",
@@ -64,7 +563,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "اگر انٹرنیٹ یا سرور بند ہو تو قاعدہ rule:438ca845ec کے تحت کیا ہوتا ہے؟",
-        "کیوسک تمام اسکینز کو منفرد gateway_event_id اور وقت کے ساتھ مقامی طور پر محفوظ کر لیتا ہے۔ سرور کے ساتھ رابطہ بحال ہوتے ہی یہ تمام اسکینز بغیر کسی نقل یا ڈپلیکیٹ حاضری کے سرور پر خودکار بھیج دیے جاتے ہیں۔"
+        "کیوسک اسکین کو اصل gateway_event_id کے ساتھ مقامی براؤزر اسٹوریج میں رکھتا ہے؛ یہ قطار خفیہ کردہ نہیں۔ زرد انتظار کا پیغام حاضری، رسائی یا صفائی کی تصدیق نہیں۔ رابطہ بحال کریں یا Sync Now دبائیں۔ مسترد ہونے پر وجہ دکھائی جاتی ہے اور ارسال رک جاتا ہے۔"
       ],
       [
         "قاعدہ rule:141cb8255f کے تحت یو ایس بی اسکینر کے لیے فوکسڈ ان پٹ کیوں ضروری ہے؟",
@@ -88,9 +587,12 @@ export const help: Record<string, HelpPage> = {
       "Complete Work & Route to AP: When repairs conclude, click 'Complete', enter the final invoiced cost, and submit. Under Rule rule:a7fc19b5fc, contractor invoices route directly to the Accountant's Accounts Payable queue.",
       "Manage Assets & Register Equipment: In Pane 2, monitor biomedical equipment, ward fixtures, and air-handling units. Click '+ Register Asset' to add new equipment with unique barcode tags and serial numbers.",
       "Log Overhead Utilities: In Pane 2, record monthly utility bills (electricity, generator diesel, bulk oxygen cylinders) by selecting the overhead category and vendor, automatically generating accounts payable liabilities.",
-      "Clear Discharge & Confirm Bed Cleaned: Rapidly clear facility/linen discharge clearance stages for discharged inpatients, and record terminal bed sanitization so beds become instantly available for new admissions.",
+      "Clear Discharge & Confirm Bed Cleaned: Choose only a discharge stage permitted by your current account; cleaning permission never grants pharmacy, nursing or billing clearance. Clear the ordered facility stage for discharged inpatients, and record terminal bed sanitization so beds become instantly available for new admissions.",
       "Monitor Facility Telemetry & Look Up Staff: In Pane 3, watch live badge scan events across hospital entryways and checkpoints, and verify employee credentials using the staff lookup search."
-    ],
+    ,
+"Department: Departments (active only); IT adds missing departments.",
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too.",
+"Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists."],
     stepsUr: [
       "ورک آرڈرز کی ترجیح اور تفویض: پین 1 میں کھلے ورک آرڈرز کا معائنہ کریں جن میں ہنگامی خرابیاں سب سے اوپر ہوتی ہیں۔ 'Assign' پر کلک کر کے اندرونی ٹیکنیشن یا بیرونی ٹھیکیدار کو تخمینہ لاگت کے ساتھ کام تفویض کریں۔",
       "پیش رفت کی نگرانی اور کام کا آغاز: جب ٹیکنیشن موقع پر پہنچ کر کام شروع کرے تو 'Start' پر کلک کریں تا کہ حالت 'In Progress' میں تبدیل ہو جائے۔",
@@ -99,7 +601,10 @@ export const help: Record<string, HelpPage> = {
       "یوٹیلٹی بلز کا اندراج: پین 2 میں بجلی، ڈیزل اور آکسیجن کے ماہانہ بل درج کریں تا کہ مالیاتی کھاتے میں ادائیگی کی ذمہ داری بن سکے۔",
       "ڈسچارج کلیئرنس اور بیڈ صفائی: ڈسچارج ہونے والے مریضوں کے دیکھ بھال کے مراحل کلیئر کریں اور فارغ بیڈ کی صفائی کی تصدیق درج کریں تا کہ بیڈ فوراً نئے داخلے کے لیے تیار ہو جائے۔",
       "لائیو بیج فیڈ اور عملے کی تلاش: پین 3 میں دروازوں سے ملازمین کی آمد و رفت کی لائیو اسکیننگ دیکھیں اور عملے کی تصدیق کے لیے سرچ کا استعمال کریں۔"
-    ],
+    ,
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔",
+"Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔"],
     faq: [
       [
         "Why can't facility operations staff mark contractor work orders as paid under Rule rule:a7fc19b5fc?",
@@ -121,7 +626,8 @@ export const help: Record<string, HelpPage> = {
         "How does the live facility feed in Pane 3 assist with access control and safety drills?",
         "Pane 3 receives live door badge telemetry from facility checkpoints and electronic turnstiles (ev:ops.badge.scan). During security sweeps, emergency code reds, or evacuation drills, security officers can verify real-time presence and query employee facts using staff lookup."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too. Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists."]],
     faqUr: [
       [
         "قاعدہ rule:a7fc19b5fc کے تحت آپریشنز عملہ ٹھیکیدار کے بلوں کو ادا شدہ کیوں نہیں کر سکتا؟",
@@ -143,7 +649,8 @@ export const help: Record<string, HelpPage> = {
         "پین 3 کی لائیو فیڈ ہسپتال کے حفاظتی انتظامات میں کیسے مددگار ہے؟",
         "پین 3 ہسپتال کے تمام دروازوں اور چیک پوائنٹس سے ملازمین کے بیج اسکین کی لائیو معلومات فراہم کرتا ہے۔ ہنگامی صورتحال یا ڈرلز کے دوران سیکیورٹی عملہ ہسپتال میں موجود عملے کی تصدیق کر سکتا ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔ Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔"]]
   },
   payroll: {
     title: "Payroll (Staff payroll processing & payslips)",
@@ -151,7 +658,7 @@ export const help: Record<string, HelpPage> = {
     purpose: "Comprehensive hospital payroll management and salary disbursement system: (1) Monthly and periodic payroll generation (POST /hr/payroll-runs) calculating contractual base compensation, attendance deductions, internal credits, commissions, and extra duties; (2) Directory and status audit of payroll runs (GET /hr/payroll-runs); (3) Employee line items inspection with formula verification (Base − Unpaid Absences − Internal Credit + Commissions + Extra Duty = Net) under statutory Rule rule:0cf7ae94dd (GET /hr/payroll-runs/{run_id}); (4) Extra duty pay computation for scheduled shifts worked beyond the 7-day weekly allowance under statutory Rule rule:e846dec8a2; (5) Multi-stage lifecycle authorization: finalization locking calculations, consuming attendance/credits, and posting general ledger records (POST /hr/payroll-runs/{run_id}/finalize); (6) Cancellation of unfinalized runs with audited operational rationale (POST /hr/payroll-runs/{run_id}/cancel); (7) Disbursement recording via bank transfer or cash (POST /hr/payroll-runs/{run_id}/paid); and (8) Itemized payslip statements and printable earnings/deductions documentation (GET /hr/payslips/{payroll_item_id}).",
     purposeUr: "ہسپتال میں عملے کی تنخواہوں کی تیاری، حساب کتاب اور تقسیم کا جامع نظام: (1) مخصوص مدت کے لیے پے رول رن تیار کرنا (POST /hr/payroll-runs) جس میں بنیادی تنخواہ، حاضری کٹوتیاں، اندرونی ادھار، کمیشن اور اضافی ڈیوٹی شامل ہیں؛ (2) تمام پے رول رن کی فہرست اور حالت کا جائزہ (GET /hr/payroll-runs)؛ (3) قاعدہ rule:0cf7ae94dd کے تحت ہر ملازم کے لیے قانونی فارمولا (بنیادی − غیر حاضریاں کٹوتی − اندرونی ادھار + کمیشن + اضافی ڈیوٹی = خالص قابل ادا رقم) کی جانچ (GET /hr/payroll-runs/{run_id})؛ (4) قاعدہ rule:e846dec8a2 کے تحت ہفتہ وار چھٹی سے زائد اضافی ڈیوٹیوں کا قانونی حساب اور تاریخوں کی تفصیل؛ (5) پے رول رن کو فائنل کرنا جس سے حسابات لاک ہوتے ہیں، حاضری/کریڈٹ خرچ ہوتے ہیں اور جنرل لیجر میں اندراج ہوتا ہے (POST /hr/payroll-runs/{run_id}/finalize)؛ (6) غیر فائنل شدہ رن کو باضابطہ وجہ کے ساتھ منسوخ کرنا (POST /hr/payroll-runs/{run_id}/cancel)؛ (7) بینک ٹرانسفر یا نقد ادائیگی کے ذریعے تنخواہیں ادا شدہ درج کرنا (POST /hr/payroll-runs/{run_id}/paid)؛ اور (8) ملازم کی تنخواہ کی تفصیلی اور پرنٹ ایبل رسید حاصل کرنا (GET /hr/payslips/{payroll_item_id})۔",
     steps: [
-      "Generate Payroll Run: Click '+ Generate Payroll', enter period start and end dates (e.g. 1st to end of month), and submit. The server automatically ingests attendance punches, unpaid leaves, pharmacy/meal internal credits, commissions, and roster duties.",
+      "Generate Payroll Run (only with hr.payroll.run; a role label does not grant access): Click '+ Generate Payroll', enter period start and end dates (e.g. 1st to end of month), and submit. The server automatically ingests attendance punches, unpaid leaves, pharmacy/meal internal credits, commissions, and roster duties.",
       "Audit Employee Formula & Line Items: Open the generated run details to verify every staff member's compensation. Inspect base salary, attendance deductions, internal credits, accrued commissions, and extra duty entitlements matching Rule rule:0cf7ae94dd.",
       "Verify Extra Duty Calculations: Review scheduled shifts worked beyond the statutory weekly rest allowance under Rule rule:e846dec8a2, ensuring daily rates and specific worked dates are accurately captured.",
       "Inspect Individual Payslips: Click 'View Slip' on any employee item to open the itemized payslip breakdown, displaying earnings, statutory deductions, net payable, and print-ready layout.",
@@ -159,7 +666,7 @@ export const help: Record<string, HelpPage> = {
       "Disburse Salaries & Mark Paid: Once salaries are disbursed through bank transfer or counter cash, click 'Mark Salaries Paid', select the payment method, and record the disbursement completion."
     ],
     stepsUr: [
-      "نیا پے رول تیار کریں: '+ Generate Payroll' پر کلک کریں، مدت کے آغاز اور اختتام کی تاریخیں درج کریں اور جمع کریں۔ سرور خودکار طور پر حاضری، غیر حاضریاں، اندرونی کریڈٹ اور ڈیوٹیاں اکٹھی کر کے حساب لگاتا ہے۔",
+      "نیا پے رول تیار کریں (صرف موجودہ hr.payroll.run اجازت کے ساتھ، عہدے کا نام اجازت نہیں دیتا): '+ Generate Payroll' پر کلک کریں، مدت کے آغاز اور اختتام کی تاریخیں درج کریں اور جمع کریں۔ سرور خودکار طور پر حاضری، غیر حاضریاں، اندرونی کریڈٹ اور ڈیوٹیاں اکٹھی کر کے حساب لگاتا ہے۔",
       "فارمولا اور ملازمین کی تفصیلات جانچیں: تیار شدہ رن کھول کر ہر ملازم کی تنخواہ کا معائنہ کریں۔ بنیادی تنخواہ، کٹوتیاں، کمیشن اور اضافی ڈیوٹی قاعدہ rule:0cf7ae94dd کے مطابق چیک کریں۔",
       "اضافی ڈیوٹی کی تصدیق: قاعدہ rule:e846dec8a2 کے تحت ہفتہ وار آرام سے زائد کی گئی ڈیوٹیوں، ان کی تاریخوں اور روزانہ شرح کے حساب کی تصدیق کریں۔",
       "انفرادی پے سلپ دیکھیں: کسی بھی ملازم کی قطار میں 'View Slip' پر کلک کر کے تفصیلی تنخواہ سلپ، کٹوتیاں اور پرنٹ ایبل رسید دیکھیں۔",
@@ -225,7 +732,8 @@ export const help: Record<string, HelpPage> = {
       "Submit Leave Application: Click 'Apply for Leave', select category and date range, toggle half-day if applicable, add an optional note, and submit to your direct supervisor (POST /self/leave-requests).",
       "Inspect Verified Monthly Payslips: Switch to 'Payslips & Profile' to review finalized monthly salary vouchers detailing base pay, additions, deductions, extra duty allowances, and printable statements.",
       "Report Maintenance or IT Issues: Switch to 'Holidays & Report Issue' and click 'Report Facility Issue' (POST /ops/work-orders) to dispatch work orders to the hospital maintenance engineering team.",
-    ],
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too.",
+"Asset: Assets by name; Maintenance adds a missing asset. A hidden purchase date or cost is absent, never zero."],
     stepsUr: [
       "آنے والی ڈیوٹیاں اور آرام کے دن دیکھیں: 'میری ڈیوٹیاں اور آرام کے دن' کھولیں۔ قاعدہ rule:907c770e92 کے تحت جس تاریخ کو ڈیوٹی نہ ہو وہ قانونی آرام کا دن ہے۔",
       "ساتھی سے ڈیوٹی کور یا تبادلہ مانگیں: آنے والی ڈیوٹی پر 'ساتھی سے پوچھیں' دبائیں۔ قاعدہ rule:9274755ac9 کے تحت فارغ ہمکار کا انتخاب کریں، وجہ درج کریں اور درخواست بھیجیں۔",
@@ -235,7 +743,8 @@ export const help: Record<string, HelpPage> = {
       "رخصت کی باضابطہ درخواست دیں: 'نئی رخصت کی درخواست' پر کلک کریں، قسم اور تاریخیں منتخب کریں اور سپروائزر کو ارسال کریں (POST /self/leave-requests)۔",
       "ماہانہ تنخواہ سلپ چیک اور پرنٹ کریں: 'پے سلپس اور پروفائل' میں جا کر بنیادی تنخواہ، کٹوتیوں اور اضافی الاؤنسز کی تفصیلی سلپ دیکھیں اور پرنٹ کریں۔",
       "سہولیات یا آلات کی خرابی رپورٹ کریں: 'تعطیلات اور شکایات' میں 'خرابی کی شکایت درج کریں' دبا کر ہسپتال انجینئرنگ ٹیم کو ورک آرڈر بھیجیں۔",
-    ],
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔",
+"Asset: اثاثے نام سے؛ دیکھ بھال شعبہ غائب اثاثہ درج کرتا ہے۔ پوشیدہ خرید تاریخ یا قیمت غائب ہے، صفر نہیں۔"],
     faq: [
       [
         "How are weekly rest days determined in continuous 24/7 hospital services (Rule 907c770e92)?",
@@ -257,7 +766,7 @@ export const help: Record<string, HelpPage> = {
         "How do I report a broken fixture, electrical fault, or medical device problem?",
         "On the 'Holidays & Report Issue' tab, click 'Report Facility Issue' (POST /ops/work-orders). Select the relevant maintenance category (such as Biomedical, Electrical, Plumbing, HVAC, or IT), specify the ward or room location, choose urgency priority, and provide a clear description. The request generates a tracked facility work order for the engineering department.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Ward: Wards; IT adds missing wards. Bed selection loads the beds too. Asset: Assets by name; Maintenance adds a missing asset. A hidden purchase date or cost is absent, never zero."]],
     faqUr: [
       [
         "ہسپتال کی 24 گھنٹے سروسز میں ہفتہ وار آرام کے دن کا تعین کیسے ہوتا ہے (قاعدہ 907c770e92)؟",
@@ -279,7 +788,7 @@ export const help: Record<string, HelpPage> = {
         "وارڈ یا کمرے میں بجلی، پلمبنگ یا طبی آلات کی خرابی کی شکایت کیسے درج کریں؟",
         "'تعطیلات اور شکایات' ٹیب میں 'خرابی کی شکایت درج کریں' دبائیں (POST /ops/work-orders)۔ متعلقہ زمرہ (جیسے بائیو میڈیکل، الیکٹریکل، آئی ٹی وغیرہ) منتخب کریں، وارڈ یا کمرہ نمبر لکھیں اور تفصیل درج کریں۔ اس سے فوری طور پر باضابطہ ورک آرڈر بن جاتا ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔ Asset: اثاثے نام سے؛ دیکھ بھال شعبہ غائب اثاثہ درج کرتا ہے۔ پوشیدہ خرید تاریخ یا قیمت غائب ہے، صفر نہیں۔"]],
   },
   leave_approvals: {
     title: "Leave approvals (supervisor inbox)",
@@ -501,11 +1010,11 @@ export const help: Record<string, HelpPage> = {
       "Inspect Daily Timecards: Review employee timecard records displaying assigned department, computed status badge (Present, Late, Absent, HalfDay, Leave, Holiday, Off), first arrival punch, last departure punch, total worked duration (hours and minutes), and late arrival minutes.",
       "Inspect Raw Punches Timeline: Click 'View Punches' on any timecard row to open the raw punch timeline drawer (GET /hr/attendance/punches). Review each punch's exact local timestamp, punch type (In/Out), badge code, terminal station ID, and punch source badge (Badge, RollCall, Manual per Rule rule:7e57360f0f).",
       "Verify Night Shift Duty Date Attribution: Under Rule rule:57ff2b4a55, observe that morning exits following a night duty are automatically grouped under the evening date when the duty began.",
-      "Record Audited Manual Punch Correction: When an employee's badge failed or physical presence was verified, click '+ Manual Punch Correction' or the row '+ Punch' button (POST /hr/attendance/manual). Enter the employee ID, local timestamp, optional duty date override, and documented operational reason (minimum 3 characters, Rule rule:7e57360f0f).",
+      "Record Audited Manual Punch Correction: When an employee's badge failed or physical presence was verified, click '+ Manual Punch Correction' or the row '+ Punch' button (POST /hr/attendance/manual). Choose the employee by name, then enter the local timestamp, optional duty date override, and documented operational reason (minimum 3 characters, Rule rule:7e57360f0f).",
       "Recompute Daily Flags: If punches were corrected or shifts modified, enter the duty date and click '(Re)compute' (POST /hr/attendance/compute). The system recalculates worked minutes, grace period thresholds, and daily status flags.",
       "Configure Fixed Default Shifts & Rest Days: On the 'Shift & Roster Policy' tab, click 'Assign Default Shift' (POST /hr/employees/{id}/shift). Select 'Fixed Default Shift', specify the shift pattern ID, effective date, and check individual weekly off days (1=Monday ... 7=Sunday) per Rule rule:e3a5ef53f8.",
       "Designate Roster-Only Staff Policy: For personnel whose schedules rotate weekly via the duty roster, select 'Roster-Only' (shift_pattern_id: null). Under Rule rule:edc1438113, this ensures that unrostered days count as paid rest days ('Off') rather than false absences ('Absent').",
-    ],
+"Shift Pattern: Fixed shift patterns by name."],
     stepsUr: [
       "حاضری کا دورانیہ فلٹر کریں: تاریخ کی شروعات اور اختتام منتخب کریں اور ضرورت کے مطابق شعبہ یا ملازم کے نام و نمبر سے فلٹر کریں۔",
       "روزانہ ٹائم کارڈز کا معائنہ: ملازمین کے ٹائم کارڈز، شعبہ، حاضری حالت (حاضر، دیر، غیر حاضر، نصف دن، رخصت، تعطیل، آرام)، پہلا پنچ، آخری پنچ، کل کام کے گھنٹے اور تاخیر کا جائزہ لیں۔",
@@ -515,7 +1024,7 @@ export const help: Record<string, HelpPage> = {
       "حاضری کے جھنڈے دوبارہ پروسیس کریں: پنچز یا روسٹر میں تبدیلی کے بعد تاریخ منتخب کر کے '(دوبارہ) پروسیس کریں' دبائیں (POST /hr/attendance/compute) تاکہ کام کا وقت اور حاضری کی حالت دوبارہ پروسیس ہو جائے۔",
       "ڈیفالٹ شفٹ اور آرام کے دن مقرر کریں: 'شفٹ پالیسی' ٹیب میں 'شفٹ تفویض کریں' دبائیں (POST /hr/employees/{id}/shift)۔ 'مستقل شفٹ' منتخب کریں، پیٹرن آئی ڈی، تاریخ اور انفرادی ہفتہ وار چھٹیاں منتخب کریں (قاعدہ rule:e3a5ef53f8)۔",
       "روسٹر کے مطابق عملے کی پالیسی: جن ملازمین کی ڈیوٹیاں روسٹر پر طے ہوتی ہیں انہیں 'صرف روسٹر' پر سیٹ کریں (shift_pattern_id: null)۔ قاعدہ rule:edc1438113 کے تحت بغیر ڈیوٹی والے دن آرام ('Off') شمار ہوں گے نہ کہ غلط غیر حاضری ('Absent')۔",
-    ],
+"Shift Pattern: مقررہ شفٹ کے اوقات نام سے۔"],
     faq: [
       [
         "How are daily attendance status flags (Present, Late, Absent, HalfDay, Leave, Holiday, Off) determined?",
@@ -537,7 +1046,7 @@ export const help: Record<string, HelpPage> = {
         "How are weekly off days and gazetted public holidays treated as paid rest days (Rule e3a5ef53f8)?",
         "Under statutory Rule rule:e3a5ef53f8, both 'Holiday' (gazetted public holidays) and 'Off' (weekly rest days) are paid rest days under hospital employment regulations. Because hospitals operate continuously 24/7/365, there is no single hospital-wide rest day; each employee has an individualized schedule of weekly off days assigned via POST /hr/employees/{id}/shift. When staff work on a gazetted holiday or their weekly off day as scheduled on the duty roster, they earn extra duty compensatory allowances.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Shift Pattern: Fixed shift patterns by name."]],
     faqUr: [
       [
         "روزانہ حاضری کے جھنڈے (حاضر، دیر، غیر حاضر، نصف دن، رخصت، تعطیل، آرام) کیسے طے ہوتے ہیں؟",
@@ -559,7 +1068,7 @@ export const help: Record<string, HelpPage> = {
         "ہفتہ وار چھٹیوں اور سرکاری تعطیلات کو بامعاوضہ آرام کا دن کیسے مانا جاتا ہے (قاعدہ e3a5ef53f8)؟",
         "قانونی قاعدہ rule:e3a5ef53f8 کے مطابق، ہسپتال کے قوانین میں 'تعطیل' (سرکاری چھٹی) اور 'آرام' (ہفتہ وار چھٹی) دونوں بامعاوضہ آرام کے دن ہیں۔ چونکہ ہسپتال 24 گھنٹے کھلا رہتا ہے اس لیے پورے ہسپتال کی کوئی ایک مشترکہ چھٹی نہیں ہوتی بلکہ ہر ملازم کی ہفتہ وار چھٹی الگ مقرر ہوتی ہے۔ آرام کے دن کام کرنے پر ملازم اضافی ڈیوٹی الاؤنس کا حقدار ہوتا ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Shift Pattern: مقررہ شفٹ کے اوقات نام سے۔"]],
   },
   support_roster: {
     title: "Support-staff duty roster & roll call",
@@ -575,7 +1084,8 @@ export const help: Record<string, HelpPage> = {
       "Print Physical Roll Call Sheet: When taking roll call outdoors at peripheral gates or wards without computer terminals, click 'Print Sheet' to print a physical roster roll call document for manual supervisor signatures.",
       "Record Verbal Shift Swaps: On the 'Duty Swaps & Covers' tab, click '+ Record Verbal Swap' (POST /rosters/swaps, Rule rule:83718fc56e) when two support staff agree in person to cover for each other. Select the proposer, receiver, their respective shifts, and the mutual reason.",
       "Audit Weekly Rest Compliance & Overtime: On the 'Week Check & Rest Audit' tab (GET /rosters/week, Rule rule:fb45bf026f), audit rest day compliance. Personnel working 7 consecutive days without a statutory rest day are flagged with amber 'NoRestDay' alerts, and extra duty overtime days are tracked.",
-    ],
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too.",
+"Department: Departments (active only); IT adds missing departments."],
     stepsUr: [
       "ہفتہ وار دورانیہ منتخب کریں: ہفتہ وار نیویگیشن بٹنوں یا پیر کی تاریخ کے ذریعے مطلوبہ آپریشنل ہفتہ منتخب کریں۔ معاون عملے کو کیٹیگری کے مطابق فلٹر کریں یا نام اور ملازم نمبر سے تلاش کریں۔",
       "معاون پلانر گرڈ کا جائزہ: شفٹ پیٹرن قطاروں (صبح، شام، رات) اور تعطیلات کے نشانات کے ساتھ 7 روزہ گرڈ کا معائنہ کریں (قاعدہ rule:2e75984ff7)۔ مناسب کوریج کے لیے زون اور گیٹ کی تعیناتی چیک کریں۔",
@@ -585,7 +1095,8 @@ export const help: Record<string, HelpPage> = {
       "کاغذی رول کال فارم پرنٹ کریں: دور دراز گیٹس یا بغیر کمپیوٹر والے مقامات پر دستی حاضری کے لیے 'رول کال شیٹ پرنٹ کریں' دبا کر کاغذی حاضری فارم حاصل کریں۔",
       "زبانی شفٹ تبادلے درج کریں: 'ڈیوٹی تبادلے' ٹیب میں جب دو ملازمین باہمی رضامندی سے ڈیوٹی بدلیں تو '+ زبانی تبادلہ درج کریں' دبائیں (POST /rosters/swaps، قاعدہ rule:83718fc56e) اور دونوں کی ڈیوٹیاں اور وجہ درج کریں۔",
       "ہفتہ وار آرام اور اوور ٹائم کا آڈٹ: 'ہفتہ وار آڈٹ' ٹیب میں قانونی آرام کی جانچ کریں (GET /rosters/week، قاعدہ rule:fb45bf026f)۔ بغیر آرام مسلسل 7 دن کام کرنے والے ملازمین پر 'NoRestDay' تنبیہ اور اوور ٹائم الاؤنس دیکھیں۔",
-    ],
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔"],
     faq: [
       [
         "Why do support staff have a dedicated roll call tab and printable weekly sheets instead of logging in?",
@@ -607,7 +1118,7 @@ export const help: Record<string, HelpPage> = {
         "How does the Week Check panel calculate rest day compliance and statutory overtime allowances for support workers?",
         "Under statutory Rule rule:fb45bf026f, GET /rosters/week audits total scheduled working days against the hospital's mandatory rest day policy (e.g., at least 1 rest day in every 7-day period). Support personnel rostered for 7 consecutive days are flagged with amber 'NoRestDay' alerts. Working days exceeding the normal weekly threshold are tracked as overtime extra duty days, ensuring that operations and payroll managers accurately disburse statutory extra duty compensation.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Ward: Wards; IT adds missing wards. Bed selection loads the beds too. Department: Departments (active only); IT adds missing departments."]],
     faqUr: [
       [
         "معاون عملے کے لیے لاگ ان کے بجائے مخصوص رول کال اور پرنٹ شدہ شیٹس کا انتظام کیوں ہے؟",
@@ -629,7 +1140,7 @@ export const help: Record<string, HelpPage> = {
         "ہفتہ وار آڈٹ پینل معاون عملے کے آرام کے قانونی دنوں اور اوور ٹائم کا حساب کیسے لگاتا ہے؟",
         "قاعدہ rule:fb45bf026f کے تحت GET /rosters/week ہر ملازم کے کام کے دنوں کا قانونی چھٹیوں کے حساب سے آڈٹ کرتا ہے۔ مسلسل 7 دن بغیر آرام کام کرنے والے عملے پر پیلے رنگ کی 'NoRestDay' وارننگ آتی ہے، اور قانونی حد سے زائد دنوں کو اوور ٹائم کے طور پر شمار کیا جاتا ہے تاکہ ان کے معاوضے کی ادائیگی یقینی بنائی جا سکے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔"]],
   },
   duty_roster_hr: {
     title: "Duty rosters (all staff)",
@@ -645,7 +1156,8 @@ export const help: Record<string, HelpPage> = {
       "Manage Duty Swaps & Covers: On the 'Duty Swaps & Covers' tab, review requested swaps (GET /rosters/swaps). Approve or reject swaps with audit notes. For staff without system logins, click '+ Record Verbal Swap' (POST /rosters/swaps) per Rule rule:83718fc56e.",
       "Configure Shift Patterns: On the 'Shift Patterns Directory' tab (GET /hr/shift-patterns), inspect timing windows and click '+ Create Shift Pattern' (POST /hr/shift-patterns, Rule rule:f0c97c644e) to register new clinical shifts with grace minutes.",
       "Audit Weekly Rest Compliance: On the 'Week Check & Rest Audit' tab (GET /rosters/week, Rule rule:fb45bf026f), audit rest day compliance. Staff with fewer rest days than due are highlighted with amber 'NoRestDay' warnings and extra duty overtime days are calculated.",
-    ],
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too.",
+"Department: Departments (active only); IT adds missing departments."],
     stepsUr: [
       "ہفتہ اور فلٹرز منتخب کریں: ہفتہ وار نیویگیشن بٹنوں کے ذریعے 7 روزہ دورانیہ منتخب کریں۔ عملے کو کیٹیگری (نرسنگ، ڈاکٹر، انتظامی، تکنیکی، سپورٹ) کے مطابق فلٹر کریں یا نام سے تلاش کریں۔",
       "پلانر گرڈ کا معائنہ: قاعدہ rule:50af6ba770 کے تحت 7 روزہ گرڈ دیکھیں۔ سرکاری تعطیلات نمایاں کی گئی ہیں (قاعدہ rule:2e75984ff7) اور شفٹ پیٹرن کے اوقات درج ہیں۔",
@@ -655,7 +1167,8 @@ export const help: Record<string, HelpPage> = {
       "ڈیوٹی تبادلوں کا انتظام: 'ڈیوٹی تبادلہ' ٹیب میں درخواستوں کا جائزہ لیں (GET /rosters/swaps)۔ تبادلہ منظور یا مسترد کریں۔ بغیر لاگ ان عملے کے لیے زبانی تبادلہ درج کریں (POST /rosters/swaps، قاعدہ rule:83718fc56e)۔",
       "شفٹ پیٹرنز تشکیل دیں: 'شفٹ پیٹرنز' ٹیب میں اوقات دیکھیں اور '+ نیا شفٹ پیٹرن' دبا کر ہسپتال کی نئی شفٹ اور رعایت کے منٹ شامل کریں (POST /hr/shift-patterns، قاعدہ rule:f0c97c644e)۔",
       "ہفتہ وار آرام کا آڈٹ: 'ہفتہ وار آڈٹ' ٹیب میں آرام کے قانونی دنوں کی جانچ کریں (GET /rosters/week، قاعدہ rule:fb45bf026f)۔ آرام سے محروم عملے پر 'NoRestDay' وارننگ اور اوور ٹائم ڈیوٹی کا حساب دیکھیں۔",
-    ],
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔"],
     faq: [
       [
         "How does the weekly duty planner handle 24/7 continuous hospital operations and Sunday staffing?",
@@ -677,7 +1190,7 @@ export const help: Record<string, HelpPage> = {
         "How does the Week Check panel calculate rest day compliance and overtime extra duty?",
         "Under statutory Rule rule:fb45bf026f, GET /rosters/week audits each staff member's total duty days against the hospital's statutory rest day policy (e.g. 1 or 2 mandatory rest days per 7-day week). If a staff member is assigned to duties with fewer rest days than due, their status is highlighted with an amber 'NoRestDay' badge. Working days exceeding the week's normal allowance are tracked as extra_duty_days for payroll overtime compensation.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Ward: Wards; IT adds missing wards. Bed selection loads the beds too. Department: Departments (active only); IT adds missing departments."]],
     faqUr: [
       [
         "ہفتہ وار پلانر ہسپتال کی 24/7 مسلسل سروسز اور اتوار کے شیڈول کو کیسے چلاتا ہے؟",
@@ -699,7 +1212,7 @@ export const help: Record<string, HelpPage> = {
         "ہفتہ وار آڈٹ پینل آرام کے دنوں کی خلاف ورزی اور اوور ٹائم کا حساب کیسے لگاتا ہے؟",
         "قاعدہ rule:fb45bf026f کے تحت GET /rosters/week ہر ملازم کی ڈیوٹیوں کو قانونی آرام کے دنوں کے مطابق جانچتا ہے۔ اگر کسی ملازم کو مطلوبہ آرام کے دن نہ ملیں تو ان کا اسٹیٹس عنبر رنگ کے 'NoRestDay' سے نمایاں ہوتا ہے، اور اضافی ڈیوٹی کے دن اوور ٹائم ادائیگی کے لیے شمار کیے جاتے ہیں۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔"]],
   },
   id_card: {
     title: "Staff ID card designer & print",
@@ -917,7 +1430,8 @@ export const help: Record<string, HelpPage> = {
       "Manage clinical and administrative departments, and provision operating theaters with designated surgical types (POST /ot/theaters).",
       "Inspect system policy settings and submit change requests for control settings or privileged roles awaiting Owner approval (Rule rule:b9dbd0ab25).",
       "Load WHO ICD-10 classification tables, activate ICD-11 releases (Rule rule:e9ca3f6b5f), monitor server telemetry, and invoke the emergency kill switch only when forced global logout is required (Rule rule:616f98fff0).",
-    ],
+"Room Charge Service: Services by name, filtered to the required Imaging, OT or RoomCharge category.",
+"Target User: User directory by name for the role change."],
     stepsUr: [
       "صارفین اور رسائی کھولیں تاکہ ایچ آر کی طرف سے جمع کروائی گئی قطار کا معائنہ کیا جا سکے اور مجاز کرداروں کے ساتھ اکاؤنٹ تیار کیا جا سکے۔",
       "ہسپتال کے ابتدائی آغاز پر پہلا مالک بنائیں کارڈ مکمل کریں اور عارضی پاس ورڈ پرچی پرنٹ کریں (قاعدہ 67877c44f8)۔",
@@ -927,7 +1441,8 @@ export const help: Record<string, HelpPage> = {
       "طبی اور انتظامی شعبہ جات کا انتظام کریں، اور آپریشن تھیٹرز کے سرجیکل یونٹس نامزد کریں (POST /ot/theaters)۔",
       "پالیسی ترتیبات کا معائنہ کریں اور کنٹرول ترتیبات یا مراعات یافتہ کرداروں کے لیے تبدیلی کی درخواستیں جمع کرائیں (قاعدہ b9dbd0ab25)۔",
       "ڈبلیو ایچ او آئی سی ڈی 10 ٹیبلز لوڈ کریں، آئی سی ڈی 11 کو فعال کریں (قاعدہ e9ca3f6b5f)، اور ہنگامی صورت میں عالمی لاگ آؤٹ کل سوئچ استعمال کریں (قاعدہ 616f98fff0)۔",
-    ],
+"Room Charge Service: خدمت نام سے؛ مطلوبہ عکس نگاری، تھیٹر یا کمرے کے نرخ کی قسم سے۔",
+"Target User: کردار بدلنے کے لیے صارف نام سے۔"],
     faq: [
       [
         "How are new user accounts provisioned from HR onboarding?",
@@ -949,7 +1464,7 @@ export const help: Record<string, HelpPage> = {
         "How should pharmacy dispensing PCs be mapped in the terminal hardware directory?",
         "Under Rule rule:b6c546385e, every PC where pharmacy staff collects cash (for dispensing or OTC sales) must have its terminal record's cash_node mapped to PharmacyCounter. This ensures pharmacy revenue is strictly isolated into the pharmacy counter cash drawer and not commingled with general reception cash.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Room Charge Service: Services by name, filtered to the required Imaging, OT or RoomCharge category. Target User: User directory by name for the role change."]],
     faqUr: [
       [
         "ایچ آر آن بورڈنگ سے نئے صارف کے اکاؤنٹس کیسے تیار کیے جاتے ہیں؟",
@@ -971,7 +1486,7 @@ export const help: Record<string, HelpPage> = {
         "فارمیسی کاؤنٹر کے کمپیوٹرز کو ٹرمینل ہارڈویئر ڈائریکٹری میں کیسے میپ کیا جانا چاہیے؟",
         "قاعدہ b6c546385e کے تحت ہر وہ کمپیوٹر جہاں ادویات کی فراہمی یا او ٹی سی فروخت کے لیے نقد رقم وصول کی جاتی ہے، اس کا کیش نوڈ لازمی طور پر PharmacyCounter پر میپ ہونا چاہیے تاکہ فارمیسی کی نقد رقم الگ محفوظ رہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Room Charge Service: خدمت نام سے؛ مطلوبہ عکس نگاری، تھیٹر یا کمرے کے نرخ کی قسم سے۔ Target User: کردار بدلنے کے لیے صارف نام سے۔"]],
   },
   onboarding_wizard: {
     title: "Staff onboarding & credentials wizard",
@@ -979,7 +1494,7 @@ export const help: Record<string, HelpPage> = {
     purpose: "Comprehensive 6-step onboarding wizard for hospital human resources administration per MSDS HRM 142: (1) Demographics entry and strictly mandatory 13-digit CNIC verification (POST /hr/employees, PATCH /hr/employees/{id}/steps/1); (2) Job taxonomy, department assignment, non-cyclic reporting supervisor hierarchy, and salary structure (PATCH /hr/employees/{id}/steps/2); (3) Professional PMDC/PNC practice licence registration and primary source verified qualifications directory (PATCH /hr/employees/{id}/steps/3, POST /hr/employees/{id}/qualifications); (4) Statutory financial configuration with strict enforcement of Rule cd04ca0d57 (visiting consultant OT split contracts are configured exclusively by the Billing Admin under Price & policy management, never within onboarding); (5) Document vault multipart uploads (Rule 44d2ead844) enforcing JPEG/PNG format and 16MP maximum for staff ID card photos (Rule 511519d15c); and (6) Finalize checklist gate (Rule c1f853fceb) disabling submission until all requirements are complete, handing over profile to IT Console as Awaiting_IT_Provisioning without creating logins (Rule adc6619db9).",
     purposeUr: "ایم ایس ڈی ایس ایچ آر ایم 142 کے مطابق ہسپتال کے ہیومن ریسورس ایڈمنسٹریشن کے لیے جامع 6 مراحل پر مشتمل آن بورڈنگ وزرڈ: (1) ڈیموگرافکس اندراج اور سختی سے لازمی 13 ہندسوں کا شناختی کارڈ کی تصدیق؛ (2) ملازمت کی درجہ بندی، محکمہ کی تفویض، غیر دائرہ دار رپورٹنگ نگران درجہ بندی اور تنخواہ کا ڈھانچہ؛ (3) پیشہ ورانہ پی ایم ڈی سی / پی این سی پریکٹس لائسنس رجسٹریشن اور بنیادی ذرائع سے تصدیق شدہ اسناد ڈائریکٹری؛ (4) قاعدہ cd04ca0d57 کا سخت نفاذ (وزیٹنگ کنسلٹنٹ او ٹی اسپلٹ کے معاہدے خصوصی طور پر بلنگ ایڈمن کے ذریعے تشکیل پاتے ہیں)؛ (5) دستاویزات والٹ ملٹی پارٹ اپ لوڈز برائے شناختی کارڈ کی تصاویر جے پی ای جی یا پی این جی فارمیٹ میں (قاعدہ 511519d15c)؛ اور (6) حتمی چیک لسٹ گیٹ (قاعدہ c1f853fceb) جو تمام ضروریات مکمل ہونے تک جمع کرانے کو غیر فعال رکھتا ہے اور لاگ ان بنائے بغیر پروفائل کو آئی ٹی کنسول کے حوالے کرتا ہے (قاعدہ adc6619db9)۔",
     steps: [
-      "Open Demographics or enter an existing Employee ID to resume an in-progress onboarding profile.",
+      "Open Demographics for a new employee. To resume a Draft, choose an existing profile by name, find it in Staff directory and choose Open Onboarding Wizard. The selected profile is carried into the wizard without entering an internal number.",
       "Enter full name, father/husband name, and strictly mandatory 13-digit CNIC number along with contact details.",
       "Configure Step 2 job taxonomy: select department, designation, specialty, reporting supervisor, and base salary.",
       "Record professional practice licence (PMDC/PNC) for clinical staff and add academic qualifications with MSDS HRM 142 verification.",
@@ -987,9 +1502,10 @@ export const help: Record<string, HelpPage> = {
       "Upload mandatory verification documents to the vault: CNIC scan, degrees, and staff ID photo (JPEG/PNG only, max 16MP per Rule 511519d15c).",
       "Inspect the Step 6 onboarding checklist to verify all mandatory prerequisites are satisfied (Rule c1f853fceb).",
       "Submit the profile to hand over to IT Console as Awaiting_IT_Provisioning without creating logins (Rule adc6619db9).",
-    ],
+"Department: Departments (active only); IT adds missing departments.",
+"Supervisor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."],
     stepsUr: [
-      "ڈیموگرافکس کھولیں یا جاری آن بورڈنگ پروفائل کو دوبارہ شروع کرنے کے لیے موجودہ ملازم کی شناخت درج کریں۔",
+      "نئے ملازم کے لیے ڈیموگرافکس کھولیں۔ ڈرافٹ جاری رکھنے کے لیے موجودہ پروفائل نام سے چنیں، عملے کی فہرست میں تلاش کریں اور آن بورڈنگ وزارڈ کھولیں۔ منتخب پروفائل خود آتی ہے؛ اندرونی نمبر نہ لکھیں۔",
       "پورا نام، والد/شوہر کا نام، اور سختی سے لازمی 13 ہندسوں کا شناختی کارڈ مع رابطہ نمبر درج کریں۔",
       "مرحلہ 2 میں ملازمت کی تفصیلات منتخب کریں: محکمہ، عہدہ، نگران اور بنیادی تنخواہ۔",
       "طبی عملے کے لیے پریکٹس لائسنس (پی ایم ڈی سی/پی این سی) اور تصدیق شدہ تعلیمی اسناد درج کریں۔",
@@ -997,7 +1513,8 @@ export const help: Record<string, HelpPage> = {
       "والٹ میں دستاویزات اور تصویر اپ لوڈ کریں: شناختی کارڈ کی تصویر صرف جے پی ای جی یا پی این جی ہونی چاہیے (قاعدہ 511519d15c)۔",
       "مرحلہ 6 پر چیک لسٹ کا معائنہ کریں تاکہ یقینی ہو سکے کہ تمام شرائط پوری ہیں (قاعدہ c1f853fceb)۔",
       "پروفائل جمع کرائیں تاکہ یہ لاگ ان بنائے بغیر Awaiting_IT_Provisioning حالت میں آئی ٹی کو منتقل ہو جائے (قاعدہ adc6619db9)۔",
-    ],
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Supervisor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"],
     faq: [
       [
         "Why is the Submit button greyed out on Step 6?",
@@ -1019,7 +1536,7 @@ export const help: Record<string, HelpPage> = {
         "What causes a CYCLE_DETECTED refusal when assigning a supervisor in Step 2?",
         "The backend organizational hierarchy strictly enforces non-cyclic acyclic graph integrity. An employee cannot be selected as their own supervisor, nor can they report to a subordinate who ultimately reports up to them. Select an independent superior or leave the field empty for top-level executives.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Department: Departments (active only); IT adds missing departments. Supervisor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."]],
     faqUr: [
       [
         "مرحلہ 6 پر جمع کرانے کا بٹن کیوں غیر فعال ہے؟",
@@ -1041,7 +1558,7 @@ export const help: Record<string, HelpPage> = {
         "مرحلہ 2 میں نگران تفویض کرتے وقت CYCLE_DETECTED کی وجہ کیا ہے؟",
         "تنظیمی درجہ بندی میں دائرہ دار رپورٹنگ ممنوع ہے۔ ملازم خود اپنا نگران نہیں ہو سکتا اور نہ ہی اپنے ماتحت کو نگران بنا سکتا ہے۔ آزاد اعلیٰ نگران منتخب کریں یا خالی چھوڑیں۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Supervisor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"]],
   },
   risk_dashboard: {
     title: "Risk & compliance",
@@ -1269,7 +1786,11 @@ export const help: Record<string, HelpPage> = {
       "To configure reagent consumption, click 'BOM' and link registered reagents with consumption quantities per test run (PUT /lab/tests/{test_id}/bom).",
       "Switch to the 'Reagents & Batches' tab to manage chemical inventory: add reagents, receive batch lots with vendor invoices (POST /lab/reagent-batches), or write off stock due to expiry or damage (POST /lab/reagent-adjustments).",
       "Switch to the 'Profit & Contractor Share' tab to inspect gross revenue, reagent COGS, net profit, test reruns, and configure the contractor revenue-sharing agreement with PMDC staff lookup (PUT /lab/contractor).",
-    ],
+"Send Out Partner: Active diagnostic partners offering the required service.",
+"Vendor Invoice: Supplier invoices, filtered to Lab for reagent intake.",
+"Reagent Batch: Choose the reagent, then its batches in expiry order; expired batches are marked. No stock: ask the lab administrator.",
+"Contractor Employee: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Contractor Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists."],
     stepsUr: [
       "ہسپتال ایڈمنسٹریشن یا لیبارٹری مینو سے لیب ایڈمنسٹریشن اسکرین کھولیں۔",
       "فعال ٹیسٹ کیٹلاگ کا جائزہ لیں یا سرچ باکس میں کوڈ یا نام لکھ کر مطلوبہ ٹیسٹ تلاش کریں۔",
@@ -1281,7 +1802,11 @@ export const help: Record<string, HelpPage> = {
       "ٹیسٹ کے لیے ری ایجنٹس کی کھپت مقرر کرنے کے لیے 'BOM' پر کلک کریں اور متعلقہ کیمیکلز مع مقدار فی ٹیسٹ منسلک کریں (PUT /lab/tests/{test_id}/bom)۔",
       "ری ایجنٹس ٹیب پر جا کر کیمیکل انوینٹری سنبھالیں: نئے ری ایجنٹس درج کریں، بیچ وصول کریں (POST /lab/reagent-batches) یا ایکسپائری پر اسٹاک خارج کریں (POST /lab/reagent-adjustments)۔",
       "منافع اور شیئرنگ ٹیب پر جا کر مجموعی آمدن، لاگت، خالص منافع کا جائزہ لیں اور ملازم سرچ کے ذریعے کنٹریکٹر کے ساتھ ریونیو شیئرنگ معاہدہ محفوظ کریں (PUT /lab/contractor)۔",
-    ],
+"Send Out Partner: مطلوبہ خدمت دینے والے فعال تشخیصی شراکت دار۔",
+"Vendor Invoice: فراہم کنندہ رسیدیں؛ ری ایجنٹ وصولی میں صرف لیب۔",
+"Reagent Batch: ری ایجنٹ چن کر میعاد کی ترتیب میں بیچ چنیں؛ ختم شدہ نشان زد ہے۔ اسٹاک نہ ہو تو لیب ایڈمن سے پوچھیں۔",
+"Contractor Employee: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Contractor Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔"],
     faq: [
       [
         "The Lab administration screen says 'The partner is not active for this service, or its MOU has expired.' (DIAGNOSTIC_PARTNER_INVALID). Why, and what do I do?",
@@ -1303,7 +1828,8 @@ export const help: Record<string, HelpPage> = {
         "How does the Reagent Bill of Materials (BOM) connect test reporting with hospital profit and contractor revenue share?",
         "When a test has an active Bill of Materials (BOM), each validated patient result automatically deducts the specified reagent units in FEFO order from inventory and accrues the cost of goods sold (COGS). On the Lab Financial Dashboard, gross revenue minus reagent COGS yields the net lab profit. The configured contractor share percentage (PUT /lab/contractor) then automatically divides the net profit between the hospital and the designated laboratory contractor."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Send Out Partner: Active diagnostic partners offering the required service. Vendor Invoice: Supplier invoices, filtered to Lab for reagent intake. Reagent Batch: Choose the reagent, then its batches in expiry order; expired batches are marked. No stock: ask the lab administrator. Contractor Employee: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Contractor Vendor: Active suppliers or contractors by name. Finance adds a missing vendor. Equipment suppliers, contractors and utility providers use their own filtered lists."]],
     faqUr: [
       [
         "لیب ایڈمنسٹریشن اسکرین کہتی ہے کہ 'یہ شراکت دار اس سروس کے لیے فعال نہیں ہے یا اس کا معاہدہ ختم ہو چکا ہے' (DIAGNOSTIC_PARTNER_INVALID)۔ یہ کیوں ہے اور میں کیا کروں؟",
@@ -1325,7 +1851,8 @@ export const help: Record<string, HelpPage> = {
         "ری ایجنٹ بل آف میٹیریل (BOM) ٹیسٹ کے نتائج کو ہسپتال کے منافع اور کنٹریکٹر کے حصے سے کیسے جوڑتا ہے؟",
         "جب ٹیسٹ کے ساتھ بل آف میٹیریل منسلک ہوتا ہے تو مریض کی رپورٹ منظور ہوتے ہی متعلقہ ری ایجنٹس اسٹاک سے خودکار طور پر کم ہو جاتے ہیں اور ان کی لاگت کا حساب لگ جاتا ہے۔ ڈیش بورڈ پر کل آمدن میں سے ری ایجنٹ کی لاگت منہا کر کے خالص منافع نکالا جاتا ہے، جسے کنٹریکٹر معاہدے (PUT /lab/contractor) کے مطابق ہسپتال اور کنٹریکٹر کے درمیان تقسیم کیا جاتا ہے۔"
       ]
-    ],
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Send Out Partner: مطلوبہ خدمت دینے والے فعال تشخیصی شراکت دار۔ Vendor Invoice: فراہم کنندہ رسیدیں؛ ری ایجنٹ وصولی میں صرف لیب۔ Reagent Batch: ری ایجنٹ چن کر میعاد کی ترتیب میں بیچ چنیں؛ ختم شدہ نشان زد ہے۔ اسٹاک نہ ہو تو لیب ایڈمن سے پوچھیں۔ Contractor Employee: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Contractor Vendor: فعال فراہم کنندہ یا ٹھیکیدار نام سے چنیں۔ مالیات غائب فراہم کنندہ درج کرتا ہے۔ آلات، ٹھیکیدار اور یوٹیلیٹی کی متعلقہ الگ فہرستیں ہیں۔"]],
   },
   cssd_board: {
     title: "Sterilization board",
@@ -1683,7 +2210,11 @@ export const help: Record<string, HelpPage> = {
       "6. Print Statutory Intimation (A4): Click 'Print Intimation (A4)' to fetch the formatted print payload (GET /mlc/cases/{id}/print-payload) containing facility headers, patient demographics, MLC serial number, alleged history, and officer signature blocks for police dispatch.",
       "7. Hand Over Physical Evidence: Secure all patient clothing, bullet fragments, chemical containers, or biological samples in tamper-evident sealed bags. Click 'Hand Over Evidence' to record the description, seal number, receiving officer details (name, rank, belt number), and police receipt reference.",
       "8. Settle MLR and Close Case: Settle the Medico-Legal Report disposition as Issued Here (with MLR number and date), Referred (selecting the designated government MLR hospital), or Not Required (recording clinical justification). Enter a mandatory clinical closure note (min 3 characters) and click 'Close Medico-Legal Case' to permanently lock the record.",
-    ],
+"Patient: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record.",
+"Case Type: Medico-legal case types by name.",
+"Police Station: Police station or referral destination by name.",
+"Mlr Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record.",
+"Referred To: Police station or referral destination by name."],
     stepsUr: [
       "1. نیا میڈیکو لیگل کیس درج کریں: جیسے ہی کوئی زخمی، حادثے، تشدد یا زہر خوری کا شکار مریض آئے، 'نیا ایم ایل سی کیس کھولیں' پر کلک کریں۔ نامعلوم مریض کے لیے پہلے 'ٹراما پروفائل' بنائیں۔",
       "2. کیس کی قسم اور لانے والے کا انتخاب: سرکاری فہرست سے کیس کی قسم منتخب کریں اور درج کریں کہ مریض کو کون لایا (پولیس، ریسکیو 1122، ایمبولینس، لواحقین، خود یا راہگیر) اور لانے والے کا نام و رابطہ درج کریں۔",
@@ -1693,7 +2224,11 @@ export const help: Record<string, HelpPage> = {
       "6. سرکاری اطلاع نامہ پرنٹ کریں: 'اطلاع نامہ پرنٹ کریں' پر کلک کر کے اے 4 سائز کا سرکاری فارم حاصل کریں جس پر ہسپتال کا مونوگرام، مریض کی تفصیلات، ایم ایل سی نمبر اور دستخط کی جگہ موجود ہوتی ہے۔",
       "7. شواہد پولیس کے حوالے کریں: کپڑے، گولی یا دیگر شواہد سیل شدہ لفافے میں بند کر کے 'شواہد کا اندراج کریں' پر کلک کریں اور سیل نمبر، وصول کنندہ پولیس افسر کا نام، بیلٹ نمبر اور رسید نمبر درج کریں۔",
       "8. ایم ایل آر رپورٹ کا تصفیہ اور کیس بندش: رپورٹ کی نوعیت درج کریں (ہسپتال سے جاری مع نمبر و تاریخ، نامزد ہسپتال ریفر، یا غیر ضروری مع وجہ)۔ اختتامی نوٹ لکھ کر 'کیس بند کریں' پر کلک کر کے ریکارڈ کو مستقل طور پر لاک کر دیں۔",
-    ],
+"Patient: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔",
+"Case Type: میڈیکو لیگل کیس کی قسم نام سے۔",
+"Police Station: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔",
+"Mlr Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔",
+"Referred To: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔"],
     faq: [
       [
         "How do I open a new medico-legal case when an assault or accident casualty arrives?",
@@ -1727,7 +2262,8 @@ export const help: Record<string, HelpPage> = {
         "The Medico-legal cases screen says 'Inform the police and settle the medico-legal report before closing the case.' (MLC_NOT_READY_TO_CLOSE). Why, and what do I do?",
         "Under rule 044cdb5a52, an MLC case cannot be closed while statutory obligations remain incomplete. The server refuses closure (MLC_NOT_READY_TO_CLOSE) if: (1) statutory police intimation has not yet been recorded, or (2) the Medico-Legal Report status remains 'Pending'. To close the case, first record the police intimation, then settle the MLR status as Issued Here (with MLR # and date), Referred (with designated hospital), or Not Required (with justification), and provide a closure note of at least 3 characters."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Patient: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record. Case Type: Medico-legal case types by name. Police Station: Police station or referral destination by name. Mlr Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record. Referred To: Police station or referral destination by name."]],
     faqUr: [
       [
         "تشدد یا حادثے کا شکار مریض آنے پر نیا میڈیکو لیگل کیس کیسے کھولا جائے؟",
@@ -1761,7 +2297,8 @@ export const help: Record<string, HelpPage> = {
         "اسکرین کہتی ہے کہ 'کیس بند کرنے سے پہلے پولیس اطلاع اور ایم ایل آر رپورٹ کا تصفیہ کریں' (MLC_NOT_READY_TO_CLOSE)۔ کیا کریں؟",
         "رول 044cdb5a52 کے تحت جب تک قانونی تقاضے پورے نہ ہوں کیس بند نہیں ہو سکتا۔ اگر تھانے کی اطلاع درج نہ ہو یا ایم ایل آر رپورٹ زیر التواء ہو تو سسٹم بندش مسترد کر دے گا۔ پہلے تھانے کو مطلع کریں، پھر رپورٹ کا تصفیہ کریں (جاری شدہ، ریفر یا غیر ضروری)، پھر اختتامی نوٹ لکھ کر کیس بند کریں۔"
       ]
-    ],
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔ Case Type: میڈیکو لیگل کیس کی قسم نام سے۔ Police Station: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔ Mlr Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔ Referred To: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔"]],
   },
   body_release_er: {
     title: "Bodies awaiting handover (ER)",
@@ -1958,14 +2495,14 @@ export const help: Record<string, HelpPage> = {
     purposeUr: "عالمی ادارہ صحت (ڈبلیو ایچ او) کے بین الاقوامی میڈیکل سرٹیفکیٹ فارم اور پنجاب ہیلتھ کیئر کمیشن کے ایم ایس ڈی ایس انڈیکیٹرز 106 اور 154 کے تحت مریض کی وفات کا اندراج اور اسباب کی تصدیق۔ پی ایم ڈی سی سے رجسٹرڈ ڈاکٹرز فوری طور پر وفات کا باضابطہ اعلان کرتے ہیں، حصہ اول کی سطور (الف تا د) میں موت کا فوری اور بنیادی سبب دورانیے اور آئی سی ڈی کوڈز کے ساتھ درج کرتے ہیں، سب سے نچلی سطر سے اصل بنیاد بننے والی بیماری کا تعین کرتے ہیں، حصہ دوم میں دیگر معاون امراض، غیر طبعی اموات میں حادثے یا حملے کے خارجی اسباب، گزشتہ 4 ہفتوں کی سرجری، خواتین کے لیے حالتِ حمل، اور نوزائیدہ بچوں کے پیدائشی کوائف درج کرتے ہیں، ڈرافٹ محفوظ کرتے ہیں، حتمی تصدیق کے بعد ریکارڈ لاک کرتے ہیں، تصحیح کی صورت میں ٹھوس وجہ کے ساتھ ترمیمی اندراج کرتے ہیں، غیر قانونی اموات میں طبی پوسٹ مارٹم کی نگرانی کرتے ہیں، اور یونین کونسل کے قانونی اندراج کے لیے سرکاری اے 4 سرٹیفکیٹ جاری کرتے ہیں۔",
     steps: [
       "1. Access Death Register: Navigate to 'Death record & certificate' from the Doctor workspace or clinical tools menu. Inspect the central death register for active draft certificates, finalized records, and setting breakdowns.",
-      "2. Record Initial Death Declaration: Click 'Record Death' to open the declaration modal. Enter the patient MRN/ID, verified death timestamp, clinical setting (Inpatient, Emergency, Outpatient, Brought Dead), arrival time if brought dead, expected/unexpected indicator, and immediate terminal event. Submit via POST /patients/{patient_id}/death.",
+      "2. Record Initial Death Declaration: Click 'Record Death' to open the declaration modal. Choose the patient by name from Patient search, then enter the verified death timestamp, clinical setting (Inpatient, Emergency, Outpatient, Brought Dead), arrival time if brought dead, expected/unexpected indicator, and immediate terminal event. Submit via POST /patients/{patient_id}/death.",
       "3. Construct WHO Part I Causal Chain: In the certificate editor, document line (a) immediate disease leading directly to death with its interval. If antecedent conditions exist, document line (b) due to, (c) due to, and (d) due to. The system automatically designates the lowest completed line as the underlying cause.",
       "4. Select ICD Diagnostic Codes & Suggestions: Use 'Pick ICD Code' on any line to browse or search active ICD-10/11 terminology. Review clinical condition chips surfaced from recent patient charts; click chips to populate cause lines without manual retyping.",
       "5. Document Part II & Contextual Attributes: Enter other significant conditions in Part II. Select the manner of death. For violent or accidental deaths, complete external cause description, place of occurrence, and date. Note any surgery within 4 weeks, pregnancy status for females aged 10-54, and perinatal birth metrics for infant mortalities under 1 year.",
       "6. Save Draft Certificate: Click 'Save Draft' to persist current entries via versioned PUT /deaths/{death_id}. Draft certificates remain editable across clinical shifts while pending laboratory, histology, or senior review.",
       "7. Certify Cause of Death: Verify that all mandatory fields are complete. Click 'Certify Cause of Death' to transmit POST /deaths/{death_id}/certify. Certification permanently locks the certificate against direct modifications and stamps the certifier's PMDC credentials.",
       "8. Append Correction or Print A4 Certificate: For post-certification amendments, click 'Add Correction' to append factual additions with required clinical justification (POST /deaths/{death_id}/corrections). Click 'Print Certificate (A4)' to fetch the official print payload (GET /deaths/{death_id}/print-payload) formatted for the family and Union Council registration.",
-    ],
+"Report Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."],
     stepsUr: [
       "1. ڈیتھ رجسٹر کھولیں: ڈاکٹر ورک اسپیس یا کلینیکل مینو سے 'ڈیتھ ریکارڈ اور سرٹیفکیٹ' اسکرین پر جائیں۔ رجسٹر میں تمام اموات کی فہرست، ڈرافٹ اور تصدیق شدہ سرٹیفکیٹس کی حالت دیکھیں۔",
       "2. وفات کا ابتدائی اعلان درج کریں: 'وفات درج کریں' بٹن پر کلک کریں۔ مریض کا شناختی نمبر، وقتِ وفات، وفات کا شعبہ (ان ڈور، ایمرجنسی، او پی ڈی، مردہ لایا گیا)، متوقع/غیر متوقع کی تفصیل درج کر کے بیک اینڈ پر محفوظ کریں۔",
@@ -1975,7 +2512,7 @@ export const help: Record<string, HelpPage> = {
       "6. سرٹیفکیٹ ڈرافٹ محفوظ کریں: 'ڈرافٹ محفوظ کریں' پر کلک کر کے اب تک کا کام محفوظ کریں تاکہ اگلی شفٹ کا ڈاکٹر یا ٹیسٹ نتائج آنے پر مزید اندراج کیا جا سکے۔",
       "7. وفات کے اسباب کی حتمی تصدیق کریں: تمام ضروری خانے چیک کرنے کے بعد 'سرٹیفکیٹ کی حتمی تصدیق' پر کلک کریں۔ اس سے سرٹیفکیٹ مستقل لاک ہو جائے گا اور ڈاکٹر کی پی ایم ڈی سی رجسٹریشن ثبت ہو جائے گی۔",
       "8. تصحیح کا اندراج یا اے 4 پرنٹ: تصدیق کے بعد کسی بھی ترمیم کے لیے 'تصحیح درج کریں' سے ٹھوس وجہ کے ساتھ نیا اندراج کریں۔ یونین کونسل کے باضابطہ اندراج اور لواحقین کے لیے 'سرٹیفکیٹ پرنٹ کریں' پر کلک کر کے اے 4 سرکاری دستاویز پرنٹ کریں۔",
-    ],
+"Report Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"],
     faq: [
       [
         "The Death record screen says \"Only a doctor registered with the PMDC can record or certify a death.\" (DEATH_CERTIFIER_NOT_DOCTOR). Why, and what do I do?",
@@ -2033,7 +2570,8 @@ export const help: Record<string, HelpPage> = {
         "How should the doctor use the suggested condition chips from recent charts?",
         "Under rule 9e98e4c3ec, the system surfaces active conditions from recent inpatient or emergency encounters as clickable suggestion chips. To maintain doctor clinical ownership, lines are never silently auto-populated. The physician reviews the chips and clicks on a suggestion to assign it to line a, b, c, d, or Part II, then verifies the duration and ICD code."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Report Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."]],
     faqUr: [
       [
         "اسکرین کہتی ہے کہ 'صرف پی ایم ڈی سی رجسٹرڈ ڈاکٹر ہی وفات کا اندراج یا تصدیق کر سکتا ہے' (DEATH_CERTIFIER_NOT_DOCTOR)۔ کیا کریں؟",
@@ -2091,7 +2629,8 @@ export const help: Record<string, HelpPage> = {
         "پچھلے چارٹس سے ملنے والی تشخیصی چپس کو کیسے استعمال کیا جائے؟",
         "رول 9e98e4c3ec کے تحت سسٹم مریض کے پچھلے داخلوں کی تشخیصات کو چپس کی صورت میں ظاہر کرتا ہے۔ ڈاکٹر کی کلینیکل توثیق یقینی بنانے کے لیے سسٹم خودکار طور پر کوئی سطر پر نہیں کرتا۔ معالج متعلقہ چپ پر کلک کر کے اسے سطر الف، ب، ج، د یا حصہ دوم میں شامل کرتا ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Report Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"]]
   },
   mlc_cases_doctor: {
     title: "Medico-legal cases",
@@ -2107,7 +2646,11 @@ export const help: Record<string, HelpPage> = {
       "6. Hand Over Physical Evidence Under Chain of Custody: Secure bullet fragments, foreign bodies, clothing, or toxicology specimens in sealed containers. Log each article's description, tamper-evident seal serial number, receiving officer details (name, rank, belt #), and station receipt reference (POST /mlc/cases/{id}/evidence).",
       "7. Settle Medico-Legal Report (MLR) Disposition: Record the final MLR status as Issued Here (entering the hospital MLR serial number and issuance date), Referred (selecting the designated government MLR referral hospital), or Not Required (recording clinical justification).",
       "8. Finalize and Close Medico-Legal Case: Review all statutory requirements (police informed, MLR settled). Provide a clinical closure summary of at least 3 characters and click 'Close Medico-Legal Case' to lock the record permanently against further modifications.",
-    ],
+"Patient: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record.",
+"Case Type: Medico-legal case types by name.",
+"Police Station: Police station or referral destination by name.",
+"Mlr Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record.",
+"Referred To: Police station or referral destination by name."],
     stepsUr: [
       "1. میڈیکو لیگل کیس کھولیں یا منتخب کریں: ڈاکٹر ورک اسپیس یا ایمرجنسی بورڈ سے میڈیکو لیگل رجسٹر کھولیں، نئے کیس کے اندراج کے لیے 'نیا کیس کھولیں' پر کلک کریں یا زیر علاج مریض کا کیس منتخب کریں۔",
       "2. مبینہ واقعہ اور راوی کا اندراج: چوٹ لگنے کے حالات اور طریقہ کار کو راوی کے ہو بہو الفاظ میں درج کریں، اور راوی کا نام و تعلق واضح طور پر محفوظ کریں۔",
@@ -2117,7 +2660,11 @@ export const help: Record<string, HelpPage> = {
       "6. مادی شواہد کی چین آف کسٹڈی منتقلی: دوران علاج برآمد شدہ گولی کے ٹکڑے، کپڑے یا کیمیائی نمونے سیل کر کے وصول کنندہ پولیس افسر کے نام، بیلٹ نمبر اور رسید کے ساتھ درج کریں۔",
       "7. میڈیکو لیگل رپورٹ (ایم ایل آر) کا تصفیہ: رپورٹ کا باضابطہ تصفیہ کریں: ہسپتال کی جاری کردہ رپورٹ کا نمبر اور تاریخ درج کریں، یا نامزد ہسپتال کو ریفر کریں، یا قانونی وجہ لکھ کر غیر ضروری قرار دیں۔",
       "8. قانونی کیس کا باضابطہ اختتام: تمام قانونی تقاضے پورے ہونے پر کم از کم 3 حروف پر مشتمل اختتامی نوٹ درج کر کے کیس کو مستقل طور پر بند کریں۔",
-    ],
+"Patient: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔",
+"Case Type: میڈیکو لیگل کیس کی قسم نام سے۔",
+"Police Station: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔",
+"Mlr Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔",
+"Referred To: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔"],
     faq: [
       [
         "The Medico-legal cases screen says \"Choose a police station (or, for a referral, a hospital designated for medico-legal reports) from the contact list.\" (MLC_CONTACT_TYPE_INVALID). Why, and what do I do?",
@@ -2151,7 +2698,8 @@ export const help: Record<string, HelpPage> = {
         "What should a doctor do if a casualty's police intimation deadline is overdue in red on the board?",
         "Under Punjab MSDS regulations and rule 280a8e8493, hospitals have a strict statutory deadline (mlc_police_intimation_minutes) to notify the local police station of non-police casualties. Overdue cases are elevated to the top of the register in bold red. The doctor or triage nurse must promptly telephone or send written notice to the jurisdictional police station from GET /mlc/contacts and record the dispatch to resolve the overdue violation."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Patient: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record. Case Type: Medico-legal case types by name. Police Station: Police station or referral destination by name. Mlr Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record. Referred To: Police station or referral destination by name."]],
     faqUr: [
       [
         "اسکرین کہتی ہے کہ 'رابطہ فہرست سے تھانہ یا نامزد ہسپتال منتخب کریں' (MLC_CONTACT_TYPE_INVALID)۔ کیا کریں؟",
@@ -2185,7 +2733,8 @@ export const help: Record<string, HelpPage> = {
         "اگر بورڈ پر کسی مریض کی پولیس اطلاع سرخ رنگ میں زائد المیعاد (Overdue) نظر آئے تو ڈاکٹر کیا کرے؟",
         "پنجاب ایم ایس ڈی ایس ریگولیشن اور رول 280a8e8493 کے تحت ہسپتال پر مقررہ وقت میں تھانے کو مطلع کرنا فرض ہے۔ وقت ختم ہونے پر کیس سرخ رنگ میں نمایاں ہو جاتا ہے۔ معالج یا ڈیوٹی سٹاف کو فوری طور پر متعلقہ تھانے کو فون یا باضابطہ مراسلے کے ذریعے اطلاع دے کر ریکارڈ درج کرنا چاہیے تاکہ قانونی خلاف ورزی ختم ہو۔"
       ]
-    ],
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔ Case Type: میڈیکو لیگل کیس کی قسم نام سے۔ Police Station: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔ Mlr Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔ Referred To: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔"]],
   },
 medication_orders_doctor: {
   title: "Verbal orders to countersign and pharmacy queries",
@@ -2252,7 +2801,6 @@ mar: {
   "For an Administered or PRN dose choose Patient identity method. Scan wristband focuses the dedicated field: scan its actual code. Without a scanner, ask name and date of birth or MRN, then choose Asked name and DOB or MRN. For an unidentified Emergency or Code Red admission only, Emergency override needs the actual explanation. Identity mismatch means STOP: do not give the dose; recheck the patient and order. Never copy a band from a different patient.",
   "Scan medicine pack in its dedicated field or tick I checked the actual medicine label after checking it. Drug mismatch means STOP and recheck. Actual dose text and Actual route start from the selected order; review them against what actually happened. A different dose/route or time outside the hospital window needs a Dose / route / time variance reason; the server decides its window. High-alert and Looks or sounds like warnings stay visible on the source line.",
   "Chart scheduled dose opens the selected actual row. Choose Actual dose outcome: Administered, Held, Refused, Missed or Cancelled. Every outcome except Administered requires the reason. For Administered complete the patient and medicine checks, confirm ordered self-administration where applicable, and record any variance. This records an actual outcome; pressing a button never gives a medicine. Confirm once. A scheduled chart is state guarded: after a lost reply only reread and reconcile, never automatic replay. MAR_STATE_INVALID means read its current status and append a correction if needed.",
-  "Give a PRN dose lists this admission’s active PRN orders directly. Read the medicine, strength, dose, route, instructions, minimum interval_hours, last_given_at and given_last_24h before choosing the returned line. No patient-history or prescription lookup and no typed identifier is needed. MEDICATION_ORDER_STOPPED means refresh the list and select a current order; never give from the stopped line. Patient identity, medicine and high-alert checks still apply.",
   "At the bedside a different registered nurse or doctor independently checks the high-alert dose. In the confirmation dialog they tick the independent check and type their own Second checker username and password. The app clears both immediately on submission/close; neither belongs in notes, stored preferences, logs or a retry draft. Same person, missing check, wrong password, locked account or missing clinical authorisation remain visible server refusals. Do not repeatedly guess a password or borrow another identity.",
   "Only the doctor can allow self-administration on the source order. The patient takes it: tick The patient took this medicine themselves as ordered. An ordinary nurse-administered line cannot be made self-administered here. The server may refuse with SELF_ADMINISTRATION_INVALID; keep the input and ask the prescriber to clarify the allowed order. Never change the checkbox to hide what actually happened.",
   "Ward stock lists actual batch number, quantity and expiry, including Expired and Recalled warnings. For a scheduled Administered dose choose Ward stock batch (optional) only when actually taking it from that stock, then a positive Ward stock quantity. Expired/recalled/empty rows are unavailable. The backend checks medicine identity and availability. BATCH_EXPIRED, BATCH_RECALLED or INSUFFICIENT_STOCK rereads stock, preserves input and requires another reviewed choice; no automatic retry. PRN does not accept ward-stock fields in its contract.",
@@ -2272,7 +2820,6 @@ mar: {
   "دی گئی یا حسب ضرورت خوراک میں شناخت کا طریقہ چنیں۔ پٹی کا اصل کوڈ اسی خانے میں اسکین کریں۔ اسکینر نہ ہو تو نام اور پیدائش یا ایم آر این پوچھ کر متعلقہ انتخاب کریں۔ صرف نامعلوم ہنگامی یا کوڈ ریڈ داخلے میں وجہ سمیت ہنگامی شناخت۔ شناخت مختلف تو رکیں، خوراک نہ دیں، مریض اور حکم پھر چیک؛ دوسری پٹی نقل نہیں۔",
   "دوا پیک متعلقہ خانے میں اسکین یا اصل لیبل چیک کے بعد نشان لگائیں۔ دوا مختلف تو رک کر پھر چیک۔ خوراک اور راستہ اصل حکم سے شروع، اصل نتیجے سے ملائیں۔ خوراک، راستہ یا ہسپتال کی وقت حد سے فرق پر وجہ لکھیں؛ حد سرور طے کرے۔ زیادہ خطرہ اور ملتے نام اصل سطر پر رہیں۔",
   "مقرر خوراک کی اصل سطر کھول کر دی گئی، روکی، انکار، چھوٹی یا منسوخ کا اصل نتیجہ چنیں۔ دی گئی کے سوا وجہ لازم۔ دی گئی میں شناخت، دوا اور مجاز خود لینے کی تصدیق و فرق کی وجہ۔ بٹن دوا نہیں دیتا، اصل نتیجہ درج کرتا ہے۔ ایک تصدیق۔ گم جواب پر صرف پڑھ کر نتیجہ ملائیں، خودکار تکرار نہیں۔ حالت انکار پر اصل حالت پڑھیں، ضرورت پر الگ تصحیح۔",
-  "حسب ضرورت خوراک اسی داخلے کے فعال احکام سے چنیں۔ دوا، طاقت، خوراک، راستہ، ہدایت، کم از کم وقفہ، آخری خوراک اور گزشتہ24گھنٹے کی تعداد پڑھیں۔ تاریخ یا نسخہ تلاش اور نمبر ٹائپ کرنا لازم نہیں۔ بند حکم کے انکار پر فہرست تازہ کریں؛ اس سطر سے خوراک نہ دیں۔ مریض، دوا اور خطرے کی جانچ لازم ہے۔",
   "مریض کے پاس الگ رجسٹرڈ نرس یا ڈاکٹر خود جانچ کرے۔ تصدیق مکالمے میں جانچ کا نشان اور اپنا صارف نام و پاس ورڈ لکھے۔ ارسال یا بند پر فوراً خالی؛ نوٹ، ترتیب، لاگ یا دوبارہ مسودے میں نہیں۔ وہی شخص، نامکمل جانچ، غلط پاس ورڈ، بند اکاؤنٹ یا طبی اجازت نہ ہونا سرور کے انکار ہیں۔ پاس ورڈ اندازہ یا دوسری شناخت نہ لیں۔",
   "صرف ڈاکٹر اصل حکم میں خود لینے کی اجازت دے۔ مریض نے خود لی تو اسی اصل انتخاب کی تصدیق کریں۔ عام نرس والی سطر یہاں خود لینے میں بدل نہیں سکتی۔ سرور انکار کرے تو معلومات رکھ کر ڈاکٹر سے مجاز حکم واضح کرائیں۔ اصل نتیجہ چھپانے کو نشان نہ بدلیں۔",
   "وارڈ اسٹاک میں اصل بیچ، مقدار، میعاد اور ختم یا واپس طلب خطرے دکھیں۔ واقعی اسی اسٹاک سے مقرر دی گئی خوراک میں اصل بیچ اور مثبت مقدار چنیں۔ ختم، واپس طلب یا خالی بند۔ دوا اور مقدار سرور چیک کرے۔ انکار پر تازہ اسٹاک، محفوظ معلومات، نئے جائزے سے دوسرا انتخاب؛ خودکار ارسال نہیں۔ حسب ضرورت درخواست وارڈ بیچ نہیں لیتی۔",
@@ -2453,7 +3000,8 @@ verbal_orders_ward: {
   "Tick I verified this patient and this exact order then Review verbal order. Compare patient/MRN/admission, selected doctor/registration and every ordered line before Confirm verbal order once. Back to order lines preserves the draft; Close asks before discarding. The app rereads patient, permission, service, doctor and medicine safety before sending. No clinical edit/delete after save: ask the prescriber for a documented correction or changed order through their workflow.",
   "Refusals are handled by code, with field details and typed lines retained. Read latest and keep order lines refreshes list/safety/context and clears read-back and acknowledgement; if safety changed, re-select the medicine from current search and read back again. A lost write locks its exact action/actor/key/body and navigation: explicit Retry original request only within retention, never a new key for the same order. No automatic replay/offline queue. Countersignature is shown only from the server, overdue remains visible until signed. F1 and shared100–250% zoom preserve work; Urdu/human role acceptance remains pending.",
   "An inpatient ExternalMarket line offers self-administration only for a drug chosen from the hospital list. A typed medicine name has unknown high-alert status and cannot be self-administered. The route must be Oral, SL, Topical, Inhaled, Ophthalmic, Otic or Nasal and the drug must not be high-alert. SELF_ADMINISTRATION_INVALID remains the server’s refusal."
-],
+,
+"Prescriber: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."],
   stepsUr: [
   "وارڈ نرسنگ یا اصل بستر سے زبانی احکام کھولیں۔ نام، ایم آر این، عمر یا پیدائش، علامات و داخلہ چیک۔ فہرست اسی داخلے کی، صرف منتظر نشان پڑھائی کا فلٹر۔ حد50،200یا1000، پوری حد مکمل تاریخ نہیں۔ سطور، ڈاکٹر، وصول کنندہ، مقرر دستخط، اصل افسر ووقت اور تاخیر پڑھیں۔ تازہ دوبارہ پڑھے؛ محفوظ کرنا ڈاکٹر کے دستخط نہیں۔",
   "اس داخلے کا نیا خالی حکم مسودہ کھولیں۔ ہنگامی حالت یا ڈاکٹر کے نہ لکھ سکنے کی تصدیق، زبانی یا فون چنیں، اصل حالت نوٹ میں۔ عام او پی ڈی یا کیموتھراپی نہیں، تحریری حکم لیں۔ یہ وارڈ صفحہ اصل داخلے کا، ای آر کا الگ اصل دورہ؛ مریض یا ٹکٹ نمبر اندازہ نہیں۔",
@@ -2468,7 +3016,8 @@ verbal_orders_ward: {
   "مریض اور یہی حکم چیک کا نشان، پھر زبانی حکم جائزہ۔ مریض، داخلہ، اصل ڈاکٹر رجسٹریشن اور ہر سطر ملائیں، ایک تصدیق۔ واپس مسودہ رکھے، بند پر پوچھے۔ ارسال سے پہلے مریض، اجازت، خدمت، ڈاکٹر و حفاظت پھر پڑھے۔ محفوظ طبی حکم یہاں ترمیم یا حذف نہیں، ڈاکٹر سے ان کے طریقے کا نیا یا درست حکم لیں۔",
   "انکار کوڈ سے، خانے کی تفصیل اور سطور محفوظ۔ تازہ پڑھیں اصل فہرست، حفاظت و سیاق تازہ، دہرا تصدیق و جائزہ نشان خالی؛ حفاظت بدلے تو نئی تلاش سے دوا پھر چن کر دہرا لیں۔ گم جواب اصل عمل، صارف، کلید و معلومات اور جگہ مقفل؛ وقت کے اندر واضح اصل درخواست، اسی حکم کی نئی کلید نہیں۔ خودکار یا آف لائن ارسال نہیں۔ دستخط صرف سرور سے، تب تک تاخیر دکھے۔ ایف ون،100تا250سائز محفوظ؛ اردو و انسانی کردار قبولیت باقی۔",
   "داخل مریض کی بیرونی دوا میں خود لینے کی اجازت صرف ہسپتال کی فہرست سے منتخب دوا پر ہے۔ ٹائپ نام کا خطرہ نامعلوم؛ خود لینے کی اجازت نہیں۔ منہ، زیر زبان، جلد، سانس، آنکھ، کان یا ناک کا راستہ اور غیر خطرناک دوا لازم۔ سرور کا انکار اصل فیصلہ ہے۔"
-],
+,
+"Prescriber: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"],
   faq: [
   [
     "How do I find and follow a verbal order?",
@@ -2522,7 +3071,8 @@ verbal_orders_ward: {
     "When may an outside medicine be self-administered?",
     "An inpatient ExternalMarket line offers self-administration only for a drug chosen from the hospital list. A typed medicine name has unknown high-alert status and cannot be self-administered. The route must be Oral, SL, Topical, Inhaled, Ophthalmic, Otic or Nasal and the drug must not be high-alert. SELF_ADMINISTRATION_INVALID remains the server’s refusal."
   ]
-],
+,
+["How do I find a record, and who adds it if missing?","Prescriber: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."]],
   faqUr: [
   [
     "زبانی حکم اور اس کے دستخط کیسے دیکھوں؟",
@@ -2576,7 +3126,8 @@ verbal_orders_ward: {
     "باہر سے لی دوا خود کب لی جا سکتی ہے؟",
     "داخل مریض کی بیرونی دوا میں خود لینے کی اجازت صرف ہسپتال کی فہرست سے منتخب دوا پر ہے۔ ٹائپ نام کا خطرہ نامعلوم؛ خود لینے کی اجازت نہیں۔ منہ، زیر زبان، جلد، سانس، آنکھ، کان یا ناک کا راستہ اور غیر خطرناک دوا لازم۔ سرور کا انکار اصل فیصلہ ہے۔"
   ]
-]
+,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Prescriber: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"]]
 },
 
  vitals_tracker: {
@@ -2947,7 +3498,8 @@ nursing_assessment: {
   "Explain this admission estimate opens the existing Doctor estimate page filtered to that real admission; select the Draft estimate, explain and obtain factual signed-paper acknowledgement there. Return to inpatient chart preserves the selected admission, not an unsent write. If no estimate exists ask Admissions/Billing to prepare it. F1 and visible Help preserve input/focus; English/Urdu and shared keyboard/Settings zoom100–250% apply. Urdu, physical printing and named human fresh-data review remain pending.",
   "Take this patient records a reason and immediately assigns the waiting patient to me. Recording the Code Red reason and provisional diagnosis also takes over. Hand over to another doctor selects an active PMDC doctor and a 3–500 character reason, then review and confirm once. No receiving acceptance is required. Read the complete TakeOver/Handover/Reassigned history. Only the treating doctor hands over; a Hospital Admin or Director reassigns while that doctor is away. TREATING_DOCTOR_ONLY means reread the doctor/history; VALIDATION_ERROR doctor_id means choose a current PMDC doctor who is not already treating. Events move patients between rounds.",
   "Vitals due and medication due arrive for both Admitted and CodeRedActive admissions once a vitals schedule is active, and end when clinical discharge begins (DischargeInProgress sets is_overdue false). Vitals due and medication due arrive for both Admitted and CodeRedActive admissions once a vitals schedule is active, and end when clinical discharge begins (DischargeInProgress sets is_overdue false). Vitals due and overdue minutes are server event facts, shown for my patients and those waiting for a doctor. A vitals.due event rereads an open flowsheet, including is_overdue. The doctor never records observations here; ask the nurse to measure and record. No timer guesses clinical alerts and the screen never polls."
-],
+,
+"Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."],
   stepsUr: [
   "معائنے کے وقت ڈاکٹر، ماہر یا سرجن ڈاکٹر سے داخل مریضوں کا معائنہ و ڈسچارج کھول کر مریض و معالج، مشاہدات و دوا ریکارڈ پڑھے، غائب داخلہ تفصیل ایک بار لکھے اور شرائط پوری ہونے پر طبی ڈسچارج شروع کرے۔ پڑھنے سے دوا یا بستر خالی نہیں ہوتا۔",
   "میرے مریض وہ داخلے ہیں جن کا معالج میرے ملازم نمبر سے ملتا ہے۔ ڈاکٹر کے منتظر میں بغیر معالج داخلے ہر ڈاکٹر کو نظر آتے ہیں۔ نرس کے کوڈ ریڈ میں ڈاکٹر منتظر ہے؛ بٹن دبانے والی نرس معالج نہیں۔ تلاش منتخب فہرست میں اور حالت سرور سے پڑھی جاتی ہے۔ معلوم داخلہ پڑھنے کی اجازت اسے میرا مریض نہیں بناتی۔",
@@ -2961,7 +3513,8 @@ nursing_assessment: {
   "اس داخلے کا تخمینہ سمجھائیں اصل داخلے سے موجود ڈاکٹر تخمینہ سکرین فلٹر کھولتا ہے؛ مسودہ چن کر اصل گفتگو و دستخط کا اندراج وہاں۔ واپس چارٹ منتخب داخلہ رکھے، غیر ارسال طبی عمل نہیں۔ تخمینہ نہ ہو تو داخلہ/بلنگ سے تیار کرائیں۔ ایف ون و مدد معلومات/فوکس رکھتے؛ دو زبان اور کی بورڈ/ترتیب زوم100تا250مشترک۔ اردو، کاغذ و نامزد انسانی جائزہ باقی۔",
   "اس مریض کی ذمہ داری لیں سے وجہ درج کرکے فوراً مریض میرا ہو جاتا ہے۔ کوڈ ریڈ کی وجہ و تشخیص درج کرنا بھی ذمہ داری لینا ہے۔ دوسرے ڈاکٹر کو حوالہ میں فعال پی ایم ڈی سی ڈاکٹر اور3تا500حروف وجہ چن کر جائزہ و ایک تصدیق۔ دوسرے ڈاکٹر کی منظوری لازم نہیں۔ پوری ذمہ داری، حوالگی اور دوبارہ تعیناتی تاریخ پڑھیں۔ صرف معالج حوالہ دیتا ہے؛ غیر موجودگی میں ایڈمن یا ڈائریکٹر تعینات کرتے ہیں۔ دوسرے معالج کے انکار پر تاریخ تازہ؛ ڈاکٹر فیلڈ کی غلطی پر فعال پی ایم ڈی سی ڈاکٹر چنیں جو پہلے معالج نہ ہو۔ اطلاعات سے فہرست بدلتی ہے۔",
   "پیمائش اور دوا کے اوقات داخل اور کوڈ ریڈ فعال دونوں مریضوں کے لیے شیڈول بننے کے بعد جاری ہوتے ہیں، اور طبی ڈسچارج شروع ہوتے ہی رک جاتے ہیں (ڈسچارج کے دوران تاخیر کا نشان ختم ہو جاتا ہے)۔ پیمائش اور دوا کے اوقات داخل اور کوڈ ریڈ فعال دونوں مریضوں کے لیے شیڈول بننے کے بعد جاری ہوتے ہیں، اور طبی ڈسچارج شروع ہوتے ہی رک جاتے ہیں (ڈسچارج کے دوران تاخیر کا نشان ختم ہو جاتا ہے)۔ پیمائش واجب اور تاخیر کے منٹ سرور کی اطلاع ہیں؛ میرے مریض اور ڈاکٹر کے منتظر پر دکھتے ہیں۔ اطلاع کھلے مشاہدات و تاخیر کی حالت دوبارہ پڑھتی ہے۔ ڈاکٹر یہاں پیمائش درج نہیں کرتا؛ نرس پیمائش و اندراج کرتی ہے۔ کوئی ٹائمر فرضی طبی اطلاع یا مسلسل درخواست نہیں بھیجتا۔"
-],
+,
+"Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"],
   faq: [
   [
     "Doctor: what do I check before a round?",
@@ -2987,7 +3540,8 @@ nursing_assessment: {
     "What should I do when vitals are due on rounds?",
     "Vitals due and overdue minutes are server event facts, shown for my patients and those waiting for a doctor. A vitals.due event rereads an open flowsheet, including is_overdue. The doctor never records observations here; ask the nurse to measure and record. No timer guesses clinical alerts and the screen never polls."
   ]
-],
+,
+["How do I find a record, and who adds it if missing?","Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."]],
   faqUr: [
   [
     "ڈاکٹر: معائنے سے پہلے کیا چیک کروں؟",
@@ -3013,7 +3567,8 @@ nursing_assessment: {
     "معائنے میں پیمائش واجب ہو تو کیا کروں؟",
     "پیمائش واجب اور تاخیر کے منٹ سرور کی اطلاع ہیں؛ میرے مریض اور ڈاکٹر کے منتظر پر دکھتے ہیں۔ اطلاع کھلے مشاہدات و تاخیر کی حالت دوبارہ پڑھتی ہے۔ ڈاکٹر یہاں پیمائش درج نہیں کرتا؛ نرس پیمائش و اندراج کرتی ہے۔ کوئی ٹائمر فرضی طبی اطلاع یا مسلسل درخواست نہیں بھیجتا۔"
   ]
-]
+,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"]]
 },
 
  explain_estimate: {
@@ -3082,7 +3637,8 @@ nursing_assessment: {
   "Choose the returned estimate in the register or Read this estimate by a known reference. Search matches name/MRN/number locally within the latest1000 filtered records; Estimate status filters on the server. Preview estimate form shows original bilingual notes; Print estimate or Save terminal estimate PDF uses the selected app language, A4 and version checks. Download English server PDF saves original server bytes. Check the actual paper; cancelling a file dialog or a printer error never repeats preparation.",
   "After explaining in the family’s language and obtaining the actual signed or thumb-printed paper, Mark explained records who heard it, relationship, language, questions/deposit agreement and the signed-paper tick. A final explanation cannot be edited; Prepare a revision creates another estimate and keeps history. Cancel estimate needs5–1000characters and applies to Draft or an incorrect Explained estimate. There is no delete.",
   "State refusals reread the exact record and keep input; field errors appear beside fields. A transfer event or reconnect refreshes and stops a stale review. Read latest and keep input resets acknowledgements before another review. After a lost reply, keep the original request: explicit Retry original request uses the same key/body within retention; never automatically retry. Reading a matching list is not proof of this preparation. If retry is unavailable, ask IT; do not create a replacement. F1 restores focus; EN/Urdu and shared keyboard/Settings zoom100–250 apply. Native Urdu, physical paper and signed human review remain pending.",
-  "For ChangeOfWard use the work item’s transfer_id or choose the returned ward move. Billing’s moves show from/to wards and both daily charges, with rate changes first, without the clinical reason, bed labels or mover. A Draft opens the existing estimate instead of preparing another. Explained means the family was already told; do not prepare a duplicate. Never type a transfer ID or open clinical transfer history from Billing."
+  "Patient: Patient search by name; Reception registers a missing patient first.",
+  "Transfer: Current admitted stays by patient name."
 ],
   stepsUr: [
   "بلنگ سے متوقع اخراجات کھولیں۔ منتظر کام پہلے، بدلے وارڈ نرخ سمیت۔ مریض، ایم آر این، داخلہ اور اصل منتقلی چیک کریں؛ تاخیر و وقت نمایاں۔ تازہ سے کام، رجسٹر، نرخ و منتقلی دوبارہ پڑھی جاتی ہے۔",
@@ -3092,7 +3648,8 @@ nursing_assessment: {
   "رجسٹر یا معلوم حوالہ سے پڑھیں۔ تلاش تازہ1000مشروط سطروں میں نام/ایم آر این/نمبر، حالت سرور فلٹر۔ جائزہ اصل دو زبان نوٹس؛ پرنٹ/ٹرمینل پی ڈی ایف ایپ زبان و اے فور و ورژن چیک۔ سرور انگریزی پی ڈی ایف اصل بائٹس۔ اصل کاغذ چیک؛ فائل منسوخ یا پرنٹر خرابی سے تیاری نہیں دہرائی جاتی۔",
   "خاندان کی زبان میں سمجھا کر اصل دستخط/انگوٹھے کے بعد سمجھایا گیا درج کریں: سننے والا، رشتہ، زبان، سوالات/پیشگی اتفاق و کاغذ نشان۔ حتمی وضاحت ترمیم نہیں؛ نیا تخمینہ تاریخ رکھتا۔ منسوخی5تا1000حروف؛ مسودہ یا غلط سمجھایا تخمینہ، تاریخ باقی۔ حذف نہیں۔",
   "حالت انکار پر عین ریکارڈ پڑھیں و معلومات رکھیں، غلطی خانے کے پاس۔ منتقلی/رابطہ بحالی تازہ کرے و پرانا جائزہ روکے۔ تازہ پڑھ کر معلومات رکھنے سے نئے جائزے کا نشان لازم۔ جواب گم تو اصل درخواست رکھیں؛ واضح اصل کوشش وہی کلید/معلومات وقت کے اندر، خودکار نہیں۔ ملتی سطر اصل تیاری کا ثبوت نہیں۔ کوشش دستیاب نہیں تو آئی ٹی، متبادل نہیں۔ ایف ون فوکس واپس؛ دو زبان و زوم100تا250مشترک۔ مقامی اردو، کاغذ و انسانی جائزہ باقی۔",
-  "وارڈ تبدیلی میں کام کی اصل منتقلی یا فہرست کی منتقلی چنیں۔ بلنگ کو دونوں وارڈ و روزانہ نرخ اور پہلے بدلے نرخ دکھتے ہیں؛ طبی وجہ، بستر یا منتقل کرنے والا نہیں۔ مسودہ ہو تو موجودہ تخمینہ کھلتا ہے، دوسرا نہیں بنتا۔ سمجھایا گیا یعنی خاندان کو بتایا جا چکا؛ نقل نہ بنائیں۔ نمبر ٹائپ یا بلنگ سے طبی تاریخ نہ پڑھیں۔"
+  "Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+  "Transfer: داخل مریضوں کے موجودہ قیام نام سے۔"
 ],
   faq: [
   [
@@ -3111,7 +3668,8 @@ nursing_assessment: {
     "Why does Billing see ward moves without the clinical reason?",
     "For ChangeOfWard use the work item’s transfer_id or choose the returned ward move. Billing’s moves show from/to wards and both daily charges, with rate changes first, without the clinical reason, bed labels or mover. A Draft opens the existing estimate instead of preparing another. Explained means the family was already told; do not prepare a duplicate. Never type a transfer ID or open clinical transfer history from Billing."
   ]
-],
+,
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Transfer: Current admitted stays by patient name."]],
   faqUr: [
   [
     "بلنگ ایڈمن طبی داخلہ اجازت کے بغیر تخمینہ کیسے بنائے؟",
@@ -3129,7 +3687,8 @@ nursing_assessment: {
     "بلنگ کو طبی وجہ کے بغیر وارڈ منتقلی کیوں دکھتی ہے؟",
     "وارڈ تبدیلی میں کام کی اصل منتقلی یا فہرست کی منتقلی چنیں۔ بلنگ کو دونوں وارڈ و روزانہ نرخ اور پہلے بدلے نرخ دکھتے ہیں؛ طبی وجہ، بستر یا منتقل کرنے والا نہیں۔ مسودہ ہو تو موجودہ تخمینہ کھلتا ہے، دوسرا نہیں بنتا۔ سمجھایا گیا یعنی خاندان کو بتایا جا چکا؛ نقل نہ بنائیں۔ نمبر ٹائپ یا بلنگ سے طبی تاریخ نہ پڑھیں۔"
   ]
-]
+,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Transfer: داخل مریضوں کے موجودہ قیام نام سے۔"]]
 },
  cost_estimates_admissions: {
   title: "Cost estimates",
@@ -3144,7 +3703,8 @@ nursing_assessment: {
   "Choose the returned estimate in the register or Read this estimate by a known reference. Search matches name/MRN/number locally within the latest1000 filtered records; Estimate status filters on the server. Preview estimate form shows original bilingual notes; Print estimate or Save terminal estimate PDF uses the selected app language, A4 and version checks. Download English server PDF saves original server bytes. Check the actual paper; cancelling a file dialog or a printer error never repeats preparation.",
   "After explaining in the family’s language and obtaining the actual signed or thumb-printed paper, Mark explained records who heard it, relationship, language, questions/deposit agreement and the signed-paper tick. A final explanation cannot be edited; Prepare a revision creates another estimate and keeps history. Cancel estimate needs5–1000characters and applies to Draft or an incorrect Explained estimate. There is no delete.",
   "State refusals reread the exact record and keep input; field errors appear beside fields. A transfer event or reconnect refreshes and stops a stale review. Read latest and keep input resets acknowledgements before another review. After a lost reply, keep the original request: explicit Retry original request uses the same key/body within retention; never automatically retry. Reading a matching list is not proof of this preparation. If retry is unavailable, ask IT; do not create a replacement. F1 restores focus; EN/Urdu and shared keyboard/Settings zoom100–250 apply. Native Urdu, physical paper and signed human review remain pending.",
-  "For ChangeOfWard use the work item’s transfer_id or choose the returned ward move. Billing’s moves show from/to wards and both daily charges, with rate changes first, without the clinical reason, bed labels or mover. A Draft opens the existing estimate instead of preparing another. Explained means the family was already told; do not prepare a duplicate. Never type a transfer ID or open clinical transfer history from Billing."
+  "Patient: Patient search by name; Reception registers a missing patient first.",
+  "Transfer: Current admitted stays by patient name."
 ],
   stepsUr: [
   "داخلہ ڈیسک سے متوقع اخراجات کھولیں۔ منتظر کام پہلے، بدلے وارڈ نرخ سمیت۔ مریض، ایم آر این، داخلہ اور اصل منتقلی چیک کریں؛ تاخیر و وقت نمایاں۔ تازہ سے کام، رجسٹر، نرخ و منتقلی دوبارہ پڑھی جاتی ہے۔",
@@ -3154,7 +3714,8 @@ nursing_assessment: {
   "رجسٹر یا معلوم حوالہ سے پڑھیں۔ تلاش تازہ1000مشروط سطروں میں نام/ایم آر این/نمبر، حالت سرور فلٹر۔ جائزہ اصل دو زبان نوٹس؛ پرنٹ/ٹرمینل پی ڈی ایف ایپ زبان و اے فور و ورژن چیک۔ سرور انگریزی پی ڈی ایف اصل بائٹس۔ اصل کاغذ چیک؛ فائل منسوخ یا پرنٹر خرابی سے تیاری نہیں دہرائی جاتی۔",
   "خاندان کی زبان میں سمجھا کر اصل دستخط/انگوٹھے کے بعد سمجھایا گیا درج کریں: سننے والا، رشتہ، زبان، سوالات/پیشگی اتفاق و کاغذ نشان۔ حتمی وضاحت ترمیم نہیں؛ نیا تخمینہ تاریخ رکھتا۔ منسوخی5تا1000حروف؛ مسودہ یا غلط سمجھایا تخمینہ، تاریخ باقی۔ حذف نہیں۔",
   "حالت انکار پر عین ریکارڈ پڑھیں و معلومات رکھیں، غلطی خانے کے پاس۔ منتقلی/رابطہ بحالی تازہ کرے و پرانا جائزہ روکے۔ تازہ پڑھ کر معلومات رکھنے سے نئے جائزے کا نشان لازم۔ جواب گم تو اصل درخواست رکھیں؛ واضح اصل کوشش وہی کلید/معلومات وقت کے اندر، خودکار نہیں۔ ملتی سطر اصل تیاری کا ثبوت نہیں۔ کوشش دستیاب نہیں تو آئی ٹی، متبادل نہیں۔ ایف ون فوکس واپس؛ دو زبان و زوم100تا250مشترک۔ مقامی اردو، کاغذ و انسانی جائزہ باقی۔",
-  "وارڈ تبدیلی میں کام کی اصل منتقلی یا فہرست کی منتقلی چنیں۔ بلنگ کو دونوں وارڈ و روزانہ نرخ اور پہلے بدلے نرخ دکھتے ہیں؛ طبی وجہ، بستر یا منتقل کرنے والا نہیں۔ مسودہ ہو تو موجودہ تخمینہ کھلتا ہے، دوسرا نہیں بنتا۔ سمجھایا گیا یعنی خاندان کو بتایا جا چکا؛ نقل نہ بنائیں۔ نمبر ٹائپ یا بلنگ سے طبی تاریخ نہ پڑھیں۔"
+  "Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+  "Transfer: داخل مریضوں کے موجودہ قیام نام سے۔"
 ],
   faq: [
   [
@@ -3173,7 +3734,8 @@ nursing_assessment: {
     "Why does Billing see ward moves without the clinical reason?",
     "For ChangeOfWard use the work item’s transfer_id or choose the returned ward move. Billing’s moves show from/to wards and both daily charges, with rate changes first, without the clinical reason, bed labels or mover. A Draft opens the existing estimate instead of preparing another. Explained means the family was already told; do not prepare a duplicate. Never type a transfer ID or open clinical transfer history from Billing."
   ]
-],
+,
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Transfer: Current admitted stays by patient name."]],
   faqUr: [
   [
     "داخلہ افسر: وارڈ بدلنے کا خرچ کیسے سمجھاؤں؟",
@@ -3191,7 +3753,8 @@ nursing_assessment: {
     "بلنگ کو طبی وجہ کے بغیر وارڈ منتقلی کیوں دکھتی ہے؟",
     "وارڈ تبدیلی میں کام کی اصل منتقلی یا فہرست کی منتقلی چنیں۔ بلنگ کو دونوں وارڈ و روزانہ نرخ اور پہلے بدلے نرخ دکھتے ہیں؛ طبی وجہ، بستر یا منتقل کرنے والا نہیں۔ مسودہ ہو تو موجودہ تخمینہ کھلتا ہے، دوسرا نہیں بنتا۔ سمجھایا گیا یعنی خاندان کو بتایا جا چکا؛ نقل نہ بنائیں۔ نمبر ٹائپ یا بلنگ سے طبی تاریخ نہ پڑھیں۔"
   ]
-]
+,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Transfer: داخل مریضوں کے موجودہ قیام نام سے۔"]]
 },
  consents_admissions: {
   title: "General consent at admission",
@@ -3209,7 +3772,10 @@ nursing_assessment: {
     "If a write reply is lost, keep the original draft/key and context. Idempotent preparation/withdraw/cancel can Retry original request with the identical payload/key within retention; never automatically. Versioned edit/sign/refuse and repeat-safe scan first read the exact consent; no automatic replay. Read current result and compare state/version/stamp, then Result reviewed; return to draft only after reconciliation. Outside retention, missing actor/source or still uncertain, ask IT. A confirmed action stays saved even if its next read or print fails.",
     "For a decided General consent, Upload this consent scan uploads a nonempty PDF/JPEG/PNG as this patient’s Consent document, separately from the decision. Choose the returned document, Review scan attachment, check its patient/title and Confirm once. An upload saved but attachment failed is not a failed signature: use that same uploaded document. Unknown upload keeps its file/key and offers only original retry or patient-document inspection; never prepare/sign again. A later attachment replaces the scan link but history remains. Save attached signed paper downloads the authorized file. A scanner never types a document ID: select the actual returned row; Scan consent form barcode accepts the printed consent number and Enter opens its exact returned General-register row. It searches the latest1000 authorised rows; an unmatched/older code needs a known record reference. It never infers an ID or captures keys from another field.",
     "F1 and visible Help explain the field/review and restore focus without losing input. English/Urdu and both themes share native keyboard/Settings zoom100–250%, reset100%. Service and permissions decide actions: records-only permits reads/prints and accepted corrections, no new consent; open_work continues existing stays. No category branching or offline write queue. Human fresh-data, clinical/native Urdu, role FAQ, physical printing and editor review remain pending; only a human signs the DEV portal review."
-  ],
+  ,
+"Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."],
   stepsUr: [
     "داخلہ ڈیسک سے داخلے پر عمومی رضامندی۔ منتظر کام پہلے؛ میرے مریض شرط، تاخیر سرخ و وقت سمیت۔ پہلے تیار مسودہ کھولیں؛ اسی داخلے سے نئی تیاری۔ آپریشن و بے ہوشی رضامندی متعلقہ طبی ٹیم کا کام، یہاں صرف عمومی فارم۔ تازہ کام، رجسٹر، فارم، پالیسی و منتخب ریکارڈ دوبارہ پڑھتا۔ واقعہ و رابطہ بحالی پر مطالعہ، پولنگ نہیں۔",
     "رضامندی یا مریض تلاش واپس عمومی ریکارڈ محدود، حالت سرور سے دوبارہ۔ معلوم اصل ریکارڈ کا حوالہ پڑھیں، اندازہ نہیں۔ نام، ایم آر این، عمر یا پیدائش، حساسیت، وفات، عارضی، میڈیکو لیگل و بقایا علامات۔ خالی حساسیت درج نہیں۔ پروفائل ضم ہونے پر طبی کام ماسٹر کے تحت جاری رہتا ہے جبکہ ضم ہونے سے پہلے دستخط شدہ رضامندی وہی اصل دستخط شدہ نام و تفصیل قانونی طور پر برقرار رکھتی ہے۔ مقام شناخت نہیں۔ خالی تلاش رضامندی کے فیصلے کا ثبوت نہیں۔",
@@ -3221,7 +3787,10 @@ nursing_assessment: {
     "جواب گم تو اصل مسودہ، کلید و مریض رکھیں۔ تیاری، واپسی، منسوخی کی اصل درخواست عین کلید و معلومات سے مدت میں واضح کوشش، خودکار نہیں۔ ورژن والی ترمیم، فیصلہ و اسکین پر پہلے عین ریکارڈ پڑھیں؛ خودکار ارسال نہیں۔ حالت، ورژن و مہر ملائیں پھر جائزہ شدہ مسودہ کھولیں۔ مدت یا شک میں آئی ٹی۔ تصدیق شدہ عمل بعد کی پڑھائی یا پرنٹ خرابی سے واپس نہیں ہوتا۔",
     "حتمی عمومی رضامندی کی غیر خالی پی ڈی ایف، جے پیگ یا پی این جی الگ مریض کی رضامندی دستاویز اپ لوڈ۔ واپس اصل دستاویز چنیں، مریض و عنوان چیک، ربط کا جائزہ و ایک تصدیق۔ اپ لوڈ محفوظ مگر ربط ناکام، دستخط ناکام نہیں؛ وہی دستاویز۔ نامعلوم اپ لوڈ فائل و کلید رکھے، اصل کوشش یا دستاویز پڑتال؛ دوبارہ تیار/سائن نہیں۔ نیا ربط پہلے اسکین بدلتا، تاریخ باقی۔ منسلک کاغذ مجاز ڈاؤن لوڈ۔ اسکینر آئی ڈی نہیں لکھتا؛ اصل سطر چنیں و فارم کا بارکوڈ خانے میں اصل چھپا نمبر اور اینٹر، واپس رجسٹر کی عین سطر کھلے۔ تازہ1000مجاز ریکارڈ میں نہ ملے تو معلوم حوالہ پڑھیں۔ آئی ڈی کا اندازہ یا دوسرے خانے کے حروف نہیں۔",
     "ایف ون و مدد خانے و جائزے کی رہنمائی اور محفوظ فوکس۔ انگریزی/اردو و دونوں تھیم، مشترک کی بورڈ و ترتیب زوم100تا250، ری سیٹ100۔ خدمت و اجازت اعمال؛ صرف ریکارڈ میں پڑھنا، پرنٹ و مجاز تصحیح، نئی رضامندی نہیں؛ ختم ہوتی خدمت میں موجودہ داخلے۔ زمرہ یا آف لائن ارسال نہیں۔ انسانی نئے ریکارڈ، طبی، مقامی اردو، کردار سوالات، اصل پرنٹ و تدوین باقی؛ صرف انسان پورٹل جائزہ سائن کرتا ہے۔"
-  ],
+  ,
+"Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"],
   faq: [
     [
       "Does preparing or printing mean consent was given?",
@@ -3259,7 +3828,8 @@ nursing_assessment: {
       "How do I print Urdu and recover a printer failure?",
       "Read the prepared declaration expands the frozen text without changing it. Preview consent form reads the actual print payload. Print this consent form routes A4 to the mapped document printer; Save terminal consent PDF lays out any supplied language locally, English or Urdu. Download server consent PDF appears for left-to-right text; right-to-left text has no server PDF and uses the terminal. The hospital heading, PHC number, issue line, patient identity, frozen form text, explanation, decision, signature lines and professional stamps are retained. Explain, read aloud when needed, answer questions, ask the patient to explain back, and check the actual paper. A printer failure or cancelled save never repeats preparation or a decision."
     ]
-  ],
+  ,
+["How do I find a record, and who adds it if missing?","Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."]],
   faqUr: [
     [
       "تیاری یا پرنٹ رضامندی دینا ہے؟",
@@ -3297,7 +3867,8 @@ nursing_assessment: {
       "اردو پرنٹ و پرنٹر کی بحالی؟",
       "تیار شدہ اقرار کا متن کھولنے سے اصل محفوظ عبارت نظر آتی، بدلتی نہیں۔ اصل فارم کا جائزہ پڑھیں۔ اے فور مقررہ دستاویز پرنٹر؛ ٹرمینل پی ڈی ایف میں انگریزی یا اردو کی مقامی ترتیب۔ بائیں سے دائیں متن پر سرور پی ڈی ایف، دائیں سے بائیں ٹرمینل۔ ہسپتال، پی ایچ سی، اجرا، شناخت، اصل متن، وضاحت، فیصلہ، دستخط و مہر باقی۔ سمجھائیں، ضرورت پر پڑھیں، سوالات جواب و واپس سمجھانا، اصل کاغذ چیک۔ پرنٹر خرابی یا فائل منسوخ سے تیاری یا فیصلہ نہ دہرائیں۔"
     ]
-  ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"]]
 },
  wristbands_admissions: {
   title: "Identity wristbands",
@@ -3571,7 +4142,8 @@ nursing_assessment: {
     "Set Order destination: choose Hospital Pharmacy (enabled only while dispensing capability is Active under rule 7cbb490706) or External / local market. Search formulary medicines to view live stock, form, strength, high-alert classification, and look-alike sound-alike (LASA) warnings. Chemotherapy is strictly prohibited under rule b72c59a315.",
     "For each ordered line, enter positive quantity, dose text, route, frequency, start datetime in hospital timezone, optional end time, interval, duration, and instructions. Tick self-administration only if allowed by the physician for permitted oral/topical non-high-alert medicines. Enter order notes explaining why the physician could not write.",
     "Perform read-back communication: tick 'I read every line back to this prescriber and they confirmed it' and 'I verified this patient and this exact order', then click 'Review verbal order'. Verify the frozen review modal and click 'Confirm verbal order once' to dispatch to POST /prescriptions/verbal with idempotency protection. The order updates MAR and pharmacy immediately and refreshes on medication.order.updated."
-  ],
+  ,
+"Prescriber: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."],
   stepsUr: [
     "ٹرائیج سے زبانی اور ٹیلی فون احکام اسکرین کھولیں۔ قاعدہ 0f229c1efb کے تحت اسکرین ایمرجنسی ڈیپارٹمنٹ کی سروس حالت کا جائزہ لے کر مکمل، اوپن ورک یا ریکارڈز موڈ اپناتی ہے۔",
     "ایمرجنسی مریض کے انتخاب میں بورڈ سے آنے والے فعال وزٹس دیکھیں۔ مریض کو نام، ایم آر این، ایمرجنسی نمبر یا ٹکٹ نمبر سے تلاش کریں۔",
@@ -3581,7 +4153,8 @@ nursing_assessment: {
     "حکم کی منزل منتخب کریں: اگر ہسپتال فارمیسی فعال ہو تو وہ منتخب کریں ورنہ بیرونی مارکیٹ۔ ادویات تلاش کر کے ان کا اسٹاک، زیادہ خطرہ الرٹ اور ملتے جلتے نام چیک کریں۔ کیموتھراپی کا زبانی حکم ممنوع ہے۔",
     "ہر سطر کی مقدار، خوراک، راستہ، تکرار، ہسپتال وقت کے مطابق آغاز، ہدایات اور ڈاکٹر کے نہ لکھ سکنے کی وجہ درج کریں۔",
     "ڈاکٹر کو تمام سطور دہرا کر سنانے کے بعد لازمی تصدیق (ریڈ بیک) لگائیں، مریض کی جانچ کا نشان لگائیں اور جائزے کے بعد ایک بار محفوظ کریں۔ حکم فوری طور پر فارمیسی اور ایم اے آر پر چلا جاتا ہے۔"
-  ],
+  ,
+"Prescriber: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"],
   faq: [
     [
       "Under what legal and clinical conditions may an emergency verbal order be taken under MSDS MOM 55?",
@@ -3611,7 +4184,8 @@ nursing_assessment: {
       "How are duplicate orders prevented during emergency network fluctuations?",
       "Every verbal order submission uses a unique client-generated Idempotency-Key retained for 24 hours. If network drops occur after dispatch, clicking Retry resubmits the identical key, returning the existing order safely without creating duplicate prescriptions on the emergency tracking board or MAR."
     ]
-  ],
+  ,
+["How do I find a record, and who adds it if missing?","Prescriber: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."]],
   faqUr: [
     [
       "ایم ایس ڈی ایس ایم او ایم 55 کے تحت زبانی حکم کن ہنگامی حالتوں میں لیا جا سکتا ہے؟",
@@ -3641,7 +4215,8 @@ nursing_assessment: {
       "انٹرنیٹ منقطع ہونے پر ایک ہی حکم کے دو بار درج ہونے سے کیسے بچا جاتا ہے؟",
       "ہر زبانی حکم کے ساتھ 24 گھنٹے کی منفرد آئیڈیمپوٹینسی کلید بھیجی جاتی ہے۔ اگر رابطہ منقطع ہو تو دوبارہ کوشش کرنے پر وہی پرانا حکم واپس ملتا ہے اور نیا ڈپلیکیٹ نسخہ نہیں بنتا۔"
     ]
-  ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Prescriber: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"]]
 },
  critical_results_er: {
   title: "Critical results of my patients: Emergency department critical results communication",
@@ -3743,7 +4318,10 @@ nursing_assessment: {
     "For a signed paper, verify who decides from the server's who_decides rules: select Patient if permitted, or an authorized Decision Maker from the policy priority list (recording their name, relationship, CNIC, and incapacity reason). Record questions asked and tick that the patient explained it back.",
     "When an unconscious or incapacitated emergency patient has no attendant and treatment cannot wait, choose 'Doctor's emergency note'. Enter why treatment cannot wait, and select a concurring registered PMDC doctor via staff lookup when required by hospital policy.",
     "Once the physical document is signed or thumb-printed, upload the file under 'Upload this consent scan' as a patient Consent document, then attach it to the permanent consent record via 'Attach the signed scan'."
-  ],
+  ,
+"Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."],
   stepsUr: [
     "ٹرائیج و ایمرجنسی میں ایمرجنسی ڈیپارٹمنٹ میں رضامندیاں کھولیں۔ بائیں جانب منتظر کام کی فہرست پہلے نظر آتی ہے جس میں عمومی رضامندی کے بغیر داخلے، رضامندی کے بغیر ہنگامی آپریشن اور اسکین کے منتظر کاغذات درج ہوتے ہیں۔ تاخیر شدہ اشیاء کے ساتھ سرخ رنگ میں اوور ڈیو لکھا ہوتا ہے۔",
     "کسی زیر التوا کام پر کام کرنے کے لیے، پہلے سے تیار مسودہ کھولنے کے لیے 'اوپن پریپیئرڈ کنسنٹ' پر کلک کریں، یا نئی رضامندی شروع کرنے کے لیے 'اس داخلے کی رضامندی تیار کریں' پر کلک کریں۔",
@@ -3753,7 +4331,10 @@ nursing_assessment: {
     "دستخط شدہ فارم کی صورت میں، سرور کی پالیسی کے تحت فیصلہ کنندہ منتخب کریں: اگر اجازت ہو تو مریض، بصورت دیگر مجاز نمائندہ (نام، رشتہ، شناختی کارڈ اور مریض کے دستخط نہ کر سکنے کی وجہ درج کریں)۔ سوال و جواب درج کریں اور مریض کے واپس سمجھانے کی تصدیق کریں۔",
     "جب مریض بے ہوش یا معذور ہو، کوئی تیماردار موجود نہ ہو اور علاج میں تاخیر جان لیوا ہو، تو 'ڈاکٹر کا ہنگامی نوٹ' منتخب کریں۔ تاخیر نہ کر سکنے کی وجہ لکھیں اور پالیسی کے مطابق اسٹاف تلاش سے دوسرا رجسٹرڈ پی ایم ڈی سی ڈاکٹر چنیں۔",
     "کاغذ پر دستخط یا انگوٹھے کے بعد، 'اسکین اپ لوڈ' کے ذریعے پی ڈی ایف یا تصویر اپ لوڈ کریں اور پھر 'دستخط شدہ اسکین کا ربط' دبا کر مستقل ریکارڈ کے ساتھ منسلک کریں۔"
-  ],
+  ,
+"Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"],
   faq: [
     [
       "The Consents in the emergency department screen says \"The consent policy does not accept this decision: who signed, for which patient, with which witness or second doctor.\" (CONSENT_SIGNER_INVALID). Why, and what do I do?",
@@ -3787,7 +4368,8 @@ nursing_assessment: {
       "The Consents in the emergency department screen says \"The patient's transfusion consent of this stay is needed first (signed, or the doctor's emergency note): the consent register.\" (BLOOD_CONSENT_REQUIRED). Why, and what do I do?",
       "Under Blood Safety protocols, emergency blood administration requires an active signed transfusion consent or an emergency note on file before issuing blood units. Navigate to the consent register, prepare the transfusion consent, and obtain sign-off before requesting release."
     ]
-  ],
+  ,
+["How do I find a record, and who adds it if missing?","Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."]],
   faqUr: [
     [
       "جب اسکرین کہے کہ پالیسی اس فیصلے، دستخط کنندہ یا دوسرے ڈاکٹر کو قبول نہیں کرتی (CONSENT_SIGNER_INVALID) تو کیا کریں؟",
@@ -3821,7 +4403,8 @@ nursing_assessment: {
       "جب اسکرین کہے کہ انتقالِ خون سے پہلے رضامندی لازمی ہے (BLOOD_CONSENT_REQUIRED) تو کیا کریں؟",
       "محفوظ انتقال خون کے قوانین کے مطابق خون لگانے سے پہلے دستخط شدہ رضامندی یا ڈاکٹر کا ہنگامی نوٹ لازمی ہے۔ پہلے کنسنٹ اسکرین سے انتقال خون کی رضامندی درج کریں، پھر بلڈ بینک سے خون طلب کریں۔"
     ]
-  ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"]]
 },
  own_medicines_ward: {
   title: "Patient's own medicines",
@@ -4193,7 +4776,9 @@ critical_results_ward: {
     "If an answer is lost, keep the original action and key. Read the exact admission or discharge status before any replacement. Only arrival’s idempotent request offers explicit identical retry within its retention; state-guarded actions never retry automatically. Missing records and matching names do not prove success. Ask IT if still uncertain. Events silently refresh actual data and reconnect resynchronizes without polling or discarding your draft.",
     "Photos are optional: ask consent, Take photo or Choose JPEG/PNG, preview/retake or Skip with no reason. Refusal, privacy, injury and emergency never delay a bed, overflow or arrival. Each photo/report upload has its own original key and patient. Reports brought by the patient accept PDF/JPEG/PNG plus type, title, issuing facility and document date. Outside provenance remains separate from hospital results. Open stored files through the authenticated viewer. A failed file never repeats an admission, bill or payment.",
     "F1 or visible Help explains the current control and restores focus with the draft intact. English/Urdu and both themes use the shared Settings/native-key zoom 100–250%, reset100%. Service views and actions follow server permissions; records-only shows history and files without admission actions. Wristbands, general consent, cost estimates, ward care and cashier payment are separate permitted handovers. Named human fresh-data, Urdu and editor review remain required."
-  ],
+  ,
+"Bed: Wards; IT adds missing wards. Bed selection loads the beds too.",
+"Panel: Panels by name."],
   stepsUr: [
     "منتظر، بل تصدیق طلب، ڈسچارج بل یا تمام جاری داخلے چنیں۔ وارڈ سرور کی شرط، تلاش موصولہ نام و نمبر میں ہے۔ داخلہ کھولیں تازہ تفصیل اور مریض پڑھتا ہے۔ اصل ریکارڈ کا معلوم داخلہ نمبر منسوخ تاریخ بھی کھولتا ہے؛ اندازہ نہ کریں۔ تازہ اصل فہرست، بستر، پینل اور وارڈ انتظار دوبارہ پڑھتا ہے۔ ناکام مطالعے پر پرانے اعمال نہیں۔",
     "بستر محفوظ میں مطلوبہ وارڈ کا اصل دستیاب بستر اور نقد یا فعال پینل چنیں۔ مریض بستر پر موجود کا نشان صرف اصل آمد پر؛ ورنہ صرف محفوظ۔ بعد میں آمد محفوظ بستر کو داخل و زیر استعمال کرتی ہے۔ بستر کسی اور کو ملے تو تازہ کرکے دوسرا چنیں۔ گم جواب نیا داخلہ بنانے کی وجہ نہیں۔",
@@ -4205,7 +4790,9 @@ critical_results_ward: {
     "جواب گم تو اصل عمل و کلید رکھیں۔ متبادل سے پہلے عین داخلہ یا ڈسچارج پڑھیں۔ صرف آمد کی محفوظ کلید مدت میں عین کوشش دیتی؛ باقی خود نہیں دہرائے جاتے۔ غائب ریکارڈ یا نام کامیابی کا ثبوت نہیں؛ نامعلوم پر آئی ٹی۔ واقعات اصل معلومات خاموش تازہ، رابطہ بحالی پر دوبارہ مطالعہ؛ مسودہ و پولنگ نہیں۔",
     "تصویر اختیاری: اجازت، کیمرہ یا جے پیگ/پی این جی، پیش منظر، دوبارہ یا بلا وجہ چھوڑیں۔ انکار، پردہ، چوٹ یا ہنگامی حالت بستر و آمد نہیں روکتی۔ ہر اپ لوڈ الگ اصل کلید و مریض۔ بیرونی رپورٹ پی ڈی ایف یا تصویر، قسم، عنوان، ادارہ و تاریخ کے ساتھ؛ اپنے ہسپتال کے نتائج سے الگ۔ محفوظ فائل مجاز ناظر میں کھولیں۔ فائل کی خرابی داخلہ، بل یا ادائیگی نہیں دہراتی۔",
     "ایف ون یا مدد موجودہ خانے کی رہنمائی اور فوکس و مسودہ رکھتی ہے۔ انگریزی/اردو و دونوں تھیم میں مشترک ترتیب و کی بورڈ زوم100تا250، ری سیٹ100۔ خدمت و اعمال سرور کی اجازت سے؛ صرف ریکارڈ میں تاریخ و فائل، داخلے کے اعمال نہیں۔ شناختی پٹی، رضامندی، تخمینہ، وارڈ نگہداشت اور کیشیئر الگ مجاز کام۔ نامزد انسانی نئے ریکارڈ، اردو و تدوین جائزہ لازم۔"
-  ],
+  ,
+"Bed: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔",
+"Panel: پینل نام سے۔"],
   faq: [
     [
       "How do I reserve without recording arrival?",
@@ -4243,7 +4830,8 @@ critical_results_ward: {
       "Who completes the next steps?",
       "F1 or visible Help explains the current control and restores focus with the draft intact. English/Urdu and both themes use the shared Settings/native-key zoom 100–250%, reset100%. Service views and actions follow server permissions; records-only shows history and files without admission actions. Wristbands, general consent, cost estimates, ward care and cashier payment are separate permitted handovers. Named human fresh-data, Urdu and editor review remain required."
     ]
-  ],
+  ,
+["How do I find a record, and who adds it if missing?","Bed: Wards; IT adds missing wards. Bed selection loads the beds too. Panel: Panels by name."]],
   faqUr: [
     [
       "آمد درج کیے بغیر بستر کیسے؟",
@@ -4281,7 +4869,8 @@ critical_results_ward: {
       "اگلا کام کون کرے؟",
       "ایف ون یا مدد موجودہ خانے کی رہنمائی اور فوکس و مسودہ رکھتی ہے۔ انگریزی/اردو و دونوں تھیم میں مشترک ترتیب و کی بورڈ زوم100تا250، ری سیٹ100۔ خدمت و اعمال سرور کی اجازت سے؛ صرف ریکارڈ میں تاریخ و فائل، داخلے کے اعمال نہیں۔ شناختی پٹی، رضامندی، تخمینہ، وارڈ نگہداشت اور کیشیئر الگ مجاز کام۔ نامزد انسانی نئے ریکارڈ، اردو و تدوین جائزہ لازم۔"
     ]
-  ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Bed: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔ Panel: پینل نام سے۔"]]
 },
  roll_call: {
   title: "Roll call",
@@ -4386,7 +4975,9 @@ critical_results_ward: {
     "Record agreed swap is for in-person agreements: select the actual original duty, a different permitted colleague of the same category, optional return duty and reason. Confirm both agreed and you are neither colleague. Review and confirm immediately approves and changes the duties; it is not an online invitation. A cover has no return duty. Never invent another employee's agreement.",
     "roster.changed and roster.swap.updated silently refresh actual lists/week checks; reconnect resync does likewise, preserving unsent batch/forms. Failed reads hide stale action data. No polling. A lost create/copy/record/reject answer freezes original key/body; explicit identical Retry original request only within24hours. Edit/cancel/approve never replay automatically. Read original roster result checks exact original ID including cancelled rows; swap recovery reads all actual statuses for the original swap ID. Absence or a matching name proves nothing. Outside retention or a missing record ask IT before a replacement. For an unknown batch, copy or recorded swap, reading a list cannot unlock a replacement request: keep the original key until confirmed, or ask IT after retention. For edit, cancel and swap decisions, the exact original ID must be found before returning to the planner.",
     "F1 and visible Help explain the current control and restore focus without discarding input; Close on an unsent form asks before discarding. English/Urdu, both themes and native Ctrl+=/-/0 share Settings zoom100–250%. No official roster PDF endpoint is provided: print the handbook through Help. Named human fresh-data/Urdu/role/editor review is still required; scheduling does not record presence or patient care."
-  ],
+  ,
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too.",
+"Department: Departments (active only); IT adds missing departments."],
   stepsUr: [
     "ہیڈ نرس سے نرسنگ ڈیوٹی روسٹر۔ ہفتہ کھولیں میں اس ہفتے کی تاریخ؛ ابتدا سرور طے کرتا ہے۔ ہفتہ، وارڈ/شعبہ اور منسوخ دکھائیں صرف مطالعہ بدلتے ہیں۔ تازہ اصل معلومات لاتا ہے۔ رات کی ڈیوٹی آغاز کی تاریخ؛ گزشتہ دن کا فیصلہ ہسپتال کے وقت سے ہے۔",
     "مجاز عملے میں تلاش موصولہ فہرست تک۔ فرد چن کر شفٹ/دن میں شامل یا فرد کا بٹن کھینچیں۔ ڈیوٹی شامل کی بورڈ/ٹچ طریقہ ہے۔ منظور رخصت پر ڈیوٹی نہیں؛ سرمئی مقرر چھٹی پر واضح ڈیوٹی ممکن۔ سرکاری چھٹی و اتوار عام خانے، ادارہ بند نہیں۔",
@@ -4399,7 +4990,9 @@ critical_results_ward: {
     "متفقہ تبادلہ بالمشافہ رضامندی کے لیے: اصل ڈیوٹی، اسی قسم کا الگ مجاز ساتھی، اختیاری بدلے کی ڈیوٹی و وجہ۔ دونوں کی رضامندی اور اپنا شامل نہ ہونا چیک۔ جائزہ/تصدیق فوراً منظور و ڈیوٹیاں بدلتا، آن لائن دعوت نہیں۔ صرف متبادل میں بدلے کی ڈیوٹی نہیں۔ دوسرے کی رضامندی فرض نہ کریں۔",
     "روسٹر و تبادلہ واقعات اصل فہرست/جانچ تازہ، دوبارہ رابطہ بھی؛ مسودہ محفوظ۔ ناکام مطالعہ پر پرانا عمل چھپے، پولنگ نہیں۔ گم تخلیق/نقل/درج/نامنظور میں اصل کلید/مواد مقفل؛24گھنٹے میں صرف عین اصل کوشش۔ ترمیم/منسوخ/منظور خود نہیں دہراتے۔ اصل نتیجہ منسوخ سمیت عین نمبر، تبادلے میں تمام اصل حالتوں سے عین نمبر پڑھتا۔ غائب یا یکساں نام ثبوت نہیں۔ مدت/ریکارڈ غائب پر پہلے آئی ٹی۔ نامعلوم مسودہ، نقل یا درج تبادلے میں فہرست پڑھنے سے متبادل ارسال نہیں کھلتا؛ تصدیق تک اصل کلید، مدت بعد آئی ٹی۔ ترمیم، منسوخ یا فیصلے میں منصوبے پر واپسی سے پہلے عین اصل نمبر ملنا لازم ہے۔",
     "ایف ون و مدد موجودہ خانے کی رہنمائی اور فوکس/مسودہ رکھیں؛ غیر ارسال بند سے پہلے پوچھیں۔ انگریزی/اردو، دونوں تھیم و کی بورڈ/ترتیب زوم100تا250۔ سرکاری روسٹر پی ڈی ایف راستہ نہیں؛ مدد سے رہنمائی پرنٹ۔ نامزد انسانی نئے ریکارڈ، اردو، کردار/تدوین جائزہ لازم؛ ڈیوٹی حاضری یا نگہداشت نہیں۔"
-  ],
+  ,
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔"],
   faq: [
     [
       "How do I schedule without dragging?",
@@ -4433,7 +5026,8 @@ critical_results_ward: {
       "What if a response is lost or a row disappears?",
       "Keep the original request. Only an idempotent action offers identical-key retry within24hours. Other actions require exact-ID rereads; swap recovery checks decided statuses too. Missing rows and matching names never mean success; ask IT when unresolved."
     ]
-  ,["Can a head nurse change the beds on an existing duty?","Yes. Edit duty, choose other beds of the same ward (or clear every selection), review and confirm. The versioned PATCH sends bed_ids with expected_version; no cancellation/re-creation is required."]],
+  ,["Can a head nurse change the beds on an existing duty?","Yes. Edit duty, choose other beds of the same ward (or clear every selection), review and confirm. The versioned PATCH sends bed_ids with expected_version; no cancellation/re-creation is required."],
+["How do I find a record, and who adds it if missing?","Ward: Wards; IT adds missing wards. Bed selection loads the beds too. Department: Departments (active only); IT adds missing departments."]],
   faqUr: [
     [
       "کھینچے بغیر ڈیوٹی کیسے؟",
@@ -4467,7 +5061,8 @@ critical_results_ward: {
       "جواب یا سطر غائب ہو تو؟",
       "اصل درخواست رکھیں۔ صرف محفوظ کلید والا عمل24گھنٹے عین کوشش۔ باقی عین نمبر دوبارہ پڑھیں؛ تبادلہ حتمی حالتیں بھی۔ غائب سطر یا نام کامیابی نہیں؛ نامعلوم پر آئی ٹی۔"
     ]
-  ,["کیا ہیڈ نرس موجودہ ڈیوٹی کے بستر بدل سکتی ہے؟","جی۔ ڈیوٹی بدلیں، اسی وارڈ کے دوسرے بستر چنیں یا تمام نشان ہٹائیں، جائزہ اور تصدیق کریں۔ بستر expected_version کے ساتھ بھیجے جاتے؛ منسوخ و نئی تخلیق ضروری نہیں۔"]]
+  ,["کیا ہیڈ نرس موجودہ ڈیوٹی کے بستر بدل سکتی ہے؟","جی۔ ڈیوٹی بدلیں، اسی وارڈ کے دوسرے بستر چنیں یا تمام نشان ہٹائیں، جائزہ اور تصدیق کریں۔ بستر expected_version کے ساتھ بھیجے جاتے؛ منسوخ و نئی تخلیق ضروری نہیں۔"],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔"]]
 },
  imaging_repeats: {
   title: "Repeated images register",
@@ -4580,7 +5175,9 @@ critical_results_ward: {
     "Tick the source-matching statement only after checking the report/reporter. Every field change clears that assertion. Review and confirm final report once: it is immutable, with external reporter/time visible and real doctor handover. This screen offers no report edit/delete. The current order/patient/context changing requires a fresh review.",
     "After a successful server-signed report payload, Save partner report PDF renders it, Save original report PDF saves server bytes and Print partner report uses the document printer. Print cancellation/errors never repeat referral/report. The print controls stay disabled without the signed payload. No ZIP or invented signature.",
     "Lost answers freeze the original action/key/body and navigation. Retry original request explicitly sends the identical key/body inside24hours; Read current result rereads the original order before release. Outside retention ask IT, never create a replacement. A confirmed write is not repeated because a later read/print failed. Manual Refresh examinations and partners and reconnect refresh current reads; no unsupported polling/live report subscription is promised. F1 from controls/dialogs preserves draft/focus, shared zoom100–250%, English/Urdu and themes remain available; named human translation/role/device/editor acceptance is pending."
-  ],
+  ,
+"Partner: Active diagnostic partners offering the required service.",
+"Critical Finding: Critical imaging findings by patient and examination."],
   stepsUr: [
     "ریڈیالوجی سے بیرونی مرکز کے معائنے۔ لائیو اور خدمت چیک۔ اصل فہرست/مقرر وقت سرور؛ قسم سرور چھانٹی، کام اور تلاش مقامی۔ اصل سطر یا معلوم مثبت نمبر سے آرڈر تاریخ کھولیں؛ نمبر فرض یا نام ملا کر آرڈر نہیں۔",
     "نام/ایم آر این اور عمر/پیدائش، ایکسیشن/آرڈر، قسم/جگہ/سمت، وجہ، آمد/ساتھ عملہ و اصل نشان چیک۔ شناخت ضم/غائب پر ارسال بند؛ استقبالیہ اصل آرڈر ملائے۔ وفات پر نیا حوالہ نہیں؛ سابق رپورٹ دستاویز معالج کے جائزے سے۔",
@@ -4591,7 +5188,9 @@ critical_results_ward: {
     "اصل رپورٹ/مصنف چیک کرکے ملانے کا نشان۔ خانہ بدلے تو صاف۔ جائزہ اور ایک حتمی تصدیق، پھر ناقابل ترمیم رپورٹ، بیرونی مصنف/وقت اور اصل ڈاکٹر حوالگی۔ ترمیم/حذف نہیں۔ آرڈر/مریض/سیاق بدلے تو تازہ جائزہ۔",
     "سرور دستخط شدہ رپورٹ جواب پر شریک پی ڈی ایف بنے، اصل پی ڈی ایف سرور سے محفوظ، پرنٹ دستاویز پرنٹر۔ منسوخی/خرابی حوالہ یا رپورٹ نہ دہرائے۔ دستخط جواب بغیر بٹن بند؛ زیپ یا فرضی مہر نہیں۔",
     "گم جواب پر اصل عمل/کلید/مواد و جگہ مقفل۔24گھنٹے عین اصل کوشش یا اصل آرڈر پڑھ کر چیک۔ مدت بعد آئی ٹی، متبادل نہیں۔ بعد کی پڑھائی/پرنٹ خرابی تصدیق شدہ عمل نہیں دہراتی۔ دستی تازہ و رابطہ بحالی اصل پڑھتے؛ غیر موجود واقعے یا پولنگ کا وعدہ نہیں۔ ایف ون خانے/مکالمے سے فوکس/مسودہ رکھے،100تا250زوم، اردو/انگریزی/تھیم؛ انسانی زبان/کردار/آلہ/مدیر قبولیت باقی۔"
-  ],
+  ,
+"Partner: مطلوبہ خدمت دینے والے فعال تشخیصی شراکت دار۔",
+"Critical Finding: مریض اور معائنے سے اہم عکس نگاری نتیجہ۔"],
   faq: [
     [
       "Who uses this screen, and may a radiographer enter the external report?",
@@ -4625,7 +5224,8 @@ critical_results_ward: {
       "How do I test help, print and Urdu?",
       "F1 from partner/report/confirmation fields must preserve focus/draft. Test both themes and shared keyboard/Settings100–250zoom, actual signed PDF and printer cancellation. A failed print never repeats clinical work. Urdu and complete human role/device/editor journeys remain pending review."
     ]
-  ,["What if IMAGING_ORDER_STATE_INVALID is returned?","The original order is reread and its current status shown; your typed draft stays. Repeats require InProgress, Completed or Reported; referral only Ordered/Scheduled; a partner report only Outsourced. Review the current record before another action; no automatic retry."]],
+  ,["What if IMAGING_ORDER_STATE_INVALID is returned?","The original order is reread and its current status shown; your typed draft stays. Repeats require InProgress, Completed or Reported; referral only Ordered/Scheduled; a partner report only Outsourced. Review the current record before another action; no automatic retry."],
+["How do I find a record, and who adds it if missing?","Partner: Active diagnostic partners offering the required service. Critical Finding: Critical imaging findings by patient and examination."]],
   faqUr: [
     [
       "صفحہ کون استعمال کرے، ریڈیوگرافر بیرونی رپورٹ درج کرے؟",
@@ -4659,7 +5259,8 @@ critical_results_ward: {
       "مدد، پرنٹ اور اردو کیسے جانچیں؟",
       "شریک/رپورٹ/تصدیق پر ایف ون سے فوکس و مسودہ رہے۔ دونوں تھیم،100تا250مشترک زوم، اصل دستخط پی ڈی ایف و پرنٹر منسوخی؛ طبی ارسال نہ دہرے۔ اردو و مکمل انسانی کردار/آلہ/مدیر جائزہ باقی۔"
     ]
-  ,["اگر آرڈر کی حالت درست نہیں کا انکار ہو؟","اصل آرڈر تازہ پڑھ کر حالت دکھائی جاتی، ٹائپ مسودہ رہتا ہے۔ تکرار جاری، مکمل یا رپورٹ شدہ؛ حوالہ صرف آرڈر یا مقرر؛ شریک رپورٹ صرف باہر بھیجا۔ دوسرے عمل سے پہلے تازہ حالت کا جائزہ، خودکار تکرار نہیں۔"]]
+  ,["اگر آرڈر کی حالت درست نہیں کا انکار ہو؟","اصل آرڈر تازہ پڑھ کر حالت دکھائی جاتی، ٹائپ مسودہ رہتا ہے۔ تکرار جاری، مکمل یا رپورٹ شدہ؛ حوالہ صرف آرڈر یا مقرر؛ شریک رپورٹ صرف باہر بھیجا۔ دوسرے عمل سے پہلے تازہ حالت کا جائزہ، خودکار تکرار نہیں۔"],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Partner: مطلوبہ خدمت دینے والے فعال تشخیصی شراکت دار۔ Critical Finding: مریض اور معائنے سے اہم عکس نگاری نتیجہ۔"]]
 },
  radiology_worklist:{
   title: "Imaging worklist",
@@ -4674,8 +5275,10 @@ critical_results_ward: {
     "Find by this accession sends an empty body. Manual sends only the actual Orthanc study ID copied from PACS: five groups of eight lower-case hex digits. Never enter an example ID or DICOM UID. PACS_NOT_CONFIGURED means images are not linked on this server: never retry; keep the order, record its checks and use Complete examination without images. The report works without images. ORTHANC_UNAVAILABLE means the configured PACS did not answer. IMAGING_STUDY_NOT_FOUND means the study has not arrived; check accession in details, and the server links a matching study later. A link in progress completes the examination: record actual contrast and the PMDC doctor first when given.",
     "Enter final report is available after completion with imaging.report.enter. Enter3–20000characters and optionally select an active modality-compatible critical finding and/or a factual critical note (<=1000). The server checks PMDC/privilege. Review imaging action freezes patient/order/version/proposed values; Confirm imaging action rechecks actual actor, service, patient and order. A changed snapshot refuses before POST. A confirmed report is FINAL with its reporter stamp, no edit/delete.",
     "A critical finding requires phoning the responsible doctor NOW using the real urgent process, then recording the communication in Critical results (Radiology). Saving a report neither makes a call nor records a communication. That separate screen is a later implementation; do not claim handover completed here. Final report output shows actual report/stamp. Print final report uses document printer; Save report PDF renders the signed payload; Preview/Save server PDF obtains original bytes. Failure never repeats the report or examination.",
-    "A lost reply locks the exact draft/dialog/navigation. All three writes are idempotent: explicitly Retry original request with identical key/body within24hours, or Read current result for the original order. Inspect actual stage/identity/report/stamp, then Result reviewed releases to current data without claiming success. Never create a replacement key after unknown outcome. Reconnect/events refresh lists without polling and preserve an open frozen draft. F1 returns focus/draft; EN/UR, both themes and shared100–250%zoom apply. Named human role/translation/device/late-data acceptance remains pending; only the human enters a Review code."
-  ],
+    "A lost reply locks the exact draft/dialog/navigation. All three writes are idempotent: explicitly Retry original request with identical key/body within24hours, or Read current result for the original order. Inspect actual stage/identity/report/stamp, then Result reviewed releases to current data without claiming success. Never create a replacement key after unknown outcome. Reconnect/events refresh lists without polling and preserve an open frozen draft. F1 returns focus/draft; EN/UR, both themes and shared100–250%zoom apply. Named human role/translation/device/late-data acceptance remains pending."
+  ,
+"Contrast Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Critical Finding: Critical imaging findings by patient and examination."],
   stepsUr: [
     "ریڈیالوجی سے عکس نگاری کی فہرست کھولیں۔ ریڈیوگرافر معائنے کرتے؛ مجاز پی ایم ڈی سی ریڈیالوجسٹ رپورٹ حتمی کرتا ہے۔ نام، ایم آر این، عمر/تاریخ پیدائش، انتباہ، آرڈر، ایکسیشن، جگہ و سمت چیک کریں۔ مشین پر یہی اصل ایکسیشن لکھیں۔ یہاں نیا مریض، آرڈر یا رقم نہیں بنتی۔",
     "فہرست سرور کی ہنگامی/مقرر وقت ترتیب رکھتی ہے۔ حالت و طریقہ سرور شرط، مقامی تلاش صرف موصولہ سطروں میں۔ معائنہ کھولیں اصل آرڈر و مرکزی مریض پڑھتا۔ تازہ صرف پڑھتا، خطا پر پرانا مواد پوشیدہ۔ ریکارڈ میں فہرست/عمل نہیں، اصل آرڈر نمبر سے مجاز تاریخ۔ ضم شناخت استقبالیہ سے ملائیں، خاموشی سے مریض نہیں بدلتے۔",
@@ -4685,7 +5288,9 @@ critical_results_ward: {
     "مکمل کے بعد رپورٹ اجازت سے حتمی متن3تا20000حروف۔ اختیاری فعال موزوں اہم نتیجہ یا1000حروف تک اصل نوٹ۔ سرور پی ایم ڈی سی/استحقاق چیک کرتا۔ جائزہ میں مریض، آرڈر، نسخہ اور قدر منجمد؛ تصدیق سے پہلے صارف، خدمت، مریض و آرڈر پھر پڑھتے۔ بدلا نسخہ ارسال سے پہلے رکتا۔ رپورٹ حتمی اور مصنف مہر، ترمیم/حذف نہیں۔",
     "اہم نتیجہ پر اصل فوری طریقے سے ذمہ دار ڈاکٹر کو ابھی فون، پھر ریڈیالوجی اہم نتائج میں اصل اطلاع درج کریں۔ رپورٹ کال یا اطلاع نہیں کرتی۔ الگ صفحہ بعد کا کام؛ یہاں حوالگی مکمل فرض نہ کریں۔ رپورٹ و مہر اصل۔ دستاویز پرنٹر یا پی ڈی ایف، سرور اصل فائل پیش منظر/محفوظ الگ۔ خطا معائنہ یا رپورٹ نہیں دہراتی۔",
     "جواب گم ہو تو اصل مسودہ، مکالمہ و جگہ مقفل۔ تینوں عمل محفوظ شناخت سے24گھنٹے صرف وہی اصل کلید/مواد کی واضح کوشش؛ یا اصل آرڈر کا موجودہ نتیجہ پڑھیں۔ حالت، شناخت، رپورٹ و مہر دیکھ کر جائزہ شدہ واپسی، کامیابی فرض نہیں۔ نامعلوم پر نئی کلید نہیں۔ واقعات/بحالی پر بغیر پولنگ فہرست تازہ، منجمد مسودہ محفوظ۔ ایف ون، اردو/انگریزی، دونوں تھیم اور100تا250زوم۔ انسانی کردار، ترجمہ، آلہ جانچ باقی؛ جائزہ کوڈ صرف انسان لکھے۔"
-  ],
+  ,
+"Contrast Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Critical Finding: مریض اور معائنے سے اہم عکس نگاری نتیجہ۔"],
   faq: [
     [
       "What does a radiographer do here?",
@@ -4725,9 +5330,10 @@ critical_results_ward: {
     ],
     [
       "What should be reviewed by a human?",
-      "Create new synthetic upstream orders and exercise allowed stages/refusals/cancellation, successful study linking only at a hospital configured with PACS (not DEV, owner decision54), contrast/doctor, final and critical reports and downstream doctor handover. Test F1 draft/focus, all role FAQs, Urdu line breaks, both themes100–250%, actual scanner/printer and network recovery. Only the human starts/records/signs a portal review and enters its Review code."
+      "Create new synthetic upstream orders and exercise allowed stages/refusals/cancellation, successful study linking only at a hospital configured with PACS (not DEV, owner decision54), contrast/doctor, final and critical reports and downstream doctor handover. Test F1 draft/focus, all role FAQs, Urdu line breaks, both themes100–250%, actual scanner/printer and network recovery. An authorized human reviewer records and signs acceptance."
     ]
-  ,["What if this server has no PACS?","PACS_NOT_CONFIGURED means images are not linked here. Never retry. Keep this order, record identity/site/pregnancy checks, then Complete examination without images; reporting works. A hospital with configured Orthanc must separately test successful linking/viewer and study.available."]],
+  ,["What if this server has no PACS?","PACS_NOT_CONFIGURED means images are not linked here. Never retry. Keep this order, record identity/site/pregnancy checks, then Complete examination without images; reporting works. A hospital with configured Orthanc must separately test successful linking/viewer and study.available."],
+["How do I find a record, and who adds it if missing?","Contrast Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Critical Finding: Critical imaging findings by patient and examination."]],
   faqUr: [
     [
       "ریڈیوگرافر یہاں کیا کرتا ہے؟",
@@ -4769,7 +5375,8 @@ critical_results_ward: {
       "انسان کیا جانچے؟",
       "نئے فرضی اصل آرڈر سے مراحل، انکار، منسوخی، اصل مطالعہ، کانٹراسٹ/ڈاکٹر، حتمی/اہم رپورٹ و معالج حوالگی۔ ایف ون مسودہ/فوکس، تمام کردار سوالات، اردو، دونوں تھیم100تا250، اصل اسکینر/پرنٹر و رابطہ خطا۔ پورٹل جائزہ، کوڈ و دستخط صرف انسان۔"
     ]
-  ,["اگر اس سرور پر پیکس نہیں تو؟","پیکس ترتیب نہیں یعنی یہاں تصاویر نہیں جڑتیں۔ دوبارہ کوشش نہیں۔ اصل آرڈر رکھیں، شناخت، جگہ، حمل کی جانچ درج کرکے تصاویر کے بغیر معائنہ مکمل کریں؛ رپورٹ بن سکتی ہے۔ مقرر آرتھینک والے ہسپتال میں اصل کامیاب ربط، ویور اور واقعہ الگ آزمائیں۔"]]
+  ,["اگر اس سرور پر پیکس نہیں تو؟","پیکس ترتیب نہیں یعنی یہاں تصاویر نہیں جڑتیں۔ دوبارہ کوشش نہیں۔ اصل آرڈر رکھیں، شناخت، جگہ، حمل کی جانچ درج کرکے تصاویر کے بغیر معائنہ مکمل کریں؛ رپورٹ بن سکتی ہے۔ مقرر آرتھینک والے ہسپتال میں اصل کامیاب ربط، ویور اور واقعہ الگ آزمائیں۔"],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Contrast Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Critical Finding: مریض اور معائنے سے اہم عکس نگاری نتیجہ۔"]]
 },
  imaging_quality_setup:{
   title:'Imaging turnaround, critical findings and policy',titleUr:'عکس نگاری کی مدت، اہم نتائج اور پالیسی',
@@ -4784,7 +5391,7 @@ critical_results_ward: {
    'Confirm reviewed setup once. Fresh actor, permission, service view and current original snapshot are checked before sending. Create has its own key; edits/retirement/reactivation always send the original expected_version. A version conflict or changed preflight is not success: close review, discard/reload and deliberately review again. Confirmed setup record shows the real server result. Later read or PDF failure never repeats this save.',
    'Lost reply locks draft/modal/Escape/navigation. New finding: Retry original request uses only the same key/body within24hours; a matching name is not proof. Target PUT and finding PATCH are NOT retried: Read current setup shows the exact original modality/finding from the authoritative list, including retired rows. Inspect actual values/version, then Result reviewed; reload draft releases without claiming success. Reopen/review before another change. Failed read keeps the hold; ask IT outside retention or when denied.',
    'Preview imaging policy fetches the original current PDF with privileged radiologists, targets and findings into a protected viewer. Close to return. Save imaging policy to print fetches fresh bytes and opens native Save; cancel writes no file. Open in your PDF reader, print/check paper and obtain the responsible human’s policy approval. After any setup change obtain a fresh policy. Printer/download failure needs document-only recovery, no setup repeat.',
-   'Use English/Urdu, Light/DarkHighContrast and shared keyboard/Settings100–250%zoom, reset100%. F1 from fields/dialogs opens this permitted page and returns focus without losing input. Offline Help stays readable; setup reads/writes need connection. Urdu/complete role journeys/editor/busy-hour/device/physical policy approval and signed fresh-data portal review remain pending human acceptance; no agent fills a Review code.'
+   'Use English/Urdu, Light/DarkHighContrast and shared keyboard/Settings100–250%zoom, reset100%. F1 from fields/dialogs opens this permitted page and returns focus without losing input. Offline Help stays readable; setup reads/writes need connection. Urdu/complete role journeys/editor/busy-hour/device/physical policy approval and signed fresh-data portal review remain pending human acceptance.'
   ],
   stepsUr:[
    'ریڈیالوجی → عکس نگاری کی مدت، اہم نتائج اور پالیسی۔ دیگر مجاز جگہوں میں بھی۔ تیاری میں صرف ہسپتال اور خدمات کے بٹن سے، روزمرہ مینو نہیں، خدمت فعال نہیں ہوتی۔ پوشیدہ مینو نہیں؛ ریکارڈ میں موجودہ تصحیح، نیا نتیجہ/غائب ہدف نہیں۔ کردار اکیلا اجازت نہیں: ریڈیوگرافر عموماً پڑھتا، منتظم ترتیب رکھتا۔',
@@ -4889,7 +5496,7 @@ critical_results_ward: {
    ['Is entered the same as published?', 'No. Partner values/reference/reporting time are entered for independent verification. Result entered time is distinct from partner reported time; returned/outstanding counts are the server’s, not publication status.'],
    ['What if the partner rejects a tube?', 'Use Review Rejected by partner with factual note. After confirmation keep the old rejected history and use the actual server replacement barcode in collection/bench. Replacement collection and a later dispatch are separate actions.'],
    ['How do I recover a missing reply?', 'Keep the original request. Dispatch/rejection retry the identical key/body within24hours; initial result entry never retries. Read actual clinical state/history first and explicitly review it. A matching or missing manifest row alone proves nothing.'],
-   ['How do I test help and Urdu?', 'Use F1 on selection, reference/time, rejection and confirmation; close Help to restore focus/draft. Try both themes and shared100–250%zoom. Use newly labelled synthetic records; only a human may enter a Review code or sign acceptance.']
+   ['How do I test help and Urdu?', 'Use F1 on selection, reference/time, rejection and confirmation; close Help to restore focus/draft. Try both themes and shared100–250%zoom. Use newly labelled synthetic records; only an authorized human reviewer signs acceptance.']
   ],
   faqUr:[
    ['نمونہ غائب کیوں؟','صرف لیا ہوا مجاز بیرونی نمونہ۔ اصل نمونہ/ادائیگی و تازہ فہرست چیک؛ فرضی نمونہ یا دوبارہ رجسٹریشن نہیں۔ روانہ/نتیجہ/مسترد اصل فہرست و تاریخ میں دیکھیں۔'],
@@ -4915,7 +5522,7 @@ critical_results_ward: {
    'Treating eligibility is server-owned. CRITICAL_RESULT_ACKNOWLEDGER_INVALID means hand over to an authorised treating doctor; FORBIDDEN means missing permission. VERSION_CONFLICT or CRITICAL_RESULT_STATE_INVALID refreshes the result; close the old confirmation and review the current history, never overwrite. A changed communication invalidates the reviewed version before submission.',
    'A lost reply locks draft, confirmation, Escape and navigation. This operation has NO retry: Read current result inspects exact patient/status/acknowledging author/action. Result reviewed; return to draft releases the hold and refreshes current detail without resending or claiming success from a missing queue row. If identity differs, ask IT. Never submit a replacement merely because the answer disappeared.',
    'Critical updates and actual reconnect refresh log/worklist/current detail without polling. Refresh my critical results also checks the independent sticky alert. Failed reads hide stale detail; an alert read error marks its last check not current and offers Check critical alerts again. Offline acknowledgement is blocked. Unsaved action drafts remain in memory and changing patient/workspace asks before discarding.',
-   'Use F1 from alert, action field or confirmation; close Help and verify draft/focus. Test English/Urdu, both themes and shared keyboard/Settings100–250%zoom. Urdu clinical wording, audible-device checks and a named human fresh-data role journey/editor review remain pending. Only the human starts/signs the DEV portal review and enters its Review code.'
+   'Use F1 from alert, action field or confirmation; close Help and verify draft/focus. Test English/Urdu, both themes and shared keyboard/Settings100–250%zoom. Urdu clinical wording, audible-device checks and a named human fresh-data role journey/editor review remain pending. An authorized human reviewer records and signs acceptance.'
   ],
   stepsUr:[
    'ڈاکٹر سے تسلیم کرنے والے اہم نتائج یا سرخ قائم تنبیہ پر جائزہ۔ تنبیہ الگ بغیر چھانٹی میرے مریض/تسلیم بقایا پڑھتی، تمام صفحات پر تازہ سرور میں بقایا ختم ہونے تک رہے۔ تاریخ چھانٹی یا عام اطلاع چھپانا نہ ہٹائے۔ میرے اصل مریض کے نئے کھلے واقعے پر نظام الارم؛ خطا نظر آئے۔',
@@ -4962,7 +5569,8 @@ critical_results_ward: {
    'Lost replies preserve the original communication key/body and lock the draft/navigation. Retry original request explicitly replays the same action inside24hours; Read current result rereads actual history. Never create another communication or repeat intake/payment because the answer was lost. Review actual IDs/history before release; outside retention ask IT. Definite validation refusals remain visible.',
    'critical_result.updated and reconnect reread list/worklist/current detail without polling. A new Imaging Opened event requests a native alarm for the exact still-open result. Attend now; Play alarm for this open result is an explicit audible reminder. Dismiss hides only the local reminder, not communication or clinical acknowledgement. Sound failure remains visible and needs device review.',
    'Records mode hides pending work and new communication but keeps permitted log/detail history. Retiring completes existing work. Offline writes are blocked. Changing result or workspace asks before discarding a draft. F1 from controls/dialogs preserves draft/focus; English/Urdu and themes use shared100–250%zoom. Named human fresh-data, Urdu/FAQ/editor and audible-device acceptance remain pending.'
-  ],
+  ,
+"Recipient User: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."],
   stepsUr:[
    'ریڈیوگرافر یا ریڈیالوجسٹ سے فوری بتانے والے اہم نتائج۔ لائیو چیک، پھر صرف عکس کی اہم اطلاع یا ترجیحی بیماری کا فوری کام کھولیں۔ نتیجہ پڑھنے سے اطلاع یا تسلیم درج نہیں ہوتی۔',
    'رجسٹر ابتدا میں عکس اور معالج کی تسلیم کے منتظر دکھاتا، کھلا و اطلاع دیا دونوں۔ حالت، تاریخ، میرے مریض اور1تا1000حد کے بعد چھانٹی لگائیں۔ میرے مریض سے ٹیسٹ مانگنے والا معالج مراد، ریڈیالوجی ملکیت نہیں۔ تسلیم شدہ کو کھلے کی شرط ہٹائیں؛ حد پوری تو تلاش محدود۔ موصولہ میں تلاش صرف مقامی ہے۔',
@@ -4974,7 +5582,8 @@ critical_results_ward: {
    'گم جواب پر اصل اطلاع کی کلید/مواد اور مسودہ/جگہ مقفل۔24گھنٹے اصل کوشش وہی عمل؛ موجودہ نتیجہ اصل تاریخ پڑھتا۔ جواب غائب ہونے پر نئی اطلاع یا رجسٹریشن/ادائیگی نہ دہرائیں۔ اصل نمبر و تاریخ چیک، مدت بعد آئی ٹی۔ واضح انکار نظر آتا ہے۔',
    'اصل اہم نتیجہ واقعہ و رابطہ بحالی سے فہرست/کام/تفصیل تازہ، پولنگ نہیں۔ نیا کھلا عکس واقعہ عین اب کھلے ریکارڈ کا نظام الارم مانگتا۔ فوراً توجہ؛ الارم بٹن واضح آواز۔ یاددہانی چھپانا اطلاع یا معالج تسلیم نہیں۔ آواز کی ناکامی نظر آتی اور آلے پر انسانی جانچ لازم۔',
    'ریکارڈ میں باقی کام و نئی اطلاع بند مگر مجاز تاریخ رہے۔ ریٹائرنگ میں موجودہ کام مکمل۔ آف لائن ارسال نہیں۔ نتیجہ/کام بدلنے سے پہلے مسودہ چھوڑنے کا سوال۔ خانے/مکالمے میں ایف ون سے فوکس و مسودہ رہے؛ اردو، انگریزی، تھیمز اور100تا250زوم۔ انسانی تازہ ریکارڈ، ترجمہ، کردار، ادارتی اور آواز جانچ باقی۔'
-  ],
+  ,
+"Recipient User: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"],
   faq:[
    ['Does opening or saving notify the doctor?', 'Opening only reads. Tell the actual clinician first through the hospital procedure, then record the completed communication. Saving never makes a call or counts as doctor acknowledgement.'],
    ['What must be read back?', 'For telephone or in-person communication, the actual recipient repeats the finding/result back. Mark the checkbox only afterward. Missing read-back refuses saving; changing method clears the check.'],
@@ -4984,7 +5593,8 @@ critical_results_ward: {
    ['What if the answer disappears after I confirm?', 'Keep the exact original communication. Read current history or explicitly retry the original key/body within24hours. Never send a replacement with a new key just because the answer was lost.'],
    ['Does dismissing the alarm close the result?', 'No. It hides the local reminder only. Native sound is requested on actual Imaging Opened events; a sound error remains visible. Human device testing must confirm audibility.'],
    ['How do I test help and Urdu?', 'Use F1 from recipient, read-back and confirmation controls, close Help and check focus/draft. Test both themes and shared100–250%zoom. Urdu wording is a draft until reviewed by the designated native/clinical owner.']
-  ],
+  ,
+["How do I find a record, and who adds it if missing?","Recipient User: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."]],
   faqUr:[
    ['کیا کھولنے یا محفوظ کرنے سے ڈاکٹر کو اطلاع ہوتی ہے؟','کھولنا صرف پڑھتا ہے۔ پہلے اصل معالج کو ہسپتال طریقے سے بتائیں، پھر مکمل اطلاع درج کریں۔ محفوظ کرنا کال یا معالج کی تسلیم نہیں۔'],
    ['دہرا کر تصدیق کیسے؟','فون/روبرو میں اصل وصول کنندہ نتیجہ دہرائے؛ بعد میں نشان دیں۔ بغیر دہرانا محفوظ سے انکار؛ طریقہ بدلنے سے نشان صاف۔'],
@@ -4994,7 +5604,8 @@ critical_results_ward: {
    ['تصدیق کے بعد جواب غائب ہو تو؟','عین اصل اطلاع رکھیں۔ موجودہ تاریخ پڑھیں یا24گھنٹے وہی اصل کلید/مواد کوشش۔ غائب جواب پر نئی کلید والا متبادل نہ بھیجیں۔'],
    ['الارم بند کرنے سے نتیجہ بند ہوتا ہے؟','نہیں، صرف مقامی یاددہانی چھپتی۔ اصل کھلے عکس واقعے پر آواز، خطا نظر آتی۔ انسانی آلے کی جانچ سے سنائی دینا ثابت ہو۔'],
    ['مدد اور اردو کیسے جانچیں؟','وصول کنندہ، دہرانا اور تصدیق پر ایف ون؛ بند کرکے فوکس و مسودہ چیک۔ دونوں تھیم و100تا250زوم۔ اردو مقرر مقامی/طبی مالک کے جائزے تک مسودہ۔']
-  ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Recipient User: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"]]
  },
  critical_results_verifier: {
   title:'Critical results to tell',titleUr:'فوری بتانے والے اہم نتائج',
@@ -5011,7 +5622,8 @@ critical_results_ward: {
    'Lost replies preserve the original communication key/body and lock the draft/navigation. Retry original request explicitly replays the same action inside24hours; Read current result rereads actual history. Never create another communication or repeat intake/payment because the answer was lost. Review actual IDs/history before release; outside retention ask IT. Definite validation refusals remain visible.',
    'critical_result.updated and reconnect reread list/worklist/current detail without polling. A new Lab Opened event requests a native alarm for the exact still-open result. Attend now; Play alarm for this open result is an explicit audible reminder. Dismiss hides only the local reminder, not communication or clinical acknowledgement. Sound failure remains visible and needs device review.',
    'Records mode hides pending work and new communication but keeps permitted log/detail history. Retiring completes existing work. Offline writes are blocked. Changing result or workspace asks before discarding a draft. F1 from controls/dialogs preserves draft/focus; English/Urdu and themes use shared100–250%zoom. Named human fresh-data, Urdu/FAQ/editor and audible-device acceptance remain pending.'
-  ],
+  ,
+"Recipient User: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."],
   stepsUr:[
    'لیب تصدیق کنندہ سے فوری بتانے والے اہم نتائج۔ لائیو چیک، پھر صرف لیب کی اہم اطلاع یا ترجیحی بیماری کا فوری کام کھولیں۔ نتیجہ پڑھنے سے اطلاع یا تسلیم درج نہیں ہوتی۔',
    'رجسٹر ابتدا میں لیب اور معالج کی تسلیم کے منتظر دکھاتا، کھلا و اطلاع دیا دونوں۔ حالت، تاریخ، میرے مریض اور1تا1000حد کے بعد چھانٹی لگائیں۔ میرے مریض سے ٹیسٹ مانگنے والا معالج مراد، لیب ملکیت نہیں۔ تسلیم شدہ کو کھلے کی شرط ہٹائیں؛ حد پوری تو تلاش محدود۔ موصولہ میں تلاش صرف مقامی ہے۔',
@@ -5023,7 +5635,8 @@ critical_results_ward: {
    'گم جواب پر اصل اطلاع کی کلید/مواد اور مسودہ/جگہ مقفل۔24گھنٹے اصل کوشش وہی عمل؛ موجودہ نتیجہ اصل تاریخ پڑھتا۔ جواب غائب ہونے پر نئی اطلاع یا رجسٹریشن/ادائیگی نہ دہرائیں۔ اصل نمبر و تاریخ چیک، مدت بعد آئی ٹی۔ واضح انکار نظر آتا ہے۔',
    'اصل اہم نتیجہ واقعہ و رابطہ بحالی سے فہرست/کام/تفصیل تازہ، پولنگ نہیں۔ نیا کھلا لیب واقعہ عین اب کھلے ریکارڈ کا نظام الارم مانگتا۔ فوراً توجہ؛ الارم بٹن واضح آواز۔ یاددہانی چھپانا اطلاع یا معالج تسلیم نہیں۔ آواز کی ناکامی نظر آتی اور آلے پر انسانی جانچ لازم۔',
    'ریکارڈ میں باقی کام و نئی اطلاع بند مگر مجاز تاریخ رہے۔ ریٹائرنگ میں موجودہ کام مکمل۔ آف لائن ارسال نہیں۔ نتیجہ/کام بدلنے سے پہلے مسودہ چھوڑنے کا سوال۔ خانے/مکالمے میں ایف ون سے فوکس و مسودہ رہے؛ اردو، انگریزی، تھیمز اور100تا250زوم۔ انسانی تازہ ریکارڈ، ترجمہ، کردار، ادارتی اور آواز جانچ باقی۔'
-  ],
+  ,
+"Recipient User: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"],
   faq:[
    ['Does opening or saving notify the doctor?', 'Opening only reads. Tell the actual clinician first through the hospital procedure, then record the completed communication. Saving never makes a call or counts as doctor acknowledgement.'],
    ['What must be read back?', 'For telephone or in-person communication, the actual recipient repeats the finding/result back. Mark the checkbox only afterward. Missing read-back refuses saving; changing method clears the check.'],
@@ -5033,7 +5646,8 @@ critical_results_ward: {
    ['What if the answer disappears after I confirm?', 'Keep the exact original communication. Read current history or explicitly retry the original key/body within24hours. Never send a replacement with a new key just because the answer was lost.'],
    ['Does dismissing the alarm close the result?', 'No. It hides the local reminder only. Native sound is requested on actual Lab Opened events; a sound error remains visible. Human device testing must confirm audibility.'],
    ['How do I test help and Urdu?', 'Use F1 from recipient, read-back and confirmation controls, close Help and check focus/draft. Test both themes and shared100–250%zoom. Urdu wording is a draft until reviewed by the designated native/clinical owner.']
-  ],
+  ,
+["How do I find a record, and who adds it if missing?","Recipient User: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."]],
   faqUr:[
    ['کیا کھولنے یا محفوظ کرنے سے ڈاکٹر کو اطلاع ہوتی ہے؟','کھولنا صرف پڑھتا ہے۔ پہلے اصل معالج کو ہسپتال طریقے سے بتائیں، پھر مکمل اطلاع درج کریں۔ محفوظ کرنا کال یا معالج کی تسلیم نہیں۔'],
    ['دہرا کر تصدیق کیسے؟','فون/روبرو میں اصل وصول کنندہ نتیجہ دہرائے؛ بعد میں نشان دیں۔ بغیر دہرانا محفوظ سے انکار؛ طریقہ بدلنے سے نشان صاف۔'],
@@ -5043,7 +5657,8 @@ critical_results_ward: {
    ['تصدیق کے بعد جواب غائب ہو تو؟','عین اصل اطلاع رکھیں۔ موجودہ تاریخ پڑھیں یا24گھنٹے وہی اصل کلید/مواد کوشش۔ غائب جواب پر نئی کلید والا متبادل نہ بھیجیں۔'],
    ['الارم بند کرنے سے نتیجہ بند ہوتا ہے؟','نہیں، صرف مقامی یاددہانی چھپتی۔ اصل کھلے لیب واقعے پر آواز، خطا نظر آتی۔ انسانی آلے کی جانچ سے سنائی دینا ثابت ہو۔'],
    ['مدد اور اردو کیسے جانچیں؟','وصول کنندہ، دہرانا اور تصدیق پر ایف ون؛ بند کرکے فوکس و مسودہ چیک۔ دونوں تھیم و100تا250زوم۔ اردو مقرر مقامی/طبی مالک کے جائزے تک مسودہ۔']
-  ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Recipient User: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"]]
  },
  critical_results_bench: {
   title:'Critical results to tell',titleUr:'فوری بتانے والے اہم نتائج',
@@ -5060,7 +5675,8 @@ critical_results_ward: {
    'Lost replies preserve the original communication key/body and lock the draft/navigation. Retry original request explicitly replays the same action inside24hours; Read current result rereads actual history. Never create another communication or repeat intake/payment because the answer was lost. Review actual IDs/history before release; outside retention ask IT. Definite validation refusals remain visible.',
    'critical_result.updated and reconnect reread list/worklist/current detail without polling. A new Lab Opened event requests a native alarm for the exact still-open result. Attend now; Play alarm for this open result is an explicit audible reminder. Dismiss hides only the local reminder, not communication or clinical acknowledgement. Sound failure remains visible and needs device review.',
    'Records mode hides pending work and new communication but keeps permitted log/detail history. Retiring completes existing work. Offline writes are blocked. Changing result or workspace asks before discarding a draft. F1 from controls/dialogs preserves draft/focus; English/Urdu and themes use shared100–250%zoom. Named human fresh-data, Urdu/FAQ/editor and audible-device acceptance remain pending.'
-  ],
+  ,
+"Recipient User: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."],
   stepsUr:[
    'لیب ٹیکنیشن سے فوری بتانے والے اہم نتائج۔ لائیو چیک، پھر صرف لیب کی اہم اطلاع یا ترجیحی بیماری کا فوری کام کھولیں۔ نتیجہ پڑھنے سے اطلاع یا تسلیم درج نہیں ہوتی۔',
    'رجسٹر ابتدا میں لیب اور معالج کی تسلیم کے منتظر دکھاتا، کھلا و اطلاع دیا دونوں۔ حالت، تاریخ، میرے مریض اور1تا1000حد کے بعد چھانٹی لگائیں۔ میرے مریض سے ٹیسٹ مانگنے والا معالج مراد، لیب ملکیت نہیں۔ تسلیم شدہ کو کھلے کی شرط ہٹائیں؛ حد پوری تو تلاش محدود۔ موصولہ میں تلاش صرف مقامی ہے۔',
@@ -5072,7 +5688,8 @@ critical_results_ward: {
    'گم جواب پر اصل اطلاع کی کلید/مواد اور مسودہ/جگہ مقفل۔24گھنٹے اصل کوشش وہی عمل؛ موجودہ نتیجہ اصل تاریخ پڑھتا۔ جواب غائب ہونے پر نئی اطلاع یا رجسٹریشن/ادائیگی نہ دہرائیں۔ اصل نمبر و تاریخ چیک، مدت بعد آئی ٹی۔ واضح انکار نظر آتا ہے۔',
    'اصل اہم نتیجہ واقعہ و رابطہ بحالی سے فہرست/کام/تفصیل تازہ، پولنگ نہیں۔ نیا کھلا لیب واقعہ عین اب کھلے ریکارڈ کا نظام الارم مانگتا۔ فوراً توجہ؛ الارم بٹن واضح آواز۔ یاددہانی چھپانا اطلاع یا معالج تسلیم نہیں۔ آواز کی ناکامی نظر آتی اور آلے پر انسانی جانچ لازم۔',
    'ریکارڈ میں باقی کام و نئی اطلاع بند مگر مجاز تاریخ رہے۔ ریٹائرنگ میں موجودہ کام مکمل۔ آف لائن ارسال نہیں۔ نتیجہ/کام بدلنے سے پہلے مسودہ چھوڑنے کا سوال۔ خانے/مکالمے میں ایف ون سے فوکس و مسودہ رہے؛ اردو، انگریزی، تھیمز اور100تا250زوم۔ انسانی تازہ ریکارڈ، ترجمہ، کردار، ادارتی اور آواز جانچ باقی۔'
-  ],
+  ,
+"Recipient User: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"],
   faq:[
    ['Does opening or saving notify the doctor?', 'Opening only reads. Tell the actual clinician first through the hospital procedure, then record the completed communication. Saving never makes a call or counts as doctor acknowledgement.'],
    ['What must be read back?', 'For telephone or in-person communication, the actual recipient repeats the finding/result back. Mark the checkbox only afterward. Missing read-back refuses saving; changing method clears the check.'],
@@ -5082,7 +5699,8 @@ critical_results_ward: {
    ['What if the answer disappears after I confirm?', 'Keep the exact original communication. Read current history or explicitly retry the original key/body within24hours. Never send a replacement with a new key just because the answer was lost.'],
    ['Does dismissing the alarm close the result?', 'No. It hides the local reminder only. Native sound is requested on actual Lab Opened events; a sound error remains visible. Human device testing must confirm audibility.'],
    ['How do I test help and Urdu?', 'Use F1 from recipient, read-back and confirmation controls, close Help and check focus/draft. Test both themes and shared100–250%zoom. Urdu wording is a draft until reviewed by the designated native/clinical owner.']
-  ],
+  ,
+["How do I find a record, and who adds it if missing?","Recipient User: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."]],
   faqUr:[
    ['کیا کھولنے یا محفوظ کرنے سے ڈاکٹر کو اطلاع ہوتی ہے؟','کھولنا صرف پڑھتا ہے۔ پہلے اصل معالج کو ہسپتال طریقے سے بتائیں، پھر مکمل اطلاع درج کریں۔ محفوظ کرنا کال یا معالج کی تسلیم نہیں۔'],
    ['دہرا کر تصدیق کیسے؟','فون/روبرو میں اصل وصول کنندہ نتیجہ دہرائے؛ بعد میں نشان دیں۔ بغیر دہرانا محفوظ سے انکار؛ طریقہ بدلنے سے نشان صاف۔'],
@@ -5092,7 +5710,8 @@ critical_results_ward: {
    ['تصدیق کے بعد جواب غائب ہو تو؟','عین اصل اطلاع رکھیں۔ موجودہ تاریخ پڑھیں یا24گھنٹے وہی اصل کلید/مواد کوشش۔ غائب جواب پر نئی کلید والا متبادل نہ بھیجیں۔'],
    ['الارم بند کرنے سے نتیجہ بند ہوتا ہے؟','نہیں، صرف مقامی یاددہانی چھپتی۔ اصل کھلے لیب واقعے پر آواز، خطا نظر آتی۔ انسانی آلے کی جانچ سے سنائی دینا ثابت ہو۔'],
    ['مدد اور اردو کیسے جانچیں؟','وصول کنندہ، دہرانا اور تصدیق پر ایف ون؛ بند کرکے فوکس و مسودہ چیک۔ دونوں تھیم و100تا250زوم۔ اردو مقرر مقامی/طبی مالک کے جائزے تک مسودہ۔']
-  ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Recipient User: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"]]
  },
  lab_verification: {
   title: 'Verification queue',
@@ -5189,7 +5808,8 @@ critical_results_ward: {
   "Unknown result locks input/navigation: Read current result, inspect actual dispensations, or explicitly Retry original request with identical key/body within24hours. Never submit a replacement supply/payment. A confirmed result stays confirmed if refresh or printing fails. Stop/clear use read reconciliation rather than automatic replay.",
   "Select the actual D-number in history for server receipt and labels. Print receipt and Print medicine labels use separate mapped printer roles. Save receipt PDF/Save label PDFs produce separate native PDF saves, never ZIP. Check which labels printed before retry; printing never repeats stock/payment.",
   "Read the linked admission's actual discharge stages and held own medicines. Returned or authorized destruction must actually be confirmed before Review Pharmacy clearance. DISCHARGE_STAGE_IMMUTABLE means already cleared: the automatic discharge-status read shows cleared_by_name and cleared_at. Keep your note; never clear again. DISCHARGE_STAGE_OUT_OF_ORDER means this pending stage waits for details.blocked_on; DISCHARGE_NOT_ALLOWED means discharge not started or cancelled. Neither means already cleared. Lost replies use Read current result; no automatic clearance retry. The limited status identity shows patient/MRN/admission without granting full admission access."
-],
+,
+"Open the selected prescription and choose its actual remaining lines; never type a line reference or dispense a guessed item."],
   stepsUr: [
   "قطار کے جائزے سے فراہمی کھولیں، یا اصل عددی نسخہ نمبر۔ مریض، ایم آر این، وزٹ/داخلہ، مہر و الرجی چیک۔ تازہ صرف پڑھتا؛ خطا پر پرانا نہیں۔ ایف۱ و مشترک زوم100تا250مسودہ رکھتے۔",
   "صرف دی جانے والی سطروں کی مثبت مقدار، باقی سے زیادہ نہیں۔ خالی شامل نہیں۔ سوال، بند، منسوخ یا بیرونی سطر دستیاب نہیں۔ خطرہ، ملتی دوا اور اصل ہدایت چیک۔ بیچ نہیں چنتے؛ سرور میعاد و ریکال دیکھتا۔",
@@ -5198,7 +5818,8 @@ critical_results_ward: {
   "نامعلوم جواب پر خانہ/جگہ مقفل؛ اصل نتیجہ اور فراہمی دیکھیں یا24گھنٹے میں عین درخواست کوشش۔ متبادل دوا/رقم نہیں۔ تصدیق کے بعد پڑھائی/پرنٹ خرابی کامیابی نہیں مٹاتی۔ بند/کلیئر میں پہلے پڑھیں۔",
   "تاریخ سے اصل Dنمبر کی رسید و لیبل۔ الگ نقش شدہ پرنٹر۔ پی ڈی ایف محفوظ ہرلیبل الگ، زپ نہیں۔ دوبارہ سے پہلے چھپے لیبل چیک؛ اسٹاک/رقم نہیں دہرتی۔",
   "منسلک داخلے کے اصل مراحل اور رکھی دوا دیکھیں۔ واپسی یا مجاز تلفی واقعی مکمل ہو تو جائزہ لیں۔ مرحلہ ناقابل تبدیلی یعنی پہلے کلیئر؛ خودکار تازہ حالت میں کرنے والا اور وقت دیکھیں۔ نوٹ رکھیں، دوبارہ کلیئر نہیں۔ غلط ترتیب یعنی منتظر مرحلہ بتائے گئے دوسرے مرحلے کے بعد ہے؛ ڈسچارج ممنوع یعنی شروع نہیں یا منسوخ۔ یہ پہلے مکمل کا مطلب نہیں۔ گم جواب پر موجودہ نتیجہ پڑھیں؛ خودکار کلیئرنس نہیں۔ محدود شناخت نام، ایم آر این اور داخلہ دکھاتی ہے۔"
-],
+,
+"منتخب نسخہ کھول کر اسی کی باقی سطور چنیں؛ سطر کا نمبر یا فرضی دوا نہ لکھیں۔"],
   faq: [
   [
     "How do I supply only part?",
@@ -5228,7 +5849,8 @@ critical_results_ward: {
     "What does an already-cleared stage mean?",
     "DISCHARGE_STAGE_IMMUTABLE says already done: read who cleared it and when in the fresh discharge status. OUT_OF_ORDER only waits behind blocked_on; NOT_ALLOWED means discharge not started/cancelled. Keep the note; no automatic retry."
   ]
-],
+,
+["How do I find a record, and who adds it if missing?","Open the selected prescription and choose its actual remaining lines; never type a line reference or dispense a guessed item."]],
   faqUr: [
   [
     "جزوی دوا کیسے دوں؟",
@@ -5258,7 +5880,8 @@ critical_results_ward: {
     "پہلے کلیئر مرحلے کا کیا مطلب ہے؟",
     "مرحلہ ناقابل تبدیلی یعنی پہلے مکمل: تازہ حالت میں کرنے والا اور وقت پڑھیں۔ غلط ترتیب صرف بتائے پچھلے مرحلے کی منتظر؛ ممنوع یعنی شروع نہیں یا منسوخ۔ نوٹ رکھیں؛ خودکار تکرار نہیں۔"
   ]
-]
+,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","منتخب نسخہ کھول کر اسی کی باقی سطور چنیں؛ سطر کا نمبر یا فرضی دوا نہ لکھیں۔"]]
 },
   rx_queue: {
     title: "Prescription queue", titleUr: "نسخوں کی قطار",
@@ -5283,7 +5906,10 @@ consents_ward: {
     "Print the consent document (GET /consents/{id}/print-payload): verify hospital branding, patient identity flags, and Nastaliq Urdu formatting. Read aloud to illiterate patients and answer all questions.",
     "Record the decision: verify eligible signers from who_decides (adult patient, or ordered priority decision makers for minors/incapacitated patients). Record signature or thumb impression, witness details, or emergency clinical note.",
     "Scan and attach physical paper: upload the signed/thumb-printed paper document via patient documents (POST /patients/{id}/documents) and link it using 'Attach the signed scan' (POST /consents/{id}/scan). Realtime updates refresh on consent.updated."
-  ],
+  ,
+"Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."],
   stepsUr: [
     "وارڈ نرسنگ سے میرے مریضوں کی رضامندی کھولیں۔ اسکرین پر وارڈ کا منتظر کام نظر آتا ہے جس میں داخلے کی عمومی رضامندی، جراحی و بے ہوشی کی مطلوبہ رضامندیاں اور اسکین کے منتظر دستخط شدہ کاغذات شامل ہیں۔",
     "'میرے مریض اور فارم' کا انتخاب کر کے اپنی شفٹ کے مریض الگ کریں یا ٹیم کے باہمی تعاون کے لیے وارڈ کے تمام داخل مریضوں کا کام دیکھیں۔",
@@ -5293,7 +5919,10 @@ consents_ward: {
     "رضامندی فارم پرنٹ کریں (GET /consents/{id}/print-payload): ہسپتال کا عنوان، مریض کی شناخت اور اردو متن کی تصدیق کریں۔ ناخواندہ مریضوں کو پڑھ کر سنائیں اور تمام سوالات کے جواب دیں۔",
     "فیصلہ درج کریں: who_decides سے مجاز فیصلہ کنندہ منتخب کریں (بالغ مریض خود، یا نابالغ/معذور مریض کے لیے ترجیحی سرپرست)۔ دستخط، انگوٹھا، گواہ یا ہنگامی ڈاکٹر نوٹ ریکارڈ کریں۔",
     "کاغذی دستاویز اسکین اور منسلک کریں: دستخط شدہ یا انگوٹھے والا اصل کاغذ اپ لوڈ کریں (POST /patients/{id}/documents) اور 'دستخط شدہ اسکین کا ربط' سے منسلک کریں۔ consent.updated سے بورڈ ازخود تازہ ہوتا ہے۔"
-  ],
+  ,
+"Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"],
   faq: [
     [
       "What is the ward nurse's responsibility regarding patient consents?",
@@ -5323,7 +5952,8 @@ consents_ward: {
       "Can a signed consent be modified after it has been finalized?",
       "No. A decided consent (Given, Refused) is permanent (rule:8b7301ca0f). If circumstances change or the patient changes their mind, withdraw the existing consent with an explicit clinical justification and prepare a new consent form."
     ]
-  ],
+  ,
+["How do I find a record, and who adds it if missing?","Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."]],
   faqUr: [
     [
       "مریضوں کی رضامندی میں وارڈ نرس کی بنیادی ذمہ داری کیا ہے؟",
@@ -5353,7 +5983,8 @@ consents_ward: {
       "کیا حتمی ہونے کے بعد رضامندی میں کوئی ترمیم ہو سکتی ہے؟",
       "نہیں۔ حتمی رضامندی (Given یا Refused) مستقل ہوتی ہے (اصول 8b7301ca0f)۔ اگر مریض رائے بدلے تو پرانی رضامندی تحریری وجہ کے ساتھ واپس (Withdraw) کی جاتی ہے اور بالکل نیا فارم تیار کیا جاتا ہے۔"
     ]
-  ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"]]
 },
  home_visit_record:{
   title: "Record a home visit",
@@ -5544,7 +6175,10 @@ consents_doctor: {
     "Verify signer eligibility via server who_decides policy (adult patient, or authorized legal guardians in defined priority order for minors or incapacitated patients).",
     "Record the decision: capture patient/guardian signature or thumb impression, witness details, or witnessed verbal refusal. In life-threatening emergencies with incapacitated patients, record an EmergencyNote with second PMDC physician concurrence.",
     "Scan signed physical document: upload the signed/thumb-printed paper copy via patient documents and attach scan to finalize the legal medical record. Board updates via realtime consent.updated events."
-  ],
+  ,
+"Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."],
   stepsUr: [
     "کلینکل او پی ڈی / آئی پی ڈی سے رضامندی: باخبر رضامندی اور انکار کھولیں۔ منتظر کام کا جائزہ لیں جہاں سرجری، بے ہوشی یا پرخطر طریقہ کار کی مطلوبہ رضامندیاں نمایاں ہوتی ہیں۔",
     "'میرے مریض اور فارم' سے فلٹر کر کے اپنے زیر علاج مریضوں پر توجہ مرکوز کریں، یا ہسپتال رجسٹر میں مریض کے نام یا ایم آر این سے تلاش کریں۔",
@@ -5554,7 +6188,10 @@ consents_doctor: {
     "سرور کی who_decides پالیسی سے مجاز فیصلہ کنندہ کی تصدیق کریں (بالغ مریض خود، یا نابالغ/بے ہوش مریض کے لیے ترجیحی قانونی سرپرست)۔",
     "فیصلہ درج کریں: مریض یا سرپرست کے دستخط یا انگوٹھا، گواہ کے کوائف یا باخبر زبانی انکار ریکارڈ کریں۔ جان لیوا ہنگامی صورتحال میں دوسرے پی ایم ڈی سی ڈاکٹر کے ساتھ ہنگامی نوٹ درج کریں۔",
     "دستخط شدہ کاغذی دستاویز اسکین کریں: دستخط شدہ یا انگوٹھے والا کاغذ اپ لوڈ کر کے منسلک کریں تاکہ قانونی طبی ریکارڈ مکمل ہو جائے۔ consent.updated سے بورڈ ازخود تازہ ہوتا ہے۔"
-  ],
+  ,
+"Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"],
   faq: [
     [
       "What is the doctor's legal and ethical responsibility in informed consent?",
@@ -5584,7 +6221,8 @@ consents_doctor: {
       "What should be done if a patient changes their mind after signing consent?",
       "A finalized consent cannot be edited. The doctor must withdraw the existing consent using POST /consents/{id}/withdraw, documenting the clinical reason for withdrawal, and prepare a fresh consent if another course of care is agreed."
     ]
-  ],
+  ,
+["How do I find a record, and who adds it if missing?","Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."]],
   faqUr: [
     [
       "باخبر رضامندی میں ڈاکٹر کی قانونی اور اخلاقی ذمہ داری کیا ہے؟",
@@ -5614,7 +6252,8 @@ consents_doctor: {
       "اگر مریض دستخط کے بعد اپنا ارادہ بدل لے تو کیا کیا جائے؟",
       "حتمی رضامندی میں ترمیم نہیں ہو سکتی۔ ڈاکٹر کو تحریری وجہ درج کر کے پرانی رضامندی واپس (Withdraw) کرنی چاہیے، اور متبادل علاج کا نیا فارم تیار کرنا چاہیے۔"
     ]
-  ]
+  ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"]]
 },
   patient_education:{
    title:"Health education given",titleUr:"دی گئی صحت کی رہنمائی",
@@ -5643,10 +6282,14 @@ consents_doctor: {
   lab_orders_results:{
    title:"Lab & imaging orders + results",titleUr:"لیب و عکس کے احکامات اور نتائج",
    purpose:"Doctors, clinical specialists and surgeons order the right investigation for the verified patient, tell them about send-outs and retrieve verified results, trends and PACS studies. Laboratory and radiology colleagues receive the confirmed order in their own workflow. Ordering, paying, sampling, reporting and acknowledgement are separate actions.",purposeUr:"ڈاکٹر، ماہر و سرجن تصدیق شدہ مریض کا درست ٹیسٹ لکھتے، بیرونی لیب بتاتے اور مصدقہ نتائج، رجحان اور عکس دیکھتے ہیں۔ لیب و شعبہ عکس اپنے کام میں مصدقہ آرڈر لیتے ہیں۔ آرڈر، ادائیگی، نمونہ، رپورٹ اور وصولی الگ ہیں۔ اردو مقامی جائزے تک مسودہ ہے۔",
-   steps:["From the clinical workspace open Lab & imaging orders + results, or Order lab/imaging on Consultation. Open the actual slip or select your live-queue patient. Check name/MRN/age, allergies and death/MLC/temporary/merge/outstanding flags. Choose this OPD visit or an actual admission, and Routine/Urgent/STAT priority.","Filter the real test catalogue. Check code/name, specimen, price where permitted, InHouse versus SendOut, named partner and turnaround. Tell the patient about a send-out. Only tests whose corresponding laboratory/outsourced_diagnostics service is Active may start new work. Select1–50tests and clinical notes, then Order selected tests once.","Create imaging order only while imaging is Active. Choose modality, body part, clinical indication and an explicit side or Not applicable. Select an actual catalogued Imaging tariff service if billing it; no guessed IDs or prices. An inpatient needs transport/escort; special or interventional procedures require a Doctor escort. Urgent/STAT uses emergency turnaround.","After confirmation read the real requisition/imaging number and accession, status, specimen barcode, due dates, partner and billing status. OPD laboratory orders create an unpaid invoice for the cashier; IPD goes to the running bill. This screen takes no cash. A rejected specimen needs a new sample coordinated with the laboratory; do not repeat registration or invent results.","An ordering doctor with own-cancellation permission can cancel only their own unsampled laboratory order with a reason. Fresh ownership/sample state is checked before sending. Collected samples hide cancellation; respect LAB_ITEM_STATE_INVALID and ask the laboratory. Imaging progression/cancellation belongs to radiology. Lost replies retain exact original keys/bodies and block new actions until safe retry/reconciliation.","Read only Published results or explicitly released unverified critical values labelled Pending verification in red. Rejected/Superseded/unreleased routine results stay hidden. Select a test and numeric metric for dated published trends. A sticky critical warning requires clinical contact and acknowledgement in the authorized Critical results workflow; reading/printing is not acknowledgement. Withdrawn provisional values disappear with a do-not-act warning.","Print lab report/Save lab report PDF uses the fresh verified print payload; partial reports say tests remain pending. Reported imaging has its separate report/stamp and A4 PDF. Download official PDFs independently. Never print provisional results. Printing errors do not repeat orders, registration or payment. Open PACS viewer re-reads the actual server URL in a separate secured window; null URL means ask radiology, not guess.","F1 opens this contextual help from fields/dialogs while retaining draft/focus. English/Urdu and both themes share100–250%Settings/keyboard zoom. Events/reconnect refresh results without polling or replacing the selected patient. Record fresh synthetic IDs and actual outcomes for the named human doctor's worksheet; native Urdu/editor/physical-printer and full downstream journey review remain pending."],
-   stepsUr:["طبی جگہ یا معائنے سے لیب و عکس کھولیں۔ اصل پرچی یا اپنی قطار کا مریض چنیں۔ نام، ایم آر این، عمر، الرجی، وفات، قانونی، عارضی، انضمام و بقایا چیک کریں۔ یہی ملاقات یا اصل داخلہ اور عام، فوری ترجیح چنیں۔","اصل ٹیسٹ کی فہرست میں نام، کوڈ، نمونہ، مجاز قیمت، اندرونی یا بیرونی لیب، شراکت دار اور مدت پڑھیں۔ مریض کو بیرونی لیب بتائیں۔ اسی خدمت کے فعال ٹیسٹ نئے احکامات میں ہیں۔1تا50ٹیسٹ اور معلومات لکھ کر ایک بار آرڈر دیں۔","فعال عکس خدمت میں قسم، حصہ، وجہ اور واضح سمت یا غیر متعلق چنیں۔ بل ہو تو اصل فہرست کی خدمت چنیں؛ فرضی نمبر یا قیمت نہیں۔ داخل مریض کا ذریعہ اور ساتھ جانے والا لازم؛ خاص یا مداخلتی عمل کو ڈاکٹر لازم۔ فوری ترجیح ایمرجنسی مدت لیتی ہے۔","تصدیق کے بعد اصل نمبر، ایکسیشن، حالت، بارکوڈ، مدت، مرکز اور بل پڑھیں۔ بیرونی لیب کی غیر ادا انوائس کیشیئر، داخل مریض کا خرچ جاری بل میں۔ یہاں نقد نہیں۔ مسترد نمونے کو لیب کے ساتھ نیا نمونہ چاہیے؛ رجسٹریشن یا فرضی نتیجہ نہیں۔","اپنی منسوخی کی اجازت والا حکم دینے والا ڈاکٹر صرف اپنا بغیر نمونہ آرڈر وجہ سے منسوخ کرتا ہے۔ پہلے تازہ مالک اور نمونہ چیک۔ نمونہ لیا تو بٹن بند؛ سرور کا انکار مان کر لیب سے کہیں۔ عکس کی پیش رفت یا منسوخی شعبہ عکس میں۔ گم جواب پر اصل نمبر و مواد محفوظ؛ محفوظ چیک تک نیا عمل بند۔","صرف جاری نتیجہ یا سرخ تصدیق باقی والا واضح جاری عارضی انتہائی اہم نتیجہ پڑھیں۔ مسترد، بدلا یا عام غیر جاری نتیجہ چھپا ہے۔ ٹیسٹ و پیمائش سے مصدقہ عدد کا تاریخ وار رجحان دیکھیں۔ مستقل انتہائی اہم پیغام پر طبی رابطہ اور مجاز وصولی؛ پڑھنا یا پرنٹ تصدیق نہیں۔ واپس عارضی قدر ہٹتی اور عمل سے روکتی ہے۔","تازہ مصدقہ معلومات سے لیب رپورٹ یا اے4پی ڈی ایف؛ جزوی رپورٹ باقی ٹیسٹ بتاتی ہے۔ رپورٹ شدہ عکس کی الگ رپورٹ و مہر ہے۔ اصل سرور پی ڈی ایف الگ لیں۔ عارضی قدر پرنٹ نہ کریں۔ خرابی آرڈر، رجسٹریشن یا ادائیگی نہیں دہراتی۔ اصل سرور کے پتے سے محفوظ الگ ویور؛ خالی پتہ ہو تو شعبہ عکس سے پوچھیں۔","ایف۱خانوں و مکالمے سے مسودہ اور فوکس رکھ کر رہنما کھولتا ہے۔ زبان، تھیم و ترتیب/کلید100تا250فیصد ایک زوم ہیں۔ واقعہ یا دوبارہ رابطہ بغیر ٹائمر یا مریض بدلے نتائج تازہ کرتا ہے۔ نئے فرضی نمبر و اصل نتیجے نام زد انسانی شیٹ میں؛ اردو، مدیر، اصل پرنٹر اور مکمل حوالگی کا جائزہ باقی ہے۔"],
-   faq:[["Who uses which part of this workflow?","Doctors, specialists and surgeons with order permissions create tests and imaging; lab.result.view/imaging.order.view permit the appropriate reads. Laboratory staff take and verify samples/results, radiology schedules/performs/reports imaging, and the cashier collects OPD diagnostic invoices. The prescriber does not impersonate those roles. Access is by server permission/capability, not facility category."],["Can I cancel a laboratory or imaging order?","The ordering doctor with lab.requisition.cancel_own may cancel their own laboratory order only before any sample is collected, with a reason. Another doctor's order needs lab administration. Collected samples cannot be cancelled here. Imaging cancellation belongs to radiology's own endpoint/workspace; no unsupported edit/delete/undo appears on this screen."],["What should I tell a patient about a send-out or delay?","Show the actual test, partner name and due time. SendOut requires Active outsourced diagnostics; an in-house test requires Active laboratory. A rejected sample means a new specimen and coordination with the laboratory. No due time recorded is explicit; never invent a promised time or turn an outside report into this hospital's result."],["What does Pending verification or a withdrawn critical result mean?","The released value is still unverified, must be labelled red and must not print. Contact the clinical team and use the authorized Critical results workflow for acknowledgement. If the verifier withdraws it, do not act on that value: it is removed and a warning appears while current reads refresh. Routine unreleased or rejected/superseded results never become visible results just because a browser has their data."],["What belongs on paper and what if PACS is missing?","Verified lab report includes patient particulars, sex-specific reference ranges, flags, performed/verified stamps, partner and amendment reason; incomplete sets say Partial. Imaging Reported output includes the reporter's stamp. Only the server-issued viewer URL opens separately; a null/missing link is visible and should be checked by radiology. Printer/PACS failure does not repeat an order or record payment/acknowledgement."],["What must the named reviewer test?","Create fresh synthetic lab and imaging orders on the identified build, read numbers and downstream queues, own cancellation/refused sampled cancellation, published/provisional/withdrawn critical results and trends, imaging side/escort, PACS and native A4/server PDFs. Verify both languages/themes250%, F1 draft/dialog focus, permissions/service retirement and lost replies without duplicate invoices. Fill the doctor worksheet with actual IDs; independent Urdu/editor and physical printer checks remain human tasks."]],
-   faqUr:[["کس حصے میں کون کام کرتا ہے؟","مجاز ڈاکٹر، ماہر و سرجن احکامات؛ نتائج و عکس کی اجازت اصل پڑھائی دیتی ہے۔ لیب نمونہ و تصدیق، شعبہ عکس ترتیب و رپورٹ اور کیشیئر بیرونی ٹیسٹ کی ادائیگی لیتا ہے۔ معالج دوسرے کردار کی شناخت نہیں لیتا۔ سرور کی اجازت و خدمت، ہسپتال کی قسم نہیں، رسائی طے کرتی ہے۔"],["کیا لیب یا عکس آرڈر منسوخ ہو سکتا ہے؟","اپنی منسوخی کی اجازت والا حکم دینے والا صرف اپنا لیب آرڈر کسی نمونے سے پہلے وجہ سے منسوخ کرتا ہے۔ دوسرے کا لیب ایڈمن۔ لیا نمونہ یہاں منسوخ نہیں۔ عکس کی منسوخی شعبہ عکس کے اپنے معاہدے میں؛ یہاں غیر مجاز ترمیم، حذف یا واپسی نہیں۔"],["بیرونی ٹیسٹ یا تاخیر پر مریض کو کیا بتاؤں؟","اصل ٹیسٹ، شراکت دار اور مدت دکھائیں۔ بیرونی کو فعال بیرونی تشخیص، اندرونی کو فعال لیب لازم۔ مسترد نمونہ نیا نمونہ اور لیب رابطہ مانگتا ہے۔ غیر درج وقت واضح ہے؛ فرضی وعدہ یا بیرونی رپورٹ کو اپنی لیب نہ کہیں۔"],["تصدیق باقی یا واپس انتہائی اہم نتیجے کا مطلب؟","جاری قدر ابھی غیر مصدقہ ہے، سرخ نشان اور پرنٹ منع۔ طبی ٹیم سے رابطہ اور مجاز انتہائی اہم نتائج میں وصولی درج کریں۔ واپس ہو تو اس قدر پر عمل نہ کریں؛ ہٹ کر پیغام اور تازہ پڑھائی آتی ہے۔ عام غیر جاری، مسترد یا بدلا ریکارڈ براؤزر میں ہونے سے نتیجہ نہیں بنتا۔"],["کاغذ پر کیا آئے اور ویور نہ ہو تو؟","مصدقہ لیب رپورٹ میں شناخت، جنس کی حد، نشان، کرنے/تصدیق کی مہر، مرکز و تصحیح کی وجہ؛ نامکمل سیٹ جزوی ہے۔ رپورٹ شدہ عکس میں معالج کی مہر۔ صرف سرور کا اصل پتہ الگ کھلتا؛ خالی ربط شعبہ عکس چیک کرے۔ پرنٹر یا ویور خرابی آرڈر، ادائیگی یا وصولی نہیں دہراتی۔"],["نام زد جائزہ لینے والا کیا چیک کرے؟","اس بلڈ پر نئے فرضی لیب و عکس احکامات، نمبر و وصول قطار، اپنی منسوخی/نمونہ پر انکار، جاری/عارضی/واپس انتہائی اہم نتیجہ و رجحان، سمت/ساتھ والا، ویور اور اصل اے4/سرور پی ڈی ایف چیک کریں۔ دونوں زبان/تھیم250فیصد، ایف۱، اجازت و خدمت بندش اور گم جواب پر عدم تکرار چیک کریں۔ اصل نمبر انسانی شیٹ میں؛ اردو، الگ مدیر و اصل پرنٹر انسانی کام ہیں۔"]]
+   steps:["From the clinical workspace open Lab & imaging orders + results, or Order lab/imaging on Consultation. Open the actual slip or select your live-queue patient. Check name/MRN/age, allergies and death/MLC/temporary/merge/outstanding flags. Choose this OPD visit or an actual admission, and Routine/Urgent/STAT priority.","Filter the real test catalogue. Check code/name, specimen, price where permitted, InHouse versus SendOut, named partner and turnaround. Tell the patient about a send-out. Only tests whose corresponding laboratory/outsourced_diagnostics service is Active may start new work. Select1–50tests and clinical notes, then Order selected tests once.","Create imaging order only while imaging is Active. Choose modality, body part, clinical indication and an explicit side or Not applicable. Select an actual catalogued Imaging tariff service if billing it; no guessed IDs or prices. An inpatient needs transport/escort; special or interventional procedures require a Doctor escort. Urgent/STAT uses emergency turnaround.","After confirmation read the real requisition/imaging number and accession, status, specimen barcode, due dates, partner and billing status. OPD laboratory orders create an unpaid invoice for the cashier; IPD goes to the running bill. This screen takes no cash. A rejected specimen needs a new sample coordinated with the laboratory; do not repeat registration or invent results.","An ordering doctor with own-cancellation permission can cancel only their own unsampled laboratory order with a reason. Fresh ownership/sample state is checked before sending. Collected samples hide cancellation; respect LAB_ITEM_STATE_INVALID and ask the laboratory. Imaging progression/cancellation belongs to radiology. Lost replies retain exact original keys/bodies and block new actions until safe retry/reconciliation.","Read only Published results or explicitly released unverified critical values labelled Pending verification in red. Rejected/Superseded/unreleased routine results stay hidden. Select a test and numeric metric for dated published trends. A sticky critical warning requires clinical contact and acknowledgement in the authorized Critical results workflow; reading/printing is not acknowledgement. Withdrawn provisional values disappear with a do-not-act warning.","Print lab report/Save lab report PDF uses the fresh verified print payload; partial reports say tests remain pending. Reported imaging has its separate report/stamp and A4 PDF. Download official PDFs independently. Never print provisional results. Printing errors do not repeat orders, registration or payment. Open PACS viewer re-reads the actual server URL in a separate secured window; null URL means ask radiology, not guess.","F1 opens this contextual help from fields/dialogs while retaining draft/focus. English/Urdu and both themes share100–250%Settings/keyboard zoom. Events/reconnect refresh results without polling or replacing the selected patient. Record fresh synthetic IDs and actual outcomes for the named human doctor's worksheet; native Urdu/editor/physical-printer and full downstream journey review remain pending.",
+"Service: Services by name, filtered to the required Imaging, OT or RoomCharge category."],
+   stepsUr:["طبی جگہ یا معائنے سے لیب و عکس کھولیں۔ اصل پرچی یا اپنی قطار کا مریض چنیں۔ نام، ایم آر این، عمر، الرجی، وفات، قانونی، عارضی، انضمام و بقایا چیک کریں۔ یہی ملاقات یا اصل داخلہ اور عام، فوری ترجیح چنیں۔","اصل ٹیسٹ کی فہرست میں نام، کوڈ، نمونہ، مجاز قیمت، اندرونی یا بیرونی لیب، شراکت دار اور مدت پڑھیں۔ مریض کو بیرونی لیب بتائیں۔ اسی خدمت کے فعال ٹیسٹ نئے احکامات میں ہیں۔1تا50ٹیسٹ اور معلومات لکھ کر ایک بار آرڈر دیں۔","فعال عکس خدمت میں قسم، حصہ، وجہ اور واضح سمت یا غیر متعلق چنیں۔ بل ہو تو اصل فہرست کی خدمت چنیں؛ فرضی نمبر یا قیمت نہیں۔ داخل مریض کا ذریعہ اور ساتھ جانے والا لازم؛ خاص یا مداخلتی عمل کو ڈاکٹر لازم۔ فوری ترجیح ایمرجنسی مدت لیتی ہے۔","تصدیق کے بعد اصل نمبر، ایکسیشن، حالت، بارکوڈ، مدت، مرکز اور بل پڑھیں۔ بیرونی لیب کی غیر ادا انوائس کیشیئر، داخل مریض کا خرچ جاری بل میں۔ یہاں نقد نہیں۔ مسترد نمونے کو لیب کے ساتھ نیا نمونہ چاہیے؛ رجسٹریشن یا فرضی نتیجہ نہیں۔","اپنی منسوخی کی اجازت والا حکم دینے والا ڈاکٹر صرف اپنا بغیر نمونہ آرڈر وجہ سے منسوخ کرتا ہے۔ پہلے تازہ مالک اور نمونہ چیک۔ نمونہ لیا تو بٹن بند؛ سرور کا انکار مان کر لیب سے کہیں۔ عکس کی پیش رفت یا منسوخی شعبہ عکس میں۔ گم جواب پر اصل نمبر و مواد محفوظ؛ محفوظ چیک تک نیا عمل بند۔","صرف جاری نتیجہ یا سرخ تصدیق باقی والا واضح جاری عارضی انتہائی اہم نتیجہ پڑھیں۔ مسترد، بدلا یا عام غیر جاری نتیجہ چھپا ہے۔ ٹیسٹ و پیمائش سے مصدقہ عدد کا تاریخ وار رجحان دیکھیں۔ مستقل انتہائی اہم پیغام پر طبی رابطہ اور مجاز وصولی؛ پڑھنا یا پرنٹ تصدیق نہیں۔ واپس عارضی قدر ہٹتی اور عمل سے روکتی ہے۔","تازہ مصدقہ معلومات سے لیب رپورٹ یا اے4پی ڈی ایف؛ جزوی رپورٹ باقی ٹیسٹ بتاتی ہے۔ رپورٹ شدہ عکس کی الگ رپورٹ و مہر ہے۔ اصل سرور پی ڈی ایف الگ لیں۔ عارضی قدر پرنٹ نہ کریں۔ خرابی آرڈر، رجسٹریشن یا ادائیگی نہیں دہراتی۔ اصل سرور کے پتے سے محفوظ الگ ویور؛ خالی پتہ ہو تو شعبہ عکس سے پوچھیں۔","ایف۱خانوں و مکالمے سے مسودہ اور فوکس رکھ کر رہنما کھولتا ہے۔ زبان، تھیم و ترتیب/کلید100تا250فیصد ایک زوم ہیں۔ واقعہ یا دوبارہ رابطہ بغیر ٹائمر یا مریض بدلے نتائج تازہ کرتا ہے۔ نئے فرضی نمبر و اصل نتیجے نام زد انسانی شیٹ میں؛ اردو، مدیر، اصل پرنٹر اور مکمل حوالگی کا جائزہ باقی ہے۔",
+"Service: خدمت نام سے؛ مطلوبہ عکس نگاری، تھیٹر یا کمرے کے نرخ کی قسم سے۔"],
+   faq:[["Who uses which part of this workflow?","Doctors, specialists and surgeons with order permissions create tests and imaging; lab.result.view/imaging.order.view permit the appropriate reads. Laboratory staff take and verify samples/results, radiology schedules/performs/reports imaging, and the cashier collects OPD diagnostic invoices. The prescriber does not impersonate those roles. Access is by server permission/capability, not facility category."],["Can I cancel a laboratory or imaging order?","The ordering doctor with lab.requisition.cancel_own may cancel their own laboratory order only before any sample is collected, with a reason. Another doctor's order needs lab administration. Collected samples cannot be cancelled here. Imaging cancellation belongs to radiology's own endpoint/workspace; no unsupported edit/delete/undo appears on this screen."],["What should I tell a patient about a send-out or delay?","Show the actual test, partner name and due time. SendOut requires Active outsourced diagnostics; an in-house test requires Active laboratory. A rejected sample means a new specimen and coordination with the laboratory. No due time recorded is explicit; never invent a promised time or turn an outside report into this hospital's result."],["What does Pending verification or a withdrawn critical result mean?","The released value is still unverified, must be labelled red and must not print. Contact the clinical team and use the authorized Critical results workflow for acknowledgement. If the verifier withdraws it, do not act on that value: it is removed and a warning appears while current reads refresh. Routine unreleased or rejected/superseded results never become visible results just because a browser has their data."],["What belongs on paper and what if PACS is missing?","Verified lab report includes patient particulars, sex-specific reference ranges, flags, performed/verified stamps, partner and amendment reason; incomplete sets say Partial. Imaging Reported output includes the reporter's stamp. Only the server-issued viewer URL opens separately; a null/missing link is visible and should be checked by radiology. Printer/PACS failure does not repeat an order or record payment/acknowledgement."],["What must the named reviewer test?","Create fresh synthetic lab and imaging orders on the identified build, read numbers and downstream queues, own cancellation/refused sampled cancellation, published/provisional/withdrawn critical results and trends, imaging side/escort, PACS and native A4/server PDFs. Verify both languages/themes250%, F1 draft/dialog focus, permissions/service retirement and lost replies without duplicate invoices. Fill the doctor worksheet with actual IDs; independent Urdu/editor and physical printer checks remain human tasks."],
+["How do I find a record, and who adds it if missing?","Service: Services by name, filtered to the required Imaging, OT or RoomCharge category."]],
+   faqUr:[["کس حصے میں کون کام کرتا ہے؟","مجاز ڈاکٹر، ماہر و سرجن احکامات؛ نتائج و عکس کی اجازت اصل پڑھائی دیتی ہے۔ لیب نمونہ و تصدیق، شعبہ عکس ترتیب و رپورٹ اور کیشیئر بیرونی ٹیسٹ کی ادائیگی لیتا ہے۔ معالج دوسرے کردار کی شناخت نہیں لیتا۔ سرور کی اجازت و خدمت، ہسپتال کی قسم نہیں، رسائی طے کرتی ہے۔"],["کیا لیب یا عکس آرڈر منسوخ ہو سکتا ہے؟","اپنی منسوخی کی اجازت والا حکم دینے والا صرف اپنا لیب آرڈر کسی نمونے سے پہلے وجہ سے منسوخ کرتا ہے۔ دوسرے کا لیب ایڈمن۔ لیا نمونہ یہاں منسوخ نہیں۔ عکس کی منسوخی شعبہ عکس کے اپنے معاہدے میں؛ یہاں غیر مجاز ترمیم، حذف یا واپسی نہیں۔"],["بیرونی ٹیسٹ یا تاخیر پر مریض کو کیا بتاؤں؟","اصل ٹیسٹ، شراکت دار اور مدت دکھائیں۔ بیرونی کو فعال بیرونی تشخیص، اندرونی کو فعال لیب لازم۔ مسترد نمونہ نیا نمونہ اور لیب رابطہ مانگتا ہے۔ غیر درج وقت واضح ہے؛ فرضی وعدہ یا بیرونی رپورٹ کو اپنی لیب نہ کہیں۔"],["تصدیق باقی یا واپس انتہائی اہم نتیجے کا مطلب؟","جاری قدر ابھی غیر مصدقہ ہے، سرخ نشان اور پرنٹ منع۔ طبی ٹیم سے رابطہ اور مجاز انتہائی اہم نتائج میں وصولی درج کریں۔ واپس ہو تو اس قدر پر عمل نہ کریں؛ ہٹ کر پیغام اور تازہ پڑھائی آتی ہے۔ عام غیر جاری، مسترد یا بدلا ریکارڈ براؤزر میں ہونے سے نتیجہ نہیں بنتا۔"],["کاغذ پر کیا آئے اور ویور نہ ہو تو؟","مصدقہ لیب رپورٹ میں شناخت، جنس کی حد، نشان، کرنے/تصدیق کی مہر، مرکز و تصحیح کی وجہ؛ نامکمل سیٹ جزوی ہے۔ رپورٹ شدہ عکس میں معالج کی مہر۔ صرف سرور کا اصل پتہ الگ کھلتا؛ خالی ربط شعبہ عکس چیک کرے۔ پرنٹر یا ویور خرابی آرڈر، ادائیگی یا وصولی نہیں دہراتی۔"],["نام زد جائزہ لینے والا کیا چیک کرے؟","اس بلڈ پر نئے فرضی لیب و عکس احکامات، نمبر و وصول قطار، اپنی منسوخی/نمونہ پر انکار، جاری/عارضی/واپس انتہائی اہم نتیجہ و رجحان، سمت/ساتھ والا، ویور اور اصل اے4/سرور پی ڈی ایف چیک کریں۔ دونوں زبان/تھیم250فیصد، ایف۱، اجازت و خدمت بندش اور گم جواب پر عدم تکرار چیک کریں۔ اصل نمبر انسانی شیٹ میں؛ اردو، الگ مدیر و اصل پرنٹر انسانی کام ہیں۔"],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Service: خدمت نام سے؛ مطلوبہ عکس نگاری، تھیٹر یا کمرے کے نرخ کی قسم سے۔"]]
   },
   eprescription:{
   title: "E-prescription builder",
@@ -5662,7 +6305,8 @@ consents_doctor: {
   "Read the saved prescription, stamp, pharmacist queries, dispensed amounts and handover history. Print prescription or Save prescription PDF separately using the actual issued payload; printing does not record handover. A failed/cancelled print leaves the prescription saved and can be retried without prescribing again.",
   "Only after actually giving the slip, Record handover to Patient or a named Attendant and choose Electronic/Carbon copy/Scan. Scan selects the patient's uploaded Prescription document. A prescriber may Cancel eligible open lines with a reason; saved clinical content is never edited/deleted. F1 preserves draft/focus, and Settings/keyboard share100–250%zoom.",
   "An inpatient ExternalMarket line offers self-administration only for a drug chosen from the hospital list. A typed medicine name has unknown high-alert status and cannot be self-administered. The route must be Oral, SL, Topical, Inhaled, Ophthalmic, Otic or Nasal and the drug must not be high-alert. SELF_ADMINISTRATION_INVALID remains the server’s refusal."
-],
+,
+"Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."],
   stepsUr: [
   "طبی جگہ یا معائنے کی حوالگی سے نسخہ کھولیں۔ اصل پرچی اسکین یا اپنی قطار کا مریض چنیں۔ نام، ایم آر این، عمر، الرجی، وفات، قانونی کیس، عارضی شناخت، انضمام اور بقایا چیک کریں۔ طبی پابندی، منتظر منظوری، صرف ریکارڈ یا گم شناخت پر نیا عمل بند ہے۔",
   "نیا نسخہ اور خود منزل چنیں؛ ہسپتال کی فارمیسی صرف خدمت فعال ہو تو، ورنہ بیرونی بازار۔ بیرونی یا داخل علاج کی جگہ اور اصل داخلہ چنیں۔ متعلقہ نوٹ سے شکایت، معائنہ، تشخیص، مشورہ اور رضامندی پرنٹ میں آتی ہے۔",
@@ -5672,7 +6316,8 @@ consents_doctor: {
   "محفوظ نسخہ، مہر، فارماسسٹ کے سوال، فراہم مقدار اور حوالگی پڑھیں۔ اصل معلومات سے پرنٹ یا پی ڈی ایف الگ کریں؛ پرنٹ حوالگی نہیں۔ پرنٹ ناکام یا منسوخ ہو تو نسخہ محفوظ اور صرف پرنٹ دوبارہ ہے۔",
   "اصل دینے کے بعد مریض یا نام زد تیماردار اور برقی، کاربن یا اسکین نقل کی حوالگی درج کریں۔ اسکین اسی مریض کی اپ لوڈ نسخہ دستاویز ہو۔ معالج وجہ سے کھلی دوائی منسوخ کر سکتا ہے؛ محفوظ مواد بدلنا یا حذف نہیں۔ ایف۱مسودہ و فوکس اور ترتیب و کلید100تا250فیصد ایک زوم رکھتی ہیں۔",
   "داخل مریض کی بیرونی دوا میں خود لینے کی اجازت صرف ہسپتال کی فہرست سے منتخب دوا پر ہے۔ ٹائپ نام کا خطرہ نامعلوم؛ خود لینے کی اجازت نہیں۔ منہ، زیر زبان، جلد، سانس، آنکھ، کان یا ناک کا راستہ اور غیر خطرناک دوا لازم۔ سرور کا انکار اصل فیصلہ ہے۔"
-],
+,
+"Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"],
   faq: [
   [
     "Who can prescribe or inspect this screen?",
@@ -5701,6 +6346,10 @@ consents_doctor: {
   [
     "When may an outside medicine be self-administered?",
     "An inpatient ExternalMarket line offers self-administration only for a drug chosen from the hospital list. A typed medicine name has unknown high-alert status and cannot be self-administered. The route must be Oral, SL, Topical, Inhaled, Ophthalmic, Otic or Nasal and the drug must not be high-alert. SELF_ADMINISTRATION_INVALID remains the server’s refusal."
+  ],
+  [
+    "How do I find a record, and who adds it if missing?",
+    "Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."
   ]
 ],
   faqUr: [
@@ -5731,6 +6380,10 @@ consents_doctor: {
   [
     "باہر سے لی دوا خود کب لی جا سکتی ہے؟",
     "داخل مریض کی بیرونی دوا میں خود لینے کی اجازت صرف ہسپتال کی فہرست سے منتخب دوا پر ہے۔ ٹائپ نام کا خطرہ نامعلوم؛ خود لینے کی اجازت نہیں۔ منہ، زیر زبان، جلد، سانس، آنکھ، کان یا ناک کا راستہ اور غیر خطرناک دوا لازم۔ سرور کا انکار اصل فیصلہ ہے۔"
+  ],
+  [
+    "ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟",
+    "Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"
   ]
 ]
 },
@@ -5749,7 +6402,10 @@ consents_doctor: {
   "A lost reply locks input/navigation. Only an idempotent operation can Retry original request within24hours with its exact original key/body. For version/state operations Read current result, compare status/version, return after review then explicitly reload the note before more editing. Unknown results never imply success. F1 retains fields, including the embedded ICD picker's own help; English/Urdu and shared100–250% zoom are available.",
   "Re-route / Refer sends the called queue entry to an OPD doctor from the current department list (with waiting counts), or to the department alone. Enter the reason, review the same patient/slip and confirm once. The patient leaves my queue and goes to the top of the destination using the same slip: no payment or refund. Successful re-route closes the consultation; review or save any unsent note before confirming. QUEUE_ENTRY_CLOSED means refresh the queue; field validation, missing reference and FORBIDDEN remain visible and keep the reason. Reception gives the original slip to a listed OPD doctor but does not re-route it.",
   "Admit may name a treating doctor from the active PMDC lookup, or leave it empty for the requesting doctor. VALIDATION_ERROR on primary_doctor_id means that doctor is not an active PMDC doctor; keep the reason/diagnosis and choose again."
-],
+,
+"Requested Ward: Wards; IT adds missing wards. Bed selection loads the beds too.",
+"Primary Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"This patient’s consents by type and status."],
   stepsUr: [
   "ڈاکٹر کی جگہ سے معائنہ یا جاری قطار سے معائنہ کھولیں۔ مکمل پرچی اسکین یا اپنی قطار سے چنیں۔ نام، ایم آر این، عمر، الرجی، وفات، میڈیکو لیگل، عارضی یا ضم شناخت اور پرچی کی حالت چیک کریں۔ ناکام یا بدلی معلومات پر عمل رکتا، مسودہ رہتا ہے۔",
   "نیا نوٹ اور قسم چنیں؛ داخلے کی قسم کے لیے مریض کا اصل داخلہ مجموعی تاریخ سے چنیں۔ شکایت، تاریخ، تشخیص، منصوبہ اور مشاہدات لکھیں۔ معائنے سے پہلے زبانی رضامندی، انکار یا معائنہ نہیں کیا خود چنیں؛ پہلے سے کچھ منتخب نہیں۔ انکار یا نہ کیا پر نتائج بند ہیں۔ کوڈ کا انتخاب اصل کوڈ ہی بھیجتا ہے۔",
@@ -5760,7 +6416,10 @@ consents_doctor: {
   "جواب گم ہو تو معلومات اور جگہ بدلنا مقفل ہے۔ صرف محفوظ شناخت والا عمل24گھنٹے میں اصل کلید اور معلومات سے دہرا سکتا ہے۔ نسخے یا حالت کے عمل پر موجودہ نتیجہ پڑھ، موازنہ اور واضح نوٹ تازہ کرکے مزید ترمیم کریں۔ نامعلوم نتیجہ کامیابی نہیں۔ ایف۱ خانے اور کوڈ کے جزو کا متعلقہ رہنما رکھتا ہے؛ اردو اور مشترک100تا250فیصد زوم ہیں۔",
   "دوسرے ڈاکٹر کو حوالہ سے بلائی گئی قطار کی سطر موجودہ او پی ڈی ڈاکٹر، انتظار کی تعداد سمیت، یا صرف شعبے کو بھیجیں۔ وجہ، وہی مریض و پرچی چیک کرکے ایک تصدیق۔ مریض میری قطار سے نکل کر نئی قطار میں سب سے اوپر اسی پرچی پر جاتا ہے؛ ادائیگی یا واپسی نہیں۔ کامیاب حوالگی معائنہ بند کرتی ہے؛ تصدیق سے پہلے غیر محفوظ نوٹ چیک یا محفوظ کریں۔ بند سطر پر قطار تازہ؛ فیلڈ، حوالہ یا اجازت کا انکار واضح اور وجہ محفوظ۔ استقبالیہ اصل پرچی مجاز او پی ڈی ڈاکٹر کو دیتا ہے، حوالگی نہیں کرتا۔",
   "داخلے میں فعال پی ایم ڈی سی معالج چنیں یا درخواست کرنے والے ڈاکٹر کے لیے خالی چھوڑیں۔ معالج فیلڈ کی غلطی یعنی فعال پی ایم ڈی سی ڈاکٹر نہیں؛ وجہ و تشخیص رکھ کر دوبارہ چنیں۔"
-],
+,
+"Requested Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔",
+"Primary Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"اسی مریض کی رضامندی قسم اور حالت سے۔"],
   faq: [
   [
     "Which clinician can edit or correct a note?",
@@ -5794,7 +6453,8 @@ consents_doctor: {
     "Which doctor may be named on admission?",
     "Admit may name a treating doctor from the active PMDC lookup, or leave it empty for the requesting doctor. VALIDATION_ERROR on primary_doctor_id means that doctor is not an active PMDC doctor; keep the reason/diagnosis and choose again."
   ]
-],
+,
+["How do I find a record, and who adds it if missing?","Requested Ward: Wards; IT adds missing wards. Bed selection loads the beds too. Primary Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. This patient’s consents by type and status."]],
   faqUr: [
   [
     "کون نوٹ بدل یا درست کر سکتا ہے؟",
@@ -5828,7 +6488,8 @@ consents_doctor: {
     "داخلے میں کس ڈاکٹر کا نام دے سکتے ہیں؟",
     "داخلے میں فعال پی ایم ڈی سی معالج چنیں یا درخواست کرنے والے ڈاکٹر کے لیے خالی چھوڑیں۔ معالج فیلڈ کی غلطی یعنی فعال پی ایم ڈی سی ڈاکٹر نہیں؛ وجہ و تشخیص رکھ کر دوبارہ چنیں۔"
   ]
-]
+,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Requested Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔ Primary Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ اسی مریض کی رضامندی قسم اور حالت سے۔"]]
 },
   icd_picker: {
     title:"ICD code picker",titleUr:"تشخیصی کوڈ کا انتخاب",
@@ -6372,7 +7033,7 @@ consents_doctor: {
       "Server connection runs health, address and licence checks. This terminal shows the server’s location and printer mapping.",
       "Hospital policy: select a setting, preserve its value type, enter a reason for control settings, and Save policy. Read the result: Applied is saved; Pending waits for an Owner. Review recent requests below.",
       "Facility profile and services opens a separate administrator screen. System (IT) opens the server-permitted user/access, hardware, health, maintenance and emergency panels. Review target and values before any change. See the detailed system instructions below for Owner requests, once-only credentials and uncertain replies.",
-    ],
+"Target User: User directory by name for the role change."],
     stepsUr: [
       "ترتیبات کھولیں یا Ctrl/Cmd comma دبائیں۔ حصے آپ کی سرور اجازت کے مطابق ہیں۔",
       "زبان، تھیم، سائز اور الگ یا مشترک PDF منتخب کریں۔ سائن اِن کے بعد ذاتی ترتیبات اکاؤنٹ میں محفوظ ہوتی ہیں؛ پہلے صرف اس ٹرمینل میں۔",
@@ -6380,7 +7041,7 @@ consents_doctor: {
       "سرور رابطہ میں صحت، پتے اور لائسنس چیک ہوتے ہیں۔ ٹرمینل میں مقام اور پرنٹر کی معلومات ہیں۔",
       "پالیسی منتخب کریں، قدر کی قسم برقرار رکھیں، وجہ لکھیں اور محفوظ کریں۔ Applied محفوظ ہے؛ Pending مالک کی منظوری کا منتظر ہے۔",
       "پروفائل اور خدمات منتظم کا الگ صفحہ ہے۔ نظام (آئی ٹی) میں سرور کی مجاز صارف، رسائی، آلات، صحت، دیکھ بھال اور ہنگامی ترتیب کھلتی ہے۔ تبدیلی سے پہلے ہدف اور کوائف دیکھیں۔ نیچے مالک کی درخواست، ایک بار کے کوائف اور غیر یقینی جواب کی مفصل ہدایات ہیں۔",
-    ],
+"Target User: کردار بدلنے کے لیے صارف نام سے۔"],
     faq: [
       [
         "Why does a policy say Waiting for an Owner?",
@@ -6398,7 +7059,7 @@ consents_doctor: {
         "What happens to login and badges when an employee is reinstated or returns?",
         "When an employee resigns or is terminated, their user account is disabled (user is null) and badges are revoked. On reinstatement to Active by HR, left_on is cleared, but the login stays off until IT re-enables it (POST /admin/users/{user_id}/active), and revoked badges stay revoked (issued anew by security). Someone IT never gave a login returns to Awaiting_IT_Provisioning in IT's queue.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Target User: User directory by name for the role change."]],
     faqUr: [
       [
         "پالیسی مالک کی منتظر کیوں ہے؟",
@@ -6416,7 +7077,7 @@ consents_doctor: {
         "ملازم کی بحالی یا واپسی پر لاگ اِن اور بیجز کا کیا بنتا ہے؟",
         "ملازم کے استعفیٰ یا برطرفی پر صارف اکاؤنٹ غیر فعال اور بیجز منسوخ ہو جاتے ہیں۔ ایچ آر کی بحالی پر رخصت تاریخ صاف ہوتی ہے مگر لاگ اِن اس وقت تک بند رہتا ہے جب تک آئی ٹی اسے دوبارہ فعال نہ کرے، اور پرانے بیجز منسوخ رہتے ہیں۔ اگر آئی ٹی نے پہلے لاگ اِن نہ دیا ہو تو ملازم آئی ٹی کی فراہمی قطار میں واپس جاتا ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Target User: کردار بدلنے کے لیے صارف نام سے۔"]],
   },
   notifications: {
     title: "Notifications",
@@ -6554,7 +7215,13 @@ consents_doctor: {
       "Describe what happened and what was done at once. Keep my name confidential restricts reporter identity to incident managers.",
       "Submit once. On confirmation note the incident number and next step. My reports shows your reports; select one for its detail.",
       "What to report downloads the hospital’s sentinel-event PDF. If an identity lookup is unavailable for your account, that path is blocked and must be resolved with the backend team.",
-    ],
+"Patient: Patient search by name; Reception registers a missing patient first.",
+"Admission: Current admitted stays by patient name.",
+"Booking: Operations by patient and procedure name, only with lookup permission.",
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary.",
+"Death: Death register by patient name, only with lookup permission.",
+"Department: Departments (active only); IT adds missing departments.",
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too."],
     stepsUr: [
       "ہسپتال کی فہرست سے واقعے کی قسم، قریب الوقوع حادثہ یا واقعہ اور نقصان منتخب کریں۔ سنگین اقسام پر نشان ہے۔",
       "وقت اور مقام لکھیں۔ متاثرہ شخص منتخب کریں۔ مریض یا ملازم تلاش کر کے منتخب کریں؛ ریکارڈ نمبر کا اندازہ نہ لگائیں۔",
@@ -6562,7 +7229,13 @@ consents_doctor: {
       "حقائق اور فوری اقدامات لکھیں۔ نام خفیہ رکھنے سے صرف واقعہ منتظم شناخت دیکھتا ہے۔",
       "ایک بار جمع کریں۔ تصدیق پر رپورٹ نمبر اور اگلا قدم پڑھیں۔ میری رپورٹس سے تفصیل کھولیں۔",
       "کیا رپورٹ کریں سے ہسپتال کی PDF حاصل کریں۔ شناخت تلاش کی اجازت نہ ہو تو بیک اینڈ ٹیم سے راستہ درست کرائیں۔",
-    ],
+"Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+"Admission: داخل مریضوں کے موجودہ قیام نام سے۔",
+"Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔",
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔",
+"Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
     faq: [
       [
         "Will a retry create a duplicate?",
@@ -6572,7 +7245,7 @@ consents_doctor: {
         "How do I select affected staff?",
         "Search active staff by name or employee number, then select the matching badge identity. Every signed-in reporter can use this minimal lookup without access to confidential HR records.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Admission: Current admitted stays by patient name. Booking: Operations by patient and procedure name, only with lookup permission. Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary. Death: Death register by patient name, only with lookup permission. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
     faqUr: [
       [
         "دوبارہ کوشش سے نقل بنے گی؟",
@@ -6582,7 +7255,7 @@ consents_doctor: {
         "متاثرہ ملازم کیسے منتخب کروں؟",
         "نام یا ملازم نمبر سے فعال عملہ تلاش کرکے درست شناخت منتخب کریں۔ ہر لاگ ان رپورٹر خفیہ ایچ آر ریکارڈ کی اجازت کے بغیر یہ محدود تلاش استعمال کر سکتا ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Admission: داخل مریضوں کے موجودہ قیام نام سے۔ Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔ Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔ Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]],
   },
   facility_profile: {
     title: "Facility profile & services",
@@ -6749,7 +7422,7 @@ consents_doctor: {
       "To update demographics (address, phone, contact, etc.), click 'Edit demographics'. Save changes with optimistic locking protection.",
       "After a VERSION_CONFLICT or uncertain save, the draft stays open and Save is blocked. Read current record, compare it with your draft, then explicitly discard/reload and re-enter only still-needed changes. Never automatically repeat PATCH.",
       "Click 'View dues & invoices' to inspect outstanding receivables and past invoices across the patient's whole merge chain.",
-    ],
+"Panel: Panels by name."],
     stepsUr: [
       "پرانے ضم نمبر سے نتیجہ موجودہ اصل مریض دکھاتا اور پرانی شناخت سے ملا، اس ریکارڈ میں ضم ہے کا پیغام واضح کرتا ہے۔ حروف اور اعداد والے نام ویسے ہی تلاش ہوتے ہیں۔ ضم شدہ شناخت سے اصل پروفائل کھلتی ہے۔ کھلا مسودہ پرانی شناخت کا ہو تو موازنے کے لیے محفوظ رکھیں، موجودہ اصل ریکارڈ پڑھیں، پھر دوبارہ محفوظ کرنے سے پہلے خود مسودہ چھوڑ کر تازہ کریں۔",
       "تلاش کے خانے میں کم از کم دو حروف (نام، فون، شناختی کارڈ یا ایم آر این) درج کریں، یا بارکوڈ سکینر سے ایم آر این سکین کریں۔",
@@ -6758,7 +7431,7 @@ consents_doctor: {
       "معلومات (پتہ، فون، رابطہ وغیرہ) تبدیل کرنے کے لیے 'معلومات میں ترمیم' پر کلک کریں اور تبدیلی محفوظ کریں۔",
       "اگر ورژن کا تنازع (VERSION_CONFLICT) پیش آئے تو سرور سے تازہ ترین ڈیٹا دیکھ کر دوبارہ محفوظ کریں۔",
       "مریض کے تمام سابقہ بل اور واجب الادا رقوم دیکھنے کے لیے 'واجبات اور انوائس دیکھیں' پر کلک کریں۔",
-    ],
+"Panel: پینل نام سے۔"],
     faq: [
       [
         "Can I issue an OPD slip if the patient has outstanding dues?",
@@ -6772,7 +7445,7 @@ consents_doctor: {
         "Why is a Deceased banner displayed?",
         "When a death record is officially logged on the hospital server, the patient profile is marked Deceased. The terminal strictly forbids starting new clinical encounters for deceased patients.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Panel: Panels by name."]],
     faqUr: [
       [
         "کیا بقایا جات والے مریض کی او پی ڈی پرچی بن سکتی ہے؟",
@@ -6786,7 +7459,7 @@ consents_doctor: {
         "وفات یافتہ کا بینر کیا ظاہر کرتا ہے؟",
         "جب ہسپتال سرور پر موت کا اندراج ہو جائے تو پروفائل پر وفات کا بینر آ جاتا ہے۔ وفات یافتہ مریض کے لیے نیا طبی وزٹ شروع کرنا ممنوع ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Panel: پینل نام سے۔"]],
   },
 
   blood_sources: {
@@ -7065,7 +7738,7 @@ consents_doctor: {
       "Decide the assessment outcome: choose 'Accepted' if all PBTA eligibility criteria are met, or 'Deferred' with temporary/permanent clinical reason.",
       "If Accepted, verify and separately check both the written informed consent and voluntary non-remuneration declaration (neither is pre-ticked).",
       "Submit the assessment with safe idempotency protection; if deferred or repeat-reactive, record confidential disclosure to the donor and confirmatory lab referral.",
-    ],
+"For Patient: Patient search by name; Reception registers a missing patient first."],
     stepsUr: [
       "ڈونر کی جسمانی صحت، لیبارٹری معیار اور خون کی حفاظت کی جانچ کے لیے 'عطیہ دہندہ کا طبی معائنہ' کھولیں۔",
       "ڈونر کے تاحیات نمبر، شناختی کارڈ، موبائل یا نام سے تلاش کریں (کم از کم 2 حروف درج کرنا لازمی ہے)۔",
@@ -7075,7 +7748,7 @@ consents_doctor: {
       "طبی فیصلہ کریں: اگر تمام معیار پورے ہوں تو 'قبول' منتخب کریں ورنہ ٹھوس وجہ کے ساتھ 'التواء' کا انتخاب کریں۔",
       "قبولیت کی صورت میں تحریری باخبر رضامندی اور بلا معاوضہ خون دینے کے اقرار نامے کے دونوں الگ خانوں کو خود ٹک کریں۔",
       "معائنہ کو محفوظ کریں؛ التواء یا ری ایکٹیو ہونے کی صورت میں ڈونر کو رازداری میں آگاہی اور ریفرنس لیب کا اندراج کریں۔",
-    ],
+"For Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔"],
     faq: [
       [
         "Who is legally authorized to assess donors and record deferrals?",
@@ -7105,7 +7778,7 @@ consents_doctor: {
         "Under what circumstances can a donor deferral be revoked?",
         "Per rule d8cd988a65, a deferral is permanent medical audit data and may ONLY be revoked if it was entered in error (e.g. misattributed laboratory reading or transcription mistake), requiring a documented explanatory justification.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","For Patient: Patient search by name; Reception registers a missing patient first."]],
     faqUr: [
       [
         "ڈونر کا معائنہ کرنے اور التواء درج کرنے کا قانونی مجاز کون ہے؟",
@@ -7135,7 +7808,7 @@ consents_doctor: {
         "کس صورتحال میں ڈونر کا التواء منسوخ کیا جا سکتا ہے؟",
         "التواء صرف اور صرف اسی صورت میں منسوخ ہو سکتا ہے جب وہ غلطی سے درج ہوا ہو (جیسے کسی اور کے ٹیسٹ کا غلط اندراج) اور اس کی ٹھوس اور تفصیلی وجہ لکھنا لازمی ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","For Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔"]],
   },
   blood_collection: {
     title: "Blood collection and donor adverse reactions",
@@ -7495,7 +8168,9 @@ consents_doctor: {
       "Document estimated arrival time (ETA in minutes) and optional clinical handover notes for the receiving resuscitation team.",
       "Click the prominent 'ACTIVATE CODE RED NOW' button to invoke POST /admissions/code-red with idempotency protection.",
       "Destination resuscitation units, pharmacy, and OT receive full-screen red warning strobes and audio chimes; upon patient arrival in the bay, click 'Confirm Patient Arrived' to transition status to Admitted (rule 77b021933d).",
-    ],
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too.",
+"Ot: Theatres by name; ask Maintenance when one is missing.",
+"Mlc Case Type: Medico-legal case types by name."],
     stepsUr: [
       "ٹرائیج ورک اسپیس -> 'کوڈ ریڈ / ایمرجنسی داخلہ' کھولیں اور ہنگامی بحالی کا کنسول دیکھیں۔",
       "منتخب کریں کہ آیا مریض کا پہلے سے شناختی نمبر موجود ہے یا وہ نامعلوم ٹراما مریض ہے (قاعدہ 79df75a537)۔",
@@ -7505,7 +8180,9 @@ consents_doctor: {
       "متوقع آمد کے منٹ (ETA) اور وصول کنندہ عملے کے لیے ہنگامی کلینیکل نوٹس درج کریں۔",
       "سرخ بٹن 'ACTIVATE CODE RED NOW' پر کلک کر کے فوری کوڈ ریڈ داخلہ سرور پر فعال کریں (قاعدہ 79df75a537)۔",
       "منزل وارڈ، فارمیسی اور آپریشن تھیٹر میں فوری ریڈ الرٹ سائرن بجتا ہے؛ مریض کے پہنچنے پر 'Confirm Patient Arrived' پر کلک کر کے داخلہ مکمل کریں (قاعدہ 77b021933d)۔",
-    ],
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔",
+"Ot: تھیٹر نام سے؛ غائب ہو تو دیکھ بھال شعبے سے پوچھیں۔",
+"Mlc Case Type: میڈیکو لیگل کیس کی قسم نام سے۔"],
     faq: [
       [
         "Why are billing and CNIC/demographic checks bypassed during Code Red?",
@@ -7535,7 +8212,7 @@ consents_doctor: {
         "How does the destination ward confirm patient arrival?",
         "Once the patient reaches the resuscitation bay, authorized staff click 'Confirm Patient Arrived in Bay' (POST /admissions/{admission_id}/arrived), transitioning admission status from CodeRedActive to Admitted.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Ward: Wards; IT adds missing wards. Bed selection loads the beds too. Ot: Theatres by name; ask Maintenance when one is missing. Mlc Case Type: Medico-legal case types by name."]],
     faqUr: [
       [
         "کوڈ ریڈ کے دوران بلنگ اور شناختی کوائف کیوں موخر کیے جاتے ہیں؟",
@@ -7565,7 +8242,7 @@ consents_doctor: {
         "منزل وارڈ مریض کی آمد کی تصدیق کیسے کرتا ہے؟",
         "مریض کے وارڈ میں پہنچتے ہی مجاز عملہ 'Confirm Patient Arrived in Bay' پر کلک کرتا ہے جس سے اسٹیٹس CodeRedActive سے تبدیل ہو کر باقاعدہ Admitted ہو جاتا ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔ Ot: تھیٹر نام سے؛ غائب ہو تو دیکھ بھال شعبے سے پوچھیں۔ Mlc Case Type: میڈیکو لیگل کیس کی قسم نام سے۔"]],
   },
   er_visit: {
     title: "Emergency visit: triage, stages & departure",
@@ -7581,7 +8258,10 @@ consents_doctor: {
       "Answer the mandatory Medico-Legal checklist (Yes/No); if confirmed, choose the case type from the catalogue and click 'Open MLC Case' (rule 50175606cd).",
       "Click 'Attach Outside Report' to upload previous laboratory, radiology, or referral letters brought by the patient with source facility and test date (rule 794ff452da).",
       "Click 'Update Stage' to advance care to InTreatment or Observation; when care finishes, click 'Record Departure' to register final disposition and discharge advice (rule 1c52f88e02, 231e22e6bd).",
-    ],
+"Mlc Case Type: Medico-legal case types by name.",
+"Patient: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record.",
+"Case Type: Medico-legal case types by name.",
+"Police Station: Police station or referral destination by name."],
     stepsUr: [
       "ٹرائیج ورک اسپیس -> 'ایمرجنسی وزٹ چارٹ' کھولیں اور وزٹ آئی ڈی درج کر کے یا بورڈ سے منتخب کر کے چارٹ کھولیں۔",
       "مریض کی تفصیلات، آمد کا ذریعہ، موجودہ مرحلے کا دورانیہ اور وارننگ بیجز (جیسے ٹرائیج تاخیر، ڈاکٹر تاخیر، ایم ایل سی نامکمل) ملاحظہ کریں۔",
@@ -7591,7 +8271,10 @@ consents_doctor: {
       "لازمی میڈیکو لیگل چیک لسٹ کا جواب (ہاں/نہیں) دیں؛ اگر واقعہ حادثاتی یا قانونی نوعیت کا ہو تو 'Open MLC Case' پر کلک کر کے فوری کیس کھولیں (قاعدہ 50175606cd)۔",
       "مریض کی لائی گئی بیرونی رپورٹس، پرانے ٹیسٹ یا ریفرل خطوط منسلک کرنے کے لیے 'Attach Outside Report' پر کلک کریں (قاعدہ 794ff452da)۔",
       "مرحلہ آگے بڑھانے کے لیے 'Update Stage' اور علاج مکمل ہونے پر حتمی روانگی اور ڈسچارج ہدایات درج کرنے کے لیے 'Record Departure' پر کلک کریں (قاعدہ 1c52f88e02، 231e22e6bd)۔",
-    ],
+"Mlc Case Type: میڈیکو لیگل کیس کی قسم نام سے۔",
+"Patient: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔",
+"Case Type: میڈیکو لیگل کیس کی قسم نام سے۔",
+"Police Station: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔"],
     faq: [
       [
         "How does the live triage algorithm determine the suggested priority level?",
@@ -7621,7 +8304,7 @@ consents_doctor: {
         "Can an ER visit chart be edited after departure is recorded?",
         "Under rule 231e22e6bd, departure represents final discharge. Once departed, the visit becomes permanently read-only (ER_VISIT_DEPARTED), and any further clinical actions must be recorded on a newly registered visit or inpatient admission.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Mlc Case Type: Medico-legal case types by name. Patient: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record. Case Type: Medico-legal case types by name. Police Station: Police station or referral destination by name."]],
     faqUr: [
       [
         "لائیو ٹرائیج الگورتھم خودکار ترجیحی لیول کا تعین کیسے کرتا ہے؟",
@@ -7651,7 +8334,7 @@ consents_doctor: {
         "کیا روانگی کے اندراج کے بعد وزٹ میں تبدیلی ممکن ہے؟",
         "قاعدہ 231e22e6bd کے تحت روانگی کے بعد وزٹ مکمل طور پر بند ہو جاتا ہے اور ریڈ اونلی (ER_VISIT_DEPARTED) ہو جاتا ہے۔ مزید علاج کے لیے نیا وزٹ یا داخلہ کرنا پڑتا ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Mlc Case Type: میڈیکو لیگل کیس کی قسم نام سے۔ Patient: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔ Case Type: میڈیکو لیگل کیس کی قسم نام سے۔ Police Station: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔"]],
   },
   er_visit_doctor: {
     title: "ER visit: triage, stages, departure",
@@ -7667,7 +8350,10 @@ consents_doctor: {
       "Click 'Update Stage' to advance care to 'InTreatment', place in 'Observation' (e.g. monitoring post-nebulization or analgesia), or flag 'AwaitingReferral' with receiving specialty notes (rule 436225bf5c).",
       "Review 'Reports Brought by Patient' or click 'Attach Outside Report' to upload prior laboratory, ECG, imaging, or outside referral documentation with source facility and date (rules 794ff452da, abab0015cb).",
       "Once emergency management concludes, click 'Record Departure' to finalize disposition (Discharged, Referred, LAMA, Discharged on Request, LWBS) with discharge advice; upon departure the chart transitions to read-only (rules 1c52f88e02, 231e22e6bd).",
-    ],
+"Mlc Case Type: Medico-legal case types by name.",
+"Patient: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record.",
+"Case Type: Medico-legal case types by name.",
+"Police Station: Police station or referral destination by name."],
     stepsUr: [
       "ڈاکٹر ورک اسپیس -> 'ایمرجنسی وزٹ چارٹ' کھولیں اور وزٹ آئی ڈی درج کر کے یا ٹریکنگ بورڈ سے منتخب کر کے مریض کا ریکارڈ دیکھیں۔",
       "مریض کی بنیادی شناخت، آمد کی تفصیلات، بنیادی شکایت اور فعال وارننگ بیجز (جیسے معائنہ تاخیر، طویل مشاہدہ، ایم ایل سی غیر درج) کا معائنہ کریں۔",
@@ -7677,7 +8363,10 @@ consents_doctor: {
       "مریض کو معالجے (InTreatment)، مشاہدے (Observation) یا ریفرل کے انتظار میں منتقل کرنے کے لیے 'Update Stage' پر کلک کریں (قاعدہ 436225bf5c)۔",
       "مریض کی لائی گئی بیرونی رپورٹس، ای سی جی یا ریفرل خطوط دیکھنے یا اپ لوڈ کرنے کے لیے 'Attach Outside Report' پر کلک کریں (قاعدہ 794ff452da)۔",
       "ہنگامی معالجہ مکمل ہونے پر 'Record Departure' پر کلک کر کے حتمی روانگی اور ڈسچارج ہدایات درج کریں؛ روانگی کے بعد وزٹ مکمل اور محفوظ ہو جاتا ہے (قاعدہ 1c52f88e02، 231e22e6bd)۔",
-    ],
+"Mlc Case Type: میڈیکو لیگل کیس کی قسم نام سے۔",
+"Patient: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔",
+"Case Type: میڈیکو لیگل کیس کی قسم نام سے۔",
+"Police Station: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔"],
     faq: [
       [
         "How does an emergency physician re-triage a deteriorating patient?",
@@ -7711,7 +8400,7 @@ consents_doctor: {
         "Can an ER visit chart be altered after departure is recorded?",
         "Under rule 231e22e6bd, departure constitutes irrevocable emergency case completion. Once departed, the visit becomes permanently read-only (ER_VISIT_DEPARTED), and any further clinical encounters require registering a new emergency visit or inpatient admission.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Mlc Case Type: Medico-legal case types by name. Patient: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record. Case Type: Medico-legal case types by name. Police Station: Police station or referral destination by name."]],
     faqUr: [
       [
         "حالت بگڑنے پر ایمرجنسی ڈاکٹر مریض کا دوبارہ ٹرائیج کیسے کرتا ہے؟",
@@ -7745,7 +8434,7 @@ consents_doctor: {
         "کیا روانگی کے اندراج کے بعد ایمرجنسی وزٹ میں کوئی تبدیلی ممکن ہے؟",
         "قاعدہ 231e22e6bd کے تحت روانگی کے بعد وزٹ مکمل اور ریڈ اونلی (ER_VISIT_DEPARTED) ہو جاتا ہے۔ مزید علاج کے لیے نیا وزٹ یا باضابطہ داخلہ کرنا پڑتا ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Mlc Case Type: میڈیکو لیگل کیس کی قسم نام سے۔ Patient: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔ Case Type: میڈیکو لیگل کیس کی قسم نام سے۔ Police Station: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔"]],
   },
 
   er_board_doctor: {
@@ -7762,7 +8451,7 @@ consents_doctor: {
       "Click '+ Register Arrival' to record a new emergency intake before formal ticketing when patients arrive directly at the resuscitation bay via ambulance, Rescue 1122, or police escort (rules 74958f2576, 141986b356).",
       "For unidentified, unconscious, or unknown trauma casualties, click '+ Quick Trauma' to generate an immediate temporary identity (e.g. 'Unknown Male 1') to initiate clinical charting and diagnostic orders without administrative delay (rule 74958f2576).",
       "Click 'On-Duty Staff' side panel to view on-duty medical officers, triage nurses, and ward staff, as well as on-call specialist consultants (general surgery, orthopaedics, cardiology) with direct contact extensions under MSDS 17 iii (rule 21a063e488).",
-    ],
+"Patient: Patient search by name; Reception registers a missing patient first."],
     stepsUr: [
       "ڈاکٹر ورک اسپیس -> 'ایمرجنسی بورڈ' کھولیں اور تمام زیر علاج ہنگامی مریضوں کا ریئل ٹائم ٹریکنگ بورڈ دیکھیں۔",
       "سب سے اوپر کے سمری ٹائلز دیکھیں جہاں ٹرائیج لیول (1 سے 5)، علاج کے مراحل اور ہدف سے زیادہ تاخیر کے شکار مریضوں کی کل تعداد دکھائی گئی ہے (قاعدہ 618704df95)۔",
@@ -7772,7 +8461,7 @@ consents_doctor: {
       "ایمبولینس یا براہ راست پہنچنے والے مریضوں کے لیے کاؤنٹر پرچی سے پہلے '+ Register Arrival' پر کلک کر کے آمد کا طریقہ اور بنیادی علامات درج کریں (قاعدہ 74958f2576، 141986b356)۔",
       "نامعلوم یا بے ہوش ایمرجنسی مریضوں کے لیے پہلے '+ Quick Trauma' پر کلک کر کے فوری عارضی پروفائل تیار کریں اور فوری طبی علاج شروع کریں (قاعدہ 74958f2576)۔",
       "ڈیوٹی پر موجود ڈاکٹرز، نرسز اور آن کال کنسلٹنٹس (سرجن، آرتھوپیڈک، کارڈیالوجی) کے براہ راست رابطہ نمبرز دیکھنے کے لیے 'On-Duty Staff' پینل کھولیں (قاعدہ 21a063e488، ایم ایس ڈی ایس 17 iii)۔",
-    ],
+"Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔"],
     faq: [
       [
         "How does the emergency doctor prioritize patients waiting on the ER board?",
@@ -7806,7 +8495,7 @@ consents_doctor: {
         "How does facility service state affect physician workflows on the ER board?",
         "Under rules 44901aa670 and 141986b356, when emergency_department transitions to 'open_work' (retiring), active patient tracking, clinical consultations, investigations, and discharge/handover workflows continue uninterrupted, but new arrival registration is blocked with a banner stating 'No new emergency arrivals from now on'.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first."]],
     faqUr: [
       [
         "ایمرجنسی ڈاکٹر بورڈ پر موجود مریضوں کے معائنے میں کس طرح ترجیح دیتا ہے؟",
@@ -7840,7 +8529,7 @@ consents_doctor: {
         "سروس کا اسٹیٹس 'open_work' ہونے پر ڈاکٹر کے طریقہ کار پر کیا فرق پڑتا ہے؟",
         "قواعد 44901aa670 اور 141986b356 کے تحت سروس کے ریٹائر ہونے پر جاری مریضوں کا علاج، ادویات اور ڈسچارج معمول کے مطابق جاری رہتا ہے لیکن نئی آمد کا اندراج 'No new emergency arrivals from now on' کے بینر کے ساتھ روک دیا جاتا ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔"]],
   },
 
   er_board: {
@@ -7857,7 +8546,7 @@ consents_doctor: {
       "Click '+ Register Arrival' to record a new patient intake with arrival mode, referred from, presenting complaint, and optional ticket ID (rule 74958f2576, 141986b356).",
       "For unidentified or unconscious emergency arrivals, click '+ Quick Trauma' to generate an instant temporary identity (e.g. 'Unknown Male 1') before triage (rule 74958f2576).",
       "Click 'On-Duty Staff' side panel to check nurses and emergency doctors currently on shift, along with on-call specialist consultants and their direct contact extensions (rule 21a063e488, MSDS 17 iii).",
-    ],
+"Patient: Patient search by name; Reception registers a missing patient first."],
     stepsUr: [
       "ٹرائیج ورک اسپیس -> 'ایمرجنسی بورڈ' کھولیں اور تمام زیر علاج ہنگامی مریضوں کا لائیو ٹریکنگ بورڈ دیکھیں۔",
       "سب سے اوپر کے سمری ٹائلز دیکھیں جہاں ٹرائیج لیول، علاج کے مراحل اور ہدف سے زیادہ تاخیر کے شکار مریضوں کی تعداد دکھائی گئی ہے (قاعدہ 618704df95)۔",
@@ -7867,7 +8556,7 @@ consents_doctor: {
       "نئے مریض کے اندراج کے لیے '+ Register Arrival' پر کلک کریں اور آمد کا طریقہ، شکایت اور ٹکٹ نمبر درج کریں (قاعدہ 74958f2576)۔",
       "نامعلوم یا بے ہوش مریض کے لیے پہلے '+ Quick Trauma' پر کلک کر کے فوری عارضی پروفائل تیار کریں اور پھر ٹرائیج شروع کریں (قاعدہ 74958f2576)۔",
       "ڈیوٹی پر موجود ڈاکٹرز، نرسز اور آن کال کنسلٹنٹس کے ایمرجنسی فون نمبرز دیکھنے کے لیے 'On-Duty Staff' پینل پر کلک کریں (قاعدہ 21a063e488، ایم ایس ڈی ایس 17 iii)۔",
-    ],
+"Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔"],
     faq: [
       [
         "Why is the board ordered by triage level rather than registration sequence?",
@@ -7897,7 +8586,7 @@ consents_doctor: {
         "How does facility service state affect new ER arrivals?",
         "Under rules 9501947a0e and 141986b356, new ER registrations are only permitted while emergency_department is Active. If the service is transitioning to 'open_work' or retired, existing visits remain manageable but the 'Register Arrival' button is locked with 'No new emergency visits from now on' banner.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first."]],
     faqUr: [
       [
         "ایمرجنسی بورڈ رجسٹریشن نمبر کے بجائے ٹرائیج کی ترتیب سے کیوں دکھایا جاتا ہے؟",
@@ -7927,7 +8616,7 @@ consents_doctor: {
         "سروس کا اسٹیٹس نئی ایمرجنسی آمد کے اندراج پر کیسے اثر انداز ہوتا ہے؟",
         "قواعد 9501947a0e اور 141986b356 کے تحت نئی آمد صرف اس وقت درج ہو سکتی ہے جب سروس ایکٹو ہو۔ اگر سروس ریٹائر ہو رہی ہو تو پرانے وزٹ نمٹائے جا سکتے ہیں لیکن نیا مریض درج نہیں ہو سکتا۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔"]],
   },
   triage_scale: {
     title: "Emergency triage scale & SOP algorithm",
@@ -8115,7 +8804,7 @@ consents_doctor: {
       "Choose a head nurse clinical reason template or document a factual clinical transfer reason (min 5 characters).",
       "Perform supervisory clinical handover checks: bedside wristband verification, SBAR handover to receiving nurse, and chart transit.",
       "Click 'Confirm Ward Transfer'; on rate change, notify admissions/billing counselor to explain revised estimate to the family.",
-    ],
+"Bed: Wards; IT adds missing wards. Bed selection loads the beds too."],
     stepsUr: [
       "ہیڈ نرس ورک اسپیس کھولیں -> 'مریض کو دوسرے بستر یا وارڈ میں منتقل کریں' پر جائیں۔",
       "مریض کا داخلہ نمبر یا ایم آر این درج کریں اور 'مریض کا چارٹ کھولیں' پر کلک کرکے موجودہ وارڈ و بستر کی تصدیق کریں۔",
@@ -8125,7 +8814,7 @@ consents_doctor: {
       "ہیڈ نرس کلینیکل ٹیمپلیٹ منتخب کریں یا منتقلی کی مستند طبی وجہ کم از کم 5 حروف میں درج کریں۔",
       "نگران کلینیکل ہینڈ اوور چیک لسٹ مکمل کریں: رسٹ بینڈ بارکوڈ تصدیق، ایس بی اے آر ہینڈ اوور اور چارٹ منتقلی۔",
       "'وارڈ منتقلی کی تصدیق کریں' پر کلک کریں؛ ٹیرف کی تبدیلی پر داخلہ ڈیسک کو نیا تخمینہ فیملی کو سمجھانے کی ہدایت دیں۔",
-    ],
+"Bed: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
     faq: [
       [
         "What supervisory role does the head nurse have in patient transfers?",
@@ -8155,7 +8844,7 @@ consents_doctor: {
         "What SBAR clinical handover is required when transferring a patient to another ward?",
         "Head nurse standards mandate confirming patient identity at bedside with wristband barcode, delivering a structured SBAR (Situation, Background, Assessment, Recommendation) handover, and verifying chart and medication transport.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Bed: Wards; IT adds missing wards. Bed selection loads the beds too."]],
     faqUr: [
       [
         "مریضوں کی منتقلی میں ہیڈ نرس کا نگران کردار کیا ہے؟",
@@ -8185,7 +8874,7 @@ consents_doctor: {
         "وارڈ منتقلی کے وقت ایس بی اے آر کلینیکل ہینڈ اوور میں کیا شامل ہے؟",
         "ہیڈ نرس قوانین کے تحت بیڈ سائیڈ پر رسٹ بینڈ بارکوڈ سے مریض کی شناخت کی تصدیق، وصول کرنے والے وارڈ کو ایس بی اے آر ہینڈ اوور کی فراہمی، اور میڈیکل چارٹ و ذاتی ادویات کی منتقلی لازمی ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Bed: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]],
   },
   ward_transfer: {
     title: "Move a patient to another bed or ward",
@@ -8201,7 +8890,7 @@ consents_doctor: {
       "Select a quick clinical reason template or type a factual clinical transfer reason of at least 5 characters.",
       "Complete the bedside safety checklist: verify wristband barcode, SBAR clinical handover to receiving nurse, and physical chart transfer.",
       "Click 'Confirm Ward Transfer'; on rate change, click 'Open Cost Estimates' to explain the revised estimate to the family.",
-    ],
+"Bed: Wards; IT adds missing wards. Bed selection loads the beds too."],
     stepsUr: [
       "ایڈمیشنز یا وارڈ نرسنگ ورک اسپیس کھولیں -> 'مریض کو دوسرے بستر یا وارڈ میں منتقل کریں' پر جائیں۔",
       "مریض کا داخلہ نمبر یا ایم آر این درج کریں اور 'مریض کا چارٹ کھولیں' پر کلک کرکے موجودہ وارڈ و بستر کی تصدیق کریں۔",
@@ -8211,7 +8900,7 @@ consents_doctor: {
       "فوری طبی وجہ کا انتخاب کریں یا منتقلی کی مستند کلینیکل وجہ کم از کم 5 حروف میں درج کریں۔",
       "بیڈ سائیڈ حفاظتی چیک لسٹ مکمل کریں: رسٹ بینڈ بارکوڈ تصدیق، ایس بی اے آر نرسنگ ہینڈ اوور اور چارٹ منتقلی۔",
       "'وارڈ منتقلی کی تصدیق کریں' پر کلک کریں؛ ٹیرف کی تبدیلی پر فیملی کو نیا تخمینہ سمجھانے کے لیے لاگت تخمینہ کھولیں۔",
-    ],
+"Bed: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
     faq: [
       [
         "Who is authorized to transfer an inpatient between beds or wards?",
@@ -8241,7 +8930,7 @@ consents_doctor: {
         "What clinical handover is mandated by Punjab Healthcare Commission standards during ward transfers?",
         "Under MSDS PRE 79, patient identity must be re-verified at bedside using the wristband barcode, structured clinical SBAR handover must be given to the receiving ward nurse, and all open medication charts (MAR) and personal medicines must accompany the patient.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Bed: Wards; IT adds missing wards. Bed selection loads the beds too."]],
     faqUr: [
       [
         "وارڈز اور بستروں کے درمیان مریض منتقل کرنے کا مجاز کون ہے؟",
@@ -8271,7 +8960,7 @@ consents_doctor: {
         "پنجاب ہیلتھ کیئر کمیشن کے تحت وارڈ منتقلی کے دوران کن حفاظتی اقدامات کا حکم ہے؟",
         "معیار PRE 79 کے تحت بیڈ سائیڈ پر رسٹ بینڈ بارکوڈ سے مریض کی شناخت کی تصدیق لازمی ہے، وصول کرنے والی نرس کو ایس بی اے آر کے تحت باضابطہ ہینڈ اوور دیا جائے اور ادویات کا چارٹ اور مریض کی ادویات ہمراہ بھیجی جائیں۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Bed: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]],
   },
   medication_safety_ward: {
     title: "Medication safety board",
@@ -8545,7 +9234,7 @@ consents_doctor: {
       "Confirm that the patient and family attendants have been informed of danger signs, and enter the mandatory clinical counselling note.",
       "In Category I and II A hospitals, complete the mandatory nutritional assessment and corrective dietary advice (rule 272b13a3e0, MSDS Indicator 28).",
       "Select the management plan ('Care Here' or 'Refer'); for transfers, click 'Issue External Referral' (POST /referrals), then click 'Save & Sign Risk Assessment'.",
-    ],
+"Destination Contact: Police station or referral destination by name."],
     stepsUr: [
       "حاملہ مریضہ کی وزٹ یا داخلے پر معائنے کے لیے ڈاکٹر یا زچگی ورک اسپیس سے 'حمل و زچگی خطرات کا جائزہ' کھولیں۔",
       "مریضہ کو ایم آر این، نام یا فون نمبر کے ذریعے تلاش کر کے اس کے ریکارڈ پر کلک کریں تاکہ سابقہ ہسٹری لوڈ ہو سکے۔",
@@ -8555,7 +9244,7 @@ consents_doctor: {
       "تصدیق کریں کہ مریضہ اور تیمارداروں کو خطرے کی علامات سے آگاہ کیا گیا ہے، اور لازمی کونسلنگ نوٹ تحریر کریں۔",
       "کیٹیگری I اور II A ہسپتالوں میں لازمی غذائی جائزہ اور اصلاحی خوراک کا مشورہ درج کریں (قاعدہ 272b13a3e0، انڈیکیٹر 28)۔",
       "نگہداشت کا پلان (یہاں علاج یا ریفر) منتخب کریں؛ منتقلی کی صورت میں 'بیرونی ریفرل جاری کریں' سے باضابطہ خط جاری کریں اور اسسمنٹ محفوظ کریں۔",
-    ],
+"Destination Contact: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔"],
     faq: [
       [
         "Why are neither of the two risk buttons pre-selected on the assessment form?",
@@ -8585,7 +9274,7 @@ consents_doctor: {
         "How does the external referral letter link with the patient's obstetric assessment?",
         "Creating a referral via POST /referrals assigns a unique referral number and referral ID. This ID is saved with the assessment payload, and the referral number is displayed on the patient's assessment flowsheet and printed clinical documents.",
       ],
-    ],
+["How do I find a record, and who adds it if missing?","Destination Contact: Police station or referral destination by name."]],
     faqUr: [
       [
         "اسسمنٹ فارم پر پہلے سے کوئی رسک بٹن منتخب کیوں نہیں ہوتا؟",
@@ -8615,7 +9304,7 @@ consents_doctor: {
         "بیرونی ریفرل لیٹر مریضہ کی زچگی اسسمنٹ کے ساتھ کیسے منسلک ہوتا ہے؟",
         "ریفرل جاری کرنے پر ایک مخصوص ریفرل آئی ڈی بنتی ہے جو اسسمنٹ ریکارڈ میں محفوظ ہو جاتی ہے اور مریضہ کے ہسٹری کارڈ اور پرنٹ شدہ دستاویزات پر ریفرل نمبر کے طور پر نظر آتی ہے۔",
       ],
-    ],
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Destination Contact: پولیس اسٹیشن یا حوالہ کی منزل نام سے۔"]],
   },
   cssd_stock: {
     title: "Sterile stock and issue",
@@ -8715,7 +9404,10 @@ consents_doctor: {
       "Apply suggested free slot: if a time overlap is detected, click 'Use Free Slot' to instantly apply the next available non-conflicting time slot calculated from the calendar.",
       "Cancel surgical booking: click 'Cancel' on any scheduled or requested booking, provide mandatory reason; any scanned consumables automatically return to pharmacy stock.",
       "Manage theatre maintenance state: switch to 'Theatres & Readiness' tab to take an operating room out of service for fumigation or maintenance, or restore an out-of-service theatre back to active surgery."
-    ],
+    ,
+"Patient: Patient search by name; Reception registers a missing patient first.",
+"Service: Services by name, filtered to the required Imaging, OT or RoomCharge category.",
+"Primary Surgeon: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."],
     stepsUr: [
       "آپریشن تھیٹر مینو سے 'او ٹی شیڈولنگ اور کیلنڈر' (ot_scheduling) کھولیں تاکہ تمام شیڈول شدہ سرجریز، انتظار کی فہرست اور تھیٹرز کی تیاری کا جائزہ لیا جا سکے۔",
       "شیڈول کیلنڈر کا جائزہ لیں: منتخب تاریخ اور تھیٹر کے مطابق آپریشنز، اوقات اور سرجنز کی تفصیلات دیکھیں (قاعدہ 992db951e1)۔",
@@ -8727,7 +9419,10 @@ consents_doctor: {
       "تجویز کردہ وقت کا استعمال: اگر وقت کا تصادم ہو تو 'تجویز کردہ وقت لیں' دبائیں تاکہ سسٹم خود اگلا دستیاب وقت منتخب کر لے۔",
       "سرجری بکنگ منسوخ کریں: کسی بھی بکنگ کو منسوخ کرنے کے لیے 'منسوخ' پر کلک کریں اور وجہ درج کریں؛ جاری شدہ سامان خودکار سٹاک میں واپس آ جائے گا۔",
       "تھیٹر کی دیکھ بھال کی حالت تبدیل کریں: 'تھیٹرز کی حالت' ٹیب پر جا کر کسی بھی تھیٹر کو صفائی یا مرمت کے لیے غیر فعال کریں یا دوبارہ فعال کریں۔"
-    ],
+    ,
+"Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+"Service: خدمت نام سے؛ مطلوبہ عکس نگاری، تھیٹر یا کمرے کے نرخ کی قسم سے۔",
+"Primary Surgeon: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"],
     faq: [
       [
         "How does the system prevent theatre double-booking?",
@@ -8753,7 +9448,8 @@ consents_doctor: {
         "Why is a theatre turnover buffer required between surgeries?",
         "MSDS IPC and COP standards require room decontamination, air changes, and surface cleaning between surgical cases to prevent surgical site cross-infection. The system enforces this buffer automatically."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Service: Services by name, filtered to the required Imaging, OT or RoomCharge category. Primary Surgeon: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."]],
     faqUr: [
       [
         "سسٹم آپریشن تھیٹر میں ڈبل بکنگ کو کیسے روکتا ہے؟",
@@ -8779,7 +9475,8 @@ consents_doctor: {
         "آپریشنز کے درمیان صفائی کا وقفہ کیوں لازمی ہے؟",
         "انفیکشن کنٹرول اور ایم ایس ڈی ایس قواعد کے تحت دو مریضوں کے درمیان تھیٹر کی جراثیم کشی اور صفائی لازمی ہے تاکہ جراثیم کی منتقلی سے بچا جا سکے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Service: خدمت نام سے؛ مطلوبہ عکس نگاری، تھیٹر یا کمرے کے نرخ کی قسم سے۔ Primary Surgeon: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"]]
   },
   ot_board: {
     title: "Live OT status board",
@@ -8859,7 +9556,10 @@ consents_doctor: {
       "Assign ASA physical status classification (ASA I to ASA VI) and toggle the emergency 'E' modifier if the case is urgent (MSDS COP 31).",
       "Formulate the anaesthetic plan: select planned technique (General, Spinal, Epidural, Regional, Sedation, or Local), document airway management, premedication orders, and NPO fasting instructions.",
       "Record fitness decision (Fit, FitWithConditions, Deferred, or NotFit) with mandatory clinical justification notes for non-standard clearances, save draft, or sign with active clinical privilege; initiate informed anaesthesia consent."
-    ],
+    ,
+"Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."],
     stepsUr: [
       "آئندہ سرجریز کے امیدوار مریضوں کا معائنہ کرنے کے لیے اینستھیزیا یا ڈاکٹر ورک اسپیس سے 'پری اینستھیزیا کلینک' کھولیں۔",
       "مطلوبہ ایام (1، 3، 7 یا 14 دن) کے مطابق فہرست فلٹر کریں یا صرف اپنے تفویض کردہ کیسز دیکھنے کے لیے 'میرے مریض' پر کلک کریں۔",
@@ -8871,7 +9571,10 @@ consents_doctor: {
       "اے ایس اے درجہ بندی (1 تا 6) تفویض کریں اور ہنگامی سرجری کی صورت میں 'E' موڈیفائر منتخب کریں (ایم ایس ڈی ایس سی او پی 31)۔",
       "اینستھیزیا کا منصوبہ منتخب کریں (جنرل، سپائنل، ایپی ڈیورل وغیرہ)، ایئر وے مینیجمنٹ، پری میڈیکیشن اور فاقہ (NPO) کی ہدایات درج کریں۔",
       "فٹنس کا حتمی فیصلہ (فٹ، مشروط فٹ، موخر، غیر موزوں) بمعہ لازمی جواز درج کریں، ڈرافٹ محفوظ کریں یا باضابطہ دستخط کریں، اور اینستھیزیا رضامندی فارم تیار کریں۔"
-    ],
+    ,
+"Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"],
     faq: [
       [
         "Who is authorized to sign a pre-anaesthesia assessment?",
@@ -8897,7 +9600,8 @@ consents_doctor: {
         "What are the mandatory pre-operative fasting (NPO) guidelines?",
         "In accordance with standard anaesthetic guidelines, clear liquids are permitted up to 2 hours before anaesthesia induction, while solids and non-human milk require at least 6 hours of fasting (8 hours for heavy meals)."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."]],
     faqUr: [
       [
         "پری اینستھیزیا اسسمنٹ پر دستخط کرنے کا مجاز کون ہے؟",
@@ -8923,7 +9627,8 @@ consents_doctor: {
         "آپریشن سے قبل فاقہ (NPO) کی بنیادی ہدایات کیا ہیں؟",
         "معیاری طبی اصولوں کے تحت شفاف مائعات آپریشن سے 2 گھنٹے پہلے تک دیے جا سکتے ہیں، جبکہ ٹھوس غذا اور دودھ کے لیے کم از کم 6 گھنٹے کا فاقہ لازمی ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"]]
   },
   consents_anaesthesia: {
     title: "Consents to anaesthesia",
@@ -8941,7 +9646,10 @@ consents_doctor: {
       "Click 'Record Signature' and review server-determined signer authority (Rule cb2f327ee7): select Patient or legal DecisionMaker in priority order with CNIC and phone.",
       "Record patient questions and answers, verify 'Understanding confirmed' checkbox, capture signature or thumb impression with witness, or record Emergency Note with concurring second doctor.",
       "Following bedside signing, click 'Attach Signed Scan' to upload the signed paper document to patient records (Rule 8b7301ca0f)."
-    ],
+    ,
+"Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+"Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."],
     stepsUr: [
       "آپریشن سے قبل رضامندی کا جائزہ لینے کے لیے اینستھیزیا یا ڈاکٹر ورک اسپیس سے 'اینستھیزیا رضامندی' کھولیں۔",
       "مطلوبہ ایام (1، 3، 7 یا 14 دن) کے مطابق فہرست فلٹر کریں یا اپنے مریض دیکھنے کے لیے 'میرے مریض' منتخب کریں (قاعدہ e9d9f576df)۔",
@@ -8953,7 +9661,10 @@ consents_doctor: {
       "دستخط ریکارڈ کرنے کے لیے 'دستخط درج کریں' کھولیں اور سرور کی پالیسی کے مطابق مریض یا قانونی سرپرست کا ترجیحی انتخاب کریں (قاعدہ cb2f327ee7)۔",
       "مریض کے سوالات اور جوابات درج کریں، فہم کی تصدیق پر نشان لگائیں، دستخط یا انگوٹھے کا نشان بمعہ گواہ محفوظ کریں، یا ہنگامی نوٹ درج کریں۔",
       "دستخط شدہ کاغذ کی تصویر یا پی ڈی ایف اپ لوڈ کرنے کے لیے 'اسکین منسلک کریں' پر کلک کریں (قاعدہ 8b7301ca0f)۔"
-    ],
+    ,
+"Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+"Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"],
     faq: [
       [
         "Who is authorized to take and explain an anaesthesia consent?",
@@ -8979,7 +9690,8 @@ consents_doctor: {
         "Can a finalized or signed consent be edited directly?",
         "No. Under Rule 8b7301ca0f, once a consent is marked Given or Refused, it is permanent. To alter the consent decision, it must be formally withdrawn (with a recorded reason) and a fresh consent prepared and signed."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."]],
     faqUr: [
       [
         "اینستھیزیا رضامندی لینے اور کونسلنگ کرنے کا مجاز کون ہے؟",
@@ -9005,7 +9717,8 @@ consents_doctor: {
         "کیا دستخط شدہ رضامندی میں براہ راست ترمیم ہو سکتی ہے؟",
         "نہیں۔ قاعدہ 8b7301ca0f کے تحت حتمی فارم مستقل بن جاتا ہے۔ کسی بھی تبدیلی کے لیے پرانا فارم باضابطہ منسوخ کر کے نیا فارم تیار کرنا پڑتا ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"]]
   },
   safety_checklist: {
     title: "Surgical safety checklist",
@@ -9023,7 +9736,14 @@ consents_doctor: {
       "Conduct the verbal pause: read checklist items aloud, verify patient name, procedure, incision site, antibiotic prophylaxis timing, and display of imaging.",
       "For Phase 3 'Sign Out', verbally confirm procedure completed, sponge/needle/instrument counts correct, specimen labelling, and recovery concerns before the patient leaves the suite (Rule 45c2bd9ac6).",
       "Check the 'Verbal Pause Executed' certification box and click 'Complete & Sign Pause'; report any near-miss incidents or add corrections as needed (Rule 9e9cb593cb)."
-    ],
+    ,
+"Patient: Patient search by name; Reception registers a missing patient first.",
+"Admission: Current admitted stays by patient name.",
+"Booking: Operations by patient and procedure name, only with lookup permission.",
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary.",
+"Death: Death register by patient name, only with lookup permission.",
+"Department: Departments (active only); IT adds missing departments.",
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too."],
     stepsUr: [
       "او ٹی نرس یا تھیٹر ورک اسپیس سے 'جراحی سیفٹی چیک لسٹ' کھولیں اور شیڈول شدہ سرجریز دیکھیں۔",
       "ایام کے مطابق فلٹر کریں یا مریض کے نام، ایم آر این یا آپریشن سے تلاش کریں۔",
@@ -9035,7 +9755,14 @@ consents_doctor: {
       "زبانی توقف کریں: مریض کا نام، آپریشن، کٹ کی جگہ، اینٹی بائیوٹک کا وقت اور ایکسرے/ایم آر آئی کی اسکرین پر موجودگی کی تصدیق کریں۔",
       "مرحلہ 3 'سائن آؤٹ' کے دوران مریض کو تھیٹر سے باہر لے جانے سے قبل سوئیاں، پٹیاں، اوزار اور نمونہ جات کی درستگی کی تصدیق کریں (قاعدہ 45c2bd9ac6)۔",
       "زبانی توثیق کے خانے پر نشان لگائیں اور 'دستخط کریں' پر کلک کریں؛ کسی بھی غیر متوقع واقعے کی صورت میں رپورٹ درج کریں (قاعدہ 9e9cb593cb)۔"
-    ],
+    ,
+"Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+"Admission: داخل مریضوں کے موجودہ قیام نام سے۔",
+"Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔",
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔",
+"Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
     faq: [
       [
         "Why does Sign In block if the pre-operative note or consent is missing?",
@@ -9061,7 +9788,8 @@ consents_doctor: {
         "Can an operation be concluded before completing Sign Out?",
         "No. Under Rule 45c2bd9ac6, completing surgery on the server (complete-surgery) returns OT_CHECKLIST_INCOMPLETE if Sign Out has not been formally recorded and signed."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Admission: Current admitted stays by patient name. Booking: Operations by patient and procedure name, only with lookup permission. Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary. Death: Death register by patient name, only with lookup permission. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
     faqUr: [
       [
         "پری آپریٹو نوٹ یا رضامندی کے بغیر سائن ان کیوں بلاک ہوتا ہے؟",
@@ -9087,7 +9815,8 @@ consents_doctor: {
         "کیا سائن آؤٹ کے بغیر آپریشن مکمل کیا جا سکتا ہے؟",
         "نہیں۔ قاعدہ 45c2bd9ac6 کے مطابق سرور سائن آؤٹ مکمل کیے بغیر سرجری ختم کرنے کی اجازت نہیں دیتا (OT_CHECKLIST_INCOMPLETE)۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Admission: داخل مریضوں کے موجودہ قیام نام سے۔ Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔ Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔ Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]]
   },
   safety_checklist_admin: {
     title: "Surgical safety checklist (OT Admin)",
@@ -9105,7 +9834,14 @@ consents_doctor: {
       "Audit Sign Out execution: ensure sponge, needle, and instrument counts were verified correct and specimen labelling confirmed before theatre departure (Rule 45c2bd9ac6).",
       "Review any intra-operative adverse incident or discrepancy reports submitted to the Quality & Safety Committee via POST /incidents.",
       "Inspect post-signature correction addenda attached under Rule 9e9cb593cb to ensure full statutory audit trail integrity without record alteration."
-    ],
+    ,
+"Patient: Patient search by name; Reception registers a missing patient first.",
+"Admission: Current admitted stays by patient name.",
+"Booking: Operations by patient and procedure name, only with lookup permission.",
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary.",
+"Death: Death register by patient name, only with lookup permission.",
+"Department: Departments (active only); IT adds missing departments.",
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too."],
     stepsUr: [
       "او ٹی ایڈمن ورک اسپیس سے 'جراحی سیفٹی چیک لسٹ' کھولیں اور تمام تھیٹرز میں حفاظتی مراحل کی تکمیل کا جائزہ لیں۔",
       "ایام کے مطابق فلٹر کریں یا مریض کے ایم آر این، سرجن یا آپریشن کے نام سے کیس تلاش کریں۔",
@@ -9117,7 +9853,14 @@ consents_doctor: {
       "سائن آؤٹ مرحلے کا آڈٹ کریں: اس بات کو یقینی بنائیں کہ پٹیاں، سوئیاں، اوزار اور نمونہ جات کی جانچ مریض کے نکلنے سے قبل مکمل ہوئی (قاعدہ 45c2bd9ac6)۔",
       "کوالٹی کمیٹی کو بھیجے گئے کسی بھی غیر متوقع واقعے یا گنتی کے فرق کی رپورٹس کا جائزہ لیں۔",
       "قاعدہ 9e9cb593cb کے تحت شامل کیے گئے تصحیحی ضمیموں کا معائنہ کریں تاکہ ریکارڈ کی قانونی سالمیت برقرار رہے۔"
-    ],
+    ,
+"Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+"Admission: داخل مریضوں کے موجودہ قیام نام سے۔",
+"Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔",
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔",
+"Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
     faq: [
       [
         "What is the OT Administrator's role in the Surgical Safety Checklist?",
@@ -9143,7 +9886,8 @@ consents_doctor: {
         "How does runtime service gating apply to safety_checklist_admin?",
         "Under Rule 3028300996, the screen evaluates GET /establishment views for screen_id safety_checklist_admin (full, open_work, records, setup, hidden) based on the surgery capability state, never by facility category."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Admission: Current admitted stays by patient name. Booking: Operations by patient and procedure name, only with lookup permission. Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary. Death: Death register by patient name, only with lookup permission. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
     faqUr: [
       [
         "او ٹی ایڈمن کا جراحی سیفٹی چیک لسٹ میں کیا کردار ہے؟",
@@ -9169,7 +9913,8 @@ consents_doctor: {
         "او ٹی ایڈمن چیک لسٹ پر سروس گیٹنگ کا کیا اطلاق ہے؟",
         "قاعدہ 3028300996 کے تحت ہسپتال کے قیام کی ترتیبات (GET /establishment) کے مطابق اسکرین کے حقوق اور نظارے کا تعین ہوتا ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Admission: داخل مریضوں کے موجودہ قیام نام سے۔ Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔ Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔ Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]]
   },
   safety_checklist_anaesthesia: {
     title: "Surgical safety checklist (Anaesthesia)",
@@ -9187,7 +9932,14 @@ consents_doctor: {
       "For Phase 3 'Sign Out', confirm surgical recovery concerns, airway management, and post-operative pain instructions before theatre discharge (Rule 45c2bd9ac6).",
       "Certify verbal pause execution and sign the pause via POST /ot/bookings/{id}/safety-checks.",
       "Document any intra-operative adverse events or attach post-finality addendum corrections via POST /ot/bookings/{id}/corrections (Rule 9e9cb593cb)."
-    ],
+    ,
+"Patient: Patient search by name; Reception registers a missing patient first.",
+"Admission: Current admitted stays by patient name.",
+"Booking: Operations by patient and procedure name, only with lookup permission.",
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary.",
+"Death: Death register by patient name, only with lookup permission.",
+"Department: Departments (active only); IT adds missing departments.",
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too."],
     stepsUr: [
       "اینستھیزیا ورک اسپیس سے 'جراحی سیفٹی چیک لسٹ' کھولیں اور بے ہوشی کے مراحل کے متلاشی کیسز کا معائنہ کریں۔",
       "ایام کے فلٹر کا انتخاب کریں یا مریض کے ایم آر این، سرجن یا آپریشن کے نام سے تلاش کریں۔",
@@ -9199,7 +9951,14 @@ consents_doctor: {
       "مرحلہ 3 'سائن آؤٹ' کے دوران مریض کو تھیٹر سے باہر بھیجنے سے قبل سانس، درد کے کنٹرول اور ریکوری کے خدشات کا جائزہ لیں (قاعدہ 45c2bd9ac6)۔",
       "زبانی توثیق کے خانے پر نشان لگا کر چیک لسٹ پر باضابطہ دستخط کریں اور محفوظ کریں۔",
       "کسی بھی غیر متوقع واقعے کی رپورٹ بھیجیں یا ضرورت پڑنے پر ریکارڈ میں باضابطہ تصحیحی ضمیمہ درج کریں (قاعدہ 9e9cb593cb)۔"
-    ],
+    ,
+"Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+"Admission: داخل مریضوں کے موجودہ قیام نام سے۔",
+"Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔",
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔",
+"Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
     faq: [
       [
         "What is the anaesthetist's statutory responsibility during Sign In?",
@@ -9225,7 +9984,8 @@ consents_doctor: {
         "How does runtime service gating affect the anaesthesia checklist screen?",
         "Under Rule 02fc9c5710, the screen evaluates GET /establishment views for screen_id safety_checklist_anaesthesia (full, open_work, records, setup, hidden) based on active surgery capability, never by facility category."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Admission: Current admitted stays by patient name. Booking: Operations by patient and procedure name, only with lookup permission. Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary. Death: Death register by patient name, only with lookup permission. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
     faqUr: [
       [
         "سائن ان کے دوران اینستھیٹسٹ کی قانونی ذمہ داری کیا ہے؟",
@@ -9251,7 +10011,8 @@ consents_doctor: {
         "اینستھیزیا چیک لسٹ اسکرین پر سروس گیٹنگ کا کیا اثر ہے؟",
         "قاعدہ 02fc9c5710 کے تحت قیام کی ترتیبات کے مطابق سرجری سروس کی کیفیت کی بنیاد پر اسکرین کے اختیارات کا تعین ہوتا ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Admission: داخل مریضوں کے موجودہ قیام نام سے۔ Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔ Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔ Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]]
   },
   ot_consumables_nurse: {
     title: "Consumables scan",
@@ -9267,7 +10028,8 @@ consents_doctor: {
       "Click Record Scan to save the consumable into the booking via POST /ot/bookings/{id}/consumables with idempotent protection.",
       "Inspect the Scanned Consumables table to confirm item description, lot/batch number, scanned timestamp, and billing revenue.",
       "If an item was scanned by mistake, click Reverse Scan, enter a mandatory clinical explanation (min 3 characters), and confirm to add a mirrored reversal record under Rule 0a80234be9."
-    ],
+    ,
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary."],
     stepsUr: [
       "بائیں جانب موجود ورک لسٹ سے متعلقہ سرجری کا انتخاب کریں یا مریض کے نام، ایم آر این یا پروسیجر سے تلاش کریں۔",
       "مریض کے شناختی بینر کی تصدیق کریں جس میں نام، ایم آر این، آپریشن تھیٹر روم، سرجن اور کیس کا اسٹیٹس ظاہر ہوتا ہے۔",
@@ -9277,7 +10039,8 @@ consents_doctor: {
       "اسکین محفوظ کریں کے بٹن پر کلک کریں تاکہ سامان محفوظ ہو جائے اور فارمیسی اسٹاک سے کٹوتی ہو جائے۔",
       "نیچے دی گئی جدول میں آئٹم کا نام، بیچ نمبر، وقت اور چارجز کی تصدیق کریں۔",
       "اگر غلطی سے کوئی آئٹم اسکین ہو گیا ہو تو 'اسکین منسوخ کریں' پر کلک کریں، لازمی وضاحتی وجہ درج کریں اور قاعدہ 0a80234be9 کے تحت منسوخی کا اندراج کریں۔"
-    ],
+    ,
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔"],
     faq: [
       [
         "Can a scanned consumable item be deleted from a surgical record?",
@@ -9303,7 +10066,8 @@ consents_doctor: {
         "How does runtime service capability gating apply to ot_consumables_nurse under Rule 77e2100829?",
         "The screen evaluates GET /establishment views for screen_id ot_consumables_nurse (full, open_work, records, setup, hidden) based on the surgery capability state, never deciding access from the facility's profile category."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary."]],
     faqUr: [
       [
         "کیا سرجری کے ریکارڈ سے اسکین شدہ آئٹم کو حذف کیا جا سکتا ہے؟",
@@ -9329,7 +10093,8 @@ consents_doctor: {
         "قاعدہ 77e2100829 کے تحت اسکرین کی سروس گیٹنگ کیسے کام کرتی ہے؟",
         "اسکرین GET /establishment کے جواب میں سرجری سروس کی حالت (فعال، ریٹائرنگ، ریکارڈز، سیٹ اپ، پوشیدہ) کا جائزہ لیتی ہے اور کیٹیگری کی بنیاد پر فیصلہ نہیں کرتی۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔"]]
   },
   ot_intraop: {
     title: "Intra-op consumables",
@@ -9346,7 +10111,8 @@ consents_doctor: {
       "If an item was scanned mistakenly, click Reverse Scan and enter a mandatory clinical explanation (min 3 characters) to record a statutory reversal under Rule f228c617bd.",
       "When the surgical procedure is finished and the WHO Safety Checklist Sign Out pause is verified, click Complete Surgery to transition booking to Cleaning via POST /ot/bookings/{id}/complete-surgery.",
       "Once the housekeeping team finishes terminal disinfection, click Complete Cleaning to mark theatre room Available (🟢) and booking Completed via POST /ot/bookings/{id}/complete-cleaning."
-    ],
+    ,
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary."],
     stepsUr: [
       "بائیں جانب موجود ورک لسٹ سے سرجری کیس منتخب کریں یا اسٹیٹس فلٹرز (شیڈول، جاری، صفائی، مکمل، ہنگامی روک، تمام) اور تلاش کی سہولت استعمال کریں۔",
       "مریض کے شناختی بینر کی تصدیق کریں جس میں نام، ایم آر این، جنس/عمر، آپریشن تھیٹر روم، سرجن، اینستھیٹسٹ اور موجودہ اسٹیٹس ظاہر ہوتا ہے۔",
@@ -9357,7 +10123,8 @@ consents_doctor: {
       "اگر غلطی سے کوئی آئٹم اسکین ہو گیا ہو تو 'اسکین منسوخ کریں' پر کلک کریں، لازمی وضاحتی وجہ درج کریں اور قاعدہ f228c617bd کے تحت منسوخی کا اندراج کریں۔",
       "سرجری مکمل ہونے اور سرجیکل سیفٹی چیک لسٹ کے سائن آؤٹ کے بعد 'سرجری مکمل کریں' پر کلک کریں تاکہ کیس کی حالت Cleaning میں تبدیل ہو جائے۔",
       "تھیٹر کی صفائی اور جراثیم کشی مکمل ہونے پر 'صفائی مکمل کریں' پر کلک کریں تاکہ کمرہ دوبارہ Available (دستیاب) ہو جائے اور کیس مکمل ہو جائے۔"
-    ],
+    ,
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔"],
     faq: [
       [
         "How does the operative lifecycle state machine progress in ot_intraop?",
@@ -9383,7 +10150,8 @@ consents_doctor: {
         "How does runtime service capability gating apply under Rule 23588c8fc8?",
         "The screen checks GET /establishment views for screen_id ot_intraop (full, open_work, records, setup, hidden). When the surgery service is retiring (open_work) or retired (records), actions starting new surgeries are restricted while allowing open cases to be completed and cleaned."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary."]],
     faqUr: [
       [
         "او ٹی انٹرا آپریٹو اسکرین میں سرجری کے لائف سائیکل کا تسلسل کیسے چلتا ہے؟",
@@ -9409,7 +10177,8 @@ consents_doctor: {
         "قاعدہ 23588c8fc8 کے تحت سروس کی اہلیت کی جانچ کیسے کی جاتی ہے؟",
         "اسکرین GET /establishment کے ذریعے سرجری سروس کی کیفیت جانچتی ہے۔ اگر سروس ریٹائر ہو رہی ہو تو نیا کیس شروع کرنے کی ممانعت ہوتی ہے لیکن جاری کیسز کی تکمیل اور صفائی کی اجازت رہتی ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔"]]
   },
   sterile_packs_ot: {
     title: "Sterile packs: scan when opened",
@@ -9426,7 +10195,9 @@ consents_doctor: {
       "When verified usable, click 'Record Pack Opened for Surgery' to call POST /cssd/packs/use and link the pack code to the surgical booking.",
       "Review the Sterile Packs Ledger below to verify that the pack status transitioned to 'Used' and is associated with the patient's MRN.",
       "If a critical recall alert banner appears (Rule 4357be8acb), click 'Filter Recalled Packs', identify any affected packs in theatre, and quarantine them immediately."
-    ],
+    ,
+"Booking: Clinical operations worklist by patient and procedure.",
+"Admission: Your rostered ward beds and admitted patients."],
     stepsUr: [
       "بائیں جانب موجود ورک لسٹ سے سرجری کیس منتخب کریں یا مریض کے نام، ایم آر این یا تھیٹر سے تلاش کریں۔",
       "مریض کے شناختی بینر کی تصدیق کریں جس میں نام، ایم آر این، آپریشن تھیٹر، سرجن اور کیس کا اسٹیٹس ظاہر ہوتا ہے۔",
@@ -9437,7 +10208,9 @@ consents_doctor: {
       "پیک کے درست ہونے پر 'پیک کا اندراج کریں' پر کلک کریں تاکہ POST /cssd/packs/use کے ذریعے سرجری کیس کے ساتھ پیک کا اندراج ہو جائے۔",
       "نیچے دی گئی جدول میں تصدیق کریں کہ پیک کی کیفیت 'Used' میں تبدیل ہو گئی ہے اور مریض کے کوائف منسلک ہو چکے ہیں۔",
       "اگر سٹرلائزیشن لاٹ کی واپسی (Recalled) کا ہنگامی بینر ظاہر ہو تو 'منسوخ شدہ فلٹر' پر کلک کریں اور تھیٹر میں موجود پیکس کو فوری قرنطینہ کریں۔"
-    ],
+    ,
+"Booking: مریض اور عمل سے طبی آپریشن فہرست۔",
+"Admission: آپ کی ڈیوٹی کے وارڈ بستر اور داخل مریض۔"],
     faq: [
       [
         "Why must sterile packs be scanned at the exact moment they are opened?",
@@ -9463,7 +10236,8 @@ consents_doctor: {
         "How does runtime service capability gating apply to sterile_packs_ot under Rule 26e45f89a1?",
         "The screen checks GET /establishment views for screen_id sterile_packs_ot (full, open_work, records, setup, hidden) based on the CSSD service state, ensuring consistent permission and view enforcement without branching on facility category."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Booking: Clinical operations worklist by patient and procedure. Admission: Your rostered ward beds and admitted patients."]],
     faqUr: [
       [
         "سٹرائل پیکس کو کھولتے وقت اسکین کرنا کیوں لازمی ہے؟",
@@ -9489,7 +10263,8 @@ consents_doctor: {
         "قاعدہ 26e45f89a1 کے تحت سروس کی اہلیت کیسے لاگو ہوتی ہے؟",
         "اسکرین GET /establishment کے ذریعے سی ایس ایس ڈی سروس کی کیفیت جانچتی ہے اور اسکرین کی کیفیت (مکمل، اوپن ورک، ریکارڈز، سیٹ اپ، پوشیدہ) کے مطابق کام کرتی ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Booking: مریض اور عمل سے طبی آپریشن فہرست۔ Admission: آپ کی ڈیوٹی کے وارڈ بستر اور داخل مریض۔"]]
   },
   sterile_packs_ot_admin: {
     title: "Sterile packs audit",
@@ -9506,7 +10281,9 @@ consents_doctor: {
       "When verified usable, click 'Record Pack Opened for Surgery' to call POST /cssd/packs/use and link the pack code to the surgical booking.",
       "Review the Sterile Packs Ledger below to verify that the pack status transitioned to 'Used' and is associated with the patient's MRN.",
       "If a critical recall alert banner appears (Rule 4357be8acb), click 'Filter Recalled Packs', identify any affected packs across theatre suites, and quarantine them immediately."
-    ],
+    ,
+"Booking: Clinical operations worklist by patient and procedure.",
+"Admission: Your rostered ward beds and admitted patients."],
     stepsUr: [
       "سرجری کیسز کی فہرست سے متعلقہ کیس منتخب کریں یا مریض کے نام، ایم آر این یا پروسیجر سے تلاش کریں۔",
       "مریض کے شناختی بینر کی تصدیق کریں جس میں نام، ایم آر این، آپریشن تھیٹر، سرجن اور کیس کا اسٹیٹس ظاہر ہوتا ہے۔",
@@ -9517,7 +10294,9 @@ consents_doctor: {
       "پیک کے درست ہونے پر 'پیک کا اندراج کریں' پر کلک کریں تاکہ POST /cssd/packs/use کے ذریعے سرجری کیس کے ساتھ پیک کا اندراج ہو جائے۔",
       "نیچے دی گئی جدول میں تصدیق کریں کہ پیک کی کیفیت 'Used' میں تبدیل ہو گئی ہے اور مریض کے کوائف منسلک ہو چکے ہیں۔",
       "اگر سٹرلائزیشن لاٹ کی واپسی (Recalled) کا ہنگامی بینر ظاہر ہو تو 'منسوخ شدہ فلٹر' پر کلک کریں اور تھیٹر میں موجود پیکس کو فوری قرنطینہ کریں۔"
-    ],
+    ,
+"Booking: مریض اور عمل سے طبی آپریشن فہرست۔",
+"Admission: آپ کی ڈیوٹی کے وارڈ بستر اور داخل مریض۔"],
     faq: [
       [
         "How does sterile pack tracking link to infection control audits in OT Admin?",
@@ -9543,7 +10322,8 @@ consents_doctor: {
         "How does runtime service capability gating apply to sterile_packs_ot_admin under Rule d897ee980e?",
         "The screen checks GET /establishment views for screen_id sterile_packs_ot_admin (full, open_work, records, setup, hidden) based on CSSD service readiness, allowing open case pack usage during retiring mode while restricting new setups when retired."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Booking: Clinical operations worklist by patient and procedure. Admission: Your rostered ward beds and admitted patients."]],
     faqUr: [
       [
         "او ٹی ایڈمن میں سٹرائل پیکس کی ٹریکنگ انفیکشن کنٹرول آڈٹ سے کیسے منسلک ہے؟",
@@ -9569,7 +10349,8 @@ consents_doctor: {
         "قاعدہ d897ee980e کے تحت سروس کی اہلیت کیسے لاگو ہوتی ہے؟",
         "اسکرین GET /establishment کے ذریعے سی ایس ایس ڈی سروس کی حالت چیک کرتی ہے تاکہ سروس کی کیفیت (مکمل، اوپن ورک، ریکارڈز، سیٹ اپ، پوشیدہ) کے مطابق ہی اختیارات میسر آئیں۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Booking: مریض اور عمل سے طبی آپریشن فہرست۔ Admission: آپ کی ڈیوٹی کے وارڈ بستر اور داخل مریض۔"]]
   },
   recovery_board_anaesthesia: {
     title: "Recovery board - Anaesthesia",
@@ -9585,7 +10366,14 @@ consents_doctor: {
       "Evaluate Modified Aldrete recovery domains (Activity, Respiration, Circulation, Consciousness, SpO2) against target score (≥9) via '✓ Discharge Patient' (Rule 99dea44a26).",
       "If discharging with an Aldrete score < 9 or elevated pain, record an explicit clinical override reason and complete the shifting handover note (MSDS 39).",
       "Chart adverse events or unexpected emergence complications via 'Report Incident' (POST /incidents, Rule fe0c435dc9) and append correction addenda when needed (Rule 9e9cb593cb)."
-    ],
+    ,
+"Patient: Patient search by name; Reception registers a missing patient first.",
+"Admission: Current admitted stays by patient name.",
+"Booking: Operations by patient and procedure name, only with lookup permission.",
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary.",
+"Death: Death register by patient name, only with lookup permission.",
+"Department: Departments (active only); IT adds missing departments.",
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too."],
     stepsUr: [
       "پی اے سی یو ریکوری بورڈ کھول کر اینستھیزیا کے بعد ہوش میں آنے والے مریضوں کا جائزہ لیں (قاعدہ f995066a59)۔",
       "اہم علامات اور وارننگ بیجز دیکھیں: سرخ بیجز (غیر اندراج شدہ وائٹلز) اور امبر بیجز (طویل قیام)۔",
@@ -9595,7 +10383,14 @@ consents_doctor: {
       "ایلڈریٹ اسکور کے پانچوں شعبوں کی جانچ کریں اور مطلوبہ حد (≥9) کی تصدیق کریں (قاعدہ 99dea44a26)۔",
       "اگر ایلڈریٹ اسکور مطلوبہ حد سے کم ہو تو کلینیکل استثنا کی وجہ درج کریں اور وارڈ نرس کے لیے ہینڈ اوور نوٹ لکھیں۔",
       "کسی بھی ہنگامی پیچیدگی کی صورت میں واقعہ رپورٹ کریں (قاعدہ fe0c435dc9) اور ضروری تصحیحات کا اندراج کریں (قاعدہ 9e9cb593cb)۔"
-    ],
+    ,
+"Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+"Admission: داخل مریضوں کے موجودہ قیام نام سے۔",
+"Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔",
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔",
+"Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
     faq: [
       [
         "What is the anaesthetist's clinical responsibility on the PACU Recovery Board?",
@@ -9617,7 +10412,8 @@ consents_doctor: {
         "How are emergence complications (delirium, laryngospasm, respiratory depression) reported?",
         "Under Rule fe0c435dc9, clicking 'Report Incident' logs the adverse event with classification (e.g. PACU_RESP_DEPRESSION) and immediate clinical measures to hospital quality assurance."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Admission: Current admitted stays by patient name. Booking: Operations by patient and procedure name, only with lookup permission. Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary. Death: Death register by patient name, only with lookup permission. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
     faqUr: [
       [
         "پی اے سی یو ریکوری بورڈ پر اینستھیٹسٹ کی کلینیکل ذمہ داری کیا ہے؟",
@@ -9639,7 +10435,8 @@ consents_doctor: {
         "ہوش میں آنے کی پیچیدگیوں (جیسے سانس کی تنگی یا ڈیلیریئم) کی رپورٹنگ کیسے ہوتی ہے؟",
         "قاعدہ fe0c435dc9 کے تحت 'رپورٹ واقعہ' کا بٹن دبا کر اسپتال کی کوالٹی ایشورنس کمیٹی کو فوری رپورٹ بھیجی جاتی ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Admission: داخل مریضوں کے موجودہ قیام نام سے۔ Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔ Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔ Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]]
   },
   recovery_board_admin: {
     title: "Recovery board - OT Admin",
@@ -9655,7 +10452,14 @@ consents_doctor: {
       "Verify that the primary surgeon signed the operative note and post-op care orders, and that the anaesthetist signed the anaesthesia record before approving PACU discharge.",
       "When the patient meets discharge criteria, click '✓ Discharge Patient' to record destination (Ward, ICU, HDU, Home) and verify the 5 modified Aldrete criteria (Rule 99dea44a26).",
       "Ensure administrative audit compliance, file incident reports for clinical complications (POST /incidents), and submit retrospective correction addenda when justified (Rule 9e9cb593cb)."
-    ],
+    ,
+"Patient: Patient search by name; Reception registers a missing patient first.",
+"Admission: Current admitted stays by patient name.",
+"Booking: Operations by patient and procedure name, only with lookup permission.",
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary.",
+"Death: Death register by patient name, only with lookup permission.",
+"Department: Departments (active only); IT adds missing departments.",
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too."],
     stepsUr: [
       "پی اے سی یو ریکوری بورڈ پر سرجری کے بعد زیر نگرانی تمام مریضوں کی فہرست طویل ترین قیام کے مطابق دیکھیں (قاعدہ f995066a59)۔",
       "مریض کے بیجز دیکھیں: سرخ بیجز (غیر اندراج شدہ یا تاخیر شدہ وائٹلز) اور امبر بیجز (طویل قیام) کی نشاندہی کریں۔",
@@ -9665,7 +10469,14 @@ consents_doctor: {
       "اس بات کی تصدیق کریں کہ سرجن نے آپریٹو نوٹ اور اینستھیٹسٹ نے اینستھیزیا ریکارڈ مکمل کر لیا ہے۔",
       "مریض کی وارڈ یا آئی سی یو منتقلی کے لیے ایلڈریٹ اسکور کی تصدیق کریں اور ڈسچارج مکمل کریں (قاعدہ 99dea44a26)۔",
       "انتظامی آڈٹ کے تقاضے پورے کریں، ناخوشگوار واقعات کی رپورٹنگ کریں اور ضروری تصحیحات کا اندراج کریں (قاعدہ 9e9cb593cb)۔"
-    ],
+    ,
+"Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+"Admission: داخل مریضوں کے موجودہ قیام نام سے۔",
+"Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔",
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔",
+"Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
     faq: [
       [
         "What is the role of the OT Administrator on the PACU Recovery Board?",
@@ -9687,7 +10498,8 @@ consents_doctor: {
         "How are adverse events in PACU audited by the OT Administrator?",
         "Under Rule fe0c435dc9, clicking 'Report Incident' files an adverse event directly to the hospital Quality Assurance committee and flags it on theatre quality management ledgers."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Admission: Current admitted stays by patient name. Booking: Operations by patient and procedure name, only with lookup permission. Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary. Death: Death register by patient name, only with lookup permission. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
     faqUr: [
       [
         "پی اے سی یو ریکوری بورڈ پر اوٹی ایڈمنسٹریٹر کا کیا کردار ہے؟",
@@ -9709,7 +10521,8 @@ consents_doctor: {
         "پی اے سی یو میں پیش آنے والے واقعات کا ایڈمن آڈٹ کیسے ہوتا ہے؟",
         "قاعدہ fe0c435dc9 کے تحت 'رپورٹ واقعہ' کا بٹن دبا کر اسپتال کی کوالٹی ایشورنس کمیٹی کو براہ راست رپورٹ ارسال کی جاتی ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Admission: داخل مریضوں کے موجودہ قیام نام سے۔ Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔ Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔ Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]]
   },
   recovery_board: {
     title: "Live PACU recovery board",
@@ -9725,7 +10538,14 @@ consents_doctor: {
       "Save the observation: the readings are charted to the chronological flowsheet and update the patient card's last observation timestamp.",
       "When the patient is ready for transfer, click '✓ Discharge Patient' to open the discharge modal: select destination (Ward, ICU, HDU, Home, ReturnedToTheatre, Died) and score the five modified Aldrete criteria (0-2 each).",
       "If the total Aldrete score is below the minimum threshold (≥9) or pain exceeds threshold, enter a mandatory clinical override rationale, complete the shifting handover note (MSDS 39), and click 'Execute Discharge' (Rule 99dea44a26)."
-    ],
+    ,
+"Patient: Patient search by name; Reception registers a missing patient first.",
+"Admission: Current admitted stays by patient name.",
+"Booking: Operations by patient and procedure name, only with lookup permission.",
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary.",
+"Death: Death register by patient name, only with lookup permission.",
+"Department: Departments (active only); IT adds missing departments.",
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too."],
     stepsUr: [
       "پی اے سی یو ریکوری بورڈ کا معائنہ کریں جہاں تمام زیر نگہداشت مریض طویل ترین قیام کے مطابق ترتیب وار موجود ہیں (قاعدہ f995066a59)۔",
       "مریض کے انتباہی بیجز دیکھیں: سرخ رنگ میں معائنے کی تاخیر، پیلے رنگ میں طویل قیام اور آپریٹو نوٹ یا اینستھیزیا ریکارڈ کے دستخط کا انتظار۔",
@@ -9735,7 +10555,14 @@ consents_doctor: {
       "مشاہدہ محفوظ کریں: یہ ریڈنگز فوری طور پر فلو شیٹ کا حصہ بن جاتی ہیں اور بورڈ پر مریض کے آخری معائنے کا وقت اپ ڈیٹ ہو جاتا ہے۔",
       "جب مریض منتقلی کے لیے تیار ہو تو '✓ ڈسچارج مریض' پر کلک کریں: منتقلی کا مقام منتخب کریں اور ایلڈریٹ کے پانچ معیارات کا 0 سے 2 تک اسکور متعین کریں۔",
       "اگر مجموعی ایلڈریٹ اسکور مطلوبہ حد (≥9) سے کم ہو تو کلینیکل استثنا کی وجہ درج کریں، وارڈ نرس کے لیے ہینڈ اوور نوٹ لکھیں اور ڈسچارج مکمل کریں (قاعدہ 99dea44a26)۔"
-    ],
+    ,
+"Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+"Admission: داخل مریضوں کے موجودہ قیام نام سے۔",
+"Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔",
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔",
+"Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
     faq: [
       [
         "Why are patients on the PACU board sorted longest-in-recovery first?",
@@ -9757,7 +10584,8 @@ consents_doctor: {
         "How is a local anaesthesia patient admitted to PACU recovery?",
         "Under Rule 1653612103, for local or regional procedures where theatre transfer is direct, clicking '+ Open Recovery Stay' and providing the surgical booking ID admits the case directly into the active PACU queue."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Admission: Current admitted stays by patient name. Booking: Operations by patient and procedure name, only with lookup permission. Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary. Death: Death register by patient name, only with lookup permission. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
     faqUr: [
       [
         "پی اے سی یو بورڈ پر مریضوں کو طویل ترین قیام کے مطابق کیوں ترتیب دیا جاتا ہے؟",
@@ -9779,7 +10607,8 @@ consents_doctor: {
         "لوکل اینستھیزیا کے مریض کو ریکوری میں کیسے داخل کیا جاتا ہے؟",
         "قاعدہ 1653612103 کے تحت لوکل سرجری کے مریضوں کے لیے '+ اوپن ریکوری اسٹے' کا بٹن دبا کر بکنگ نمبر درج کرنے سے مریض کا ریکوری قیام شروع ہو جاتا ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Admission: داخل مریضوں کے موجودہ قیام نام سے۔ Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔ Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔ Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]]
   },
   surgical_record_surgeon: {
     title: "Surgical record: pre-operative and operative notes",
@@ -9787,29 +10616,49 @@ consents_doctor: {
     purpose: "Intra-operative surgical record, pre-operative clinical evaluation, informed operation consent, and operative note in surgeon workspace (MSDS COP 32, 33, 35, 38): Pre-operative note with ICD-10 provisional diagnosis and laterality marking (Rule 8bbdbdc51d), informed operation consent verification (form OPERATION, Rule 451c4b4945), operative note and post-operative care orders (Rule 2b25651d1e), primary surgeon signing as prerequisite for PACU discharge (OT_OPERATIVE_NOTE_REQUIRED, Rule 2b25651d1e), official A4 printable surgical record (Rule 40d4b7c1c0), post-finality retrospective correction addenda (Rule 9e9cb593cb), in-theatre adverse incident reporting (POST /incidents, Rule fe0c435dc9), active clinical privileges authorization check (Rule db3a19e806), and runtime service capability gating from GET /establishment views for screen_id surgical_record_surgeon under Rule 7bb3ca4e1d.",
     purposeUr: "سرجن کے ورک اسپیس میں مکمل سرجیکل ریکارڈ، پری آپریٹو جائزہ، باخبر آپریشن رضامندی اور آپریٹو نوٹ (ایم ایس ڈی ایس 32، 33، 35، 38): آئی سی ڈی 10 عارضی تشخیص اور سائیڈ مارکنگ کے ساتھ پری آپریٹو نوٹ (قاعدہ 8bbdbdc51d)، آپریشن کی باخبر رضامندی کی تصدیق (فارم OPERATION، قاعدہ 451c4b4945)، آپریٹو نوٹ اور آپریشن کے بعد نگہداشت کے احکامات (قاعدہ 2b25651d1e)، پی اے سی یو ریکوری سے ڈسچارج کے لیے سرجن کے دستخط کی لازمی شرط (OT_OPERATIVE_NOTE_REQUIRED، قاعدہ 2b25651d1e)، سرکاری اے فور پرنٹ دستاویز (قاعدہ 40d4b7c1c0)، دستخط کے بعد آڈٹ تصحیحی اندراج (قاعدہ 9e9cb593cb)، تھیٹر میں پیش آنے والے ناخوشگوار واقعات کی رپورٹنگ (POST /incidents، قاعدہ fe0c435dc9)، کلینیکل مراعات کی تصدیق (قاعدہ db3a19e806) اور سروس صلاحیت کے تحت اسکرین کے اختیارات (قاعدہ 7bb3ca4e1d)۔",
     steps: [
-      "Select the surgical case from the active clinical worklist or search by patient name, MRN, or procedure.",
-      "Verify the patient identity banner: Name, MRN, Age, Gender, Scheduled Procedure, Theatre Room, and Primary Surgeon.",
-      "On the Pre-Op Note tab, enter clinical history, provisional diagnosis, search ICD-10 terms, select laterality (Left, Right, Bilateral, NotApplicable), and enter the planned procedure.",
-      "Click 'Save Pre-Op Note' to commit the pre-operative evaluation before the WHO Surgical Safety Checklist Sign In pause (Rule 8bbdbdc51d).",
-      "On the Operation Consent tab, confirm proposed procedure, performing surgeon, risks, benefits, and alternatives discussed with the patient in their language (Rule 451c4b4945).",
-      "Execute consent by clicking 'Sign Consent', recording signer CNIC, relationship if surrogate decision-maker, and witness CNIC, marking consent as Given.",
-      "On the Operative Note tab, document procedures performed, post-op diagnosis, intra-operative findings, technique narrative, incision, and CDC wound classification (Rule 2b25651d1e).",
-      "Record estimated blood loss (EBL), fluid balance, blood transfusion, implants left in situ, surgical drains, tissue specimens sent to histopathology, and end condition.",
-      "Establish the post-operative plan: select ward monitoring interval (15, 30, 60, 120 min), and enter monitoring, analgesia/antibiotics, wound care, and nutrition instructions.",
-      "Click 'Sign Operative Note' to finalize and lock the record; this clears the PACU discharge prerequisite (Rule 2b25651d1e) and allows printing the complete A4 record (Rule 40d4b7c1c0)."
-    ],
+  "Select the surgical case from the active clinical worklist or search by patient name, MRN, or procedure.",
+  "Verify the patient identity banner: Name, MRN, Age, Gender, Scheduled Procedure, Theatre Room, and Primary Surgeon.",
+  "On the Pre-Op Note tab, enter clinical history, provisional diagnosis, search ICD-10 terms, select laterality (Left, Right, Bilateral, NotApplicable), and enter the planned procedure.",
+  "Click 'Save Pre-Op Note' to commit the pre-operative evaluation before the WHO Surgical Safety Checklist Sign In pause (Rule 8bbdbdc51d).",
+  "On the Operation Consent tab, confirm proposed procedure, performing surgeon, risks, benefits, and alternatives discussed with the patient in their language (Rule 451c4b4945).",
+  "Execute consent by clicking 'Sign Consent', recording signer CNIC, relationship if surrogate decision-maker, and witness CNIC, marking consent as Given.",
+  "On the Operative Note tab, document procedures performed, post-op diagnosis, intra-operative findings, technique narrative, incision, and CDC wound classification (Rule 2b25651d1e).",
+  "Record estimated blood loss (EBL), fluid balance, blood transfusion, implants left in situ, surgical drains, tissue specimens sent to histopathology, and end condition.",
+  "Establish the post-operative plan: select ward monitoring interval (15, 30, 60, 120 min), and enter monitoring, analgesia/antibiotics, wound care, and nutrition instructions.",
+  "Click 'Sign Operative Note' to finalize and lock the record; this clears the PACU discharge prerequisite (Rule 2b25651d1e) and allows printing the complete A4 record (Rule 40d4b7c1c0).",
+  "Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record.",
+  "Patient: Patient search by name; Reception registers a missing patient first.",
+  "Admission: Current admitted stays by patient name.",
+  "Booking: Operations by patient and procedure name, only with lookup permission.",
+  "Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary.",
+  "Death: Death register by patient name, only with lookup permission.",
+  "Department: Departments (active only); IT adds missing departments.",
+  "Ward: Wards; IT adds missing wards. Bed selection loads the beds too.",
+  "Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins.",
+  "Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."
+],
     stepsUr: [
-      "ایکٹو کلینیکل ورک لسٹ میں سے سرجیکل کیس منتخب کریں یا مریض کے نام، ایم آر این یا طریقہ کار کے ذریعے تلاش کریں۔",
-      "مریض کی شناخت کے بینر کی تصدیق کریں: نام، ایم آر این، عمر، جنس، مجوزہ طریقہ کار، تھیٹر روم اور پرائمری سرجن۔",
-      "پری آپ نوٹ ٹیب پر طبی تاریخ اور عارضی تشخیص درج کریں، آئی سی ڈی کوڈ تلاش کریں، سائیڈ (بایاں، دایاں، دونوں، لاگو نہیں) منتخب کریں اور تجویز کردہ طریقہ کار درج کریں۔",
-      "ڈبلیو ایچ او چیک لسٹ کے سائن ان وقفے سے قبل پری آپریٹو جائزہ محفوظ کرنے کے لیے 'پری آپ نوٹ محفوظ کریں' پر کلک کریں (قاعدہ 8bbdbdc51d)۔",
-      "آپریشن رضامندی ٹیب پر مریض کے ساتھ اس کی زبان میں زیر بحث لائے گئے طریقہ کار، سرجن، فوائد، خطرات اور متبادل کی تصدیق کریں (قاعدہ 451c4b4945)۔",
-      "رضامندی کی ونڈو میں سائنر کا شناختی کارڈ، سرپرست کا رشتہ اور گواہ کا شناختی کارڈ درج کر کے باخبر رضامندی مکمل کریں۔",
-      "آپریٹو نوٹ ٹیب پر انجام دیے گئے طریقہ کار، پوسٹ آپ تشخیص، فائنڈنگز، سرجیکل تکنیک، چیرے کی تفصیل اور زخم کی درجہ بندی درج کریں (قاعدہ 2b25651d1e)۔",
-      "خون کے ضیاع کا تخمینہ، فلوئڈ بیلنس، خون کی منتقلی، لگائے گئے امپلانٹس، ڈرینز، پیتھالوجی کے نمونے اور مریض کی اختتامی حالت درج کریں۔",
-      "آپریشن کے بعد کی نگہداشت کا پلان مرتب کریں: وارڈ معائنے کا وقفہ (15، 30، 60 یا 120 منٹ) منتخب کریں اور دوائیں، پٹی اور خوراک کی ہدایات درج کریں۔",
-      "آپریٹو نوٹ پر حتمی دستخط کرنے کے لیے 'آپریٹو نوٹ پر دستخط کریں' پر کلک کریں تاکہ ریکوری سے منتقلی ممکن ہو سکے اور سرکاری اے فور پرنٹ تیار کیا جا سکے (قاعدہ 2b25651d1e)۔"
-    ],
+  "ایکٹو کلینیکل ورک لسٹ میں سے سرجیکل کیس منتخب کریں یا مریض کے نام، ایم آر این یا طریقہ کار کے ذریعے تلاش کریں۔",
+  "مریض کی شناخت کے بینر کی تصدیق کریں: نام، ایم آر این، عمر، جنس، مجوزہ طریقہ کار، تھیٹر روم اور پرائمری سرجن۔",
+  "پری آپ نوٹ ٹیب پر طبی تاریخ اور عارضی تشخیص درج کریں، آئی سی ڈی کوڈ تلاش کریں، سائیڈ (بایاں، دایاں، دونوں، لاگو نہیں) منتخب کریں اور تجویز کردہ طریقہ کار درج کریں۔",
+  "ڈبلیو ایچ او چیک لسٹ کے سائن ان وقفے سے قبل پری آپریٹو جائزہ محفوظ کرنے کے لیے 'پری آپ نوٹ محفوظ کریں' پر کلک کریں (قاعدہ 8bbdbdc51d)۔",
+  "آپریشن رضامندی ٹیب پر مریض کے ساتھ اس کی زبان میں زیر بحث لائے گئے طریقہ کار، سرجن، فوائد، خطرات اور متبادل کی تصدیق کریں (قاعدہ 451c4b4945)۔",
+  "رضامندی کی ونڈو میں سائنر کا شناختی کارڈ، سرپرست کا رشتہ اور گواہ کا شناختی کارڈ درج کر کے باخبر رضامندی مکمل کریں۔",
+  "آپریٹو نوٹ ٹیب پر انجام دیے گئے طریقہ کار، پوسٹ آپ تشخیص، فائنڈنگز، سرجیکل تکنیک، چیرے کی تفصیل اور زخم کی درجہ بندی درج کریں (قاعدہ 2b25651d1e)۔",
+  "خون کے ضیاع کا تخمینہ، فلوئڈ بیلنس، خون کی منتقلی، لگائے گئے امپلانٹس، ڈرینز، پیتھالوجی کے نمونے اور مریض کی اختتامی حالت درج کریں۔",
+  "آپریشن کے بعد کی نگہداشت کا پلان مرتب کریں: وارڈ معائنے کا وقفہ (15، 30، 60 یا 120 منٹ) منتخب کریں اور دوائیں، پٹی اور خوراک کی ہدایات درج کریں۔",
+  "آپریٹو نوٹ پر حتمی دستخط کرنے کے لیے 'آپریٹو نوٹ پر دستخط کریں' پر کلک کریں تاکہ ریکوری سے منتقلی ممکن ہو سکے اور سرکاری اے فور پرنٹ تیار کیا جا سکے (قاعدہ 2b25651d1e)۔",
+  "Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔",
+  "Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+  "Admission: داخل مریضوں کے موجودہ قیام نام سے۔",
+  "Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔",
+  "Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔",
+  "Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔",
+  "Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+  "Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔",
+  "Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔",
+  "Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"
+],
     faq: [
       [
         "Why does the pre-operative note lock upon the WHO Surgical Safety Checklist Sign In pause?",
@@ -9835,7 +10684,8 @@ consents_doctor: {
         "How are in-theatre surgical complications and adverse incidents reported?",
         "Under Rule fe0c435dc9, critical procedural complications (e.g. unanticipated blood loss, bowel perforation, foreign body retention) must be reported to the hospital safety committee via POST /incidents with area 'Surgery' or 'Theatre' and an immediate severity classification."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Admission: Current admitted stays by patient name. Booking: Operations by patient and procedure name, only with lookup permission. Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary. Death: Death register by patient name, only with lookup permission. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too. Performer: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Second Doctor: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins. Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."]],
     faqUr: [
       [
         "ڈبلیو ایچ او سیفٹی چیک لسٹ کے سائن ان پر پری آپ نوٹ کیوں لاک ہو جاتا ہے؟",
@@ -9861,7 +10711,8 @@ consents_doctor: {
         "آپریشن تھیٹر میں پیش آنے والی پیچیدگیوں اور واقعات کی رپورٹنگ کیسے ہوتی ہے؟",
         "قاعدہ fe0c435dc9 کے تحت سرجری کے دوران کسی غیر متوقع پیچیدگی یا حادثے کو ہسپتال کی سیفٹی کمیٹی کو POST /incidents کے ذریعے سرجری کے شعبے کے تحت رپورٹ کیا جاتا ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Admission: داخل مریضوں کے موجودہ قیام نام سے۔ Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔ Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔ Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔ Performer: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Second Doctor: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔ Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"]]
   },
       anaesthesia_record: {
     title: "Anaesthesia record and flowsheet",
@@ -9879,7 +10730,14 @@ consents_doctor: {
       "Chart periodic vitals: Enter HR, cardiac rhythm, BP, respiratory rate, SpO2, EtCO2, temperature, and airway patency, then click 'Record Vitals Reading' (MSDS 36).",
       "Chart medications, fluids, and blood products: Select category, enter drug name, dose, and administration route, then click 'Record Event'.",
       "Review post-procedure summary, enter total fluids, estimated blood loss, urine output, and recovery handover instructions, then click 'Sign Anaesthesia Record' (Rule 2fc0c843dc)."
-    ],
+    ,
+"Patient: Patient search by name; Reception registers a missing patient first.",
+"Admission: Current admitted stays by patient name.",
+"Booking: Operations by patient and procedure name, only with lookup permission.",
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary.",
+"Death: Death register by patient name, only with lookup permission.",
+"Department: Departments (active only); IT adds missing departments.",
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too."],
     stepsUr: [
       "فعال سرجیکل کیسز کی فہرست سے مریض منتخب کریں یا نام، ایم آر این یا طریقہ کار کے ذریعے تلاش کریں۔",
       "مریض کے شناختی بینر کی تصدیق کریں: نام، ایم آر این، جنس، عمر، پروسیجر، تھیٹر روم اور سرجن کا نام۔",
@@ -9891,7 +10749,14 @@ consents_doctor: {
       "پیریوڈک وائٹلز درج کریں: دل کی دھڑکن، تال، بی پی، سانس کی رفتار، آکسیجن، درجہ حرارت اور ایئروے کی حالت درج کر کے محفوظ کریں (ایم ایس ڈی ایس 36)۔",
       "ادویات، مائعات اور خون درج کریں: کیٹیگری منتخب کریں، دوا کا نام، خوراک اور طریقہ درج کر کے 'واقعہ محفوظ کریں' پر کلک کریں۔",
       "خلاصہ درج کریں: مجموعی مائعات، خون کا ضیاع، پیشاب کی مقدار اور ریکوری ہینڈ اوور نوٹ لکھ کر 'اینستھیزیا ریکارڈ پر دستخط کریں' پر کلک کریں (قاعدہ 2fc0c843dc)۔"
-    ],
+    ,
+"Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔",
+"Admission: داخل مریضوں کے موجودہ قیام نام سے۔",
+"Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔",
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔",
+"Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔",
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
     faq: [
       [
         "Why is Pre-Induction baseline evaluation mandatory before induction?",
@@ -9917,7 +10782,8 @@ consents_doctor: {
         "How can an anaesthetist append corrections to a signed record post-finality?",
         "Under Rule 9e9cb593cb, retrospective clinical modifications to a signed record must be submitted as a correction addendum via POST /ot/bookings/{id}/corrections with part 'Anaesthesia', the correction text, and an audit reason. The corrections are permanently preserved and printed directly below the part."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Admission: Current admitted stays by patient name. Booking: Operations by patient and procedure name, only with lookup permission. Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary. Death: Death register by patient name, only with lookup permission. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
     faqUr: [
       [
         "انڈکشن سے قبل پری انڈکشن معائنہ کیوں لازمی ہے؟",
@@ -9943,7 +10809,8 @@ consents_doctor: {
         "دستخط کے بعد ریکارڈ میں کوئی تصحیح کیسے شامل کی جا سکتی ہے؟",
         "قاعدہ 9e9cb593cb کے تحت دستخط کے بعد کی جانے والی کسی بھی تصحیح کو ایک تصحیحی ضمیمہ کے طور پر معقول آڈٹ وجہ کے ساتھ POST /ot/bookings/{id}/corrections کے ذریعے درج کیا جاتا ہے جو ہمیشہ کے لیے ریکارڈ کا حصہ بن جاتا ہے۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Admission: داخل مریضوں کے موجودہ قیام نام سے۔ Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔ Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔ Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]]
   },
 sterile_packs_ward: {
     title: "Sterile packs: scan when opened (Ward)",
@@ -9960,7 +10827,9 @@ sterile_packs_ward: {
       "When verified usable, click 'Record Pack Opened for Ward Inpatient' to call POST /cssd/packs/use and link the pack code to the patient admission.",
       "Review the Sterile Packs Ledger below to verify that the pack status transitioned to 'Used' and is associated with the patient's MRN.",
       "If a critical recall alert banner appears (Rule 4357be8acb), click 'Filter Recalled Packs', identify any affected packs on the ward, and quarantine them immediately."
-    ],
+    ,
+"Booking: Clinical operations worklist by patient and procedure.",
+"Admission: Your rostered ward beds and admitted patients."],
     stepsUr: [
       "وارڈ کے داخل مریضوں کی فہرست سے مریض منتخب کریں یا نام، ایم آر این، وارڈ یا بیڈ کے ذریعے تلاش کریں۔",
       "مریض کے شناختی بینر کی تصدیق کریں جس میں نام، ایم آر این، وارڈ کا نام، بیڈ کا لیبل اور داخلہ نمبر ظاہر ہوتا ہے۔",
@@ -9971,7 +10840,9 @@ sterile_packs_ward: {
       "پیک کے درست ہونے پر 'پیک کا اندراج کریں' پر کلک کریں تاکہ POST /cssd/packs/use کے ذریعے وارڈ داخلہ کے ساتھ پیک کا اندراج ہو جائے۔",
       "نیچے دی گئی جدول میں تصدیق کریں کہ پیک کی کیفیت 'Used' میں تبدیل ہو گئی ہے اور مریض کے کوائف منسلک ہو چکے ہیں۔",
       "اگر سٹرلائزیشن لاٹ کی واپسی (Recalled) کا ہنگامی بینر ظاہر ہو تو 'منسوخ شدہ فلٹر' پر کلک کریں اور وارڈ میں موجود پیکس کو فوری قرنطینہ کریں۔"
-    ],
+    ,
+"Booking: مریض اور عمل سے طبی آپریشن فہرست۔",
+"Admission: آپ کی ڈیوٹی کے وارڈ بستر اور داخل مریض۔"],
     faq: [
       [
         "Why must sterile packs opened on inpatient wards be scanned to an admission?",
@@ -9997,7 +10868,8 @@ sterile_packs_ward: {
         "How does runtime service capability gating apply to sterile_packs_ward under Rule b531dda372?",
         "The screen checks GET /establishment views for screen_id sterile_packs_ward (full, open_work, records, setup, hidden) based on CSSD service readiness, allowing inpatients to use existing stock during retiring mode while restricting new setups when retired."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Booking: Clinical operations worklist by patient and procedure. Admission: Your rostered ward beds and admitted patients."]],
     faqUr: [
       [
         "وارڈ میں کھولے جانے والے سٹرائل پیکس کو داخلے سے منسلک کرنا کیوں لازمی ہے؟",
@@ -10023,7 +10895,8 @@ sterile_packs_ward: {
         "قاعدہ b531dda372 کے تحت وارڈ پر سی ایس ایس ڈی سروس کی اہلیت کیسے لاگو ہوتی ہے؟",
         "اسکرین GET /establishment کے ذریعے سی ایس ایس ڈی سروس کی حالت چیک کرتی ہے تاکہ سروس کی کیفیت (مکمل، اوپن ورک، ریکارڈز، سیٹ اپ، پوشیدہ) کے مطابق ہی اختیارات میسر آئیں۔"
       ]
-    ]
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Booking: مریض اور عمل سے طبی آپریشن فہرست۔ Admission: آپ کی ڈیوٹی کے وارڈ بستر اور داخل مریض۔"]]
   },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
@@ -10330,7 +11203,7 @@ sterile_packs_ward: {
       "If the reading is out of range, review the red warning prompt and record the mandatory remedial action taken under Rule e66d8b92db (STORAGE_CHECK_ACTION_REQUIRED).",
       "Click 'Save Reading' to submit the record; if out of range, the system alerts pharmacists at once via realtime WebSocket broadcast.",
       "Switch to the 'Surveyor Compliance Summary' tab to verify that both checks per day are completed for every area without survey gaps (Rule ac70d74fb1), and click 'Print Register PDF' to generate the official MSDS MOM 58 report.",
-    ],
+"Ward: Wards; IT adds missing wards. Bed selection loads the beds too."],
     stepsUr: [
       "فارمیسی ایڈمن یا وارڈ مینو سے میڈیسن اسٹوریج لاگ اسکرین کھول کر درجہ حرارت کی ریڈنگز اور سرویئر خلاصہ دیکھیں۔",
       "کسی بھی ریفریجریٹر، فریزر یا ادویات کے اسٹور کا صبح یا شام کا باقاعدہ درجہ حرارت درج کرنے کے لیے '+ Record Check' پر کلک کریں۔",
@@ -10341,7 +11214,7 @@ sterile_packs_ward: {
       "اگر درجہ حرارت مقررہ حد سے باہر ہو تو سرخ انتباہ دیکھ کر قاعدہ e66d8b92db کے تحت فوری حفاظتی اقدام لازماً درج کریں (STORAGE_CHECK_ACTION_REQUIRED)۔",
       "ریڈنگ محفوظ کرنے کے لیے 'Save Reading' پر کلک کریں؛ اگر ریڈنگ حد سے باہر ہو تو سسٹم فوری طور پر فارماسسٹس کو ریئل ٹائم الرٹ بھیجتا ہے۔",
       "سرویئر خلاصہ ٹیب پر جا کر تصدیق کریں کہ تمام جگہوں پر روزانہ دو بار کا معمول مکمل ہے (قاعدہ ac70d74fb1) اور سرکاری معائنہ رپورٹ کے لیے 'Print Register PDF' دبائیں۔",
-    ],
+"Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"],
     faq: [
       [
         "The Medicine storage log screen says 'The reading is out of range: record the action taken.' (STORAGE_CHECK_ACTION_REQUIRED). Why, and what do I do?",
@@ -10363,7 +11236,8 @@ sterile_packs_ward: {
         "How do I generate the official temperature log register for visiting health care commission surveyors?",
         "Select the audit date range using the 'From Date' and 'To Date' selectors, then click 'Print Register PDF' (GET /pharmacy/storage-checks/register/pdf). The system renders a surveyor-ready PDF document containing all recorded checks, timestamps, staff signatures, out-of-range flags, and remedial action notes."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
     faqUr: [
       [
         "اسکرین کہتی ہے کہ 'ریڈنگ حد سے باہر ہے: کیا گیا اقدام درج کریں' (STORAGE_CHECK_ACTION_REQUIRED)۔ اس کی کیا وجہ ہے اور مجھے کیا کرنا چاہیے؟",
@@ -10385,7 +11259,8 @@ sterile_packs_ward: {
         "ہیلتھ کیئر کمیشن کے سرویئرز کے لیے سرکاری درجہ حرارت لاگ رجسٹر کیسے پرنٹ کیا جاتا ہے؟",
         "ابتدائی اور آخری تاریخ منتخب کریں اور پھر 'Print Register PDF' بٹن پر کلک کریں۔ سسٹم تمام ریڈنگز، اوقات، نرس کے دستخط، انحراف اور تدارکی اقدامات پر مشتمل قانونی معائنہ رجسٹر پی ڈی ایف تیار کر دیتا ہے۔"
       ]
-    ],
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]],
   },
   drug_recalls: {
     title: "Batch recalls",
@@ -10402,7 +11277,7 @@ sterile_packs_ward: {
       "From the Campaign Details view, review the holding wards and click 'Remove Stock' (POST /drug-recalls/{recall_id}/remove-stock) to write off units returned to supplier or incinerated per Rule 6e16f97bd1.",
       "Audit the patient contact list and click 'Record Contact' on each recipient to log outreach outcomes (Contacted, Unreachable, NotNeeded) with clinical discussion notes.",
       "Once stock_left is 0 and all patient contacts are finalized (can_close true), click 'Close Recall' to submit the closing audit note under Rule 2b020bd53b.",
-    ],
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary."],
     stepsUr: [
       "فارمیسی ایڈمن مینو سے ادویات کی تنسیخ و واپسی اسکرین کھول کر تمام فعال، بند اور منسوخ شدہ مہمات کا جائزہ لیں۔",
       "ڈریپ کا الرٹ یا خرابی کا نوٹس ملنے پر نئی واپسی مہم شروع کرنے کے لیے '+ Open Recall Campaign' پر کلک کریں۔",
@@ -10413,7 +11288,7 @@ sterile_packs_ward: {
       "مہم کی تفاصیل میں وارڈز کا اسٹاک دیکھیں اور قاعدہ 6e16f97bd1 کے تحت سپلائر کو واپسی یا تلفی کا نوٹ لکھ کر 'Remove Stock' پر کلک کریں۔",
       "متاثرہ مریضوں کی فہرست میں جا کر ہر مریض کے نام کے آگے 'Record Contact' دبائیں اور گفتگو کا نتیجہ (رابطہ مکمل، نمبر بند، یا غیر ضروری) درج کریں۔",
       "جب تمام اسٹاک خارج اور مریضوں سے رابطے مکمل ہو جائیں (can_close درست ہو) تو قاعدہ 2b020bd53b کے تحت 'Close Recall' پر کلک کر کے مہم مکمل کریں۔",
-    ],
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔"],
     faq: [
       [
         "The Batch recalls screen says 'This batch is recalled: it cannot be dispensed, sent to a ward, used in theatre or given.' (BATCH_RECALLED). Why, and what do I do?",
@@ -10435,7 +11310,8 @@ sterile_packs_ward: {
         "The Batch recalls screen says 'The recall cannot close yet: stock of the batches is left, or patients are still to be contacted.' (RECALL_NOT_COMPLETE). Why, and what do I do?",
         "Statutory Rule 2b020bd53b forbids closing a recall campaign while stock_left is greater than 0 or patients_to_contact remains unresolved. First use 'Remove stock' to write off all remaining units in pharmacy and ward stock, then record contact outcomes for all patients on the roster until can_close displays as Yes."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary."]],
     faqUr: [
       [
         "اسکرین پر پیغام آتا ہے کہ 'یہ بیج واپس بلایا جا چکا ہے: اسے جاری، وارڈ کو منتقل یا استعمال نہیں کیا جا سکتا' (BATCH_RECALLED)۔ اس کی کیا وجہ ہے اور مجھے کیا کرنا چاہیے؟",
@@ -10457,7 +11333,8 @@ sterile_packs_ward: {
         "اسکرین کہتی ہے کہ 'واپسی ابھی بند نہیں ہو سکتی: اسٹاک بچا ہے یا مریضوں سے رابطہ باقی ہے' (RECALL_NOT_COMPLETE)۔ اس کی کیا وجہ ہے؟",
         "قاعدہ 2b020bd53b کے تحت جب تک تمام بقایا یونٹس تلف نہ کر دیے جائیں ('Remove stock') اور فہرست میں موجود تمام مریضوں سے رابطہ لاگ مکمل نہ ہو جائے، مہم کو بند نہیں کیا جا سکتا۔ پہلے یہ دونوں تقاضے پورے کریں پھر 'Close Recall' دبائیں۔"
       ]
-    ],
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔"]],
   },
   medication_safety_setup: {
     title: "High-alert and look-alike medicines",
@@ -10543,7 +11420,8 @@ sterile_packs_ward: {
       "On expiring or damaged batches, click '+ Return Batch to Supplier' to issue a supplier return note under Rule f65fc1a5a8.",
       "Specify return reason (Expired, NearExpiry, Recall, Damaged, Excess); if reason is Recall, input the mandatory recall ID.",
       "Click 'PDF Voucher' on any return in the returns ledger to print the official return note accompanying the dispatched goods.",
-    ],
+"Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary.",
+"Recall: Drug recalls by medicine and notice."],
     stepsUr: [
       "کم اسٹاک ادویات، قریب المیعاد بیجز اور لائیو منافع کی نگرانی کے لیے ڈیش بورڈز ٹیب منتخب کریں۔",
       "کسی بھی کم اسٹاک دوا پر '+ Quick Intake' دبائیں یا نئے اسٹاک کے لیے بیچ وصولی ٹیب پر جائیں۔",
@@ -10553,7 +11431,8 @@ sterile_packs_ward: {
       "زائد المیعاد یا خراب اسٹاک پر '+ Return Batch to Supplier' پر کلک کر کے قاعدہ f65fc1a5a8 کے تحت واپسی واؤچر جاری کریں۔",
       "واپسی کی وجہ درج کریں؛ اگر وجہ ریکال ہو تو لازمی ریکال آئی ڈی درج کریں۔",
       "سامان کے ساتھ بھیجنے کے لیے آفیشل واپسی واؤچر پرنٹ کرنے کے لیے لسٹ میں 'PDF Voucher' پر کلک کریں۔",
-    ],
+"Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔",
+"Recall: دوا اور نوٹس سے واپسی۔"],
     faq: [
       [
         "How is unit cost calculated when receiving multi-pack pharmaceutical shipments?",
@@ -10575,7 +11454,8 @@ sterile_packs_ward: {
         "How does the pharmacy back office update when medicines are dispensed across wards or counters?",
         "The screen subscribes to the realtime WebSocket event 'pharmacy.low_stock', refreshing low-stock and near-expiry indicators automatically without manual polling."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary. Recall: Drug recalls by medicine and notice."]],
     faqUr: [
       [
         "ہسپتال میں ادویات کی وصولی کے وقت فی گولی یا یونٹ لاگت کیسے نکالی جاتی ہے؟",
@@ -10597,7 +11477,8 @@ sterile_packs_ward: {
         "جب کاؤنٹرز یا وارڈز میں دوائیں دی جاتی ہیں تو فارمیسی بیک آفس کیسے اپڈیٹ ہوتا ہے؟",
         "سسٹم ریئل ٹائم ایونٹ 'pharmacy.low_stock' سے جڑا ہوتا ہے اور کسی بھی دوا کا اسٹاک کم ہونے پر لسٹ خودکار ریفریش ہو جاتی ہے۔"
       ]
-    ],
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔ Recall: دوا اور نوٹس سے واپسی۔"]],
   },
   billing_admin: {
     title: "Price & policy management",
@@ -10613,7 +11494,8 @@ sterile_packs_ward: {
       "Click '+ Effective Discount Rule' to establish dated panel concessions on specific services or hospital-wide.",
       "Navigate to the Discount Ceilings tab to set role-based or user-specific maximum authorized concession percentages.",
       "Open Consultant Contracts tab, search medical staff via registry lookup, and record commission agreement terms.",
-    ],
+"Department: Departments (active only); IT adds missing departments.",
+"User: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."],
     stepsUr: [
       "او پی ڈی، ان ڈور، آپریشن تھیٹر، لیب اور بیڈ چارجز کی سروسز دیکھنے کے لیے سروس کیٹلاگ ٹیب منتخب کریں۔",
       "کوڈ، شعبہ، نام اور سرکاری فیس کے اندراج کے ساتھ نیا طریقہ کار شامل کرنے کے لیے '+ Add Priced Service' پر کلک کریں۔",
@@ -10623,7 +11505,8 @@ sterile_packs_ward: {
       "مخصوص سروسز یا پورے ہسپتال کے لیے تاریخ کے مطابق پینل رعایت کا قانون درج کرنے کے لیے '+ Effective Discount Rule' دبائیں۔",
       "مختلف کرداروں یا صارفین کے لیے زیادہ سے زیادہ رعایتی اختیارات مقرر کرنے کے لیے ڈسکاؤنٹ سیلنگز ٹیب پر جائیں۔",
       "کنسلٹنٹ معاہدات کا ٹیب کھولیں، عملہ تلاش کے ذریعے ڈاکٹر منتخب کریں اور کمیشن کی شرائط درج کریں۔",
-    ],
+"Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔",
+"User: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"],
     faq: [
       [
         "What happens to existing patient bills when a service price is updated in the catalogue?",
@@ -10645,7 +11528,8 @@ sterile_packs_ward: {
         "Can a panel allow patients to be treated on credit without immediate payment?",
         "Yes, enabling 'is_credit_panel' permits receivables and credit invoice generation for approved sponsor organizations."
       ]
-    ],
+    ,
+["How do I find a record, and who adds it if missing?","Department: Departments (active only); IT adds missing departments. User: Staff search: type at least two letters. Doctors use the PMDC list. A staff choice uses its employee link; a user choice offers only staff with a login. Type more of the name if none match; HR adds staff and IT provides logins."]],
     faqUr: [
       [
         "جب کیٹلاگ میں کسی سروس کی قیمت تبدیل ہوتی ہے تو مریضوں کے پرانے بلز کا کیا بنتا ہے؟",
@@ -10667,7 +11551,8 @@ sterile_packs_ward: {
         "کیا کوئی پینل مریضوں کو فوری ادائیگی کے بغیر ادھار علاج کی اجازت دے سکتا ہے؟",
         "جی ہاں، پینل کی رجسٹریشن میں 'is_credit_panel' کو فعال کرنے سے منظور شدہ اداروں کے لیے ادھار بلنگ ممکن ہوتی ہے۔"
       ]
-    ],
+    ,
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ User: عملہ: کم از کم دو حروف سے تلاش کریں۔ ڈاکٹر پی ایم ڈی سی فہرست سے چنیں۔ عملے کے لیے ملازم اور صارف کے لیے لاگ ان والا فرد چنیں۔ نہ ملے تو مزید نام؛ عملہ ایچ آر اور لاگ ان آئی ٹی دیتا ہے۔"]],
   },
   accountant_cockpit: {
     title: "Accountant 3-pane cockpit",

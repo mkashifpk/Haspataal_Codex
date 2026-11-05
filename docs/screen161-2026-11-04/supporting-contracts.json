@@ -1,0 +1,1335 @@
+{
+  "departments": {
+    "method": "GET",
+    "path": "/api/v1/admin/departments",
+    "summary": "Departments",
+    "tags": [
+      "Super Admin"
+    ],
+    "permissions": [],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "access": {
+      "authentication": "user",
+      "permissions": [],
+      "permissions_mode": "all",
+      "who": "any logged-in user"
+    },
+    "description": "",
+    "roles_allowed": [],
+    "parameters": [],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[DepartmentOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "DepartmentOut",
+            "properties": {
+              "department_id": {
+                "type": "integer",
+                "title": "Department Id"
+              },
+              "code": {
+                "type": "string",
+                "title": "Code"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name"
+              },
+              "is_clinical": {
+                "type": "boolean",
+                "title": "Is Clinical"
+              },
+              "is_active": {
+                "type": "boolean",
+                "title": "Is Active"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              }
+            },
+            "type": "object",
+            "required": [
+              "department_id",
+              "code",
+              "name",
+              "is_clinical",
+              "is_active",
+              "row_version"
+            ]
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admin/departments"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "department_id": 1,
+              "code": "CARD",
+              "name": "Cardiology & Vascular",
+              "is_clinical": true,
+              "is_active": true,
+              "row_version": 2
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:34:24.417658+00:00"
+          },
+          "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+        }
+      }
+    },
+    "errors": [],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "ipc_audits",
+      "it_console"
+    ],
+    "used_by_workflows": [],
+    "typescript_example": "// Departments  (permissions: any logged-in user)\nexport const departments = () =>\n  api(\"GET\", `/admin/departments`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [],
+      "search": [],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": []
+  },
+  "wards": {
+    "method": "GET",
+    "path": "/api/v1/beds/matrix",
+    "summary": "Live bed matrix (counts per ward + optional bed list)",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.bed.view",
+      "cssd.operate",
+      "infection.control.manage"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "Keep live with `bed.state_changed`. Patient names are included only for users who can\nview admissions. The sterile supply (`cssd.operate`) and infection control (`infection.control.manage`) read it for\nits wards: where packs are issued and audits held (backend issue #41). Every bed listed belongs to a ward in `wards` (the open wards): a closed ward (deactivated in the\nIT console, `PUT /admin/wards/{ward_id}`) leaves the matrix with its beds and its counts, and comes back when it\nis reopened. A ward closed meanwhile shows in an allocation's `BED_NO_LONGER_AVAILABLE` (`details.in_service`\nfalse); an event for a bed the matrix does not list (a ward reopened meanwhile): re-fetch the matrix.\n\n**Required permission:** `ipd.bed.view OR cssd.operate OR infection.control.manage`\n\n**Required permission:** `ipd.bed.view OR cssd.operate OR infection.control.manage`",
+    "roles_allowed": [
+      "admissions_officer",
+      "anaesthetist",
+      "clinic_director",
+      "clinical_specialist",
+      "cssd_technician",
+      "doctor",
+      "head_nurse",
+      "hospital_admin",
+      "hospital_director",
+      "ipc_nurse",
+      "ops_admin",
+      "owner",
+      "receptionist",
+      "super_admin",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "include_beds",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "type": "boolean",
+          "default": true,
+          "title": "Include Beds"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[BedMatrixOut]",
+      "properties": {
+        "data": {
+          "title": "BedMatrixOut",
+          "properties": {
+            "wards": {
+              "items": {
+                "$ref": "#/components/schemas/WardOccupancyOut"
+              },
+              "type": "array",
+              "title": "Wards"
+            },
+            "summary": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object",
+              "title": "Summary",
+              "description": "Ward name -> available beds"
+            },
+            "beds": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/BedMatrixBedOut"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Beds",
+              "description": "Only with include_beds=true"
+            }
+          },
+          "type": "object",
+          "required": [
+            "wards",
+            "summary"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/beds/matrix"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "wards": [
+              {
+                "ward_id": 2,
+                "code": "GW",
+                "name": "General Ward",
+                "ward_type": "General",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 0,
+                "reserved": 0,
+                "occupied": 1,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 1,
+                "code": "ICU",
+                "name": "ICU",
+                "ward_type": "ICU",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 1,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              }
+            ],
+            "summary": {
+              "General Ward": 0,
+              "ICU": 1
+            },
+            "beds": [
+              {
+                "bed_id": 1,
+                "ward_id": 1,
+                "label": "ICU-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 2,
+                "ward_id": 2,
+                "label": "GW-1",
+                "current_state": "Occupied",
+                "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": 1,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": "Admitted",
+                "is_overflow": false,
+                "discharge_blocked_on": null
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:22.967241+00:00"
+          },
+          "request_id": "802131a929b14db0a0c8033474e8d271"
+        }
+      },
+      "errors_seen": [
+        "FORBIDDEN"
+      ]
+    },
+    "errors": [
+      {
+        "code": "BED_NO_LONGER_AVAILABLE",
+        "http_status": 409,
+        "message": "Bed was reserved by another terminal.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "FORBIDDEN"
+    ],
+    "used_by_screens": [
+      "consultation",
+      "bed_matrix",
+      "duty_roster",
+      "cssd_stock",
+      "ipc_audits",
+      "ward_transfer",
+      "ward_transfer_head_nurse"
+    ],
+    "used_by_workflows": [
+      "cost-estimates-and-tariff",
+      "infection-control",
+      "inpatient-and-discharge"
+    ],
+    "typescript_example": "// Live bed matrix (counts per ward + optional bed list)  (permissions: ipd.bed.view, cssd.operate, infection.control.manage)\nexport const bedMatrix = () =>\n  api(\"GET\", `/beds/matrix`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.bed.view",
+        "cssd.operate",
+        "infection.control.manage"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage",
+      "roles_allowed": [
+        "admissions_officer",
+        "anaesthetist",
+        "clinic_director",
+        "clinical_specialist",
+        "cssd_technician",
+        "doctor",
+        "head_nurse",
+        "hospital_admin",
+        "hospital_director",
+        "ipc_nurse",
+        "ops_admin",
+        "owner",
+        "receptionist",
+        "super_admin",
+        "surgeon",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "object",
+      "paging": [],
+      "search": [],
+      "filters": [
+        {
+          "name": "include_beds",
+          "required": false,
+          "type": "boolean",
+          "default": true
+        }
+      ],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "BED_NO_LONGER_AVAILABLE",
+        "http_status": 409,
+        "message": "Bed was reserved by another terminal.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [
+          "bed_id",
+          "current_state"
+        ],
+        "details_from": "POST /api/v1/admissions/{admission_id}/allocate-bed"
+      },
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "any_of",
+          "required"
+        ],
+        "details_from": "POST /api/v1/admin/departments"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "qualityWardAlternative": {
+    "method": "GET",
+    "path": "/api/v1/msds/profile",
+    "summary": "The PHC category: as confirmed, and what the beds suggest",
+    "tags": [
+      "MSDS inspection"
+    ],
+    "permissions": [
+      "msds.view",
+      "establishment.manage",
+      "msds.inspect"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "The recorded category (Clinic, II C, II B, II A or I) with the PHC registration or licence number, the date it\ntook effect and the licence in the compliance register, and what the inpatient beds suggest by the PHC's bands (I:\nmore than 50, II A: 31-49, II B: 16-30, II C: up to 15; emergency wards are not counted; no beds suggest nothing),\nward by ward. `needs_confirmation` is true when nothing is recorded or the beds now suggest another band: offer the\nadmin the facility settings (POST /establishment/changes/preview with a profile, pre-filled with the suggestion).\n`standards` lists the five frameworks Haspataal holds.\n\n**Required permission:** `msds.view OR establishment.manage OR msds.inspect`\n\n**Required permission:** `msds.view OR establishment.manage OR msds.inspect`",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "phc_inspector",
+      "quality_officer"
+    ],
+    "parameters": [],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[MsdsProfileOut]",
+      "properties": {
+        "data": {
+          "title": "MsdsProfileOut",
+          "properties": {
+            "category": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "Clinic",
+                    "IIC",
+                    "IIB",
+                    "IIA",
+                    "I"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category",
+              "description": "Null until a person records it"
+            },
+            "category_label": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Label"
+            },
+            "registration_number": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Registration Number",
+              "description": "The PHC registration or licence number on every printout"
+            },
+            "licence_document": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/LicenceDocumentOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "effective_from": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Effective From",
+              "description": "The date the category took effect on the licence"
+            },
+            "confirmed_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Confirmed At"
+            },
+            "confirmed_by_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Confirmed By Name"
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reason",
+              "description": "Why the confirmed category differs from the suggestion, when it does"
+            },
+            "bed_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Bed Count",
+              "description": "The beds counted when it was confirmed"
+            },
+            "licensed_beds": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Licensed Beds",
+              "description": "The beds the licence names, as entered with the profile; null when none was entered"
+            },
+            "review": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Review",
+              "description": "What to look at again: more beds set up than the licence names, a licence outside its category's band. Advice only: the category stays as recorded"
+            },
+            "suggestion": {
+              "$ref": "#/components/schemas/CategorySuggestionOut"
+            },
+            "needs_confirmation": {
+              "type": "boolean",
+              "title": "Needs Confirmation",
+              "description": "True when nothing is recorded, or the beds now suggest another band than when it was recorded: offer the admin the facility settings"
+            },
+            "standards": {
+              "items": {
+                "$ref": "#/components/schemas/StandardOut"
+              },
+              "type": "array",
+              "title": "Standards",
+              "description": "The PHC frameworks Haspataal holds: Clinic, II C, II B, II A, I"
+            }
+          },
+          "type": "object",
+          "required": [
+            "category",
+            "category_label",
+            "registration_number",
+            "licence_document",
+            "effective_from",
+            "confirmed_at",
+            "confirmed_by_name",
+            "reason",
+            "bed_count",
+            "licensed_beds",
+            "review",
+            "suggestion",
+            "needs_confirmation",
+            "standards"
+          ],
+          "description": "The establishment's PHC category as recorded, and what the beds suggest today."
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/msds/profile"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "category": "IIA",
+            "category_label": "Category II A",
+            "registration_number": "PHC-IIA-2",
+            "licence_document": null,
+            "effective_from": "2026-10-14",
+            "confirmed_at": "2026-10-14T10:59:04.545469+00:00",
+            "confirmed_by_name": "u2f4fd5a42b",
+            "reason": "Step 1",
+            "bed_count": 3,
+            "licensed_beds": null,
+            "review": [],
+            "suggestion": {
+              "category": "IIC",
+              "category_label": "Category II C",
+              "beds": 3,
+              "operational": 3,
+              "out_of_service": 0,
+              "supported": true,
+              "note": "3 inpatient beds: Category II C by the PHC's bands. The category on the licence decides.",
+              "wards": [
+                {
+                  "ward_id": 4,
+                  "code": "E63809e",
+                  "name": "E63809e",
+                  "ward_type": "Emergency",
+                  "beds": 1,
+                  "out_of_service": 0,
+                  "counted": false
+                },
+                {
+                  "ward_id": 2,
+                  "code": "GW",
+                  "name": "General Ward",
+                  "ward_type": "General",
+                  "beds": 1,
+                  "out_of_service": 0,
+                  "counted": true
+                },
+                {
+                  "ward_id": 3,
+                  "code": "W63809e",
+                  "name": "W63809e",
+                  "ward_type": "General",
+                  "beds": 1,
+                  "out_of_service": 0,
+                  "counted": true
+                }
+              ]
+            },
+            "needs_confirmation": false,
+            "standards": [
+              {
+                "category": "Clinic",
+                "label": "Clinic (GP, family physician, specialist)",
+                "edition": "MSDS Reference Manual for General Practitioners, Family Physicians and Specialist Clinics, 2017",
+                "indicators": 47
+              },
+              {
+                "category": "IIC",
+                "label": "Category II C",
+                "edition": "MSDS and Reference Manual for Category II C HCEs, 2017",
+                "indicators": 118
+              },
+              {
+                "category": "IIB",
+                "label": "Category II B",
+                "edition": "MSDS and Reference Manual for Category II B HCEs, 2017 (amended 2018)",
+                "indicators": 122
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-10-14T10:59:04.588364+00:00"
+          },
+          "request_id": "f3d5775cac044754882040d88090744f"
+        }
+      },
+      "errors_seen": [
+        "ACCOUNT_EXPIRED",
+        "FORBIDDEN"
+      ]
+    },
+    "errors": [
+      {
+        "code": "ACCOUNT_EXPIRED",
+        "http_status": 403,
+        "message": "This guest account has expired (the PHC inspector's access ended).",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "ACCOUNT_EXPIRED",
+      "FORBIDDEN"
+    ],
+    "used_by_screens": [
+      "facility_profile",
+      "msds_readiness",
+      "msds_readiness_owner",
+      "msds_inspection_pack",
+      "msds_inspection_pack_owner",
+      "inspection_home",
+      "msds_inspection_pack_inspector"
+    ],
+    "used_by_workflows": [
+      "facility-profile-and-services",
+      "phc-inspection"
+    ],
+    "typescript_example": "// The PHC category: as confirmed, and what the beds suggest  (permissions: msds.view, establishment.manage, msds.inspect)\nexport const getProfile = () =>\n  api(\"GET\", `/msds/profile`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "msds.view",
+        "establishment.manage",
+        "msds.inspect"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of msds.view or establishment.manage or msds.inspect",
+      "roles_allowed": [
+        "clinic_director",
+        "hospital_admin",
+        "hospital_director",
+        "owner",
+        "phc_inspector",
+        "quality_officer"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "object",
+      "paging": [],
+      "search": [],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "ACCOUNT_EXPIRED",
+        "http_status": 403,
+        "message": "This guest account has expired (the PHC inspector's access ended).",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "GET /api/v1/msds/profile"
+      },
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "any_of",
+          "required"
+        ],
+        "details_from": "POST /api/v1/admin/departments"
+      }
+    ]
+  },
+  "staff": {
+    "method": "GET",
+    "path": "/api/v1/facility/staff",
+    "summary": "Pick a member of staff",
+    "tags": [
+      "Facility: licences, equipment, drills"
+    ],
+    "permissions": [
+      "facility.compliance.manage",
+      "facility.equipment.manage",
+      "facility.maintenance.record",
+      "facility.drill.manage",
+      "personnel.training.record"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "The drill participants, the in-house technician of a visit (`employee_id`), the official of an entry and the owner\nof an action (`user_id`), the attendees of a training session: active staff by name or number, support staff without\na login included.\n\n**Required permission:** `facility.compliance.manage OR facility.equipment.manage OR facility.maintenance.record OR facility.drill.manage OR personnel.training.record`\n\n**Required permission:** `facility.compliance.manage OR facility.equipment.manage OR facility.maintenance.record OR facility.drill.manage OR personnel.training.record`",
+    "roles_allowed": [
+      "head_nurse",
+      "hr_admin",
+      "ipc_nurse",
+      "maintenance_admin",
+      "ops_admin",
+      "quality_officer"
+    ],
+    "parameters": [
+      {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Q"
+        }
+      },
+      {
+        "name": "department_id",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        }
+      },
+      {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "maximum": 500,
+          "minimum": 1,
+          "default": 50,
+          "title": "Limit"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[FacilityStaffOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "FacilityStaffOut",
+            "properties": {
+              "employee_id": {
+                "type": "integer",
+                "title": "Employee Id"
+              },
+              "full_name": {
+                "type": "string",
+                "title": "Full Name"
+              },
+              "emp_number": {
+                "type": "string",
+                "title": "Emp Number"
+              },
+              "designation": {
+                "type": "string",
+                "title": "Designation"
+              },
+              "staff_category": {
+                "type": "string",
+                "enum": [
+                  "Clinical",
+                  "Nursing",
+                  "Administrative",
+                  "Technical",
+                  "SupportZeroInterface",
+                  "Visiting"
+                ],
+                "title": "Staff Category"
+              },
+              "department_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Department Id"
+              },
+              "department_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Department Name"
+              },
+              "user_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "User Id",
+                "description": "Set when they have a login: they can be an entry's official or own an action"
+              }
+            },
+            "type": "object",
+            "required": [
+              "employee_id",
+              "full_name",
+              "emp_number",
+              "designation",
+              "staff_category",
+              "department_id",
+              "department_name",
+              "user_id"
+            ]
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/facility/staff",
+        "query": {
+          "q": "Biomedical"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "employee_id": 4,
+              "full_name": "Biomedical Technician Ali",
+              "emp_number": "EMP-2026-0004",
+              "designation": "Officer",
+              "staff_category": "Technical",
+              "department_id": 1,
+              "department_name": "BME",
+              "user_id": null
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-01T07:16:00.602859+00:00"
+          },
+          "request_id": "bbc9901bb5a5418bbeaaf5fdd26256e8"
+        }
+      }
+    },
+    "errors": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "staff_training_hr",
+      "staff_training_ipc",
+      "compliance_register_ops",
+      "compliance_register_quality",
+      "equipment_maintenance",
+      "equipment_maintenance_ops",
+      "mock_drills_ops",
+      "mock_drills_quality"
+    ],
+    "used_by_workflows": [
+      "facility-compliance-equipment-drills",
+      "personnel-records"
+    ],
+    "typescript_example": "// Pick a member of staff  (permissions: facility.compliance.manage, facility.equipment.manage, facility.maintenance.record, facility.drill.manage, personnel.training.record)\nexport const staffFacility = () =>\n  api(\"GET\", `/facility/staff`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "facility.compliance.manage",
+        "facility.equipment.manage",
+        "facility.maintenance.record",
+        "facility.drill.manage",
+        "personnel.training.record"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of facility.compliance.manage or facility.equipment.manage or facility.maintenance.record or facility.drill.manage or personnel.training.record",
+      "roles_allowed": [
+        "head_nurse",
+        "hr_admin",
+        "ipc_nurse",
+        "maintenance_admin",
+        "ops_admin",
+        "quality_officer"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [
+        {
+          "name": "limit",
+          "required": false,
+          "type": "integer",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 500
+        }
+      ],
+      "search": [
+        {
+          "name": "q",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "filters": [
+        {
+          "name": "department_id",
+          "required": false,
+          "type": "integer"
+        }
+      ],
+      "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  }
+}

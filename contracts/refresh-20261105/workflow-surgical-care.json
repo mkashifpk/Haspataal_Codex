@@ -1,0 +1,283 @@
+{
+  "slug": "surgical-care",
+  "title": "Surgical care (MSDS)",
+  "summary": "The clinical record of an operation - clinical privileges, the surgeon's pre-operative note, the consents, the pre-anaesthesia assessment, the surgical safety checklist, the anaesthesia record, the operative note with the post-operative plan, recovery, the adverse events (reported as incidents), the statistics and the written theatre policy.",
+  "order": 99,
+  "workflow": "MSDS COP indicators 31-47, IMS 150",
+  "workspaces": [
+    "doctor",
+    "anaesthesia",
+    "ot_nurse",
+    "ot_admin",
+    "quality",
+    "owner_dashboard"
+  ],
+  "file": "surgical-care.md",
+  "markdown": "# Surgical care (MSDS)\n\nThe Punjab Healthcare Commission's Minimum Service Delivery Standards (MSDS) sample ten surgical records and check that\neach has:\n\n* a **pre-operative assessment** by the surgeon with a provisional diagnosis and a plan (indicator 42);\n* a **pre-anaesthesia assessment** by an authorized doctor, with the **anaesthesia plan** it leads to (32, 33);\n* the **informed consent** to the operation, taken by a doctor of the surgical team (43), and to the anaesthesia, taken\n  by the anaesthesia team (35), before the operation (see [Consent](consent.md));\n* the **immediate pre-induction re-evaluation** (34), **monitoring during anaesthesia** (36: heart rate, rhythm, blood\n  pressure, breathing, oxygen saturation, the airway), the **identity confirmed before induction** (37);\n* the **checklist**: the site marked, the documents and equipment ready, the **time out** in which the whole team\n  agrees on the patient, the procedure and the side (44);\n* the names of the **surgeon, the team and the anaesthetist**, each authorized for what they did (45);\n* the **operative note** before the patient leaves recovery (46; IMS 150: the surgeon, the procedure, the findings,\n  the specimens, the condition at the end) and the **post-operative plan** (47);\n* **observations in recovery** (38: pulse, blood pressure, breathing, airway, consciousness, pain) and the **discharge\n  from recovery** by a qualified person against written criteria (39);\n* every **adverse anaesthesia event** recorded, analysed and followed up (40): reported as an incident with the\n  operation and the phase, see [incidents](incidents-and-sentinel-events.md).\n\nThe same data gives the hospital the written policies the surveyor asks for (31, 39, 41, 44) and the statistics of its\nsurgical quality committee (45, 48).\n\nWho does what:\n\n* **Surgeons** (doctor workspace: `ot.pre_op.record`, `ot.operative_note.write`, `ot.checklist.record`): the\n  pre-operative note, the time out, the operative note and post-operative plan.\n* **Anaesthetists** (role `anaesthetist`, workspace `anaesthesia`: `ot.anaesthesia.record`, `ot.recovery.record`): the\n  pre-anaesthesia clinic, the anaesthesia record, the sign in, recovery and its discharge.\n* **OT nurses** (role `ot_nurse`, and the OT Admin): the safety checklist, consumables, recovery observations and,\n  with a recovery privilege, the discharge from recovery. OT nurses never see money or schedule theatres.\n* **The medical director** (Owner / Hospital Admin: `ot.privilege.manage`): the clinical privileges.\n* **Quality Officer, Owner** (`incident.manage`, `ot.checklist.configure`, `ot.clinical_statistics.view`): the\n  theatre's incidents, the checklist, the statistics and the theatre policy. The theatre managers\n  (`ot.clinical_statistics.view`) read the theatre's incidents.\n\nEvery part of the record hangs on the **OT booking** (`/ot/bookings/{booking_id}/...`, see\n[Operating theater](operating-theater.md)). Every write answers with the whole surgical record (`SurgicalRecordOut`):\n`parts` says where each part stands (`Missing`, `Draft`, `Final`, `NotNeeded`) and `next_step` what to do next (null\nwhen the record is complete). Refresh open records and the recovery board on `ot.clinical.updated`.\n\nEach part is written while the booking is in the states below; the database refuses it otherwise with\n`OT_BOOKING_STATE_INVALID` (409, not retryable: read the booking again and offer the part only when it applies; backend\nissue #44). Every route names it.\n\n| Part | The booking's states |\n|---|---|\n| Pre-operative note (`PUT …/pre-op-note`) | Requested, Scheduled, EmergencyHold, InProgress; final once the patient is signed in |\n| Pre-anaesthesia assessment (`PUT …/pre-anaesthesia`) | Requested, Scheduled, EmergencyHold, InProgress, before the sign in |\n| Safety checklist (`POST …/safety-checks`) | SignIn: Scheduled, EmergencyHold, InProgress; TimeOut and SignOut: InProgress |\n| Anaesthesia record (`PUT …/anaesthesia-record`) | opened on Scheduled, EmergencyHold, InProgress, Cleaning, Completed |\n| Operative note (`PUT …/operative-note`) | written on InProgress, Cleaning, Completed; signed when the operation is over |\n| Recovery (`POST …/recovery`) | Cleaning, Completed (the operation is over) |\n\n## 1. Clinical privileges (once, then yearly)\n\nThe hospital authorizes each clinician for what they may do:\n\n* `Surgery`: operate (the operating surgeon at the time out and on the operative note);\n* `Anaesthesia`: give anaesthesia; it includes the two below;\n* `PreAnaesthesiaAssessment`: sign a pre-anaesthesia assessment;\n* `RecoveryDischarge`: discharge a patient from recovery (a trained doctor or nurse).\n\n1. `GET /ot/privileges` (`include_revoked`, `employee_id`, `privilege`): the register. `is_current`: valid today.\n2. `POST /ot/privileges {\"employee_id\", \"privilege\", \"scope\", \"basis\", \"valid_from\"?, \"valid_until\"?}`: clinicians only\n   (`VALIDATION_ERROR`); one live grant per person and privilege (`OT_PRIVILEGE_EXISTS`).\n3. `PATCH /ot/privileges/{privilege_id} {\"scope\"?, \"basis\"?, \"valid_until\"?, \"expected_version\"}`: the yearly renewal.\n4. `POST /ot/privileges/{privilege_id}/revoke {\"reason\"}`: from then on the person's signatures that need it are\n   refused (`OT_PRIVILEGE_REQUIRED`).\n\n## 2. Before the operation\n\n1. **The worklist**: `GET /ot/clinical-worklist?days=7&mine=true` lists the operations coming up, under way or with an\n   incomplete record, each with its `parts` and `next_step` (the anaesthetist's pre-anaesthesia clinic, the surgeon's\n   list).\n2. **The surgeon's pre-operative note** (MSDS 42): `PUT /ot/bookings/{booking_id}/pre-op-note\n   {\"history_examination\", \"provisional_diagnosis\", \"icd_codes\"?, \"operation_plan\", \"laterality\"}` (`laterality`:\n   `Left`, `Right`, `Bilateral`, `NotApplicable`; ICD codes from `GET /icd/codes`). Rewritable until the sign in, then\n   final (`OT_RECORD_FINAL`).\n3. **The pre-anaesthesia assessment** (MSDS 32, 33): `PUT /ot/bookings/{booking_id}/pre-anaesthesia` with the fields\n   changed (history, medications, allergies, examination, `airway_mallampati`, vital signs, investigations,\n   `asa_class`, `asa_emergency`, risks, `planned_technique`, `plan`, premedication, fasting, `decision`,\n   `decision_note`) saves the draft; a draft lists what signing still needs in `missing`.\n   `POST /ot/bookings/{booking_id}/pre-anaesthesia/sign {\"expected_version\"}` signs it: every required part\n   (`OT_RECORD_INCOMPLETE`, `details.missing`), a note for any decision but `Fit`, and a pre-anaesthesia or anaesthesia\n   privilege (`OT_PRIVILEGE_REQUIRED`). The booking's `anesthesia_type` becomes the planned technique. To assess again\n   (the patient was not fit, the operation was postponed), `PUT` with `reassess: true`: the latest signed assessment\n   counts.\n4. **Local anaesthesia by the surgeon**: a booking with `anesthesia_type` `Local` (or `None`) and no anaesthetist\n   needs no assessment, anaesthesia consent, anaesthesia record or recovery stay (`needs_anaesthetist` false, those\n   parts `NotNeeded`).\n5. **The consents** (MSDS 35, 43; the parts `OperationConsent` and `AnaesthesiaConsent`, the record's `consents`): the\n   surgeon prepares the consent to the operation, `POST /consents {\"form_code\": \"OPERATION\", \"booking_id\", \"language\",\n   \"risks\", \"benefits\", \"alternatives\"}` (the procedure and the surgeon come from the booking), prints it in the\n   patient's language, explains it and records the signature (`POST /consents/{consent_id}/sign`); with an\n   anaesthetist, a doctor of the anaesthesia team does the same with `form_code` `ANAESTHESIA` (prefilled with the\n   planned technique and the anaesthetist of the assessment). The whole flow, the emergency note and the refusals:\n   [Consent](consent.md).\n\n## 3. The surgical safety checklist (MSDS 37, 44)\n\n`GET /ot/checklist-items` gives the hospital's items for three pauses. Show every active item of the pause: a `Confirm`\nis answered `Yes` (or `NotApplicable` when `allow_na`), a `Question` `Yes` or `No`, with a note on the answer in\n`note_when` (a known allergy: to what). Record each pause once:\n`POST /ot/bookings/{booking_id}/safety-checks {\"phase\", \"answers\": [{\"item_id\", \"answer\", \"note\"?}], \"team\"?, \"note\"?}`.\n\n1. **Sign in**, before the induction (the booking `Scheduled`, `EmergencyHold` or `InProgress`): needs the pre-operative\n   note (`OT_PRE_OP_NOTE_REQUIRED`), with an anaesthetist a signed assessment finding the patient `Fit` or\n   `FitWithConditions` (`OT_PRE_ANAESTHESIA_REQUIRED`), then the consent to the operation and, with an anaesthetist,\n   to the anaesthesia, given within `consent_valid_days` (30) (`CONSENT_REQUIRED`). The nurse still confirms that the\n   signed papers are in the file (a checklist item). The sign in identifies the patient before the anaesthetic (MSDS\n   COP 37): scan the wristband into `wristband_code`, or send `identity_check: \"TwoIdentifiers\"` (an unidentified\n   emergency: `\"EmergencyOverride\"` with `identity_note`); `PATIENT_IDENTITY_REQUIRED`, `PATIENT_IDENTITY_MISMATCH`\n   ([medication safety](medication-safety.md)).\n2. **Time out**, before the incision, the patient in the theatre (`POST /ot/bookings/{booking_id}/start` first):\n   `team` lists who agreed, `[{\"employee_id\", \"role_in_ot\": \"PrimarySurgeon\" | \"AssistantSurgeon\" | \"Anesthetist\" |\n   \"ScrubNurse\" | \"CirculatingNurse\" | \"Other\"}]`. The operating surgeon (with a surgery privilege) and, with an\n   anaesthetist, the anaesthetist (with an anaesthesia privilege) are required (`OT_CHECKLIST_INCOMPLETE`,\n   `OT_PRIVILEGE_REQUIRED`). Pick them from `GET /ot/privileges`.\n3. **Sign out**, before the patient leaves the theatre. `POST /ot/bookings/{booking_id}/complete-surgery` is refused\n   without it (`OT_CHECKLIST_INCOMPLETE`).\n\nThe pauses run in order (`OT_CHECKLIST_INCOMPLETE`) and once each (`OT_RECORD_FINAL`). A missing answer, an answer the\nitem does not allow, a missing note or a confirmation answered `No` gives `OT_CHECKLIST_ANSWERS_INVALID` with\n`details.items`: a confirmation that is not true stops the pause until it is put right. The answers are kept with the\nitems as they read that day, under the stamp of whoever recorded the pause.\n\n## 4. In the theatre: the anaesthesia record (MSDS 34, 36, 37)\n\n1. `PUT /ot/bookings/{booking_id}/anaesthesia-record` opens the record (the anaesthetist is the caller unless\n   `anaesthetist_id` names another; an anaesthesia privilege is required) and updates it: the pre-induction\n   re-evaluation (`pre_induction_at`, pulse, blood pressure, SpO2, `pre_induction_findings` such as \"No change since the\n   assessment\", `plan_changed` and `plan_change`), `technique`, `airway_device`, `airway_details`, the times\n   (`induction_at`, `incision_at`, `surgery_end_at`, `anaesthesia_end_at`), fluids, blood loss, urine output,\n   complications, the handover. `induction_at` needs the sign in and `incision_at` the time out\n   (`OT_CHECKLIST_INCOMPLETE`); the times must be in order.\n2. `POST /ot/bookings/{booking_id}/anaesthesia-record/vitals {\"recorded_at\"?, \"heart_rate\", \"rhythm\", \"bp_systolic\",\n   \"bp_diastolic\", \"respiratory_rate\", \"spo2\", \"etco2\"?, \"temp_c\"?, \"airway_patent\"}`: the chart. Readings further apart\n   than `ot_anaesthesia_chart_minutes` show as `chart_gaps`.\n3. `POST /ot/bookings/{booking_id}/anaesthesia-record/events {\"at\"?, \"kind\": \"Drug\" | \"Fluid\" | \"Blood\" | \"Event\",\n   \"description\", \"dose\"?, \"route\"?}`.\n4. `POST /ot/bookings/{booking_id}/anaesthesia-record/sign {\"expected_version\"}`: needs the pre-induction\n   re-evaluation, the technique and airway, the induction and end times, `complications` (\"None\") and one reading at\n   least; an anaesthesia privilege. The record and its chart are then final.\n\n## 5. The operative note and the post-operative plan (IMS 150; MSDS 45-47)\n\n1. `PUT /ot/bookings/{booking_id}/operative-note` from the start of the operation: the first save fills the surgeon,\n   the assistants and the anaesthetist from the time out and the anaesthesia record, the pre-operative diagnosis, the\n   procedure from the booking and the blood loss from the chart. The note: `post_op_diagnosis`, `icd_codes`,\n   `procedure_performed`, `incision`, `findings`, `procedure_details`, `specimens` (\"None\", or what and where),\n   `histopathology_sent`, `blood_loss_ml`, `transfusion`, `implants`, `drains`, `closure`, `unexpected_events`,\n   `condition_at_end`. The plan (MSDS 47, every part written, \"Not needed\" included): `monitoring` and\n   `monitoring_interval_minutes`, `medications`, `wound_care`, `drains_catheters`, `positioning`, `nutrition`,\n   `referrals`, `fluid_balance`, `transfusion_instructions`.\n2. `POST /ot/bookings/{booking_id}/operative-note/sign {\"expected_version\"}`: when the operation is over\n   (`OT_BOOKING_STATE_INVALID`), by the operating surgeon or a doctor of the team (`OT_PRIVILEGE_REQUIRED`), with every\n   part written (`OT_RECORD_INCOMPLETE`). The patient's admission then takes the plan's monitoring interval as its\n   vitals interval: the ward's vitals-due list follows it.\n\n## 6. Recovery (MSDS 38, 39)\n\n1. `POST /ot/bookings/{booking_id}/complete-surgery` puts a patient who had an anaesthetist in recovery. After local\n   anaesthesia, when the patient goes to recovery anyway: `POST /ot/bookings/{booking_id}/recovery`.\n2. `GET /ot/recovery-board`: every patient in recovery with the last observation and `flags` (`NoObservation`,\n   `ObservationOverdue` after `ot_recovery_obs_minutes`, `LongStay` after `ot_recovery_max_minutes`,\n   `OperativeNoteUnsigned`, `AnaesthesiaRecordOpen`) and the hospital's `targets`.\n3. `POST /ot/bookings/{booking_id}/recovery/observations {\"heart_rate\", \"bp_systolic\", \"bp_diastolic\",\n   \"respiratory_rate\", \"spo2\", \"airway\", \"consciousness\", \"pain_score\", ...}`: `airway` `Patent`, `Supported`,\n   `Obstructed`; `consciousness` AVPU (`Alert`, `Voice`, `Pain`, `Unresponsive`).\n4. `POST /ot/bookings/{booking_id}/recovery/discharge {\"destination\", \"score_activity\", \"score_respiration\",\n   \"score_circulation\", \"score_consciousness\", \"score_spo2\", \"pain_score\", \"shifting_note\", \"override_reason\"?}`: by a\n   person with a recovery or anaesthesia privilege. Each sign is scored 0-2 (the criteria print with the theatre\n   policy). Below `ot_recovery_min_score` or above `ot_recovery_max_pain`, the patient goes to the `Ward` or `Home`\n   only with `override_reason` (`OT_RECOVERY_CRITERIA_NOT_MET`, `details`); the `ICU`, the `HDU` and\n   `ReturnedToTheatre` need none. The discharge needs an observation (`OT_RECORD_INCOMPLETE`), the signed operative\n   note (`OT_OPERATIVE_NOTE_REQUIRED`) and, with an anaesthetist, the signed anaesthesia record\n   (`OT_ANAESTHESIA_RECORD_OPEN`). `Died` needs the death recorded first (`POST /patients/{patient_id}/death`).\n\n## 7. The whole record, corrections, printing\n\n* `GET /ot/bookings/{booking_id}/surgical-record`: every part (reading it is logged as a patient-data access).\n* `POST /ot/bookings/{booking_id}/corrections {\"record\", \"correction_text\", \"correction_reason\"}`: signed parts never\n  change; a correction is appended with its reason and its author's stamp, by someone with the permission that writes\n  that part. `record`: `PreOpNote`, `PreAnaesthesia`, `SafetyChecklist`, `AnaesthesiaRecord`, `OperativeNote`,\n  `Recovery`. Not signed yet: `OT_RECORD_NOT_SIGNED` (edit it instead).\n* `GET /ot/bookings/{booking_id}/surgical-record/print-payload` (A4 text) and\n  `GET /ot/bookings/{booking_id}/surgical-record/pdf`: every signed part under its author's stamp, and the corrections.\n\n## 8. Adverse events (MSDS 40, 45)\n\nA theatre adverse event is an incident of the hospital's register ([incidents](incidents-and-sentinel-events.md)), so\nit is classed, analysed and followed up like every other one and counts in the sentinel events and the statistics.\n\n1. Anyone of the theatre team: the theatre's types `GET /incident-types?area=Anaesthesia` (or `Surgery`), then\n   `POST /incidents {\"type_code\", \"harm\", \"occurred_at\", \"affected\": \"Patient\", \"booking_id\", \"ot_phase\": \"Emergence\",\n   \"description\", \"immediate_action\"}`. The operation and the phase are required for these areas\n   (`INCIDENT_DETAILS_REQUIRED`); the patient follows from the booking.\n   The theatre's form sends only these (decision 62): no department, ward, medicine or death record; a medication error\n   with its medicine goes on the general incident form.\n2. The theatre managers read them: `GET /incidents?booking_id=` or `GET /incidents?area=Anaesthesia`; the surgical\n   record lists them (`adverse_events`). The review, the analysis, the actions and the closure follow the incident playbook.\n3. The worker's screening list proposes every return to theatre within 24 hours that nobody reported\n   (`GET /incident-screening`).\n\n## 9. The checklist, the theatre policy, the statistics\n\n* `GET /ot/checklist-items?include_inactive=true`, `POST /ot/checklist-items {\"phase\", \"prompt\", \"kind\", \"allow_na\",\n  \"note_when\"?, \"reference\"?, \"sort_order\"}`, `PATCH /ot/checklist-items/{item_id}` (retire with `is_active` false). The\n  checklist ships as a starting point modelled on the WHO Surgical Safety Checklist, in Haspataal's own words: the\n  theatre team adapts it.\n* `GET /ot/theatre-policy/pdf`: the checklist, the recovery discharge criteria and the privileges in force, as the\n  written SOPs, with lines for the medical director's approval and the yearly review.\n* `GET /ot/clinical-statistics?date_from&date_to`: for the operations that ended in the period, each measure the\n  surveyor samples (applicable, met, %), the theatre's incidents, and per surgeon and theatre the operations, signed\n  notes, complete checklists and incidents. The medical record review checks the same for each sampled admission\n  (criteria `ADM_OPERATIVE_NOTE`, `ADM_ANAESTHESIA`, `ADM_SAFETY_CHECKLIST`).\n\nSettings (`PUT /admin/settings/{key}`): `ot_anaesthesia_chart_minutes` (15), `ot_recovery_obs_minutes` (15),\n`ot_recovery_min_score` (9), `ot_recovery_max_pain` (4), `ot_recovery_max_minutes` (180).",
+  "steps": [
+    {
+      "heading": "1. Clinical privileges (once, then yearly)",
+      "anchor": "1-clinical-privileges-once-then-yearly",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/privileges",
+          "summary": "The clinical privileges register"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/privileges",
+          "summary": "Grant a clinical privilege"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/ot/privileges/{privilege_id}",
+          "summary": "Change the scope, basis or end of a privilege"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/privileges/{privilege_id}/revoke",
+          "summary": "Revoke a clinical privilege"
+        }
+      ]
+    },
+    {
+      "heading": "2. Before the operation",
+      "anchor": "2-before-the-operation",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/clinical-worklist",
+          "summary": "Operations whose surgical record needs work"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/ot/bookings/{booking_id}/pre-op-note",
+          "summary": "Write the surgeon's pre-operative note"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/icd/codes",
+          "summary": "ICD picker: search codes by code or words"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/ot/bookings/{booking_id}/pre-anaesthesia",
+          "summary": "Write the pre-anaesthesia assessment (draft)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/pre-anaesthesia/sign",
+          "summary": "Sign the pre-anaesthesia assessment"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/consents",
+          "summary": "Prepare a consent form"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/consents/{consent_id}/sign",
+          "summary": "Record a consent as given"
+        }
+      ]
+    },
+    {
+      "heading": "3. The surgical safety checklist (MSDS 37, 44)",
+      "anchor": "3-the-surgical-safety-checklist-msds-37-44",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/checklist-items",
+          "summary": "The surgical safety checklist of the hospital"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/safety-checks",
+          "summary": "Record a pause of the surgical safety checklist"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/start",
+          "summary": "Patient in theater → 🔴 In-Surgery"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/privileges",
+          "summary": "The clinical privileges register"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/complete-surgery",
+          "summary": "Surgery finished → 🟡 Cleaning-Prep"
+        }
+      ]
+    },
+    {
+      "heading": "4. In the theatre: the anaesthesia record (MSDS 34, 36, 37)",
+      "anchor": "4-in-the-theatre-the-anaesthesia-record-msds-34-36-37",
+      "calls": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/ot/bookings/{booking_id}/anaesthesia-record",
+          "summary": "Open or update the anaesthesia record"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/anaesthesia-record/vitals",
+          "summary": "Chart a reading during anaesthesia"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/anaesthesia-record/events",
+          "summary": "Chart a drug, fluid, blood product or event"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/anaesthesia-record/sign",
+          "summary": "Sign the anaesthesia record"
+        }
+      ]
+    },
+    {
+      "heading": "5. The operative note and the post-operative plan (IMS 150; MSDS 45-47)",
+      "anchor": "5-the-operative-note-and-the-post-operative-plan-ims-150-msds-45-47",
+      "calls": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/ot/bookings/{booking_id}/operative-note",
+          "summary": "Write the operative note and the post-operative plan (draft)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/operative-note/sign",
+          "summary": "Sign the operative note and the post-operative plan"
+        }
+      ]
+    },
+    {
+      "heading": "6. Recovery (MSDS 38, 39)",
+      "anchor": "6-recovery-msds-38-39",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/complete-surgery",
+          "summary": "Surgery finished → 🟡 Cleaning-Prep"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/recovery",
+          "summary": "Receive a patient in recovery (local anaesthesia)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/recovery-board",
+          "summary": "Patients in recovery now"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/recovery/observations",
+          "summary": "Record an observation in recovery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/recovery/discharge",
+          "summary": "Discharge the patient from recovery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/death",
+          "summary": "Record a death"
+        }
+      ]
+    },
+    {
+      "heading": "7. The whole record, corrections, printing",
+      "anchor": "7-the-whole-record-corrections-printing",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/bookings/{booking_id}/surgical-record",
+          "summary": "The surgical record of an operation"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/corrections",
+          "summary": "Append a correction to a signed part of the record"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/bookings/{booking_id}/surgical-record/print-payload",
+          "summary": "The surgical record (A4)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/bookings/{booking_id}/surgical-record/pdf",
+          "summary": "The surgical record as a PDF"
+        }
+      ]
+    },
+    {
+      "heading": "8. Adverse events (MSDS 40, 45)",
+      "anchor": "8-adverse-events-msds-40-45",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/incident-types",
+          "summary": "What to report: the incident types"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/incidents",
+          "summary": "Report an incident, an adverse event or a near miss"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/incidents",
+          "summary": "The incident register"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/incident-screening",
+          "summary": "What the records show that may be a sentinel event"
+        }
+      ]
+    },
+    {
+      "heading": "9. The checklist, the theatre policy, the statistics",
+      "anchor": "9-the-checklist-the-theatre-policy-the-statistics",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/checklist-items",
+          "summary": "The surgical safety checklist of the hospital"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/checklist-items",
+          "summary": "Add an item to the safety checklist"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/ot/checklist-items/{item_id}",
+          "summary": "Change or retire a safety checklist item"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/theatre-policy/pdf",
+          "summary": "The written theatre policy as a PDF"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/clinical-statistics",
+          "summary": "Surgical care statistics"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/settings/{key}",
+          "summary": "Change a policy setting (type-checked, audited)"
+        }
+      ]
+    }
+  ]
+}

@@ -32,9 +32,14 @@ export interface StaffDirectoryCapabilityView {
   noticeUr?: string;
 }
 
-export function getStaffDirectoryCapabilityView(establishment?: any): StaffDirectoryCapabilityView {
-  const screens: string[] = establishment?.views?.screens || [];
-  const hasDirectory = screens.length === 0 || screens.includes("staff_directory");
+export function getStaffDirectoryCapabilityView(establishment?: any,permissions:readonly string[]=[]): StaffDirectoryCapabilityView {
+  const screens=establishment?.views?.screens;
+  // This is a core HR screen; the service view list normally omits it. Honour
+  // explicit overrides, and wait for establishment data before offering work.
+  const view=Array.isArray(screens)?screens.find((screen:any)=>screen.screen_id==='staff_directory')?.view??'full':'hidden';
+  const hasDirectory = view!=='hidden'&&permissions.includes('hr.employee.view');
+  const canUpdateStatus=permissions.includes('hr.employee.update');
+  const canManageLeaveBalances=permissions.includes('hr.leave.manage');
 
   if (!hasDirectory) {
     return {
@@ -48,9 +53,9 @@ export function getStaffDirectoryCapabilityView(establishment?: any): StaffDirec
     };
   }
 
-  const isRecordsOnly = Boolean(establishment?.views?.records_only);
-  const isOpenWorkOnly = Boolean(establishment?.views?.open_work_only);
-  const isSetupOnly = Boolean(establishment?.views?.setup_only);
+  const isRecordsOnly = view==='records';
+  const isOpenWorkOnly = view==='open_work';
+  const isSetupOnly = view==='setup';
 
   if (isRecordsOnly) {
     return {
@@ -68,7 +73,7 @@ export function getStaffDirectoryCapabilityView(establishment?: any): StaffDirec
     return {
       mode: "open_work",
       canViewDirectory: true,
-      canUpdateStatus: true,
+      canUpdateStatus,
       canManageLeaveBalances: false,
       canViewOrgChart: true,
       noticeEn: "Restricted Mode: Managing operational staff statuses; policy and leave allocation adjustments restricted.",
@@ -81,7 +86,7 @@ export function getStaffDirectoryCapabilityView(establishment?: any): StaffDirec
       mode: "setup",
       canViewDirectory: true,
       canUpdateStatus: false,
-      canManageLeaveBalances: true,
+      canManageLeaveBalances,
       canViewOrgChart: true,
       noticeEn: "Setup Mode: Initial annual leave balance configuration active.",
       noticeUr: "سیٹ اپ موڈ: سالانہ رخصتوں کے ابتدائی بیلنس کی ترتیب فعال ہے۔",
@@ -91,8 +96,8 @@ export function getStaffDirectoryCapabilityView(establishment?: any): StaffDirec
   return {
     mode: "full",
     canViewDirectory: true,
-    canUpdateStatus: true,
-    canManageLeaveBalances: true,
+    canUpdateStatus,
+    canManageLeaveBalances,
     canViewOrgChart: true,
   };
 }

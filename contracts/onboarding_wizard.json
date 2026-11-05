@@ -1,7 +1,7 @@
 {
   "screen_id": "onboarding_wizard",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -259,8 +259,27 @@
       }
     ],
     "related_workflows": [
+      "clinic-quality-and-education",
+      "clinical-and-prescriptions",
+      "complaints",
+      "consent",
+      "diagnostic-services",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "finance-and-owner",
       "hr-and-payroll",
-      "personnel-records"
+      "incidents-and-sentinel-events",
+      "infection-control",
+      "inpatient-and-discharge",
+      "laboratory-and-radiology",
+      "medical-record-review",
+      "medication-safety",
+      "opd-reception",
+      "operating-theater",
+      "personnel-records",
+      "phc-interview-prep",
+      "quality-indicators-and-committees"
     ]
   },
   "rules_in_force": null,
@@ -270,14 +289,23 @@
     "workspace": "hr",
     "phase": "P8",
     "position": 143,
-    "points": 63,
+    "points": 69,
     "capabilities": [
       "idempotent_writes",
       "uploads",
       "f1_help",
       "zoom"
     ],
-    "depends_on": [],
+    "depends_on": [
+      {
+        "from": "onboarding_wizard",
+        "to": "it_console",
+        "kind": "data_candidate",
+        "evidence": "it reads admin/departments, which POST /admin/departments on it_console creates",
+        "ordering": false,
+        "forward": false
+      }
+    ],
     "needed_by": [
       {
         "from": "clinical_privileges",
@@ -326,53 +354,65 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 63,
+    "points": 69,
     "items": [
       {
         "id": "ep:POST /hr/employees",
         "label": "POST /hr/employees",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PATCH /hr/employees/{employee_id}/steps/1",
         "label": "PATCH /hr/employees/{employee_id}/steps/1",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PATCH /hr/employees/{employee_id}/steps/2",
         "label": "PATCH /hr/employees/{employee_id}/steps/2",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PATCH /hr/employees/{employee_id}/steps/3",
         "label": "PATCH /hr/employees/{employee_id}/steps/3",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /hr/employees/{employee_id}/qualifications",
         "label": "POST /hr/employees/{employee_id}/qualifications",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /hr/employees/{employee_id}/documents",
         "label": "POST /hr/employees/{employee_id}/documents",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /hr/employees/{employee_id}/submit",
         "label": "POST /hr/employees/{employee_id}/submit",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /hr/employees/{employee_id}",
         "label": "GET /hr/employees/{employee_id}",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /admin/departments",
+        "label": "GET /admin/departments",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /staff/lookup",
+        "label": "GET /staff/lookup",
         "points": 3,
         "claimed": false
       },
@@ -380,61 +420,61 @@
         "id": "rule:adc6619db9",
         "label": "Step 6 never creates a login — it hands over to IT (status Awaiting_IT_Provisioning).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:c1f853fceb",
         "label": "Grey out Submit until GET /hr/employees/{id}.checklist.ready is true.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:44d2ead844",
         "label": "Upload files as multipart/form-data (file + doc_type + optional title); only paths are stored in the DB.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:511519d15c",
         "label": "Documents are PDF, JPEG or PNG; the Photo (printed on the ID card) is a JPEG or PNG only, at most 16 megapixels (UNSUPPORTED_MEDIA_TYPE, VALIDATION_ERROR for a damaged image).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:cd04ca0d57",
         "label": "Step 4, financial config (a Visiting contract): the OT split contract is set by the Billing Admin on Price & policy management (decisions 56). Say that it is needed and who sets it; the wizard never sends it.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
         "label": "Test plan passed",
         "points": 4,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -464,13 +504,13 @@
         "id": "q:character",
         "label": "Design principles applied",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:editor",
         "label": "Editor's pass",
         "points": 2,
-        "claimed": false
+        "claimed": true
       }
     ],
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
@@ -962,7 +1002,8 @@
             "pointer": "/department_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The department (GET /admin/departments)"
           },
           {
             "pointer": "/designation",
@@ -981,7 +1022,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "Builds the reporting hierarchy (leave approvals route here)"
+            "description": "Builds the reporting hierarchy (leave approvals route here) (GET /staff/lookup)"
           },
           {
             "pointer": "/base_salary",
@@ -1287,8 +1328,8 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 1950.0,
-            "maximum": 2100.0
+            "minimum": 1950,
+            "maximum": 2100
           },
           {
             "pointer": "/license_number",
@@ -1706,6 +1747,211 @@
         "filters": [],
         "note": null
       }
+    },
+    {
+      "endpoint": "GET /admin/departments",
+      "summary": "Departments",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DepartmentOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "UNAUTHENTICATED",
+          "http_status": 401,
+          "message": "Authentication is required.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/settings/sections"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": true,
+          "description": "Part of the name, or the start of the employee number",
+          "schema": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80,
+            "description": "Part of the name, or the start of the employee number",
+            "title": "Q"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "Only this department",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only this department",
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "license_type",
+          "in": "query",
+          "required": false,
+          "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "PMDC",
+                  "PNC"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+            "title": "License Type"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 20,
+            "minimum": 1,
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_StaffLookupOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 20
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": true,
+            "type": "string",
+            "min_length": 2,
+            "description": "Part of the name, or the start of the employee number"
+          }
+        ],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer",
+            "description": "Only this department"
+          },
+          {
+            "name": "license_type",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PMDC",
+              "PNC"
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
     }
   ],
   "realtime": {
@@ -2050,6 +2296,10 @@
       "why": "every call (show error.code's message)"
     },
     {
+      "state": "empty",
+      "why": "a list can be empty: say why and what to do next"
+    },
+    {
       "state": "forbidden",
       "why": "actions hidden or disabled by permission (GET /auth/me)"
     },
@@ -2072,6 +2322,7 @@
       "IDEMPOTENCY_CONFLICT": "Idempotency-Key was reused with a different request body.",
       "NOT_FOUND": "The requested resource was not found.",
       "PAYLOAD_TOO_LARGE": "The uploaded file is too large.",
+      "UNAUTHENTICATED": "Authentication is required.",
       "UNSUPPORTED_MEDIA_TYPE": "This file type is not allowed.",
       "VALIDATION_ERROR": "The request is invalid.",
       "ZERO_INTERFACE_STAFF_NO_LOGIN": "Support staff use a badge at badge stations and never receive logins."
@@ -2284,6 +2535,35 @@
           "owner",
           "super_admin"
         ]
+      },
+      {
+        "id": "case:GET /admin/departments",
+        "call": "GET /api/v1/admin/departments",
+        "summary": "Departments",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /staff/lookup",
+        "call": "GET /api/v1/staff/lookup",
+        "summary": "Find a staff member for a form (badge facts only)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "UNAUTHENTICATED",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "any logged-in user"
+        ]
       }
     ],
     "service_cases": [],
@@ -2324,8 +2604,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -2443,6 +2723,24 @@
         ],
         "permissions_mode": "all",
         "access": null
+      },
+      {
+        "id": "onboarding_wizard::GET /admin/departments",
+        "task": "Departments",
+        "call": "GET /admin/departments",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "onboarding_wizard::GET /staff/lookup",
+        "task": "Find a staff member for a form (badge facts only)",
+        "call": "GET /staff/lookup",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
       }
     ],
     "rules_to_explain": [
@@ -2488,6 +2786,11 @@
         "code": "PAYLOAD_TOO_LARGE",
         "message": "The uploaded file is too large.",
         "ui_action": "Tell the user the file is too large."
+      },
+      {
+        "code": "UNAUTHENTICATED",
+        "message": "Authentication is required.",
+        "ui_action": "Refresh the token once; if that fails return to login."
       },
       {
         "code": "UNSUPPORTED_MEDIA_TYPE",
@@ -2565,14 +2868,109 @@
   },
   "workflows": [
     {
+      "slug": "clinic-quality-and-education",
+      "title": "QA rounds, patient feedback and health education",
+      "recipe": "get_workflow_recipe('clinic-quality-and-education')"
+    },
+    {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
+    {
+      "slug": "consent",
+      "title": "Consent (MSDS)",
+      "recipe": "get_workflow_recipe('consent')"
+    },
+    {
+      "slug": "diagnostic-services",
+      "title": "Diagnostic services quality (MSDS)",
+      "recipe": "get_workflow_recipe('diagnostic-services')"
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
+    },
+    {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "facility-compliance-equipment-drills",
+      "title": "Licences, equipment maintenance and mock drills (MSDS)",
+      "recipe": "get_workflow_recipe('facility-compliance-equipment-drills')"
+    },
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
       "slug": "hr-and-payroll",
       "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
       "recipe": "get_workflow_recipe('hr-and-payroll')"
     },
     {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "recipe": "get_workflow_recipe('infection-control')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "laboratory-and-radiology",
+      "title": "Laboratory & radiology",
+      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
+    },
+    {
+      "slug": "medical-record-review",
+      "title": "Medical record review (MSDS IMS-3)",
+      "recipe": "get_workflow_recipe('medical-record-review')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
+    },
+    {
+      "slug": "opd-reception",
+      "title": "OPD reception, queues & re-routing",
+      "recipe": "get_workflow_recipe('opd-reception')"
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
+    },
+    {
       "slug": "personnel-records",
       "title": "Personnel records (MSDS)",
       "recipe": "get_workflow_recipe('personnel-records')"
+    },
+    {
+      "slug": "phc-interview-prep",
+      "title": "PHC inspection interviews: daily practice, mock interviews, model answers and readiness",
+      "recipe": "get_workflow_recipe('phc-interview-prep')"
+    },
+    {
+      "slug": "quality-indicators-and-committees",
+      "title": "Clinical quality indicators and committees (MSDS)",
+      "recipe": "get_workflow_recipe('quality-indicators-and-committees')"
     }
   ],
   "scenarios": [],
@@ -2757,7 +3155,7 @@
             "specialty": null,
             "supervisor_id": null,
             "supervisor_name": null,
-            "base_salary": 0.0,
+            "base_salary": 0,
             "contract_type": "Permanent",
             "shift_pattern_id": null,
             "employment_status": "Draft",
@@ -2825,7 +3223,7 @@
             "specialty": null,
             "supervisor_id": null,
             "supervisor_name": null,
-            "base_salary": 0.0,
+            "base_salary": 0,
             "contract_type": "Permanent",
             "shift_pattern_id": null,
             "employment_status": "Draft",
@@ -2896,7 +3294,7 @@
             "specialty": null,
             "supervisor_id": null,
             "supervisor_name": null,
-            "base_salary": 60000.0,
+            "base_salary": 60000,
             "contract_type": "Permanent",
             "shift_pattern_id": null,
             "employment_status": "Draft",
@@ -2967,7 +3365,7 @@
             "specialty": null,
             "supervisor_id": null,
             "supervisor_name": null,
-            "base_salary": 60000.0,
+            "base_salary": 60000,
             "contract_type": "Permanent",
             "shift_pattern_id": null,
             "employment_status": "Draft",
@@ -3096,6 +3494,59 @@
       "response": {
         "status": 200,
         "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"employee_id\": 4, \"emp_number\": \"EMP-2026-0004\", \"full_name\": \"Sana Tariq\", \"father_or_husband_name\": null, \"cnic\": \"44193-4871435-2\", \"dob\": null, \"gender\": \"female\", \"mobile\": \"03001234567\", \"email\": null, \"address\": \"House 12, Street 4, Lahore\", \"blood_group\": \"B+\", \"department_id\": null, \"department_name\": null, \"designation\": \"Staff Nurse\", \"specialty\": null, \"supervisor_id\": null, \"supervisor_name\": null, \"base_salary\": 60000.0, \"contract_type\": \"Permanent\", \"shift_pattern_id\": null, \"employment_status\": \"Draft\", \"staff_category\": \"Nursing\", \"is_clinical_staff\": true, \"license_type\": \"PNC\", \"license_number\": \"PNC-99\", \"joined_on\": null, \"left_on\": null, \"onboarding_step\": 4, \"row_version\": 7, \"created_at\": \"2026-09-27T17:36:57.664341+00:00\", \"qualifications\": [], \"documents\": [{\"document_id\": 1, \"doc_type\": \"CNIC\", \"title\": null, \"content_type\": \"application/pdf\", \"size_bytes\": 25, \"is_required\": true, \"is_verified\": false, \"uploaded_at\": \"2026-09-27T17:36:57.754154+00:00\"}, {\"document_id\": 2, \"doc_type\": \"PNC\", \"title\": null, \"content_type\": \"application/pdf\", \"size_bytes\": 25, \"is_required\": true, \"is_verified\": false, \"uploaded_at\": \"2026-09-27T17:36:57.780927+00:00\"}], \"contract\": null, \"user\": null, \"badges\": [], \"schedule\": {\"shift_pattern_id\": null, \"shift_name\": null, \"effective_from\": null, \"weekly_off_days\": [7]}, \"checklist\": {\"ready\": true, \"missing\": []}}, \"meta\": {\"server_time\": \"2026-09-27T17:36:57.790733+00:00\"}, \"reques…"
+      }
+    },
+    "GET /admin/departments": {
+      "request": {
+        "path": "/api/v1/admin/departments"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "department_id": 1,
+              "code": "CARD",
+              "name": "Cardiology & Vascular",
+              "is_clinical": true,
+              "is_active": true,
+              "row_version": 2
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:34:24.417658+00:00"
+          },
+          "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+        }
+      }
+    },
+    "GET /staff/lookup": {
+      "request": {
+        "path": "/api/v1/staff/lookup",
+        "query": {
+          "q": "sana look"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "employee_id": 2,
+              "emp_number": "EMP-2026-0002",
+              "full_name": "Sana Lookuptest",
+              "designation": "Officer",
+              "department_name": null,
+              "license_type": "PNC",
+              "user_id": 2,
+              "registration": "PNC PNC-31852"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-11-05T01:52:33.483546+00:00"
+          },
+          "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
+        }
       }
     }
   },
@@ -3228,6 +3679,44 @@
       ],
       "title": "ContractOut",
       "description": "A consultant's commission rule (workflow section 5.5)."
+    },
+    "DepartmentOut": {
+      "properties": {
+        "department_id": {
+          "type": "integer",
+          "title": "Department Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "is_clinical": {
+          "type": "boolean",
+          "title": "Is Clinical"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "department_id",
+        "code",
+        "name",
+        "is_clinical",
+        "is_active",
+        "row_version"
+      ],
+      "title": "DepartmentOut"
     },
     "EmployeeBadgeOut": {
       "properties": {
@@ -4089,6 +4578,56 @@
       ],
       "title": "Envelope[QualificationOut]"
     },
+    "Envelope_list_DepartmentOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/DepartmentOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[DepartmentOut]]"
+    },
+    "Envelope_list_StaffLookupOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/StaffLookupOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[StaffLookupOut]]"
+    },
     "HTTPValidationError": {
       "properties": {
         "detail": {
@@ -4185,8 +4724,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 2100.0,
-              "minimum": 1950.0
+              "maximum": 2100,
+              "minimum": 1950
             },
             {
               "type": "null"
@@ -4385,6 +4924,92 @@
       ],
       "title": "QualificationOut"
     },
+    "StaffLookupOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id",
+          "description": "The id a form's staff field takes (contrast_doctor_id, employee_id, ...)"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "license_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "PMDC",
+                "PNC",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "License Type",
+          "description": "The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none"
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id",
+          "description": "Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "department_name",
+        "license_type",
+        "registration",
+        "user_id"
+      ],
+      "title": "StaffLookupOut",
+      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."
+    },
     "Step1In": {
       "properties": {
         "full_name": {
@@ -4531,7 +5156,8 @@
               "type": "null"
             }
           ],
-          "title": "Department Id"
+          "title": "Department Id",
+          "description": "The department (GET /admin/departments)"
         },
         "designation": {
           "anyOf": [
@@ -4565,13 +5191,13 @@
             }
           ],
           "title": "Supervisor Id",
-          "description": "Builds the reporting hierarchy (leave approvals route here)"
+          "description": "Builds the reporting hierarchy (leave approvals route here) (GET /staff/lookup)"
         },
         "base_salary": {
           "anyOf": [
             {
               "type": "number",
-              "minimum": 0.0
+              "minimum": 0
             },
             {
               "type": "string",

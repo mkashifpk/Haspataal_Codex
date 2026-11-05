@@ -1,0 +1,116 @@
+{
+  "slug": "icd-coding",
+  "title": "ICD coding (disease classifications)",
+  "summary": "The WHO ICD-11 code list shipped with the server, a hospital's licensed ICD-10, the ICD picker in every coding screen, codes checked against the active list and sent with their titles, coded morbidity and mortality statistics.",
+  "order": 99,
+  "workflow": "MSDS IMS 148; indicator 105 vii",
+  "workspaces": [
+    "doctor",
+    "quality",
+    "owner_dashboard",
+    "super_admin"
+  ],
+  "file": "icd-coding.md",
+  "markdown": "# ICD coding (disease classifications)\n\nThe Punjab Healthcare Commission's MSDS wants diagnoses coded \"as per the International Classification of Diseases,\n10th or as revised from time to time\" (indicator 148), and the quality committee to watch how completely records are\ncoded (105 vii). Haspataal codes clinical notes, discharge summaries and death certificates in **ICD-11** out of the box,\nand in **ICD-10** once the hospital loads the WHO file it is licensed to use.\n\n## The code lists\n\n| Classification | Where it comes from | Licence |\n|---|---|---|\n| **ICD-11 MMS** (WHO release 2026-01, English; 18 505 codes of chapters 01-26 and V) | ships with the server; `hms migrate apply` loads it, and a server upgrade brings WHO's next yearly release | WHO, CC BY-ND 3.0 IGO: free, also in commercial software, **with the attribution** (`icd11_citation`) and codes never changed |\n| **ICD-10** | the hospital loads it (`POST /icd/releases`) | WHO licenses ICD-10 separately (an internal-use licence for the hospital, licensing@who.int); it never ships with the product |\n\n`GET /icd/releases` → every release loaded (`source` Bundled / Imported, `code_count`, `licence_note`, `is_active`),\n`coding_system` (the classification doctors code in: setting `icd_coding_system`, ICD-11 by default) and\n`icd11_citation`. One release per classification is **active**: the picker searches it and new codes must be in it.\n\n## The picker (screen `icd_picker`, inside every coding screen)\n\n1. `GET /icd/codes?q=…[&system=ICD-11|ICD-10][&limit=30]` as the doctor types (2+ characters, debounced): a code prefix\n   (`CA40`) or words in any order (`pneumonia bacterial`). Exact code first, then code prefixes in the\n   classification's order, then titles starting with the words; specific codes before residual ones\n   (`is_residual`: \"other specified\", \"unspecified\"). Show `code` in bold, `title`, and `parent_title` in grey.\n2. Browsing: `GET /icd/browse` → the chapters; `GET /icd/browse?parent=12` → a chapter's blocks; `?parent=CA40` → a\n   category's children.\n3. One code: `GET /icd/codes/{code}` → the entry, `ancestors` (chapter → blocks → categories) and `children`.\n4. Show `icd11_citation` in small print at the picker's foot. `ICD_SYSTEM_NOT_LOADED`: no active list of that\n   classification (ICD-10 before the hospital loads it).\n\nStore the **code** only:\n\n| Record | Field |\n|---|---|\n| clinical note | `icd_codes` (`POST /clinical-encounters`, `PATCH /clinical-encounters/{id}`) |\n| discharge summary | `icd_codes` (`PUT /admissions/{id}/discharge-summary`); `suggested.icd_terms` offers the notes' codes |\n| death certificate | `cause_a_icd` … `cause_d_icd`, `other_conditions_icd` (`POST /patients/{id}/death`, `PUT /deaths/{id}`) |\n\nCodes are normalized (upper case, no spaces, each once) and each must be a category of the **active** list of its\nclassification (a code's format tells which: ICD-11 codes have a letter second, `CA40.Z`; ICD-10 a digit, `J18.9`).\nOtherwise `ICD_CODE_UNKNOWN` with `details.unknown` (the codes) and `details.loaded` (the classifications loaded).\nWherever codes come back they come with **`icd_terms`**: `[{code, system, title, uri}]` (a death record also has\n`underlying_term`). Show code and title, never a bare code: the ICD-11 licence asks for code, title and URI together.\n\n## Loading ICD-10 or a newer ICD-11 (screen `icd_code_lists`, Quality Officer or Super Admin)\n\n`POST /icd/releases` (multipart, permission `icd.release.manage`):\n\n| Field | |\n|---|---|\n| `file` | ClaML XML (the format WHO distributes classifications in), WHO's ICD-11 simple tabulation (`.zip` or `.txt`), or a CSV / TSV with `code` and `title` columns (optionally `kind`, `parent`, `chapter`) |\n| `code_system` | `ICD-10` or `ICD-11` |\n| `release_label` | e.g. `2019` |\n| `licence_note` | required for ICD-10: the WHO licence the hospital holds |\n| `activate` | `true` (default): it becomes the active list of its classification |\n\nThe file is checked: every code in the classification's format and every entry titled (`ICD_IMPORT_INVALID`,\n`details.examples`); a release already loaded → `ICD_RELEASE_EXISTS`. A release never changes: load a corrected one and\nactivate it (`POST /icd/releases/{release_id}/activate`). Codes already in records keep their titles (from the release\nthat has them).\n\nSwitching the classification doctors code in: the Super Admin sets `icd_coding_system` (`PUT /admin/settings/icd_coding_system\n{\"value\": \"ICD-10\"}`), refused (`ICD_SYSTEM_NOT_LOADED`) until a list of that classification is active. Both\nclassifications stay valid in records; no mapping between them is offered (WHO licenses mappings separately).\n\n## Coded diagnosis statistics (screens `disease_statistics`, `disease_statistics_owner`)\n\n`GET /icd/statistics?date_from=…&date_to=…&limit=50` (permission `icd.statistics.view`: Quality Officer, Owner, Hospital\nAdmin), this month so far by default:\n\n* `completeness`: per source (OPD: finalized OPD, follow-up and emergency notes; Inpatient: patients discharged; Deaths:\n  deaths certified) the records and how many carry a code, `coded_pct` (MSDS 105 vii);\n* `chapters`: counts per chapter (OPD, inpatient, deaths, total); `top_codes`: the most frequent codes with titles;\n* `citation`: print it at the foot of the report when ICD-11 was used.\n\nThe mortality statistics (`GET /deaths/statistics`) group the underlying causes by ICD category (the ICD-10 three-character\ncategory or the ICD-11 stem code) with its title. The record review's `ICD_CODED` check passes when a finalized note or\nthe signed discharge summary carries a code.",
+  "steps": [
+    {
+      "heading": "The code lists",
+      "anchor": "the-code-lists",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/icd/releases",
+          "summary": "Load an ICD code list (the hospital's licensed ICD-10, or a newer WHO ICD-11 release)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/icd/releases",
+          "summary": "The ICD code lists loaded"
+        }
+      ]
+    },
+    {
+      "heading": "The picker (screen icd_picker, inside every coding screen)",
+      "anchor": "the-picker-screen-icd-picker-inside-every-coding-screen",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/icd/codes",
+          "summary": "ICD picker: search codes by code or words"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/icd/browse",
+          "summary": "ICD picker: browse chapters, blocks, categories"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/icd/codes/{code}",
+          "summary": "One ICD code with its place in the tree"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/clinical-encounters",
+          "summary": "Write a clinical note (draft or finalize=true)"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/clinical-encounters/{encounter_id}",
+          "summary": "Edit your DRAFT note"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admissions/{admission_id}/discharge-summary",
+          "summary": "Save the discharge summary draft"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/death",
+          "summary": "Record a death"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/deaths/{death_id}",
+          "summary": "Write the cause-of-death certificate (draft)"
+        }
+      ]
+    },
+    {
+      "heading": "Loading ICD-10 or a newer ICD-11 (screen icd_code_lists, Quality Officer or Super Admin)",
+      "anchor": "loading-icd-10-or-a-newer-icd-11-screen-icd-code-lists-quality-officer-or-super-admin",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/icd/releases",
+          "summary": "Load an ICD code list (the hospital's licensed ICD-10, or a newer WHO ICD-11 release)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/icd/releases/{release_id}/activate",
+          "summary": "Make a release the active list of its classification"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/settings/{key}",
+          "summary": "Change a policy setting (type-checked, audited)"
+        }
+      ]
+    },
+    {
+      "heading": "Coded diagnosis statistics (screens disease_statistics, disease_statistics_owner)",
+      "anchor": "coded-diagnosis-statistics-screens-disease-statistics-disease-statistics-owner",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/icd/statistics",
+          "summary": "Coded diagnosis statistics: by ICD chapter and code, and coding completeness"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/deaths/statistics",
+          "summary": "Mortality statistics for a period"
+        }
+      ]
+    }
+  ]
+}

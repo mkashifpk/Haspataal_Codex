@@ -9,6 +9,7 @@ const withQuery = (path: string, q?: Record<string, unknown>) => {
 };
 
 export interface RecallIn {
+  /** The recalled medicine (GET /drugs/search) */
   drug_id: number;
   /** The recalled batches of the medicine */
   batch_ids?: number[] | null;
@@ -197,6 +198,33 @@ export interface BatchAvailabilityOut {
   is_expired: boolean;
 }
 
+/** A drug with its live stock (view v_drug_stock): what e-prescription search shows. */
+export interface DrugStockOut {
+  drug_id: number;
+  code: string;
+  name: string;
+  generic_name: string | null;
+  strength: string | null;
+  form: "Tablet" | "Capsule" | "Syrup" | "Suspension" | "Injection" | "Infusion" | "Cream" | "Ointment" | "Drops" | "Inhaler" | "Suppository" | "Powder" | "Consumable" | "Device" | "Other";
+  unit: string;
+  schedule: "OTC" | "ScheduleG" | "ScheduleH" | "ScheduleX" | "HospitalOnly";
+  is_otc_allowed: boolean;
+  barcode: string | null;
+  low_stock_threshold: number;
+  is_active: boolean;
+  /** Set: a high-alert medicine (MSDS 56): show it in red; a second person checks it when dispensed and given */
+  high_alert_category: "ConcentratedElectrolyte" | "Chemotherapy" | "Anticoagulant" | "Insulin" | "Opioid" | "Sedative" | "NeuromuscularBlocker" | "Inotrope" | "Thrombolytic" | "Psychotropic" | "HighCost" | "Other" | null;
+  /** Prescribed only with the RestrictedPrescribing privilege (MSDS 52) */
+  is_restricted: boolean;
+  /** Medicines it looks or sounds like: warn when one is picked */
+  lasa_with: string[];
+  /** Non-expired stock */
+  qty_available: number;
+  next_expiry: string | null;
+  /** OutOfStock: show the drug greyed out */
+  stock_status: "InStock" | "Low" | "OutOfStock";
+}
+
 /** Open a batch recall — POST /api/v1/drug-recalls (who may call: holders of pharmacy.recall.manage). */
 export function openRecall(body: RecallIn): Promise<RecallDetailOut> {
   return api<RecallDetailOut>("POST", `/drug-recalls`, body, { idempotent: true });
@@ -235,4 +263,9 @@ export function cancelRecall(recall_id: number, body: MedicationReasonIn): Promi
 /** Drug stock with batches in FEFO order — GET /api/v1/drugs/{drug_id}/stock-status (who may call: holders of pharmacy.formulary.view or pharmacy.stock.view). */
 export function stockStatus(drug_id: number): Promise<DrugStockDetailOut> {
   return api<DrugStockDetailOut>("GET", `/drugs/${drug_id}/stock-status`, undefined);
+}
+
+/** Formulary search with live stock colour — GET /api/v1/drugs/search (who may call: holders of pharmacy.formulary.view). */
+export function searchDrugs(query?: { q?: string; limit?: number }): Promise<DrugStockOut[]> {
+  return api<DrugStockOut[]>("GET", withQuery(`/drugs/search`, query), undefined);
 }

@@ -1,0 +1,266 @@
+{
+  "slug": "blood-transfusion",
+  "title": "Blood transfusion",
+  "summary": "The hospital blood bank from a licensed source to the bedside - sources, units received, the storage log, requests with the transfusion consent, compatibility tests, issue, the two-person bedside check within 30 minutes, observations, the end, reactions with their incident, discards and returns - and the registers and measures the PHC asks for.",
+  "order": 99,
+  "workflow": "MSDS Category I 21-25 and 104; II A 82-86; II B and II C 62-65; the II C manual p154-163 (decisions 43)",
+  "workspaces": [
+    "lab_admin",
+    "lab_tech",
+    "doctor",
+    "ward_nurse",
+    "triage",
+    "ot_nurse",
+    "quality"
+  ],
+  "file": "blood-transfusion.md",
+  "markdown": "# Blood transfusion\n\n| Source | What the surveyor checks | Haspataal |\n|---|---|---|\n| Cat I 21 (PDF p42-43), II C 62 (p154) | Written SOPs for the whole blood chain, followed; traceability at every step | Every step recorded and linked: `GET /blood/units/{unit_id}` is one unit's chain; the SOPs themselves are the hospital's |\n| Cat I 22 (p43-44), II C 63 (p157-158) | The service under the Punjab Blood Transfusion Safety Act 2016: a PBTA licence, or an MOU with a licensed blood establishment; only legal blood reaches patients; temporary storage | `/blood/sources` with the PBTA licence and the MOU from the compliance register; units only from active sources; the storage log |\n| Cat I 23 (p44), II C 64 (p159-160) | Informed consent of every recipient (signed, or the physician's note in an emergency) | A request is refused without the patient's Given transfusion consent of the stay (`BLOOD_CONSENT_REQUIRED`, database rule) |\n| Cat I 25 (p45-46), II C 65 (p161-163) | Reactions recorded, analysed, actions; the Authority informed (the Act s.13) | `POST /blood/transfusions/{id}/reaction` (Table 11's fields) creates the incident; `POST /blood/reactions/{id}/recheck` adds the regrouping and the Authority's notice |\n| Cat I 104 (p117) | The percentage of transfusion reactions, of wastage and of component usage, and the turnaround of issue, before the CQI committee | `GET /blood/statistics`, `GET /blood/statistics/pdf` |\n\nA hospital that also runs its own blood *center* (donors, screening, collection, components: owner decision B1,\ndecisions 48) uses the separate service `blood_center` ([Blood center](blood-center.md)); its components reach this\nblood bank only by their release, as units of the source kind `OwnBloodCenter`, each with its `donation_number`. The\nABO compatibility of a unit is the laboratory's test result; Haspataal records it and shows both groups, and enforces\nno compatibility matrix of its own.\n\nThe service `blood_transfusion` (it requires inpatient care) is switched on in the facility settings\n([Facility profile and services](facility-profile-and-services.md)) once an active licensed source, someone who may\ntest and issue (`blood.bank.operate`) and someone who may transfuse (`blood.transfuse`) exist. New requests and units\nreceived are refused while it is not Active (`CAPABILITY_INACTIVE`); while it is Retiring, the requests made before\ncontinue to their end.\n\nWho: the **Lab Admin** keeps the sources (`blood.bank.manage`); **lab technicians and verifiers** receive units\n(`blood.receive`), test, issue and keep the log (`blood.bank.operate`); **doctors** request (`blood.request`); **ward,\nOT and ER nurses and doctors** transfuse (`blood.transfuse`); the **Quality Officer**, the **Owner** and the clinical\nstaff read (`blood.view`).\n\n## 1. The sources and the service (Lab Admin, Hospital Admin)\n\n1. `POST /blood/sources` with an `Idempotency-Key`: `name`, `kind` (`BloodCenter` | `HospitalBloodBank`; the hospital's\n   own center is `OwnBloodCenter`, see [Blood center](blood-center.md)),\n   `licence_number` (PBTA), optionally `agreement_document_id` (the MOU or contract from\n   `GET /facility/compliance-documents`). A II B or II C hospital without its own blood bank transfuses under such a\n   contract (II C p158). `BLOOD_SOURCE_EXISTS`.\n2. `GET /blood/sources`; `PATCH /blood/sources/{source_id}` with `expected_version` (`is_active` false stops receiving).\n3. `POST /establishment/changes/preview` then `POST /establishment/changes` with `blood_transfusion` → `Active`; the\n   preview lists `CAPABILITY_PREREQUISITE` (`blood_source`, `blood_bank_staff`, `transfusion_staff`) until they exist.\n\n## 2. The blood bank (lab technician)\n\n4. `POST /blood/units` with an `Idempotency-Key`: the bag as labelled: `source_id`, `unit_number`, `component`\n   (`WholeBlood` | `RedCells` | `FreshFrozenPlasma` | `Cryoprecipitate` | `Platelets`), `abo`, `rh`, `expires_at`,\n   `screened` (true, never pre-ticked), optional `volume_ml`, `collected_on`, `arrival_temperature_c`.\n   `BLOOD_UNIT_EXISTS`, `BLOOD_UNIT_EXPIRED`, `CAPABILITY_INACTIVE`.\n5. `GET /blood/units`: the stock (on the shelf, reserved, out), soonest expiry first; `expired` true: discard it.\n6. `POST /blood/storage-checks` with an `Idempotency-Key`: `equipment`, `storage_kind` (`BloodRefrigerator` +2 to +6 C,\n   `PlasmaFreezer` at most -30 C, `PlateletIncubator` +20 to +24 C: the II C manual p155; settings\n   `blood_refrigerator_min_c` ... may change them), `temperature_c`, `alarm_working`; out of range needs\n   `action_taken` (`STORAGE_CHECK_ACTION_REQUIRED`) and emits `blood.storage.out_of_range`. `GET /blood/storage-checks`,\n   `GET /blood/storage-checks/pdf`.\n7. `GET /blood/requests`: the worklist (open requests, Emergency first); `blood.request.created` refreshes it.\n   `GET /blood/requests/{request_id}`.\n8. `POST /blood/requests/{request_id}/crossmatches` with an `Idempotency-Key`: `unit_id` (on the shelf, the component\n   requested), the patient's `patient_abo` / `patient_rh` on this sample, `sample_taken_at`, `method`, `result`\n   (`Compatible` reserves the unit for the request). `BLOOD_UNIT_STATE`, `BLOOD_UNIT_EXPIRED`, `VALIDATION_ERROR`.\n9. `POST /blood/requests/{request_id}/issue` with an `Idempotency-Key`: `unit_id`, `crossmatch_id` (only an Emergency\n   request with `uncrossmatched_note` may leave it out: `BLOOD_CROSSMATCH_REQUIRED`), and the collecting nurse or\n   doctor signs for the unit on the bank's screen: `collector_username`, `collector_password` (`STEP_UP_REQUIRED`;\n   `ADMINISTRATION_NOT_AUTHORIZED` when not a registered nurse or doctor). The answer's `start_by` is 30 minutes\n   after the issue. Emits `blood.unit.issued` to the ward.\n10. A unit coming back: `POST /blood/transfusions/{transfusion_id}/return`: `fit_for_use` true within 30 minutes (signed\n    back into the refrigerator; it keeps its reservation; `BLOOD_UNIT_OUT_TOO_LONG` after), or false with\n    `discard_reason` and `note` (not given, discarded).\n11. Out of the stock: `POST /blood/units/{unit_id}/discard` (`reason`, `note`: the wastage measure) or\n    `POST /blood/units/{unit_id}/return-to-source` (`note`: the contract's take-back).\n12. When the request is done: `POST /blood/requests/{request_id}/close` (the units still reserved go back on the shelf).\n\n## 3. The request (doctor)\n\n13. `GET /consents?patient_id=...`: the patient's transfusion consent of this stay must be `Given` (signed, or the\n    doctor's emergency note: [consent](consent.md)); none: take it first.\n14. `POST /blood/requests` with an `Idempotency-Key`: `admission_id` or `er_visit_id`, optional `booking_id`, `component`,\n    `units_requested`, `urgency`, `indication`, `consent_id`; for `Emergency` only, optionally `uncrossmatched_note`.\n    `BLOOD_CONSENT_REQUIRED`, `PRESCRIBER_NOT_AUTHORIZED`, `VALIDATION_ERROR` (not a current stay), `CAPABILITY_INACTIVE`.\n    The request is for the stay the doctor has open: its `admission_id`, or the emergency visit's `er_visit_id`;\n    `booking_id` only when the blood is for an operation of that stay. The consent picked (`GET /consents?patient_id=`)\n    belongs to the same stay.\n15. Follow it with `GET /blood/requests/{request_id}`; `POST /blood/requests/{request_id}/cancel` with why, only before\n    any blood was given (`BLOOD_REQUEST_STATE`); `POST /blood/requests/{request_id}/close` when done.\n\n## 4. At the bedside (nurse; ward, theatre or emergency)\n\n16. On `blood.unit.issued`: `GET /blood/transfusions/{transfusion_id}`; show the countdown to `start_by`.\n17. `POST /blood/transfusions/{transfusion_id}/observations` with an `Idempotency-Key`: the baseline before the start,\n    then as taken (`temperature_c`, `pulse`, `bp_systolic`, `bp_diastolic`, `respiratory_rate`, `note`).\n18. `POST /blood/transfusions/{transfusion_id}/start`: `wristband_code` (or `identity_check` TwoIdentifiers;\n    EmergencyOverride with `identity_note`; `GET /wristbands/verify` checks a band first), the five `checks` (`identity`,\n    `unit_number`, `expiry`, `product`, `bag`: every one true, none pre-ticked; a failure is\n    `BLOOD_BEDSIDE_CHECK_FAILED`: record the unit as not given, step 10), and the second nurse or doctor's\n    `second_checker_username` / `_password` (`STEP_UP_REQUIRED`, `DUAL_CONTROL_SAME_PERSON`). `BLOOD_UNIT_OUT_TOO_LONG`\n    after 30 minutes. `BLOOD_CONSENT_REQUIRED`: the patient withdrew the transfusion consent since the request (the bank's\n    issue is refused the same way): do not transfuse; record the unit as not given or sign it back (step 10).\n    On `blood.consent.withdrawn` (critical: the patient withdrew the consent) the requests in `cancelled_requests` are\n    already cancelled; for every unit in `units_out` show \"Do not start: consent withdrawn\" and, for a transfusion\n    running, \"Stop the transfusion\" (`POST /blood/transfusions/{transfusion_id}/end` with `outcome` Stopped).\n19. `POST /blood/transfusions/{transfusion_id}/end`: `outcome` Completed, or Stopped with `end_note`; optional\n    `volume_given_ml`. `ended_late` is true more than 4 hours after the issue (II C p157).\n20. A reaction: `POST /blood/transfusions/{transfusion_id}/reaction` with an `Idempotency-Key`: `noticed_at`,\n    `reaction_type`, `reaction_class` (Haemolytic, Anaphylactic, DelayedHaemolytic with `delayed_after` and optional\n    `antibody`, Bacterial with `organism`, Other: the II A manual's form, Table 11), `fatal` (only with `harm` Death),\n    `signs`, `action_taken`, optional `possible_reason`, `harm`, `wrong_blood` (the sentinel event).\n    The incident is created in the same call (its number is in `reaction_report.incident_number`); its review and\n    actions follow [incidents and sentinel events](incidents-and-sentinel-events.md). Emits `blood.reaction.reported`.\n    `BLOOD_REACTION_EXISTS`.\n\n## 5. Registers and monitoring (Quality Officer, blood bank in charge)\n\n21. `GET /blood/reactions/{reaction_id}/pdf`: the reaction on the II A manual's report form (Table 11) for the blood\n    bank and the file; haemolytic and life-threatening reactions go to the blood bank within 10 days, fatal ones by\n    telephone the next working day, then in writing.\n    `POST /blood/reactions/{reaction_id}/recheck` (`blood.bank.manage`): `recipient_group_recheck`,\n    `donor_group_recheck`, and `authority_informed_at` with `authority_reference`; each once (`BLOOD_REACTION_RECORDED`).\n22. `GET /blood/statistics?date_from=&date_to=` and `GET /blood/statistics/pdf`: the four measures of indicator 104.\n23. `GET /blood/registers/transfusions/pdf` and `GET /blood/registers/reactions/pdf` (Table 11): each patient printed is\n    logged as a read of their record. The inspection pack carries the same four documents (`blood_*`).\n24. `GET /blood/units/{unit_id}`: one unit's whole chain, from the source to the patient (traceability).\n\n## 6. Retiring the service\n\nThe preview of `blood_transfusion` → `Retired` lists the open work: open requests (close or cancel them), units in the\nbank (use, return to the source or discard them) and units out on a ward (finish or sign back). The registers and the\nhistory stay readable afterwards; a reaction's incident stays in the incident register.",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/units/{unit_id}",
+          "summary": "One unit and its whole chain"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/transfusions/{transfusion_id}/reaction",
+          "summary": "Report a transfusion reaction"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/reactions/{reaction_id}/recheck",
+          "summary": "Add the rechecked groups or the Authority's notice to a reaction"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/statistics",
+          "summary": "The use of blood: the measures"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/statistics/pdf",
+          "summary": "The use of blood: the measures (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "1. The sources and the service (Lab Admin, Hospital Admin)",
+      "anchor": "1-the-sources-and-the-service-lab-admin-hospital-admin",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/sources",
+          "summary": "Add a blood source"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/facility/compliance-documents",
+          "summary": "The compliance register"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/sources",
+          "summary": "The licensed blood sources"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/blood/sources/{source_id}",
+          "summary": "Change a blood source or stop receiving from it"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/establishment/changes/preview",
+          "summary": "Preview a change of profile or services (nothing is saved)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/establishment/changes",
+          "summary": "Apply a change of profile or services"
+        }
+      ]
+    },
+    {
+      "heading": "2. The blood bank (lab technician)",
+      "anchor": "2-the-blood-bank-lab-technician",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/units",
+          "summary": "Receive a unit of blood"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/units",
+          "summary": "The blood stock"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/storage-checks",
+          "summary": "Record a blood refrigerator, freezer or incubator reading"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/storage-checks",
+          "summary": "The blood storage temperature log"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/storage-checks/pdf",
+          "summary": "The blood storage temperature log (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/requests",
+          "summary": "Blood requests"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/requests/{request_id}",
+          "summary": "One blood request"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/requests/{request_id}/crossmatches",
+          "summary": "Record a compatibility test"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/requests/{request_id}/issue",
+          "summary": "Issue a unit to the bedside"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/transfusions/{transfusion_id}/return",
+          "summary": "Sign a unit back, or record it as not given"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/units/{unit_id}/discard",
+          "summary": "Discard a unit"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/units/{unit_id}/return-to-source",
+          "summary": "Return an unused unit to its source"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/requests/{request_id}/close",
+          "summary": "Close a blood request (done)"
+        }
+      ]
+    },
+    {
+      "heading": "3. The request (doctor)",
+      "anchor": "3-the-request-doctor",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/consents",
+          "summary": "The consent register"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/requests",
+          "summary": "Request blood"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/requests/{request_id}",
+          "summary": "One blood request"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/requests/{request_id}/cancel",
+          "summary": "Cancel a blood request"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/requests/{request_id}/close",
+          "summary": "Close a blood request (done)"
+        }
+      ]
+    },
+    {
+      "heading": "4. At the bedside (nurse; ward, theatre or emergency)",
+      "anchor": "4-at-the-bedside-nurse-ward-theatre-or-emergency",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/transfusions/{transfusion_id}",
+          "summary": "One transfusion"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/transfusions/{transfusion_id}/observations",
+          "summary": "Record observations during a transfusion"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/transfusions/{transfusion_id}/start",
+          "summary": "The bedside check by two people, then the start"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/wristbands/verify",
+          "summary": "Scan to verify a patient's identity"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/transfusions/{transfusion_id}/end",
+          "summary": "End a transfusion"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/transfusions/{transfusion_id}/reaction",
+          "summary": "Report a transfusion reaction"
+        }
+      ]
+    },
+    {
+      "heading": "5. Registers and monitoring (Quality Officer, blood bank in charge)",
+      "anchor": "5-registers-and-monitoring-quality-officer-blood-bank-in-charge",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/reactions/{reaction_id}/pdf",
+          "summary": "One transfusion reaction report (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/reactions/{reaction_id}/recheck",
+          "summary": "Add the rechecked groups or the Authority's notice to a reaction"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/statistics",
+          "summary": "The use of blood: the measures"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/statistics/pdf",
+          "summary": "The use of blood: the measures (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/registers/transfusions/pdf",
+          "summary": "The blood transfusion register (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/registers/reactions/pdf",
+          "summary": "The transfusion reaction register (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/units/{unit_id}",
+          "summary": "One unit and its whole chain"
+        }
+      ]
+    }
+  ]
+}

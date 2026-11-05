@@ -1,0 +1,184 @@
+{
+  "slug": "medical-record-review",
+  "title": "Medical record review (MSDS IMS-3)",
+  "summary": "The quarterly review the Punjab Healthcare Commission requires - statistical sample, peer review against a checklist, deficiencies to the authors, corrective actions, the surveyor's report.",
+  "order": 99,
+  "workflow": "MSDS IMS-3 (indicators 156-162)",
+  "workspaces": [
+    "quality",
+    "owner_dashboard",
+    "doctor",
+    "head_nurse"
+  ],
+  "file": "medical-record-review.md",
+  "markdown": "# Medical record review (MSDS IMS-3)\n\nThe Punjab Healthcare Commission's Minimum Service Delivery Standards (MSDS) require hospitals to review their\nmedical records at least **every quarter**, on a **representative sample** chosen by statistical principles, by\n**clinicians from the disciplines that write in the record** (not only the records staff), checking **timeliness,\nlegibility and completeness** of **open and closed** records, documenting the **deficiencies** and the **corrective and\npreventive actions** (indicators 156-162). This module does all of it and prints the evidence a surveyor asks for.\n\nWho does what:\n\n* **Quality Officer** (role `quality_officer`, workspace `quality`; the Owner and Hospital Admin can do the same from\n  the owner dashboard): plans, starts and closes cycles, records actions, reads the report.\n* **Reviewers**: doctors and head nurses (`quality.review.perform`). Nobody reviews a record they wrote in: the\n  database refuses (`RECORD_REVIEWER_IS_AUTHOR`).\n* **Authors**: doctors fix the deficiencies found in their records; head nurses fix the nursing ones (vitals, doses).\n\n## 1. See what is due\n\n`GET /quality/record-review/status`: `next_due` names the last completed period (a quarter by default, setting\n`record_review_frequency_months`) that no cycle covers yet, and `indicator_156` shows how a surveyor would rate the\nreview frequency over the last 12 months. The worker reminds the Quality Officer a week after a period ends, and again\nwhen a cycle or an action is overdue (notification categories `record_review_due`, `record_review_overdue`,\n`record_review_action`).\n\n## 2. Plan a cycle\n\n1. Pick the panel from `GET /quality/record-review/people` (`can_review`; `default_discipline` comes from the staff\n   category). MSDS 158 wants several disciplines: at least a doctor and a nurse.\n2. `POST /quality/record-reviews {\"reviewers\": [{\"user_id\": 12}, {\"user_id\": 15}]}` with no period plans the period\n   that is due; give `period_start` / `period_end` for another one. Periods of live cycles cannot overlap\n   (`RECORD_REVIEW_PERIOD_OVERLAP`). Change the panel with `PUT /quality/record-reviews/{cycle_id}/reviewers`.\n3. `GET /quality/record-reviews/{cycle_id}/sample-plan` previews the sample: population and sample size per department\n   and record state (`Active` = open inpatient records, `Discharged` = closed, `Visit` = OPD). The size is Cochran's\n   formula for a proportion at the cycle's confidence (95 %) and margin (10 %), corrected for the population size and\n   shared out in proportion, with at least `min_per_stratum` records from every stratum.\n\n## 3. Start the review\n\n`POST /quality/record-reviews/{cycle_id}/start` draws the sample with a random seed (stored: the same seed gives the\nsame records), shares the records out among the panel (fewest first, never a record the reviewer wrote in), runs the\nsystem checks and notifies each reviewer. From now on the period and the sample are frozen. A record that every panel\nmember wrote in has no reviewer: add someone to the panel and `POST /quality/record-review-items/{item_id}/assign`\nit. Follow progress with `GET /quality/record-reviews/{cycle_id}` and the `record_review.updated` event.\n\n## 4. Review a record (doctors, head nurses)\n\n1. `GET /quality/record-review-items/mine` lists my records to review (by record number and MRN).\n2. `GET /quality/record-review-items/{item_id}` returns the record (`snapshot`: notes with author and time, vitals and\n   dose summaries, operations, documents, what was ordered), the checklist (`criteria`) and the system's answers\n   (`auto_results`: Pass / Fail / NA with a detail line, re-run while the record is pending). Opening a record is\n   logged as a patient-data access.\n3. `POST /quality/record-review-items/{item_id}/review {\"answers\": {\"ADM_REASON\": {\"answer\": \"Yes\"}, \"ICD_CODED\":\n   {\"answer\": \"No\", \"comment\": \"No ICD code on the IPD note\"}, ...}, \"note\": \"...\"}`. Every applicable item needs Yes,\n   No or NA. A No, or an answer that differs from the system's check, needs a comment; otherwise\n   `RECORD_REVIEW_ANSWERS_INCOMPLETE` lists the problems by code in `details.problems`. Submitting is final. Every No\n   becomes a deficiency and notifies the record's author (nursing items: the head nurses).\n\nThe checklist (`GET /quality/record-review/criteria`) covers the three MSDS categories. Items with an `auto_check`\nare pre-answered: reason for admission, diagnosis and plan of care (the admission's own, required since MSDS 149, then\nthe finalized notes), the signed operative note and post-operative plan of every operation, its anaesthesia records\n(assessment, anaesthesia record, discharge from recovery) and its three checklist pauses\n([surgical care](surgical-care.md)), the general consent of the stay and the consents of every operation and\ntransfusion ([consent](consent.md): given before the sign in, the signed forms scanned), the signed\ndischarge summary, the transfer record, vitals at the ordered interval, every due dose charted, the identity wristband,\nthe verbal orders countersigned in time and the patient's own medicines handed back\n([medication safety](medication-safety.md)), every critical result told in time and acknowledged and the lab results\nand imaging reports within their turnaround ([diagnostic services](diagnostic-services.md)), presenting complaint,\nOPD diagnosis and plan, ICD code, no unsigned drafts, notes finalized on time (setting\n`record_review_note_finalize_hours`), the certified death certificate of a patient who died (MSDS 153) and the whole\nclinical autopsy trail (MSDS 154). The snapshot shows the death (`death`), the medico-legal case numbers\n(`mlc_numbers`) and who recorded the admission's reason and diagnosis (`details_stamp`) of the record. The reviewer judges the rest (legibility, whether the discharge summary's six\nelements say enough). The Quality Officer adds the hospital's own items with\n`POST /quality/record-review/criteria` and rewords or retires them with\n`PATCH /quality/record-review/criteria/{criterion_id}`.\n\n## 5. Fix the deficiencies (authors)\n\n`GET /quality/record-review-deficiencies` shows mine: the ones in my records (nursing ones for head nurses) and the\nones I raised. Fix the record the usual way (a correction entry: records are never edited), then\n`POST /quality/record-review-deficiencies/{deficiency_id}/resolve {\"status\": \"Corrected\", \"note\": \"correction entry added\"}`.\nThe Quality Officer may instead mark one `Acknowledged` (true but cannot be undone, e.g. a late note: an action\naddresses it) or `Withdrawn` (not a deficiency after all; the reviewer who raised it may withdraw it too).\n\n## 6. Actions and closing\n\n1. `POST /quality/record-reviews/{cycle_id}/actions {\"action_type\": \"Preventive\", \"description\": \"...\",\n   \"owner_user_id\": 12, \"due_date\": \"2026-11-30\", \"criterion_code\": \"ICD_CODED\"}`: a row of the hospital's action\n   register. The owner sees it in \"My actions\" (`GET /quality/actions?mine=true`) and closes it with\n   `POST /quality/actions/{action_id}/complete {\"status\": \"Done\", \"note\": \"...\"}`, even after the cycle has closed\n   (see [incidents and the action register](incidents-and-sentinel-events.md)).\n   The owner from `GET /quality/record-review/people`, the department from `GET /admin/departments`.\n2. `POST /quality/record-reviews/{cycle_id}/close {\"summary\": \"the minutes\"}`. The database refuses while a record is\n   unreviewed (`RECORD_REVIEW_OPEN_ITEMS`), a deficiency is open (`RECORD_REVIEW_OPEN_DEFICIENCIES`), or deficiencies\n   were found and no action is recorded (`RECORD_REVIEW_ACTION_REQUIRED`). A closed cycle cannot change.\n   `POST /quality/record-reviews/{cycle_id}/cancel` frees the period for a new cycle.\n\n## 7. The surveyor's report\n\n`GET /quality/record-reviews/{cycle_id}/report`: the plan and seed, the panel with their disciplines, results per\nstratum, per category and per checklist item (with how often the reviewers agreed with the system), the deficiencies\nand the actions, and each MSDS indicator 156-162 rated `Met` / `PartlyMet` / `NotMet` with its evidence. Records\nappear by record number and MRN, never by patient name.\n\nPrint it: `GET /quality/record-reviews/{cycle_id}/report/pdf` (A4, the MSDS ratings first). The latest closed review is\nalso the `record_review_report` of the PHC inspection pack ([PHC inspection](phc-inspection.md)).\n\n## Open questions (for the hospital, not guessed)\n\n* The MSDS asks the hospital to define who may write in the record and the review policy in written SOPs; the system\n  enforces them and prints the written IMS policy and the list of authorized personnel from the live data\n  ([PHC inspection](phc-inspection.md)); the medical superintendent approves and signs them.\n* OPD visits are sampled by default (`include_opd`); a hospital whose surveyors look only at inpatient files can leave\n  them out per cycle.",
+  "steps": [
+    {
+      "heading": "1. See what is due",
+      "anchor": "1-see-what-is-due",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-review/status",
+          "summary": "Review schedule at a glance (what is due, what is open, MSDS 156)"
+        }
+      ]
+    },
+    {
+      "heading": "2. Plan a cycle",
+      "anchor": "2-plan-a-cycle",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-review/people",
+          "summary": "Who can review records or own an action"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/record-reviews",
+          "summary": "Plan a review cycle"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/quality/record-reviews/{cycle_id}/reviewers",
+          "summary": "Replace the review panel"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-reviews/{cycle_id}/sample-plan",
+          "summary": "The sampling plan (a preview before the start; nothing is drawn)"
+        }
+      ]
+    },
+    {
+      "heading": "3. Start the review",
+      "anchor": "3-start-the-review",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/record-reviews/{cycle_id}/start",
+          "summary": "Draw the sample and start the review"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/record-review-items/{item_id}/assign",
+          "summary": "Hand a pending record to another panel member"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-reviews/{cycle_id}",
+          "summary": "A cycle with its panel, sampled records, deficiency counts and actions"
+        }
+      ]
+    },
+    {
+      "heading": "4. Review a record (doctors, head nurses)",
+      "anchor": "4-review-a-record-doctors-head-nurses",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-review-items/mine",
+          "summary": "My records to review"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-review-items/{item_id}",
+          "summary": "A sampled record with its checklist and the system's answers"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/record-review-items/{item_id}/review",
+          "summary": "Submit the review (final)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-review/criteria",
+          "summary": "The review checklist"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/record-review/criteria",
+          "summary": "Add a checklist item of the hospital's own"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/quality/record-review/criteria/{criterion_id}",
+          "summary": "Reword, reorder or retire a checklist item"
+        }
+      ]
+    },
+    {
+      "heading": "5. Fix the deficiencies (authors)",
+      "anchor": "5-fix-the-deficiencies-authors",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-review-deficiencies",
+          "summary": "Record deficiencies (mine: to fix, or raised by me)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/record-review-deficiencies/{deficiency_id}/resolve",
+          "summary": "Resolve a deficiency"
+        }
+      ]
+    },
+    {
+      "heading": "6. Actions and closing",
+      "anchor": "6-actions-and-closing",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/record-reviews/{cycle_id}/actions",
+          "summary": "Record a corrective or preventive action"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/actions",
+          "summary": "The action register (mine: the actions I own)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/actions/{action_id}/complete",
+          "summary": "Close an action: done with the evidence, or cancelled"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-review/people",
+          "summary": "Who can review records or own an action"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/record-reviews/{cycle_id}/close",
+          "summary": "Close the cycle with the minutes"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/record-reviews/{cycle_id}/cancel",
+          "summary": "Cancel a cycle"
+        }
+      ]
+    },
+    {
+      "heading": "7. The surveyor's report",
+      "anchor": "7-the-surveyor-s-report",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-reviews/{cycle_id}/report",
+          "summary": "The surveyor's report, with the MSDS 156-162 ratings"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-reviews/{cycle_id}/report/pdf",
+          "summary": "The surveyor's report as a PDF"
+        }
+      ]
+    }
+  ]
+}

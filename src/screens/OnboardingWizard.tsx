@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 /**
  * Screen 143: onboarding_wizard
  * "Staff onboarding & credentials wizard"
@@ -56,6 +57,8 @@ export interface OnboardingWizardProps {
   connected?: boolean;
   timeZone?: string;
   onNavigateScreen?: (screenId: string) => void;
+  initialEmployeeId?: number;
+  onClearInitial?:()=>void;
 }
 
 type WizardStep = 1 | 2 | 3 | 4 | 5 | 6;
@@ -79,6 +82,8 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
   connected = true,
   timeZone = "Asia/Karachi",
   onNavigateScreen,
+  initialEmployeeId,
+  onClearInitial,
 }) => {
   // Capability evaluation
   const capability: OnboardingWizardCapabilityView = useMemo(
@@ -252,22 +257,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
       // Non-fatal if departments cannot be loaded
     }
 
-    try {
-      // Supervisors list from /hr/employees
-      const empRes = await api<any[]>("GET", "/hr/employees");
-      if (Array.isArray(empRes)) {
-        setSupervisors(
-          empRes.map((e) => ({
-            employee_id: e.employee_id,
-            emp_number: e.emp_number || `EMP-${e.employee_id}`,
-            full_name: e.full_name || "Staff",
-            designation: e.designation || "Employee",
-          }))
-        );
-      }
-    } catch {
-      // Non-fatal if employees list fails
-    }
+
   }, []);
 
   useEffect(() => {
@@ -301,8 +291,10 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
     [syncEmployeeToForms]
   );
 
+  useEffect(()=>{if(initialEmployeeId)void loadEmployee(initialEmployeeId);},[initialEmployeeId,loadEmployee]);
   // Reset to new draft
   const handleStartNewEmployee = useCallback(() => {
+    onClearInitial?.();
     setEmployee(null);
     setActiveStep(1);
     setSearchEmpIdInput("");
@@ -682,22 +674,15 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
 
         {/* Load Existing Draft or Start New */}
         <div className="flex items-center gap-2">
-          <input
-            type="number"
-            placeholder="Employee ID..."
-            value={searchEmpIdInput}
-            onChange={(e) => setSearchEmpIdInput(e.target.value)}
-            className="w-32 px-2.5 py-1.5 text-sm border rounded focus:ring-1 focus:ring-blue-500"
-            data-help="onboarding_wizard.load_emp_id"
-          />
+          <button type="button" data-help="onboarding_wizard.load_emp_id" disabled={loading||actionLoading} onClick={()=>onNavigateScreen?.('staff_directory')}>Choose an existing profile by name / نام سے موجودہ پروفائل چنیں</button>
           <button
             type="button"
-            onClick={() => loadEmployee(Number(searchEmpIdInput))}
-            disabled={loading || !searchEmpIdInput}
+            onClick={() => employee&&loadEmployee(employee.employee_id)}
+            disabled={loading || actionLoading || !employee}
             className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 border rounded font-medium disabled:opacity-50"
             data-help="onboarding_wizard.btn_load_emp"
           >
-            {loading ? "Loading..." : "Load Profile"}
+            {loading ? "Loading..." : "Refresh selected profile"}
           </button>
           <button
             type="button"
@@ -1105,19 +1090,12 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
               {/* Department */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">Department</label>
-                <select
+                <DirectoryPicker
                   value={step2Data.department_id}
                   onChange={(e) => setStep2Data({ ...step2Data, department_id: e.target.value })}
                   className="w-full px-3 py-2 text-sm border rounded focus:ring-1 focus:ring-blue-500"
                   data-help="onboarding_wizard.step2_department"
-                >
-                  <option value="">Select department...</option>
-                  {departments.map((dept) => (
-                    <option key={dept.department_id} value={dept.department_id}>
-                      {dept.name} {dept.code ? `(${dept.code})` : ""}
-                    </option>
-                  ))}
-                </select>
+                 path="/admin/departments" idField="department_id" />
               </div>
 
               {/* Designation */}
@@ -1157,21 +1135,12 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Supervisor (Reports To)
                 </label>
-                <select
+                <DirectoryPicker
                   value={step2Data.supervisor_id}
                   onChange={(e) => setStep2Data({ ...step2Data, supervisor_id: e.target.value })}
                   className="w-full px-3 py-2 text-sm border rounded focus:ring-1 focus:ring-blue-500"
                   data-help="onboarding_wizard.step2_supervisor"
-                >
-                  <option value="">No supervisor (Top-level / Self-managed)</option>
-                  {supervisors
-                    .filter((s) => !employee || s.employee_id !== employee.employee_id)
-                    .map((sup) => (
-                      <option key={sup.employee_id} value={sup.employee_id}>
-                        {sup.full_name} ({sup.designation}) [{sup.emp_number}]
-                      </option>
-                    ))}
-                </select>
+                 path="/staff/lookup" idField="employee_id" search />
                 {step2Errors.supervisor_id && (
                   <p className="text-xs text-red-600 mt-1">{step2Errors.supervisor_id}</p>
                 )}

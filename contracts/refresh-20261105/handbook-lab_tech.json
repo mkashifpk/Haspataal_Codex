@@ -1,0 +1,4150 @@
+{
+  "unknowns": [],
+  "workspaces": [
+    {
+      "page": "workspaces/lab_tech",
+      "workspace": "lab_tech",
+      "label": "Lab Technician",
+      "label_ur": "لیب ٹیکنیشن",
+      "description": "Scanner-first sample processing, dynamic metric grid with live flagging, patient identification at collection, rejected samples, samples sent to partner laboratories, critical results to tell.",
+      "roles": [
+        "lab_technician"
+      ],
+      "demo_accounts": [
+        "demo.labtech"
+      ],
+      "screens": [
+        {
+          "page": "screens/lab_bench",
+          "screen_id": "lab_bench",
+          "title": "Scanner-first lab bench",
+          "purpose": "Scan a sample barcode → metric grid with this patient's reference ranges → submit.",
+          "tasks": [
+            {
+              "id": "lab_bench::GET /lab/worklist",
+              "task": "Open lab work (STAT first)",
+              "call": "GET /lab/worklist",
+              "is_action": false,
+              "permissions": [
+                "lab.sample.collect",
+                "lab.sample.receive",
+                "lab.result.enter"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "lab_bench::POST /lab/samples/{sample_id}/collect",
+              "task": "Collect a sample → returns the barcode label print payload",
+              "call": "POST /lab/samples/{sample_id}/collect",
+              "is_action": true,
+              "permissions": [
+                "lab.sample.collect"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "lab_bench::GET /lab/samples/{sample_id}/label",
+              "task": "Re-print a sample barcode label",
+              "call": "GET /lab/samples/{sample_id}/label",
+              "is_action": false,
+              "permissions": [
+                "lab.sample.collect"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "lab_bench::GET /lab/scan/{barcode}",
+              "task": "Scanner lookup → metric grid with this patient's reference ranges",
+              "call": "GET /lab/scan/{barcode}",
+              "is_action": false,
+              "permissions": [
+                "lab.sample.receive",
+                "lab.result.enter"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "lab_bench::POST /lab/samples/{sample_id}/receive",
+              "task": "Mark the sample received in the lab (item → Processing)",
+              "call": "POST /lab/samples/{sample_id}/receive",
+              "is_action": true,
+              "permissions": [
+                "lab.sample.receive"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "lab_bench::POST /lab/items/{item_id}/results",
+              "task": "Submit & Broadcast a result (goes to the verifier)",
+              "call": "POST /lab/items/{item_id}/results",
+              "is_action": true,
+              "permissions": [
+                "lab.result.enter"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "lab_bench::POST /lab/items/{item_id}/rerun",
+              "task": "Re-run a failed test (new barcode, not billed again)",
+              "call": "POST /lab/items/{item_id}/rerun",
+              "is_action": true,
+              "permissions": [
+                "lab.rerun.request"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "lab_bench::POST /lab/items/{item_id}/corrections",
+              "task": "Amend a published result (re-verification required)",
+              "call": "POST /lab/items/{item_id}/corrections",
+              "is_action": true,
+              "permissions": [
+                "lab.result.enter"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "lab_bench::POST /lab/samples/{sample_id}/reject",
+              "task": "Reject an unusable sample (the test goes back to collection)",
+              "call": "POST /lab/samples/{sample_id}/reject",
+              "is_action": true,
+              "permissions": [
+                "lab.sample.receive",
+                "lab.sendout.manage"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "lab_bench::GET /wristbands/verify",
+              "task": "Scan to verify a patient's identity",
+              "call": "GET /wristbands/verify",
+              "is_action": false,
+              "permissions": [
+                "patient.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "Keep focus in a hidden scanner input; Enter triggers GET /lab/scan/{barcode}.",
+            "Collect: identify the patient first (body of POST /lab/samples/{id}/collect): scan the wristband (wristband_code; PATIENT_IDENTITY_MISMATCH = another patient's band: STOP), or ask two identifiers (identity_check TwoIdentifiers); an emergency patient who cannot be identified yet: EmergencyOverride with identity_note. Label the tube at the bedside (MSDS AAC 3).",
+            "Receiving a sample still Pending (taken at the lab counter now) needs the same identity body.",
+            "Flag values live (red/amber) against metric_grid[].reference_range and critical before submitting; a text metric with critical.values (e.g. Positive for a priority disease) is critical too (flag C).",
+            "Worklist: is_emergency first, due_at and is_overdue (red): the turnaround clock starts at the sample's receipt (MSDS AAC 4). is_send_out: the sample goes to a partner laboratory (screen lab_send_outs).",
+            "Reject an unusable sample (POST /lab/samples/{id}/reject: Haemolysed, Clotted, InsufficientVolume, WrongContainer, Unlabelled, Mislabelled, Leaked, DelayedTransport, Contaminated, Other + note): the test goes back to collection with a new barcode and the doctor is told.",
+            "Lab technicians never see prices or take cash; LAB_PAYMENT_REQUIRED means the patient must pay at the counter.",
+            "GET /lab/samples/{sample_id}/label is a print, never a preview: call it only when the user prints or reprints. Each call counts as one more label (label_print_count) whether or not the printer printed it; it never changes the sample (row_version stays), so nothing needs reloading before the next action.",
+            "Events: lab.result.pending_verification reaches every bench (lab.result.enter) when any technician submits a result: refresh the worklist. lab.result.published belongs to the verifiers and the doctor, not the bench.",
+            "Exists for the service laboratory (work): show it as GET /establishment views.screens says for screen_id lab_bench (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+          ],
+          "updates_by_itself_on": [
+            "lab.result.pending_verification",
+            "critical_result.updated"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "CAPABILITY_INACTIVE",
+              "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "INSUFFICIENT_STOCK",
+              "message": "Not enough stock available.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "LAB_ITEM_STATE_INVALID",
+              "message": "Invalid lab test state change.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "LAB_METRICS_INVALID",
+              "message": "Metric values do not match the test's metric schema.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "LAB_PAYMENT_REQUIRED",
+              "message": "The lab bill must be paid before sample collection.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "LAB_REAGENT_BOM_MISSING",
+              "message": "This test has no reagent bill-of-materials configured.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "LAB_RESULT_CORRECTION_INVALID",
+              "message": "A correction must amend a published result of the same test.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "LAB_SAMPLE_NOT_FOUND",
+              "message": "No sample with this barcode.",
+              "ui_action": "Say 'not found'; refresh the list."
+            },
+            {
+              "code": "LAB_SAMPLE_STATE_INVALID",
+              "message": "The sample cannot do that in its present state.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "NOT_FOUND",
+              "message": "The requested resource was not found.",
+              "ui_action": "Say 'not found'; refresh the list."
+            },
+            {
+              "code": "PATIENT_IDENTITY_MISMATCH",
+              "message": "The wristband scanned is not this patient's: stop and check who the patient is.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "PATIENT_IDENTITY_REQUIRED",
+              "message": "Identify the patient first: scan the wristband, or confirm two identifiers (name and MRN or date of birth).",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/critical_results_bench",
+          "screen_id": "critical_results_bench",
+          "title": "Critical results to tell",
+          "purpose": "Tell the doctor responsible about every critical Lab result at once, and record it.",
+          "tasks": [
+            {
+              "id": "critical_results_bench::GET /critical-results",
+              "task": "The critical results log",
+              "call": "GET /critical-results",
+              "is_action": false,
+              "permissions": [
+                "diagnostics.critical.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "critical_results_bench::GET /critical-results/{critical_result_id}",
+              "task": "A critical result with who was told",
+              "call": "GET /critical-results/{critical_result_id}",
+              "is_action": false,
+              "permissions": [
+                "diagnostics.critical.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "critical_results_bench::POST /critical-results/{critical_result_id}/communications",
+              "task": "Record who was told the critical result",
+              "call": "POST /critical-results/{critical_result_id}/communications",
+              "is_action": true,
+              "permissions": [
+                "diagnostics.critical.communicate"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "critical_results_bench::GET /diagnostics/worklist",
+              "task": "Diagnostic services work waiting",
+              "call": "GET /diagnostics/worklist",
+              "is_action": false,
+              "permissions": [
+                "diagnostics.critical.view",
+                "diagnostics.quality.view"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "critical_results_bench::GET /staff/lookup",
+              "task": "Find a staff member for a form (badge facts only)",
+              "call": "GET /staff/lookup",
+              "is_action": false,
+              "permissions": [],
+              "permissions_mode": "all",
+              "access": "any logged-in user"
+            }
+          ],
+          "rules_to_explain": [
+            "Default filter: open_only=true, source=Lab. Worklist kinds CriticalToCommunicate and PriorityDiseaseToNotify (GET /diagnostics/worklist?area=…).",
+            "The critical results log (GET /critical-results): critical lab values, positive tests for priority diseases and critical imaging findings, opened by the system when the result is released. Open ones first; is_overdue (nobody responsible told yet, past communicate_due_at) in red. critical_result.updated (priority critical when Opened): sound an alarm and refresh.",
+            "Record each communication right after the call (POST /critical-results/{id}/communications): means (Telephone, InPerson, Written, Electronic), recipient_role and recipient_name, read_back (required by telephone or in person: CRITICAL_RESULT_READ_BACK_REQUIRED). A priority disease (notifiable_disease; authority_pending) is also notified to the health authority: recipient_role HealthAuthority.",
+            "Show the communications under the result (GET /critical-results/{id}): when, how, by whom, to whom, read back.",
+            "Exists for the service laboratory (work): show it as GET /establishment views.screens says for screen_id critical_results_bench (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+          ],
+          "updates_by_itself_on": [
+            "critical_result.updated"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "CRITICAL_RESULT_READ_BACK_REQUIRED",
+              "message": "A critical result told by telephone or in person is read back by the person who received it: confirm read_back.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "UNAUTHENTICATED",
+              "message": "Authentication is required.",
+              "ui_action": "Refresh the token once; if that fails return to login."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/lab_send_outs",
+          "screen_id": "lab_send_outs",
+          "title": "Samples sent to partner laboratories",
+          "purpose": "Dispatch the samples of sent-out tests on a manifest, and enter the partners' results when they come.",
+          "tasks": [
+            {
+              "id": "lab_send_outs::GET /lab/send-outs/pending",
+              "task": "Samples waiting to be sent to a partner laboratory",
+              "call": "GET /lab/send-outs/pending",
+              "is_action": false,
+              "permissions": [
+                "lab.sendout.manage"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "lab_send_outs::POST /lab/send-outs",
+              "task": "Send samples to a partner laboratory (the manifest)",
+              "call": "POST /lab/send-outs",
+              "is_action": true,
+              "permissions": [
+                "lab.sendout.manage"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "lab_send_outs::GET /lab/send-outs",
+              "task": "Send-out manifests",
+              "call": "GET /lab/send-outs",
+              "is_action": false,
+              "permissions": [
+                "lab.sendout.manage",
+                "diagnostics.quality.view"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "lab_send_outs::GET /lab/send-outs/{send_out_id}",
+              "task": "A send-out manifest",
+              "call": "GET /lab/send-outs/{send_out_id}",
+              "is_action": false,
+              "permissions": [
+                "lab.sendout.manage",
+                "diagnostics.quality.view"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "lab_send_outs::GET /lab/send-outs/{send_out_id}/print-payload",
+              "task": "The manifest to print for the courier",
+              "call": "GET /lab/send-outs/{send_out_id}/print-payload",
+              "is_action": false,
+              "permissions": [
+                "lab.sendout.manage"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "lab_send_outs::GET /diagnostic-partners",
+              "task": "Partner laboratories and imaging centres",
+              "call": "GET /diagnostic-partners",
+              "is_action": false,
+              "permissions": [
+                "diagnostics.setup.manage",
+                "diagnostics.quality.view",
+                "lab.sendout.manage",
+                "imaging.order.update",
+                "lab.test.manage"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "lab_send_outs::POST /lab/items/{item_id}/results",
+              "task": "Submit & Broadcast a result (goes to the verifier)",
+              "call": "POST /lab/items/{item_id}/results",
+              "is_action": true,
+              "permissions": [
+                "lab.result.enter"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "lab_send_outs::POST /lab/samples/{sample_id}/reject",
+              "task": "Reject an unusable sample (the test goes back to collection)",
+              "call": "POST /lab/samples/{sample_id}/reject",
+              "is_action": true,
+              "permissions": [
+                "lab.sample.receive",
+                "lab.sendout.manage"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "Pending: tick the samples for one partner (partner_id defaults to each test's partner), add the courier, POST /lab/send-outs, then print the manifest (A4) for the courier to sign.",
+            "Outstanding manifests (outstanding=true): due_at is the MOU's turnaround; each sample shows when its result was entered.",
+            "The partner's result: the usual result entry with partner_report_ref and partner_reported_at; a sample the partner could not use: reject it with RejectedByPartner (a new sample to collect).",
+            "Exists for the service outsourced_diagnostics (work): show it as GET /establishment views.screens says for screen_id lab_send_outs (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+          ],
+          "updates_by_itself_on": [],
+          "errors_the_user_can_meet": [
+            {
+              "code": "DIAGNOSTIC_PARTNER_INVALID",
+              "message": "The partner is not active for this service, or its MOU has expired.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "INSUFFICIENT_STOCK",
+              "message": "Not enough stock available.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "LAB_ITEM_STATE_INVALID",
+              "message": "Invalid lab test state change.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "LAB_METRICS_INVALID",
+              "message": "Metric values do not match the test's metric schema.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "LAB_REAGENT_BOM_MISSING",
+              "message": "This test has no reagent bill-of-materials configured.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "LAB_SAMPLE_STATE_INVALID",
+              "message": "The sample cannot do that in its present state.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "REFERENCE_NOT_FOUND",
+              "message": "A referenced record does not exist.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/blood_bank",
+          "screen_id": "blood_bank",
+          "title": "Blood bank",
+          "purpose": "Receive units, the stock with its expiries, the worklist of requests, compatibility tests, issue to the bedside, units signed back, discards and returns to the source, the storage temperature log.",
+          "tasks": [
+            {
+              "id": "blood_bank::GET /blood/units",
+              "task": "The blood stock",
+              "call": "GET /blood/units",
+              "is_action": false,
+              "permissions": [
+                "blood.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::POST /blood/units",
+              "task": "Receive a unit of blood",
+              "call": "POST /blood/units",
+              "is_action": true,
+              "permissions": [
+                "blood.receive"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::GET /blood/units/{unit_id}",
+              "task": "One unit and its whole chain",
+              "call": "GET /blood/units/{unit_id}",
+              "is_action": false,
+              "permissions": [
+                "blood.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::POST /blood/units/{unit_id}/discard",
+              "task": "Discard a unit",
+              "call": "POST /blood/units/{unit_id}/discard",
+              "is_action": true,
+              "permissions": [
+                "blood.bank.operate"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::POST /blood/units/{unit_id}/return-to-source",
+              "task": "Return an unused unit to its source",
+              "call": "POST /blood/units/{unit_id}/return-to-source",
+              "is_action": true,
+              "permissions": [
+                "blood.bank.operate"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::GET /blood/requests",
+              "task": "Blood requests",
+              "call": "GET /blood/requests",
+              "is_action": false,
+              "permissions": [
+                "blood.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::GET /blood/requests/{request_id}",
+              "task": "One blood request",
+              "call": "GET /blood/requests/{request_id}",
+              "is_action": false,
+              "permissions": [
+                "blood.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::POST /blood/requests/{request_id}/crossmatches",
+              "task": "Record a compatibility test",
+              "call": "POST /blood/requests/{request_id}/crossmatches",
+              "is_action": true,
+              "permissions": [
+                "blood.bank.operate"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::POST /blood/requests/{request_id}/issue",
+              "task": "Issue a unit to the bedside",
+              "call": "POST /blood/requests/{request_id}/issue",
+              "is_action": true,
+              "permissions": [
+                "blood.bank.operate"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::POST /blood/requests/{request_id}/close",
+              "task": "Close a blood request (done)",
+              "call": "POST /blood/requests/{request_id}/close",
+              "is_action": true,
+              "permissions": [
+                "blood.request",
+                "blood.bank.operate"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "blood_bank::POST /blood/transfusions/{transfusion_id}/return",
+              "task": "Sign a unit back, or record it as not given",
+              "call": "POST /blood/transfusions/{transfusion_id}/return",
+              "is_action": true,
+              "permissions": [
+                "blood.bank.operate",
+                "blood.transfuse"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "blood_bank::GET /blood/storage-checks",
+              "task": "The blood storage temperature log",
+              "call": "GET /blood/storage-checks",
+              "is_action": false,
+              "permissions": [
+                "blood.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::POST /blood/storage-checks",
+              "task": "Record a blood refrigerator, freezer or incubator reading",
+              "call": "POST /blood/storage-checks",
+              "is_action": true,
+              "permissions": [
+                "blood.bank.operate"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::GET /blood/storage-checks/pdf",
+              "task": "The blood storage temperature log (PDF)",
+              "call": "GET /blood/storage-checks/pdf",
+              "is_action": false,
+              "permissions": [
+                "blood.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_bank::GET /blood/sources",
+              "task": "The licensed blood sources",
+              "call": "GET /blood/sources",
+              "is_action": false,
+              "permissions": [
+                "blood.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "Receive: type or scan the unit number as on the bag, the component, ABO and Rh, the expiry; the 'screened' box is never ticked in advance (an unscreened unit is refused). BLOOD_UNIT_EXISTS: the number was already received from that source. Units of the hospital's own blood center arrive by their release (blood_center.component.released refreshes the stock) and show their donation_number.",
+            "Stock: soonest expiry first; expired true in red with 'Discard'. Worklist: open requests, Emergency first (blood.request.created refreshes it).",
+            "Compatibility test: one unit on the shelf of the requested component; Compatible reserves it. Issue: the reserved unit with its test; the nurse or doctor who collects it signs for it on the bank's screen with their own username and password (STEP_UP_REQUIRED, ADMINISTRATION_NOT_AUTHORIZED for someone not registered); without a test only on an Emergency request carrying the doctor's note (BLOOD_CROSSMATCH_REQUIRED).",
+            "A unit coming back: 'Signed back in time' (within 30 minutes of the issue) or 'Not given' with the reason. Return unused units to their source, or discard with the reason (the wastage measure).",
+            "Storage log: each refrigerator, plasma freezer and platelet incubator, with the limits shown; out of range needs the action taken (STORAGE_CHECK_ACTION_REQUIRED) and alerts the bank (blood.storage.out_of_range).",
+            "Exists for the service blood_transfusion (work): show it as GET /establishment views.screens says for screen_id blood_bank (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+            "POST /blood/units starts new blood_transfusion work: offer it only while blood_transfusion is Active (GET /establishment active).",
+            "POST /blood/requests/{request_id}/crossmatches continues blood_transfusion work started earlier: offer it while blood_transfusion is Active or Retiring (GET /establishment).",
+            "POST /blood/requests/{request_id}/issue continues blood_transfusion work started earlier: offer it while blood_transfusion is Active or Retiring (GET /establishment)."
+          ],
+          "updates_by_itself_on": [
+            "blood.request.created",
+            "blood.consent.withdrawn",
+            "blood.storage.out_of_range",
+            "blood.reaction.reported",
+            "blood_center.component.released"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "ACCOUNT_LOCKED",
+              "message": "Too many failed attempts; the account is temporarily locked.",
+              "ui_action": "Show a countdown from retry_after_seconds."
+            },
+            {
+              "code": "ADMINISTRATION_NOT_AUTHORIZED",
+              "message": "Medicines are given (and double-checked) by a registered nurse or doctor, or by staff the hospital allows.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "BLOOD_CONSENT_REQUIRED",
+              "message": "The patient's transfusion consent of this stay is needed first (signed, or the doctor's emergency note): the consent register.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "BLOOD_CROSSMATCH_REQUIRED",
+              "message": "Issue a unit with its compatible test for this request; uncross-matched blood only on an Emergency request with the doctor's note.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_REQUEST_CLOSED",
+              "message": "This blood request is closed or cancelled: the doctor requests again.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_REQUEST_STATE",
+              "message": "Not now: a unit of the request is still out, blood was given (close instead of cancel), units are still reserved, or every unit requested is issued.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_TRANSFUSION_STATE",
+              "message": "This transfusion is not at this step (issued, running, ended, or the unit went back); details.status says where it is.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_UNIT_EXISTS",
+              "message": "This unit number was already received from this source.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_UNIT_EXPIRED",
+              "message": "The unit has expired: it is not received, tested, issued or transfused; discard it.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_UNIT_OUT_TOO_LONG",
+              "message": "More than 30 minutes since the unit left the blood bank: it is unsafe; record it as not given and return it for disposal (the II C manual, p157).",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_UNIT_STATE",
+              "message": "The unit is not where this step needs it (on the shelf, reserved for this request, issued); details.status says where it is.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "CAPABILITY_INACTIVE",
+              "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "DUAL_CONTROL_SAME_PERSON",
+              "message": "The second approver must be a different person.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "EXPORT_TOO_LARGE",
+              "message": "These records are too many for one PDF: select fewer patients or a shorter period (details: the patient and the section).",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "NOT_FOUND",
+              "message": "The requested resource was not found.",
+              "ui_action": "Say 'not found'; refresh the list."
+            },
+            {
+              "code": "REFERENCE_NOT_FOUND",
+              "message": "A referenced record does not exist.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "STEP_UP_REQUIRED",
+              "message": "A second authorised person must co-sign this action.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "STORAGE_CHECK_ACTION_REQUIRED",
+              "message": "The reading is out of range: record the action taken.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/blood_donors",
+          "screen_id": "blood_donors",
+          "title": "Blood donors",
+          "purpose": "Find a donor, or register one once for life with a donor number; correct their particulars.",
+          "tasks": [
+            {
+              "id": "blood_donors::GET /blood-center/donors",
+              "task": "Find blood donors",
+              "call": "GET /blood-center/donors",
+              "is_action": false,
+              "permissions": [
+                "blood_center.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_donors::POST /blood-center/donors",
+              "task": "Register a blood donor",
+              "call": "POST /blood-center/donors",
+              "is_action": true,
+              "permissions": [
+                "blood_center.donor.register"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_donors::GET /blood-center/donors/{donor_id}",
+              "task": "One donor's record",
+              "call": "GET /blood-center/donors/{donor_id}",
+              "is_action": false,
+              "permissions": [
+                "blood_center.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_donors::PATCH /blood-center/donors/{donor_id}",
+              "task": "Correct a donor's particulars",
+              "call": "PATCH /blood-center/donors/{donor_id}",
+              "is_action": true,
+              "permissions": [
+                "blood_center.donor.register"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_donors::GET /establishment",
+              "task": "The establishment's profile and services, with the configuration revision",
+              "call": "GET /establishment",
+              "is_action": false,
+              "permissions": [],
+              "permissions_mode": "all",
+              "access": "any logged-in user"
+            }
+          ],
+          "rules_to_explain": [
+            "Search first (q, at least 2 characters: the donor number, the CNIC, the mobile number or a part of the name; there is no list of every donor, and each donor shown is logged): a donor is registered once for life (BLOOD_DONOR_EXISTS opens the existing donor instead).",
+            "Register: the name, sex, date of birth, the identification (CNIC; a passport or proof of registration for foreigners and refugees) and at least one contact.",
+            "The donor's record shows deferred_now and may_donate_from; permanently_deferred: never 'Donate'. Opening it is logged: say so on the screen.",
+            "Corrections: the changed fields, the reason and expected_version; the donor number never changes.",
+            "Exists for the service blood_center (work): show it as GET /establishment views.screens says for screen_id blood_donors (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+            "POST /blood-center/donors starts new blood_center work: offer it only while blood_center is Active (GET /establishment active)."
+          ],
+          "updates_by_itself_on": [
+            "establishment.changed"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "BLOOD_DONOR_EXISTS",
+              "message": "A donor with this identification is registered already: open their record (a donor is registered once for life).",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "CAPABILITY_INACTIVE",
+              "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "NOT_FOUND",
+              "message": "The requested resource was not found.",
+              "ui_action": "Say 'not found'; refresh the list."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "VERSION_CONFLICT",
+              "message": "The record was changed by someone else; reload and try again.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/blood_collection",
+          "screen_id": "blood_collection",
+          "title": "Blood collection",
+          "purpose": "The accepted donors waiting, the donation number labels for the bags and tubes, the collection or why it failed, and the donor's reaction.",
+          "tasks": [
+            {
+              "id": "blood_collection::GET /blood-center/donations",
+              "task": "Donations and the worklists",
+              "call": "GET /blood-center/donations",
+              "is_action": false,
+              "permissions": [
+                "blood_center.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_collection::GET /blood-center/donations/{donation_id}/labels",
+              "task": "The donation number labels for the bags and tubes",
+              "call": "GET /blood-center/donations/{donation_id}/labels",
+              "is_action": false,
+              "permissions": [
+                "blood_center.collect",
+                "blood_center.process"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "blood_collection::POST /blood-center/donations/{donation_id}/collection",
+              "task": "Record the collection",
+              "call": "POST /blood-center/donations/{donation_id}/collection",
+              "is_action": true,
+              "permissions": [
+                "blood_center.collect"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "The worklist: GET /blood-center/donations?status=Accepted, oldest waiting first on screen.",
+            "Print the labels at the donor's side before the venepuncture: one per bag of the pack and the two tubes; no donor name on a bag.",
+            "Collected: the bag type and lot, the anticoagulant, the start and end, the volume (at most 495 ml; the screen shows the limit for a donor under 50 kg). Unsuccessful: why.",
+            "A collection starts after its own assessment and within 24 hours of it: BLOOD_ASSESSMENT_EXPIRED offers 'Record unsuccessful' and a new assessment; BLOOD_DONOR_DEFERRED means a deferral was recorded since.",
+            "A reaction (vasovagal, haematoma ...) with the action taken; Severe also needs the harm and is reported as an incident at once: link to it (reaction_incident_number).",
+            "Exists for the service blood_center (work): show it as GET /establishment views.screens says for screen_id blood_collection (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+          ],
+          "updates_by_itself_on": [],
+          "errors_the_user_can_meet": [
+            {
+              "code": "BLOOD_ASSESSMENT_EXPIRED",
+              "message": "The donor's assessment is more than 24 hours old: record this donation Unsuccessful and assess the donor again.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_DONATION_STATE",
+              "message": "The donation is not at this step (accepted, collected, cleared, reactive), or the donor has another donation in progress.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_DONOR_DEFERRED",
+              "message": "The donor is deferred today (see the donor's deferrals): not accepted until the deferral ends.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "INCIDENT_TYPE_INACTIVE",
+              "message": "This incident type is no longer on the hospital's list.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "NOT_FOUND",
+              "message": "The requested resource was not found.",
+              "ui_action": "Say 'not found'; refresh the list."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/blood_center_lab",
+          "screen_id": "blood_center_lab",
+          "title": "Blood center laboratory",
+          "purpose": "Each collected donation's screens and groups, its components into quarantine, discards, and the labels.",
+          "tasks": [
+            {
+              "id": "blood_center_lab::GET /blood-center/donations",
+              "task": "Donations and the worklists",
+              "call": "GET /blood-center/donations",
+              "is_action": false,
+              "permissions": [
+                "blood_center.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_center_lab::GET /blood-center/donations/{donation_id}",
+              "task": "One donation, from the donor to the patients",
+              "call": "GET /blood-center/donations/{donation_id}",
+              "is_action": false,
+              "permissions": [
+                "blood_center.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_center_lab::POST /blood-center/donations/{donation_id}/tests",
+              "task": "Record test results",
+              "call": "POST /blood-center/donations/{donation_id}/tests",
+              "is_action": true,
+              "permissions": [
+                "blood_center.process"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_center_lab::POST /blood-center/donations/{donation_id}/components",
+              "task": "Prepare components into quarantine",
+              "call": "POST /blood-center/donations/{donation_id}/components",
+              "is_action": true,
+              "permissions": [
+                "blood_center.process"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_center_lab::GET /blood-center/components",
+              "task": "The quarantine and the components",
+              "call": "GET /blood-center/components",
+              "is_action": false,
+              "permissions": [
+                "blood_center.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_center_lab::POST /blood-center/components/{component_id}/discard",
+              "task": "Discard a component in quarantine",
+              "call": "POST /blood-center/components/{component_id}/discard",
+              "is_action": true,
+              "permissions": [
+                "blood_center.process"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "blood_center_lab::GET /blood-center/components/{component_id}/label",
+              "task": "A component's label",
+              "call": "GET /blood-center/components/{component_id}/label",
+              "is_action": false,
+              "permissions": [
+                "blood_center.process",
+                "blood_center.release"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "The worklist: GET /blood-center/donations?status=Collected. A result grid per donation: the five screens (HBsAg, AntiHCV, AntiHIV, Syphilis, Malaria) and ABO forward, ABO reverse and RhD, each at least twice for the groups; the result field starts empty.",
+            "A reactive screen shows 'Repeat on another sample from the bag' (sample Repeat), in red; keep reactive and untested components apart on the quarantine list.",
+            "Components: whole blood (kept whole) or red cells, plasma and platelets (the last two within 8 hours of the venepuncture: BLOOD_PROCESSING_TIME_EXCEEDED), cryoprecipitate from the plasma; the expiry from the bag's label (the shelf life is the database's limit; left empty, the PBTA's shelf life, which for whole blood and red cells needs a CPDA-1 bag).",
+            "Discard in quarantine with the reason (Other: a note); a released unit is discarded in the blood bank.",
+            "Exists for the service blood_center (work): show it as GET /establishment views.screens says for screen_id blood_center_lab (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+            "POST /blood-center/donations/{donation_id}/tests continues blood_center work started earlier: offer it while blood_center is Active or Retiring (GET /establishment).",
+            "POST /blood-center/donations/{donation_id}/components continues blood_center work started earlier: offer it while blood_center is Active or Retiring (GET /establishment)."
+          ],
+          "updates_by_itself_on": [
+            "blood_center.donation.reactive"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "BLOOD_COMPONENT_EXISTS",
+              "message": "This component was already prepared from this donation.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_COMPONENT_STATE",
+              "message": "The component is not in quarantine (released, discarded or processed already); details.status says where it is.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_DONATION_STATE",
+              "message": "The donation is not at this step (accepted, collected, cleared, reactive), or the donor has another donation in progress.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BLOOD_PROCESSING_TIME_EXCEEDED",
+              "message": "Platelets and fresh frozen plasma are prepared within 8 hours of the venepuncture (PBTA Standards ch.3).",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "CAPABILITY_INACTIVE",
+              "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "NOT_FOUND",
+              "message": "The requested resource was not found.",
+              "ui_action": "Say 'not found'; refresh the list."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        }
+      ],
+      "linked_screens": [
+        {
+          "screen_id": "report_incident",
+          "page": "screens/report_incident",
+          "title": "Report an incident",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations",
+          "title": "Incidents I investigate",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations",
+          "title": "Complaints I investigate",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_actions",
+          "page": "screens/my_actions",
+          "title": "My actions",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "connect_server",
+          "page": "screens/connect_server",
+          "title": "Connect to server (first run / server unreachable)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "login",
+          "page": "screens/login",
+          "title": "Login",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker",
+          "title": "Workspace launcher",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "settings",
+          "page": "screens/settings",
+          "title": "Settings (avatar or Ctrl+,)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "help_center",
+          "page": "screens/help_center",
+          "title": "Help: the end-user handbook",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "notifications",
+          "page": "screens/notifications",
+          "title": "Notification bell",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker",
+          "title": "ICD code picker (component)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue",
+          "title": "Approval queue",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "app_shell",
+          "page": "screens/app_shell",
+          "title": "App shell (every workspace)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "ot_board",
+          "page": "screens/ot_board",
+          "title": "Live OT status board",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_committees",
+          "page": "screens/my_committees",
+          "title": "My committees",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice",
+          "title": "PHC inspection interview practice",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews",
+          "title": "Mock PHC interviews",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record",
+          "title": "My personnel record",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions",
+          "title": "Equipment requisitions",
+          "reason": "shared"
+        }
+      ],
+      "workspace_page_sections": [
+        "A day in each role",
+        "Complete job-task index",
+        "Detailed role-specific FAQ",
+        "Handovers, exceptions and troubleshooting",
+        "Glossary and guided practice"
+      ],
+      "faq_tasks": [
+        {
+          "id": "lab_bench::GET /lab/worklist",
+          "task": "Open lab work (STAT first)",
+          "call": "GET /lab/worklist",
+          "is_action": false,
+          "permissions": [
+            "lab.sample.collect",
+            "lab.sample.receive",
+            "lab.result.enter"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "lab_bench",
+          "page": "screens/lab_bench"
+        },
+        {
+          "id": "lab_bench::POST /lab/samples/{sample_id}/collect",
+          "task": "Collect a sample → returns the barcode label print payload",
+          "call": "POST /lab/samples/{sample_id}/collect",
+          "is_action": true,
+          "permissions": [
+            "lab.sample.collect"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "lab_bench",
+          "page": "screens/lab_bench"
+        },
+        {
+          "id": "lab_bench::GET /lab/samples/{sample_id}/label",
+          "task": "Re-print a sample barcode label",
+          "call": "GET /lab/samples/{sample_id}/label",
+          "is_action": false,
+          "permissions": [
+            "lab.sample.collect"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "lab_bench",
+          "page": "screens/lab_bench"
+        },
+        {
+          "id": "lab_bench::GET /lab/scan/{barcode}",
+          "task": "Scanner lookup → metric grid with this patient's reference ranges",
+          "call": "GET /lab/scan/{barcode}",
+          "is_action": false,
+          "permissions": [
+            "lab.sample.receive",
+            "lab.result.enter"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "lab_bench",
+          "page": "screens/lab_bench"
+        },
+        {
+          "id": "lab_bench::POST /lab/samples/{sample_id}/receive",
+          "task": "Mark the sample received in the lab (item → Processing)",
+          "call": "POST /lab/samples/{sample_id}/receive",
+          "is_action": true,
+          "permissions": [
+            "lab.sample.receive"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "lab_bench",
+          "page": "screens/lab_bench"
+        },
+        {
+          "id": "lab_bench::POST /lab/items/{item_id}/results",
+          "task": "Submit & Broadcast a result (goes to the verifier)",
+          "call": "POST /lab/items/{item_id}/results",
+          "is_action": true,
+          "permissions": [
+            "lab.result.enter"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "lab_bench",
+          "page": "screens/lab_bench"
+        },
+        {
+          "id": "lab_bench::POST /lab/items/{item_id}/rerun",
+          "task": "Re-run a failed test (new barcode, not billed again)",
+          "call": "POST /lab/items/{item_id}/rerun",
+          "is_action": true,
+          "permissions": [
+            "lab.rerun.request"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "lab_bench",
+          "page": "screens/lab_bench"
+        },
+        {
+          "id": "lab_bench::POST /lab/items/{item_id}/corrections",
+          "task": "Amend a published result (re-verification required)",
+          "call": "POST /lab/items/{item_id}/corrections",
+          "is_action": true,
+          "permissions": [
+            "lab.result.enter"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "lab_bench",
+          "page": "screens/lab_bench"
+        },
+        {
+          "id": "lab_bench::POST /lab/samples/{sample_id}/reject",
+          "task": "Reject an unusable sample (the test goes back to collection)",
+          "call": "POST /lab/samples/{sample_id}/reject",
+          "is_action": true,
+          "permissions": [
+            "lab.sample.receive",
+            "lab.sendout.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "lab_bench",
+          "page": "screens/lab_bench"
+        },
+        {
+          "id": "lab_bench::GET /wristbands/verify",
+          "task": "Scan to verify a patient's identity",
+          "call": "GET /wristbands/verify",
+          "is_action": false,
+          "permissions": [
+            "patient.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "lab_bench",
+          "page": "screens/lab_bench"
+        },
+        {
+          "id": "critical_results_bench::GET /critical-results",
+          "task": "The critical results log",
+          "call": "GET /critical-results",
+          "is_action": false,
+          "permissions": [
+            "diagnostics.critical.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "critical_results_bench",
+          "page": "screens/critical_results_bench"
+        },
+        {
+          "id": "critical_results_bench::GET /critical-results/{critical_result_id}",
+          "task": "A critical result with who was told",
+          "call": "GET /critical-results/{critical_result_id}",
+          "is_action": false,
+          "permissions": [
+            "diagnostics.critical.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "critical_results_bench",
+          "page": "screens/critical_results_bench"
+        },
+        {
+          "id": "critical_results_bench::POST /critical-results/{critical_result_id}/communications",
+          "task": "Record who was told the critical result",
+          "call": "POST /critical-results/{critical_result_id}/communications",
+          "is_action": true,
+          "permissions": [
+            "diagnostics.critical.communicate"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "critical_results_bench",
+          "page": "screens/critical_results_bench"
+        },
+        {
+          "id": "critical_results_bench::GET /diagnostics/worklist",
+          "task": "Diagnostic services work waiting",
+          "call": "GET /diagnostics/worklist",
+          "is_action": false,
+          "permissions": [
+            "diagnostics.critical.view",
+            "diagnostics.quality.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "critical_results_bench",
+          "page": "screens/critical_results_bench"
+        },
+        {
+          "id": "critical_results_bench::GET /staff/lookup",
+          "task": "Find a staff member for a form (badge facts only)",
+          "call": "GET /staff/lookup",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "critical_results_bench",
+          "page": "screens/critical_results_bench"
+        },
+        {
+          "id": "lab_send_outs::GET /lab/send-outs/pending",
+          "task": "Samples waiting to be sent to a partner laboratory",
+          "call": "GET /lab/send-outs/pending",
+          "is_action": false,
+          "permissions": [
+            "lab.sendout.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "lab_send_outs",
+          "page": "screens/lab_send_outs"
+        },
+        {
+          "id": "lab_send_outs::POST /lab/send-outs",
+          "task": "Send samples to a partner laboratory (the manifest)",
+          "call": "POST /lab/send-outs",
+          "is_action": true,
+          "permissions": [
+            "lab.sendout.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "lab_send_outs",
+          "page": "screens/lab_send_outs"
+        },
+        {
+          "id": "lab_send_outs::GET /lab/send-outs",
+          "task": "Send-out manifests",
+          "call": "GET /lab/send-outs",
+          "is_action": false,
+          "permissions": [
+            "lab.sendout.manage",
+            "diagnostics.quality.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "lab_send_outs",
+          "page": "screens/lab_send_outs"
+        },
+        {
+          "id": "lab_send_outs::GET /lab/send-outs/{send_out_id}",
+          "task": "A send-out manifest",
+          "call": "GET /lab/send-outs/{send_out_id}",
+          "is_action": false,
+          "permissions": [
+            "lab.sendout.manage",
+            "diagnostics.quality.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "lab_send_outs",
+          "page": "screens/lab_send_outs"
+        },
+        {
+          "id": "lab_send_outs::GET /lab/send-outs/{send_out_id}/print-payload",
+          "task": "The manifest to print for the courier",
+          "call": "GET /lab/send-outs/{send_out_id}/print-payload",
+          "is_action": false,
+          "permissions": [
+            "lab.sendout.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "lab_send_outs",
+          "page": "screens/lab_send_outs"
+        },
+        {
+          "id": "lab_send_outs::GET /diagnostic-partners",
+          "task": "Partner laboratories and imaging centres",
+          "call": "GET /diagnostic-partners",
+          "is_action": false,
+          "permissions": [
+            "diagnostics.setup.manage",
+            "diagnostics.quality.view",
+            "lab.sendout.manage",
+            "imaging.order.update",
+            "lab.test.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "lab_send_outs",
+          "page": "screens/lab_send_outs"
+        },
+        {
+          "id": "lab_send_outs::POST /lab/items/{item_id}/results",
+          "task": "Submit & Broadcast a result (goes to the verifier)",
+          "call": "POST /lab/items/{item_id}/results",
+          "is_action": true,
+          "permissions": [
+            "lab.result.enter"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "lab_send_outs",
+          "page": "screens/lab_send_outs"
+        },
+        {
+          "id": "lab_send_outs::POST /lab/samples/{sample_id}/reject",
+          "task": "Reject an unusable sample (the test goes back to collection)",
+          "call": "POST /lab/samples/{sample_id}/reject",
+          "is_action": true,
+          "permissions": [
+            "lab.sample.receive",
+            "lab.sendout.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "lab_send_outs",
+          "page": "screens/lab_send_outs"
+        },
+        {
+          "id": "blood_bank::GET /blood/units",
+          "task": "The blood stock",
+          "call": "GET /blood/units",
+          "is_action": false,
+          "permissions": [
+            "blood.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::POST /blood/units",
+          "task": "Receive a unit of blood",
+          "call": "POST /blood/units",
+          "is_action": true,
+          "permissions": [
+            "blood.receive"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::GET /blood/units/{unit_id}",
+          "task": "One unit and its whole chain",
+          "call": "GET /blood/units/{unit_id}",
+          "is_action": false,
+          "permissions": [
+            "blood.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::POST /blood/units/{unit_id}/discard",
+          "task": "Discard a unit",
+          "call": "POST /blood/units/{unit_id}/discard",
+          "is_action": true,
+          "permissions": [
+            "blood.bank.operate"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::POST /blood/units/{unit_id}/return-to-source",
+          "task": "Return an unused unit to its source",
+          "call": "POST /blood/units/{unit_id}/return-to-source",
+          "is_action": true,
+          "permissions": [
+            "blood.bank.operate"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::GET /blood/requests",
+          "task": "Blood requests",
+          "call": "GET /blood/requests",
+          "is_action": false,
+          "permissions": [
+            "blood.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::GET /blood/requests/{request_id}",
+          "task": "One blood request",
+          "call": "GET /blood/requests/{request_id}",
+          "is_action": false,
+          "permissions": [
+            "blood.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::POST /blood/requests/{request_id}/crossmatches",
+          "task": "Record a compatibility test",
+          "call": "POST /blood/requests/{request_id}/crossmatches",
+          "is_action": true,
+          "permissions": [
+            "blood.bank.operate"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::POST /blood/requests/{request_id}/issue",
+          "task": "Issue a unit to the bedside",
+          "call": "POST /blood/requests/{request_id}/issue",
+          "is_action": true,
+          "permissions": [
+            "blood.bank.operate"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::POST /blood/requests/{request_id}/close",
+          "task": "Close a blood request (done)",
+          "call": "POST /blood/requests/{request_id}/close",
+          "is_action": true,
+          "permissions": [
+            "blood.request",
+            "blood.bank.operate"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::POST /blood/transfusions/{transfusion_id}/return",
+          "task": "Sign a unit back, or record it as not given",
+          "call": "POST /blood/transfusions/{transfusion_id}/return",
+          "is_action": true,
+          "permissions": [
+            "blood.bank.operate",
+            "blood.transfuse"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::GET /blood/storage-checks",
+          "task": "The blood storage temperature log",
+          "call": "GET /blood/storage-checks",
+          "is_action": false,
+          "permissions": [
+            "blood.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::POST /blood/storage-checks",
+          "task": "Record a blood refrigerator, freezer or incubator reading",
+          "call": "POST /blood/storage-checks",
+          "is_action": true,
+          "permissions": [
+            "blood.bank.operate"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::GET /blood/storage-checks/pdf",
+          "task": "The blood storage temperature log (PDF)",
+          "call": "GET /blood/storage-checks/pdf",
+          "is_action": false,
+          "permissions": [
+            "blood.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_bank::GET /blood/sources",
+          "task": "The licensed blood sources",
+          "call": "GET /blood/sources",
+          "is_action": false,
+          "permissions": [
+            "blood.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_bank",
+          "page": "screens/blood_bank"
+        },
+        {
+          "id": "blood_donors::GET /blood-center/donors",
+          "task": "Find blood donors",
+          "call": "GET /blood-center/donors",
+          "is_action": false,
+          "permissions": [
+            "blood_center.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_donors",
+          "page": "screens/blood_donors"
+        },
+        {
+          "id": "blood_donors::POST /blood-center/donors",
+          "task": "Register a blood donor",
+          "call": "POST /blood-center/donors",
+          "is_action": true,
+          "permissions": [
+            "blood_center.donor.register"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_donors",
+          "page": "screens/blood_donors"
+        },
+        {
+          "id": "blood_donors::GET /blood-center/donors/{donor_id}",
+          "task": "One donor's record",
+          "call": "GET /blood-center/donors/{donor_id}",
+          "is_action": false,
+          "permissions": [
+            "blood_center.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_donors",
+          "page": "screens/blood_donors"
+        },
+        {
+          "id": "blood_donors::PATCH /blood-center/donors/{donor_id}",
+          "task": "Correct a donor's particulars",
+          "call": "PATCH /blood-center/donors/{donor_id}",
+          "is_action": true,
+          "permissions": [
+            "blood_center.donor.register"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_donors",
+          "page": "screens/blood_donors"
+        },
+        {
+          "id": "blood_donors::GET /establishment",
+          "task": "The establishment's profile and services, with the configuration revision",
+          "call": "GET /establishment",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "blood_donors",
+          "page": "screens/blood_donors"
+        },
+        {
+          "id": "blood_collection::GET /blood-center/donations",
+          "task": "Donations and the worklists",
+          "call": "GET /blood-center/donations",
+          "is_action": false,
+          "permissions": [
+            "blood_center.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_collection",
+          "page": "screens/blood_collection"
+        },
+        {
+          "id": "blood_collection::GET /blood-center/donations/{donation_id}/labels",
+          "task": "The donation number labels for the bags and tubes",
+          "call": "GET /blood-center/donations/{donation_id}/labels",
+          "is_action": false,
+          "permissions": [
+            "blood_center.collect",
+            "blood_center.process"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "blood_collection",
+          "page": "screens/blood_collection"
+        },
+        {
+          "id": "blood_collection::POST /blood-center/donations/{donation_id}/collection",
+          "task": "Record the collection",
+          "call": "POST /blood-center/donations/{donation_id}/collection",
+          "is_action": true,
+          "permissions": [
+            "blood_center.collect"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_collection",
+          "page": "screens/blood_collection"
+        },
+        {
+          "id": "blood_center_lab::GET /blood-center/donations",
+          "task": "Donations and the worklists",
+          "call": "GET /blood-center/donations",
+          "is_action": false,
+          "permissions": [
+            "blood_center.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_center_lab",
+          "page": "screens/blood_center_lab"
+        },
+        {
+          "id": "blood_center_lab::GET /blood-center/donations/{donation_id}",
+          "task": "One donation, from the donor to the patients",
+          "call": "GET /blood-center/donations/{donation_id}",
+          "is_action": false,
+          "permissions": [
+            "blood_center.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_center_lab",
+          "page": "screens/blood_center_lab"
+        },
+        {
+          "id": "blood_center_lab::POST /blood-center/donations/{donation_id}/tests",
+          "task": "Record test results",
+          "call": "POST /blood-center/donations/{donation_id}/tests",
+          "is_action": true,
+          "permissions": [
+            "blood_center.process"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_center_lab",
+          "page": "screens/blood_center_lab"
+        },
+        {
+          "id": "blood_center_lab::POST /blood-center/donations/{donation_id}/components",
+          "task": "Prepare components into quarantine",
+          "call": "POST /blood-center/donations/{donation_id}/components",
+          "is_action": true,
+          "permissions": [
+            "blood_center.process"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_center_lab",
+          "page": "screens/blood_center_lab"
+        },
+        {
+          "id": "blood_center_lab::GET /blood-center/components",
+          "task": "The quarantine and the components",
+          "call": "GET /blood-center/components",
+          "is_action": false,
+          "permissions": [
+            "blood_center.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_center_lab",
+          "page": "screens/blood_center_lab"
+        },
+        {
+          "id": "blood_center_lab::POST /blood-center/components/{component_id}/discard",
+          "task": "Discard a component in quarantine",
+          "call": "POST /blood-center/components/{component_id}/discard",
+          "is_action": true,
+          "permissions": [
+            "blood_center.process"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "blood_center_lab",
+          "page": "screens/blood_center_lab"
+        },
+        {
+          "id": "blood_center_lab::GET /blood-center/components/{component_id}/label",
+          "task": "A component's label",
+          "call": "GET /blood-center/components/{component_id}/label",
+          "is_action": false,
+          "permissions": [
+            "blood_center.process",
+            "blood_center.release"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "blood_center_lab",
+          "page": "screens/blood_center_lab"
+        },
+        {
+          "id": "report_incident::GET /incident-types",
+          "task": "What to report: the incident types",
+          "call": "GET /incident-types",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::POST /incidents",
+          "task": "Report an incident, an adverse event or a near miss",
+          "call": "POST /incidents",
+          "is_action": true,
+          "permissions": [
+            "incident.report"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /incidents",
+          "task": "The incident register",
+          "call": "GET /incidents",
+          "is_action": false,
+          "permissions": [
+            "incident.view",
+            "incident.report",
+            "ot.clinical_statistics.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /incidents/{incident_id}",
+          "task": "One incident",
+          "call": "GET /incidents/{incident_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "incident.view, the reporter and the investigator; ot.clinical_statistics.view for theatre adverse events",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /incidents/sentinel-list/pdf",
+          "task": "The list of sentinel events and how to report (PDF)",
+          "call": "GET /incidents/sentinel-list/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /staff/lookup",
+          "task": "Find a staff member for a form (badge facts only)",
+          "call": "GET /staff/lookup",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /patients/search",
+          "task": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
+          "call": "GET /patients/search",
+          "is_action": false,
+          "permissions": [
+            "patient.search"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /admissions",
+          "task": "Admissions (default: all live ones; admissions desk queue)",
+          "call": "GET /admissions",
+          "is_action": false,
+          "permissions": [
+            "ipd.admission.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /ot/bookings",
+          "task": "Bookings (mine=true for a surgeon's own list)",
+          "call": "GET /ot/bookings",
+          "is_action": false,
+          "permissions": [
+            "ot.booking.view",
+            "ot.booking.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /deaths",
+          "task": "The death register",
+          "call": "GET /deaths",
+          "is_action": false,
+          "permissions": [
+            "death.register.view",
+            "death.record",
+            "death.body.release"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /drugs/search",
+          "task": "Formulary search with live stock colour",
+          "call": "GET /drugs/search",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.formulary.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /beds/matrix",
+          "task": "Live bed matrix (counts per ward + optional bed list)",
+          "call": "GET /beds/matrix",
+          "is_action": false,
+          "permissions": [
+            "ipd.bed.view",
+            "cssd.operate",
+            "infection.control.manage",
+            "complaint.manage",
+            "incident.view",
+            "facility.drill.manage",
+            "roster.manage.all",
+            "facility.equipment.manage",
+            "pharmacy.storage.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "my_investigations::GET /incidents",
+          "task": "The incident register",
+          "call": "GET /incidents",
+          "is_action": false,
+          "permissions": [
+            "incident.view",
+            "incident.report",
+            "ot.clinical_statistics.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /incidents/{incident_id}",
+          "task": "One incident",
+          "call": "GET /incidents/{incident_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "incident.view, the reporter and the investigator; ot.clinical_statistics.view for theatre adverse events",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::PUT /incidents/{incident_id}/analysis",
+          "task": "Save the analysis (a draft until signed)",
+          "call": "PUT /incidents/{incident_id}/analysis",
+          "is_action": true,
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::POST /incidents/{incident_id}/analysis/sign",
+          "task": "Sign the analysis (final)",
+          "call": "POST /incidents/{incident_id}/analysis/sign",
+          "is_action": true,
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::POST /incidents/{incident_id}/actions",
+          "task": "Record a corrective or preventive action",
+          "call": "POST /incidents/{incident_id}/actions",
+          "is_action": true,
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /quality/record-review/people",
+          "task": "Who can review records or own an action",
+          "call": "GET /quality/record-review/people",
+          "is_action": false,
+          "permissions": [
+            "quality.review.manage",
+            "committee.manage",
+            "infection.control.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /incidents/{incident_id}/pdf",
+          "task": "The incident report with its analysis and actions (PDF)",
+          "call": "GET /incidents/{incident_id}/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "incident.view, the reporter and the investigator; ot.clinical_statistics.view for theatre adverse events",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /staff/lookup",
+          "task": "Find a staff member for a form (badge facts only)",
+          "call": "GET /staff/lookup",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /complaints",
+          "task": "The complaints register",
+          "call": "GET /complaints",
+          "is_action": false,
+          "permissions": [
+            "complaint.view",
+            "complaint.manage",
+            "complaint.register"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /complaints/{complaint_id}",
+          "task": "One complaint",
+          "call": "GET /complaints/{complaint_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.view or complaint.manage, the person who received the complaint and its investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::POST /complaints/{complaint_id}/findings",
+          "task": "Write the findings of the investigation",
+          "call": "POST /complaints/{complaint_id}/findings",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.manage or the complaint's named investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::POST /complaints/{complaint_id}/updates",
+          "task": "Record a contact with the complainant (progress, more time)",
+          "call": "POST /complaints/{complaint_id}/updates",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.manage or the complaint's named investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::POST /complaints/{complaint_id}/actions",
+          "task": "Record a corrective or preventive action",
+          "call": "POST /complaints/{complaint_id}/actions",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.manage or the complaint's named investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /staff/lookup",
+          "task": "Find a staff member for a form (badge facts only)",
+          "call": "GET /staff/lookup",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_actions::GET /quality/actions",
+          "task": "The action register (mine: the actions I own)",
+          "call": "GET /quality/actions",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the actions they own (mine is forced without quality.action.view or quality.action.manage)",
+          "screen_id": "my_actions",
+          "page": "screens/my_actions"
+        },
+        {
+          "id": "my_actions::GET /quality/actions/{action_id}",
+          "task": "One action",
+          "call": "GET /quality/actions/{action_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the action's owner, the person who recorded it, quality.action.view or quality.action.manage",
+          "screen_id": "my_actions",
+          "page": "screens/my_actions"
+        },
+        {
+          "id": "my_actions::POST /quality/actions/{action_id}/complete",
+          "task": "Close an action: done with the evidence, or cancelled",
+          "call": "POST /quality/actions/{action_id}/complete",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the action's owner or quality.action.manage",
+          "screen_id": "my_actions",
+          "page": "screens/my_actions"
+        },
+        {
+          "id": "connect_server::GET /meta/server-info",
+          "task": "How terminals reach and trust this server — works before login",
+          "call": "GET /meta/server-info",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "connect_server",
+          "page": "screens/connect_server"
+        },
+        {
+          "id": "connect_server::GET /terminals/whoami",
+          "task": "Identify this terminal (location + mapped printers) — works before login",
+          "call": "GET /terminals/whoami",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "connect_server",
+          "page": "screens/connect_server"
+        },
+        {
+          "id": "login::POST /auth/login",
+          "task": "Log in (returns tokens, profile, roles, workspaces)",
+          "call": "POST /auth/login",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /terminals/whoami",
+          "task": "Identify this terminal (location + mapped printers) — works before login",
+          "call": "GET /terminals/whoami",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::POST /auth/change-password",
+          "task": "Change own password",
+          "call": "POST /auth/change-password",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /meta/license",
+          "task": "The server's license state: show a banner when it needs attention — works before login",
+          "call": "GET /meta/license",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /health/live",
+          "task": "Is the server there? (unauthenticated, no database)",
+          "call": "GET /health/live",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /health",
+          "task": "Server health (unauthenticated; used by the login screen)",
+          "call": "GET /health",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "workspace_picker::GET /auth/workspaces",
+          "task": "Workspaces the user may open (multi-role launch screen)",
+          "call": "GET /auth/workspaces",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker"
+        },
+        {
+          "id": "workspace_picker::GET /auth/me",
+          "task": "Current user, roles, permissions, workspaces, preferences",
+          "call": "GET /auth/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker"
+        },
+        {
+          "id": "workspace_picker::GET /establishment",
+          "task": "The establishment's profile and services, with the configuration revision",
+          "call": "GET /establishment",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker"
+        },
+        {
+          "id": "settings::GET /settings/sections",
+          "task": "The Settings window: the tiers and sections this caller may open (also before login)",
+          "call": "GET /settings/sections",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login); a logged-in caller also gets what their permissions open",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /settings/me",
+          "task": "My preferences (theme, language, UI scale, PDF download)",
+          "call": "GET /settings/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::PUT /settings/me",
+          "task": "Update my preferences (only the fields you send)",
+          "call": "PUT /settings/me",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::POST /settings/me/change-password",
+          "task": "Change my password (same as /auth/change-password)",
+          "call": "POST /settings/me/change-password",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/settings",
+          "task": "Hospital policy settings",
+          "call": "GET /admin/settings",
+          "is_action": false,
+          "permissions": [
+            "admin.settings.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::PUT /admin/settings/{key}",
+          "task": "Change a policy setting (type-checked, audited)",
+          "call": "PUT /admin/settings/{key}",
+          "is_action": true,
+          "permissions": [
+            "admin.settings.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::POST /admin/change-requests",
+          "task": "Request a control-setting or privileged-access change (applied at once for an Owner)",
+          "call": "POST /admin/change-requests",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "admin.settings.manage for a setting, admin.user.manage for a user's roles, admin.role_matrix.update for a role's permissions (the service checks)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/change-requests",
+          "task": "Control-setting and privileged-access change requests",
+          "call": "GET /admin/change-requests",
+          "is_action": false,
+          "permissions": [
+            "admin.settings.manage",
+            "admin.user.manage",
+            "admin.role_matrix.update",
+            "approval.policy_change.approve",
+            "approval.privileged_access.approve"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/change-requests/{change_request_id}",
+          "task": "One control-setting or privileged-access change request",
+          "call": "GET /admin/change-requests/{change_request_id}",
+          "is_action": false,
+          "permissions": [
+            "admin.settings.manage",
+            "admin.user.manage",
+            "admin.role_matrix.update",
+            "approval.policy_change.approve",
+            "approval.privileged_access.approve"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/users",
+          "task": "Search users",
+          "call": "GET /admin/users",
+          "is_action": false,
+          "permissions": [
+            "admin.user.manage",
+            "admin.user.provision"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "help_center::GET /meta/handbook",
+          "task": "The end-user handbook's outline for the logged-in employee (only what they may use)",
+          "call": "GET /meta/handbook",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "help_center",
+          "page": "screens/help_center"
+        },
+        {
+          "id": "help_center::GET /settings/me",
+          "task": "My preferences (theme, language, UI scale, PDF download)",
+          "call": "GET /settings/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "help_center",
+          "page": "screens/help_center"
+        },
+        {
+          "id": "notifications::GET /notifications",
+          "task": "My notifications (newest first)",
+          "call": "GET /notifications",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "notifications::GET /notifications/unread-count",
+          "task": "Badge count",
+          "call": "GET /notifications/unread-count",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "notifications::POST /notifications/{notification_id}/read",
+          "task": "Mark one as read",
+          "call": "POST /notifications/{notification_id}/read",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "notifications::POST /notifications/read-all",
+          "task": "Mark everything as read",
+          "call": "POST /notifications/read-all",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "icd_picker::GET /icd/codes",
+          "task": "ICD picker: search codes by code or words",
+          "call": "GET /icd/codes",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "icd_picker::GET /icd/browse",
+          "task": "ICD picker: browse chapters, blocks, categories",
+          "call": "GET /icd/browse",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "icd_picker::GET /icd/codes/{code}",
+          "task": "One ICD code with its place in the tree",
+          "call": "GET /icd/codes/{code}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "icd_picker::GET /icd/releases",
+          "task": "The ICD code lists loaded",
+          "call": "GET /icd/releases",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "approval_queue::GET /approvals",
+          "task": "Approval queue visible to me (or my own requests with mine=true)",
+          "call": "GET /approvals",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the pending requests whose required_permission they hold, or their own with mine=true",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::GET /approvals/{request_id}",
+          "task": "One approval request",
+          "call": "GET /approvals/{request_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the request's requester or a holder of its required_permission; anyone else gets FORBIDDEN",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::POST /approvals/{request_id}/approve",
+          "task": "Approve (applies the effect atomically)",
+          "call": "POST /approvals/{request_id}/approve",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "a holder of the request's required_permission while the request's can_decide is true (decide_blocked says why not); never its requester (SELF_APPROVAL_FORBIDDEN, self_decision forbidden), except the Owner of a solo practice who alone can decide their own refund, waiver or credit, with a note (self_decision allowed_with_note); a large cash drop is never approved by the cashier of its shift (DUAL_CONTROL_SAME_PERSON)",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::POST /approvals/{request_id}/reject",
+          "task": "Reject (unfreezes the subject)",
+          "call": "POST /approvals/{request_id}/reject",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "a holder of the request's required_permission while the request's can_decide is true (decide_blocked says why not); never its requester (SELF_APPROVAL_FORBIDDEN, self_decision forbidden), except the Owner of a solo practice who alone can decide their own refund, waiver or credit, with a note (self_decision allowed_with_note); a large cash drop is never approved by the cashier of its shift (DUAL_CONTROL_SAME_PERSON)",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::POST /approvals/{request_id}/cancel",
+          "task": "Requester withdraws a pending request",
+          "call": "POST /approvals/{request_id}/cancel",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the requester only",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "app_shell::POST /auth/refresh",
+          "task": "Rotate the refresh token and get a new access token",
+          "call": "POST /auth/refresh",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::POST /auth/logout",
+          "task": "End this session (or all sessions)",
+          "call": "POST /auth/logout",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/enums",
+          "task": "All enumerated values, introspected from database CHECK constraints",
+          "call": "GET /meta/enums",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/settings",
+          "task": "Non-sensitive hospital settings for UI display",
+          "call": "GET /meta/settings",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/workspaces",
+          "task": "UI workspaces and the screens each should contain",
+          "call": "GET /meta/workspaces",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/error-codes",
+          "task": "Every error code the API can return",
+          "call": "GET /meta/error-codes",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/events",
+          "task": "Realtime WebSocket event catalogue",
+          "call": "GET /meta/events",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "ot_board::GET /ot/status-board",
+          "task": "Live OT board (🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep)",
+          "call": "GET /ot/status-board",
+          "is_action": false,
+          "permissions": [
+            "ot.status.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "ot_board",
+          "page": "screens/ot_board"
+        },
+        {
+          "id": "my_committees::GET /committees",
+          "task": "The committees",
+          "call": "GET /committees",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the committees they are a member of (all with committee.view or committee.manage)",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::GET /committees/{committee_id}",
+          "task": "A committee and its meetings",
+          "call": "GET /committees/{committee_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::GET /committee-meetings/{meeting_id}",
+          "task": "A meeting and its minutes",
+          "call": "GET /committee-meetings/{meeting_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::POST /committee-meetings/{meeting_id}/finalize",
+          "task": "Approve the minutes (final)",
+          "call": "POST /committee-meetings/{meeting_id}/finalize",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the chair of the committee or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::GET /committee-meetings/{meeting_id}/pdf",
+          "task": "The minutes (PDF)",
+          "call": "GET /committee-meetings/{meeting_id}/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/my-deck",
+          "task": "My practice deck: the question of the day and what to rehearse now",
+          "call": "GET /msds/interview-prep/my-deck",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/questions/{key}",
+          "task": "One question: other ways of asking, the model answer with the hospital's facts, key points, follow-ups, pitfalls, what to show",
+          "call": "GET /msds/interview-prep/questions/{key}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::POST /msds/interview-prep/rehearsals",
+          "task": "Record how well I knew a question (Knew, Partly, DidNotKnow)",
+          "call": "POST /msds/interview-prep/rehearsals",
+          "is_action": true,
+          "permissions": [
+            "msds.interview.practice"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/my-progress",
+          "task": "My readiness: questions known, chapter by chapter, my streak and my last mock interview",
+          "call": "GET /msds/interview-prep/my-progress",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/questions",
+          "task": "The PHC inspection interview questions (filter by role, chapter, indicator, type, words)",
+          "call": "GET /msds/interview-prep/questions",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/roles",
+          "task": "The roles and how many inspection interview questions each rehearses",
+          "call": "GET /msds/interview-prep/roles",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/pocket-guide/pdf",
+          "task": "A role's pocket guide: questions, key points and model answers (PDF)",
+          "call": "GET /msds/interview-prep/pocket-guide/pdf",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/pocket-guide",
+          "task": "A role's pocket guide as a print payload, in English or Urdu",
+          "call": "GET /msds/interview-prep/pocket-guide",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/mock-interviews",
+          "task": "Mock interviews, newest first (staff who do not conduct them see their own)",
+          "call": "GET /msds/interview-prep/mock-interviews",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "task": "One mock interview: each answer and the actions it raised",
+          "call": "GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/staff",
+          "task": "The staff to question in a mock interview (with or without a login)",
+          "call": "GET /msds/interview-prep/staff",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.conduct"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/mock-interviews/plan",
+          "task": "The questions to put in a mock interview: the member of staff's weak points first",
+          "call": "GET /msds/interview-prep/mock-interviews/plan",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.conduct"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::POST /msds/interview-prep/mock-interviews",
+          "task": "Record a mock PHC interview: each answer Met, PartlyMet or NotMet, and the actions for the gaps",
+          "call": "POST /msds/interview-prep/mock-interviews",
+          "is_action": true,
+          "permissions": [
+            "msds.interview.conduct"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/mock-interviews",
+          "task": "Mock interviews, newest first (staff who do not conduct them see their own)",
+          "call": "GET /msds/interview-prep/mock-interviews",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "task": "One mock interview: each answer and the actions it raised",
+          "call": "GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/roles",
+          "task": "The roles and how many inspection interview questions each rehearses",
+          "call": "GET /msds/interview-prep/roles",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/questions/{key}",
+          "task": "One question: other ways of asking, the model answer with the hospital's facts, key points, follow-ups, pitfalls, what to show",
+          "call": "GET /msds/interview-prep/questions/{key}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /quality/actions",
+          "task": "The action register (mine: the actions I own)",
+          "call": "GET /quality/actions",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the actions they own (mine is forced without quality.action.view or quality.action.manage)",
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/me",
+          "task": "My personnel record",
+          "call": "GET /personnel/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/appraisals/{appraisal_id}",
+          "task": "One appraisal",
+          "call": "GET /personnel/appraisals/{appraisal_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "personnel.view or personnel.manage, the appraiser and the member of staff appraised",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::POST /personnel/appraisals/{appraisal_id}/acknowledge",
+          "task": "The member of staff's comments and acknowledgement",
+          "call": "POST /personnel/appraisals/{appraisal_id}/acknowledge",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the member of staff appraised, or personnel.manage from the signed paper",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/appraisals/{appraisal_id}/pdf",
+          "task": "The appraisal (PDF)",
+          "call": "GET /personnel/appraisals/{appraisal_id}/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "personnel.view or personnel.manage, the appraiser and the member of staff appraised",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/appraisal-policy/pdf",
+          "task": "The performance appraisal system (PDF)",
+          "call": "GET /personnel/appraisal-policy/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "equipment_requisitions::GET /facility/equipment-requisitions",
+          "task": "The equipment requisitions",
+          "call": "GET /facility/equipment-requisitions",
+          "is_action": false,
+          "permissions": [
+            "facility.view",
+            "facility.equipment.request",
+            "facility.equipment.evaluate",
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /facility/equipment-requisitions/{requisition_id}",
+          "task": "One equipment requisition with its models and their evaluations",
+          "call": "GET /facility/equipment-requisitions/{requisition_id}",
+          "is_action": false,
+          "permissions": [
+            "facility.view",
+            "facility.equipment.request",
+            "facility.equipment.evaluate",
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions",
+          "task": "Ask for equipment with its specification and justification",
+          "call": "POST /facility/equipment-requisitions",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.request"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/options",
+          "task": "Add a model on offer",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/options",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.request"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/evaluations",
+          "task": "Evaluate a model you will use",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/evaluations",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.evaluate"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/decide",
+          "task": "Decide on one evaluated model",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/decide",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/purchased",
+          "task": "Record the purchase in the equipment register",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/purchased",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/cancel",
+          "task": "Cancel a requisition",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/cancel",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.request",
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /finance/vendors",
+          "task": "Vendors",
+          "call": "GET /finance/vendors",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /facility/equipment",
+          "task": "The equipment inventory",
+          "call": "GET /facility/equipment",
+          "is_action": false,
+          "permissions": [
+            "facility.view",
+            "facility.equipment.manage",
+            "facility.maintenance.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /committees",
+          "task": "The committees",
+          "call": "GET /committees",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the committees they are a member of (all with committee.view or committee.manage)",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /committees/{committee_id}",
+          "task": "A committee and its meetings",
+          "call": "GET /committees/{committee_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        }
+      ],
+      "faq_role_coverage": [
+        {
+          "role": "lab_technician",
+          "task_ids": [
+            "lab_bench::GET /lab/worklist",
+            "lab_bench::POST /lab/samples/{sample_id}/collect",
+            "lab_bench::GET /lab/samples/{sample_id}/label",
+            "lab_bench::GET /lab/scan/{barcode}",
+            "lab_bench::POST /lab/samples/{sample_id}/receive",
+            "lab_bench::POST /lab/items/{item_id}/results",
+            "lab_bench::POST /lab/items/{item_id}/rerun",
+            "lab_bench::POST /lab/items/{item_id}/corrections",
+            "lab_bench::POST /lab/samples/{sample_id}/reject",
+            "lab_bench::GET /wristbands/verify",
+            "critical_results_bench::GET /critical-results",
+            "critical_results_bench::GET /critical-results/{critical_result_id}",
+            "critical_results_bench::POST /critical-results/{critical_result_id}/communications",
+            "critical_results_bench::GET /diagnostics/worklist",
+            "critical_results_bench::GET /staff/lookup",
+            "lab_send_outs::GET /lab/send-outs/pending",
+            "lab_send_outs::POST /lab/send-outs",
+            "lab_send_outs::GET /lab/send-outs",
+            "lab_send_outs::GET /lab/send-outs/{send_out_id}",
+            "lab_send_outs::GET /lab/send-outs/{send_out_id}/print-payload",
+            "lab_send_outs::GET /diagnostic-partners",
+            "lab_send_outs::POST /lab/items/{item_id}/results",
+            "lab_send_outs::POST /lab/samples/{sample_id}/reject",
+            "blood_bank::GET /blood/units",
+            "blood_bank::POST /blood/units",
+            "blood_bank::GET /blood/units/{unit_id}",
+            "blood_bank::POST /blood/units/{unit_id}/discard",
+            "blood_bank::POST /blood/units/{unit_id}/return-to-source",
+            "blood_bank::GET /blood/requests",
+            "blood_bank::GET /blood/requests/{request_id}",
+            "blood_bank::POST /blood/requests/{request_id}/crossmatches",
+            "blood_bank::POST /blood/requests/{request_id}/issue",
+            "blood_bank::POST /blood/requests/{request_id}/close",
+            "blood_bank::POST /blood/transfusions/{transfusion_id}/return",
+            "blood_bank::GET /blood/storage-checks",
+            "blood_bank::POST /blood/storage-checks",
+            "blood_bank::GET /blood/storage-checks/pdf",
+            "blood_bank::GET /blood/sources",
+            "blood_donors::GET /blood-center/donors",
+            "blood_donors::POST /blood-center/donors",
+            "blood_donors::GET /blood-center/donors/{donor_id}",
+            "blood_donors::PATCH /blood-center/donors/{donor_id}",
+            "blood_donors::GET /establishment",
+            "blood_collection::GET /blood-center/donations",
+            "blood_collection::GET /blood-center/donations/{donation_id}/labels",
+            "blood_collection::POST /blood-center/donations/{donation_id}/collection",
+            "blood_center_lab::GET /blood-center/donations",
+            "blood_center_lab::GET /blood-center/donations/{donation_id}",
+            "blood_center_lab::POST /blood-center/donations/{donation_id}/tests",
+            "blood_center_lab::POST /blood-center/donations/{donation_id}/components",
+            "blood_center_lab::GET /blood-center/components",
+            "blood_center_lab::POST /blood-center/components/{component_id}/discard",
+            "blood_center_lab::GET /blood-center/components/{component_id}/label",
+            "report_incident::GET /incident-types",
+            "report_incident::POST /incidents",
+            "report_incident::GET /incidents",
+            "report_incident::GET /incidents/{incident_id}",
+            "report_incident::GET /incidents/sentinel-list/pdf",
+            "report_incident::GET /staff/lookup",
+            "report_incident::GET /admin/departments",
+            "report_incident::GET /patients/search",
+            "my_investigations::GET /incidents",
+            "my_investigations::GET /incidents/{incident_id}",
+            "my_investigations::PUT /incidents/{incident_id}/analysis",
+            "my_investigations::POST /incidents/{incident_id}/analysis/sign",
+            "my_investigations::POST /incidents/{incident_id}/actions",
+            "my_investigations::GET /incidents/{incident_id}/pdf",
+            "my_investigations::GET /admin/departments",
+            "my_investigations::GET /staff/lookup",
+            "my_complaint_investigations::GET /complaints/{complaint_id}",
+            "my_complaint_investigations::POST /complaints/{complaint_id}/findings",
+            "my_complaint_investigations::POST /complaints/{complaint_id}/updates",
+            "my_complaint_investigations::POST /complaints/{complaint_id}/actions",
+            "my_complaint_investigations::GET /admin/departments",
+            "my_complaint_investigations::GET /staff/lookup",
+            "my_actions::GET /quality/actions",
+            "my_actions::GET /quality/actions/{action_id}",
+            "my_actions::POST /quality/actions/{action_id}/complete",
+            "connect_server::GET /meta/server-info",
+            "connect_server::GET /terminals/whoami",
+            "login::POST /auth/login",
+            "login::GET /terminals/whoami",
+            "login::POST /auth/change-password",
+            "login::GET /meta/license",
+            "login::GET /health/live",
+            "login::GET /health",
+            "workspace_picker::GET /auth/workspaces",
+            "workspace_picker::GET /auth/me",
+            "workspace_picker::GET /establishment",
+            "settings::GET /settings/sections",
+            "settings::GET /settings/me",
+            "settings::PUT /settings/me",
+            "settings::POST /settings/me/change-password",
+            "settings::POST /admin/change-requests",
+            "help_center::GET /meta/handbook",
+            "help_center::GET /settings/me",
+            "notifications::GET /notifications",
+            "notifications::GET /notifications/unread-count",
+            "notifications::POST /notifications/{notification_id}/read",
+            "notifications::POST /notifications/read-all",
+            "icd_picker::GET /icd/codes",
+            "icd_picker::GET /icd/browse",
+            "icd_picker::GET /icd/codes/{code}",
+            "icd_picker::GET /icd/releases",
+            "approval_queue::GET /approvals",
+            "approval_queue::GET /approvals/{request_id}",
+            "approval_queue::POST /approvals/{request_id}/approve",
+            "approval_queue::POST /approvals/{request_id}/reject",
+            "approval_queue::POST /approvals/{request_id}/cancel",
+            "app_shell::POST /auth/refresh",
+            "app_shell::POST /auth/logout",
+            "app_shell::GET /meta/enums",
+            "app_shell::GET /meta/settings",
+            "app_shell::GET /meta/workspaces",
+            "app_shell::GET /meta/error-codes",
+            "app_shell::GET /meta/events",
+            "my_committees::GET /committees",
+            "my_committees::GET /committees/{committee_id}",
+            "my_committees::GET /committee-meetings/{meeting_id}",
+            "my_committees::POST /committee-meetings/{meeting_id}/finalize",
+            "my_committees::GET /committee-meetings/{meeting_id}/pdf",
+            "interview_practice::GET /msds/interview-prep/my-deck",
+            "interview_practice::GET /msds/interview-prep/questions/{key}",
+            "interview_practice::POST /msds/interview-prep/rehearsals",
+            "interview_practice::GET /msds/interview-prep/my-progress",
+            "interview_practice::GET /msds/interview-prep/questions",
+            "interview_practice::GET /msds/interview-prep/roles",
+            "interview_practice::GET /msds/interview-prep/pocket-guide/pdf",
+            "interview_practice::GET /msds/interview-prep/pocket-guide",
+            "interview_practice::GET /msds/interview-prep/mock-interviews",
+            "interview_practice::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+            "mock_interviews::GET /msds/interview-prep/mock-interviews",
+            "mock_interviews::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+            "mock_interviews::GET /msds/interview-prep/roles",
+            "mock_interviews::GET /msds/interview-prep/questions/{key}",
+            "mock_interviews::GET /quality/actions",
+            "mock_interviews::GET /admin/departments",
+            "my_personnel_record::GET /personnel/me",
+            "my_personnel_record::GET /personnel/appraisals/{appraisal_id}",
+            "my_personnel_record::POST /personnel/appraisals/{appraisal_id}/acknowledge",
+            "my_personnel_record::GET /personnel/appraisals/{appraisal_id}/pdf",
+            "my_personnel_record::GET /personnel/appraisal-policy/pdf",
+            "equipment_requisitions::GET /facility/equipment-requisitions",
+            "equipment_requisitions::GET /facility/equipment-requisitions/{requisition_id}",
+            "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/evaluations",
+            "equipment_requisitions::GET /finance/vendors",
+            "equipment_requisitions::GET /admin/departments",
+            "equipment_requisitions::GET /committees",
+            "equipment_requisitions::GET /committees/{committee_id}"
+          ]
+        }
+      ],
+      "faq_seed": [
+        {
+          "id": "lab_tech:error:LAB_PAYMENT_REQUIRED",
+          "workspace": "lab_tech",
+          "screen_id": "lab_bench",
+          "kind": "error",
+          "code": "LAB_PAYMENT_REQUIRED",
+          "entity": null,
+          "question": "The Scanner-first lab bench screen says \"The lab bill must be paid before sample collection.\" (LAB_PAYMENT_REQUIRED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:PATIENT_IDENTITY_MISMATCH",
+          "workspace": "lab_tech",
+          "screen_id": "lab_bench",
+          "kind": "error",
+          "code": "PATIENT_IDENTITY_MISMATCH",
+          "entity": null,
+          "question": "The Scanner-first lab bench screen says \"The wristband scanned is not this patient's: stop and check who the patient is.\" (PATIENT_IDENTITY_MISMATCH). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:PATIENT_IDENTITY_REQUIRED",
+          "workspace": "lab_tech",
+          "screen_id": "lab_bench",
+          "kind": "error",
+          "code": "PATIENT_IDENTITY_REQUIRED",
+          "entity": null,
+          "question": "The Scanner-first lab bench screen says \"Identify the patient first: scan the wristband, or confirm two identifiers (name and MRN or date of birth).\" (PATIENT_IDENTITY_REQUIRED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:LAB_SAMPLE_STATE_INVALID",
+          "workspace": "lab_tech",
+          "screen_id": "lab_bench",
+          "kind": "error",
+          "code": "LAB_SAMPLE_STATE_INVALID",
+          "entity": null,
+          "question": "The Scanner-first lab bench screen says \"The sample cannot do that in its present state.\" (LAB_SAMPLE_STATE_INVALID). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:LAB_SAMPLE_NOT_FOUND",
+          "workspace": "lab_tech",
+          "screen_id": "lab_bench",
+          "kind": "error",
+          "code": "LAB_SAMPLE_NOT_FOUND",
+          "entity": null,
+          "question": "The Scanner-first lab bench screen says \"No sample with this barcode.\" (LAB_SAMPLE_NOT_FOUND). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:LAB_METRICS_INVALID",
+          "workspace": "lab_tech",
+          "screen_id": "lab_bench",
+          "kind": "error",
+          "code": "LAB_METRICS_INVALID",
+          "entity": null,
+          "question": "The Scanner-first lab bench screen says \"Metric values do not match the test's metric schema.\" (LAB_METRICS_INVALID). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:LAB_REAGENT_BOM_MISSING",
+          "workspace": "lab_tech",
+          "screen_id": "lab_bench",
+          "kind": "error",
+          "code": "LAB_REAGENT_BOM_MISSING",
+          "entity": null,
+          "question": "The Scanner-first lab bench screen says \"This test has no reagent bill-of-materials configured.\" (LAB_REAGENT_BOM_MISSING). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:INSUFFICIENT_STOCK",
+          "workspace": "lab_tech",
+          "screen_id": "lab_bench",
+          "kind": "error",
+          "code": "INSUFFICIENT_STOCK",
+          "entity": null,
+          "question": "The Scanner-first lab bench screen says \"Not enough stock available.\" (INSUFFICIENT_STOCK). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:LAB_ITEM_STATE_INVALID",
+          "workspace": "lab_tech",
+          "screen_id": "lab_bench",
+          "kind": "error",
+          "code": "LAB_ITEM_STATE_INVALID",
+          "entity": null,
+          "question": "The Scanner-first lab bench screen says \"Invalid lab test state change.\" (LAB_ITEM_STATE_INVALID). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:CAPABILITY_INACTIVE",
+          "workspace": "lab_tech",
+          "screen_id": "lab_bench",
+          "kind": "error",
+          "code": "CAPABILITY_INACTIVE",
+          "entity": null,
+          "question": "The Scanner-first lab bench screen says \"This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).\" (CAPABILITY_INACTIVE). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:LAB_RESULT_CORRECTION_INVALID",
+          "workspace": "lab_tech",
+          "screen_id": "lab_bench",
+          "kind": "error",
+          "code": "LAB_RESULT_CORRECTION_INVALID",
+          "entity": null,
+          "question": "The Scanner-first lab bench screen says \"A correction must amend a published result of the same test.\" (LAB_RESULT_CORRECTION_INVALID). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:state:critical_result",
+          "workspace": "lab_tech",
+          "screen_id": "critical_results_bench",
+          "kind": "state",
+          "code": null,
+          "entity": "critical_result",
+          "question": "What do the states of a critical result mean (Open, Communicated, Acknowledged), and what moves it from one to the next?"
+        },
+        {
+          "id": "lab_tech:error:CRITICAL_RESULT_READ_BACK_REQUIRED",
+          "workspace": "lab_tech",
+          "screen_id": "critical_results_bench",
+          "kind": "error",
+          "code": "CRITICAL_RESULT_READ_BACK_REQUIRED",
+          "entity": null,
+          "question": "The Critical results to tell screen says \"A critical result told by telephone or in person is read back by the person who received it: confirm read_back.\" (CRITICAL_RESULT_READ_BACK_REQUIRED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:DIAGNOSTIC_PARTNER_INVALID",
+          "workspace": "lab_tech",
+          "screen_id": "lab_send_outs",
+          "kind": "error",
+          "code": "DIAGNOSTIC_PARTNER_INVALID",
+          "entity": null,
+          "question": "The Samples sent to partner laboratories screen says \"The partner is not active for this service, or its MOU has expired.\" (DIAGNOSTIC_PARTNER_INVALID). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_UNIT_EXISTS",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "BLOOD_UNIT_EXISTS",
+          "entity": null,
+          "question": "The Blood bank screen says \"This unit number was already received from this source.\" (BLOOD_UNIT_EXISTS). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_UNIT_EXPIRED",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "BLOOD_UNIT_EXPIRED",
+          "entity": null,
+          "question": "The Blood bank screen says \"The unit has expired: it is not received, tested, issued or transfused; discard it.\" (BLOOD_UNIT_EXPIRED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:state:blood_unit",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "state",
+          "code": null,
+          "entity": "blood_unit",
+          "question": "What do the states of a blood unit mean (InStock, Reserved, Issued, Transfused, Discarded, ReturnedToSource), and what moves it from one to the next?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_UNIT_STATE",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "BLOOD_UNIT_STATE",
+          "entity": null,
+          "question": "The Blood bank screen says \"The unit is not where this step needs it (on the shelf, reserved for this request, issued); details.status says where it is.\" (BLOOD_UNIT_STATE). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:state:blood_request",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "state",
+          "code": null,
+          "entity": "blood_request",
+          "question": "What do the states of a blood request mean (Open, Closed, Cancelled), and what moves it from one to the next?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_REQUEST_CLOSED",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "BLOOD_REQUEST_CLOSED",
+          "entity": null,
+          "question": "The Blood bank screen says \"This blood request is closed or cancelled: the doctor requests again.\" (BLOOD_REQUEST_CLOSED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:STEP_UP_REQUIRED",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "STEP_UP_REQUIRED",
+          "entity": null,
+          "question": "The Blood bank screen says \"A second authorised person must co-sign this action.\" (STEP_UP_REQUIRED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:DUAL_CONTROL_SAME_PERSON",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "DUAL_CONTROL_SAME_PERSON",
+          "entity": null,
+          "question": "The Blood bank screen says \"The second approver must be a different person.\" (DUAL_CONTROL_SAME_PERSON). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_CROSSMATCH_REQUIRED",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "BLOOD_CROSSMATCH_REQUIRED",
+          "entity": null,
+          "question": "The Blood bank screen says \"Issue a unit with its compatible test for this request; uncross-matched blood only on an Emergency request with the doctor's note.\" (BLOOD_CROSSMATCH_REQUIRED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_REQUEST_STATE",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "BLOOD_REQUEST_STATE",
+          "entity": null,
+          "question": "The Blood bank screen says \"Not now: a unit of the request is still out, blood was given (close instead of cancel), units are still reserved, or every unit requested is issued.\" (BLOOD_REQUEST_STATE). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_CONSENT_REQUIRED",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "BLOOD_CONSENT_REQUIRED",
+          "entity": null,
+          "question": "The Blood bank screen says \"The patient's transfusion consent of this stay is needed first (signed, or the doctor's emergency note): the consent register.\" (BLOOD_CONSENT_REQUIRED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:ADMINISTRATION_NOT_AUTHORIZED",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "ADMINISTRATION_NOT_AUTHORIZED",
+          "entity": null,
+          "question": "The Blood bank screen says \"Medicines are given (and double-checked) by a registered nurse or doctor, or by staff the hospital allows.\" (ADMINISTRATION_NOT_AUTHORIZED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:ACCOUNT_LOCKED",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "ACCOUNT_LOCKED",
+          "entity": null,
+          "question": "The Blood bank screen says \"Too many failed attempts; the account is temporarily locked.\" (ACCOUNT_LOCKED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_UNIT_OUT_TOO_LONG",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "BLOOD_UNIT_OUT_TOO_LONG",
+          "entity": null,
+          "question": "The Blood bank screen says \"More than 30 minutes since the unit left the blood bank: it is unsafe; record it as not given and return it for disposal (the II C manual, p157).\" (BLOOD_UNIT_OUT_TOO_LONG). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_TRANSFUSION_STATE",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "BLOOD_TRANSFUSION_STATE",
+          "entity": null,
+          "question": "The Blood bank screen says \"This transfusion is not at this step (issued, running, ended, or the unit went back); details.status says where it is.\" (BLOOD_TRANSFUSION_STATE). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:state:blood_transfusion",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "state",
+          "code": null,
+          "entity": "blood_transfusion",
+          "question": "What do the states of a blood transfusion mean (Issued, InProgress, Completed, Stopped, Returned, NotGiven), and what moves it from one to the next?"
+        },
+        {
+          "id": "lab_tech:error:STORAGE_CHECK_ACTION_REQUIRED",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "STORAGE_CHECK_ACTION_REQUIRED",
+          "entity": null,
+          "question": "The Blood bank screen says \"The reading is out of range: record the action taken.\" (STORAGE_CHECK_ACTION_REQUIRED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:EXPORT_TOO_LARGE",
+          "workspace": "lab_tech",
+          "screen_id": "blood_bank",
+          "kind": "error",
+          "code": "EXPORT_TOO_LARGE",
+          "entity": null,
+          "question": "The Blood bank screen says \"These records are too many for one PDF: select fewer patients or a shorter period (details: the patient and the section).\" (EXPORT_TOO_LARGE). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_DONOR_EXISTS",
+          "workspace": "lab_tech",
+          "screen_id": "blood_donors",
+          "kind": "error",
+          "code": "BLOOD_DONOR_EXISTS",
+          "entity": null,
+          "question": "The Blood donors screen says \"A donor with this identification is registered already: open their record (a donor is registered once for life).\" (BLOOD_DONOR_EXISTS). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_DONATION_STATE",
+          "workspace": "lab_tech",
+          "screen_id": "blood_collection",
+          "kind": "error",
+          "code": "BLOOD_DONATION_STATE",
+          "entity": null,
+          "question": "The Blood collection screen says \"The donation is not at this step (accepted, collected, cleared, reactive), or the donor has another donation in progress.\" (BLOOD_DONATION_STATE). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_ASSESSMENT_EXPIRED",
+          "workspace": "lab_tech",
+          "screen_id": "blood_collection",
+          "kind": "error",
+          "code": "BLOOD_ASSESSMENT_EXPIRED",
+          "entity": null,
+          "question": "The Blood collection screen says \"The donor's assessment is more than 24 hours old: record this donation Unsuccessful and assess the donor again.\" (BLOOD_ASSESSMENT_EXPIRED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_DONOR_DEFERRED",
+          "workspace": "lab_tech",
+          "screen_id": "blood_collection",
+          "kind": "error",
+          "code": "BLOOD_DONOR_DEFERRED",
+          "entity": null,
+          "question": "The Blood collection screen says \"The donor is deferred today (see the donor's deferrals): not accepted until the deferral ends.\" (BLOOD_DONOR_DEFERRED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:INCIDENT_TYPE_INACTIVE",
+          "workspace": "lab_tech",
+          "screen_id": "blood_collection",
+          "kind": "error",
+          "code": "INCIDENT_TYPE_INACTIVE",
+          "entity": null,
+          "question": "The Blood collection screen says \"This incident type is no longer on the hospital's list.\" (INCIDENT_TYPE_INACTIVE). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_COMPONENT_EXISTS",
+          "workspace": "lab_tech",
+          "screen_id": "blood_center_lab",
+          "kind": "error",
+          "code": "BLOOD_COMPONENT_EXISTS",
+          "entity": null,
+          "question": "The Blood center laboratory screen says \"This component was already prepared from this donation.\" (BLOOD_COMPONENT_EXISTS). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_PROCESSING_TIME_EXCEEDED",
+          "workspace": "lab_tech",
+          "screen_id": "blood_center_lab",
+          "kind": "error",
+          "code": "BLOOD_PROCESSING_TIME_EXCEEDED",
+          "entity": null,
+          "question": "The Blood center laboratory screen says \"Platelets and fresh frozen plasma are prepared within 8 hours of the venepuncture (PBTA Standards ch.3).\" (BLOOD_PROCESSING_TIME_EXCEEDED). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:error:BLOOD_COMPONENT_STATE",
+          "workspace": "lab_tech",
+          "screen_id": "blood_center_lab",
+          "kind": "error",
+          "code": "BLOOD_COMPONENT_STATE",
+          "entity": null,
+          "question": "The Blood center laboratory screen says \"The component is not in quarantine (released, discarded or processed already); details.status says where it is.\" (BLOOD_COMPONENT_STATE). Why, and what do I do?"
+        },
+        {
+          "id": "lab_tech:state:blood_center_component",
+          "workspace": "lab_tech",
+          "screen_id": "blood_center_lab",
+          "kind": "state",
+          "code": null,
+          "entity": "blood_center_component",
+          "question": "What do the states of a blood center component mean (Quarantine, Released, Discarded, Processed), and what moves it from one to the next?"
+        }
+      ],
+      "faq_requirement": "Write a detailed How do I...? answer for each supported task, with prerequisites, steps, outcomes, recovery and handovers; follow W2 and W3. Answer every question of faq_seed too.",
+      "coverage_note": "Catalogue minimum, conditional on access rules and the actual records. Add frontend-only tasks, controls and other authorized screens used by the app. This is not runtime authorization."
+    }
+  ],
+  "rbac": "the help site shows only the pages GET /meta/handbook lists for the logged-in user",
+  "languages": [
+    "en",
+    "ur"
+  ],
+  "screen_requirements": [
+    {
+      "id": "S1",
+      "title": "Purpose and audience",
+      "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+    },
+    {
+      "id": "S2",
+      "title": "Step by step (one per task, where to click)",
+      "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+    },
+    {
+      "id": "S3",
+      "title": "Every control and its effects",
+      "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+    },
+    {
+      "id": "S4",
+      "title": "States and feedback",
+      "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+    },
+    {
+      "id": "S5",
+      "title": "Messages, mistakes and recovery",
+      "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+    },
+    {
+      "id": "S6",
+      "title": "Language and visual examples",
+      "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+    },
+    {
+      "id": "S7",
+      "title": "Related help and delivery",
+      "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+    }
+  ],
+  "workspace_requirements": [
+    {
+      "id": "W1",
+      "title": "A day in each role",
+      "instruction": "Explain the workspace's purpose and each role that uses it, how to enter or switch workspaces, start and finish a\nshift, and the typical order of work. State what the role may do and what requires another role, without presenting\nrole names as the app's permission checks. Include shared and linked screens needed to finish the job."
+    },
+    {
+      "id": "W2",
+      "title": "Complete job-task index",
+      "instruction": "List every job task supported for each role in this workspace. Map each task to a detailed FAQ answer and the\nrelevant screen instructions. Reconcile this inventory with the catalogue's tasks, permissions, playbooks, shared\nscreens and the actual UI, including frontend-only tasks. Do not claim that a list of API operations alone covers\neverything staff need to learn. Mark unsupported requests explicitly rather than inventing a workflow."
+    },
+    {
+      "id": "W3",
+      "title": "Detailed role-specific FAQ",
+      "instruction": "For every supported task answer \"How do I ...?\" in the user's language. Each answer must give when to use it,\nprerequisites, exact navigation and labels, ordered steps, what each action changes, the expected outcome, common\nmistakes/refusals and recovery, approvals or handovers and links to screen help. Include exceptions and follow-up\nquestions from the tested journey. Shared answers may be linked, but distinguish differences between roles and\npermissions. Short generic advice or an unexplained link is insufficient.\n\nThis FAQ is compulsory for every supported role in the workspace, including its shared tasks. Missing answers,\nmissing English/Urdu coverage or an unreviewed FAQ keep the workspace unfinished, even when its API calls work.\n\nThe FAQ answers at least every question of `faq_seed` for the workspace (`GET /meta/handbook?workspace=<code>` →\n`faq_seed`; the MCP server's `get_handbook_outline` gives the same list): one per error a screen of the workspace can\nmeet and one per state machine its screens move. They are the minimum, not the whole FAQ."
+    },
+    {
+      "id": "W4",
+      "title": "Handovers, exceptions and troubleshooting",
+      "instruction": "Explain what to do when work is waiting for another role, who acts next, how to find the request later and how to\nrecognize completion or refusal. Cover the workspace's applicable problems: unavailable devices or network, a locked\nsession, conflicting edits, a correction, an uncertain submission and an unfinished shift. Refer to the hospital's\napproved downtime procedure where required; do not invent clinical or financial policy."
+    },
+    {
+      "id": "W5",
+      "title": "Glossary and guided practice",
+      "instruction": "Define the workspace's staff-facing terms consistently with the UI. Provide a complete practice journey using newly\ncreated synthetic records on the DEV server, covering the relevant screens, role boundaries and help navigation.\nA named human reviewer must follow the [workspace acceptance checklist](17-workspace-review-checklist.md)\nusing the handbook and check that the FAQ enables the role's work. Keep both languages, screenshots, task index\nand help links current with the implemented workspace."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7"
+}

@@ -4,7 +4,16 @@ const require = createRequire(import.meta.url);
 const { request, checkedRoot } = require("../electron/transport.cjs");
 const config = JSON.parse(fs.readFileSync(".dev-terminal.json", "utf8"));
 const ca = checkedRoot(config.ca_pem, config.ca_fingerprint_sha256);
-const base = config.server_urls[0];
+// Use a reachable pinned address, as the terminal does. The first configured
+// address may be an office LAN address unavailable over the VPN.
+let base;
+for (const address of config.server_urls) {
+  try {
+    const health = await request(address + "/health", { ca, timeoutMs: 3000 });
+    if (health.status === 200) { base = address; break; }
+  } catch { /* Try the next configured address; never relax TLS. */ }
+}
+if (!base) throw new Error("No configured pinned DEV server address is reachable");
 const records = [];
 let token;
 const { validate } = require("../electron/contract.cjs");

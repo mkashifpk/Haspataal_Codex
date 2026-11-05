@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   listEntriesRosters,
@@ -112,6 +113,7 @@ export const DutyRosterHr: React.FC<DutyRosterHrProps> = ({
     shift_pattern_id: number;
     duty_area: "Ward" | "Department" | "Emergency" | "OT" | "Facility" | "Other";
     ward_id: string;
+    department_id?: string;
     zone_label: string;
     notes: string;
     is_on_call: boolean;
@@ -317,6 +319,7 @@ export const DutyRosterHr: React.FC<DutyRosterHrProps> = ({
         shift_pattern_id: addEntryDraft.shift_pattern_id,
         duty_area: addEntryDraft.duty_area,
         ward_id: addEntryDraft.ward_id ? Number(addEntryDraft.ward_id) : undefined,
+        department_id: addEntryDraft.department_id ? Number(addEntryDraft.department_id) : undefined,
         zone_label: addEntryDraft.zone_label.trim() || undefined,
         notes: addEntryDraft.notes.trim() || undefined,
         is_on_call: addEntryDraft.is_on_call,
@@ -1310,6 +1313,8 @@ export const DutyRosterHr: React.FC<DutyRosterHrProps> = ({
                   </div>
 
                   <div className="mb-3">
+                    {addEntryDraft.duty_area==='Ward'&&<DirectoryPicker path="/beds/matrix?include_beds=false" idField="ward_id" list="wards" value={addEntryDraft.ward_id} onChange={e=>setAddEntryDraft({...addEntryDraft,ward_id:e.target.value})} data-help="duty_roster_hr.modal_add_area_select"/>}
+                    {addEntryDraft.duty_area==='Department'&&<DirectoryPicker path="/admin/departments" idField="department_id" value={addEntryDraft.department_id??''} onChange={e=>setAddEntryDraft({...addEntryDraft,department_id:e.target.value})} data-help="duty_roster_hr.modal_add_area_select"/>}
                     <label className="form-label small fw-semibold">Duty Notes / Assignment Instructions</label>
                     <input
                       type="text"

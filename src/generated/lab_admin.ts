@@ -115,6 +115,7 @@ export interface LabTestUpdate {
   turnaround_minutes?: number | null;
   emergency_turnaround_minutes?: number | null;
   availability?: "InHouse" | "SendOut" | null;
+  /** SendOut: the partner laboratory (GET /diagnostic-partners) */
   send_out_partner_id?: number | null;
   available_24h?: boolean | null;
   notifiable_disease?: string | null;
@@ -190,7 +191,7 @@ export interface ReagentBatchIn {
   expiry_date: string;
   qty_received: number | string;
   total_cost: number | string;
-  /** Supplier invoice (see /pharmacy/vendor-invoices, module=Lab) */
+  /** Supplier invoice (GET /pharmacy-admin/vendor-invoices, module=Lab) */
   vendor_invoice_id?: number | null;
 }
 
@@ -209,6 +210,7 @@ export interface ReagentBatchOut {
 }
 
 export interface ReagentAdjustIn {
+  /** The batch to write off (GET /lab/reagents/{reagent_id}/batches) */
   reagent_batch_id: number;
   qty: number | string;
   reason: "Adjustment" | "Expiry" | "Damage";
@@ -249,7 +251,9 @@ export interface LabRevenueByTestOut {
 
 export interface ContractorIn {
   hospital_share_pct: number | string;
+  /** A contracting pathologist (GET /staff/lookup) */
   contractor_employee_id?: number | null;
+  /** A contracting laboratory firm (GET /finance/vendors) */
   contractor_vendor_id?: number | null;
   effective_from: string;
 }
@@ -278,6 +282,77 @@ export interface StaffLookupOut {
   license_type: "PMDC" | "PNC" | "Other" | null;
   /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
   registration: string | null;
+  /** Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62) */
+  user_id: number | null;
+}
+
+export interface VendorOut {
+  vendor_id: number;
+  name: string;
+  vendor_type: "PharmacySupplier" | "ReagentSupplier" | "EquipmentSupplier" | "UtilityProvider" | "Contractor" | "Other";
+  contact_name: string | null;
+  phone: string | null;
+  address: string | null;
+  tax_number: string | null;
+  cnic: string | null;
+  is_active: boolean;
+  row_version: number;
+}
+
+export interface PartnerOut {
+  partner_id: number;
+  name: string;
+  services: "Lab" | "Imaging" | "Both";
+  phc_registration: string | null;
+  accreditation: string | null;
+  pnra_licence: string | null;
+  mou_reference: string | null;
+  mou_valid_from: string | null;
+  mou_valid_until: string | null;
+  turnaround_hours: number | null;
+  quality_note: string | null;
+  contact: string | null;
+  address: string | null;
+  is_active: boolean;
+  row_version: number;
+  /** Nothing is sent to a partner whose MOU has expired */
+  mou_expired: boolean;
+  /** Active lab tests sent to this partner by default */
+  tests_sent_out: number;
+}
+
+export interface VendorInvoiceListOut {
+  vendor_invoice_id: number;
+  vendor_id: number;
+  invoice_no: string;
+  invoice_type: "Purchase" | "Return" | "CreditNote" | "Service" | "Utility" | "Other";
+  module: "Pharmacy" | "Lab" | "Ops" | "OT" | "Other";
+  total_cost: number;
+  paid_amount: number;
+  status: "Pending" | "PartiallyPaid" | "Paid" | "Cancelled";
+  invoice_date: string;
+  due_date: string | null;
+  received_by: number | null;
+  received_at: string;
+  notes: string | null;
+  row_version: number;
+  vendor_name: string;
+  balance: number;
+}
+
+/** A batch of a reagent with what is left of it (GET /lab/reagents/{reagent_id}/batches): what a write-off picks. */
+export interface ReagentBatchStockOut {
+  reagent_batch_id: number;
+  reagent_id: number;
+  batch_no: string;
+  expiry_date: string;
+  qty_received: number;
+  /** What is left of the batch */
+  qty_available: number;
+  unit_cost: number;
+  received_at: string;
+  /** Expired by the hospital's business date: write it off with reason Expiry */
+  is_expired: boolean;
 }
 
 /** Active lab test catalogue (for the ordering picker) — GET /api/v1/lab/tests (who may call: holders of lab.requisition.create or lab.test.manage or lab.requisition.view). */
@@ -343,4 +418,24 @@ export function setContractor(body: ContractorIn): Promise<ContractorShareOut> {
 /** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
 export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
   return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
+}
+
+/** Vendors — GET /api/v1/finance/vendors (who may call: any logged-in user). */
+export function vendors(query?: { vendor_type?: "PharmacySupplier" | "ReagentSupplier" | "EquipmentSupplier" | "UtilityProvider" | "Contractor" | "Other" | null }): Promise<VendorOut[]> {
+  return api<VendorOut[]>("GET", withQuery(`/finance/vendors`, query), undefined);
+}
+
+/** Partner laboratories and imaging centres — GET /api/v1/diagnostic-partners (who may call: holders of diagnostics.setup.manage or diagnostics.quality.view or lab.sendout.manage or imaging.order.update or lab.test.manage). */
+export function listPartners(query?: { services?: "Lab" | "Imaging" | null; active_only?: boolean }): Promise<PartnerOut[]> {
+  return api<PartnerOut[]>("GET", withQuery(`/diagnostic-partners`, query), undefined);
+}
+
+/** Supplier invoices and amounts owed — GET /api/v1/pharmacy-admin/vendor-invoices (who may call: holders of pharmacy.vendor_invoice.manage or finance.ap.view). */
+export function listVendorInvoices(query?: { module?: string | null; status?: string | null }): Promise<VendorInvoiceListOut[]> {
+  return api<VendorInvoiceListOut[]>("GET", withQuery(`/pharmacy-admin/vendor-invoices`, query), undefined);
+}
+
+/** A reagent's batches with stock, the first to expire first — GET /api/v1/lab/reagents/{reagent_id}/batches (who may call: holders of lab.reagent.manage or lab.bom.manage). */
+export function reagentBatches(reagent_id: number): Promise<ReagentBatchStockOut[]> {
+  return api<ReagentBatchStockOut[]>("GET", `/lab/reagents/${reagent_id}/batches`, undefined);
 }

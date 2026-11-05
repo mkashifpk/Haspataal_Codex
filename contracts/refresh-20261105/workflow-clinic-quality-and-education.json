@@ -1,0 +1,218 @@
+{
+  "slug": "clinic-quality-and-education",
+  "title": "QA rounds, patient feedback and health education",
+  "summary": "The in-charge's recurring QA checklist signed and kept, its findings turned into corrective actions; patient feedback on the client satisfaction form with the person in charge's review; the health education materials and every patient guided.",
+  "order": 99,
+  "workflow": "The clinic manual, indicators 17-18, 25 and 45 with Annex A (decisions 24-26)",
+  "workspaces": [
+    "quality",
+    "owner_dashboard",
+    "reception",
+    "doctor",
+    "ward_nurse"
+  ],
+  "file": "clinic-quality-and-education.md",
+  "markdown": "# QA rounds, patient feedback and health education\n\n| Source | What the surveyor checks | Haspataal |\n|---|---|---|\n| Clinic indicator 17 (PDF p47-50) | The in-charge checks the facilities and services periodically on a checklist, dated, signed and kept in record | The QA rounds: `POST /qa/rounds`, `GET /qa/rounds/{id}/pdf` |\n| Clinic indicator 18 (PDF p47-48) | A written record of the actions taken on the observations | `POST /qa/rounds/{id}/actions`, `POST /patient-feedback/{id}/actions`: the action register |\n| Clinic indicator 25 (PDF p57) | Health messages and IEC material displayed or available, and consistent evidence that patients are guided | `/education/materials`, `POST /patients/{id}/education`, `GET /education/register` |\n| Clinic indicator 45 and Annex A (PDF p97, p111) | Client feedback on a simple format during the visit; its use to improve the system | `POST /patient-feedback`, the review, the summary |\n\nWho: the **Quality Officer**, the **Owner** and the **Hospital Admin** run the rounds (`qa.round.conduct`), keep the\nchecklist (`qa.checklist.manage`) and the education materials (`education.manage`) and review the feedback\n(`feedback.review`); **Reception** records feedback (`feedback.record`); **doctors**, **nurses** and the\n**pharmacist** record the education they give (`education.give`).\n\n## 1. QA rounds (Quality Officer, Owner)\n\n1. `GET /qa/rounds/status`: one card per checklist, `is_due` when it was never done or the interval has passed.\n2. `GET /qa/checklist-items?frequency=DailyWeekly`: the 15 daily/weekly items of the manual's form (13\n   monthly/quarterly: its first monthly item has three parts), plus the establishment's own.\n3. `POST /qa/rounds` with an `Idempotency-Key`:\n\n   ```json\n   {\"frequency\": \"DailyWeekly\", \"conducted_at\": \"2026-10-14T09:30:00+05:00\",\n    \"items\": [{\"item_id\": 1, \"result\": \"Satisfactory\"},\n              {\"item_id\": 9, \"result\": \"NeedsAttention\", \"observation\": \"Cylinder half empty\",\n               \"recommendation\": \"Refill weekly\"}],\n    \"general_remarks\": \"Clean; oxygen low\"}\n   ```\n\n   Every active item of the frequency must be answered once (`VALIDATION_ERROR` with `missing_item_ids` /\n   `unknown_item_ids`); NeedsAttention needs the observation. The round is signed with the in-charge's stamp and kept\n   as signed.\n4. `POST /qa/rounds/{id}/actions` for each finding to act on (`action_type`, `description`, `owner_user_id`,\n   `due_date`); it appears in `GET /quality/actions?source=QaRound`.\n   An action's department comes from `GET /admin/departments`.\n5. `GET /qa/rounds/{id}/pdf`: the form filled in, for the record.\n\nChecklist items: `POST /qa/checklist-items` (`QA_CHECKLIST_ITEM_EXISTS` for a code in use),\n`PATCH /qa/checklist-items/{id}` (reword, reorder, `is_active: false` to retire; `expected_version`).\n\n### The quarterly inspection of the medicine storage\n\nThe third checklist, `StorageQuarterly`, is the written record the clinic manual asks of the technical in-charge every\nquarter (indicator 36's guideline, PDF p80-81): its eleven safe storage practices and the line on emergency medicines\n(Emergency Box, Crash Carts), seeded with their source. It works like the other rounds\n(`GET /qa/checklist-items?frequency=StorageQuarterly`, `POST /qa/rounds {\"frequency\": \"StorageQuarterly\", ...}`), is\ndue again after `qa_round_storage_days` (92) and prints as \"Drug storage site inspection\". The Category II C manual's\nfour further practices (p225: the patient's own medicines, special storage conditions, returns to the pharmacy, the\nmedication room locked) are seeded inactive with their source: a II C hospital switches them on with\n`PATCH /qa/checklist-items/{item_id} {\"is_active\": true}` (`GET /qa/checklist-items?include_inactive=true`).\n\n## 2. Patient feedback (Reception; Quality Officer, Owner)\n\n1. `POST /patient-feedback` with an `Idempotency-Key`: `channel` (ExitInterview, Form, KeyInformant), `respondent`\n   (Patient, Relative, Anonymous, CommunityMember), `satisfied`, `reasons` from the list of that answer, `other_reason`\n   with Other, `comments`, `received_on`; `ticket_id` only when the respondent agrees to be named.\n   A named respondent's patient from `GET /patients/search`; the visit of an exit interview from today's queue,\n   `GET /opd-queues/reception-dashboard`.\n\n   If satisfied, \"how?\":\n\n1. `CompleteInformation`: Complete information provided\n2. `AvailableWhenNeeded`: Services available when needed\n3. `NotCostly`: Services are not costly\n4. `ConvenientToReach`: Convenient to reach the facility\n5. `CourteousStaff`: Staff is courteous\n6. `RelevantStaffAvailable`: Relevant staff is available\n7. `PrivacyObserved`: Privacy is observed\n8. `FemaleStaffAvailable`: Female staff is available\n9. `Recovered`: I recovered after treatment\n10. `Other`: Other (specify)\n\n   If not, \"why?\":\n\n1. `Confidentiality`: Issues of confidentiality\n2. `Privacy`: Issues of privacy\n3. `LackOfAttention`: Lack of attention\n4. `InadequateInformation`: Inadequate information provided\n5. `AskedToComeAgain`: I was asked to come another time\n6. `Costly`: Medicines/services are costly\n7. `LongWait`: Waiting time is too long\n8. `DiscourteousStaff`: Staff is discourteous / unsatisfactory behaviour\n9. `StaffNotCompetent`: Staff is not competent\n10. `RelevantStaffNotAvailable`: Relevant staff not available\n11. `FemaleStaffNotAvailable`: Female staff not available (gender issue)\n12. `SideEffects`: I suffered from side effects of the treatment\n13. `Other`: Other (specify)\n2. `GET /patient-feedback/form/pdf`: blank forms for the suggestion box.\n3. Review: `GET /patient-feedback?review_pending=true`, then `POST /patient-feedback/{id}/review\n   {\"action_taken\"}` once (`FEEDBACK_ALREADY_REVIEWED`), and `POST /patient-feedback/{id}/actions` for a change.\n   An action's department comes from `GET /admin/departments`.\n4. `GET /patient-feedback/summary?date_from=&date_to=`: counts by answer and by reason, still to review, actions raised.\n\n## 3. Health education (doctor, nurse; Quality Officer)\n\n1. Materials: `GET /education/materials`, `POST /education/materials` (`EDUCATION_MATERIAL_EXISTS` for a title in use),\n   `PATCH /education/materials/{id}`.\n2. In the consultation or the chart: `POST /patients/{patient_id}/education` with an `Idempotency-Key`:\n   `{\"topic\", \"method\", \"given_to\", \"material_id\", \"encounter_id\", \"note\"}`. A Leaflet or Video names its material;\n   a retired material answers `REFERENCE_NOT_FOUND`. `GET /patients/{patient_id}/education` lists them.\n3. `GET /education/register?date_from=&date_to=`: the evidence for the surveyor; every row read is logged.",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/qa/rounds",
+          "summary": "Conduct and sign a round"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/qa/rounds/{round_id}/pdf",
+          "summary": "The signed round (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/qa/rounds/{round_id}/actions",
+          "summary": "Raise a corrective or preventive action from a round"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patient-feedback/{feedback_id}/actions",
+          "summary": "Raise a corrective or preventive action from a response"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/education",
+          "summary": "Record health education given"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/education/register",
+          "summary": "The education register of a period"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patient-feedback",
+          "summary": "Record a patient's feedback (Annex A)"
+        }
+      ]
+    },
+    {
+      "heading": "1. QA rounds (Quality Officer, Owner)",
+      "anchor": "1-qa-rounds-quality-officer-owner",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/qa/rounds/status",
+          "summary": "Which checklist is due"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/qa/checklist-items",
+          "summary": "The checklist's items"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/qa/rounds",
+          "summary": "Conduct and sign a round"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/qa/rounds/{round_id}/actions",
+          "summary": "Raise a corrective or preventive action from a round"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/actions",
+          "summary": "The action register (mine: the actions I own)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/qa/rounds/{round_id}/pdf",
+          "summary": "The signed round (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/qa/checklist-items",
+          "summary": "Add the establishment's own checklist item"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/qa/checklist-items/{item_id}",
+          "summary": "Reword, move or retire a checklist item"
+        }
+      ]
+    },
+    {
+      "heading": "The quarterly inspection of the medicine storage",
+      "anchor": "the-quarterly-inspection-of-the-medicine-storage",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/qa/checklist-items",
+          "summary": "The checklist's items"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/qa/rounds",
+          "summary": "Conduct and sign a round"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/qa/checklist-items/{item_id}",
+          "summary": "Reword, move or retire a checklist item"
+        }
+      ]
+    },
+    {
+      "heading": "2. Patient feedback (Reception; Quality Officer, Owner)",
+      "anchor": "2-patient-feedback-reception-quality-officer-owner",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/patient-feedback",
+          "summary": "Record a patient's feedback (Annex A)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/opd-queues/reception-dashboard",
+          "summary": "All queues, deferred tickets, pending approvals, cash-back prompts"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patient-feedback/form/pdf",
+          "summary": "The blank client satisfaction form (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patient-feedback",
+          "summary": "The feedback received"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patient-feedback/{feedback_id}/review",
+          "summary": "Write the action taken by the person in charge"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patient-feedback/{feedback_id}/actions",
+          "summary": "Raise a corrective or preventive action from a response"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patient-feedback/summary",
+          "summary": "The feedback of a period"
+        }
+      ]
+    },
+    {
+      "heading": "3. Health education (doctor, nurse; Quality Officer)",
+      "anchor": "3-health-education-doctor-nurse-quality-officer",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/education/materials",
+          "summary": "The education materials"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/education/materials",
+          "summary": "Add a material"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/education/materials/{material_id}",
+          "summary": "Change or retire a material"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/education",
+          "summary": "Record health education given"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/{patient_id}/education",
+          "summary": "The education a patient was given"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/education/register",
+          "summary": "The education register of a period"
+        }
+      ]
+    }
+  ]
+}

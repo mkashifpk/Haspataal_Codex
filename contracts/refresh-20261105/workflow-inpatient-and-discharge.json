@@ -1,0 +1,396 @@
+{
+  "slug": "inpatient-and-discharge",
+  "title": "Admission, beds, nursing & discharge",
+  "summary": "Live bed matrix, admission → bed allocation/waitlist/overflow, Code Red, flowsheet & MAR, strict discharge state machine.",
+  "order": 99,
+  "workflow": "§2.1–§2.7",
+  "workspaces": [
+    "doctor",
+    "admissions",
+    "triage",
+    "ward_nurse",
+    "head_nurse"
+  ],
+  "file": "inpatient-and-discharge.md",
+  "markdown": "# Admission, beds, nursing & discharge\n\n## Bed matrix (§2.1)\n\n`GET /beds/matrix` → per-ward counts + beds (`Available`, `Reserved`, `Occupied`, `Dirty`, `Cleaning`,\n`OutOfService`, and `discharge_blocked_on` for discharging patients). Keep live with `bed.state_changed`.\nPatient names come only to users who can view admissions. The screens that pick a ward read its wards with\n`include_beds=false`: the sterile supply, infection control, the complaints register, the incident screening list,\nthe mock drills, HR's duty roster, the equipment register and the medicine storage log (decisions 56 and 62).\nOnly open wards are listed, and every bed belongs to a ward in `wards`: a ward closed in the IT console (decisions 55,\nfacility and IT playbook) leaves the matrix with its beds and counts, and no desk can reserve its beds\n(`BED_NO_LONGER_AVAILABLE` with `details.in_service` false; re-fetch the matrix). A ward is closed only when empty.\n\n`POST /beds/{bed_id}/state {\"state\": \"OutOfService\" | \"Available\", \"reason\"}` takes an Available, Dirty or Cleaning bed\nout of service and brings it back (the reason, 3-300 characters, is kept). A Reserved or Occupied bed answers\n`BED_STATE_INVALID` (409, not retryable) and nothing changes: read the matrix again, keep the reason typed, never retry.\nA reason too short or too long answers `VALIDATION_ERROR` (422, `details.fields`).\n\n## Standard admission (§2.2, §2.3)\n\nThe **Patient Photo is optional** here as everywhere: no admission (standard, planned, emergency, overflow, Code Red)\nwaits for one. The admissions desk shows the photo already on record (`photo_document_id` on the admission, through\n`GET /patient-documents/{document_id}/download`) for the identity check, or offers to take one with the patient's\nagreement; skipping needs no reason. The **reports the patient brought** (laboratory, imaging, another hospital's\ndischarge summary, prescriptions) are offered on the same form. Both are separate uploads,\n`POST /patients/{patient_id}/documents`, exactly as at reception (OPD playbook, section 2a: `doc_type=Photo`, a JPEG or\nPNG; outside reports with `is_outside=true`, `source_facility` and `document_date`), each with its own\n`Idempotency-Key` and never holding up the bed. The doctor reads them with `GET /patients/{patient_id}/documents`\non the rounds screen, labelled as outside reports.\n\n1. Doctor: `POST /admissions {\"ticket_id\", \"requested_ward_id\", \"admission_reason\", \"provisional_diagnosis\",\n   \"initial_care_plan\"?, \"notes\"?}` → `AdmissionPending` (event `admission.requested` to the admissions desk).\n   The reason for admission and the provisional diagnosis are **required** (MSDS IMS 149; the database refuses an\n   admission without them); pre-fill them from the consultation note for the doctor to confirm. They are recorded\n   once, under the doctor's stamp (`details_stamp`: name, designation, PMDC number, date-time); later thinking goes\n   into the inpatient notes (`ADMISSION_DETAILS_RECORDED`). `notes` is for the admissions desk, not clinical.\n   `requested_ward_id` is optional, the doctor's preference (without it the desk picks the ward). The consultation's\n   Admit dialog offers only the wards of `GET /beds/matrix?include_beds=false`, read when it opens (the doctor holds\n   `ipd.bed.view`; the IT console's ward list is not theirs): each by name, with its `available` beds and\n   `gender_restriction`. A ward with no free bed may still be chosen; the desk waitlists or overflows. A ward closed\n   since the read answers `VALIDATION_ERROR` (`details.field` `requested_ward_id`) and nothing is created: re-read the\n   matrix, keep what the doctor typed, and choose another ward or none.\n2. Desk: `POST /admissions/{id}/allocate-bed {\"bed_id\", \"admit_now\": true, \"billing_category\": \"Cash\"}`.\n   * Two desks racing for one bed: the loser gets `BED_NO_LONGER_AVAILABLE` → refresh and choose again.\n   * Without `admit_now` the bed is `Reserved` (expires after `bed_reservation_ttl_minutes`); confirm\n     arrival with `POST /admissions/{id}/admit`.\n   * An admission another desk has placed or cancelled meanwhile, or a repeat after a lost answer (of this call, the\n     waitlist or the overflow override below): `ADMISSION_STATE_INVALID` (409, not retryable) and nothing changes →\n     read `GET /admissions/{id}` again, show where it stands and keep what the user chose; never retry.\n   * The bed from `GET /beds/matrix?include_beds=true`, a panel from `GET /finance/panels`.\n3. No bed: `POST /admissions/{id}/waitlist {\"ward_id\"}`; when a bed frees up the desk gets\n   `bed.waitlist.notification`. A closed ward takes no waiting patient (`VALIDATION_ERROR`, `details.field` `ward_id`):\n   offer the wards of the matrix. Cross-ward placement: `POST /admissions/{id}/overflow-override {\"bed_id\", \"reason\"}`.\n   An admission that will not happen (the family took the patient elsewhere, the doctor decided against it, the\n   establishment is retiring inpatient care and refers the patient instead): `POST /admissions/{id}/cancel {\"reason\"}`,\n   only while AdmissionPending, Waitlisted or BedReserved (`ADMISSION_STATE_INVALID` otherwise: an admitted patient is\n   discharged). A reserved bed becomes Available again, the waitlist entry closes, the ER board puts an emergency patient\n   back in treatment, and `admission.cancelled` refreshes the desk.\n4. A running IPD bill opens automatically; room charges post daily, pharmacy/lab/OT lines append.\n\n## Code Red (§2.4)\n\nNo photo is asked in this flow. Once the patient is stable and agrees, the desk may take one on the trauma profile;\nit stays with the person when the profile is merged into the real record.\n\n`POST /admissions/code-red {\"gender\": \"male\", \"ward_type\": \"ICU\", \"eta_minutes\": 2, \"needs_ot\": true}`\n— no demographics, no billing. Creates a trauma profile (\"Unknown Male 3\"), locks the nearest bed\n(and an OT if needed) and broadcasts `admission.code_red` (priority critical) to the destination,\npharmacy and OT with a ready message: *\"Incoming Trauma: ETA 2 Minutes. Prepare Bed ICU-1 (ICU).\"*\nArrival: `POST /admissions/{id}/arrived`. Identify later with `POST /patients/{trauma_id}/merge`.\nBilling is **deferred, never waived** (`is_billing_deferred`): room charges, medicines, tests and the theatre go on the\nrunning bill from the first day, but nobody asks how the stay is paid while the patient is being saved. Once the patient\nis stable (and identified), the admissions desk confirms it, once:\n`POST /admissions/{id}/confirm-billing {\"billing_category\": \"Cash\"}` (or `\"Panel\"` with `panel_id`). Until then the\nfinal bill and the `BillingSettlement` stage answer `BILLING_DEFERRED` (`details.next_step` names the call): list the\nadmissions with `is_billing_deferred` true as \"Billing to confirm\" on the desk.\nNothing clinical is asked at the door (`notes` goes to `admission_notes`): once the patient is stable, the doctor\nrecords the reason and the provisional diagnosis, once:\n`POST /admissions/{id}/admission-details {\"admission_reason\", \"provisional_diagnosis\", \"initial_care_plan\"?}`. The\nclinical discharge needs them (`ADMISSION_DETAILS_REQUIRED`); show a red task on the patient until then\n(`admission_reason` null). The general consent comes later too: from the patient once able, from a relative the\nconsent policy allows, or as the doctor's emergency note ([consent](consent.md)).\nThe treating doctor (`primary_doctor_id`, decisions 57) is the caller when a doctor registered with the PMDC presses\nthe button. A triage nurse's Code Red has none (null): show \"Doctor: waiting\", and on the doctors' rounds list it under\n\"Waiting for a doctor\" for every doctor; the first doctor to record the reason and the diagnosis\n(`admission-details`) becomes its doctor. Never show the nurse who pressed it as the doctor.\nThe panel from `GET /finance/panels`.\nThe ward from `GET /beds/matrix?include_beds=false` (or a `ward_type`), the theatre to hold from `GET /ot/theaters`, a\nmedico-legal case type from `GET /mlc/case-types`.\n\n## The treating doctor and its handover (decisions 58)\n\nEvery live admission has a treating doctor (`primary_doctor_id`), except a Code Red a triage nurse pressed until a doctor\ntakes it over. `GET /ipd/treating-doctors` lists the live admissions with their doctor and since when, those waiting\nfor a doctor first (`doctor_id`: one doctor's patients; `waiting=true`: only those waiting); it shows no clinical record,\nand the Hospital Admin reads it too. A change takes effect at once and is kept:\n`POST /admissions/{id}/treating-doctor {\"doctor_id\": 41, \"reason\": \"On leave from tomorrow: handed over to the\ncardiologist on call\"}` with an `Idempotency-Key`, by\n* the treating doctor, handing the patient over (`Handover`);\n* any doctor registered with the PMDC, for an admission without a doctor (`TakeOver`; recording a Code Red's reason and\n  diagnosis takes it over too);\n* the Hospital Admin or a Director (`ipd.admission.reassign`), while the treating doctor is away (`Reassigned`).\n\nAnyone else answers `TREATING_DOCTOR_ONLY` (403). The new doctor must be an active doctor registered with the PMDC\n(`GET /staff/lookup?license_type=PMDC`) and not the treating doctor already (`VALIDATION_ERROR`, `details.field`\n`doctor_id`). Both doctors and the rounds receive `admission.doctor_changed`; the new doctor is notified.\n`GET /admissions/{id}/treating-doctor` answers the doctor and `changes`, oldest first (who, when, the kind, the\nreason); it is logged as a read of the record. The database refuses a change of doctor without its record.\nFrom the emergency department send the visit's `er_visit_id` (default: the patient's open ER visit, or a new one): the\nCode Red is recorded there as triage level 1, the visit waits for the admission and closes as admitted on arrival. Send\n`is_medico_legal` (and `mlc_case_type_id`) when known ([emergency department](emergency-department.md)). An admission\nrequested with an emergency `ticket_id` moves the patient's ER visit to \"waiting for admission\" (a waitlist: \"no bed\")\nand closes it when the patient is admitted.\n\n## Ward nursing (§2.5, §2.6)\n\n* My beds: `GET /ipd/my-beds` — the beds of my ward duties today (a night shift keeps its beds after midnight\n  until it ends); the head nurse rosters nurses onto beds in\n  the duty roster (`POST /rosters` with `duty_area: \"Ward\"` and `bed_ids`; see [Duty rosters, roll call, badges & attendance](duty-rosters-and-attendance.md)).\n* Vitals: `POST /admissions/{id}/flowsheet/vitals`; corrections only via `/correction` (reason).\n  Mandated interval: `PUT …/vitals-schedule`; the worker emits `vitals.due` when due/overdue, to the nurses who record\n  them and to the doctors' rounds (everyone with `ipd.flowsheet.view`; backend issue #43), which re-read the patient's\n  `GET /admissions/{id}/flowsheet` (`is_overdue`) and never record them. Both go by the same rule: an `Admitted` or\n  `CodeRedActive` admission with a schedule, a Code Red still waiting for a doctor included (backend issue #51), and\n  not once the clinical discharge has started (`is_overdue` false, no event; the nurse may still chart vitals). A Code\n  Red has a schedule only once someone sets its interval; `POST /admissions/{id}/arrived` gives it the default one. After an operation the\n  signed post-operative plan sets it ([surgical care](surgical-care.md)); find the stay's operations with\n  `GET /ot/clinical-worklist?admission_id=…` and read the plan in `GET /ot/bookings/{booking_id}/surgical-record`\n  (`ot.clinical.view`: ward nurses have it).\n* MAR: `GET /admissions/{id}/mar`; chart `POST /mar/{mar_id}/chart {\"status\": \"Administered\", \"wristband_code\": …}`\n  (Held/Refused/Missed need `status_reason`); PRN: pick the line from `GET /admissions/{id}/mar/prn-orders` (a PRN\n  line is not on the MAR before its first dose: the active PRN lines with the last dose and the doses of the last 24\n  hours), then `POST /admissions/{id}/mar/prn` with an `Idempotency-Key` (no schedule guards a PRN dose: a retry with the\n  same key cannot chart it twice; `MEDICATION_ORDER_STOPPED` for a stopped order). Doses due soon →\n  `medication.due`, on the same `Admitted` and `CodeRedActive` admissions the MAR is generated for. A given dose passes the checks of [medication safety](medication-safety.md) (MSDS 57, 62-68): the\n  wristband scanned or two identifiers, the medicine's barcode, a second nurse for a high-alert medicine, a reason for\n  another dose, route or time; label a prepared dose first (`POST /mar/{mar_id}/prepare`).\n  Medicines prescribed for an outside pharmacy (the family buys them) are on the chart too. Pick them from the drug\n  list (`drug_id`, also on an outside slip): a high-alert one then needs the second nurse at the bedside as any other;\n  a medicine typed as free text (`external_drug_name`) has no high-alert flag.\n* Wristband: print one at admission (`POST /wristbands {\"admission_id\"}`, the desk or the ward); a verbal or telephone\n  order from a doctor: `POST /prescriptions/verbal`; medicines the patient brought in:\n  `POST /admissions/{id}/own-medicines` ([medication safety](medication-safety.md)).\n* Lab samples at the bedside: `POST /lab/samples/{sample_id}/collect {\"wristband_code\": …}` (the band scanned, or two\n  identifiers) prints the tube's label; a critical result of the patient: `GET /critical-results?admission_id=…` (the lab\n  phones the ward: read it back and tell the doctor) ([diagnostic services](diagnostic-services.md)).\n* Ward supplies: `POST /wards/{ward_id}/indents` → pharmacy admin approves (partial allowed). Expired or damaged ward\n  stock: `POST /wards/{ward_id}/inventory/remove`.\n* The nursing assessment (MSDS CQI 99 c, d): `GET /admissions/{id}/nursing-assessment` (what is due within\n  `nutrition_screening_hours` and `nursing_care_plan_hours`), the nutrition screening `POST /admissions/{id}/nutrition-screenings`\n  (MUST scores; a plan above 0) and the care plan `PUT /admissions/{id}/nursing-care-plan`\n  ([quality indicators](quality-indicators-and-committees.md)).\n\n## Moving a patient to another bed or ward (MSDS PRE 79)\n\nThe admissions desk or the head nurse: `POST /admissions/{id}/transfer {\"bed_id\", \"reason\"}` (an Available bed from the\nbed matrix). The old bed goes to cleaning, the new one is occupied; the move logs both wards' daily bed charges. When the\ncharge changes, `admission.transferred` (priority high) and a notification ask the estimate staff to explain the new\nestimate to the family ([cost estimates](cost-estimates-and-tariff.md)). The moves: `GET /admissions/{id}/transfers`.\n\n## Discharge summary (§2.7; MSDS IMS 149, 151, 152)\n\nNo patient leaves without a signed discharge summary: the Punjab Healthcare Commission's standards check that every\ndischarge summary holds the reason for admission, the significant results, the procedures and treatment, the response\nto treatment, the discharge medicines and the follow-up, signed by a qualified person.\n\n1. `GET /admissions/{id}/discharge-summary` returns the summary (`null` until the first save), `suggested` (a\n   starting point from the stay: the reason and diagnosis written so far with their ICD codes (`icd_terms`: code and\n   title; the summary's own `icd_codes` come from the ICD picker, [ICD coding](icd-coding.md)), abnormal results with\n   value and flag, the tests that were normal, imaging reports, operations, the medicines given, the oral and topical\n   medicines still prescribed) and `missing` (what signing still needs). Offer each suggestion beside its field; never\n   save one unasked.\n2. The outcome decides what is required: `Home`, `Transferred` (to another hospital: `receiving_hospital`,\n   `transfer_reason`, `transfer_arrangements`, MSDS 151), `LAMA` (left against medical advice) and `Absconded` (with\n   the circumstances in `outcome_note`), `Died` (no medicines or follow-up; the death is recorded on this admission\n   and its cause certified first, see [Deaths and medico-legal cases](deaths-and-medico-legal-cases.md):\n   `POST /patients/{id}/death`, then `POST /deaths/{death_id}/certify`; once a death is recorded `suggested.outcome` is\n   `Died` and no other outcome can be signed, `DISCHARGE_SUMMARY_PATIENT_DIED`). Everyone else also needs\n   `condition_at_discharge`.\n3. Save the draft as the doctor writes: `PUT /admissions/{id}/discharge-summary {\"outcome\": \"Home\",\n   \"reason_for_admission\": \"...\", ...}` (only the fields sent change; send `row_version` as `expected_version`).\n4. `POST /admissions/{id}/discharge-summary/sign`: `DISCHARGE_SUMMARY_INCOMPLETE` lists `details.missing`; only a\n   clinician signs (`DISCHARGE_SUMMARY_SIGNER_NOT_CLINICAL`); a death summary needs the certified death\n   (`DISCHARGE_SUMMARY_DEATH_NOT_CERTIFIED`). The signer's name, designation and PMDC/PNC number are\n   stamped on it. From now on it never changes: `POST /admissions/{id}/discharge-summary/corrections {\"field\",\n   \"correction_text\", \"correction_reason\"}` appends a correction that is shown and printed under it.\n5. Print on A4: `GET /admissions/{id}/discharge-summary/print-payload` (`document_type` `discharge_summary`, or\n   `referral_slip` for a transfer) or the PDF, `GET /admissions/{id}/discharge-summary/pdf`.\n\n## Discharge state machine (§2.7)\n\n`POST /admissions/{id}/discharge` (doctor; the reason and diagnosis recorded, else `ADMISSION_DETAILS_REQUIRED`, the\nsigned summary, else `DISCHARGE_SUMMARY_REQUIRED`, and the general consent of the admission recorded, else\n`CONSENT_REQUIRED`: take it at admission, see [consent](consent.md), MSDS 72) does\n**not** free the bed: it flips to `Dirty` and stays locked through, strictly in order:\n\n`ClinicalDischarge → PharmacyClearance → NursingMARVerification → BillingSettlement → OpsCleaning → Available`\n\nPharmacy Clearance is a stage only where the pharmacy took part (dispensing running at the clinical discharge, or\nmedicines dispensed to this patient); otherwise the discharge goes from Clinical Discharge to Nursing MAR verification.\n`GET /admissions/{id}/discharge-status` lists the stages this discharge has.\nIt is available to admission viewers and each stage's clearer, including the pharmacist without `ipd.admission.view`.\nIt returns `admission_id`, `admission_number`, `patient_id`, `mrn`, `patient_name`, admission `status`, and the clearance\nprogress; no clinical admission details or invoice. Every successful read is PHI-access logged. Confirm identity and\n`blocked_on` before clearing. After a lost clearance answer, re-read this endpoint's stage status, actor and time;\nnever automatically retry the clearance. Before discharge, `started` is false; an unknown admission is `NOT_FOUND`.\n\n* Show `GET /admissions/{id}/discharge-status` → `blocked_on` everywhere (bed matrix, desk, ward).\n* Each stage: `POST /admissions/{id}/discharge/{stage}/clear` by the responsible role; out of order →\n  `DISCHARGE_STAGE_OUT_OF_ORDER` with `details.blocked_on`. A stage already cleared (a repeat after a lost answer,\n  also once the discharge is complete) → `DISCHARGE_STAGE_IMMUTABLE` with `details.stage` and `details.cleared_at`:\n  nothing changed, the clearance stands. The ward clears `NursingMARVerification` only after the\n  patient's own medicines are handed back or destroyed (`OWN_MEDICINES_HELD`, MSDS 71).\n* Billing: `POST /admissions/{id}/final-bill` → collect payment (`/finance/invoices/{id}/payments`) or\n  credit → clear `BillingSettlement` (refused while a balance is due, and for a Code Red admission while its billing\n  is not confirmed: `BILLING_DEFERRED`, see above; the database refuses it too).\n* Cleaning is zero-interface: the sweeper presents a badge at the bed's station, or at the ward's\n  barcode-scanner kiosk together with the bed's QR sticker (`POST /badge-stations/scans`); a scan before billing\n  clears is remembered and completes automatically. Where there is no station, the ward nurse, head nurse or\n  ops admin confirms it: `POST /beds/{bed_id}/mark-cleaned {\"cleaned_by_employee_id\": …}`, the cleaner picked with\n  `GET /staff/lookup?q=`.",
+  "steps": [
+    {
+      "heading": "Bed matrix (§2.1)",
+      "anchor": "bed-matrix-2-1",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/beds/{bed_id}/state",
+          "summary": "Take a bed out of / back into service"
+        }
+      ]
+    },
+    {
+      "heading": "Standard admission (§2.2, §2.3)",
+      "anchor": "standard-admission-2-2-2-3",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/patient-documents/{document_id}/download",
+          "summary": "Download a patient document"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/documents",
+          "summary": "Upload a patient document (PDF/JPEG/PNG)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/{patient_id}/documents",
+          "summary": "List patient documents"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions",
+          "summary": "Doctor: Admit Patient (→ Admission_Pending)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/allocate-bed",
+          "summary": "Admissions desk: Allocate Bed"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/admit",
+          "summary": "Patient arrived at the bed (Admitted, bed Occupied)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}",
+          "summary": "Admission with bed, discharge stage and bill"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/panels",
+          "summary": "Panels (Sehat Sahulat, Zakat, corporate ...)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/waitlist",
+          "summary": "No bed: add to the ward waitlist"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/overflow-override",
+          "summary": "Admissions manager: cross-ward overflow bed"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/cancel",
+          "summary": "Cancel an admission that will not happen (before the patient is admitted)"
+        }
+      ]
+    },
+    {
+      "heading": "Code Red (§2.4)",
+      "anchor": "code-red-2-4",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/code-red",
+          "summary": "CODE RED / Emergency Admit (one click)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/arrived",
+          "summary": "Code Red patient arrived (CodeRedActive → Admitted)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/merge",
+          "summary": "Merge this temporary/duplicate profile into a master profile"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/confirm-billing",
+          "summary": "Confirm how a Code Red admission is paid (ends its billing deferral)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/admission-details",
+          "summary": "Record the reason for admission and the provisional diagnosis (Code Red)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/panels",
+          "summary": "Panels (Sehat Sahulat, Zakat, corporate ...)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/theaters",
+          "summary": "All theaters (incl. out-of-service)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/mlc/case-types",
+          "summary": "Medico-legal case types"
+        }
+      ]
+    },
+    {
+      "heading": "The treating doctor and its handover (decisions 58)",
+      "anchor": "the-treating-doctor-and-its-handover-decisions-58",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/ipd/treating-doctors",
+          "summary": "The live admissions and their treating doctors"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/treating-doctor",
+          "summary": "Hand an inpatient over to another doctor"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/treating-doctor",
+          "summary": "An inpatient's treating doctor and every change of it"
+        }
+      ]
+    },
+    {
+      "heading": "Ward nursing (§2.5, §2.6)",
+      "anchor": "ward-nursing-2-5-2-6",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/ipd/my-beds",
+          "summary": "Ward nurse: my rostered beds this shift (doses due, last vitals)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/rosters",
+          "summary": "Roster one or many duties (all or nothing)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/flowsheet/vitals",
+          "summary": "Commit Flowsheet Entry: vitals"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/flowsheet",
+          "summary": "Vitals grid, nursing notes, schedule & next due time"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/arrived",
+          "summary": "Code Red patient arrived (CodeRedActive → Admitted)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/clinical-worklist",
+          "summary": "Operations whose surgical record needs work"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/bookings/{booking_id}/surgical-record",
+          "summary": "The surgical record of an operation"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/mar",
+          "summary": "Medication Administration Record (checklist)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mar/{mar_id}/chart",
+          "summary": "Chart a scheduled dose (Administered / Held / Refused / Missed)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/mar/prn-orders",
+          "summary": "The PRN orders a dose can be given from"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/mar/prn",
+          "summary": "Chart a PRN / ad-hoc dose"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mar/{mar_id}/prepare",
+          "summary": "Prepare a dose and print its label"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/wristbands",
+          "summary": "Print an identity wristband"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/verbal",
+          "summary": "Write down a verbal or telephone order"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/own-medicines",
+          "summary": "Record the medicines a patient brought in"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/samples/{sample_id}/collect",
+          "summary": "Collect a sample → returns the barcode label print payload"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/critical-results",
+          "summary": "The critical results log"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/wards/{ward_id}/indents",
+          "summary": "Head Nurse: ward supply requisition (indent)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/wards/{ward_id}/inventory/remove",
+          "summary": "Remove stock from a ward (expired, damaged, or returned to the pharmacy)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/nursing-assessment",
+          "summary": "The nursing assessment: nutrition screenings and the nursing care plan"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/nutrition-screenings",
+          "summary": "Screen an inpatient for nutrition"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admissions/{admission_id}/nursing-care-plan",
+          "summary": "Write or update the nursing care plan"
+        }
+      ]
+    },
+    {
+      "heading": "Moving a patient to another bed or ward (MSDS PRE 79)",
+      "anchor": "moving-a-patient-to-another-bed-or-ward-msds-pre-79",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/transfer",
+          "summary": "Move an inpatient to another bed or ward"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/transfers",
+          "summary": "The moves of an admission"
+        }
+      ]
+    },
+    {
+      "heading": "Discharge summary (§2.7; MSDS IMS 149, 151, 152)",
+      "anchor": "discharge-summary-2-7-msds-ims-149-151-152",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/discharge-summary",
+          "summary": "The discharge summary, what the stay suggests, and what is still missing"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/death",
+          "summary": "Record a death"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/deaths/{death_id}/certify",
+          "summary": "Certify the cause of death (final)"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admissions/{admission_id}/discharge-summary",
+          "summary": "Save the discharge summary draft"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/discharge-summary/sign",
+          "summary": "Sign the discharge summary (final)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/discharge-summary/corrections",
+          "summary": "Append a correction to a signed discharge summary"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/discharge-summary/print-payload",
+          "summary": "Printable discharge summary, or referral slip for a transfer"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/discharge-summary/pdf",
+          "summary": "The signed discharge summary as a PDF"
+        }
+      ]
+    },
+    {
+      "heading": "Discharge state machine (§2.7)",
+      "anchor": "discharge-state-machine-2-7",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/discharge",
+          "summary": "Doctor: Discharge (Clinical Discharge stage)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/discharge-status",
+          "summary": "Which clearance stage the discharge is blocked on"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/discharge/{stage}/clear",
+          "summary": "Clear a discharge stage (in order)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/final-bill",
+          "summary": "Finalize the running IPD bill (then collect payment)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/badge-stations/scans",
+          "summary": "A badge was presented at a station (station-authenticated, no user login)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/beds/{bed_id}/mark-cleaned",
+          "summary": "Confirm a bed was cleaned (where no badge station records it)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        }
+      ]
+    }
+  ]
+}

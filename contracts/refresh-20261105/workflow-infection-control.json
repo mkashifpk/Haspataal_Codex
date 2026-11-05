@@ -1,0 +1,245 @@
+{
+  "slug": "infection-control",
+  "title": "Infection prevention and control (MSDS)",
+  "summary": "The sterile supply (sets and their shelf life, sterilizers, the daily Bowie-Dick test, loads released on their mechanical, chemical and biological indicators, pack labels, the issue and the use of each pack on a patient, recalls with the patients exposed), healthcare-associated infections reported and decided, the wound surveillance after operations with its rates by surgeon, procedure and theatre, the audits (hand hygiene by moment), the waste log, and the committee's report.",
+  "order": 99,
+  "workflow": "MSDS IPC 84-92, COP 50",
+  "workspaces": [
+    "infection_control",
+    "cssd",
+    "ot_nurse",
+    "ot_admin",
+    "ward_nurse",
+    "doctor",
+    "quality",
+    "owner_dashboard"
+  ],
+  "file": "infection-control.md",
+  "markdown": "# Infection prevention and control (MSDS)\n\n| MSDS | What is checked | Haspataal |\n|---|---|---|\n| IPC 84, 86 | A programme, audits (hand hygiene), the committee's recommendations carried out | The **audits** (append-only) with compliance by kind and area; their **actions** in the hospital's register |\n| IPC 88 | Waste segregated, weighed, handed to a licensed contractor | The **waste log** with the consignment note and the disposal (Punjab HWM Rules 2014) |\n| IPC 91 | A written sterilization procedure, records of each cycle with its indicators, shelf life by packaging | The **CSSD**: sets with their shelf life, the daily **Bowie-Dick** test before any steam load, loads released only on their indicators, **labels** with USE BEFORE |\n| IPC 92 | A recall procedure | `POST /cssd/cycles/{cycle_id}/recall` blocks every unused pack and lists the **patients exposed** |\n| COP 50 | Surgical site infections followed and their rates reported | The **wound surveillance** after every operation (30 days, 90 with an implant); confirmed cases; **rates** by surgeon, procedure, theatre, wound class |\n\nRoles: **Infection control nurse** (`ipc_nurse`: `infection.control.manage`, `infection.statistics.view`, `cssd.view`);\n**CSSD technician** (`cssd_technician`: `cssd.operate`); **CSSD supervisor** (`cssd.manage`); **theatre and ward\nnurses** (`cssd.pack.use`); **clinicians** (`infection.case.report`); **ops, porters' supervisors**\n(`infection.waste.record`).\n\n## 1. The sterile supply (CSSD)\n\n1. Set-up: `GET /cssd/set-types`, `POST /cssd/set-types {\"code\", \"name\", \"kind\", \"method\", \"shelf_life_days\",\n   \"contains_implant\"}`, `PATCH /cssd/set-types/{set_type_id}`; sterilizers: `GET /cssd/sterilizers`,\n   `POST /cssd/sterilizers {\"name\", \"method\", \"asset_id\"?}`, `PATCH /cssd/sterilizers/{sterilizer_id}` (link the asset:\n   its maintenance and calibration are followed in [the facility](facility-compliance-equipment-drills.md)).\n2. Every morning, on each steam sterilizer: `POST /cssd/cycles {\"sterilizer_id\": 1, \"cycle_type\": \"BowieDick\"}`, then\n   `POST /cssd/cycles/{cycle_id}/results {\"mechanical_pass\": true, \"chemical_result\": \"Pass\"}`. Until it has passed, a\n   steam load is refused (`CSSD_DAILY_TEST_REQUIRED`).\n3. A load: `POST /cssd/cycles {\"sterilizer_id\": 1, \"packs\": [{\"set_type_id\": 3, \"count\": 4}]}`; print the labels\n   `GET /cssd/cycles/{cycle_id}/labels` and stick them on. After the cycle: `POST /cssd/cycles/{cycle_id}/results`\n   ```json\n   { \"temperature_c\": 134, \"pressure_kpa\": 210, \"exposure_minutes\": 4, \"mechanical_pass\": true,\n     \"chemical_result\": \"Pass\", \"biological_result\": \"NotUsed\" }\n   ```\n   A load with an implant needs its biological indicator (`CSSD_BIOLOGICAL_REQUIRED`): send `Pending` (quarantined),\n   then only `{\"biological_result\": \"Pass\"}` when read. A failure fails the load and alerts the supervisors\n   (`cssd.cycle.updated`, critical).\n4. The work list: `GET /cssd/cycles?status=Running`; one cycle: `GET /cssd/cycles/{cycle_id}`.\n5. Issue: `GET /cssd/packs?expiring_only=true` (oldest first); the destination, a ward from\n   `GET /beds/matrix?include_beds=false` (by name: the CSSD sees no patient names) or a theatre from `GET /ot/theaters`;\n   then `POST /cssd/packs/issue {\"pack_codes\": [...], \"ot_id\": 2}` (all or nothing; `CSSD_PACK_UNUSABLE` names the\n   pack).\n6. In the theatre or on the ward, when a pack is opened: `POST /cssd/packs/use {\"pack_code\": \"SP-000123\", \"booking_id\": 55}`;\n   an expired, failed or recalled pack is refused. A pack: `GET /cssd/packs/{pack_code}`.\n   In the theatre the operation comes from `GET /ot/clinical-worklist`, on the ward the stay from the nurse's beds,\n   `GET /ipd/my-beds`.\n7. A recall: `POST /cssd/cycles/{cycle_id}/recall {\"reason\"}`: the answer lists the packs and `patients_exposed`; report\n   it as an incident too.\n8. The log and the procedure for the surveyor: `GET /cssd/log/pdf?date_from=&date_to=`, `GET /cssd/procedure/pdf`.\n\n## 2. Infections and the wound surveillance\n\n1. Any clinician: `POST /infection-cases`\n   ```json\n   { \"kind\": \"SurgicalSite\", \"admission_id\": 812, \"booking_id\": 55, \"ssi_depth\": \"Superficial\",\n     \"onset_date\": \"2026-09-28\", \"found_at\": \"DuringStay\", \"description\": \"Redness and discharge at the wound, fever 38.4\" }\n   ```\n   The team decides: `GET /infection-cases?status=Suspected`, `POST /infection-cases/{case_id}/decision\n   {\"status\": \"Confirmed\", \"note\": \"CDC superficial SSI criteria met\", \"organism\": \"S. aureus\"}`.\n   The clinician reports from the patient's chart: send the stay's `admission_id` (the patient follows from it), or the\n   operation's `booking_id` for a surgical site infection; `patient_id` alone for a patient no longer admitted.\n   Infection control picks the patient from `GET /patients/search` and the operation from\n   `GET /infection/ssi-surveillance`.\n2. After each operation (the operative note records `wound_class` and `implant_left`): the surveillance list\n   `GET /infection/ssi-surveillance?state=Due` (Due and Overdue first: telephone the patients), and each check\n   `POST /ot/bookings/{booking_id}/ssi-checks {\"method\": \"Telephone\", \"wound\": \"Healed\"}`. Signs of infection open a\n   suspected case. The worker announces the checks due (job infection.alerts).\n3. The rates: `GET /infection/ssi-rates?date_from=&date_to=` (by surgeon, procedure, theatre, wound class, month).\n\n## 3. Audits, waste, the report\n\n1. `POST /infection/audits` (append-only)\n   ```json\n   { \"kind\": \"HandHygiene\", \"ward_id\": 4, \"lines\": [{\"item\": \"Before touching a patient\", \"observed\": 20, \"compliant\": 14},\n     {\"item\": \"After body fluid exposure\", \"observed\": 8, \"compliant\": 8}], \"findings\": \"Gel dispensers empty in bay 2\" }\n   ```\n   `GET /infection/audits?kind=&date_from=&date_to=` (compliance by kind and area); the committee's follow-up:\n   `POST /infection/audits/{audit_id}/actions` (the hospital's action register).\n2. Waste, weighed at collection: `POST /infection/waste {\"category\": \"Infectious\", \"ward_id\": 4, \"bags\": 3,\n   \"weight_kg\": 6.5}`, with an `Idempotency-Key`; when the contractor takes it there and then, add `\"vendor_id\": 9,\n   \"manifest_number\": \"LWMC-7781\", \"disposal\": \"Incineration\"`. Taken later, on one consignment note for several\n   collections: `GET /infection/waste?awaiting_handover=true`, choose the collections the note covers, and\n   `POST /infection/waste/handover {\"waste_ids\": [41, 42], \"vendor_id\": 9, \"manifest_number\": \"LWMC-7781\",\n   \"disposal\": \"Incineration\"}` (with an `Idempotency-Key`; the contractor from `GET /finance/vendors?vendor_type=Contractor`).\n   Never record the same weight twice: each collection is handed over whole, once (`WASTE_HANDED_OVER` after that).\n   The log and its totals (`handed_over_kg` below `weight_kg`: what still waits): `GET /infection/waste?date_from=&date_to=`.\n   The ward from `GET /beds/matrix?include_beds=false`, the department from `GET /admin/departments`.\n3. The committee's monthly report: `GET /infection/report/pdf?date_from=&date_to=`. Staff training in infection control\n   and the staff vaccinations: [personnel records](personnel-records.md).\n\nEvents: `cssd.cycle.updated` (released, quarantined, failed, recalled).",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/cssd/cycles/{cycle_id}/recall",
+          "summary": "Recall a released load (a breakdown was found)"
+        }
+      ]
+    },
+    {
+      "heading": "1. The sterile supply (CSSD)",
+      "anchor": "1-the-sterile-supply-cssd",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/cssd/set-types",
+          "summary": "The sets and packs the CSSD sterilizes"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/cssd/set-types",
+          "summary": "Add a set or pack"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/cssd/set-types/{set_type_id}",
+          "summary": "Change or retire a set"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cssd/sterilizers",
+          "summary": "The sterilizers"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/cssd/sterilizers",
+          "summary": "Add a sterilizer"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/cssd/sterilizers/{sterilizer_id}",
+          "summary": "Change or retire a sterilizer"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/cssd/cycles",
+          "summary": "Start a cycle: a load with its packs, or a test"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/cssd/cycles/{cycle_id}/results",
+          "summary": "Record a cycle's indicators (release, quarantine or fail)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cssd/cycles/{cycle_id}/labels",
+          "summary": "The pack labels of a load (label printer)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cssd/cycles",
+          "summary": "The sterilization cycles"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cssd/cycles/{cycle_id}",
+          "summary": "One cycle"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cssd/packs",
+          "summary": "Sterile packs (the stock)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/theaters",
+          "summary": "All theaters (incl. out-of-service)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/cssd/packs/issue",
+          "summary": "Issue sterile packs to a ward or theatre"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/cssd/packs/use",
+          "summary": "A sterile pack opened for a patient"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cssd/packs/{pack_code}",
+          "summary": "One sterile pack (scan its label)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/clinical-worklist",
+          "summary": "Operations whose surgical record needs work"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ipd/my-beds",
+          "summary": "Ward nurse: my rostered beds this shift (doses due, last vitals)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/cssd/cycles/{cycle_id}/recall",
+          "summary": "Recall a released load (a breakdown was found)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cssd/log/pdf",
+          "summary": "The sterilization log for a period (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/cssd/procedure/pdf",
+          "summary": "The sterilization, validation and recall procedure (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "2. Infections and the wound surveillance",
+      "anchor": "2-infections-and-the-wound-surveillance",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/infection-cases",
+          "summary": "Report a suspected healthcare-associated infection"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/infection-cases",
+          "summary": "Infection cases"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/infection-cases/{case_id}/decision",
+          "summary": "Confirm or exclude a suspected infection"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/infection/ssi-surveillance",
+          "summary": "Operations under wound surveillance"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/ssi-checks",
+          "summary": "Record a wound check after an operation"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/infection/ssi-rates",
+          "summary": "Surgical site infection rates"
+        }
+      ]
+    },
+    {
+      "heading": "3. Audits, waste, the report",
+      "anchor": "3-audits-waste-the-report",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/infection/audits",
+          "summary": "Record an infection control round or audit"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/infection/audits",
+          "summary": "Infection control audits and compliance"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/infection/audits/{audit_id}/actions",
+          "summary": "Record a corrective or preventive action from an audit"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/infection/waste",
+          "summary": "Record hospital waste"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/infection/waste",
+          "summary": "The waste log"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/infection/waste/handover",
+          "summary": "Hand collected waste over to the contractor"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/vendors",
+          "summary": "Vendors"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/infection/report/pdf",
+          "summary": "The infection prevention and control report (PDF)"
+        }
+      ]
+    }
+  ]
+}

@@ -47,7 +47,7 @@ export interface PayrollProps {
 
 export const Payroll: React.FC<PayrollProps> = ({
   user,
-  userPermissions = [],
+  userPermissions,
   currentUserRole,
   establishment,
   session,
@@ -57,11 +57,11 @@ export const Payroll: React.FC<PayrollProps> = ({
     if (session) return session;
     if (user) {
       return {
-        user_id: user.user_id || 1,
+        user_id: user.user_id,
         employee_id: user.employee_id,
         username: user.username || "",
-        roles: user.roles || (user.role ? [user.role] : (currentUserRole ? [currentUserRole] : ["hr_admin"])),
-        permissions: userPermissions.length > 0 ? userPermissions : (user.permissions || ["hr.payroll.run", "hr.payroll.view"]),
+        roles: user.roles || [],
+        permissions: user.permissions ?? userPermissions ?? [],
       } as SessionInfo;
     }
     return null;

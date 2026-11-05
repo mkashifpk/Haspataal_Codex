@@ -2429,6 +2429,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -2509,6 +2510,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -2634,6 +2636,18 @@
       "idempotency_key": true,
       "errors": [
         {
+          "code": "ADMISSION_PATIENT_MISMATCH",
+          "http_status": 422,
+          "message": "The admission belongs to another patient.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
           "code": "CAPABILITY_INACTIVE",
           "http_status": 409,
           "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
@@ -2699,6 +2713,18 @@
             "unknown"
           ],
           "details_from": "POST /api/v1/clinical-encounters"
+        },
+        {
+          "code": "LAB_ONLY_QUEUE_FORBIDDEN",
+          "http_status": 409,
+          "message": "Lab-only walk-in patients cannot enter doctor queues.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
         },
         {
           "code": "PROCEDURE_NOTE_INCOMPLETE",
@@ -2969,7 +2995,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "The informed consent of the consent register (the patient's own)"
+            "description": "The informed consent of the consent register (the patient's own) (GET /consents?patient_id=)"
           },
           {
             "pointer": "/procedure/assistant_employee_id",
@@ -3109,6 +3135,21 @@
           ],
           "details_fields": [],
           "details_from": "PATCH /api/v1/clinical-encounters/{encounter_id}"
+        },
+        {
+          "code": "ICD_CODE_UNKNOWN",
+          "http_status": 422,
+          "message": "A code is not in the active ICD code list: pick it from the ICD picker.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "loaded",
+            "unknown"
+          ],
+          "details_from": "POST /api/v1/clinical-encounters"
         },
         {
           "code": "VALIDATION_ERROR",
@@ -3292,7 +3333,8 @@
             "pointer": "/procedure/consent_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The informed consent of the consent register (the patient's own) (GET /consents?patient_id=)"
           },
           {
             "pointer": "/procedure/assistant_employee_id",
@@ -3571,6 +3613,18 @@
       "service_gates": [],
       "idempotency_key": true,
       "errors": [
+        {
+          "code": "CORRECTION_REQUIRES_FINAL",
+          "http_status": 409,
+          "message": "Only finalized notes take correction entries.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
         {
           "code": "VALIDATION_ERROR",
           "http_status": 422,
@@ -3880,6 +3934,18 @@
       "service_gates": [],
       "idempotency_key": true,
       "errors": [
+        {
+          "code": "APPROVAL_PENDING",
+          "http_status": 409,
+          "message": "This record is frozen while an approval is pending.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
         {
           "code": "ER_VISIT_OPEN",
           "http_status": 409,
@@ -4204,13 +4270,26 @@
           "details_from": "POST /api/v1/er/visits"
         },
         {
+          "code": "LAB_ONLY_QUEUE_FORBIDDEN",
+          "http_status": 409,
+          "message": "Lab-only walk-in patients cannot enter doctor queues.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
           "code": "REFERENCE_NOT_FOUND",
           "http_status": 422,
           "message": "A referenced record does not exist.",
           "retryable": false,
           "ui_action": "Show field errors from details.fields / the message.",
           "source": [
-            "documented"
+            "documented",
+            "seen_in_tests"
           ],
           "details_fields": [
             "ward_id"
@@ -4312,7 +4391,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "Defaults to the requesting doctor"
+            "description": "The treating doctor (default: the requesting doctor): an active doctor registered with the PMDC, GET /staff/lookup?license_type=PMDC"
           },
           {
             "pointer": "/admission_type",
@@ -4394,21 +4473,36 @@
       "access": {
         "authentication": "user",
         "permissions": [
-          "ipd.bed.view"
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
         ],
-        "permissions_mode": "all",
-        "who": "holders of ipd.bed.view",
+        "permissions_mode": "any",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record",
         "roles_allowed": [
           "admissions_officer",
           "anaesthetist",
           "clinic_director",
           "clinical_specialist",
+          "cssd_technician",
           "doctor",
           "head_nurse",
           "hospital_admin",
           "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
           "ops_admin",
           "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
           "receptionist",
           "super_admin",
           "surgeon",
@@ -4433,6 +4527,21 @@
             "current_state"
           ],
           "details_from": "POST /api/v1/admissions/{admission_id}/allocate-bed"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
         },
         {
           "code": "VALIDATION_ERROR",
@@ -4893,6 +5002,20 @@
       "idempotency_key": false,
       "errors": [
         {
+          "code": "ICD_SYSTEM_NOT_LOADED",
+          "http_status": 409,
+          "message": "No code list of this classification is loaded (ICD-10: load the hospital's licensed WHO file first).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "code_system"
+          ],
+          "details_from": "GET /api/v1/icd/codes"
+        },
+        {
           "code": "VALIDATION_ERROR",
           "http_status": 422,
           "message": "The request is invalid.",
@@ -5005,6 +5128,20 @@
       "service_gates": [],
       "idempotency_key": false,
       "errors": [
+        {
+          "code": "ICD_SYSTEM_NOT_LOADED",
+          "http_status": 409,
+          "message": "No code list of this classification is loaded (ICD-10: load the hospital's licensed WHO file first).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "code_system"
+          ],
+          "details_from": "GET /api/v1/icd/codes"
+        },
         {
           "code": "NOT_FOUND",
           "http_status": 404,
@@ -5879,7 +6016,8 @@
               "type": "null"
             }
           ],
-          "title": "Primary Doctor Id"
+          "title": "Primary Doctor Id",
+          "description": "The treating doctor's employee id; null for a Code Red no doctor has taken over yet (decisions 57): show 'Doctor: waiting'"
         },
         "primary_doctor_name": {
           "anyOf": [
@@ -6201,7 +6339,7 @@
             }
           ],
           "title": "Primary Doctor Id",
-          "description": "Defaults to the requesting doctor"
+          "description": "The treating doctor (default: the requesting doctor): an active doctor registered with the PMDC, GET /staff/lookup?license_type=PMDC"
         },
         "admission_type": {
           "type": "string",
@@ -10782,7 +10920,7 @@
             }
           ],
           "title": "Consent Id",
-          "description": "The informed consent of the consent register (the patient's own)"
+          "description": "The informed consent of the consent register (the patient's own) (GET /consents?patient_id=)"
         },
         "assistant_employee_id": {
           "anyOf": [
@@ -10957,7 +11095,8 @@
               "type": "null"
             }
           ],
-          "title": "Consent Id"
+          "title": "Consent Id",
+          "description": "The informed consent of the consent register (the patient's own) (GET /consents?patient_id=)"
         },
         "assistant_employee_id": {
           "anyOf": [
@@ -11117,6 +11256,18 @@
           ],
           "title": "Registration",
           "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id",
+          "description": "Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62)"
         }
       },
       "type": "object",
@@ -11127,7 +11278,8 @@
         "designation",
         "department_name",
         "license_type",
-        "registration"
+        "registration",
+        "user_id"
       ],
       "title": "StaffLookupOut",
       "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."

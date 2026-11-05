@@ -1,0 +1,699 @@
+{
+  "screen": "code_red",
+  "title": "Code Red / Emergency admit",
+  "cases": [
+    {
+      "id": "case:POST /admissions/code-red",
+      "call": "POST /api/v1/admissions/code-red",
+      "summary": "CODE RED / Emergency Admit (one click)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/code-red",
+            "body": {
+              "gender": "male",
+              "ward_type": "ICU",
+              "notes": "RTA, GCS 10",
+              "is_medico_legal": true,
+              "mlc_case_type_id": 1
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "admission_id": 1,
+                "admission_number": "ADM-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Unknown Male 1",
+                "gender": "male",
+                "age_years": null,
+                "requested_ward_id": 1,
+                "requested_ward_name": "ICU",
+                "ward_id": 1,
+                "ward_name": "ICU",
+                "bed_id": 1,
+                "bed_label": "ICU-1",
+                "primary_doctor_id": 11,
+                "primary_doctor_name": "Nurse Nadia",
+                "admission_type": "CodeRed",
+                "status": "CodeRedActive",
+                "billing_category": "Cash",
+                "panel_id": null,
+                "is_billing_confirmed": false,
+                "is_billing_deferred": true,
+                "is_overflow": false,
+                "overflow_reason": null,
+                "eta_minutes": null,
+                "source_ticket_id": null,
+                "admission_reason": null,
+                "provisional_diagnosis": null,
+                "initial_care_plan": null,
+                "photo_document_id": null,
+                "details_stamp": null,
+                "admission_notes": "RTA, GCS 10",
+                "requested_at": "2026-10-13T11:32:20.142701+00:00",
+                "reserved_at": "2026-10-13T11:32:20.142701+00:00",
+                "admitted_at": null,
+                "discharge_initiated_at": null,
+                "discharged_at": null,
+                "row_version": 2,
+                "discharge": {
+                  "stages": [],
+                  "blocked_on": null,
+                  "started": false,
+                  "complete": false
+                },
+                "invoice": null,
+                "alert_message": "Incoming Trauma. Prepare Bed ICU-1 (ICU).",
+                "ot_booking": null
+              },
+              "meta": {
+                "server_time": "2026-10-13T11:32:20.243813+00:00"
+              },
+              "request_id": "940cfcebb4364350b80cc212bf28c1a2"
+            }
+          },
+          "errors_seen": [
+            "IDEMPOTENCY_CONFLICT"
+          ],
+          "events_emitted": [
+            "admission.code_red",
+            "bed.state_changed",
+            "er.visit.updated",
+            "ot.booking.updated",
+            "ot.emergency_hold",
+            "ot.status.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "BED_NO_LONGER_AVAILABLE",
+        "CAPABILITY_INACTIVE",
+        "IDEMPOTENCY_CONFLICT",
+        "LAB_ONLY_QUEUE_FORBIDDEN",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /admissions/{admission_id}/arrived",
+      "call": "POST /api/v1/admissions/{admission_id}/arrived",
+      "summary": "Code Red patient arrived (CodeRedActive → Admitted)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/arrived"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "admission_id": 1,
+                "admission_number": "ADM-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Unknown Male 1",
+                "gender": "male",
+                "age_years": null,
+                "requested_ward_id": 1,
+                "requested_ward_name": "ICU",
+                "ward_id": 1,
+                "ward_name": "ICU",
+                "bed_id": 1,
+                "bed_label": "ICU-1",
+                "primary_doctor_id": 11,
+                "primary_doctor_name": "Nurse Nadia",
+                "admission_type": "CodeRed",
+                "status": "Admitted",
+                "billing_category": "Cash",
+                "panel_id": null,
+                "is_billing_confirmed": false,
+                "is_billing_deferred": true,
+                "is_overflow": false,
+                "overflow_reason": null,
+                "eta_minutes": null,
+                "source_ticket_id": null,
+                "admission_reason": null,
+                "provisional_diagnosis": null,
+                "initial_care_plan": null,
+                "photo_document_id": null,
+                "details_stamp": null,
+                "admission_notes": "RTA, GCS 10",
+                "requested_at": "2026-10-13T11:32:20.142701+00:00",
+                "reserved_at": "2026-10-13T11:32:20.142701+00:00",
+                "admitted_at": "2026-10-13T11:32:20.375284+00:00",
+                "discharge_initiated_at": null,
+                "discharged_at": null,
+                "row_version": 3,
+                "discharge": {
+                  "stages": [],
+                  "blocked_on": null,
+                  "started": false,
+                  "complete": false
+                },
+                "invoice": {
+                  "invoice_id": 1,
+                  "invoice_no": "INV-2026-0000001",
+                  "status": "Draft",
+                  "gross_total": 0,
+                  "net_payable": 0,
+                  "amount_paid": 0
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-13T11:32:20.409142+00:00"
+              },
+              "request_id": "7433544bb9cc4124b04833ad4733e4f0"
+            }
+          },
+          "events_emitted": [
+            "bed.state_changed",
+            "er.visit.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ADMISSION_STATE_INVALID",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /patients/trauma",
+      "call": "POST /api/v1/patients/trauma",
+      "summary": "Create a temporary trauma profile ('Unknown Male 1')",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "receptionist",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/trauma",
+            "body": {
+              "gender": "male",
+              "approx_age_years": 30
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "registration_type": "TraumaTemp",
+                "full_name": "Unknown Male 1",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "dob": null,
+                "age_years": 30,
+                "age_recorded_on": null,
+                "mobile": null,
+                "cnic": null,
+                "upmrn": null,
+                "address": null,
+                "emergency_contact_name": null,
+                "emergency_contact_phone": null,
+                "blood_group": null,
+                "allergies": null,
+                "billing_category": "Cash",
+                "panel_id": null,
+                "panel_name": null,
+                "panel_member_no": null,
+                "temp_identifier": "Unknown Male 1",
+                "merged_into_id": null,
+                "linked_employee_id": null,
+                "is_deceased": false,
+                "created_at": "2026-10-23T19:53:29.220481+00:00",
+                "row_version": 1,
+                "death_id": null,
+                "death_at": null,
+                "photo_document_id": null,
+                "mlc_numbers": [],
+                "outstanding": {
+                  "has_outstanding_ar": false,
+                  "outstanding_ar_balance": 0,
+                  "ar_block_applies": false,
+                  "banner_text": null
+                },
+                "master_patient_id": 1,
+                "merged_profiles": []
+              },
+              "meta": {
+                "server_time": "2026-10-23T19:53:29.299888+00:00"
+              },
+              "request_id": "e355236bf77543a6817b83f33cd21c71"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /mlc/case-types",
+      "call": "GET /api/v1/mlc/case-types",
+      "summary": "Medico-legal case types",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/case-types"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "case_type_id": 1,
+                  "code": "RTA",
+                  "name": "Road traffic accident",
+                  "description": "Any injury from a road traffic accident",
+                  "sort_order": 10,
+                  "is_active": true
+                },
+                {
+                  "case_type_id": 2,
+                  "code": "ASSAULT",
+                  "name": "Assault",
+                  "description": "Injury from a fight or an attack with a blunt or sharp weapon",
+                  "sort_order": 20,
+                  "is_active": true
+                },
+                {
+                  "case_type_id": 3,
+                  "code": "FIREARM",
+                  "name": "Firearm injury",
+                  "description": "Gunshot or pellet wound, whatever the history",
+                  "sort_order": 30,
+                  "is_active": true
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-28T21:43:04.422275+00:00"
+              },
+              "request_id": "3c1232e69b83468db074bb84aaaa46a6"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /ot/theaters",
+      "call": "GET /api/v1/ot/theaters",
+      "summary": "All theaters (incl. out-of-service)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/ot/theaters"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "ot_id": 1,
+                  "code": "OT1",
+                  "name": "Main OT 1",
+                  "theater_type": "General",
+                  "current_state": "Available",
+                  "state_changed_at": "2026-09-27T17:42:59.374678+00:00",
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "ot_id": 2,
+                  "code": "OT2",
+                  "name": "Main OT 2",
+                  "theater_type": "General",
+                  "current_state": "Available",
+                  "state_changed_at": "2026-09-27T17:42:59.400594+00:00",
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:42:59.704771+00:00"
+              },
+              "request_id": "e1c02615e32f4a8c8e379580ecef7d2d"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "employee_self",
+          "hr_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN"
+      ]
+    },
+    {
+      "id": "case:GET /beds/matrix",
+      "call": "GET /api/v1/beds/matrix",
+      "summary": "Live bed matrix (counts per ward + optional bed list)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/beds/matrix"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "wards": [
+                  {
+                    "ward_id": 2,
+                    "code": "GW",
+                    "name": "General Ward",
+                    "ward_type": "General",
+                    "gender_restriction": "any",
+                    "total_beds": 1,
+                    "available": 0,
+                    "reserved": 0,
+                    "occupied": 1,
+                    "turnover": 0,
+                    "out_of_service": 0
+                  },
+                  {
+                    "ward_id": 1,
+                    "code": "ICU",
+                    "name": "ICU",
+                    "ward_type": "ICU",
+                    "gender_restriction": "any",
+                    "total_beds": 1,
+                    "available": 1,
+                    "reserved": 0,
+                    "occupied": 0,
+                    "turnover": 0,
+                    "out_of_service": 0
+                  }
+                ],
+                "summary": {
+                  "General Ward": 0,
+                  "ICU": 1
+                },
+                "beds": [
+                  {
+                    "bed_id": 1,
+                    "ward_id": 1,
+                    "label": "ICU-1",
+                    "current_state": "Available",
+                    "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                    "is_overflow_allowed": false,
+                    "admission_id": null,
+                    "patient_name": null,
+                    "mrn": null,
+                    "admission_status": null,
+                    "is_overflow": null,
+                    "discharge_blocked_on": null
+                  },
+                  {
+                    "bed_id": 2,
+                    "ward_id": 2,
+                    "label": "GW-1",
+                    "current_state": "Occupied",
+                    "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                    "is_overflow_allowed": false,
+                    "admission_id": 1,
+                    "patient_name": null,
+                    "mrn": null,
+                    "admission_status": "Admitted",
+                    "is_overflow": false,
+                    "discharge_blocked_on": null
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:38:22.967241+00:00"
+              },
+              "request_id": "802131a929b14db0a0c8033474e8d271"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "employee_self",
+          "lab_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "BED_NO_LONGER_AVAILABLE",
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=code_red].view = full (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "open_work",
+      "set_up": "GET /establishment answers views.screens[screen_id=code_red].view = open_work (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+    },
+    {
+      "view": "records",
+      "set_up": "GET /establishment answers views.screens[screen_id=code_red].view = records (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+    },
+    {
+      "view": "hidden",
+      "set_up": "GET /establishment answers views.screens[screen_id=code_red].view = hidden (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+    },
+    {
+      "call": "POST /api/v1/admissions/code-red",
+      "set_up": "inpatient not Active in GET /establishment",
+      "expect": "the action is hidden"
+    },
+    {
+      "call": "POST /api/v1/admissions/code-red",
+      "set_up": "emergency_department not Active in GET /establishment",
+      "expect": "the choice unless the patient has an open emergency visit is hidden or disabled; the rest of the action stays"
+    },
+    {
+      "call": "POST /api/v1/admissions/code-red",
+      "set_up": "surgery not Active in GET /establishment",
+      "expect": "the choice with needs_ot (the emergency theatre hold) is hidden or disabled; the rest of the action stays"
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/code_red",
+  "workspace_guide": "get_handbook_outline('triage')",
+  "realtime": [
+    {
+      "event": "admission.code_red",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Never block on billing or demographics in this flow, nor on the reason and diagnosis: the doctor records them once the patient is stable (inpatient rounds screen, admission-details). Billing is deferred, never waived: the admissions desk confirms it later (pending_admissions, confirm-billing).",
+    "No photo in this flow: the Patient Photo is optional and may be taken later, once the patient is stable and agrees, from the admissions desk or the document vault.",
+    "From an ER visit send its er_visit_id; the Code Red is recorded there as triage level 1 and the visit waits for the admission. Send is_medico_legal (+ mlc_case_type_id) if known; else ask it later on the ER visit.",
+    "On admission.code_red at the DESTINATION terminal: flash red full-screen + audio chime with payload.message.",
+    "Pharmacy and OT terminals receive the same alert.",
+    "The answer's primary_doctor_id is the caller only when a doctor pressed the button; a nurse's Code Red shows 'Doctor: waiting' (null) until a doctor records the reason and diagnosis (decisions 57).",
+    "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id code_red (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+    "POST /admissions/code-red starts new inpatient work: offer it only while inpatient is Active (GET /establishment active).",
+    "POST /admissions/code-red starts new emergency_department work unless the patient has an open emergency visit: offer that choice only while emergency_department is Active (GET /establishment active); the rest of the action stays.",
+    "POST /admissions/code-red starts new surgery work with needs_ot (the emergency theatre hold): offer that choice only while surgery is Active (GET /establishment active); the rest of the action stays."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

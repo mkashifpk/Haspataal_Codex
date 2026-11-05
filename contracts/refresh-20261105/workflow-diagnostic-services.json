@@ -1,0 +1,322 @@
+{
+  "slug": "diagnostic-services",
+  "title": "Diagnostic services quality (MSDS)",
+  "summary": "The quality of the laboratory and imaging services - the patient identified when a sample is taken and before an examination, rejected samples, samples sent to partner laboratories under an MOU, turnaround targets with alerts and the MSDS score, critical results and priority diseases told at once, read back, acknowledged and escalated, the radiologist's report and critical findings, the checks before an examination (site and side, pregnancy, contrast under a doctor), outsourced examinations, repeated images, the statistics and the written lab and imaging policies.",
+  "order": 99,
+  "workflow": "MSDS AAC indicators 1-14",
+  "workspaces": [
+    "lab_tech",
+    "lab_verifier",
+    "lab_admin",
+    "radiology",
+    "doctor",
+    "ward_nurse",
+    "triage",
+    "reception",
+    "quality",
+    "owner_dashboard"
+  ],
+  "file": "diagnostic-services.md",
+  "markdown": "# Diagnostic services quality (MSDS)\n\nThe Punjab Healthcare Commission's Minimum Service Delivery Standards (MSDS) open with the diagnostic services: the\nlaboratory (AAC 1-6) and imaging (AAC 7-14). Surveyors read the policies and the registers, check the turnaround in\n3-5 inpatient files, and look for the log of critical results. What the system does for each:\n\n| MSDS | What is checked | Haspataal |\n|---|---|---|\n| 1, 8 | The scope of the services, the tests done in house and round the clock, what is outsourced, displayed | The test catalogue (`available_24h`, `availability` InHouse or SendOut); the **list of diagnostic services** PDF to display |\n| 2, 9 | Qualified staff; reports issued by the pathologist; imaging reported only by a registered radiologist | The performer's and verifier's stamps on every result; imaging reported only with a **PMDC registration and the RadiologyReporting privilege** (database) |\n| 3 | Policies for collection, identification, handling, transport, processing, disposal | The patient **identified at collection** (wristband scan or two identifiers, database); **rejected samples** with reasons and a new sample; the written **laboratory policy** |\n| 4, 11 | Documented turnaround for routine and emergency work; 95 % routine and 100 % emergency on time | Targets per test and per modality; the clocks; **overdue alerts**; the **turnaround report with the MSDS score**; delay reasons |\n| 5, 12 | Critical values and priority diseases, critical imaging findings, told at once and logged (patient, MRN, result, times, who, how, to whom) | The **critical results log**, opened by the database; communications **read back**; the doctor's **acknowledgement**; **escalation**; the health authority notified; the printed **register** |\n| 6, 14 | Outsourced tests and examinations: an MOU with turnaround, the partner's PHC registration and accreditation or PNRA licence, evidence of timely reports | The **partner register**; samples sent on a **manifest**; results stamped with the partner and shown on the report; **outsourced examinations** with the partner's report; each partner's on-time record |\n| 7, 13 | PNRA licence, radiation protection, a QA plan, the register of repeated images | The written **imaging policy and QA plan**; the **repeat register**; pregnancy asked before ionising radiation; contrast only with a doctor present |\n| 10 | Patient identified and taken safely to imaging; correct site and side | The order carries the side, the transport and the escort; the radiographer records the **identity, site and side** before the examination (database) |\n\nWho does what:\n\n* **Lab technicians** (`lab.sample.collect`, `lab.sample.receive`, `lab.sendout.manage`, `diagnostics.critical.communicate`):\n  collect with the identity check, reject unusable samples, send samples out, tell critical results. **Ward and ER\n  nurses** collect inpatient and emergency samples at the bedside (`lab.sample.collect`).\n* **Lab verifiers** (`lab.result.verify`, `diagnostics.critical.communicate`): verify first what is critical, tell the\n  doctor, record it.\n* **Radiographers** (`imaging.order.update`): the checks before the examination, repeats, outsourcing, the partner's\n  report. **Radiologists** (`imaging.report.enter`, with the RadiologyReporting privilege): the report and its critical\n  finding, the department's targets and findings list.\n* **Doctors** (`diagnostics.critical.acknowledge`): acknowledge their patients' critical results with the action taken.\n* **Lab admin, radiologists** (`diagnostics.setup.manage`): partners, the findings list, the imaging targets.\n* **Quality officer, owner** (`diagnostics.quality.view`, `diagnostics.critical.escalation`): the turnaround report, the\n  statistics, the registers and policies; the escalations.\n\n## 1. Setting up (lab admin, radiology head)\n\n1. Partners under an MOU: `POST /diagnostic-partners`\n   ```json\n   { \"name\": \"City Reference Laboratory\", \"services\": \"Lab\", \"phc_registration\": \"PHC-R-00123\",\n     \"accreditation\": \"PNAC ISO 15189, certificate ML-045\", \"mou_reference\": \"MOU-2026-01\",\n     \"mou_valid_from\": \"2026-04-01\", \"mou_valid_until\": \"2028-03-31\", \"turnaround_hours\": 48,\n     \"quality_note\": \"External quality assessment passed\" }\n   ```\n   (`services` Imaging with `pnra_licence` for an imaging centre, or Both). `GET /diagnostic-partners` (`services`,\n   `active_only`) shows `mou_expired`; `PATCH /diagnostic-partners/{partner_id}` renews the MOU or retires the partner\n   (`is_active: false`). A partner whose MOU has expired receives nothing more (`DIAGNOSTIC_PARTNER_INVALID`).\n2. The lab catalogue (`POST /lab/tests`, `PATCH /lab/tests/{test_id}`, [laboratory and radiology](laboratory-and-radiology.md)):\n   `turnaround_minutes` (routine) and `emergency_turnaround_minutes` (Urgent, STAT; without them the settings\n   `lab_turnaround_routine_minutes` 240 and `lab_turnaround_emergency_minutes` 60), `availability` SendOut with\n   `send_out_partner_id`, `available_24h` for the basic tests (CBC, blood sugar, grouping, urine...), and\n   `notifiable_disease` for a test whose positive result is a priority disease. Critical limits in the metric schema:\n   `\"critical\": {\"low\": 2.5, \"high\": 6.5}` for a number, `\"critical\": {\"values\": [\"Positive\", \"Reactive\"]}` for a text\n   result.\n3. Imaging: `GET /imaging/turnaround-targets` and `PUT /imaging/turnaround-targets/{modality}` (minutes from the order to\n   the examination and from the examination to the report, routine and emergency; an emergency target is never longer\n   than the routine one). The critical findings list: `GET /critical-imaging-findings`, `POST /critical-imaging-findings\n   {\"name\", \"modality\", \"description\"}`, `PATCH /critical-imaging-findings/{finding_id}` (retire with `is_active: false`).\n4. Radiologists: the `RadiologyReporting` privilege in the [clinical privileges register](surgical-care.md)\n   (`POST /ot/privileges`), and a PMDC registration on their staff record.\n5. The written documents, printed and approved: `GET /diagnostics/lab-policy/pdf` (scope, staff, the six specimen\n   procedures, turnaround per test, critical values and priority diseases, the communication protocol, tests sent out),\n   `GET /diagnostics/imaging-policy/pdf` (radiation protection, the privileged radiologists, identification, site and side,\n   pregnancy, transport, turnaround per modality, critical findings, repeats, outsourced examinations), and\n   `GET /diagnostics/services/pdf` to display at the reception, the laboratory and radiology.\n\n## 2. Taking a sample (ward nurse, ER nurse, phlebotomist)\n\n`POST /lab/samples/{sample_id}/collect` identifies the patient as the sample is taken (MSDS AAC 3):\n\n```json\n{ \"wristband_code\": \"HMS:PT:MRN-2026-000123\" }\n```\n\n(the band scanned; `PATIENT_IDENTITY_MISMATCH` when it is another patient's: stop), or\n`{\"identity_check\": \"TwoIdentifiers\"}` after asking the name and the date of birth or MRN, or for an emergency patient who\ncannot be identified yet `{\"identity_check\": \"EmergencyOverride\", \"identity_note\": \"…\"}` (only an emergency or Code Red\nticket or admission). Nothing: `PATIENT_IDENTITY_REQUIRED`. Print the label and stick it on the tube at the bedside. A\nsample still Pending that is taken at the lab counter: `POST /lab/samples/{sample_id}/receive` with the same body.\n\n## 3. At the bench (lab technician)\n\n1. `POST /lab/samples/{sample_id}/receive` starts the turnaround clock; the worklist (`GET /lab/worklist`) shows\n   `is_emergency`, `due_at`, `is_overdue` and `is_send_out`.\n2. An unusable sample: `POST /lab/samples/{sample_id}/reject {\"code\": \"Haemolysed\"}` (`Clotted`, `InsufficientVolume`,\n   `WrongContainer`, `Unlabelled`, `Mislabelled`, `Leaked`, `DelayedTransport`, `Contaminated`, `RejectedByPartner`,\n   `Other` with a `note`). The sample stays on record as Rejected; the test goes back to collection with a new barcode and\n   the requesting doctor (and, for an inpatient, the ward) is told to take it again. A test with a result:\n   `LAB_SAMPLE_STATE_INVALID`.\n3. A result past its due time: the verifier may give `delay_reason` in `POST /lab/results/{result_id}/verify`; the\n   worker (job `diagnostics.alerts`) alerts the lab once when a test becomes overdue.\n\n## 4. Sending samples out (lab technician)\n\n1. `GET /lab/send-outs/pending`: collected samples of sent-out tests, with each test's partner.\n2. `POST /lab/send-outs {\"partner_id\": 3, \"sample_ids\": [41, 42], \"courier\": \"Rider Asif\"}` → the manifest; print it for\n   the courier: `GET /lab/send-outs/{send_out_id}/print-payload` (A4, lines to sign on handover and receipt).\n3. `GET /lab/send-outs` (`partner_id`, `outstanding`) and `GET /lab/send-outs/{send_out_id}`: `due_at` from the MOU's\n   turnaround, what came back.\n4. The partner's result: `POST /lab/items/{item_id}/results` with `partner_report_ref` and `partner_reported_at`; it is\n   stamped with the partner (no reagents are deducted), verified as usual, and the lab report says\n   \"Outsourced: performed by …\". A sample the partner could not use: reject it with `RejectedByPartner`.\n\n## 5. Critical results (lab, radiology, doctor)\n\n1. When a verifier publishes a result with a critical value (a number beyond `critical.low` / `critical.high`, or a text\n   value in `critical.values`), or a radiologist reports a critical finding, the database opens an entry in the critical\n   results log: `critical_number` (CR-…), the patient, the test, `finding` (\"Potassium 7.1 mmol/L (critical high)\"),\n   `reported_at`, `notifiable_disease` for a priority disease. `critical_result.updated` (change Opened, priority\n   critical) reaches the lab or radiology screens and the requesting doctor.\n2. Tell the doctor responsible (or the ward, or the patient) at once, then record it:\n   `POST /critical-results/{critical_result_id}/communications`\n   ```json\n   { \"means\": \"Telephone\", \"recipient_role\": \"RequestingDoctor\", \"recipient_name\": \"Dr Ahmed Khan\",\n     \"read_back\": true }\n   ```\n   By telephone or in person the person told reads it back (`CRITICAL_RESULT_READ_BACK_REQUIRED` otherwise). The first\n   communication makes it Communicated. A priority disease is also notified to the health authority\n   (`recipient_role: \"HealthAuthority\"`: `authority_informed_at`).\n   A member of staff with a login is named with `GET /staff/lookup` (their `user_id`) beside the typed name.\n3. The doctor acknowledges it with the action taken: `POST /critical-results/{critical_result_id}/acknowledge\n   {\"action_taken\": \"Potassium repeated, calcium gluconate given, ECG done\"}` (a doctor who may treat:\n   `CRITICAL_RESULT_ACKNOWLEDGER_INVALID`; final: `CRITICAL_RESULT_STATE_INVALID`). A doctor who reads it on the screen\n   before anyone phoned acknowledges it directly.\n4. `GET /critical-results` (`status`, `source`, `patient_id`, `admission_id`, `mine`, `open_only`, `date_from`, `date_to`)\n   and `GET /critical-results/{critical_result_id}` (with every communication). `is_overdue`: nobody responsible told\n   within `critical_result_communicate_minutes` (30). The worker then alarms the lab verifiers or the radiologists and\n   the doctor again (escalation level 1), and after twice as long the medical superintendent\n   (`diagnostics.critical.escalation`, level 2).\n5. `GET /critical-results/register/pdf?date_from=…&date_to=…`: the register the surveyor reads.\n\n## 6. Imaging: the order, the checks, the report (doctor, radiographer, radiologist)\n\n1. The doctor orders (`POST /imaging/orders`) with `laterality` for a limb or a paired organ, and for an inpatient\n   `transport` (Walking, Wheelchair, Trolley, Bed, Portable) and `escort` (a Doctor for special and interventional\n   procedures). Urgent and STAT run against the emergency targets.\n2. The radiographer starts the examination with the checks (MSDS AAC 10, 13): `POST /imaging/orders/{order_id}/status`\n   ```json\n   { \"status\": \"InProgress\", \"wristband_code\": \"MRN-2026-000123\", \"site_confirmed\": true,\n     \"pregnancy_status\": \"NotPregnant\" }\n   ```\n   `pregnancy_status` is required for a woman of 10 to 55 before X-ray, CT, fluoroscopy or mammography (the worklist\n   shows `pregnancy_check_needed`; Pregnant needs `pregnancy_note` with the decision). Missing:\n   `PATIENT_IDENTITY_REQUIRED` or `IMAGING_SAFETY_CHECK_REQUIRED`. The system records who checked and when.\n3. `Completed` with contrast names the doctor present: `{\"status\": \"Completed\", \"contrast\": \"Iohexol 50 ml IV\",\n   \"contrast_doctor_id\": 12}`. `contrast_doctor_id` is the `employee_id` of a doctor registered with the PMDC: pick them\n   with `GET /staff/lookup?q=Ahmed&license_type=PMDC` (any user may call it; it lists only clinical staff with a PMDC\n   number on file and shows `registration`, e.g. \"PMDC 12345-P\"). Anyone else: `IMAGING_SAFETY_CHECK_REQUIRED`.\n   A PACS study linked while the examination is in progress completes it; an order the radiographer never started keeps\n   its status until the checks are recorded. Without PACS, `Completed` is how the examination ends.\n4. A repeated exposure: `POST /imaging/orders/{order_id}/repeats {\"reason\": \"Positioning\", \"exposures\": 1}`, only once\n   the examination was performed (`InProgress`, `Completed` or `Reported`; otherwise `IMAGING_ORDER_STATE_INVALID`,\n   nothing recorded: read the order again); the register: `GET /imaging/repeats?date_from=…&date_to=…`.\n5. The radiologist reports: `POST /imaging/orders/{order_id}/report {\"report_text\", \"critical_finding_id\",\n   \"critical_finding_note\"}` (only a PMDC radiologist with the RadiologyReporting privilege:\n   `IMAGING_REPORTER_NOT_AUTHORIZED`). A critical finding opens the critical results log (section 5) and the printed\n   report shows it.\n\n## 7. Outsourced examinations (radiographer)\n\n1. `POST /imaging/orders/{order_id}/outsource {\"partner_id\": 4}`: an Ordered or Scheduled order goes to an active imaging\n   partner under a valid MOU (`DIAGNOSTIC_PARTNER_INVALID`); its report is due within the MOU's turnaround. Any other\n   order: `IMAGING_ORDER_STATE_INVALID`.\n2. `POST /imaging/orders/{order_id}/external-report {\"report_text\", \"external_reporter\": \"Dr Nadeem, PMDC 12345-P\",\n   \"reported_at\"}`: the partner's report, final like our own; the printout says where it was performed. Only an\n   Outsourced order (`IMAGING_ORDER_STATE_INVALID` otherwise).\n   A critical finding from `GET /critical-imaging-findings`.\n\n## 8. Turnaround, the worklist and the statistics (quality officer, lab admin, radiology head, owner)\n\n* `GET /diagnostics/turnaround?service=Lab|Imaging&date_from=…&date_to=…`: the results due in the period (released, or\n  still open past their due time) per class with `pct` against `target_pct` (95 routine, 100 emergency), the MSDS\n  `score` (FullyMet, PartiallyMet, NotMet), `by_item` per test or modality, and `late` with their reasons.\n  `GET /diagnostics/turnaround/pdf` prints both services.\n* `GET /diagnostics/worklist` (`area`; `mine` for the doctor's critical results only): critical results to tell and to\n  acknowledge, priority diseases to notify, overdue lab tests, examinations and reports, samples to send out, partners'\n  MOUs ending within 30 days.\n* `GET /diagnostics/statistics?date_from=…&date_to=…`: `measures` with their MSDS indicator (lab and imaging on time,\n  critical results told in time and acknowledged, priority diseases notified, inpatient samples and examinations after a\n  wristband scan, partners on time), the scores, rejections and repeats by reason, the repeat and rejection rates, each\n  partner's record, critical results by test.\n* The medical record review checks each record automatically: CRITICAL_RESULTS and DIAGNOSTIC_TURNAROUND\n  ([medical record review](medical-record-review.md)).\n\n## The correlation review (MSDS CQI 100)\n\nA doctor, a pathologist (lab verifier), a radiologist or the quality officer (`diagnostics.correlation.review`) reads a\npublished histopathology or cytology result, or a reported CT or MRI examination, against the clinical diagnosis.\n\n1. `GET /diagnostics/correlations/worklist?source=Lab|Imaging&date_from=…&date_to=…` (default: the last 30 days): the\n   reports not reviewed yet, the oldest first, with `examination` and the `clinical_context` (the requisition's\n   clinical notes or the order's clinical indication).\n2. `POST /diagnostics/correlations {\"source\": \"Imaging\", \"imaging_order_id\": 12, \"clinical_diagnosis\": \"…\",\n   \"outcome\": \"PartlyCorrelates\", \"note\": \"…\"}` (with `Idempotency-Key`; a lab result: `\"source\": \"Lab\",\n   \"lab_result_id\"`). The outcome is Correlates, PartlyCorrelates, DoesNotCorrelate or NotAssessable; a note is\n   required unless it is Correlates (`VALIDATION_ERROR`). A review is never edited: review the report again and the\n   latest counts. Only a published histopathology or cytology result, or a reported CT or MRI examination, of the same\n   patient: `CORRELATION_REPORT_INVALID`; an id that does not exist: `REFERENCE_NOT_FOUND` (`details.field`). The report\n   leaves the worklist.\n3. `GET /diagnostics/correlations?date_from=…&date_to=…&source=…&outcome=…`: the register, the newest first, with the\n   reviewer's name (also for `diagnostics.quality.view`).\n\nThe monthly share that correlates is the quality indicator `DIAGNOSTIC_CORRELATION` (the latest review of each report;\nNotAssessable reviews left out) in `GET /quality/indicators?date_from=&date_to=` and its trend\n([quality indicators and committees](quality-indicators-and-committees.md)). Staff adherence to safety precautions is\nchecked on site.\n\n## Settings\n\n| Key | Default | Meaning |\n|---|---|---|\n| `lab_turnaround_routine_minutes` | 240 | the turnaround of a routine test without its own target |\n| `lab_turnaround_emergency_minutes` | 60 | the turnaround of an Urgent or STAT test without its own target |\n| `critical_result_communicate_minutes` | 30 | a critical result nobody responsible was told about by then is escalated (twice as long: the medical superintendent) |",
+  "steps": [
+    {
+      "heading": "1. Setting up (lab admin, radiology head)",
+      "anchor": "1-setting-up-lab-admin-radiology-head",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/diagnostic-partners",
+          "summary": "Add a partner"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/diagnostic-partners",
+          "summary": "Partner laboratories and imaging centres"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/diagnostic-partners/{partner_id}",
+          "summary": "Change or retire a partner"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/tests",
+          "summary": "Add a test with its metric schema"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/lab/tests/{test_id}",
+          "summary": "Edit a test (not its price)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/imaging/turnaround-targets",
+          "summary": "The documented turnaround of each modality"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/imaging/turnaround-targets/{modality}",
+          "summary": "Set a modality's turnaround"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/critical-imaging-findings",
+          "summary": "The critical imaging findings list"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/critical-imaging-findings",
+          "summary": "Add a critical imaging finding"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/critical-imaging-findings/{finding_id}",
+          "summary": "Change or retire a critical imaging finding"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/privileges",
+          "summary": "Grant a clinical privilege"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/diagnostics/lab-policy/pdf",
+          "summary": "The written laboratory policy (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/diagnostics/imaging-policy/pdf",
+          "summary": "The imaging policy and quality assurance plan (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/diagnostics/services/pdf",
+          "summary": "The list of diagnostic services to display (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "2. Taking a sample (ward nurse, ER nurse, phlebotomist)",
+      "anchor": "2-taking-a-sample-ward-nurse-er-nurse-phlebotomist",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/samples/{sample_id}/collect",
+          "summary": "Collect a sample → returns the barcode label print payload"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/samples/{sample_id}/receive",
+          "summary": "Mark the sample received in the lab (item → Processing)"
+        }
+      ]
+    },
+    {
+      "heading": "3. At the bench (lab technician)",
+      "anchor": "3-at-the-bench-lab-technician",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/samples/{sample_id}/receive",
+          "summary": "Mark the sample received in the lab (item → Processing)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/worklist",
+          "summary": "Open lab work (STAT first)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/samples/{sample_id}/reject",
+          "summary": "Reject an unusable sample (the test goes back to collection)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/results/{result_id}/verify",
+          "summary": "Verify (publish + notify doctor) or reject back to the bench"
+        }
+      ]
+    },
+    {
+      "heading": "4. Sending samples out (lab technician)",
+      "anchor": "4-sending-samples-out-lab-technician",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/send-outs/pending",
+          "summary": "Samples waiting to be sent to a partner laboratory"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/send-outs",
+          "summary": "Send samples to a partner laboratory (the manifest)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/send-outs/{send_out_id}/print-payload",
+          "summary": "The manifest to print for the courier"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/send-outs",
+          "summary": "Send-out manifests"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/send-outs/{send_out_id}",
+          "summary": "A send-out manifest"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/lab/items/{item_id}/results",
+          "summary": "Submit & Broadcast a result (goes to the verifier)"
+        }
+      ]
+    },
+    {
+      "heading": "5. Critical results (lab, radiology, doctor)",
+      "anchor": "5-critical-results-lab-radiology-doctor",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/critical-results/{critical_result_id}/communications",
+          "summary": "Record who was told the critical result"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/critical-results/{critical_result_id}/acknowledge",
+          "summary": "Acknowledge a critical result with the action taken"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/critical-results",
+          "summary": "The critical results log"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/critical-results/{critical_result_id}",
+          "summary": "A critical result with who was told"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/critical-results/register/pdf",
+          "summary": "The critical results register for a period (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "6. Imaging: the order, the checks, the report (doctor, radiographer, radiologist)",
+      "anchor": "6-imaging-the-order-the-checks-the-report-doctor-radiographer-radiologist",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/imaging/orders",
+          "summary": "Order imaging (doctor)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/imaging/orders/{order_id}/status",
+          "summary": "Progress / cancel an imaging order"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/imaging/orders/{order_id}/repeats",
+          "summary": "Record a repeated exposure"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/imaging/repeats",
+          "summary": "The register of repeated images"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/imaging/orders/{order_id}/report",
+          "summary": "Enter the radiology report (radiologist)"
+        }
+      ]
+    },
+    {
+      "heading": "7. Outsourced examinations (radiographer)",
+      "anchor": "7-outsourced-examinations-radiographer",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/imaging/orders/{order_id}/outsource",
+          "summary": "Send an examination to a partner centre"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/imaging/orders/{order_id}/external-report",
+          "summary": "Enter the partner centre's report"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/critical-imaging-findings",
+          "summary": "The critical imaging findings list"
+        }
+      ]
+    },
+    {
+      "heading": "8. Turnaround, the worklist and the statistics (quality officer, lab admin, radiology head, owner)",
+      "anchor": "8-turnaround-the-worklist-and-the-statistics-quality-officer-lab-admin-radiology-head-owner",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/diagnostics/turnaround",
+          "summary": "Turnaround of lab results or imaging reports, with the MSDS score"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/diagnostics/turnaround/pdf",
+          "summary": "The turnaround evidence for a period (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/diagnostics/worklist",
+          "summary": "Diagnostic services work waiting"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/diagnostics/statistics",
+          "summary": "Diagnostic services statistics"
+        }
+      ]
+    },
+    {
+      "heading": "The correlation review (MSDS CQI 100)",
+      "anchor": "the-correlation-review-msds-cqi-100",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/diagnostics/correlations/worklist",
+          "summary": "Reports to read against the clinical diagnosis (MSDS CQI 100)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/diagnostics/correlations",
+          "summary": "Record whether a report correlates with the clinical diagnosis"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/diagnostics/correlations",
+          "summary": "The register of correlation reviews"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/indicators",
+          "summary": "The clinical quality indicators of a period"
+        }
+      ]
+    }
+  ]
+}

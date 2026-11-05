@@ -346,7 +346,9 @@ export interface IssueIn {
   description: string;
   priority?: "Low" | "Normal" | "High" | "Emergency";
   location_text?: string | null;
+  /** The ward (GET /beds/matrix?include_beds=false); or location_text */
   ward_id?: number | null;
+  /** The equipment or fitting (GET /ops/assets); or location_text */
   asset_id?: number | null;
   wo_type?: "InternalAsset" | "ExternalContractor" | "Utility" | null;
   mark_asset_under_repair?: boolean;
@@ -390,6 +392,27 @@ export interface WorkOrderHistoryOut {
   note: string | null;
   at: string;
   actor: string | null;
+}
+
+export interface AssetMonitorOut {
+  asset_id: number;
+  asset_tag: string;
+  name: string;
+  category: string;
+  serial_no: string | null;
+  location: string | null;
+  department_id: number | null;
+  ward_id: number | null;
+  status: "Active" | "UnderRepair" | "OutOfService" | "Disposed" | "Lost";
+  purchase_date: string | null;
+  purchase_cost: number | null;
+  notes: string | null;
+  /** Medical equipment: its record, maintenance and calibration are under /facility/equipment */
+  is_medical: boolean;
+  row_version: number;
+  department_name: string | null;
+  ward_name: string | null;
+  open_work_orders: number;
 }
 
 /** Request leave (routes to my supervisor) — POST /api/v1/self/leave-requests (who may call: holders of self.leave.request). */
@@ -465,4 +488,9 @@ export function cancelSwap(swap_id: number): Promise<DutySwapOut> {
 /** "Report Issue" (staff with ops.workorder.report) — POST /api/v1/ops/work-orders (who may call: holders of ops.workorder.report). */
 export function reportOpsWorkOrders(body: IssueIn): Promise<WorkOrderOut> {
   return api<WorkOrderOut>("POST", `/ops/work-orders`, body, { idempotent: true });
+}
+
+/** Asset monitor — GET /api/v1/ops/assets (who may call: holders of ops.asset.view or cssd.manage or ops.workorder.report). */
+export function assets(query?: { status?: string | null }): Promise<AssetMonitorOut[]> {
+  return api<AssetMonitorOut[]>("GET", withQuery(`/ops/assets`, query), undefined);
 }

@@ -165,6 +165,18 @@
             "required"
           ],
           "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -388,7 +400,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "date_from",
@@ -682,6 +707,7 @@
           "retryable": false,
           "ui_action": "Show field errors from details.fields / the message.",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [],
@@ -803,6 +829,24 @@
           "details_from": "POST /api/v1/pharmacy/storage-checks"
         },
         {
+          "code": "ROSTER_CONFLICT",
+          "http_status": 409,
+          "message": "This duty overlaps another duty of the same employee.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date",
+            "roster_id",
+            "shift_name"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_DATE_CLOSED",
           "http_status": 409,
           "message": "Rosters of past days can only be changed by HR.",
@@ -818,6 +862,22 @@
           "details_from": "POST /api/v1/rosters"
         },
         {
+          "code": "ROSTER_EMPLOYEE_INACTIVE",
+          "http_status": 409,
+          "message": "Only active staff can be rostered.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_ENTRY_CANCELLED",
           "http_status": 409,
           "message": "This duty was cancelled: create a new one.",
@@ -828,6 +888,50 @@
           ],
           "details_fields": [],
           "details_from": "POST /api/v1/rosters/{roster_id}/cancel"
+        },
+        {
+          "code": "ROSTER_ON_LEAVE",
+          "http_status": 409,
+          "message": "The employee is on approved leave that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         },
         {
           "code": "VERSION_CONFLICT",
@@ -931,13 +1035,15 @@
             "pointer": "/ward_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The ward (GET /beds/matrix?include_beds=false)"
           },
           {
             "pointer": "/department_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The department (GET /admin/departments)"
           },
           {
             "pointer": "/zone_label",
@@ -1030,6 +1136,34 @@
           ],
           "details_fields": [],
           "details_from": "POST /api/v1/rosters/{roster_id}/cancel"
+        },
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1127,6 +1261,24 @@
       "idempotency_key": true,
       "errors": [
         {
+          "code": "ROSTER_CONFLICT",
+          "http_status": 409,
+          "message": "This duty overlaps another duty of the same employee.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date",
+            "roster_id",
+            "shift_name"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_DATE_CLOSED",
           "http_status": 409,
           "message": "Rosters of past days can only be changed by HR.",
@@ -1142,12 +1294,61 @@
           "details_from": "POST /api/v1/rosters"
         },
         {
+          "code": "ROSTER_EMPLOYEE_INACTIVE",
+          "http_status": 409,
+          "message": "Only active staff can be rostered.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_ON_LEAVE",
+          "http_status": 409,
+          "message": "The employee is on approved leave that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "VALIDATION_ERROR",
           "http_status": 422,
           "message": "The request is invalid.",
           "retryable": false,
           "ui_action": "Show field errors from details.fields / the message.",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [],
@@ -1236,13 +1437,15 @@
             "pointer": "/ward_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The ward (GET /beds/matrix?include_beds=false)"
           },
           {
             "pointer": "/department_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The department (GET /admin/departments)"
           },
           {
             "pointer": "/staff_category",
@@ -1358,7 +1561,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "week_of",
@@ -1520,7 +1736,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "status",
@@ -1635,6 +1864,22 @@
           "details_from": "POST /api/v1/rosters"
         },
         {
+          "code": "ROSTER_EMPLOYEE_INACTIVE",
+          "http_status": 409,
+          "message": "Only active staff can be rostered.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_ON_LEAVE",
           "http_status": 409,
           "message": "The employee is on approved leave that day.",
@@ -1723,6 +1968,18 @@
           ],
           "details_fields": [],
           "details_from": "POST /api/v1/rosters/swaps"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1848,6 +2105,40 @@
       "idempotency_key": false,
       "errors": [
         {
+          "code": "ROSTER_CONFLICT",
+          "http_status": 409,
+          "message": "This duty overlaps another duty of the same employee.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date",
+            "roster_id",
+            "shift_name"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_ON_LEAVE",
+          "http_status": 409,
+          "message": "The employee is on approved leave that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_OUT_OF_SCOPE",
           "http_status": 403,
           "message": "You may not roster this employee (outside your staff scope).",
@@ -1903,6 +2194,18 @@
             "status"
           ],
           "details_from": "POST /api/v1/rosters/swaps/{swap_id}/reject"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -2041,6 +2344,18 @@
             "status"
           ],
           "details_from": "POST /api/v1/rosters/swaps/{swap_id}/reject"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -2152,7 +2467,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "roster_date",
@@ -2306,6 +2634,22 @@
           "details_from": "POST /api/v1/rosters"
         },
         {
+          "code": "ROSTER_EMPLOYEE_INACTIVE",
+          "http_status": 409,
+          "message": "Only active staff can be rostered.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_OUT_OF_SCOPE",
           "http_status": 403,
           "message": "You may not roster this employee (outside your staff scope).",
@@ -2329,6 +2673,7 @@
           "retryable": false,
           "ui_action": "Show field errors from details.fields / the message.",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [],

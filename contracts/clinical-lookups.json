@@ -1,26 +1,40 @@
 {
   "endpoints": [
     {
-      "method": "GET",
-      "path": "/api/v1/ot/bookings",
+      "endpoint": "GET /ot/bookings",
       "summary": "Bookings (mine=true for a surgeon's own list)",
-      "tags": [
-        "Operating Theater"
-      ],
-      "permissions": [
-        "ot.booking.view",
-        "ot.booking.manage"
-      ],
-      "permissions_mode": "any",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ot.booking.view",
+          "ot.booking.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ot.booking.view or ot.booking.manage",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "ot_admin",
+          "ot_nurse",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
       "idempotency_key": false,
-      "description": "**Required permission:** `ot.booking.view OR ot.booking.manage`\n\n**Required permission:** `ot.booking.view OR ot.booking.manage`",
-      "roles_allowed": [
-        "anaesthetist",
-        "clinical_specialist",
-        "doctor",
-        "ot_admin",
-        "ot_nurse",
-        "surgeon"
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
       ],
       "parameters": [
         {
@@ -75,254 +89,28 @@
         }
       ],
       "request_body": null,
-      "request_content_type": null,
-      "response_schema": {
-        "title": "Envelope[list[OtBookingListItemOut]]",
-        "properties": {
-          "data": {
-            "items": {
-              "title": "OtBookingListItemOut",
-              "properties": {
-                "booking_id": {
-                  "type": "integer",
-                  "title": "Booking Id"
-                },
-                "booking_number": {
-                  "type": "string",
-                  "title": "Booking Number"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "Requested",
-                    "Scheduled",
-                    "InProgress",
-                    "Cleaning",
-                    "Completed",
-                    "Cancelled",
-                    "EmergencyHold"
-                  ],
-                  "title": "Status"
-                },
-                "booking_type": {
-                  "type": "string",
-                  "enum": [
-                    "Scheduled",
-                    "Emergency",
-                    "CodeRed"
-                  ],
-                  "title": "Booking Type"
-                },
-                "procedure_name": {
-                  "type": "string",
-                  "title": "Procedure Name"
-                },
-                "ot_id": {
-                  "anyOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Ot Id"
-                },
-                "ot_name": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Ot Name"
-                },
-                "scheduled_start": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Scheduled Start"
-                },
-                "scheduled_end": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Scheduled End"
-                },
-                "patient_name": {
-                  "type": "string",
-                  "title": "Patient Name"
-                },
-                "mrn": {
-                  "type": "string",
-                  "title": "Mrn"
-                },
-                "surgeon_name": {
-                  "type": "string",
-                  "title": "Surgeon Name"
-                },
-                "is_settled": {
-                  "type": "boolean",
-                  "title": "Is Settled"
-                }
-              },
-              "type": "object",
-              "required": [
-                "booking_id",
-                "booking_number",
-                "status",
-                "booking_type",
-                "procedure_name",
-                "ot_id",
-                "ot_name",
-                "scheduled_start",
-                "scheduled_end",
-                "patient_name",
-                "mrn",
-                "surgeon_name",
-                "is_settled"
-              ]
-            },
-            "type": "array",
-            "title": "Data"
-          },
-          "meta": {
-            "title": "Meta",
-            "properties": {
-              "server_time": {
-                "type": "string",
-                "title": "Server Time",
-                "description": "Server clock (UTC). Use it to detect terminal clock skew."
-              },
-              "page": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Page"
-              },
-              "page_size": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Page Size"
-              },
-              "total_count": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Total Count"
-              },
-              "next_cursor": {
-                "title": "Next Cursor"
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_OtBookingListItemOut__"
               }
-            },
-            "type": "object",
-            "required": [
-              "server_time"
-            ]
-          },
-          "request_id": {
-            "type": "string",
-            "title": "Request Id"
+            }
           }
         },
-        "type": "object",
-        "required": [
-          "data",
-          "meta",
-          "request_id"
-        ]
-      },
-      "recorded_example": {
-        "request": {
-          "path": "/api/v1/ot/bookings",
-          "query": {
-            "mine": true
-          }
-        },
-        "response": {
-          "status": 200,
-          "body": {
-            "data": [
-              {
-                "booking_id": 1,
-                "booking_number": "OT-2026-00001",
-                "status": "Requested",
-                "booking_type": "Scheduled",
-                "procedure_name": "Appendectomy",
-                "ot_id": null,
-                "ot_name": null,
-                "scheduled_start": null,
-                "scheduled_end": null,
-                "patient_name": "Ali Khan",
-                "mrn": "MRN-2026-000001",
-                "surgeon_name": "Dr Tariq",
-                "is_settled": false
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
               }
-            ],
-            "meta": {
-              "server_time": "2026-09-27T17:42:59.860722+00:00"
-            },
-            "request_id": "06c687418d12467191ba257b564bc251"
+            }
           }
         }
       },
-      "errors": [],
-      "errors_seen_in_tests": [],
-      "used_by_screens": [
-        "ot_scheduling",
-        "ot_consumables_nurse"
-      ],
-      "used_by_workflows": [],
-      "typescript_example": "// Bookings (mine=true for a surgeon's own list)  (permissions: ot.booking.view, ot.booking.manage)\nexport const listBookings = () =>\n  api(\"GET\", `/ot/bookings`, undefined);   // api(): see get_guide('envelope-and-errors')",
-      "access": {
-        "authentication": "user",
-        "permissions": [
-          "ot.booking.view",
-          "ot.booking.manage"
-        ],
-        "permissions_mode": "any",
-        "who": "holders of ot.booking.view or ot.booking.manage",
-        "roles_allowed": [
-          "anaesthetist",
-          "clinical_specialist",
-          "doctor",
-          "ot_admin",
-          "ot_nurse",
-          "surgeon"
-        ]
-      },
-      "write_semantics": null,
-      "emits_events": [],
       "list": {
         "returns": "list",
         "paging": [
@@ -359,39 +147,50 @@
           }
         ],
         "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
-      },
-      "cross_field_rules": {},
-      "errors_detail": [],
-      "endpoint": "GET /ot/bookings"
+      }
     },
     {
-      "method": "GET",
-      "path": "/api/v1/deaths",
+      "endpoint": "GET /deaths",
       "summary": "The death register",
-      "tags": [
-        "Deaths"
-      ],
-      "permissions": [
-        "death.register.view",
-        "death.record",
-        "death.body.release"
-      ],
-      "permissions_mode": "any",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "death.register.view",
+          "death.record",
+          "death.body.release"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of death.register.view or death.record or death.body.release",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
       "idempotency_key": false,
-      "description": "One line per death, newest first: where, the underlying cause as certified, manner, MLC number, certification and\nhandover. `status=Draft` lists the certificates still to write; `status=Certified&body_released=false` the bodies\nstill in the hospital.\n\n**Required permission:** `death.register.view OR death.record OR death.body.release`\n\n**Required permission:** `death.register.view OR death.record OR death.body.release`",
-      "roles_allowed": [
-        "anaesthetist",
-        "clinic_director",
-        "clinical_specialist",
-        "doctor",
-        "head_nurse",
-        "hospital_admin",
-        "hospital_director",
-        "owner",
-        "quality_officer",
-        "surgeon",
-        "triage_nurse",
-        "ward_nurse"
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
       ],
       "parameters": [
         {
@@ -540,434 +339,28 @@
         }
       ],
       "request_body": null,
-      "request_content_type": null,
-      "response_schema": {
-        "title": "Envelope[list[DeathRegisterRowOut]]",
-        "properties": {
-          "data": {
-            "items": {
-              "title": "DeathRegisterRowOut",
-              "properties": {
-                "death_id": {
-                  "type": "integer",
-                  "title": "Death Id"
-                },
-                "death_number": {
-                  "type": "string",
-                  "title": "Death Number"
-                },
-                "patient_id": {
-                  "type": "integer",
-                  "title": "Patient Id"
-                },
-                "mrn": {
-                  "type": "string",
-                  "title": "Mrn"
-                },
-                "patient_name": {
-                  "type": "string",
-                  "title": "Patient Name"
-                },
-                "gender": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "enum": [
-                        "male",
-                        "female",
-                        "other",
-                        "unknown"
-                      ]
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Gender"
-                },
-                "setting": {
-                  "type": "string",
-                  "enum": [
-                    "Inpatient",
-                    "Emergency",
-                    "Outpatient",
-                    "BroughtDead"
-                  ],
-                  "title": "Setting"
-                },
-                "death_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "Death At"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "Draft",
-                    "Certified"
-                  ],
-                  "title": "Status"
-                },
-                "admission_number": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Admission Number"
-                },
-                "ward_name": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Ward Name"
-                },
-                "department_name": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Department Name"
-                },
-                "underlying_cause": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Underlying Cause"
-                },
-                "underlying_icd": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Underlying Icd"
-                },
-                "underlying_term": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/IcdTermOut"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "description": "The underlying cause's code with its title and WHO URI"
-                },
-                "manner": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "enum": [
-                        "Disease",
-                        "Accident",
-                        "IntentionalSelfHarm",
-                        "Assault",
-                        "LegalIntervention",
-                        "War",
-                        "PendingInvestigation",
-                        "CouldNotBeDetermined"
-                      ]
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Manner"
-                },
-                "expected_death": {
-                  "anyOf": [
-                    {
-                      "type": "boolean"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Expected Death"
-                },
-                "mlc_number": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Mlc Number"
-                },
-                "certifier_name": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Certifier Name"
-                },
-                "certified_at": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Certified At"
-                },
-                "body_released_at": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Body Released At"
-                },
-                "body_released_to": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "enum": [
-                        "NextOfKin",
-                        "Police",
-                        "Mortuary",
-                        "Other"
-                      ]
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Body Released To"
-                },
-                "autopsy_status": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "enum": [
-                        "Requested",
-                        "Authorized",
-                        "Reported",
-                        "Cancelled"
-                      ]
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Autopsy Status"
-                }
-              },
-              "type": "object",
-              "required": [
-                "death_id",
-                "death_number",
-                "patient_id",
-                "mrn",
-                "patient_name",
-                "gender",
-                "setting",
-                "death_at",
-                "status",
-                "admission_number",
-                "ward_name",
-                "department_name",
-                "underlying_cause",
-                "underlying_icd",
-                "underlying_term",
-                "manner",
-                "expected_death",
-                "mlc_number",
-                "certifier_name",
-                "certified_at",
-                "body_released_at",
-                "body_released_to",
-                "autopsy_status"
-              ]
-            },
-            "type": "array",
-            "title": "Data"
-          },
-          "meta": {
-            "title": "Meta",
-            "properties": {
-              "server_time": {
-                "type": "string",
-                "title": "Server Time",
-                "description": "Server clock (UTC). Use it to detect terminal clock skew."
-              },
-              "page": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Page"
-              },
-              "page_size": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Page Size"
-              },
-              "total_count": {
-                "anyOf": [
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Total Count"
-              },
-              "next_cursor": {
-                "title": "Next Cursor"
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DeathRegisterRowOut__"
               }
-            },
-            "type": "object",
-            "required": [
-              "server_time"
-            ]
-          },
-          "request_id": {
-            "type": "string",
-            "title": "Request Id"
+            }
           }
         },
-        "type": "object",
-        "required": [
-          "data",
-          "meta",
-          "request_id"
-        ]
-      },
-      "recorded_example": {
-        "request": {
-          "path": "/api/v1/deaths",
-          "query": {
-            "status": "Certified",
-            "body_released": "true"
-          }
-        },
-        "response": {
-          "status": 200,
-          "body": {
-            "data": [
-              {
-                "death_id": 2,
-                "death_number": "DTH-2026-00001",
-                "patient_id": 1,
-                "mrn": "MRN-2026-000001",
-                "patient_name": "Ali Khan",
-                "gender": "male",
-                "setting": "Inpatient",
-                "death_at": "2026-09-29T03:33:52.931281+00:00",
-                "status": "Certified",
-                "admission_number": "ADM-2026-00001",
-                "ward_name": "General Ward",
-                "department_name": "General Medicine",
-                "underlying_cause": "Right lower lobe pneumonia",
-                "underlying_icd": "CA40.Z",
-                "underlying_term": {
-                  "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
-                  "code": "CA40.Z",
-                  "title": "Pneumonia, organism unspecified",
-                  "system": "ICD-11"
-                },
-                "manner": "Disease",
-                "expected_death": true,
-                "mlc_number": null,
-                "certifier_name": "Dr Ahmed",
-                "certified_at": "2026-09-29T03:43:53.113388+00:00",
-                "body_released_at": "2026-09-29T03:43:53.172919+00:00",
-                "body_released_to": "NextOfKin",
-                "autopsy_status": null
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
               }
-            ],
-            "meta": {
-              "server_time": "2026-09-29T03:43:53.327714+00:00"
-            },
-            "request_id": "783124927a68481e8da2a8e1d5c6e07b"
+            }
           }
         }
       },
-      "errors": [],
-      "errors_seen_in_tests": [],
-      "used_by_screens": [
-        "death_record",
-        "body_release_er",
-        "body_release_ward",
-        "death_register",
-        "mortality_review"
-      ],
-      "used_by_workflows": [
-        "deaths-and-medico-legal-cases"
-      ],
-      "typescript_example": "// The death register  (permissions: death.register.view, death.record, death.body.release)\nexport const deathRegister = () =>\n  api(\"GET\", `/deaths`, undefined);   // api(): see get_guide('envelope-and-errors')",
-      "access": {
-        "authentication": "user",
-        "permissions": [
-          "death.register.view",
-          "death.record",
-          "death.body.release"
-        ],
-        "permissions_mode": "any",
-        "who": "holders of death.register.view or death.record or death.body.release",
-        "roles_allowed": [
-          "anaesthetist",
-          "clinic_director",
-          "clinical_specialist",
-          "doctor",
-          "head_nurse",
-          "hospital_admin",
-          "hospital_director",
-          "owner",
-          "quality_officer",
-          "surgeon",
-          "triage_nurse",
-          "ward_nurse"
-        ]
-      },
-      "write_semantics": null,
-      "emits_events": [],
       "list": {
         "returns": "list",
         "paging": [
@@ -1029,10 +422,7 @@
           }
         ],
         "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
-      },
-      "cross_field_rules": {},
-      "errors_detail": [],
-      "endpoint": "GET /deaths"
+      }
     }
   ]
 }

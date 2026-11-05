@@ -1,7 +1,7 @@
 {
   "screen_id": "code_red",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -269,9 +269,17 @@
       }
     ],
     "related_workflows": [
+      "complaints",
+      "cost-estimates-and-tariff",
       "deaths-and-medico-legal-cases",
+      "duty-rosters-and-attendance",
       "emergency-department",
-      "inpatient-and-discharge"
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "incidents-and-sentinel-events",
+      "infection-control",
+      "inpatient-and-discharge",
+      "medication-safety"
     ],
     "service": {
       "services": [
@@ -295,7 +303,7 @@
     "workspace": "triage",
     "phase": "P5",
     "position": 94,
-    "points": 60,
+    "points": 69,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -311,6 +319,22 @@
         "evidence": "POST /admissions/code-red answers CAPABILITY_INACTIVE (documented); resolved on facility_profile",
         "ordering": true,
         "forward": false
+      },
+      {
+        "from": "code_red",
+        "to": "it_console",
+        "kind": "data_candidate",
+        "evidence": "it reads ot/theaters, which POST /ot/theaters on it_console creates",
+        "ordering": false,
+        "forward": true
+      },
+      {
+        "from": "code_red",
+        "to": "mlc_register",
+        "kind": "data_candidate",
+        "evidence": "it reads mlc/case-types, which POST /mlc/case-types on mlc_register creates",
+        "ordering": false,
+        "forward": true
       }
     ],
     "needed_by": [
@@ -375,23 +399,41 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 60,
+    "points": 69,
     "items": [
       {
         "id": "ep:POST /admissions/code-red",
         "label": "POST /admissions/code-red",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /admissions/{admission_id}/arrived",
         "label": "POST /admissions/{admission_id}/arrived",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /patients/trauma",
         "label": "POST /patients/trauma",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /mlc/case-types",
+        "label": "GET /mlc/case-types",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /ot/theaters",
+        "label": "GET /ot/theaters",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /beds/matrix",
+        "label": "GET /beds/matrix",
         "points": 3,
         "claimed": false
       },
@@ -399,97 +441,97 @@
         "id": "ev:admission.code_red",
         "label": "admission.code_red",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:79df75a537",
         "label": "Never block on billing or demographics in this flow, nor on the reason and diagnosis: the doctor records them once the patient is stable (inpatient rounds screen, admission-details). Billing is deferred, never waived: the admissions desk confirms it later (pending_admissions, confirm-billing).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:ddc33f8c02",
         "label": "No photo in this flow: the Patient Photo is optional and may be taken later, once the patient is stable and agrees, from the admissions desk or the document vault.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:2d008ab65a",
         "label": "From an ER visit send its er_visit_id; the Code Red is recorded there as triage level 1 and the visit waits for the admission. Send is_medico_legal (+ mlc_case_type_id) if known; else ask it later on the ER visit.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:77b021933d",
         "label": "On admission.code_red at the DESTINATION terminal: flash red full-screen + audio chime with payload.message.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:3eafe672a6",
         "label": "Pharmacy and OT terminals receive the same alert.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:0bf43fe61a",
         "label": "The answer's primary_doctor_id is the caller only when a doctor pressed the button; a nurse's Code Red shows 'Doctor: waiting' (null) until a doctor records the reason and diagnosis (decisions 57).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:97aab11043",
         "label": "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id code_red (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:e67eb016d9",
         "label": "POST /admissions/code-red starts new inpatient work: offer it only while inpatient is Active (GET /establishment active).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:8cd8387cf2",
         "label": "POST /admissions/code-red starts new emergency_department work unless the patient has an open emergency visit: offer that choice only while emergency_department is Active (GET /establishment active); the rest of the action stays.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:45f4e0ca60",
         "label": "POST /admissions/code-red starts new surgery work with needs_ot (the emergency theatre hold): offer that choice only while surgery is Active (GET /establishment active); the rest of the action stays.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
         "label": "Test plan passed",
         "points": 4,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -519,13 +561,13 @@
         "id": "q:character",
         "label": "Design principles applied",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:editor",
         "label": "Editor's pass",
         "points": 2,
-        "claimed": false
+        "claimed": true
       }
     ],
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
@@ -719,15 +761,15 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 0.0,
-            "maximum": 150.0
+            "minimum": 0,
+            "maximum": 150
           },
           {
             "pointer": "/ward_id",
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "Destination ward; or ward_type"
+            "description": "Destination ward; or ward_type (GET /beds/matrix?include_beds=false)"
           },
           {
             "pointer": "/ward_type",
@@ -754,7 +796,8 @@
             "pointer": "/ot_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "With needs_ot: the theatre to hold (GET /ot/theaters)"
           },
           {
             "pointer": "/procedure_name",
@@ -767,8 +810,8 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 0.0,
-            "maximum": 240.0
+            "minimum": 0,
+            "maximum": 240
           },
           {
             "pointer": "/notes",
@@ -1040,8 +1083,8 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 0.0,
-            "maximum": 150.0
+            "minimum": 0,
+            "maximum": 150
           }
         ],
         "cross_field_rules": {},
@@ -1054,6 +1097,315 @@
         "emits_events": [],
         "prints": false,
         "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /mlc/case-types",
+      "summary": "Medico-legal case types",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "mlc.case.manage",
+          "mlc.register.view",
+          "mlc.setup.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of mlc.case.manage or mlc.register.view or mlc.setup.manage",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "include_inactive",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Include Inactive"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_MlcCaseTypeOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "include_inactive",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /ot/theaters",
+      "summary": "All theaters (incl. out-of-service)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ot.status.view",
+          "cssd.operate",
+          "facility.equipment.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ot.status.view or cssd.operate or facility.equipment.manage",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        }
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_TheaterOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /beds/matrix",
+      "summary": "Live bed matrix (counts per ward + optional bed list)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "BED_NO_LONGER_AVAILABLE",
+          "http_status": 409,
+          "message": "Bed was reserved by another terminal.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "bed_id",
+            "current_state"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/allocate-bed"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "include_beds",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "title": "Include Beds"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_BedMatrixOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "include_beds",
+            "required": false,
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        "note": null
       }
     }
   ],
@@ -1072,7 +1424,11 @@
         "emitted_by_operations": [
           "POST /admissions/code-red"
         ],
-        "refresh": []
+        "refresh": [
+          "GET /mlc/case-types",
+          "GET /ot/theaters",
+          "GET /beds/matrix"
+        ]
       }
     ],
     "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
@@ -1245,6 +1601,56 @@
     },
     {
       "values": [
+        "Available",
+        "Reserved",
+        "Occupied",
+        "Dirty",
+        "Cleaning",
+        "OutOfService"
+      ],
+      "column": "beds.current_state",
+      "used_at": "GET /beds/matrix.beds[].current_state",
+      "labels": {
+        "Available": "Available",
+        "Reserved": "Reserved",
+        "Occupied": "Occupied",
+        "Dirty": "Dirty",
+        "Cleaning": "Cleaning",
+        "OutOfService": "Out of service"
+      },
+      "state_machine": "bed",
+      "final_states": [],
+      "transitions": {
+        "Available": [
+          "Reserved",
+          "Occupied",
+          "OutOfService"
+        ],
+        "Reserved": [
+          "Occupied",
+          "Available"
+        ],
+        "Occupied": [
+          "Dirty"
+        ],
+        "Dirty": [
+          "Cleaning",
+          "Available",
+          "OutOfService"
+        ],
+        "Cleaning": [
+          "Available",
+          "Dirty",
+          "OutOfService"
+        ],
+        "OutOfService": [
+          "Available",
+          "Dirty"
+        ]
+      }
+    },
+    {
+      "values": [
         "ClinicalDischarge",
         "PharmacyClearance",
         "NursingMARVerification",
@@ -1297,6 +1703,24 @@
         "Waivered": "Waivered",
         "Refunded": "Refunded",
         "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "Available",
+        "EmergencyHold",
+        "InSurgery",
+        "CleaningPrep",
+        "OutOfService"
+      ],
+      "column": "operating_theaters.current_state",
+      "used_at": "GET /ot/theaters[].current_state",
+      "labels": {
+        "Available": "Available",
+        "EmergencyHold": "Emergency hold",
+        "InSurgery": "In surgery",
+        "CleaningPrep": "Cleaning prep",
+        "OutOfService": "Out of service"
       }
     },
     {
@@ -1371,6 +1795,52 @@
     },
     {
       "values": [
+        "male",
+        "female",
+        "any"
+      ],
+      "column": "wards.gender_restriction",
+      "used_at": "GET /beds/matrix.wards[].gender_restriction",
+      "labels": {
+        "male": "Male",
+        "female": "Female",
+        "any": "Any"
+      }
+    },
+    {
+      "values": [
+        "General",
+        "Private",
+        "SemiPrivate",
+        "ICU",
+        "CCU",
+        "NICU",
+        "Surgical",
+        "Pediatric",
+        "Maternity",
+        "Emergency",
+        "Isolation",
+        "Other"
+      ],
+      "column": "wards.ward_type",
+      "used_at": "GET /beds/matrix.wards[].ward_type",
+      "labels": {
+        "General": "General",
+        "Private": "Private",
+        "SemiPrivate": "Semi private",
+        "ICU": "ICU",
+        "CCU": "CCU",
+        "NICU": "NICU",
+        "Surgical": "Surgical",
+        "Pediatric": "Pediatric",
+        "Maternity": "Maternity",
+        "Emergency": "Emergency",
+        "Isolation": "Isolation",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
         "ICU",
         "CCU",
         "Emergency",
@@ -1398,6 +1868,10 @@
       "why": "every call (show error.code's message)"
     },
     {
+      "state": "empty",
+      "why": "a list can be empty: say why and what to do next"
+    },
+    {
       "state": "forbidden",
       "why": "actions hidden or disabled by permission (GET /auth/me)"
     },
@@ -1420,6 +1894,7 @@
       "ADMISSION_STATE_INVALID": "The admission cannot move to that state.",
       "BED_NO_LONGER_AVAILABLE": "Bed was reserved by another terminal.",
       "CAPABILITY_INACTIVE": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+      "FORBIDDEN": "You do not have permission to do this.",
       "IDEMPOTENCY_CONFLICT": "Idempotency-Key was reused with a different request body.",
       "LAB_ONLY_QUEUE_FORBIDDEN": "Lab-only walk-in patients cannot enter doctor queues.",
       "VALIDATION_ERROR": "The request is invalid."
@@ -1441,10 +1916,25 @@
       "anaesthetist"
     ],
     "partial": [
+      "super_admin",
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
       "receptionist",
       "admissions_officer",
+      "ot_admin",
+      "ot_nurse",
       "ward_nurse",
-      "head_nurse"
+      "head_nurse",
+      "pharmacist",
+      "pharmacy_admin",
+      "hr_admin",
+      "maintenance_admin",
+      "ops_admin",
+      "quality_officer",
+      "ipc_nurse",
+      "cssd_technician"
     ],
     "page_for": [
       "triage_nurse",
@@ -1544,6 +2034,121 @@
           "surgeon",
           "triage_nurse"
         ]
+      },
+      {
+        "id": "case:GET /mlc/case-types",
+        "call": "GET /api/v1/mlc/case-types",
+        "summary": "Medico-legal case types",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /ot/theaters",
+        "call": "GET /api/v1/ot/theaters",
+        "summary": "All theaters (incl. out-of-service)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "employee_self",
+            "hr_admin"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN"
+        ],
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /beds/matrix",
+        "call": "GET /api/v1/beds/matrix",
+        "summary": "Live bed matrix (counts per ward + optional bed list)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "employee_self",
+            "lab_admin"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "BED_NO_LONGER_AVAILABLE",
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
       }
     ],
     "service_cases": [
@@ -1620,8 +2225,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -1696,6 +2301,51 @@
         ],
         "permissions_mode": "any",
         "access": null
+      },
+      {
+        "id": "code_red::GET /mlc/case-types",
+        "task": "Medico-legal case types",
+        "call": "GET /mlc/case-types",
+        "is_action": false,
+        "permissions": [
+          "mlc.case.manage",
+          "mlc.register.view",
+          "mlc.setup.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "code_red::GET /ot/theaters",
+        "task": "All theaters (incl. out-of-service)",
+        "call": "GET /ot/theaters",
+        "is_action": false,
+        "permissions": [
+          "ot.status.view",
+          "cssd.operate",
+          "facility.equipment.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "code_red::GET /beds/matrix",
+        "task": "Live bed matrix (counts per ward + optional bed list)",
+        "call": "GET /beds/matrix",
+        "is_action": false,
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
+        ],
+        "permissions_mode": "any",
+        "access": null
       }
     ],
     "rules_to_explain": [
@@ -1728,6 +2378,11 @@
         "code": "CAPABILITY_INACTIVE",
         "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
       },
       {
         "code": "IDEMPOTENCY_CONFLICT",
@@ -1805,9 +2460,24 @@
   },
   "workflows": [
     {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
+    {
+      "slug": "cost-estimates-and-tariff",
+      "title": "Cost estimates, the tariff and ward transfers (MSDS)",
+      "recipe": "get_workflow_recipe('cost-estimates-and-tariff')"
+    },
+    {
       "slug": "deaths-and-medico-legal-cases",
       "title": "Deaths and medico-legal cases (MSDS)",
       "recipe": "get_workflow_recipe('deaths-and-medico-legal-cases')"
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
     },
     {
       "slug": "emergency-department",
@@ -1815,9 +2485,34 @@
       "recipe": "get_workflow_recipe('emergency-department')"
     },
     {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "facility-compliance-equipment-drills",
+      "title": "Licences, equipment maintenance and mock drills (MSDS)",
+      "recipe": "get_workflow_recipe('facility-compliance-equipment-drills')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "recipe": "get_workflow_recipe('infection-control')"
+    },
+    {
       "slug": "inpatient-and-discharge",
       "title": "Admission, beds, nursing & discharge",
       "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
     }
   ],
   "scenarios": [
@@ -2100,9 +2795,9 @@
               "invoice_id": 1,
               "invoice_no": "INV-2026-0000001",
               "status": "Draft",
-              "gross_total": 0.0,
-              "net_payable": 0.0,
-              "amount_paid": 0.0
+              "gross_total": 0,
+              "net_payable": 0,
+              "amount_paid": 0
             }
           },
           "meta": {
@@ -2168,6 +2863,160 @@
             "server_time": "2026-10-23T19:53:29.299888+00:00"
           },
           "request_id": "e355236bf77543a6817b83f33cd21c71"
+        }
+      }
+    },
+    "GET /mlc/case-types": {
+      "request": {
+        "path": "/api/v1/mlc/case-types"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "case_type_id": 1,
+              "code": "RTA",
+              "name": "Road traffic accident",
+              "description": "Any injury from a road traffic accident",
+              "sort_order": 10,
+              "is_active": true
+            },
+            {
+              "case_type_id": 2,
+              "code": "ASSAULT",
+              "name": "Assault",
+              "description": "Injury from a fight or an attack with a blunt or sharp weapon",
+              "sort_order": 20,
+              "is_active": true
+            },
+            {
+              "case_type_id": 3,
+              "code": "FIREARM",
+              "name": "Firearm injury",
+              "description": "Gunshot or pellet wound, whatever the history",
+              "sort_order": 30,
+              "is_active": true
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-28T21:43:04.422275+00:00"
+          },
+          "request_id": "3c1232e69b83468db074bb84aaaa46a6"
+        }
+      }
+    },
+    "GET /ot/theaters": {
+      "request": {
+        "path": "/api/v1/ot/theaters"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "ot_id": 1,
+              "code": "OT1",
+              "name": "Main OT 1",
+              "theater_type": "General",
+              "current_state": "Available",
+              "state_changed_at": "2026-09-27T17:42:59.374678+00:00",
+              "is_active": true,
+              "row_version": 1
+            },
+            {
+              "ot_id": 2,
+              "code": "OT2",
+              "name": "Main OT 2",
+              "theater_type": "General",
+              "current_state": "Available",
+              "state_changed_at": "2026-09-27T17:42:59.400594+00:00",
+              "is_active": true,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:42:59.704771+00:00"
+          },
+          "request_id": "e1c02615e32f4a8c8e379580ecef7d2d"
+        }
+      }
+    },
+    "GET /beds/matrix": {
+      "request": {
+        "path": "/api/v1/beds/matrix"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "wards": [
+              {
+                "ward_id": 2,
+                "code": "GW",
+                "name": "General Ward",
+                "ward_type": "General",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 0,
+                "reserved": 0,
+                "occupied": 1,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 1,
+                "code": "ICU",
+                "name": "ICU",
+                "ward_type": "ICU",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 1,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              }
+            ],
+            "summary": {
+              "General Ward": 0,
+              "ICU": 1
+            },
+            "beds": [
+              {
+                "bed_id": 1,
+                "ward_id": 1,
+                "label": "ICU-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 2,
+                "ward_id": 2,
+                "label": "GW-1",
+                "current_state": "Occupied",
+                "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": 1,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": "Admitted",
+                "is_overflow": false,
+                "discharge_blocked_on": null
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:22.967241+00:00"
+          },
+          "request_id": "802131a929b14db0a0c8033474e8d271"
         }
       }
     }
@@ -2718,6 +3567,178 @@
       "title": "AuthorStampOut",
       "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
     },
+    "BedMatrixBedOut": {
+      "properties": {
+        "bed_id": {
+          "type": "integer",
+          "title": "Bed Id"
+        },
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "current_state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "Reserved",
+            "Occupied",
+            "Dirty",
+            "Cleaning",
+            "OutOfService"
+          ],
+          "title": "Current State"
+        },
+        "state_changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Changed At"
+        },
+        "is_overflow_allowed": {
+          "type": "boolean",
+          "title": "Is Overflow Allowed"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "patient_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Name",
+          "description": "Only with with_patients=true"
+        },
+        "mrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mrn",
+          "description": "Only with with_patients=true"
+        },
+        "admission_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "AdmissionPending",
+                "Waitlisted",
+                "BedReserved",
+                "CodeRedActive",
+                "Admitted",
+                "DischargeInProgress",
+                "Discharged",
+                "Cancelled"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Status"
+        },
+        "is_overflow": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Is Overflow"
+        },
+        "discharge_blocked_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharge Blocked On",
+          "description": "The discharge stage the patient in this bed waits for"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bed_id",
+        "ward_id",
+        "label",
+        "current_state",
+        "state_changed_at",
+        "is_overflow_allowed",
+        "admission_id",
+        "patient_name",
+        "mrn",
+        "admission_status",
+        "is_overflow",
+        "discharge_blocked_on"
+      ],
+      "title": "BedMatrixBedOut"
+    },
+    "BedMatrixOut": {
+      "properties": {
+        "wards": {
+          "items": {
+            "$ref": "#/components/schemas/WardOccupancyOut"
+          },
+          "type": "array",
+          "title": "Wards"
+        },
+        "summary": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "type": "object",
+          "title": "Summary",
+          "description": "Ward name -> available beds"
+        },
+        "beds": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/components/schemas/BedMatrixBedOut"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Beds",
+          "description": "Only with include_beds=true"
+        }
+      },
+      "type": "object",
+      "required": [
+        "wards",
+        "summary"
+      ],
+      "title": "BedMatrixOut"
+    },
     "CodeRedIn": {
       "properties": {
         "patient_id": {
@@ -2759,8 +3780,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 150.0,
-              "minimum": 0.0
+              "maximum": 150,
+              "minimum": 0
             },
             {
               "type": "null"
@@ -2778,7 +3799,7 @@
             }
           ],
           "title": "Ward Id",
-          "description": "Destination ward; or ward_type"
+          "description": "Destination ward; or ward_type (GET /beds/matrix?include_beds=false)"
         },
         "ward_type": {
           "anyOf": [
@@ -2813,7 +3834,8 @@
               "type": "null"
             }
           ],
-          "title": "Ot Id"
+          "title": "Ot Id",
+          "description": "With needs_ot: the theatre to hold (GET /ot/theaters)"
         },
         "procedure_name": {
           "anyOf": [
@@ -2830,8 +3852,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 240.0,
-              "minimum": 0.0
+              "maximum": 240,
+              "minimum": 0
             },
             {
               "type": "null"
@@ -3521,6 +4543,27 @@
       ],
       "title": "Envelope[AdmissionDetailOut]"
     },
+    "Envelope_BedMatrixOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/BedMatrixOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[BedMatrixOut]"
+    },
     "Envelope_CodeRedOut_": {
       "properties": {
         "data": {
@@ -3562,6 +4605,56 @@
         "request_id"
       ],
       "title": "Envelope[PatientDetailOut]"
+    },
+    "Envelope_list_MlcCaseTypeOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/MlcCaseTypeOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[MlcCaseTypeOut]]"
+    },
+    "Envelope_list_TheaterOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/TheaterOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[TheaterOut]]"
     },
     "HTTPValidationError": {
       "properties": {
@@ -3672,6 +4765,51 @@
         "server_time"
       ],
       "title": "Meta"
+    },
+    "MlcCaseTypeOut": {
+      "properties": {
+        "case_type_id": {
+          "type": "integer",
+          "title": "Case Type Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "sort_order": {
+          "type": "integer",
+          "title": "Sort Order"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        }
+      },
+      "type": "object",
+      "required": [
+        "case_type_id",
+        "code",
+        "name",
+        "description",
+        "sort_order",
+        "is_active"
+      ],
+      "title": "MlcCaseTypeOut"
     },
     "OutstandingBannerOut": {
       "properties": {
@@ -4086,6 +5224,62 @@
       ],
       "title": "PatientDetailOut"
     },
+    "TheaterOut": {
+      "properties": {
+        "ot_id": {
+          "type": "integer",
+          "title": "Ot Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "theater_type": {
+          "type": "string",
+          "title": "Theater Type"
+        },
+        "current_state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "EmergencyHold",
+            "InSurgery",
+            "CleaningPrep",
+            "OutOfService"
+          ],
+          "title": "Current State"
+        },
+        "state_changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Changed At"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ot_id",
+        "code",
+        "name",
+        "theater_type",
+        "current_state",
+        "state_changed_at",
+        "is_active",
+        "row_version"
+      ],
+      "title": "TheaterOut"
+    },
     "TraumaCreate": {
       "properties": {
         "temp_identifier": {
@@ -4116,8 +5310,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 150.0,
-              "minimum": 0.0
+              "maximum": 150,
+              "minimum": 0
             },
             {
               "type": "null"
@@ -4168,6 +5362,90 @@
         "type"
       ],
       "title": "ValidationError"
+    },
+    "WardOccupancyOut": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "ward_type": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Private",
+            "SemiPrivate",
+            "ICU",
+            "CCU",
+            "NICU",
+            "Surgical",
+            "Pediatric",
+            "Maternity",
+            "Emergency",
+            "Isolation",
+            "Other"
+          ],
+          "title": "Ward Type"
+        },
+        "gender_restriction": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "any"
+          ],
+          "title": "Gender Restriction"
+        },
+        "total_beds": {
+          "type": "integer",
+          "title": "Total Beds"
+        },
+        "available": {
+          "type": "integer",
+          "title": "Available"
+        },
+        "reserved": {
+          "type": "integer",
+          "title": "Reserved"
+        },
+        "occupied": {
+          "type": "integer",
+          "title": "Occupied"
+        },
+        "turnover": {
+          "type": "integer",
+          "title": "Turnover",
+          "description": "Beds being cleaned or waiting for discharge clearance"
+        },
+        "out_of_service": {
+          "type": "integer",
+          "title": "Out Of Service"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id",
+        "code",
+        "name",
+        "ward_type",
+        "gender_restriction",
+        "total_beds",
+        "available",
+        "reserved",
+        "occupied",
+        "turnover",
+        "out_of_service"
+      ],
+      "title": "WardOccupancyOut",
+      "description": "A ward's bed counts (view v_bed_matrix)."
     }
   },
   "unknowns": [

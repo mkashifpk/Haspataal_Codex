@@ -1,0 +1,997 @@
+{
+  "screen": "mock_drills_ops",
+  "title": "Mock drills",
+  "cases": [
+    {
+      "id": "case:GET /facility/drills",
+      "call": "GET /api/v1/facility/drills",
+      "summary": "The mock drills",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/facility/drills",
+            "query": {
+              "kind": "Fire",
+              "status": "Final",
+              "department_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "drill_id": 2,
+                  "drill_number": "DRL-2026-0001",
+                  "kind": "Fire",
+                  "scenario": "Smoke from the linen store beside the ER at night",
+                  "department_id": 1,
+                  "department_name": "EMRG",
+                  "ward_id": null,
+                  "ward_name": null,
+                  "area": null,
+                  "place": "EMRG",
+                  "shift": "Night",
+                  "held_at": "2026-10-01T05:16:08.373856+00:00",
+                  "announced": false,
+                  "external_agency": "Rescue 1122",
+                  "response_minutes": 2.5,
+                  "evacuation_minutes": 9,
+                  "observations": "Alarm heard late in the side room; the corridor was blocked by trolleys",
+                  "outcome": "NeedsImprovement",
+                  "status": "Final",
+                  "finalized_at": "2026-10-01T07:16:08.475334+00:00",
+                  "final_stamp": {
+                    "at": "2026-10-01T07:16:08.475334+00:00",
+                    "name": "Staff 59399",
+                    "text": "Staff 59399, Officer, 01-Oct-2026 12:16",
+                    "user_id": 2,
+                    "designation": "Officer",
+                    "employee_id": 2,
+                    "registration": null
+                  },
+                  "created_by_name": "u67928a74b5",
+                  "created_at": "2026-10-01T07:16:08.411167+00:00",
+                  "row_version": 3,
+                  "participant_count": 2,
+                  "actions": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:16:08.590129+00:00"
+              },
+              "request_id": "bb095cbe82c94e88865b64449a69612f"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /facility/drills",
+      "call": "POST /api/v1/facility/drills",
+      "summary": "Report a mock drill",
+      "happy_path": {
+        "as_one_of": [
+          "ops_admin",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/facility/drills",
+            "body": {
+              "kind": "Fire",
+              "scenario": "Smoke from the linen store beside the ER at night",
+              "department_id": 1,
+              "shift": "Night",
+              "held_at": "2026-10-01T05:16:08.373856+00:00",
+              "announced": false,
+              "external_agency": "Rescue 1122",
+              "participants": [
+                {
+                  "employee_id": 5,
+                  "drill_role": "Fire warden"
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "drill_id": 2,
+                "drill_number": "DRL-2026-0001",
+                "kind": "Fire",
+                "scenario": "Smoke from the linen store beside the ER at night",
+                "department_id": 1,
+                "department_name": "EMRG",
+                "ward_id": null,
+                "ward_name": null,
+                "area": null,
+                "place": "EMRG",
+                "shift": "Night",
+                "held_at": "2026-10-01T05:16:08.373856+00:00",
+                "announced": false,
+                "external_agency": "Rescue 1122",
+                "response_minutes": null,
+                "evacuation_minutes": null,
+                "observations": null,
+                "outcome": null,
+                "status": "Draft",
+                "finalized_at": null,
+                "final_stamp": null,
+                "created_by_name": "u67928a74b5",
+                "created_at": "2026-10-01T07:16:08.411167+00:00",
+                "row_version": 1,
+                "participant_count": 1,
+                "actions": 0,
+                "participants": [
+                  {
+                    "employee_id": 5,
+                    "employee_name": "Fire Warden Bilal",
+                    "emp_number": "EMP-2026-0005",
+                    "department_name": "EMRG",
+                    "drill_role": "Fire warden"
+                  }
+                ],
+                "action_list": []
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:16:08.439413+00:00"
+              },
+              "request_id": "47a7df17a3d54c08a0f3124c3058296a"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /facility/drills/coverage",
+      "call": "GET /api/v1/facility/drills/coverage",
+      "summary": "Drill coverage by department and shift",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/facility/drills/coverage"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "since": "2025-10-01",
+                "months": 12,
+                "drills": 1,
+                "shifts": [
+                  {
+                    "shift": "Morning",
+                    "drills": 0
+                  },
+                  {
+                    "shift": "Evening",
+                    "drills": 0
+                  },
+                  {
+                    "shift": "Night",
+                    "drills": 1
+                  }
+                ],
+                "departments": [
+                  {
+                    "department_id": 1,
+                    "department_name": "EMRG",
+                    "morning": 0,
+                    "evening": 0,
+                    "night": 1,
+                    "last_drill_at": "2026-10-01T05:16:08.373856+00:00",
+                    "staff": 2,
+                    "staff_drilled": 2,
+                    "drills": 1,
+                    "shifts_missing": [
+                      "Morning",
+                      "Evening"
+                    ]
+                  }
+                ],
+                "departments_not_drilled": []
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:16:08.578899+00:00"
+              },
+              "request_id": "6a9d1b53af0f4223b91c4e386e66dd83"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /facility/drills/{drill_id}",
+      "call": "GET /api/v1/facility/drills/{drill_id}",
+      "summary": "One drill report",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/facility/drills/2"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "drill_id": 2,
+                "drill_number": "DRL-2026-0001",
+                "kind": "Fire",
+                "scenario": "Smoke from the linen store beside the ER at night",
+                "department_id": 1,
+                "department_name": "EMRG",
+                "ward_id": null,
+                "ward_name": null,
+                "area": null,
+                "place": "EMRG",
+                "shift": "Night",
+                "held_at": "2026-10-14T08:45:49.967377+00:00",
+                "announced": false,
+                "external_agency": "Rescue 1122",
+                "response_minutes": 2.5,
+                "evacuation_minutes": 9,
+                "observations": "Alarm heard late in the side room; the corridor was blocked by trolleys",
+                "outcome": "NeedsImprovement",
+                "status": "Final",
+                "finalized_at": "2026-10-14T10:45:50.097634+00:00",
+                "final_stamp": {
+                  "at": "2026-10-14T10:45:50.097634+00:00",
+                  "name": "Staff 49136",
+                  "text": "Staff 49136, Officer, 14-Oct-2026 15:45",
+                  "user_id": 2,
+                  "designation": "Officer",
+                  "employee_id": 2,
+                  "registration": null
+                },
+                "created_by_name": "u11a4cc9599",
+                "created_at": "2026-10-14T10:45:50.011523+00:00",
+                "row_version": 3,
+                "participant_count": 2,
+                "actions": 1,
+                "participants": [
+                  {
+                    "employee_id": 5,
+                    "employee_name": "Fire Warden Bilal",
+                    "emp_number": "EMP-2026-0005",
+                    "department_name": "EMRG",
+                    "drill_role": "Fire warden"
+                  },
+                  {
+                    "employee_id": 6,
+                    "employee_name": "Staff Nurse Hina",
+                    "emp_number": "EMP-2026-0006",
+                    "department_name": "EMRG",
+                    "drill_role": "Evacuation lead"
+                  }
+                ],
+                "action_list": [
+                  {
+                    "action_id": 2,
+                    "action_number": "CAPA-2026-0001",
+                    "source": "Drill",
+                    "cycle_id": null,
+                    "cycle_number": null,
+                    "incident_id": null,
+                    "incident_number": null,
+                    "complaint_id": null,
+                    "complaint_number": null,
+                    "ipc_audit_id": null,
+                    "audit_number": null,
+                    "meeting_id": null,
+                    "meeting_number": null,
+                    "drill_id": 2,
+                    "drill_number": "DRL-2026-0001",
+                    "mock_interview_id": null,
+                    "interview_number": null,
+                    "qa_round_id": null,
+                    "qa_round_number": null,
+                    "feedback_id": null,
+                    "feedback_number": null,
+                    "source_number": "DRL-2026-0001",
+                    "action_type": "Corrective",
+                    "description": "Keep the ER corridor clear: trolleys parked in bay 3",
+                    "criterion_code": null,
+                    "department_id": null,
+                    "department_name": null,
+                    "owner_user_id": 1,
+                    "owner_name": "u11a4cc9599",
+                    "due_date": "2026-10-28",
+                    "status": "Open",
+                    "outcome_note": null,
+                    "completed_at": null,
+                    "completed_by_name": null,
+                    "created_by": 1,
+                    "created_by_name": "u11a4cc9599",
+                    "created_at": "2026-10-14T10:45:50.140140+00:00",
+                    "row_version": 1,
+                    "is_overdue": false
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:45:50.180229+00:00"
+              },
+              "request_id": "2bb0e22804724381ad1267a3b76cca4b"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:PUT /facility/drills/{drill_id}",
+      "call": "PUT /api/v1/facility/drills/{drill_id}",
+      "summary": "Complete the draft report",
+      "happy_path": {
+        "as_one_of": [
+          "ops_admin",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/facility/drills/2",
+            "body": {
+              "kind": "Fire",
+              "scenario": "Smoke from the linen store beside the ER at night",
+              "department_id": 1,
+              "shift": "Night",
+              "held_at": "2026-10-01T05:16:08.373856+00:00",
+              "announced": false,
+              "external_agency": "Rescue 1122",
+              "participants": [
+                {
+                  "employee_id": 5,
+                  "drill_role": "Fire warden"
+                },
+                {
+                  "employee_id": 6,
+                  "drill_role": "Evacuation lead"
+                }
+              ],
+              "response_minutes": 2.5,
+              "evacuation_minutes": 9,
+              "outcome": "NeedsImprovement",
+              "observations": "Alarm heard late in the side room; the corridor was blocked by trolleys",
+              "expected_version": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "drill_id": 2,
+                "drill_number": "DRL-2026-0001",
+                "kind": "Fire",
+                "scenario": "Smoke from the linen store beside the ER at night",
+                "department_id": 1,
+                "department_name": "EMRG",
+                "ward_id": null,
+                "ward_name": null,
+                "area": null,
+                "place": "EMRG",
+                "shift": "Night",
+                "held_at": "2026-10-01T05:16:08.373856+00:00",
+                "announced": false,
+                "external_agency": "Rescue 1122",
+                "response_minutes": 2.5,
+                "evacuation_minutes": 9,
+                "observations": "Alarm heard late in the side room; the corridor was blocked by trolleys",
+                "outcome": "NeedsImprovement",
+                "status": "Draft",
+                "finalized_at": null,
+                "final_stamp": null,
+                "created_by_name": "u67928a74b5",
+                "created_at": "2026-10-01T07:16:08.411167+00:00",
+                "row_version": 2,
+                "participant_count": 2,
+                "actions": 0,
+                "participants": [
+                  {
+                    "employee_id": 5,
+                    "employee_name": "Fire Warden Bilal",
+                    "emp_number": "EMP-2026-0005",
+                    "department_name": "EMRG",
+                    "drill_role": "Fire warden"
+                  },
+                  {
+                    "employee_id": 6,
+                    "employee_name": "Staff Nurse Hina",
+                    "emp_number": "EMP-2026-0006",
+                    "department_name": "EMRG",
+                    "drill_role": "Evacuation lead"
+                  }
+                ],
+                "action_list": []
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:16:08.471047+00:00"
+              },
+              "request_id": "2e4cc69ca1e24b8cbaf8c0214a365252"
+            }
+          },
+          "errors_seen": [
+            "DRILL_FINAL"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DRILL_FINAL",
+        "VALIDATION_ERROR"
+      ],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    },
+    {
+      "id": "case:POST /facility/drills/{drill_id}/finalize",
+      "call": "POST /api/v1/facility/drills/{drill_id}/finalize",
+      "summary": "Sign the report",
+      "happy_path": {
+        "as_one_of": [
+          "ops_admin",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/facility/drills/2/finalize"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "drill_id": 2,
+                "drill_number": "DRL-2026-0001",
+                "kind": "Fire",
+                "scenario": "Smoke from the linen store beside the ER at night",
+                "department_id": 1,
+                "department_name": "EMRG",
+                "ward_id": null,
+                "ward_name": null,
+                "area": null,
+                "place": "EMRG",
+                "shift": "Night",
+                "held_at": "2026-10-01T05:16:08.373856+00:00",
+                "announced": false,
+                "external_agency": "Rescue 1122",
+                "response_minutes": 2.5,
+                "evacuation_minutes": 9,
+                "observations": "Alarm heard late in the side room; the corridor was blocked by trolleys",
+                "outcome": "NeedsImprovement",
+                "status": "Final",
+                "finalized_at": "2026-10-01T07:16:08.475334+00:00",
+                "final_stamp": {
+                  "at": "2026-10-01T07:16:08.475334+00:00",
+                  "name": "Staff 59399",
+                  "text": "Staff 59399, Officer, 01-Oct-2026 12:16",
+                  "user_id": 2,
+                  "designation": "Officer",
+                  "employee_id": 2,
+                  "registration": null
+                },
+                "created_by_name": "u67928a74b5",
+                "created_at": "2026-10-01T07:16:08.411167+00:00",
+                "row_version": 3,
+                "participant_count": 2,
+                "actions": 0,
+                "participants": [
+                  {
+                    "employee_id": 5,
+                    "employee_name": "Fire Warden Bilal",
+                    "emp_number": "EMP-2026-0005",
+                    "department_name": "EMRG",
+                    "drill_role": "Fire warden"
+                  },
+                  {
+                    "employee_id": 6,
+                    "employee_name": "Staff Nurse Hina",
+                    "emp_number": "EMP-2026-0006",
+                    "department_name": "EMRG",
+                    "drill_role": "Evacuation lead"
+                  }
+                ],
+                "action_list": []
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:16:08.486058+00:00"
+              },
+              "request_id": "3e7ef79570f6435fb841a223b81d27f1"
+            }
+          },
+          "errors_seen": [
+            "DRILL_FINAL",
+            "DRILL_REPORT_INCOMPLETE"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DRILL_FINAL",
+        "DRILL_REPORT_INCOMPLETE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /facility/drills/{drill_id}/actions",
+      "call": "POST /api/v1/facility/drills/{drill_id}/actions",
+      "summary": "Record an action the drill showed was needed",
+      "happy_path": {
+        "as_one_of": [
+          "ops_admin",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/facility/drills/2/actions",
+            "body": {
+              "action_type": "Corrective",
+              "description": "Keep the ER corridor clear: trolleys parked in bay 3",
+              "owner_user_id": 1,
+              "due_date": "2026-10-28"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "action_id": 2,
+                "action_number": "CAPA-2026-0001",
+                "source": "Drill",
+                "cycle_id": null,
+                "cycle_number": null,
+                "incident_id": null,
+                "incident_number": null,
+                "complaint_id": null,
+                "complaint_number": null,
+                "ipc_audit_id": null,
+                "audit_number": null,
+                "meeting_id": null,
+                "meeting_number": null,
+                "drill_id": 2,
+                "drill_number": "DRL-2026-0001",
+                "mock_interview_id": null,
+                "interview_number": null,
+                "qa_round_id": null,
+                "qa_round_number": null,
+                "feedback_id": null,
+                "feedback_number": null,
+                "source_number": "DRL-2026-0001",
+                "action_type": "Corrective",
+                "description": "Keep the ER corridor clear: trolleys parked in bay 3",
+                "criterion_code": null,
+                "department_id": null,
+                "department_name": null,
+                "owner_user_id": 1,
+                "owner_name": "u11a4cc9599",
+                "due_date": "2026-10-28",
+                "status": "Open",
+                "outcome_note": null,
+                "completed_at": null,
+                "completed_by_name": null,
+                "created_by": 1,
+                "created_by_name": "u11a4cc9599",
+                "created_at": "2026-10-14T10:45:50.140140+00:00",
+                "row_version": 1,
+                "is_overdue": false
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:45:50.151876+00:00"
+              },
+              "request_id": "6c2077d53a9a4313b87965ea02a49777"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /facility/drills/{drill_id}/pdf",
+      "call": "GET /api/v1/facility/drills/{drill_id}/pdf",
+      "summary": "The drill report (PDF)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/facility/drills/2/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 3249
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /facility/staff",
+      "call": "GET /api/v1/facility/staff",
+      "summary": "Pick a member of staff",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/facility/staff",
+            "query": {
+              "q": "Biomedical"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 4,
+                  "full_name": "Biomedical Technician Ali",
+                  "emp_number": "EMP-2026-0004",
+                  "designation": "Officer",
+                  "staff_category": "Technical",
+                  "department_id": 1,
+                  "department_name": "BME",
+                  "user_id": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:16:00.602859+00:00"
+              },
+              "request_id": "bbc9901bb5a5418bbeaaf5fdd26256e8"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /beds/matrix",
+      "call": "GET /api/v1/beds/matrix",
+      "summary": "Live bed matrix (counts per ward + optional bed list)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/beds/matrix"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "wards": [
+                  {
+                    "ward_id": 2,
+                    "code": "GW",
+                    "name": "General Ward",
+                    "ward_type": "General",
+                    "gender_restriction": "any",
+                    "total_beds": 1,
+                    "available": 0,
+                    "reserved": 0,
+                    "occupied": 1,
+                    "turnover": 0,
+                    "out_of_service": 0
+                  },
+                  {
+                    "ward_id": 1,
+                    "code": "ICU",
+                    "name": "ICU",
+                    "ward_type": "ICU",
+                    "gender_restriction": "any",
+                    "total_beds": 1,
+                    "available": 1,
+                    "reserved": 0,
+                    "occupied": 0,
+                    "turnover": 0,
+                    "out_of_service": 0
+                  }
+                ],
+                "summary": {
+                  "General Ward": 0,
+                  "ICU": 1
+                },
+                "beds": [
+                  {
+                    "bed_id": 1,
+                    "ward_id": 1,
+                    "label": "ICU-1",
+                    "current_state": "Available",
+                    "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                    "is_overflow_allowed": false,
+                    "admission_id": null,
+                    "patient_name": null,
+                    "mrn": null,
+                    "admission_status": null,
+                    "is_overflow": null,
+                    "discharge_blocked_on": null
+                  },
+                  {
+                    "bed_id": 2,
+                    "ward_id": 2,
+                    "label": "GW-1",
+                    "current_state": "Occupied",
+                    "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                    "is_overflow_allowed": false,
+                    "admission_id": 1,
+                    "patient_name": null,
+                    "mrn": null,
+                    "admission_status": "Admitted",
+                    "is_overflow": false,
+                    "discharge_blocked_on": null
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:38:22.967241+00:00"
+              },
+              "request_id": "802131a929b14db0a0c8033474e8d271"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "employee_self",
+          "lab_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "BED_NO_LONGER_AVAILABLE",
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/mock_drills_ops",
+  "workspace_guide": "get_handbook_outline('ops_admin')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Open on the coverage: a grid of departments by shift (morning, evening, night) for the last drill_interval_months; departments_not_drilled in red; staff_drilled of staff per department.",
+    "Report a drill after it is held (a draft): kind, scenario, the department, ward or area, shift, time, announced, Rescue 1122 or Civil Defence, the response and evacuation minutes, the participants (GET /facility/staff) with their role, the observations and the outcome. Sign it (finalize): DRILL_REPORT_INCOMPLETE lists what is missing. Then record its actions and print the report."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

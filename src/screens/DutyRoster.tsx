@@ -1,3 +1,4 @@
+import {canReadDirectory} from "../DirectoryPicker";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, getWithClock } from "../bridge";
 import {
@@ -198,10 +199,10 @@ export function DutyRoster({
   );
   const beds = useLoad(
     () =>
-      user.permissions.includes("ipd.bed.view")
+      canReadDirectory("/beds/matrix",user.permissions)
         ? roster.bedMatrix()
         : Promise.resolve(undefined),
-    [user.permissions.includes("ipd.bed.view"), revision],
+    [canReadDirectory("/beds/matrix",user.permissions), revision],
   );
   const swaps = useLoad(
     () =>
@@ -224,16 +225,8 @@ export function DutyRoster({
   const days = start
     ? Array.from({ length: 7 }, (_, i) => rosterAddDays(start, i))
     : [];
-  const departments = Array.from(
-    new Map(
-      [...staff, ...rows]
-        .filter((r) => r.department_id)
-        .map((r) => [
-          r.department_id!,
-          r.department_name || String(r.department_id),
-        ]),
-    ).entries(),
-  );
+  const departmentDirectory=useLoad(()=>roster.departments(),[revision]);
+  const departments: [number,string][]=(departmentDirectory.data??[]).filter(row=>row.is_active).map(row=>[row.department_id,row.name]);
   const shifts = Array.from(
     new Map(
       [
@@ -497,7 +490,7 @@ export function DutyRoster({
       const dates = entries.map((e) => e.roster_date).sort();
       const [p, b] = await Promise.all([
         roster.staffRosters({ date_from: dates[0], date_to: dates.at(-1) }),
-        user.permissions.includes("ipd.bed.view")
+        canReadDirectory("/beds/matrix",user.permissions)
           ? roster.bedMatrix()
           : Promise.resolve(undefined),
       ]);
@@ -872,6 +865,7 @@ export function DutyRoster({
       <LoadState {...list} retry={list.reload} />
       {canManage && <LoadState {...planner} retry={planner.reload} />}
       <LoadState {...beds} retry={beds.reload} />
+      <LoadState {...departmentDirectory} retry={departmentDirectory.reload} />
       {wk && (
         <p>
           <bdi>

@@ -1,0 +1,198 @@
+{
+  "slug": "opd-reception",
+  "title": "OPD reception, queues & re-routing",
+  "summary": "Register → pay → token → live doctor queue; re-route, defer/reactivate, expiry; lab-only walk-ins.",
+  "order": 99,
+  "workflow": "§1.1–§1.5, §1.10",
+  "workspaces": [
+    "reception",
+    "doctor"
+  ],
+  "file": "opd-reception.md",
+  "markdown": "# OPD reception, queues & re-routing\n\n## 1. Find or register the patient (§1.1, §1.2)\n\n1. `GET /patients/search?q=<mrn|mobile|cnic|name>` as the receptionist types (debounce 250 ms).\n   * Each hit has `outstanding` → if `has_outstanding_ar`, show `banner_text` in a red banner.\n   * Send what the user typed or scanned, as it is. A name may contain digits (the trauma label \"Unknown Male 3\"):\n     a term with any letter is also looked for in the names; a term of digits alone is a mobile (7 digits or more)\n     or a CNIC (13).\n   * Each person is one hit, their master record, also when a profile merged into it matched (the MRN on an old\n     slip, a trauma label, a duplicate's name). `matched_merged_profile` then names that profile: say \"Found by\n     MRN-…, merged into this record\", so a scanned slip whose MRN differs is not taken for a wrong match. It is null\n     when the master itself matched.\n2. New patient: collect only what is required (full name, gender, age **or** DOB, mobile; CNIC optional, and the\n   universal patient medical record number `upmrn` optional too: the PHC announced it for Category I hospitals but has\n   not published its format; `PATIENT_CNIC_EXISTS` / `PATIENT_UPMRN_EXISTS`: that person is registered already, search\n   for them).\n   The form also offers two optional parts, uploaded once the slip is issued (section 2a): the **Patient Photo** and\n   the **reports the patient brought**. Neither is ever required.\n   * A member of staff registering as a patient (their bills can go to payroll deduction): `linked_employee_id`, picked\n     with `GET /staff/lookup?q=` (the badge facts of active staff: reception never needs the HR directory).\n   * A panel patient's panel (`panel_id`) from `GET /finance/panels`; the same on `PATCH /patients/{patient_id}`.\n\n## 2. Issue the slip — ONE atomic call (§1.3)\n\n```http\nPOST /reception/registrations\nIdempotency-Key: <uuid per click>\n{ \"new_patient\": { \"full_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"mobile\": \"03001234567\" },\n  \"doctor_id\": 17,\n  \"payment\": { \"method\": \"Cash\" } }\n```\n\nResponse `201`: ticket (`status: \"Waiting\"`, `payment_status: \"Paid\"`), `queue.token_no`, `invoice`, `payment`,\n`queue_entry_created` and `print_payload` (80 mm slip with barcode). The dues banner comes from the search hit (step 1).\n\n* Everything (patient, ticket, invoice, payment into **your open cash shift**, queue entry, ledger)\n  commits together or not at all. Open a shift first (`POST /finance/cash-shifts/open`) or you get `SHIFT_NOT_OPEN`.\n* The doctor's screen updates via `opd.queue.updated` — no polling.\n* Discounts: `discount_amount` + `discount_reason`, capped by your ceiling. More than the ceiling →\n  `DISCOUNT_CEILING_EXCEEDED` (`details.max_pct`): issue the ticket within the ceiling, then request the rest as\n  a pre-consultation VIP waiver, `POST /opd-tickets/{id}/vip-waiver-request` with `waiver_pct` 1-100, which\n  Billing Admin or Owner approves (see *Refunds, waivers & credit*). There is no separate \"discount approval\".\n* Outstanding dues block a new slip (`AR_OUTSTANDING_BLOCK`) unless `source: \"Emergency\"`\n  (ER bypass) or a supervisor with `opd.ticket.ar_override` gives `ar_override_reason`.\n* An emergency slip (`source: \"Emergency\"`) also opens the patient's ER visit, or joins the one the triage nurse opened\n  first: the ER register, triage, the waiting times and the departure are in the\n  [emergency department](emergency-department.md) playbook. The ER doctor's queue is ordered by the triage level.\n* Unpaid slip (omit `payment`) → status `Issued`, not queued; pay later with\n  `POST /opd-tickets/{id}/pay` or request credit / waiver.\n\n## 2a. Patient Photo and reports brought by the patient (optional, §1.1)\n\nBoth are uploads to the patient's document vault, made after the registration answered with the `patient_id`, each\nwith **its own** `Idempotency-Key`: a failed upload is retried alone and never repeats the registration or the payment.\n\n* **Patient Photo (optional, never required).** Offer *Take photo* (camera) or *Choose file*, a preview, *Retake*\n  and *Skip*; skipping needs no reason. Ask the patient first and accept a refusal (purdah, privacy). Upload\n  `POST /patients/{patient_id}/documents` (multipart: `file`, `doc_type=Photo`): a **JPEG or PNG** only, at most\n  16 megapixels (resize a phone photo in the app; a webcam frame is plenty). The newest photo is `photo_document_id`\n  on `GET /patients/{patient_id}` and on every admission; show it with `GET /patient-documents/{document_id}/download`\n  (a logged patient-data read, never a public URL). A new photo replaces the old one on screen; both stay on record.\n* **Reports brought by the patient** (any number): a laboratory report, an X-ray or scan report, another\n  hospital's discharge summary, an earlier prescription or a referral letter. The form asks for the file (a PDF, or\n  a JPEG/PNG scan or photo of the paper), its type (`LabReport`, `Imaging`, `DischargeSummary`, `Prescription`,\n  `ReferralLetter`, `Other`), a `title` naming the test or report (\"CBC\", \"Chest X-ray\"), **issued by**\n  (`source_facility`, required) and the date written on it (`document_date`, optional, never in the future). Send them\n  with `is_outside=true` to `POST /patients/{patient_id}/documents`. List them with\n  `GET /patients/{patient_id}/documents` (`is_outside`, `source_facility`, `document_date`) under the heading\n  *Outside reports*, each labelled with its facility and date: they are attachments for the doctor to read, never\n  this hospital's results, and nothing counts them as such.\n* Refusals: `UNSUPPORTED_MEDIA_TYPE` (another file type, a PDF as the photo, a file that is not what its name says),\n  `VALIDATION_ERROR` (a damaged or oversized image, an outside report without its facility, a future date),\n  `PAYLOAD_TOO_LARGE` (`details.max_bytes`). Keep the form and the chosen file so the user can fix and retry.\n\n## 3. Doctor calls the patient (§1.3)\n\n* `GET /opd-queues/me` → ordered queue (re-routed patients first, `is_rerouted: true`).\n* `POST /opd-queues/{queue_id}/call` → ticket `InConsultation`.\n* Finalizing a clinical note (`POST /clinical-encounters/{id}/finalize`) marks the ticket `Examined`;\n  `POST /opd-tickets/{id}/complete` closes the visit.\n\n## 4. Misdirected patient → re-route (§1.4)\n\nThe desk gave the slip to the wrong doctor, or the patient asked for a doctor who cannot handle the case: the doctor\nwhose queue it is sends the patient on, from the queue or from the consultation's Quick-Action Bar (instead of writing\na diagnosis). The reception does not re-route; it sees the move on its dashboard.\n\n1. The target: `GET /opd-queues/doctors` (`department_id` optional): the doctors who see an OPD queue, by department,\n   with `waiting` (their patients and their department's unassigned ones). The desk uses the same list for the slip's\n   doctor (`POST /reception/registrations` refuses anyone else, `VALIDATION_ERROR`, `details.field` `doctor_id`).\n2. `POST /opd-queues/{queue_id}/reroute {\"target_doctor_id\": 23, \"reason\": \"Needs cardiology\"}` (or\n   `\"target_department_id\"` alone: every doctor of that department sees the patient) → the patient lands at the **top**\n   of the target queue (`is_rerouted`, `reroute_reason`), with the same slip: no new payment, no refund. A patient in\n   consultation goes back to `Waiting` in the new queue.\n3. `opd.queue.updated` tells the first doctor (their entry `Rerouted`), the new doctor (the new entry, priority high) or\n   the department's doctors, and the reception dashboard.\n\nRefusals: `VALIDATION_ERROR` (`details.field` `target_doctor_id` or `target_department_id`: not a doctor who sees an OPD\nqueue, the doctor whose queue it already is, or a department without one); `REFERENCE_NOT_FOUND`; `FORBIDDEN` (another\ndoctor's patient); `QUEUE_ENTRY_CLOSED` (moved or ended meanwhile: refresh the queue). Several re-routes within an hour\nwithout clinical notes are flagged for risk review (possible ghost patient).\n\n## 5. Patient leaves and comes back (§1.5)\n\n* `POST /opd-tickets/{id}/defer {\"reason\"}` → off the queue, token kept.\n* `POST /opd-tickets/{id}/reactivate` → back in the queue with the **same token**, no new payment,\n  while `valid_until` has not passed (validity is a hospital setting, default 72 h from payment).\n* After `valid_until` the worker marks the ticket `Expired` (`ticket.forfeited` later) → a new visit needs a new slip.\n\n## 6. Lab-only walk-in (§1.10)\n\n`POST /patients/lab-only-walk-in {\"full_name\", \"mobile\", \"test_ids\": [...], \"referring_doctor_name\"?}`\ncreates a `LabOnly` patient, the lab requisition and a **Lab** invoice. The patient never enters a doctor\nqueue (`LAB_ONLY_QUEUE_FORBIDDEN` if anyone tries). Collect the bill with\n`POST /finance/invoices/{invoice_id}/payments`; the lab collects the sample only after payment.\n\n**The report.** A walk-in has no ordering doctor, so the reception desk hands its report over. When a verifier publishes\na walk-in's result, `lab.result.published` reaches every user who can register walk-ins (holding both `patient.create`\nand `lab.requisition.create`), whoever registered it; doctors are not told of walk-ins, and the desk is not told of a\ndoctor's orders. Treat it as a hint: when its `patient_id` or `requisition_id` is the one on screen, read\n`GET /lab/requisitions?patient_id=…` again and offer the report, then print it with\n`GET /lab/requisitions/{requisition_id}/report/print-payload` (or its PDF). The report is ready only when that read\nanswers (`LAB_REPORT_NOT_READY`: nothing verified yet; `complete: false`: some tests are still in the lab). Never show\na value from the event itself (decisions 52; backend issue #28).\n\n## 7. Merging profiles (§2.4)\n\nA trauma profile (\"Unknown Male 3\") or a lab-only profile becomes part of the identified patient's permanent record\nwith `POST /patients/{patient_id}/merge {\"target_patient_id\", \"reason\"}` (the id in the path is the profile that is\nmerged away). A merge is **for good**: the merged profile can never be edited or used again, its records show under the\nmaster, and a death recorded on it moves to the master. So:\n\n* show both profiles side by side (name, father/husband, sex, date of birth or age, CNIC, mobile, MRN) and ask for a\n  confirmation before sending;\n* a **permanent (Regular) profile** (a duplicate) merges only with a second person who holds `patient.merge.approve`\n  (the Owner, the Hospital Admin): they type their username and password on the same screen (`cosigner_username`,\n  `cosigner_password`); without them `MERGE_COSIGNER_REQUIRED`; a co-signer who cannot co-sign answers\n  `STEP_UP_REQUIRED`, `ACCOUNT_LOCKED` or `DUAL_CONTROL_SAME_PERSON`;\n* two different people are refused, never overridden: `MERGE_IDENTITY_CONFLICT` with `details.conflicts` (`cnic`,\n  `upmrn`, `gender`, `dob`, `seen_after_death`: one was seen alive after the other's recorded death). Correct the wrong profile\n  first (`PATCH /patients/{patient_id}`), or keep both records;\n* a CNIC or UPMRN that only the merged profile carried is copied to the master, so refresh the master's form after the\n  merge. The merged profile's MRN, name and numbers keep finding the person: the search answers with the master\n  (`matched_merged_profile`, step 1 of section 1);\n* work the merged profile already holds finishes normally: an open ticket is paid, reactivated and re-routed, a\n  prescription dispensed, an operation settled, and the new queue entry, dispensation and invoice carry the master's\n  id, while the ticket, prescription, booking and admission keep the id they were opened with. Use either id for\n  anything you attach to them; only new work on the merged id is refused (`PATIENT_MERGED_CANNOT_TRANSACT`);\n* lists and records show the person whatever id they hold: `patient_name` and `mrn` are the master's even where\n  `patient_id` is the merged profile's, and a `patient_id` filter finds every profile of the person. So never compare\n  a row's `patient_id` with the patient on screen, and refresh on `patient.merged`. A consent signed before the merge\n  keeps the name it was signed under.\n\n## Events\n\n`opd.queue.updated`, `opd.ticket.status_changed`, `ticket.forfeited`, `patient.merged`.",
+  "steps": [
+    {
+      "heading": "1. Find or register the patient (§1.1, §1.2)",
+      "anchor": "1-find-or-register-the-patient-1-1-1-2",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/panels",
+          "summary": "Panels (Sehat Sahulat, Zakat, corporate ...)"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/patients/{patient_id}",
+          "summary": "Update demographics (optimistic locking)"
+        }
+      ]
+    },
+    {
+      "heading": "2. Issue the slip — ONE atomic call (§1.3)",
+      "anchor": "2-issue-the-slip-one-atomic-call-1-3",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/reception/registrations",
+          "summary": "Register + OPD slip + payment + queue token (atomic)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/cash-shifts/open",
+          "summary": "Open my cash shift at a counter"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-tickets/{ticket_id}/vip-waiver-request",
+          "summary": "Request VIP / 100% waiver BEFORE consultation (needs approval)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-tickets/{ticket_id}/pay",
+          "summary": "Collect payment for an unpaid ticket (then queues it)"
+        }
+      ]
+    },
+    {
+      "heading": "2a. Patient Photo and reports brought by the patient (optional, §1.1)",
+      "anchor": "2a-patient-photo-and-reports-brought-by-the-patient-optional-1-1",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/documents",
+          "summary": "Upload a patient document (PDF/JPEG/PNG)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/{patient_id}",
+          "summary": "Patient profile (+ outstanding banner, merged profiles)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patient-documents/{document_id}/download",
+          "summary": "Download a patient document"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/{patient_id}/documents",
+          "summary": "List patient documents"
+        }
+      ]
+    },
+    {
+      "heading": "3. Doctor calls the patient (§1.3)",
+      "anchor": "3-doctor-calls-the-patient-1-3",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/opd-queues/me",
+          "summary": "Doctor: my live queue"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-queues/{queue_id}/call",
+          "summary": "Doctor calls the patient in (InConsultation)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/clinical-encounters/{encounter_id}/finalize",
+          "summary": "Commit the note (immutable afterwards)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-tickets/{ticket_id}/complete",
+          "summary": "Close an examined visit"
+        }
+      ]
+    },
+    {
+      "heading": "4. Misdirected patient → re-route (§1.4)",
+      "anchor": "4-misdirected-patient-re-route-1-4",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/opd-queues/doctors",
+          "summary": "The doctors who see an OPD queue (the re-route and slip picker)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/reception/registrations",
+          "summary": "Register + OPD slip + payment + queue token (atomic)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-queues/{queue_id}/reroute",
+          "summary": "Re-route / Refer to another doctor (top of their queue)"
+        }
+      ]
+    },
+    {
+      "heading": "5. Patient leaves and comes back (§1.5)",
+      "anchor": "5-patient-leaves-and-comes-back-1-5",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-tickets/{ticket_id}/defer",
+          "summary": "Defer (patient must leave; keeps the ticket, no refund)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-tickets/{ticket_id}/reactivate",
+          "summary": "Reactivate a deferred ticket (no new payment)"
+        }
+      ]
+    },
+    {
+      "heading": "6. Lab-only walk-in (§1.10)",
+      "anchor": "6-lab-only-walk-in-1-10",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/lab-only-walk-in",
+          "summary": "Lab-only walk-in (name + mobile only)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/invoices/{invoice_id}/payments",
+          "summary": "Collect a payment (lab / pharmacy / final IPD bill ...)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/requisitions",
+          "summary": "Requisitions of one patient (newest first)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/lab/requisitions/{requisition_id}/report/print-payload",
+          "summary": "Printable lab report with who performed and who verified each test"
+        }
+      ]
+    },
+    {
+      "heading": "7. Merging profiles (§2.4)",
+      "anchor": "7-merging-profiles-2-4",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/merge",
+          "summary": "Merge this temporary/duplicate profile into a master profile"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/patients/{patient_id}",
+          "summary": "Update demographics (optimistic locking)"
+        }
+      ]
+    }
+  ]
+}

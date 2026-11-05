@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import type {
   RosterRangeOut,
@@ -135,6 +136,10 @@ export const SupportRoster: React.FC<SupportRosterProps> = ({
   const [assignTargetDate, setAssignTargetDate] = useState<string>(selectedMonday);
   const [assignTargetShiftId, setAssignTargetShiftId] = useState<number>(0);
   const [assignEmployeeId, setAssignEmployeeId] = useState<number>(0);
+  const [assignWard,setAssignWard]=useState("");
+  const [assignDepartment,setAssignDepartment]=useState("");
+  const [editWard,setEditWard]=useState("");
+  const [editDepartment,setEditDepartment]=useState("");
   const [assignDutyArea, setAssignDutyArea] = useState<"Ward" | "Department" | "Emergency" | "OT" | "Facility" | "Other">("Facility");
   const [assignZoneLabel, setAssignZoneLabel] = useState<string>("Zone A - Entrance");
   const [assignIsOnCall, setAssignIsOnCall] = useState<boolean>(false);
@@ -341,6 +346,8 @@ export const SupportRoster: React.FC<SupportRosterProps> = ({
             roster_date: assignTargetDate,
             shift_pattern_id: assignTargetShiftId,
             duty_area: assignDutyArea,
+            ward_id:assignDutyArea==="Ward"&&assignWard?Number(assignWard):null,
+            department_id:assignDutyArea==="Department"&&assignDepartment?Number(assignDepartment):null,
             zone_label: assignZoneLabel.trim() || null,
             is_on_call: assignIsOnCall,
             notes: assignNotes.trim() || null
@@ -371,6 +378,8 @@ export const SupportRoster: React.FC<SupportRosterProps> = ({
       const patchBody: EntryPatch = {
         expected_version: selectedDutyForEdit.row_version,
         duty_area: editDutyArea,
+        ward_id:editDutyArea==="Ward"&&editWard?Number(editWard):null,
+        department_id:editDutyArea==="Department"&&editDepartment?Number(editDepartment):null,
         zone_label: editZoneLabel.trim() || null,
         is_on_call: editIsOnCall,
         notes: editNotes.trim() || null
@@ -947,7 +956,7 @@ export const SupportRoster: React.FC<SupportRosterProps> = ({
                                   key={duty.roster_id}
                                   onClick={() => {
                                     setSelectedDutyForEdit(duty);
-                                    setEditDutyArea(duty.duty_area);
+                                    setEditDutyArea(duty.duty_area);setEditWard(duty.ward_id?String(duty.ward_id):"");setEditDepartment(duty.department_id?String(duty.department_id):"");
                                     setEditZoneLabel(duty.zone_label || "");
                                     setEditIsOnCall(duty.is_on_call);
                                     setEditNotes(duty.notes || "");
@@ -1780,14 +1789,14 @@ export const SupportRoster: React.FC<SupportRosterProps> = ({
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "4px" }}>
                   {isUrdu ? "مقام / زون لیبل:" : "Zone / Gate Label:"}
                 </label>
-                <input
+                <>{assignDutyArea==='Ward'&&<label>Ward / وارڈ<DirectoryPicker path="/beds/matrix?include_beds=false" idField="ward_id" list="wards" value={assignWard} onChange={e=>setAssignWard(e.target.value)} data-help="support_roster.input_assign_zone_label"/></label>}{assignDutyArea==='Department'&&<label>Department / شعبہ<DirectoryPicker path="/admin/departments" idField="department_id" value={assignDepartment} onChange={e=>setAssignDepartment(e.target.value)} data-help="support_roster.input_assign_zone_label"/></label>}<input
                   type="text"
                   value={assignZoneLabel}
                   onChange={e => setAssignZoneLabel(e.target.value)}
                   placeholder="e.g. Zone A - Main Gate"
                   data-help="support_roster.input_assign_zone_label"
                   style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
+                /></>
               </div>
             </div>
 
@@ -1905,13 +1914,13 @@ export const SupportRoster: React.FC<SupportRosterProps> = ({
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "4px" }}>
                   {isUrdu ? "مقام / زون لیبل:" : "Zone / Gate Label:"}
                 </label>
-                <input
+                <>{editDutyArea==='Ward'&&<label>Ward / وارڈ<DirectoryPicker path="/beds/matrix?include_beds=false" idField="ward_id" list="wards" value={editWard} onChange={e=>setEditWard(e.target.value)} data-help="support_roster.input_edit_zone_label"/></label>}{editDutyArea==='Department'&&<label>Department / شعبہ<DirectoryPicker path="/admin/departments" idField="department_id" value={editDepartment} onChange={e=>setEditDepartment(e.target.value)} data-help="support_roster.input_edit_zone_label"/></label>}<input
                   type="text"
                   value={editZoneLabel}
                   onChange={e => setEditZoneLabel(e.target.value)}
                   data-help="support_roster.input_edit_zone_label"
                   style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
+                /></>
               </div>
             </div>
 

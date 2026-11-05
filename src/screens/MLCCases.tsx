@@ -1,3 +1,5 @@
+import {ConsentScanUpload} from "./ConsentScanUpload";
+import {DirectoryPicker} from "../DirectoryPicker";
 import React, { useEffect, useState, useMemo } from "react";
 import {
   Empty,
@@ -102,6 +104,8 @@ export function MLCCases({
   const [mlrNumber, setMlrNumber] = useState<string>("");
   const [mlrIssuedAt, setMlrIssuedAt] = useState<string>("");
   const [mlrReferredToId, setMlrReferredToId] = useState<number | null>(null);
+  const [scanPending,setScanPending]=useState(false);
+  const [mlrDocument,setMlrDocument]=useState<number|null>(null);
   const [mlrNote, setMlrNote] = useState<string>("");
 
   // Case Close Form
@@ -243,9 +247,11 @@ export function MLCCases({
 
   // Handle case selection
   async function handleSelectCase(mlcId: number, openModal = true) {
+    if(scanPending||write.blocked)return;
     try {
       const fullCase = await getCase(mlcId);
       setSelectedCase(fullCase);
+      if(selectedCase?.mlc_id!==fullCase.mlc_id)setMlrDocument(fullCase.mlr_document_id);
       // Initialize detail state
       setEditAllegedHistory(fullCase.alleged_history || "");
       setEditHistoryGivenBy(fullCase.history_given_by || "");
@@ -272,8 +278,8 @@ export function MLCCases({
 
     const payload: MlcOpenIn = {
       patient_id: pid,
-      ticket_id: openTicketId.trim() ? parseInt(openTicketId, 10) : null,
-      admission_id: openAdmissionId.trim() ? parseInt(openAdmissionId, 10) : null,
+
+
       case_type_id: ctid,
       brought_by: openBroughtBy,
       brought_by_name: openBroughtByName.trim() || null,
@@ -306,7 +312,7 @@ export function MLCCases({
   // Handle updating alleged history and findings
   function handleUpdateFindingsSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!selectedCase) return;
+    if (!selectedCase||scanPending||write.blocked) return;
 
     const payload: MlcUpdateIn = {
       alleged_history: editAllegedHistory.trim() || null,
@@ -337,6 +343,7 @@ export function MLCCases({
 
     const payload: MlcUpdateIn = {
       mlr_status: mlrStatus,
+      mlr_document_id:mlrDocument,
       mlr_number: mlrStatus === "IssuedHere" ? mlrNumber.trim() || null : null,
       mlr_issued_at: mlrStatus === "IssuedHere" && mlrIssuedAt ? `${mlrIssuedAt}T00:00:00Z` : null,
       referred_to_id: mlrStatus === "Referred" ? mlrReferredToId : null,
@@ -457,7 +464,7 @@ export function MLCCases({
   }
 
   return (
-    <div className="container-fluid p-3" data-screen-id={screenId} style={{ minHeight: "100vh" }}>
+    <div data-write-pending={write.blocked||scanPending} data-unsaved={!!selectedCase&&mlrDocument!==selectedCase.mlr_document_id} className="container-fluid p-3" data-screen-id={screenId} style={{ minHeight: "100vh" }}>
       {/* Retiring / Service View Banner (rule:81b46f9cf6) */}
       {view.banner && (
         <div className="alert alert-warning d-flex align-items-center mb-3" role="alert">
@@ -828,7 +835,7 @@ export function MLCCases({
                 <button
                   type="button"
                   className="btn-close btn-close-white"
-                  onClick={() => setShowDetailModal(false)}
+                  onClick={() => {if(!scanPending&&!write.blocked)setShowDetailModal(false);}}
                   aria-label="Close"
                   data-help="mlc_cases.btn_close_detail_modal"
                 ></button>
@@ -1141,6 +1148,7 @@ export function MLCCases({
                   <div className="card-body p-3">
                     {selectedCase.status === "Open" && canManage ? (
                       <form onSubmit={handleUpdateMlrSubmit}>
+      {selectedCase&&user.permissions.includes('patient.document.upload')&&<ConsentScanUpload key={selectedCase.patient_id} patientId={selectedCase.patient_id} consentNumber={selectedCase.mlc_number} docType="MedicoLegalReport" disabled={write.blocked} onPending={setScanPending} onUploaded={v=>setMlrDocument(v.document_id)}/>}
                         <div className="row g-2 align-items-end mb-2">
                           <div className="col-12 col-md-3">
                             <label className="form-label small fw-bold">
@@ -1230,7 +1238,7 @@ export function MLCCases({
                             <button
                               type="submit"
                               className="btn btn-sm btn-outline-primary w-100"
-                              disabled={write.busy}
+                                disabled={write.blocked||scanPending}
                               data-help="mlc_cases.btn_update_mlr"
                             >
                               💾 {t("Save MLR Settlement", "ایم ایل آر تصفیہ محفوظ کریں")}
@@ -1371,7 +1379,7 @@ export function MLCCases({
                 <button
                   type="button"
                   className="btn btn-sm btn-secondary"
-                  onClick={() => setShowDetailModal(false)}
+                  onClick={() => {if(!scanPending&&!write.blocked)setShowDetailModal(false);}}
                   data-help="mlc_cases.btn_footer_close_detail"
                 >
                   {t("Close", "بند کریں")}
@@ -1419,49 +1427,23 @@ export function MLCCases({
                   <div className="row g-2 mb-2">
                     <div className="col-12 col-md-4">
                       <label className="form-label small fw-bold">
-                        {t("Patient ID:", "مریض کا آئی ڈی:")} <span className="text-danger">*</span>
+                        {t("Patient:", "مریض:")} <span className="text-danger">*</span>
                       </label>
-                      <input
-                        type="number"
+                      <DirectoryPicker
                         className={`form-control form-control-sm ${openFormErrors.patient_id ? "is-invalid" : ""}`}
                         value={openPatientId}
                         onChange={(e) => setOpenPatientId(e.target.value)}
-                        placeholder="e.g. 1"
                         data-help="mlc_cases.input_patient_id"
                         required
-                      />
+                       path="/patients/search" idField="patient_id" search />
                       {openFormErrors.patient_id && (
                         <div className="invalid-feedback">{openFormErrors.patient_id}</div>
                       )}
                     </div>
 
-                    <div className="col-6 col-md-4">
-                      <label className="form-label small fw-bold">
-                        {t("Ticket ID (optional):", "پرچی آئی ڈی:")}
-                      </label>
-                      <input
-                        type="number"
-                        className="form-control form-control-sm"
-                        value={openTicketId}
-                        onChange={(e) => setOpenTicketId(e.target.value)}
-                        placeholder="e.g. 10"
-                        data-help="mlc_cases.input_ticket_id"
-                      />
-                    </div>
 
-                    <div className="col-6 col-md-4">
-                      <label className="form-label small fw-bold">
-                        {t("Admission ID (optional):", "داخلہ آئی ڈی:")}
-                      </label>
-                      <input
-                        type="number"
-                        className="form-control form-control-sm"
-                        value={openAdmissionId}
-                        onChange={(e) => setOpenAdmissionId(e.target.value)}
-                        placeholder="e.g. 5"
-                        data-help="mlc_cases.input_admission_id"
-                      />
-                    </div>
+
+
                   </div>
 
                   <div className="row g-2 mb-2">

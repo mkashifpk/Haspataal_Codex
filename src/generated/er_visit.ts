@@ -249,7 +249,7 @@ export interface MlcOpenIn {
   alleged_history: string;
   history_given_by?: string | null;
   examination_findings?: string | null;
-  /** Required when the police brought the patient */
+  /** Required when the police brought the patient (GET /mlc/contacts, contact_type PoliceStation) */
   police_station_id?: number | null;
   police_reference?: string | null;
   investigating_officer?: string | null;
@@ -363,6 +363,18 @@ export interface PatientDocumentUploadOut {
   uploaded_at: string;
 }
 
+export interface MlcContactOut {
+  contact_id: number;
+  contact_type: "PoliceStation" | "MlrHospital" | "ReferralHospital" | "HealthOffice" | "TraumaCentre" | "BloodBank" | "RescueService" | "FireBrigade" | "PoliceEmergency" | "Ambulance" | "SocialService";
+  name: string;
+  district: string | null;
+  phone: string | null;
+  alt_phone: string | null;
+  address: string | null;
+  notes: string | null;
+  is_active: boolean;
+}
+
 /** One ER visit — GET /api/v1/er/visits/{er_visit_id} (who may call: holders of er.visit.view). */
 export function getVisit(er_visit_id: number): Promise<ErVisitDetailOut> {
   return api<ErVisitDetailOut>("GET", `/er/visits/${er_visit_id}`, undefined);
@@ -416,4 +428,9 @@ export function uploadDocumentPatientsDocuments(patient_id: number, body: FormDa
 /** Download a patient document — GET /api/v1/patient-documents/{document_id}/download (who may call: holders of patient.document.view). */
 export function downloadDocumentPatientDocuments(document_id: number): Promise<unknown> {
   return api<unknown>("GET", `/patient-documents/${document_id}/download`, undefined);
+}
+
+/** Police stations and MLR hospitals (contact list) — GET /api/v1/mlc/contacts (who may call: holders of mlc.case.manage or mlc.register.view or mlc.setup.manage). */
+export function contacts(query?: { contact_type?: "PoliceStation" | "MlrHospital" | "ReferralHospital" | "HealthOffice" | "TraumaCentre" | "BloodBank" | "RescueService" | "FireBrigade" | "PoliceEmergency" | "Ambulance" | "SocialService" | null; include_inactive?: boolean }): Promise<MlcContactOut[]> {
+  return api<MlcContactOut[]>("GET", withQuery(`/mlc/contacts`, query), undefined);
 }

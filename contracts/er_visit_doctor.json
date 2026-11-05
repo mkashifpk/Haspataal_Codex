@@ -1,7 +1,7 @@
 {
   "screen_id": "er_visit_doctor",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -290,10 +290,13 @@
       }
     ],
     "related_workflows": [
+      "clinical-and-prescriptions",
       "consent",
       "deaths-and-medico-legal-cases",
       "emergency-department",
+      "external-referrals",
       "inpatient-and-discharge",
+      "maternity-and-newborns",
       "opd-reception"
     ],
     "service": {
@@ -318,7 +321,7 @@
     "workspace": "doctor",
     "phase": "P5",
     "position": 101,
-    "points": 84,
+    "points": 87,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -358,71 +361,77 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 84,
+    "points": 87,
     "items": [
       {
         "id": "ep:GET /er/visits/{er_visit_id}",
         "label": "GET /er/visits/{er_visit_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /er/triage-scale",
         "label": "GET /er/triage-scale",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /er/visits/{er_visit_id}/triage",
         "label": "POST /er/visits/{er_visit_id}/triage",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /er/visits/{er_visit_id}/medico-legal",
         "label": "POST /er/visits/{er_visit_id}/medico-legal",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /er/visits/{er_visit_id}/stage",
         "label": "POST /er/visits/{er_visit_id}/stage",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /er/visits/{er_visit_id}/depart",
         "label": "POST /er/visits/{er_visit_id}/depart",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /mlc/case-types",
         "label": "GET /mlc/case-types",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /mlc/cases",
         "label": "POST /mlc/cases",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /patients/{patient_id}/documents",
         "label": "GET /patients/{patient_id}/documents",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /patients/{patient_id}/documents",
         "label": "POST /patients/{patient_id}/documents",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /patient-documents/{document_id}/download",
         "label": "GET /patient-documents/{document_id}/download",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /mlc/contacts",
+        "label": "GET /mlc/contacts",
         "points": 3,
         "claimed": false
       },
@@ -430,97 +439,97 @@
         "id": "ev:er.visit.updated",
         "label": "er.visit.updated",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:b985ad38dc",
         "label": "Triage form from GET /er/triage-scale: the vital signs, then per level the danger signs as tick boxes (level 1 on top, in its colour). Show the level the ticks and vital signs give as the nurse types; POST sends `signs` (discriminator ids) and the vital signs, and the server decides the suggested level.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:bd91e95b22",
         "label": "A level other than the suggested one: ask for the reason (VALIDATION_ERROR carries details.suggested_level and details.matched). Show the whole triage history with each nurse's stamp; re-triage when the condition changes.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:50175606cd",
         "label": "The medico-legal checklist is a required yes / no on every triage, with the case type (GET /mlc/case-types) when yes; then offer 'Open medico-legal case' (POST /mlc/cases with the ticket or admission). After a Code Red: POST /er/visits/{er_visit_id}/medico-legal.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:436225bf5c",
         "label": "Stage buttons: With doctor, Observation, Waiting for referral (the note says where and why). Waiting for admission and for a bed follow the admission (Admit from the consultation screen; the admissions desk's waitlist).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:1c52f88e02",
         "label": "Departure form (MSDS 20) by disposition: Discharged (condition, follow-up advice), Referred (condition, reason, receiving hospital), LAMA (who signed the statement, or when the absence was noticed), Discharged on request (who signed the statement), Left without being seen (when the absence was noticed; not after a doctor saw the patient). Admitted, Died and Brought dead are recorded by themselves (the admission, POST /patients/{id}/death).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:231e22e6bd",
         "label": "After the departure the visit is read-only (ER_VISIT_DEPARTED). The emergency ticket completes with the note; completing it before the departure: ER_VISIT_OPEN.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:7571033b1d",
         "label": "Upload PDF, JPEG or PNG (multipart/form-data, at most MAX_UPLOAD_MB): UNSUPPORTED_MEDIA_TYPE for another type, a PDF as the Photo or a file that is not what it claims; VALIDATION_ERROR for a damaged image, an outside document without its facility or a future date; PAYLOAD_TOO_LARGE (details.max_bytes) above the limit.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:794ff452da",
         "label": "'Reports brought by the patient' (optional, any number): file (PDF, or a JPEG/PNG scan or photo of the paper), type (LabReport, Imaging, DischargeSummary, Prescription, ReferralLetter, Other), title (the test or report, e.g. 'CBC'), issued by (source_facility, required) and the date on it (document_date) → POST /patients/{patient_id}/documents with is_outside=true. List them labelled 'Outside: <facility>, <date>', apart from this hospital's own results: they are never shown or counted as this hospital's lab or imaging results.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:abab0015cb",
         "label": "Reports and referral letters the patient brings to the ER are attached here, by the triage nurse too (decisions 47): POST /patients/{patient_id}/documents with is_outside, source_facility and document_date.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:c8b716e97e",
         "label": "Exists for the service emergency_department (work): show it as GET /establishment views.screens says for screen_id er_visit_doctor (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
         "label": "Test plan passed",
         "points": 4,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -550,13 +559,13 @@
         "id": "q:character",
         "label": "Design principles applied",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:editor",
         "label": "Editor's pass",
         "points": 2,
-        "claimed": false
+        "claimed": true
       }
     ],
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
@@ -880,40 +889,40 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 10.0,
-            "maximum": 300.0
+            "minimum": 10,
+            "maximum": 300
           },
           {
             "pointer": "/respiratory_rate",
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 2.0,
-            "maximum": 80.0
+            "minimum": 2,
+            "maximum": 80
           },
           {
             "pointer": "/bp_systolic",
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 30.0,
-            "maximum": 300.0
+            "minimum": 30,
+            "maximum": 300
           },
           {
             "pointer": "/bp_diastolic",
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 10.0,
-            "maximum": 200.0
+            "minimum": 10,
+            "maximum": 200
           },
           {
             "pointer": "/spo2",
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 30.0,
-            "maximum": 100.0
+            "minimum": 30,
+            "maximum": 100
           },
           {
             "pointer": "/temp_c",
@@ -926,8 +935,8 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 3.0,
-            "maximum": 15.0,
+            "minimum": 3,
+            "maximum": 15,
             "description": "Glasgow coma score"
           },
           {
@@ -935,8 +944,8 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 0.0,
-            "maximum": 10.0
+            "minimum": 0,
+            "maximum": 10
           },
           {
             "pointer": "/blood_glucose",
@@ -958,8 +967,8 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 1.0,
-            "maximum": 5.0,
+            "minimum": 1,
+            "maximum": 5,
             "description": "Default: the suggested level; another level needs override_reason"
           },
           {
@@ -1895,7 +1904,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "Required when the police brought the patient"
+            "description": "Required when the police brought the patient (GET /mlc/contacts, contact_type PoliceStation)"
           },
           {
             "pointer": "/police_reference",
@@ -2373,6 +2382,146 @@
           "application/octet-stream"
         ]
       }
+    },
+    {
+      "endpoint": "GET /mlc/contacts",
+      "summary": "Police stations and MLR hospitals (contact list)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "mlc.case.manage",
+          "mlc.register.view",
+          "mlc.setup.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of mlc.case.manage or mlc.register.view or mlc.setup.manage",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "contact_type",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "PoliceStation",
+                  "MlrHospital",
+                  "ReferralHospital",
+                  "HealthOffice",
+                  "TraumaCentre",
+                  "BloodBank",
+                  "RescueService",
+                  "FireBrigade",
+                  "PoliceEmergency",
+                  "Ambulance",
+                  "SocialService"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Type"
+          }
+        },
+        {
+          "name": "include_inactive",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Include Inactive"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_MlcContactOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "contact_type",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PoliceStation",
+              "MlrHospital",
+              "ReferralHospital",
+              "HealthOffice",
+              "TraumaCentre",
+              "BloodBank",
+              "RescueService",
+              "FireBrigade",
+              "PoliceEmergency",
+              "Ambulance",
+              "SocialService"
+            ]
+          },
+          {
+            "name": "include_inactive",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
     }
   ],
   "realtime": {
@@ -2407,7 +2556,8 @@
           "GET /er/visits/{er_visit_id}",
           "GET /er/triage-scale",
           "GET /mlc/case-types",
-          "GET /patients/{patient_id}/documents"
+          "GET /patients/{patient_id}/documents",
+          "GET /mlc/contacts"
         ]
       }
     ],
@@ -2839,6 +2989,36 @@
       "labels": {
         "Open": "Open",
         "Closed": "Closed"
+      }
+    },
+    {
+      "values": [
+        "PoliceStation",
+        "MlrHospital",
+        "ReferralHospital",
+        "HealthOffice",
+        "TraumaCentre",
+        "BloodBank",
+        "RescueService",
+        "FireBrigade",
+        "PoliceEmergency",
+        "Ambulance",
+        "SocialService"
+      ],
+      "column": "medico_legal_contacts.contact_type",
+      "used_at": "GET /mlc/contacts[].contact_type",
+      "labels": {
+        "PoliceStation": "Police station",
+        "MlrHospital": "Mlr hospital",
+        "ReferralHospital": "Referral hospital",
+        "HealthOffice": "Health office",
+        "TraumaCentre": "Trauma centre",
+        "BloodBank": "Blood bank",
+        "RescueService": "Rescue service",
+        "FireBrigade": "Fire brigade",
+        "PoliceEmergency": "Police emergency",
+        "Ambulance": "Ambulance",
+        "SocialService": "Social service"
       }
     },
     {
@@ -3463,6 +3643,36 @@
           "triage_nurse",
           "ward_nurse"
         ]
+      },
+      {
+        "id": "case:GET /mlc/contacts",
+        "call": "GET /api/v1/mlc/contacts",
+        "summary": "Police stations and MLR hospitals (contact list)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ]
       }
     ],
     "service_cases": [
@@ -3524,8 +3734,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -3688,6 +3898,19 @@
         ],
         "permissions_mode": "all",
         "access": null
+      },
+      {
+        "id": "er_visit_doctor::GET /mlc/contacts",
+        "task": "Police stations and MLR hospitals (contact list)",
+        "call": "GET /mlc/contacts",
+        "is_action": false,
+        "permissions": [
+          "mlc.case.manage",
+          "mlc.register.view",
+          "mlc.setup.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
       }
     ],
     "rules_to_explain": [
@@ -3827,6 +4050,11 @@
   },
   "workflows": [
     {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
       "slug": "consent",
       "title": "Consent (MSDS)",
       "recipe": "get_workflow_recipe('consent')"
@@ -3842,9 +4070,19 @@
       "recipe": "get_workflow_recipe('emergency-department')"
     },
     {
+      "slug": "external-referrals",
+      "title": "External referrals and the emergency contact list",
+      "recipe": "get_workflow_recipe('external-referrals')"
+    },
+    {
       "slug": "inpatient-and-discharge",
       "title": "Admission, beds, nursing & discharge",
       "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "maternity-and-newborns",
+      "title": "Maternity and newborns",
+      "recipe": "get_workflow_recipe('maternity-and-newborns')"
     },
     {
       "slug": "opd-reception",
@@ -4225,6 +4463,33 @@
         "content_type": "application/pdf",
         "bytes": 28
       }
+    },
+    "GET /mlc/contacts": {
+      "request": {
+        "path": "/api/v1/mlc/contacts"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "contact_id": 2,
+              "contact_type": "MlrHospital",
+              "name": "District Headquarters Hospital",
+              "district": "Lahore",
+              "phone": null,
+              "alt_phone": null,
+              "address": null,
+              "notes": null,
+              "is_active": true
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-28T21:43:04.413300+00:00"
+          },
+          "request_id": "070f596e36b34426ace5f31a7744b295"
+        }
+      }
     }
   },
   "schemas": {
@@ -4493,6 +4758,31 @@
         "request_id"
       ],
       "title": "Envelope[list[MlcCaseTypeOut]]"
+    },
+    "Envelope_list_MlcContactOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/MlcContactOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[MlcContactOut]]"
     },
     "Envelope_list_PatientDocumentOut__": {
       "properties": {
@@ -4923,8 +5213,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 300.0,
-              "minimum": 10.0
+              "maximum": 300,
+              "minimum": 10
             },
             {
               "type": "null"
@@ -4936,8 +5226,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 80.0,
-              "minimum": 2.0
+              "maximum": 80,
+              "minimum": 2
             },
             {
               "type": "null"
@@ -4949,8 +5239,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 300.0,
-              "minimum": 30.0
+              "maximum": 300,
+              "minimum": 30
             },
             {
               "type": "null"
@@ -4962,8 +5252,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 200.0,
-              "minimum": 10.0
+              "maximum": 200,
+              "minimum": 10
             },
             {
               "type": "null"
@@ -4975,8 +5265,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 100.0,
-              "minimum": 30.0
+              "maximum": 100,
+              "minimum": 30
             },
             {
               "type": "null"
@@ -4988,8 +5278,8 @@
           "anyOf": [
             {
               "type": "number",
-              "maximum": 45.0,
-              "minimum": 25.0
+              "maximum": 45,
+              "minimum": 25
             },
             {
               "type": "string",
@@ -5005,8 +5295,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 15.0,
-              "minimum": 3.0
+              "maximum": 15,
+              "minimum": 3
             },
             {
               "type": "null"
@@ -5019,8 +5309,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 10.0,
-              "minimum": 0.0
+              "maximum": 10,
+              "minimum": 0
             },
             {
               "type": "null"
@@ -5032,8 +5322,8 @@
           "anyOf": [
             {
               "type": "number",
-              "maximum": 1000.0,
-              "minimum": 10.0
+              "maximum": 1000,
+              "minimum": 10
             },
             {
               "type": "string",
@@ -5059,8 +5349,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 5.0,
-              "minimum": 1.0
+              "maximum": 5,
+              "minimum": 1
             },
             {
               "type": "null"
@@ -6836,6 +7126,107 @@
       ],
       "title": "MlcCaseTypeOut"
     },
+    "MlcContactOut": {
+      "properties": {
+        "contact_id": {
+          "type": "integer",
+          "title": "Contact Id"
+        },
+        "contact_type": {
+          "type": "string",
+          "enum": [
+            "PoliceStation",
+            "MlrHospital",
+            "ReferralHospital",
+            "HealthOffice",
+            "TraumaCentre",
+            "BloodBank",
+            "RescueService",
+            "FireBrigade",
+            "PoliceEmergency",
+            "Ambulance",
+            "SocialService"
+          ],
+          "title": "Contact Type"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "district": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "District"
+        },
+        "phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Phone"
+        },
+        "alt_phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Alt Phone"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        }
+      },
+      "type": "object",
+      "required": [
+        "contact_id",
+        "contact_type",
+        "name",
+        "district",
+        "phone",
+        "alt_phone",
+        "address",
+        "notes",
+        "is_active"
+      ],
+      "title": "MlcContactOut"
+    },
     "MlcEvidenceOut": {
       "properties": {
         "evidence_id": {
@@ -7024,7 +7415,7 @@
             }
           ],
           "title": "Police Station Id",
-          "description": "Required when the police brought the patient"
+          "description": "Required when the police brought the patient (GET /mlc/contacts, contact_type PoliceStation)"
         },
         "police_reference": {
           "anyOf": [

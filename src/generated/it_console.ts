@@ -66,7 +66,7 @@ export interface WardIn {
   ward_type: "General" | "Private" | "SemiPrivate" | "ICU" | "CCU" | "NICU" | "Surgical" | "Pediatric" | "Maternity" | "Emergency" | "Isolation" | "Other";
   gender_restriction?: "male" | "female" | "any";
   department_id?: number | null;
-  /** Per bed-day charge (service catalog, category RoomCharge) */
+  /** Per bed-day charge (service catalog, category RoomCharge) (GET /finance/service-catalog?category=RoomCharge) */
   room_charge_service_id?: number | null;
   is_active?: boolean;
 }
@@ -554,6 +554,7 @@ export interface FirstOwnerOut {
 export interface ChangeRequestIn {
   kind: "Setting" | "UserRoles" | "RolePermissions";
   setting_key?: string | null;
+  /** kind UserRoles: the user (GET /admin/users) */
   target_user_id?: number | null;
   target_role_code?: string | null;
   /** Setting: the new value; UserRoles: role codes; RolePermissions: permission codes */
@@ -576,6 +577,20 @@ export interface AdminChangeRequestOut {
   requested_by_name: string;
   requested_at: string;
   decided_at: string | null;
+}
+
+export interface ServiceListItemOut {
+  service_id: number;
+  code: string;
+  name: string;
+  category: "OPD" | "IPD" | "OT" | "Imaging" | "RoomCharge" | "Procedure" | "Other";
+  department_id: number | null;
+  doctor_id: number | null;
+  default_price: number;
+  is_active: boolean;
+  row_version: number;
+  department_name: string | null;
+  doctor_name: string | null;
 }
 
 /** User with roles, lockout and session info — GET /api/v1/admin/users/{user_id} (who may call: holders of admin.user.manage or admin.user.provision). */
@@ -796,4 +811,9 @@ export function listChangeRequests(query?: { status?: string | null; limit?: num
 /** One control-setting or privileged-access change request — GET /api/v1/admin/change-requests/{change_request_id} (who may call: holders of admin.settings.manage or admin.user.manage or admin.role_matrix.update or approval.policy_change.approve or approval.privileged_access.approve). */
 export function getChangeRequest(change_request_id: number): Promise<AdminChangeRequestOut> {
   return api<AdminChangeRequestOut>("GET", `/admin/change-requests/${change_request_id}`, undefined);
+}
+
+/** Hospital service prices (lab prices live in the lab catalogue) — GET /api/v1/finance/service-catalog (who may call: any logged-in user). */
+export function serviceCatalog(query?: { category?: string | null }): Promise<ServiceListItemOut[]> {
+  return api<ServiceListItemOut[]>("GET", withQuery(`/finance/service-catalog`, query), undefined);
 }

@@ -1,0 +1,1727 @@
+{
+  "screen": "duty_roster_hr",
+  "title": "Duty rosters (all staff)",
+  "cases": [
+    {
+      "id": "case:GET /rosters",
+      "call": "GET /api/v1/rosters",
+      "summary": "Roster entries for a date range (planner grid, a week by default)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ops_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters",
+            "query": {
+              "date_from": "2026-09-29",
+              "include_cancelled": true
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "date_from": "2026-09-29",
+                "date_to": "2026-10-05",
+                "entries": [
+                  {
+                    "roster_id": 1,
+                    "employee_id": 1,
+                    "emp_number": "EMP-2026-0001",
+                    "full_name": "Nurse Amna",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "roster_date": "2026-10-01",
+                    "shift_pattern_id": 1,
+                    "shift_name": "Morning",
+                    "start_time": "08:00:00",
+                    "end_time": "14:00:00",
+                    "duty_area": "Ward",
+                    "ward_id": 1,
+                    "ward_name": "Roster Ward",
+                    "department_id": null,
+                    "department_name": null,
+                    "zone_label": null,
+                    "is_on_call": false,
+                    "notes": null,
+                    "status": "Cancelled",
+                    "cancel_reason": "Worked by Nurse Bushra (duty swap 1)",
+                    "swap_id": null,
+                    "row_version": 2,
+                    "bed_ids": []
+                  },
+                  {
+                    "roster_id": 4,
+                    "employee_id": 7,
+                    "emp_number": "EMP-2026-0007",
+                    "full_name": "Nurse Bushra",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "roster_date": "2026-10-01",
+                    "shift_pattern_id": 1,
+                    "shift_name": "Morning",
+                    "start_time": "08:00:00",
+                    "end_time": "14:00:00",
+                    "duty_area": "Ward",
+                    "ward_id": 1,
+                    "ward_name": "Roster Ward",
+                    "department_id": null,
+                    "department_name": null,
+                    "zone_label": null,
+                    "is_on_call": false,
+                    "notes": null,
+                    "status": "Active",
+                    "cancel_reason": null,
+                    "swap_id": 1,
+                    "row_version": 1,
+                    "bed_ids": []
+                  },
+                  {
+                    "roster_id": 3,
+                    "employee_id": 8,
+                    "emp_number": "EMP-2026-0008",
+                    "full_name": "Nurse Kiran",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "roster_date": "2026-10-01",
+                    "shift_pattern_id": 1,
+                    "shift_name": "Morning",
+                    "start_time": "08:00:00",
+                    "end_time": "14:00:00",
+                    "duty_area": "Ward",
+                    "ward_id": 1,
+                    "ward_name": "Roster Ward",
+                    "department_id": null,
+                    "department_name": null,
+                    "zone_label": null,
+                    "is_on_call": false,
+                    "notes": null,
+                    "status": "Active",
+                    "cancel_reason": null,
+                    "swap_id": null,
+                    "row_version": 1,
+                    "bed_ids": []
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:41.609824+00:00"
+              },
+              "request_id": "57fec44be40b471faada1980ea488e2f"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /rosters/staff",
+      "call": "GET /api/v1/rosters/staff",
+      "summary": "Staff I may roster, with default shift and approved leave in the range",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters/staff"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "date_from": "2026-09-29",
+                "date_to": "2026-10-05",
+                "shift_patterns": [
+                  {
+                    "shift_pattern_id": 1,
+                    "name": "Morning",
+                    "start_time": "08:00:00",
+                    "end_time": "14:00:00",
+                    "grace_minutes": 10,
+                    "half_day_after_minutes": 120,
+                    "is_active": true,
+                    "row_version": 1
+                  },
+                  {
+                    "shift_pattern_id": 2,
+                    "name": "Evening",
+                    "start_time": "14:00:00",
+                    "end_time": "20:00:00",
+                    "grace_minutes": 10,
+                    "half_day_after_minutes": 120,
+                    "is_active": true,
+                    "row_version": 1
+                  },
+                  {
+                    "shift_pattern_id": 3,
+                    "name": "Night",
+                    "start_time": "20:00:00",
+                    "end_time": "08:00:00",
+                    "grace_minutes": 10,
+                    "half_day_after_minutes": 120,
+                    "is_active": true,
+                    "row_version": 1
+                  }
+                ],
+                "holidays": [],
+                "staff": [
+                  {
+                    "employee_id": 2,
+                    "emp_number": "EMP-2026-0002",
+                    "full_name": "Sweeper Aslam",
+                    "designation": "Officer",
+                    "staff_category": "SupportZeroInterface",
+                    "department_id": null,
+                    "department_name": null,
+                    "default_shift_pattern_id": null,
+                    "default_weekly_off_days": [],
+                    "leave": []
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:48:36.833443+00:00"
+              },
+              "request_id": "3741f41532ed481b8a8b99eae1532511"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /rosters",
+      "call": "POST /api/v1/rosters",
+      "summary": "Roster one or many duties (all or nothing)",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters",
+            "body": {
+              "entries": [
+                {
+                  "employee_id": 1,
+                  "roster_date": "2026-10-05",
+                  "shift_pattern_id": 1,
+                  "duty_area": "Ward",
+                  "ward_id": 1
+                },
+                {
+                  "employee_id": 1,
+                  "roster_date": "2026-10-06",
+                  "shift_pattern_id": 1,
+                  "duty_area": "Ward",
+                  "ward_id": 1
+                },
+                {
+                  "employee_id": 1,
+                  "roster_date": "2026-10-07",
+                  "shift_pattern_id": 1,
+                  "duty_area": "Ward",
+                  "ward_id": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": [
+                {
+                  "roster_id": 1,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-05",
+                  "shift_pattern_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": []
+                },
+                {
+                  "roster_id": 2,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-06",
+                  "shift_pattern_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": []
+                },
+                {
+                  "roster_id": 3,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-07",
+                  "shift_pattern_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": []
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-29T02:40:30.471928+00:00"
+              },
+              "request_id": "d8f8acfaaa99445fa8badd0567d800d8"
+            }
+          },
+          "errors_seen": [
+            "ROSTER_CONFLICT",
+            "ROSTER_DATE_CLOSED",
+            "ROSTER_EMPLOYEE_INACTIVE",
+            "ROSTER_ON_LEAVE",
+            "ROSTER_OUT_OF_SCOPE",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "notification.created",
+            "roster.changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "REFERENCE_NOT_FOUND",
+        "ROSTER_CONFLICT",
+        "ROSTER_DATE_CLOSED",
+        "ROSTER_EMPLOYEE_INACTIVE",
+        "ROSTER_ON_LEAVE",
+        "ROSTER_OUT_OF_SCOPE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:PATCH /rosters/{roster_id}",
+      "call": "PATCH /api/v1/rosters/{roster_id}",
+      "summary": "Change a duty (shift, date, place, beds, on-call, notes)",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters/1",
+            "body": {
+              "shift_pattern_id": 2,
+              "zone_label": "Bay C",
+              "expected_version": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "roster_id": 1,
+                "employee_id": 1,
+                "emp_number": "EMP-2026-0001",
+                "full_name": "Nurse Amna",
+                "designation": "Officer",
+                "staff_category": "Nursing",
+                "roster_date": "2026-09-30",
+                "shift_pattern_id": 2,
+                "shift_name": "Evening",
+                "start_time": "14:00:00",
+                "end_time": "20:00:00",
+                "duty_area": "Ward",
+                "ward_id": 1,
+                "ward_name": "Roster Ward",
+                "department_id": null,
+                "department_name": null,
+                "zone_label": "Bay C",
+                "is_on_call": false,
+                "notes": null,
+                "status": "Active",
+                "cancel_reason": null,
+                "swap_id": null,
+                "row_version": 2,
+                "bed_ids": []
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:51:39.744265+00:00"
+              },
+              "request_id": "7c14df1b0b68482f8d5811ce70a86bae"
+            }
+          },
+          "errors_seen": [
+            "VERSION_CONFLICT"
+          ],
+          "events_emitted": [
+            "notification.created",
+            "roster.changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "REFERENCE_NOT_FOUND",
+        "ROSTER_CONFLICT",
+        "ROSTER_DATE_CLOSED",
+        "ROSTER_EMPLOYEE_INACTIVE",
+        "ROSTER_ENTRY_CANCELLED",
+        "ROSTER_ON_LEAVE",
+        "ROSTER_OUT_OF_SCOPE",
+        "VALIDATION_ERROR",
+        "VERSION_CONFLICT"
+      ],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    },
+    {
+      "id": "case:POST /rosters/{roster_id}/cancel",
+      "call": "POST /api/v1/rosters/{roster_id}/cancel",
+      "summary": "Cancel a duty (reason kept; never deleted)",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters/4/cancel",
+            "body": {
+              "reason": "Ward closed for repairs"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "roster_id": 4,
+                "employee_id": 1,
+                "emp_number": "EMP-2026-0001",
+                "full_name": "Nurse Amna",
+                "designation": "Officer",
+                "staff_category": "Nursing",
+                "roster_date": "2026-10-07",
+                "shift_pattern_id": 1,
+                "shift_name": "Morning",
+                "start_time": "08:00:00",
+                "end_time": "14:00:00",
+                "duty_area": "Department",
+                "ward_id": null,
+                "ward_name": null,
+                "department_id": null,
+                "department_name": null,
+                "zone_label": null,
+                "is_on_call": false,
+                "notes": null,
+                "status": "Cancelled",
+                "cancel_reason": "Ward closed for repairs",
+                "swap_id": null,
+                "row_version": 2,
+                "bed_ids": []
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:47.429381+00:00"
+              },
+              "request_id": "43194a475d1e46259f84fd48508b297a"
+            }
+          },
+          "errors_seen": [
+            "ROSTER_ENTRY_CANCELLED"
+          ],
+          "events_emitted": [
+            "notification.created",
+            "roster.changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ROSTER_DATE_CLOSED",
+        "ROSTER_ENTRY_CANCELLED",
+        "ROSTER_OUT_OF_SCOPE",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /rosters/copy",
+      "call": "POST /api/v1/rosters/copy",
+      "summary": "Repeat a period (e.g. last week) from a later date",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters/copy",
+            "body": {
+              "source_from": "2026-10-05",
+              "source_to": "2026-10-11",
+              "target_from": "2026-10-12",
+              "rotate_days": 1
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "created": [
+                  {
+                    "roster_id": 14,
+                    "employee_id": 1,
+                    "emp_number": "EMP-2026-0001",
+                    "full_name": "Nurse Amna",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "roster_date": "2026-10-13",
+                    "shift_pattern_id": 1,
+                    "shift_name": "Morning",
+                    "start_time": "08:00:00",
+                    "end_time": "14:00:00",
+                    "duty_area": "Ward",
+                    "ward_id": 1,
+                    "ward_name": "Roster Ward",
+                    "department_id": null,
+                    "department_name": null,
+                    "zone_label": null,
+                    "is_on_call": false,
+                    "notes": null,
+                    "status": "Active",
+                    "cancel_reason": null,
+                    "swap_id": null,
+                    "row_version": 1,
+                    "bed_ids": []
+                  },
+                  {
+                    "roster_id": 15,
+                    "employee_id": 7,
+                    "emp_number": "EMP-2026-0007",
+                    "full_name": "Nurse Bushra",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "roster_date": "2026-10-13",
+                    "shift_pattern_id": 2,
+                    "shift_name": "Evening",
+                    "start_time": "14:00:00",
+                    "end_time": "20:00:00",
+                    "duty_area": "Ward",
+                    "ward_id": 1,
+                    "ward_name": "Roster Ward",
+                    "department_id": null,
+                    "department_name": null,
+                    "zone_label": null,
+                    "is_on_call": false,
+                    "notes": null,
+                    "status": "Active",
+                    "cancel_reason": null,
+                    "swap_id": null,
+                    "row_version": 1,
+                    "bed_ids": []
+                  },
+                  {
+                    "roster_id": 16,
+                    "employee_id": 1,
+                    "emp_number": "EMP-2026-0001",
+                    "full_name": "Nurse Amna",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "roster_date": "2026-10-14",
+                    "shift_pattern_id": 1,
+                    "shift_name": "Morning",
+                    "start_time": "08:00:00",
+                    "end_time": "14:00:00",
+                    "duty_area": "Ward",
+                    "ward_id": 1,
+                    "ward_name": "Roster Ward",
+                    "department_id": null,
+                    "department_name": null,
+                    "zone_label": null,
+                    "is_on_call": false,
+                    "notes": null,
+                    "status": "Active",
+                    "cancel_reason": null,
+                    "swap_id": null,
+                    "row_version": 1,
+                    "bed_ids": []
+                  }
+                ],
+                "skipped": []
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:30.572642+00:00"
+              },
+              "request_id": "7fa5488d7e1f46b0bc4b24edb20c6f89"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "notification.created",
+            "roster.changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ROSTER_CONFLICT",
+        "ROSTER_DATE_CLOSED",
+        "ROSTER_EMPLOYEE_INACTIVE",
+        "ROSTER_ON_LEAVE",
+        "ROSTER_OUT_OF_SCOPE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /rosters/week",
+      "call": "GET /api/v1/rosters/week",
+      "summary": "Week check: rest days per person, staff per day and shift",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ops_admin",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters/week",
+            "query": {
+              "week_of": "2026-10-08",
+              "ward_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "week_start": "2026-10-05",
+                "week_end": "2026-10-11",
+                "rest_days_due": 1,
+                "staff_without_rest_day": 1,
+                "staff": [
+                  {
+                    "employee_id": 1,
+                    "emp_number": "EMP-2026-0001",
+                    "full_name": "Nurse Amna",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "department_name": null,
+                    "has_default_shift": false,
+                    "duty_dates": [
+                      "2026-10-05",
+                      "2026-10-06",
+                      "2026-10-07"
+                    ],
+                    "rest_dates": [
+                      "2026-10-11"
+                    ],
+                    "leave_dates": [],
+                    "working_days": 6,
+                    "extra_duty_days": 0,
+                    "status": "Ok"
+                  },
+                  {
+                    "employee_id": 7,
+                    "emp_number": "EMP-2026-0007",
+                    "full_name": "Nurse Bushra",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "department_name": null,
+                    "has_default_shift": false,
+                    "duty_dates": [
+                      "2026-10-05",
+                      "2026-10-06",
+                      "2026-10-07"
+                    ],
+                    "rest_dates": [],
+                    "leave_dates": [],
+                    "working_days": 7,
+                    "extra_duty_days": 1,
+                    "status": "NoRestDay"
+                  }
+                ],
+                "days": [
+                  {
+                    "day": "2026-10-05",
+                    "weekday": 1,
+                    "holiday_name": null,
+                    "on_duty": 2,
+                    "on_leave": 0,
+                    "resting": 0,
+                    "shifts": [
+                      {
+                        "shift_pattern_id": 1,
+                        "shift_name": "Morning",
+                        "start_time": "08:00:00",
+                        "end_time": "14:00:00",
+                        "staff": 1
+                      },
+                      {
+                        "shift_pattern_id": 2,
+                        "shift_name": "Evening",
+                        "start_time": "14:00:00",
+                        "end_time": "20:00:00",
+                        "staff": 1
+                      }
+                    ]
+                  },
+                  {
+                    "day": "2026-10-06",
+                    "weekday": 2,
+                    "holiday_name": null,
+                    "on_duty": 2,
+                    "on_leave": 0,
+                    "resting": 0,
+                    "shifts": [
+                      {
+                        "shift_pattern_id": 1,
+                        "shift_name": "Morning",
+                        "start_time": "08:00:00",
+                        "end_time": "14:00:00",
+                        "staff": 1
+                      },
+                      {
+                        "shift_pattern_id": 2,
+                        "shift_name": "Evening",
+                        "start_time": "14:00:00",
+                        "end_time": "20:00:00",
+                        "staff": 1
+                      }
+                    ]
+                  },
+                  {
+                    "day": "2026-10-07",
+                    "weekday": 3,
+                    "holiday_name": null,
+                    "on_duty": 2,
+                    "on_leave": 0,
+                    "resting": 0,
+                    "shifts": [
+                      {
+                        "shift_pattern_id": 1,
+                        "shift_name": "Morning",
+                        "start_time": "08:00:00",
+                        "end_time": "14:00:00",
+                        "staff": 1
+                      },
+                      {
+                        "shift_pattern_id": 2,
+                        "shift_name": "Evening",
+                        "start_time": "14:00:00",
+                        "end_time": "20:00:00",
+                        "staff": 1
+                      }
+                    ]
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:30.501411+00:00"
+              },
+              "request_id": "4694d41c32944c37b4ff9462048530b7"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /rosters/swaps",
+      "call": "GET /api/v1/rosters/swaps",
+      "summary": "Duty swaps of the staff I roster (open ones by default)",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters/swaps"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "swap_id": 1,
+                  "status": "Accepted",
+                  "reason": "Family emergency",
+                  "roster_id": 1,
+                  "return_roster_id": 2,
+                  "requester_employee_id": 1,
+                  "requester_name": "Nurse Amna",
+                  "covering_employee_id": 7,
+                  "covering_name": "Nurse Bushra",
+                  "staff_category": "Nursing",
+                  "requested_at": "2026-09-29T02:40:41.486972+00:00",
+                  "responded_at": "2026-09-29T02:40:41.533158+00:00",
+                  "response_note": "Happy to help",
+                  "responded_by_name": "Nurse Bushra",
+                  "decided_at": null,
+                  "decision_note": null,
+                  "decided_by_name": null,
+                  "closed_at": null,
+                  "cover_roster_id": null,
+                  "return_cover_roster_id": null,
+                  "row_version": 2,
+                  "kind": "Swap",
+                  "duty": {
+                    "roster_id": 1,
+                    "employee_id": 1,
+                    "emp_number": "EMP-2026-0001",
+                    "full_name": "Nurse Amna",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "roster_date": "2026-10-01",
+                    "shift_pattern_id": 1,
+                    "shift_name": "Morning",
+                    "start_time": "08:00:00",
+                    "end_time": "14:00:00",
+                    "duty_area": "Ward",
+                    "ward_id": 1,
+                    "ward_name": "Roster Ward",
+                    "department_id": null,
+                    "department_name": null,
+                    "zone_label": null,
+                    "is_on_call": false,
+                    "notes": null,
+                    "status": "Active",
+                    "cancel_reason": null,
+                    "swap_id": null,
+                    "row_version": 1,
+                    "bed_ids": []
+                  },
+                  "return_duty": {
+                    "roster_id": 2,
+                    "employee_id": 7,
+                    "emp_number": "EMP-2026-0007",
+                    "full_name": "Nurse Bushra",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "roster_date": "2026-10-02",
+                    "shift_pattern_id": 2,
+                    "shift_name": "Evening",
+                    "start_time": "14:00:00",
+                    "end_time": "20:00:00",
+                    "duty_area": "Ward",
+                    "ward_id": 1,
+                    "ward_name": "Roster Ward",
+                    "department_id": null,
+                    "department_name": null,
+                    "zone_label": null,
+                    "is_on_call": false,
+                    "notes": null,
+                    "status": "Active",
+                    "cancel_reason": null,
+                    "swap_id": null,
+                    "row_version": 1,
+                    "bed_ids": []
+                  }
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-29T02:40:41.552575+00:00"
+              },
+              "request_id": "3f41c7a2835e4e16a337c0be066681be"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /rosters/swaps",
+      "call": "POST /api/v1/rosters/swaps",
+      "summary": "Record a swap agreed on the ward (staff without a login)",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters/swaps",
+            "body": {
+              "roster_id": 1,
+              "covering_employee_id": 7,
+              "return_roster_id": 2,
+              "reason": "Agreed at the gate"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "swap_id": 1,
+                "status": "Approved",
+                "reason": "Agreed at the gate",
+                "roster_id": 1,
+                "return_roster_id": 2,
+                "requester_employee_id": 5,
+                "requester_name": "Sweeper Rafiq",
+                "covering_employee_id": 7,
+                "covering_name": "Guard Nadeem",
+                "staff_category": "SupportZeroInterface",
+                "requested_at": "2026-09-29T02:40:53.009971+00:00",
+                "responded_at": "2026-09-29T02:40:53.009971+00:00",
+                "response_note": "Agreed in person; recorded by the roster manager",
+                "responded_by_name": "uc8e355f8a6",
+                "decided_at": "2026-09-29T02:40:53.009971+00:00",
+                "decision_note": "Recorded by the roster manager",
+                "decided_by_name": "uc8e355f8a6",
+                "closed_at": "2026-09-29T02:40:53.009971+00:00",
+                "cover_roster_id": 3,
+                "return_cover_roster_id": 4,
+                "row_version": 3,
+                "kind": "Swap",
+                "duty": {
+                  "roster_id": 1,
+                  "employee_id": 5,
+                  "emp_number": "EMP-2026-0005",
+                  "full_name": "Sweeper Rafiq",
+                  "designation": "Officer",
+                  "staff_category": "SupportZeroInterface",
+                  "roster_date": "2026-10-01",
+                  "shift_pattern_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "duty_area": "Facility",
+                  "ward_id": null,
+                  "ward_name": null,
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Cancelled",
+                  "cancel_reason": "Worked by Guard Nadeem (duty swap 1)",
+                  "swap_id": null,
+                  "row_version": 2,
+                  "bed_ids": []
+                },
+                "return_duty": {
+                  "roster_id": 2,
+                  "employee_id": 7,
+                  "emp_number": "EMP-2026-0007",
+                  "full_name": "Guard Nadeem",
+                  "designation": "Officer",
+                  "staff_category": "SupportZeroInterface",
+                  "roster_date": "2026-10-02",
+                  "shift_pattern_id": 3,
+                  "shift_name": "Night",
+                  "start_time": "20:00:00",
+                  "end_time": "08:00:00",
+                  "duty_area": "Facility",
+                  "ward_id": null,
+                  "ward_name": null,
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Cancelled",
+                  "cancel_reason": "Worked by Sweeper Rafiq (duty swap 1)",
+                  "swap_id": null,
+                  "row_version": 2,
+                  "bed_ids": []
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:53.083696+00:00"
+              },
+              "request_id": "6a9bddf45cda473aade155f6eed74c8e"
+            }
+          },
+          "errors_seen": [
+            "ROSTER_OUT_OF_SCOPE",
+            "SWAP_SELF_APPROVAL"
+          ],
+          "events_emitted": [
+            "roster.changed",
+            "roster.swap.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ROSTER_CONFLICT",
+        "ROSTER_EMPLOYEE_INACTIVE",
+        "ROSTER_ON_LEAVE",
+        "ROSTER_OUT_OF_SCOPE",
+        "SWAP_COLLEAGUE_INELIGIBLE",
+        "SWAP_DUTY_STARTED",
+        "SWAP_EXISTS",
+        "SWAP_SELF_APPROVAL",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /rosters/swaps/{swap_id}/approve",
+      "call": "POST /api/v1/rosters/swaps/{swap_id}/approve",
+      "summary": "Approve a duty swap",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters/swaps/1/approve",
+            "body": {
+              "note": "Fine"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "swap_id": 1,
+                "status": "Approved",
+                "reason": "Family emergency",
+                "roster_id": 1,
+                "return_roster_id": 2,
+                "requester_employee_id": 1,
+                "requester_name": "Nurse Amna",
+                "covering_employee_id": 7,
+                "covering_name": "Nurse Bushra",
+                "staff_category": "Nursing",
+                "requested_at": "2026-09-29T02:40:41.486972+00:00",
+                "responded_at": "2026-09-29T02:40:41.533158+00:00",
+                "response_note": "Happy to help",
+                "responded_by_name": "Nurse Bushra",
+                "decided_at": "2026-09-29T02:40:41.556790+00:00",
+                "decision_note": "Fine",
+                "decided_by_name": "ue4b4b9d8a3",
+                "closed_at": "2026-09-29T02:40:41.556790+00:00",
+                "cover_roster_id": 4,
+                "return_cover_roster_id": 5,
+                "row_version": 3,
+                "kind": "Swap",
+                "duty": {
+                  "roster_id": 1,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-01",
+                  "shift_pattern_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Cancelled",
+                  "cancel_reason": "Worked by Nurse Bushra (duty swap 1)",
+                  "swap_id": null,
+                  "row_version": 2,
+                  "bed_ids": []
+                },
+                "return_duty": {
+                  "roster_id": 2,
+                  "employee_id": 7,
+                  "emp_number": "EMP-2026-0007",
+                  "full_name": "Nurse Bushra",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-02",
+                  "shift_pattern_id": 2,
+                  "shift_name": "Evening",
+                  "start_time": "14:00:00",
+                  "end_time": "20:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Cancelled",
+                  "cancel_reason": "Worked by Nurse Amna (duty swap 1)",
+                  "swap_id": null,
+                  "row_version": 2,
+                  "bed_ids": []
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:41.569443+00:00"
+              },
+              "request_id": "0633ca2552b44590a18669d51832deb6"
+            }
+          },
+          "events_emitted": [
+            "notification.created",
+            "roster.changed",
+            "roster.swap.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ROSTER_CONFLICT",
+        "ROSTER_ON_LEAVE",
+        "ROSTER_OUT_OF_SCOPE",
+        "SWAP_DUTY_STARTED",
+        "SWAP_SELF_APPROVAL",
+        "SWAP_TRANSITION_INVALID",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /rosters/swaps/{swap_id}/reject",
+      "call": "POST /api/v1/rosters/swaps/{swap_id}/reject",
+      "summary": "Reject a duty swap",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters/swaps/3/reject",
+            "body": {
+              "note": "Ward short that day"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "swap_id": 3,
+                "status": "Rejected",
+                "reason": "Child unwell",
+                "roster_id": 2,
+                "return_roster_id": null,
+                "requester_employee_id": 1,
+                "requester_name": "Nurse Amna",
+                "covering_employee_id": 7,
+                "covering_name": "Nurse Kiran",
+                "staff_category": "Nursing",
+                "requested_at": "2026-09-29T02:40:47.341398+00:00",
+                "responded_at": "2026-09-29T02:40:47.351808+00:00",
+                "response_note": null,
+                "responded_by_name": "Nurse Kiran",
+                "decided_at": "2026-09-29T02:40:47.365344+00:00",
+                "decision_note": "Ward short that day",
+                "decided_by_name": "u8dfb1e7acc",
+                "closed_at": "2026-09-29T02:40:47.365344+00:00",
+                "cover_roster_id": null,
+                "return_cover_roster_id": null,
+                "row_version": 3,
+                "kind": "Cover",
+                "duty": {
+                  "roster_id": 2,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-03",
+                  "shift_pattern_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "duty_area": "Department",
+                  "ward_id": null,
+                  "ward_name": null,
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": []
+                },
+                "return_duty": null
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:47.371152+00:00"
+              },
+              "request_id": "c9cec1bdfe5041d4b0f8d15f933a0fe5"
+            }
+          },
+          "errors_seen": [
+            "SWAP_TRANSITION_INVALID"
+          ],
+          "events_emitted": [
+            "notification.created",
+            "roster.swap.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ROSTER_OUT_OF_SCOPE",
+        "SWAP_SELF_APPROVAL",
+        "SWAP_TRANSITION_INVALID",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /hr/shift-patterns",
+      "call": "GET /api/v1/hr/shift-patterns",
+      "summary": "Shift patterns",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/shift-patterns"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "shift_pattern_id": 1,
+                  "name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "grace_minutes": 10,
+                  "half_day_after_minutes": 120,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "shift_pattern_id": 4,
+                  "name": "Morning 08-16",
+                  "start_time": "08:00:00",
+                  "end_time": "16:00:00",
+                  "grace_minutes": 15,
+                  "half_day_after_minutes": 120,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "shift_pattern_id": 2,
+                  "name": "Evening",
+                  "start_time": "14:00:00",
+                  "end_time": "20:00:00",
+                  "grace_minutes": 10,
+                  "half_day_after_minutes": 120,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:37:45.304301+00:00"
+              },
+              "request_id": "e83330e10908494aa41763cac64ee681"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /hr/shift-patterns",
+      "call": "POST /api/v1/hr/shift-patterns",
+      "summary": "Create a shift pattern",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/shift-patterns",
+            "body": {
+              "name": "Day 08-16",
+              "start_time": "08:00:00",
+              "end_time": "16:00:00",
+              "grace_minutes": 10
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "shift_pattern_id": 4,
+                "name": "Day 08-16",
+                "start_time": "08:00:00",
+                "end_time": "16:00:00",
+                "grace_minutes": 10,
+                "half_day_after_minutes": 120,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:07.731497+00:00"
+              },
+              "request_id": "24295cb9c7624189a114a18e7c87d1e4"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /beds/matrix",
+      "call": "GET /api/v1/beds/matrix",
+      "summary": "Live bed matrix (counts per ward + optional bed list)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/beds/matrix"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "wards": [
+                  {
+                    "ward_id": 2,
+                    "code": "GW",
+                    "name": "General Ward",
+                    "ward_type": "General",
+                    "gender_restriction": "any",
+                    "total_beds": 1,
+                    "available": 0,
+                    "reserved": 0,
+                    "occupied": 1,
+                    "turnover": 0,
+                    "out_of_service": 0
+                  },
+                  {
+                    "ward_id": 1,
+                    "code": "ICU",
+                    "name": "ICU",
+                    "ward_type": "ICU",
+                    "gender_restriction": "any",
+                    "total_beds": 1,
+                    "available": 1,
+                    "reserved": 0,
+                    "occupied": 0,
+                    "turnover": 0,
+                    "out_of_service": 0
+                  }
+                ],
+                "summary": {
+                  "General Ward": 0,
+                  "ICU": 1
+                },
+                "beds": [
+                  {
+                    "bed_id": 1,
+                    "ward_id": 1,
+                    "label": "ICU-1",
+                    "current_state": "Available",
+                    "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                    "is_overflow_allowed": false,
+                    "admission_id": null,
+                    "patient_name": null,
+                    "mrn": null,
+                    "admission_status": null,
+                    "is_overflow": null,
+                    "discharge_blocked_on": null
+                  },
+                  {
+                    "bed_id": 2,
+                    "ward_id": 2,
+                    "label": "GW-1",
+                    "current_state": "Occupied",
+                    "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                    "is_overflow_allowed": false,
+                    "admission_id": 1,
+                    "patient_name": null,
+                    "mrn": null,
+                    "admission_status": "Admitted",
+                    "is_overflow": false,
+                    "discharge_blocked_on": null
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:38:22.967241+00:00"
+              },
+              "request_id": "802131a929b14db0a0c8033474e8d271"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "employee_self",
+          "lab_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "BED_NO_LONGER_AVAILABLE",
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /admin/departments",
+      "call": "GET /api/v1/admin/departments",
+      "summary": "Departments",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/departments"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "department_id": 1,
+                  "code": "CARD",
+                  "name": "Cardiology & Vascular",
+                  "is_clinical": true,
+                  "is_active": true,
+                  "row_version": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.417658+00:00"
+              },
+              "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/duty_roster_hr",
+  "workspace_guide": "get_handbook_outline('hr')",
+  "realtime": [
+    {
+      "event": "roster.changed",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "roster.swap.updated",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Week grid: one row per shift pattern (GET /rosters/staff → shift_patterns), one column per day; drag staff from the left column onto a cell. Save with POST /rosters (all or nothing: on an error, highlight details.entry_index).",
+    "Grey out the days in each person's `leave`; ROSTER_CONFLICT means the person already works an overlapping shift (a night shift runs into the next morning).",
+    "Mark the public holidays (GET /rosters/staff → holidays): rostering on them is allowed, and rostered staff work as rostered.",
+    "Edit with PATCH (send row_version as expected_version), never delete: cancel with a reason.",
+    "Past days are read-only unless you are HR (ROSTER_DATE_CLOSED).",
+    "The hospital works every day: Sunday is a column like any other (usually with fewer staff), and each person gets their weekly rest day on a different day. Staff on a fixed schedule show their weekly day off (default_weekly_off_days) greyed; rostering them that day makes it a working day.",
+    "'Repeat last week' = POST /rosters/copy; show the `skipped` list with its reasons. Offer 'Repeat, moving everyone's days on' (rotate_days 1): rest days, and Sunday duty, then rotate week by week.",
+    "Week check panel (GET /rosters/week): NoRestDay in amber (each day beyond the allowance is paid as extra duty), NotRostered in grey; under the grid, a row of counts per day and shift from `days`, so a thin Sunday shows before the week starts.",
+    "Swaps tab: GET /rosters/swaps (Accepted = both colleagues agreed, waiting for you) → Approve, or Reject with a reason. For staff without a login, 'Record swap' (POST /rosters/swaps) when the two agreed in person. You never decide a swap you are part of (SWAP_SELF_APPROVAL). Duties taken over show their swap_id.",
+    "Keep the grid live with the roster.changed event, the swaps tab with roster.swap.updated.",
+    "Shift patterns are the rows of the grid; create them here first."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

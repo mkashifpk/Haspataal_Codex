@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 import { useState } from "react";
 import {
   Empty,
@@ -73,8 +74,10 @@ export function CodeRed({
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
   // Write controller
-  const write = useClinicalWrite(user, "code_red", () => {
-    // Action completed
+  const write = useClinicalWrite(user, "code_red", (value,command) => {
+    if(command.path === "/admissions/code-red")setActiveCodeReds(old => [value,...old]);
+    else if(command.path.endsWith("/arrived"))setActiveCodeReds(old=>old.map(row=>row.admission_id===value.admission_id?{...row,...value}:row));
+    else if(command.path==="/patients/trauma"){setPatientIdInput(String(value.patient_id));setIsKnownPatient(true);setShowTraumaModal(false);}
   });
 
   // Code Red Form State
@@ -98,7 +101,7 @@ export function CodeRed({
     initialErVisitId ? String(initialErVisitId) : ""
   );
   const [isMlcInput, setIsMlcInput] = useState<boolean>(false);
-  const [mlcTypeIdInput, setMlcTypeIdInput] = useState<string>("1");
+  const [mlcTypeIdInput, setMlcTypeIdInput] = useState<string>("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Quick Trauma Modal
@@ -143,74 +146,7 @@ export function CodeRed({
         label: t("Activate Emergency Code Red Admission", "کوڈ ریڈ ہنگامی داخلہ فعال کریں"),
       });
 
-      // Optimistically create tracking item
-      const newCodeRed: CodeRedOut = {
-        admission_id: Date.now(),
-        admission_number: `ADM-${Date.now().toString().slice(-6)}`,
-        patient_id: payload.patient_id ?? 9999,
-        photo_document_id: null,
-        mrn: payload.patient_id ? `MRN-${payload.patient_id}` : `TRM-${Date.now().toString().slice(-4)}`,
-        patient_name: isKnownPatient ? `Patient #${payload.patient_id}` : (tempIdInput || "Unknown Trauma Patient"),
-        gender: payload.gender ?? null,
-        age_years: payload.approx_age_years ?? null,
-        requested_ward_id: null,
-        requested_ward_name: wardTypeInput,
-        ward_id: null,
-        ward_name: wardTypeInput,
-        bed_id: null,
-        bed_label: null,
-        primary_doctor_id: user.permissions?.includes("ipd.doctor.care") ? user.user_id : null,
-        primary_doctor_name: user.permissions?.includes("ipd.doctor.care") ? `Doctor #${user.user_id}` : null,
-        admission_type: "CodeRed",
-        status: "CodeRedActive",
-        billing_category: "Cash",
-        panel_id: null,
-        is_billing_confirmed: false,
-        is_billing_deferred: true,
-        is_overflow: false,
-        overflow_reason: null,
-        eta_minutes: payload.eta_minutes ?? 5,
-        source_ticket_id: null,
-        admission_reason: null,
-        provisional_diagnosis: null,
-        initial_care_plan: null,
-        details_stamp: null,
-        admission_notes: payload.notes || null,
-        requested_at: new Date().toISOString(),
-        reserved_at: null,
-        admitted_at: new Date().toISOString(),
-        discharge_initiated_at: null,
-        discharged_at: null,
-        row_version: 1,
-        discharge: { stages: [], blocked_on: null, started: false, complete: false },
-        invoice: null,
-        alert_message: `CODE RED: Critical resuscitation intake to ${wardTypeInput}!`,
-        ot_booking: payload.needs_ot
-          ? {
-              booking_id: Date.now(),
-              ot_id: payload.ot_id ?? 1,
-              ot_name: "Emergency Theatre",
-              hold_until: new Date(Date.now() + 3600000).toISOString(),
-            }
-          : null,
-      };
 
-      setActiveCodeReds((prev) => [newCodeRed, ...prev]);
-      setIncomingBroadcast({
-        admission_number: newCodeRed.admission_number,
-        patient_name: newCodeRed.patient_name,
-        ward_name: newCodeRed.ward_name || "Emergency",
-        needs_ot: !!newCodeRed.ot_booking,
-        eta_minutes: payload.eta_minutes ?? 5,
-        message: `CODE RED: Incoming critical resuscitation to ${newCodeRed.ward_name || "Emergency"}!`,
-      });
-
-      setActionNotice(
-        t(
-          `Code Red ${newCodeRed.admission_number} activated! Resuscitation team alerted.`,
-          `کوڈ ریڈ داخلہ نمبر ${newCodeRed.admission_number} فعال کر دیا گیا!`
-        )
-      );
     } catch (err) {
       setActionNotice(explainCodeRedError(err));
     }
@@ -227,14 +163,7 @@ export function CodeRed({
         label: t("Confirm Code Red Patient Arrival", "مریض کی آمد کی تصدیق کریں"),
       });
 
-      setActiveCodeReds((prev) =>
-        prev.map((a) =>
-          a.admission_id === admissionId
-            ? { ...a, status: "Admitted" }
-            : a
-        )
-      );
-      setActionNotice(t("Patient arrival confirmed. Status updated to Admitted.", "مریض کی آمد کی تصدیق ہو گئی۔"));
+
     } catch (err) {
       setActionNotice(explainCodeRedError(err));
     }
@@ -263,12 +192,6 @@ export function CodeRed({
         label: t("Create Temporary Trauma Profile", "عارضی ٹراما پروفائل بنائیں"),
       });
 
-      setTempIdInput(modalTempId);
-      setGenderInput(modalGender);
-      setApproxAgeInput(modalAge);
-      setIsKnownPatient(false);
-      setShowTraumaModal(false);
-      setActionNotice(t(`Trauma profile '${modalTempId}' created and selected.`, "عارضی ٹراما پروفائل تیار ہو گیا۔"));
     } catch (err) {
       setActionNotice(explainCodeRedError(err));
     }
@@ -452,16 +375,14 @@ export function CodeRed({
               {/* Known Patient Input */}
               {isKnownPatient ? (
                 <div className="mb-3">
-                  <Field label={t("Patient ID (MRN)", "مریض کا آئی ڈی نمبر")}>
-                    <input
-                      type="number"
+                  <Field label={t("Existing patient", "درج مریض")}>
+                    <DirectoryPicker
                       className="form-control"
                       data-help="code_red.input_patient_id"
                       value={patientIdInput}
                       onChange={(e) => setPatientIdInput(e.target.value)}
-                      placeholder="e.g. 101"
                       required
-                    />
+                     path="/patients/search" idField="patient_id" search />
                   </Field>
                   {formErrors.patient && (
                     <div className="text-danger small">{formErrors.patient}</div>
@@ -530,6 +451,7 @@ export function CodeRed({
                       <option value="General">General Medical Ward</option>
                     </select>
                   </Field>
+                  <DirectoryPicker path="/beds/matrix?include_beds=false" idField="ward_id" list="wards" value={wardIdInput} onChange={e=>setWardIdInput(e.target.value)} data-help="code_red.select_ward_type"/>
                 </div>
 
                 <div className="col-md-6">
@@ -578,14 +500,12 @@ export function CodeRed({
                       </div>
                       <div className="col-md-6">
                         <Field label={t("Specific OT ID (Optional)", "مخصوص تھیٹر نمبر")}>
-                          <input
-                            type="number"
+                          <DirectoryPicker
                             className="form-control"
                             data-help="code_red.input_ot_id"
                             value={otIdInput}
                             onChange={(e) => setOtIdInput(e.target.value)}
-                            placeholder="1"
-                          />
+                           path="/ot/theaters" idField="ot_id" />
                         </Field>
                       </div>
                     </div>
@@ -611,14 +531,12 @@ export function CodeRed({
                 {isMlcInput && (
                   <div className="mt-2">
                     <Field label={t("MLC Case Type ID", "کیس کی قسم")}>
-                      <input
-                        type="number"
+                      <DirectoryPicker
                         className="form-control"
                         data-help="code_red.input_mlc_type"
                         value={mlcTypeIdInput}
                         onChange={(e) => setMlcTypeIdInput(e.target.value)}
-                        placeholder="1 (RTA)"
-                      />
+                       path="/mlc/case-types" idField="case_type_id" />
                     </Field>
                   </div>
                 )}

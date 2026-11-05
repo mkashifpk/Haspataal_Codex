@@ -58,7 +58,9 @@ export interface AssetIn {
   category: string;
   serial_no?: string | null;
   location?: string | null;
+  /** The department (GET /admin/departments) */
   department_id?: number | null;
+  /** The ward (GET /beds/matrix?include_beds=false) */
   ward_id?: number | null;
   purchase_date?: string | null;
   purchase_cost?: number | string | null;
@@ -204,7 +206,7 @@ export interface WorkOrderListItemOut {
 export interface AssignIn {
   /** Internal maintenance staff */
   employee_id?: number | null;
-  /** External contractor (plumber, electrician...) */
+  /** External contractor (plumber, electrician...; GET /finance/vendors) */
   vendor_id?: number | null;
   estimated_cost?: number | string | null;
   note?: string | null;
@@ -232,6 +234,7 @@ export interface UtilityCategoryOut {
 export interface UtilityIn {
   /** GET /ops/utility-categories */
   category_id: number;
+  /** The utility provider (GET /finance/vendors) */
   vendor_id: number;
   billing_period: string;
   /** kWh / litres / cylinders */
@@ -340,6 +343,72 @@ export interface StaffLookupOut {
   license_type: "PMDC" | "PNC" | "Other" | null;
   /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
   registration: string | null;
+  /** Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62) */
+  user_id: number | null;
+}
+
+export interface VendorOut {
+  vendor_id: number;
+  name: string;
+  vendor_type: "PharmacySupplier" | "ReagentSupplier" | "EquipmentSupplier" | "UtilityProvider" | "Contractor" | "Other";
+  contact_name: string | null;
+  phone: string | null;
+  address: string | null;
+  tax_number: string | null;
+  cnic: string | null;
+  is_active: boolean;
+  row_version: number;
+}
+
+export interface DepartmentOut {
+  department_id: number;
+  code: string;
+  name: string;
+  is_clinical: boolean;
+  is_active: boolean;
+  row_version: number;
+}
+
+export interface BedMatrixOut {
+  wards: WardOccupancyOut[];
+  /** Ward name -> available beds */
+  summary: Record<string, number>;
+  /** Only with include_beds=true */
+  beds?: BedMatrixBedOut[] | null;
+}
+
+/** A ward's bed counts (view v_bed_matrix). */
+export interface WardOccupancyOut {
+  ward_id: number;
+  code: string;
+  name: string;
+  ward_type: "General" | "Private" | "SemiPrivate" | "ICU" | "CCU" | "NICU" | "Surgical" | "Pediatric" | "Maternity" | "Emergency" | "Isolation" | "Other";
+  gender_restriction: "male" | "female" | "any";
+  total_beds: number;
+  available: number;
+  reserved: number;
+  occupied: number;
+  /** Beds being cleaned or waiting for discharge clearance */
+  turnover: number;
+  out_of_service: number;
+}
+
+export interface BedMatrixBedOut {
+  bed_id: number;
+  ward_id: number;
+  label: string;
+  current_state: "Available" | "Reserved" | "Occupied" | "Dirty" | "Cleaning" | "OutOfService";
+  state_changed_at: string;
+  is_overflow_allowed: boolean;
+  admission_id: number | null;
+  /** Only with with_patients=true */
+  patient_name: string | null;
+  /** Only with with_patients=true */
+  mrn: string | null;
+  admission_status: "AdmissionPending" | "Waitlisted" | "BedReserved" | "CodeRedActive" | "Admitted" | "DischargeInProgress" | "Discharged" | "Cancelled" | null;
+  is_overflow: boolean | null;
+  /** The discharge stage the patient in this bed waits for */
+  discharge_blocked_on: string | null;
 }
 
 /** Work order with status history — GET /api/v1/ops/work-orders/{wo_id} (who may call: holders of ops.workorder.report or ops.workorder.manage). */
@@ -397,7 +466,7 @@ export function utilityLogs(query?: { limit?: number }): Promise<UtilityLogListI
   return api<UtilityLogListItemOut[]>("GET", withQuery(`/ops/utility-logs`, query), undefined);
 }
 
-/** Asset monitor — GET /api/v1/ops/assets (who may call: holders of ops.asset.view or cssd.manage). */
+/** Asset monitor — GET /api/v1/ops/assets (who may call: holders of ops.asset.view or cssd.manage or ops.workorder.report). */
 export function assets(query?: { status?: string | null }): Promise<AssetMonitorOut[]> {
   return api<AssetMonitorOut[]>("GET", withQuery(`/ops/assets`, query), undefined);
 }
@@ -420,4 +489,19 @@ export function markCleaned(bed_id: number, body: CleanedIn | null): Promise<Bed
 /** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
 export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
   return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
+}
+
+/** Vendors — GET /api/v1/finance/vendors (who may call: any logged-in user). */
+export function vendors(query?: { vendor_type?: "PharmacySupplier" | "ReagentSupplier" | "EquipmentSupplier" | "UtilityProvider" | "Contractor" | "Other" | null }): Promise<VendorOut[]> {
+  return api<VendorOut[]>("GET", withQuery(`/finance/vendors`, query), undefined);
+}
+
+/** Departments — GET /api/v1/admin/departments (who may call: any logged-in user). */
+export function departments(): Promise<DepartmentOut[]> {
+  return api<DepartmentOut[]>("GET", `/admin/departments`, undefined);
+}
+
+/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record). */
+export function bedMatrix(query?: { include_beds?: boolean }): Promise<BedMatrixOut> {
+  return api<BedMatrixOut>("GET", withQuery(`/beds/matrix`, query), undefined);
 }

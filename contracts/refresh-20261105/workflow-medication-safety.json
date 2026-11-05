@@ -1,0 +1,369 @@
+{
+  "slug": "medication-safety",
+  "title": "Medication safety (MSDS)",
+  "summary": "Medication safety - who may prescribe, verbal and telephone orders with the prescriber's countersignature, the pharmacist's queries on unclear orders, high-alert and look-alike medicines with a second person's check at the counter and at the bedside, identity wristbands and the checks before every dose, labels, batch recalls, expired ward stock, self-administration, the patient's own medicines, the written policy and the statistics.",
+  "order": 99,
+  "workflow": "MSDS MOM indicators 51-71, AAC 30, COP 37",
+  "workspaces": [
+    "doctor",
+    "ward_nurse",
+    "head_nurse",
+    "triage",
+    "admissions",
+    "pharmacy",
+    "pharmacy_admin",
+    "quality",
+    "owner_dashboard"
+  ],
+  "file": "medication-safety.md",
+  "markdown": "# Medication safety (MSDS)\n\nThe Punjab Healthcare Commission's Minimum Service Delivery Standards (MSDS) give medication 21 indicators (MOM 51-71)\nand patient identification two more (AAC 30, COP 37). Surveyors read the policies, then sample ten inpatient records\nand watch nurses and pharmacists at work; most indicators are \"not met\" after a single failure. What the system does\nfor each:\n\n| MSDS | What is checked | Haspataal |\n|---|---|---|\n| 51, 54 | Orders written clearly, dated, timed, signed; what happens when one is unclear | Structured e-prescriptions with the prescriber's stamp; the pharmacist's **query** blocks the line until a doctor answers |\n| 52 | Who may prescribe; restricted classes | A PMDC doctor, or the **Prescribing** privilege; **restricted** medicines need **RestrictedPrescribing** (database) |\n| 53 | Orders in one place in the record | The prescription of the visit or the admission |\n| 55 | Verbal orders written down, read back, countersigned | **Verbal/telephone orders** by the nurse, read back, countersigned by the prescriber in time (reminder, review) |\n| 56, 57 | A list of high-alert and look-alike medicines, displayed; verified before dispensing and giving | **High-alert categories** and **look-alike pairs** on every screen; a **second person** co-signs at the counter and at the bedside (database) |\n| 58-60 | Safe dispensing, recalls, no expired medicine | FEFO; expired and **recalled** batches never issued, in the pharmacy or from ward stock; the **recall register**; expired ward stock removed |\n| 61, 63 | Labels | A **label per medicine** dispensed; the **label of a prepared dose** |\n| 62 | Given only by those permitted by law | A registered nurse (PNC) or doctor (PMDC), or the **MedicationAdministration** privilege (database) |\n| 64-68, AAC 30 | Patient identified; medicine, dose, route and time checked before a dose | **Wristbands**; the chart needs the band scanned (or two identifiers), checks the medicine's barcode, and a reason for another dose, route or time |\n| 69 | Every dose documented | The MAR (every due dose charted: record review ADM_MAR) |\n| 70 | Self-administration | The doctor allows it per line; the nurse charts each dose |\n| 71 | Medicines brought from outside | Recorded, identified by the pharmacist, kept, **handed back before the ward clears the discharge** (database) |\n| COP 37 | Identity before the anaesthetic | The sign in of the safety checklist records the band scan (or two identifiers) |\n\nWho does what:\n\n* **Doctors** (`prescription.create`): prescribe; countersign their verbal orders; answer the pharmacist's queries.\n* **Ward nurses** (`prescription.verbal.record`, `patient.wristband.print`, `patient.own_medicine.record`,\n  `ipd.mar.administer`, `medication.double_check`): verbal orders, wristbands, own medicines, the checks before a dose,\n  the second check of a colleague's high-alert dose. **ER nurses** (`prescription.verbal.record`,\n  `patient.wristband.print`, `medication.double_check`): verbal orders, wristbands, the second check. The **admission desk** prints wristbands too.\n* **Pharmacists** (`prescription.query.raise`, `patient.own_medicine.identify`, `medication.double_check`): queries,\n  identifying own medicines, the second check at the counter.\n* **Pharmacy admin** (`medication.safety.configure`, `pharmacy.recall.manage`): the lists, recalls.\n* **Quality Officer, Owner** (`medication.statistics.view`): the statistics, the policy.\n\n## 1. The lists and the policy (pharmacy admin)\n\n1. Flag the formulary: `PATCH /medication-safety/drugs/{drug_id}` with `high_alert_category` (`ConcentratedElectrolyte`,\n   `Chemotherapy`, `Anticoagulant`, `Insulin`, `Opioid`, `Sedative`, `NeuromuscularBlocker`, `Inotrope`,\n   `Thrombolytic`, `Psychotropic`, `HighCost`, `Other`; `null` clears it) and `is_restricted`. A new drug can carry them\n   from `POST /pharmacy-admin/drugs`. A high-alert medicine is never sold over the counter (`VALIDATION_ERROR`).\n2. Pair look-alikes: `POST /medication-safety/lasa-pairs {\"drug_id\", \"other_drug_id\", \"note\"}` (the note says how to\n   tell them apart); `PATCH /medication-safety/lasa-pairs/{pair_id}` changes the note or retires the pair\n   (`is_active: false`).\n3. `GET /medication-safety/high-alert-list` (screen) and `GET /medication-safety/high-alert-list/pdf`: print it for\n   every nursing station and the pharmacy, again after every change (MSDS 56 ii).\n4. `GET /medication-safety/policy/pdf`: the written medication policy generated from what the system enforces, with\n   lines for the medical director's and the chief pharmacist's approval (MSDS 51, 55, 57-61, 63, 70, 71).\n5. Privileges (the [clinical privileges register](surgical-care.md), `POST /ot/privileges`): `Prescribing` for\n   a clinician other than a PMDC doctor who may prescribe (e.g. a nurse-midwife, within its scope),\n   `RestrictedPrescribing` for the restricted medicines, `MedicationAdministration` for staff other than registered\n   nurses and doctors who may give medicines.\n\nEvery medicine the formulary search returns (`GET /drugs/search`) carries `high_alert_category`, `is_restricted` and\n`lasa_with` (the names it looks or sounds like); so do the lines of a prescription and the doses of the MAR. Show a red\nbadge for high-alert and a \"looks like …\" warning.\n\n## 2. Prescribing (doctor)\n\n`POST /prescriptions` as in [clinical and prescriptions](clinical-and-prescriptions.md), plus:\n\n* The caller must be allowed to prescribe (`PRESCRIBER_NOT_AUTHORIZED`), and to prescribe a restricted medicine.\n* `self_administration: true` on an inpatient's oral, inhaled or topical medicine that is not high-alert lets the\n  patient take it themselves (MSDS 70; `SELF_ADMINISTRATION_INVALID` otherwise). Explain it to the patient. It applies\n  to a medicine bought outside too (an `ExternalMarket` prescription, decisions 59) when the line names a drug of the\n  hospital's list (`drug_id`), so that its high-alert check applies; a typed `external_drug_name` is never\n  self-administered.\n\n## 3. Verbal and telephone orders (nurse → doctor)\n\nOnly in an emergency or when the doctor cannot write, for an inpatient or an emergency patient; never for an\noutpatient, never chemotherapy (`VERBAL_ORDER_INVALID`).\n\n1. The nurse writes it down at once and reads it back: `POST /prescriptions/verbal` with `Idempotency-Key`:\n   ```json\n   { \"prescriber_id\": 12, \"order_mode\": \"Telephone\", \"read_back\": true, \"admission_id\": 301,\n     \"items\": [ { \"drug_id\": 5, \"qty_prescribed\": 2, \"dose_text\": \"1 g\", \"route\": \"IV\", \"frequency_code\": \"BD\",\n                  \"interval_hours\": 12, \"start_at\": \"2026-09-30T22:00:00+05:00\" } ] }\n   ```\n   An emergency patient without an admission: `ticket_id` of the ER visit instead of `admission_id`. The order goes to\n   the pharmacy and the MAR like a written one, stamped with the doctor's name; `received_by` is the nurse.\n   The prescriber from `GET /staff/lookup?license_type=PMDC`. A verbal order is not part of a consultation note: leave\n   `encounter_id` out (decision 62).\n2. The doctor is told (`medication.order.updated` to their screens) and countersigns:\n   `POST /prescriptions/{prescription_id}/countersign` (only the prescriber, once: `VERBAL_ORDER_COUNTERSIGN_INVALID`).\n3. `GET /verbal-orders` (`mine`, `pending`, `admission_id`): `is_overdue` once `verbal_order_countersign_hours` (24) have\n   passed; the worker job `medication.alerts` reminds the prescriber once (a notification); the record review counts\n   every late or missing countersignature (ADM_VERBAL_ORDERS).\n\n## 4. The pharmacist's query (pharmacist ↔ doctor)\n\n1. An unclear or unsafe order is not dispensed: `POST /prescriptions/{prescription_id}/queries`\n   `{\"prescription_item_id\": 77, \"reason\": \"ChildDose\", \"question\": \"Adult dose for a 4-year-old (14 kg)?\"}`\n   (`prescription_item_id` null: the whole prescription). Reasons: `Unclear`, `DoseOrFrequency`, `Allergy`,\n   `Interaction`, `Duplicate`, `ChildDose`, `Restricted`, `WrongPatient`, `Other`. One open query per line\n   (`PRESCRIPTION_QUERY_OPEN`). The prescriber gets a notification.\n2. While it is open the line cannot be dispensed (`PRESCRIPTION_QUERY_OPEN`); the queue shows `open_queries`.\n3. A doctor who may prescribe answers: `POST /prescription-queries/{query_id}/answer`\n   `{\"outcome\": \"ConfirmedAsWritten\", \"answer\": \"…\"}`, or `\"Changed\"` after stopping the line\n   (`POST /prescriptions/{id}/items/{item_id}/stop`) or cancelling the prescription and writing the new order\n   (`PRESCRIPTION_QUERY_STATE_INVALID` otherwise). The answer carries the doctor's stamp; the pharmacist is notified.\n4. `GET /prescription-queries` (`status`, `mine` for the doctor's own orders, `prescription_id`);\n   `POST /prescription-queries/{query_id}/withdraw` for a query raised by mistake. `GET /prescriptions/{id}` lists\n   `queries`.\n\n## 5. Dispensing a high-alert medicine, and the labels (pharmacist)\n\n1. `POST /prescriptions/{id}/dispense` as usual; a line of a high-alert medicine needs the second person's check: they\n   check the order and the medicine and type their credentials:\n   ```json\n   { \"items\": [ { \"prescription_item_id\": 9 } ], \"checker_username\": \"usman\", \"checker_password\": \"••••\" }\n   ```\n   Without it `HIGH_ALERT_CHECK_REQUIRED`; the same person `DUAL_CONTROL_SAME_PERSON`. The dispensation records\n   `checked_by`. Recalled batches are never picked.\n2. Print one label per medicine: `GET /dispensations/{dispensation_id}/labels` → print payloads for the label printer:\n   the patient, the medicine (brand and generic) and strength, `directions` (dose, route, frequency, duration,\n   instructions), the prescriber, the date, the batch and expiry, `warnings` (high-alert, look-alike).\n\n## 6. Wristbands (admission desk, ward, ER)\n\n1. `POST /wristbands {\"admission_id\": 301}` (or `{\"er_visit_id\": 88}`) → `wristband` and `print` (label printer: name,\n   MRN as a barcode and QR code `HMS:PT:<mrn>`, age and sex, the admission or ER number, ward and bed; `allergies`\n   printed prominently). A patient who already wears one: `replacement_reason` required (damaged, cut off for a\n   cannula, details corrected); the last band is marked replaced.\n2. `GET /wristbands?admission_id=…` (the register, `is_current`); reprint the same band after a printer jam:\n   `GET /wristbands/{wristband_id}/print-payload`.\n3. Scan to verify on any screen that treats or samples a patient: `GET /wristbands/verify?code=…&admission_id=…` →\n   `match`; false: stop, `scanned_patient` says whose band it is.\n4. The worklist lists patients without a band (`NoWristband`); the record review checks one was worn (ADM_WRISTBAND).\n\nThe theatre sign in records the identity check too ([surgical care](surgical-care.md)): `wristband_code` (or\n`identity_check: \"TwoIdentifiers\"`) in `POST /ot/bookings/{booking_id}/safety-checks` with `phase: \"SignIn\"`.\n\n## 7. Giving a dose (ward nurse)\n\n`POST /mar/{mar_id}/chart` (or `POST /admissions/{id}/mar/prn`) with `status: \"Administered\"` walks the rights:\n\n```json\n{ \"status\": \"Administered\", \"wristband_code\": \"MRN-2026-000123\", \"drug_barcode\": \"8964000100093\",\n  \"second_checker_username\": \"hina\", \"second_checker_password\": \"••••\",\n  \"dose_given_text\": \"10 mmol\", \"route_given\": \"IV\", \"variance_reason\": null }\n```\n\n* **The patient**: `wristband_code` as scanned (`PATIENT_IDENTITY_MISMATCH`: another patient's band, stop). No scanner:\n  `identity_check: \"TwoIdentifiers\"` after asking the name and the date of birth or MRN. An emergency or Code Red patient\n  who cannot be identified yet: `\"EmergencyOverride\"` with `identity_note`. Nothing: `PATIENT_IDENTITY_REQUIRED`.\n* **The medicine**: `drug_barcode` as scanned from the pack (`DRUG_MISMATCH`: stop), else it counts as checked by eye.\n* **A high-alert medicine**: a second nurse or doctor checks independently and co-signs\n  (`HIGH_ALERT_CHECK_REQUIRED`; a colleague without a registration: `ADMINISTRATION_NOT_AUTHORIZED`).\n* **The dose, route and time**: default the order's; another dose or route, or more than `mar_on_time_window_minutes`\n  (60) from the scheduled time, needs `variance_reason` (`ADMINISTRATION_VARIANCE_REASON_REQUIRED`).\n* **Who gives it**: a registered nurse (PNC) or doctor (PMDC), or the MedicationAdministration privilege\n  (`ADMINISTRATION_NOT_AUTHORIZED`).\n* `self_administered: true` for a line the doctor allowed (`self_administration`).\n* From ward stock (`ward_stock_batch_id`): never an expired (`BATCH_EXPIRED`) or recalled (`BATCH_RECALLED`) batch.\n\nBefore drawing up an injection or an infusion: `POST /mar/{mar_id}/prepare {\"preparation\": \"in 100 ml normal saline\nover 30 minutes\"}` → the label to stick on the syringe or bag (MSDS 63), once per dose. A label lost or never printed\n(the app restarted, the printer failed): `GET /mar/{mar_id}/dose-label` prints it again from what the preparation\nrecorded, marked REPRINT (`fields.reprint`); it prepares and gives nothing (`DOSE_NOT_PREPARED` before the\npreparation).\n\n`GET /admissions/{id}/mar` shows per dose `identity_check`, `drug_check`, `second_checked_by_name`, `variance_reason`,\n`prepared_at` and the medicine's `high_alert_category` and `lasa_with`.\n\n## 8. Recalls (pharmacy admin)\n\n1. `POST /drug-recalls` with `Idempotency-Key`:\n   ```json\n   { \"drug_id\": 5, \"batch_ids\": [41], \"source\": \"DRAP\", \"reference\": \"DRAP alert 12/2026\", \"recall_class\": \"ClassII\",\n     \"reason\": \"Particulate matter in vials\", \"contact_patients\": true }\n   ```\n   (`all_batches: true` for every batch.) At once the batches are blocked: FEFO skips them and the database refuses to\n   dispense them, send them to a ward, use them in theatre or give a dose from ward stock (`BATCH_RECALLED`). The wards\n   and the pharmacy get a critical notification; screens refresh on `pharmacy.recall.updated`.\n   The medicine from `GET /drugs/search`.\n2. `GET /drug-recalls/{recall_id}`: per batch what is left in the pharmacy and on the wards and what was dispensed,\n   given and used in theatre; the wards holding it; the `patients` who received it (patients with their mobile, named\n   walk-in customers and staff), with each `source`.\n3. `POST /drug-recalls/{recall_id}/remove-stock {\"note\": \"Destroyed as DRAP directs\"}` writes off every unit left\n   (again later if more turns up). Stock the supplier takes back goes as a return instead, so its credit is not lost:\n   `POST /pharmacy-admin/batches/{batch_id}/supplier-returns {\"reason\": \"Recall\", \"recall_id\": …}` for each batch\n   ([back office](clinical-and-prescriptions.md)); the recall can close once no stock is left either way.\n4. `PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id} {\"outcome\": \"Contacted\", \"note\": \"…\"}`\n   (`Unreachable`, `NotNeeded` with the reason).\n5. `POST /drug-recalls/{recall_id}/close {\"note\"}` once `can_close` (`RECALL_NOT_COMPLETE` with the counts). Opened by\n   mistake: `POST /drug-recalls/{recall_id}/cancel {\"reason\"}` releases the batches.\n6. `GET /drug-recalls` (`status`, `drug_id`): the register the surveyor asks for (MSDS 59).\n\n## 9. Expired ward stock (head nurse)\n\n`GET /wards/{ward_id}/inventory` flags `is_expired` and `is_recalled`; the worklist lists `ExpiredWardStock`. Remove\nit: `POST /wards/{ward_id}/inventory/remove {\"batch_id\", \"qty\", \"reason\": \"Expiry\", \"note\"}` (`Damage` too: written\noff; `ReturnToPharmacy`: unexpired, unrecalled stock back on the pharmacy's shelves).\n\n## 10. The patient's own medicines (ward nurse, pharmacist)\n\n1. On arrival: `POST /admissions/{id}/own-medicines`\n   ```json\n   { \"brought_by\": \"Son, Kamran\", \"stored_at\": \"Ward\",\n     \"medicines\": [ { \"medicine_name\": \"Metformin\", \"strength\": \"500 mg\", \"quantity\": \"1 strip, 6 tablets left\",\n                      \"batch_no\": \"MF2231\", \"expiry_date\": \"2027-06-30\" } ] }\n   ```\n   They are kept and **not used** during the stay: the doctor orders what the patient needs and the pharmacy supplies\n   it. `GET /admissions/{id}/own-medicines` (the doctor sees them as the medication history).\n2. The pharmacist identifies each (worklist `OwnMedicineToIdentify`): `POST /own-medicines/{id}/identify\n   {\"identification\": \"Identified\", \"drug_id\": 5, \"stored_at\": \"Pharmacy\"}` (`NotIdentifiable`, `Expired`, `Damaged`).\n3. Before the patient leaves: `POST /admissions/{id}/own-medicines/hand-back {\"handed_to\": \"Son, Kamran\"}` (all still\n   held, or `own_medicine_ids`), or `POST /own-medicines/{id}/destroy {\"reason\", \"witness\"}` with the patient's\n   agreement. The ward's discharge clearance (`NursingMARVerification`) waits for this (`OWN_MEDICINES_HELD` with\n   `details.medicines`); the worklist shows `OwnMedicineToHandBack`.\n\n## 11. The worklist and the statistics\n\n* `GET /medication-safety/worklist` (`ward_id`; `mine`: the caller's verbal orders and queries only): verbal orders to\n  countersign, open queries, patients without a wristband, own medicines to identify and to hand back, open recalls,\n  expired ward stock; `is_overdue` in red. The admissions desk (`patient.wristband.print` without\n  `medication.safety.view`) gets the patients without a wristband only.\n* `GET /medication-safety/statistics?date_from=…&date_to=…` (`medication.statistics.view`): `measures` with the MSDS\n  indicator each evidences (verbal orders countersigned in time, high-alert doses and dispensing double-checked, doses\n  after a wristband scan and a medicine scan, doses on time, due doses charted, admissions with a wristband, own\n  medicines handed back), doses by identity and medicine check, variances, the queries by reason and outcome, the\n  recalls.\n* The medical record review checks each admission automatically: ADM_WRISTBAND, ADM_MAR, ADM_VERBAL_ORDERS,\n  ADM_OWN_MEDICINES ([medical record review](medical-record-review.md)).\n\n## 12. The storage log (pharmacist, ward nurse)\n\nMSDS MOM 58 and the web portal's CPSA 10.3 ask for the temperature (and humidity) of every place medicines are kept, recorded\ntwice a day, with the action taken when a reading is out of range.\n\n1. `POST /pharmacy/storage-checks` (`pharmacy.storage.record`: pharmacists, pharmacy admins, ward and head nurses)\n   ```json\n   { \"storage_area\": \"Ward 2 refrigerator\", \"storage_kind\": \"Refrigerator\", \"ward_id\": 3, \"temperature_c\": 9.5,\n     \"action_taken\": \"Door found ajar: closed; insulin checked, nothing discarded\" }\n   ```\n   Keep one spelling per place (the register groups by `storage_area`). The limits are the settings of the `storage_kind`\n   (Room, Refrigerator, Freezer, ColdChainBox) unless `min_c` / `max_c` are given for a place with its own range. Out of\n   range without `action_taken`: `STORAGE_CHECK_ACTION_REQUIRED`; with it the reading is kept, the row shows red and the\n   event `pharmacy.storage.out_of_range` (priority high) reaches the pharmacists.\n   The ward from `GET /beds/matrix?include_beds=false` (none for the pharmacy).\n2. `GET /pharmacy/storage-checks?date_from=&date_to=&storage_area=%fridge%&ward_id=&out_of_range_only=` (the log),\n   `GET /pharmacy/storage-checks/summary` (per area: readings, out of range, lowest and highest, the days with the full\n   twice-a-day routine: a day with one reading or none is a gap to explain to the surveyor) and\n   `GET /pharmacy/storage-checks/register/pdf` (the register of the period); readers: `pharmacy.stock.view`,\n   `medication.safety.view` or `pharmacy.storage.record`.\n\n## Settings\n\n| Key | Default | Meaning |\n|---|---|---|\n| `verbal_order_countersign_hours` | 24 | a verbal order not countersigned by then is overdue: the prescriber is reminded once |\n| `mar_on_time_window_minutes` | 60 | a scheduled dose given further from its time needs a reason |\n| `pharmacy_room_min_c`, `pharmacy_room_max_c` | 10, 25 | the acceptable readings of a room or cupboard |\n| `pharmacy_fridge_min_c`, `pharmacy_fridge_max_c` | 2, 8 | the acceptable readings of a medicine refrigerator or cold-chain box |\n| `pharmacy_freezer_min_c`, `pharmacy_freezer_max_c` | -30, -15 | the acceptable readings of a medicine freezer |",
+  "steps": [
+    {
+      "heading": "1. The lists and the policy (pharmacy admin)",
+      "anchor": "1-the-lists-and-the-policy-pharmacy-admin",
+      "calls": [
+        {
+          "method": "PATCH",
+          "path": "/api/v1/medication-safety/drugs/{drug_id}",
+          "summary": "Set a medicine's high-alert category or restriction"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/pharmacy-admin/drugs",
+          "summary": "Add a formulary drug"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/medication-safety/lasa-pairs",
+          "summary": "Pair two look-alike or sound-alike medicines"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/medication-safety/lasa-pairs/{pair_id}",
+          "summary": "Change or retire a look-alike pair"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/medication-safety/high-alert-list",
+          "summary": "The high-alert, restricted and look-alike medicines"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/medication-safety/high-alert-list/pdf",
+          "summary": "The high-alert list to display, as a PDF"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/medication-safety/policy/pdf",
+          "summary": "The written medication policy as a PDF"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/privileges",
+          "summary": "Grant a clinical privilege"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drugs/search",
+          "summary": "Formulary search with live stock colour"
+        }
+      ]
+    },
+    {
+      "heading": "2. Prescribing (doctor)",
+      "anchor": "2-prescribing-doctor",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions",
+          "summary": "E-prescription (hospital pharmacy or external slip)"
+        }
+      ]
+    },
+    {
+      "heading": "3. Verbal and telephone orders (nurse → doctor)",
+      "anchor": "3-verbal-and-telephone-orders-nurse-doctor",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/verbal",
+          "summary": "Write down a verbal or telephone order"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/countersign",
+          "summary": "Countersign my verbal order"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/verbal-orders",
+          "summary": "Verbal orders and their countersignatures"
+        }
+      ]
+    },
+    {
+      "heading": "4. The pharmacist's query (pharmacist ↔ doctor)",
+      "anchor": "4-the-pharmacist-s-query-pharmacist-doctor",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/queries",
+          "summary": "Query an unclear or unsafe order"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescription-queries/{query_id}/answer",
+          "summary": "Answer the pharmacist's query"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/items/{item_id}/stop",
+          "summary": "Stop one medication line"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/prescription-queries",
+          "summary": "The pharmacist's queries"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescription-queries/{query_id}/withdraw",
+          "summary": "Withdraw a query"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/prescriptions/{prescription_id}",
+          "summary": "Prescription with remaining quantities and stock per line"
+        }
+      ]
+    },
+    {
+      "heading": "5. Dispensing a high-alert medicine, and the labels (pharmacist)",
+      "anchor": "5-dispensing-a-high-alert-medicine-and-the-labels-pharmacist",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/dispense",
+          "summary": "Dispense Now (partial allowed, FEFO)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/dispensations/{dispensation_id}/labels",
+          "summary": "The labels of a dispensation"
+        }
+      ]
+    },
+    {
+      "heading": "6. Wristbands (admission desk, ward, ER)",
+      "anchor": "6-wristbands-admission-desk-ward-er",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/wristbands",
+          "summary": "Print an identity wristband"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/wristbands",
+          "summary": "The wristbands of a patient or a stay"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/wristbands/{wristband_id}/print-payload",
+          "summary": "Reprint a wristband's label"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/wristbands/verify",
+          "summary": "Scan to verify a patient's identity"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/safety-checks",
+          "summary": "Record a pause of the surgical safety checklist"
+        }
+      ]
+    },
+    {
+      "heading": "7. Giving a dose (ward nurse)",
+      "anchor": "7-giving-a-dose-ward-nurse",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/mar/{mar_id}/chart",
+          "summary": "Chart a scheduled dose (Administered / Held / Refused / Missed)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/mar/prn",
+          "summary": "Chart a PRN / ad-hoc dose"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mar/{mar_id}/prepare",
+          "summary": "Prepare a dose and print its label"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/mar/{mar_id}/dose-label",
+          "summary": "Print a prepared dose's label again"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/mar",
+          "summary": "Medication Administration Record (checklist)"
+        }
+      ]
+    },
+    {
+      "heading": "8. Recalls (pharmacy admin)",
+      "anchor": "8-recalls-pharmacy-admin",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/drug-recalls",
+          "summary": "Open a batch recall"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drugs/search",
+          "summary": "Formulary search with live stock colour"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drug-recalls/{recall_id}",
+          "summary": "A recall and where its batches went"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/drug-recalls/{recall_id}/remove-stock",
+          "summary": "Remove the recalled stock left"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/pharmacy-admin/batches/{batch_id}/supplier-returns",
+          "summary": "Return units of a batch to its supplier"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/drug-recalls/{recall_id}/patients/{recall_patient_id}",
+          "summary": "Record a contact with a patient of a recall"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/drug-recalls/{recall_id}/close",
+          "summary": "Close a recall"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/drug-recalls/{recall_id}/cancel",
+          "summary": "Cancel a recall opened by mistake"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drug-recalls",
+          "summary": "The recall register"
+        }
+      ]
+    },
+    {
+      "heading": "9. Expired ward stock (head nurse)",
+      "anchor": "9-expired-ward-stock-head-nurse",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/wards/{ward_id}/inventory",
+          "summary": "Ward-local stock"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/wards/{ward_id}/inventory/remove",
+          "summary": "Remove stock from a ward (expired, damaged, or returned to the pharmacy)"
+        }
+      ]
+    },
+    {
+      "heading": "10. The patient's own medicines (ward nurse, pharmacist)",
+      "anchor": "10-the-patient-s-own-medicines-ward-nurse-pharmacist",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/own-medicines",
+          "summary": "Record the medicines a patient brought in"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/own-medicines",
+          "summary": "The patient's own medicines"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/own-medicines/{own_medicine_id}/identify",
+          "summary": "Identify a patient's own medicine"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/own-medicines/hand-back",
+          "summary": "Hand the patient's own medicines back"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/own-medicines/{own_medicine_id}/destroy",
+          "summary": "Destroy a patient's own medicine"
+        }
+      ]
+    },
+    {
+      "heading": "11. The worklist and the statistics",
+      "anchor": "11-the-worklist-and-the-statistics",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/medication-safety/worklist",
+          "summary": "Medication safety work waiting"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/medication-safety/statistics",
+          "summary": "Medication safety statistics"
+        }
+      ]
+    },
+    {
+      "heading": "12. The storage log (pharmacist, ward nurse)",
+      "anchor": "12-the-storage-log-pharmacist-ward-nurse",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/pharmacy/storage-checks",
+          "summary": "Record a temperature (and humidity) reading of a medicine store, refrigerator or freezer"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/pharmacy/storage-checks",
+          "summary": "The storage log"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/pharmacy/storage-checks/summary",
+          "summary": "The storage log by storage area: readings, out of range, days with the full routine"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/pharmacy/storage-checks/register/pdf",
+          "summary": "The storage register of a period as a PDF (MSDS MOM 58)"
+        }
+      ]
+    }
+  ]
+}

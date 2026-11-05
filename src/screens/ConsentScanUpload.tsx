@@ -11,12 +11,14 @@ export function ConsentScanUpload({
   disabled,
   onPending,
   onUploaded,
+  docType = 'Consent',
 }: {
   patientId: number;
   consentNumber: string;
   disabled: boolean;
   onPending: (v: boolean) => void;
   onUploaded: (v: PatientDocumentUploadOut) => void;
+  docType?: 'Consent'|'Prescription'|'MedicoLegalReport'|'AutopsyReport';
 }) {
   const [file, setFile] = useState<File>(),
     [attempt, setAttempt] = useState<{
@@ -25,6 +27,7 @@ export function ConsentScanUpload({
       file: File;
       patientId: number;
       title: string;
+      docType: 'Consent'|'Prescription'|'MedicoLegalReport'|'AutopsyReport';
     }>(),
     [busy, setBusy] = useState(false),
     [error, setError] = useState<unknown>(),
@@ -42,6 +45,7 @@ export function ConsentScanUpload({
       file: file!,
       patientId,
       title: consentNumber,
+      docType,
     };
     if (!canRetryWrite({ ...a, body: null })) {
       setError(
@@ -76,7 +80,7 @@ export function ConsentScanUpload({
     try {
       const body = new FormData();
       body.append("file", a.file);
-      body.append("doc_type", "Consent");
+      body.append("doc_type", a.docType);
       body.append("title", a.title);
       body.append("is_outside", "false");
       const r = await api<PatientDocumentUploadOut>(
@@ -85,7 +89,7 @@ export function ConsentScanUpload({
         body,
         { key: a.key },
       );
-      if (r.patient_id !== a.patientId || r.doc_type !== "Consent")
+      if (r.patient_id !== a.patientId || r.doc_type !== a.docType)
         throw Error(
           "The uploaded document identity differs. Reconcile before attaching.",
         );
@@ -126,9 +130,9 @@ export function ConsentScanUpload({
         {t("Upload the signed paper separately", "دستخط شدہ کاغذ الگ اپ لوڈ")}
       </h3>
       <ErrorBox error={error} />
-      <Field label={t("Consent scan file", "رضامندی کی اسکین فائل")}>
+      <Field label={t("Patient scan file", "مریض کی اسکین فائل")}>
         <input
-          data-help="consents.upload"
+          data-help={docType==='Prescription'?'rx.handover':docType==='MedicoLegalReport'?'mlc_cases.input_mlr_note':docType==='AutopsyReport'?'death_record.input_autopsy_findings':'consents.upload'}
           type="file"
           accept="application/pdf,image/jpeg,image/png"
           disabled={disabled || busy || !!attempt}
@@ -139,12 +143,12 @@ export function ConsentScanUpload({
         />
       </Field>
       {!attempt && (
-        <button
-          data-help="consents.upload"
+        <button type="button"
+          data-help={docType==='Prescription'?'rx.handover':docType==='MedicoLegalReport'?'mlc_cases.input_mlr_note':docType==='AutopsyReport'?'death_record.input_autopsy_findings':'consents.upload'}
           disabled={disabled || busy || !file}
           onClick={() => void send()}
         >
-          {t("Upload this consent scan", "رضامندی کی یہ اسکین اپ لوڈ")}
+          {t("Upload this scan", "یہ اسکین اپ لوڈ کریں")}
         </button>
       )}
       {saved && (
@@ -160,18 +164,18 @@ export function ConsentScanUpload({
         <div className="notice" role="alert">
           <p>
             {t(
-              "Upload result unknown. Keep the original file and key; do not issue or sign consent again.",
-              "اپ لوڈ کا نتیجہ نامعلوم۔ اصل فائل و کلید رکھیں؛ رضامندی دوبارہ تیار یا سائن نہیں۔",
+              "Upload result unknown. Keep the original file and key; never repeat the main record to repair an upload.",
+              "اپ لوڈ کا نتیجہ نامعلوم۔ اصل فائل و کلید رکھیں؛ اپ لوڈ درست کرنے کو اصل اندراج نہ دہرائیں۔",
             )}
           </p>
-          <button data-help="consents.recovery" onClick={() => void inspect()}>
+          <button type="button" data-help={docType==='Prescription'?'rx.handover':docType==='MedicoLegalReport'?'mlc_cases.input_mlr_note':docType==='AutopsyReport'?'death_record.input_autopsy_findings':'consents.recovery'} onClick={() => void inspect()}>
             {t(
               "Read original patient documents",
               "اصل مریض کی دستاویزات پڑھیں",
             )}
           </button>
           {canRetryWrite({ ...attempt, body: null }) && (
-            <button data-help="consents.recovery" onClick={() => void send()}>
+            <button type="button" data-help={docType==='Prescription'?'rx.handover':docType==='MedicoLegalReport'?'mlc_cases.input_mlr_note':docType==='AutopsyReport'?'death_record.input_autopsy_findings':'consents.recovery'} onClick={() => void send()}>
               {t("Retry original scan upload", "اصل اسکین اپ لوڈ دوبارہ")}
             </button>
           )}
@@ -184,14 +188,14 @@ export function ConsentScanUpload({
                 )}
               </p>
               {observed
-                .filter((d) => d.doc_type === "Consent")
+                .filter((d) => d.doc_type === attempt.docType)
                 .map((d) => (
                   <p key={d.document_id}>
                     #{d.document_id} · {d.title} · {d.uploaded_at}
                   </p>
                 ))}
-              <button
-                data-help="consents.recovery"
+              <button type="button"
+                data-help={docType==='Prescription'?'rx.handover':docType==='MedicoLegalReport'?'mlc_cases.input_mlr_note':docType==='AutopsyReport'?'death_record.input_autopsy_findings':'consents.recovery'}
                 onClick={() => {
                   setAttempt(undefined);
                   setObserved(undefined);

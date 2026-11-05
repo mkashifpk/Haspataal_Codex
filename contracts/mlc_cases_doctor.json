@@ -1,7 +1,7 @@
 {
   "screen_id": "mlc_cases_doctor",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -177,6 +177,11 @@
             "call": "POST /mlc/cases/{mlc_id}/evidence",
             "summary": "Record evidence handed to the police",
             "screen": "mlc_cases_doctor"
+          },
+          {
+            "call": "POST /patients/{patient_id}/documents",
+            "summary": "Upload a patient document (PDF/JPEG/PNG)",
+            "screen": "mlc_cases_doctor"
           }
         ],
         "update_or_correct": [
@@ -258,9 +263,14 @@
       }
     ],
     "related_workflows": [
+      "clinical-and-prescriptions",
+      "consent",
       "deaths-and-medico-legal-cases",
       "emergency-department",
-      "external-referrals"
+      "external-referrals",
+      "inpatient-and-discharge",
+      "maternity-and-newborns",
+      "opd-reception"
     ]
   },
   "rules_in_force": null,
@@ -270,13 +280,14 @@
     "workspace": "doctor",
     "phase": "P5",
     "position": 103,
-    "points": 73,
+    "points": 76,
     "capabilities": [
       "realtime",
       "patient_context",
       "idempotent_writes",
       "versioned_edits",
       "printing",
+      "uploads",
       "f1_help",
       "zoom"
     ],
@@ -310,65 +321,71 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 73,
+    "points": 76,
     "items": [
       {
         "id": "ep:GET /mlc/cases",
         "label": "GET /mlc/cases",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /mlc/cases",
         "label": "POST /mlc/cases",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /mlc/cases/{mlc_id}",
         "label": "GET /mlc/cases/{mlc_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PATCH /mlc/cases/{mlc_id}",
         "label": "PATCH /mlc/cases/{mlc_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /mlc/cases/{mlc_id}/police-intimation",
         "label": "POST /mlc/cases/{mlc_id}/police-intimation",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /mlc/cases/{mlc_id}/evidence",
         "label": "POST /mlc/cases/{mlc_id}/evidence",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /mlc/cases/{mlc_id}/close",
         "label": "POST /mlc/cases/{mlc_id}/close",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /mlc/cases/{mlc_id}/print-payload",
         "label": "GET /mlc/cases/{mlc_id}/print-payload",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /mlc/case-types",
         "label": "GET /mlc/case-types",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /mlc/contacts",
         "label": "GET /mlc/contacts",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:POST /patients/{patient_id}/documents",
+        "label": "POST /patients/{patient_id}/documents",
         "points": 3,
         "claimed": false
       },
@@ -376,73 +393,73 @@
         "id": "ev:notification.created",
         "label": "notification.created",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:4d698e4d1b",
         "label": "Offer 'Open MLC' from the emergency visit whenever the complaint matches a case type (GET /mlc/case-types). An unknown patient gets a trauma profile first (POST /patients/trauma).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:5bc7258288",
         "label": "Write the history as alleged, in the teller's words, and who told it; the examination may follow later (PATCH).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:280a8e8493",
         "label": "Not brought by the police: 'Inform police' at once (police-intimation: station from GET /mlc/contacts, how, to whom, their reference). It is recorded once and never changes. Keep police_intimation_overdue cases in red at the top.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:2b6e9d023c",
         "label": "Print the intimation for the police station (print-payload, A4) and hand over evidence item by item, each signed for (evidence: seal number, officer, receipt).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:044cdb5a52",
         "label": "Settle the medico-legal report: IssuedHere (number, date; upload the copy as a MedicoLegalReport document), Referred (the designated hospital) or NotRequired (why); then 'Close' (MLC_NOT_READY_TO_CLOSE lists details.missing).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:ca37655fad",
         "label": "Every screen of this patient shows the MLC number (patient.mlc_numbers).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
         "label": "Test plan passed",
         "points": 4,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -472,13 +489,13 @@
         "id": "q:character",
         "label": "Design principles applied",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:editor",
         "label": "Editor's pass",
         "points": 2,
-        "claimed": false
+        "claimed": true
       }
     ],
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
@@ -982,7 +999,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "Required when the police brought the patient"
+            "description": "Required when the police brought the patient (GET /mlc/contacts, contact_type PoliceStation)"
           },
           {
             "pointer": "/police_reference",
@@ -1346,7 +1363,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "The MLR copy in the patient's documents (MedicoLegalReport)"
+            "description": "The MLR copy in the patient's documents (MedicoLegalReport) (POST /patients/{patient_id}/documents)"
           },
           {
             "pointer": "/referred_to_id",
@@ -2229,6 +2246,254 @@
         ],
         "note": null
       }
+    },
+    {
+      "endpoint": "POST /patients/{patient_id}/documents",
+      "summary": "Upload a patient document (PDF/JPEG/PNG)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "patient.document.upload"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of patient.document.upload",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "IDEMPOTENCY_CONFLICT",
+          "http_status": 422,
+          "message": "Idempotency-Key was reused with a different request body.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/reception/registrations"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "PAYLOAD_TOO_LARGE",
+          "http_status": 413,
+          "message": "The uploaded file is too large.",
+          "retryable": false,
+          "ui_action": "Tell the user the file is too large.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/settings/me"
+        },
+        {
+          "code": "UNSUPPORTED_MEDIA_TYPE",
+          "http_status": 415,
+          "message": "This file type is not allowed.",
+          "retryable": false,
+          "ui_action": "Tell the user the file type is not allowed.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "allowed"
+          ],
+          "details_from": "POST /api/v1/patients/{patient_id}/documents"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "patient_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Patient Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "$ref": "#/components/schemas/Body_upload_document_api_v1_patients__patient_id__documents_post"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_PatientDocumentUploadOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "multipart/form-data",
+        "model": "Body_upload_document_api_v1_patients__patient_id__documents_post",
+        "fields": [
+          {
+            "pointer": "/file",
+            "type": "string",
+            "required": true,
+            "nullable": false
+          },
+          {
+            "pointer": "/doc_type",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Photo",
+              "CNIC",
+              "PanelCard",
+              "Consent",
+              "ReferralLetter",
+              "DeathCertificate",
+              "AutopsyReport",
+              "PostMortemReport",
+              "MedicoLegalReport",
+              "LabReport",
+              "Imaging",
+              "DischargeSummary",
+              "Prescription",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/title",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200,
+            "description": "What it is, e.g. 'CBC' or 'Chest X-ray report'"
+          },
+          {
+            "pointer": "/is_outside",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": false,
+            "description": "Brought from another hospital, laboratory or clinic"
+          },
+          {
+            "pointer": "/source_facility",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200,
+            "description": "Who issued the outside document (required with is_outside)"
+          },
+          {
+            "pointer": "/document_date",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date",
+            "description": "The date written on the document"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /patients/{patient_id}/documents",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
     }
   ],
   "realtime": {
@@ -2317,7 +2582,9 @@
   },
   "handoffs": [],
   "patient_context": {
-    "contexts": [],
+    "contexts": [
+      "patient_id"
+    ],
     "load": [
       "GET /patients/{patient_id}"
     ],
@@ -2487,6 +2754,56 @@
     },
     {
       "values": [
+        "application/pdf",
+        "image/jpeg",
+        "image/png"
+      ],
+      "column": "patient_documents.content_type",
+      "used_at": "POST /patients/{patient_id}/documents.content_type",
+      "labels": {
+        "application/pdf": "Application pdf",
+        "image/jpeg": "Image jpeg",
+        "image/png": "Image png"
+      }
+    },
+    {
+      "values": [
+        "Photo",
+        "CNIC",
+        "PanelCard",
+        "Consent",
+        "ReferralLetter",
+        "DeathCertificate",
+        "AutopsyReport",
+        "PostMortemReport",
+        "MedicoLegalReport",
+        "LabReport",
+        "Imaging",
+        "DischargeSummary",
+        "Prescription",
+        "Other"
+      ],
+      "column": "patient_documents.doc_type",
+      "used_at": "POST /patients/{patient_id}/documents.doc_type",
+      "labels": {
+        "Photo": "Photo",
+        "CNIC": "CNIC",
+        "PanelCard": "Panel card",
+        "Consent": "Consent",
+        "ReferralLetter": "Referral letter",
+        "DeathCertificate": "Death certificate",
+        "AutopsyReport": "Autopsy report",
+        "PostMortemReport": "Post mortem report",
+        "MedicoLegalReport": "Medico legal report",
+        "LabReport": "Lab report",
+        "Imaging": "Imaging",
+        "DischargeSummary": "Discharge summary",
+        "Prescription": "Prescription",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
         "male",
         "female",
         "other",
@@ -2622,12 +2939,16 @@
     },
     "error_messages": {
       "FORBIDDEN": "You do not have permission to do this.",
+      "IDEMPOTENCY_CONFLICT": "Idempotency-Key was reused with a different request body.",
       "MLC_CLOSED": "A closed medico-legal case cannot change.",
       "MLC_CONTACT_TYPE_INVALID": "Choose a police station (or, for a referral, a hospital designated for medico-legal reports) from the contact list.",
       "MLC_NOT_READY_TO_CLOSE": "Inform the police and settle the medico-legal report before closing the case.",
       "MLC_POLICE_ALREADY_INFORMED": "The police intimation is recorded and cannot change.",
+      "NOT_FOUND": "The requested resource was not found.",
       "PATIENT_MERGED_CANNOT_TRANSACT": "This patient record was merged; use the master record.",
+      "PAYLOAD_TOO_LARGE": "The uploaded file is too large.",
       "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
+      "UNSUPPORTED_MEDIA_TYPE": "This file type is not allowed.",
       "VALIDATION_ERROR": "The request is invalid."
     },
     "wording_quoted_in_rules": [
@@ -2651,6 +2972,10 @@
       "hospital_admin",
       "hospital_director",
       "clinic_director",
+      "receptionist",
+      "admissions_officer",
+      "ward_nurse",
+      "head_nurse",
       "quality_officer"
     ],
     "page_for": [
@@ -2958,6 +3283,41 @@
           "surgeon",
           "triage_nurse"
         ]
+      },
+      {
+        "id": "case:POST /patients/{patient_id}/documents",
+        "call": "POST /api/v1/patients/{patient_id}/documents",
+        "summary": "Upload a patient document (PDF/JPEG/PNG)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "clinic_director",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "IDEMPOTENCY_CONFLICT",
+          "NOT_FOUND",
+          "PAYLOAD_TOO_LARGE",
+          "UNSUPPORTED_MEDIA_TYPE",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
       }
     ],
     "service_cases": [],
@@ -2998,8 +3358,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -3152,6 +3512,17 @@
         ],
         "permissions_mode": "any",
         "access": null
+      },
+      {
+        "id": "mlc_cases_doctor::POST /patients/{patient_id}/documents",
+        "task": "Upload a patient document (PDF/JPEG/PNG)",
+        "call": "POST /patients/{patient_id}/documents",
+        "is_action": true,
+        "permissions": [
+          "patient.document.upload"
+        ],
+        "permissions_mode": "all",
+        "access": null
       }
     ],
     "rules_to_explain": [
@@ -3170,6 +3541,11 @@
         "code": "FORBIDDEN",
         "message": "You do not have permission to do this.",
         "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "IDEMPOTENCY_CONFLICT",
+        "message": "Idempotency-Key was reused with a different request body.",
+        "ui_action": "Show field errors from details.fields / the message."
       },
       {
         "code": "MLC_CLOSED",
@@ -3192,14 +3568,29 @@
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
       },
       {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
         "code": "PATIENT_MERGED_CANNOT_TRANSACT",
         "message": "This patient record was merged; use the master record.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
       },
       {
+        "code": "PAYLOAD_TOO_LARGE",
+        "message": "The uploaded file is too large.",
+        "ui_action": "Tell the user the file is too large."
+      },
+      {
         "code": "REFERENCE_NOT_FOUND",
         "message": "A referenced record does not exist.",
         "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "UNSUPPORTED_MEDIA_TYPE",
+        "message": "This file type is not allowed.",
+        "ui_action": "Tell the user the file type is not allowed."
       },
       {
         "code": "VALIDATION_ERROR",
@@ -3267,6 +3658,16 @@
   },
   "workflows": [
     {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "consent",
+      "title": "Consent (MSDS)",
+      "recipe": "get_workflow_recipe('consent')"
+    },
+    {
       "slug": "deaths-and-medico-legal-cases",
       "title": "Deaths and medico-legal cases (MSDS)",
       "recipe": "get_workflow_recipe('deaths-and-medico-legal-cases')"
@@ -3280,6 +3681,21 @@
       "slug": "external-referrals",
       "title": "External referrals and the emergency contact list",
       "recipe": "get_workflow_recipe('external-referrals')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "maternity-and-newborns",
+      "title": "Maternity and newborns",
+      "recipe": "get_workflow_recipe('maternity-and-newborns')"
+    },
+    {
+      "slug": "opd-reception",
+      "title": "OPD reception, queues & re-routing",
+      "recipe": "get_workflow_recipe('opd-reception')"
     }
   ],
   "scenarios": [],
@@ -3629,9 +4045,119 @@
           "request_id": "070f596e36b34426ace5f31a7744b295"
         }
       }
+    },
+    "POST /patients/{patient_id}/documents": {
+      "request": {
+        "path": "/api/v1/patients/1/documents",
+        "multipart": {
+          "file": "<file>",
+          "doc_type": "CNIC"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "document_id": 1,
+            "patient_id": 1,
+            "doc_type": "CNIC",
+            "title": null,
+            "content_type": "application/pdf",
+            "size_bytes": 31,
+            "is_outside": false,
+            "source_facility": null,
+            "document_date": null,
+            "uploaded_at": "2026-10-13T11:27:11.017375+00:00"
+          },
+          "meta": {
+            "server_time": "2026-10-13T11:27:11.028856+00:00"
+          },
+          "request_id": "16803b23adfa4ca89f6674d80ff160a0"
+        }
+      }
     }
   },
   "schemas": {
+    "Body_upload_document_api_v1_patients__patient_id__documents_post": {
+      "properties": {
+        "file": {
+          "type": "string",
+          "contentMediaType": "application/octet-stream",
+          "title": "File"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title",
+          "description": "What it is, e.g. 'CBC' or 'Chest X-ray report'"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought from another hospital, laboratory or clinic",
+          "default": false
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "Who issued the outside document (required with is_outside)"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document"
+        }
+      },
+      "type": "object",
+      "required": [
+        "file",
+        "doc_type"
+      ],
+      "title": "Body_upload_document_api_v1_patients__patient_id__documents_post"
+    },
     "Envelope_MlcCaseOut_": {
       "properties": {
         "data": {
@@ -3652,6 +4178,27 @@
         "request_id"
       ],
       "title": "Envelope[MlcCaseOut]"
+    },
+    "Envelope_PatientDocumentUploadOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PatientDocumentUploadOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PatientDocumentUploadOut]"
     },
     "Envelope_PrintOut_MlcPrintFieldsOut__": {
       "properties": {
@@ -4984,7 +5531,7 @@
             }
           ],
           "title": "Police Station Id",
-          "description": "Required when the police brought the patient"
+          "description": "Required when the police brought the patient (GET /mlc/contacts, contact_type PoliceStation)"
         },
         "police_reference": {
           "anyOf": [
@@ -5231,7 +5778,7 @@
             }
           ],
           "title": "Mlr Document Id",
-          "description": "The MLR copy in the patient's documents (MedicoLegalReport)"
+          "description": "The MLR copy in the patient's documents (MedicoLegalReport) (POST /patients/{patient_id}/documents)"
         },
         "referred_to_id": {
           "anyOf": [
@@ -5272,6 +5819,112 @@
       },
       "type": "object",
       "title": "MlcUpdateIn"
+    },
+    "PatientDocumentUploadOut": {
+      "properties": {
+        "document_id": {
+          "type": "integer",
+          "title": "Document Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "application/pdf",
+            "image/jpeg",
+            "image/png"
+          ],
+          "title": "Content Type"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "title": "Size Bytes"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought by the patient from another hospital, laboratory or clinic: show it labelled as an outside document, never as a result of this hospital"
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "The hospital, laboratory or clinic that issued an outside document"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document (the test, the report, the visit)"
+        },
+        "uploaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Uploaded At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_id",
+        "patient_id",
+        "doc_type",
+        "title",
+        "content_type",
+        "size_bytes",
+        "is_outside",
+        "source_facility",
+        "document_date",
+        "uploaded_at"
+      ],
+      "title": "PatientDocumentUploadOut",
+      "description": "The stored document (download it with GET /patient-documents/{document_id}/download)."
     },
     "PoliceIntimationIn": {
       "properties": {

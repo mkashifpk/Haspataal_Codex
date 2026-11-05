@@ -1,7 +1,7 @@
 {
   "screen_id": "bed_matrix",
-  "contract_fingerprint": "5f8bd8feecd1d68f7841",
-  "knowledge_revision": "893766fb0e066973",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "5980e5c3b1817f4e",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "admissions",
       "purpose": "Grid of beds per ward with colour by state; counts per ward.",
@@ -233,8 +233,15 @@
       }
     ],
     "related_workflows": [
+      "complaints",
       "cost-estimates-and-tariff",
-      "inpatient-and-discharge"
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "incidents-and-sentinel-events",
+      "infection-control",
+      "inpatient-and-discharge",
+      "medication-safety"
     ],
     "service": {
       "services": [
@@ -569,21 +576,36 @@
       "access": {
         "authentication": "user",
         "permissions": [
-          "ipd.bed.view"
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
         ],
-        "permissions_mode": "all",
-        "who": "holders of ipd.bed.view",
+        "permissions_mode": "any",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record",
         "roles_allowed": [
           "admissions_officer",
           "anaesthetist",
           "clinic_director",
           "clinical_specialist",
+          "cssd_technician",
           "doctor",
           "head_nurse",
           "hospital_admin",
           "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
           "ops_admin",
           "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
           "receptionist",
           "super_admin",
           "surgeon",
@@ -608,6 +630,21 @@
             "current_state"
           ],
           "details_from": "POST /api/v1/admissions/{admission_id}/allocate-bed"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
         },
         {
           "code": "VALIDATION_ERROR",
@@ -910,7 +947,14 @@
       "anaesthetist",
       "ward_nurse",
       "head_nurse",
-      "ops_admin"
+      "pharmacist",
+      "pharmacy_admin",
+      "hr_admin",
+      "maintenance_admin",
+      "ops_admin",
+      "quality_officer",
+      "ipc_nurse",
+      "cssd_technician"
     ],
     "page_for": [
       "admissions_officer"
@@ -955,13 +999,14 @@
             "accountant",
             "billing_admin",
             "cashier",
-            "cssd_technician",
-            "employee_self"
+            "employee_self",
+            "lab_admin"
           ],
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
           "BED_NO_LONGER_AVAILABLE",
+          "FORBIDDEN",
           "VALIDATION_ERROR"
         ],
         "as_one_of": [
@@ -969,12 +1014,19 @@
           "anaesthetist",
           "clinic_director",
           "clinical_specialist",
+          "cssd_technician",
           "doctor",
           "head_nurse",
           "hospital_admin",
           "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
           "ops_admin",
           "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
           "receptionist",
           "super_admin",
           "surgeon",
@@ -1096,9 +1148,17 @@
         "call": "GET /beds/matrix",
         "is_action": false,
         "permissions": [
-          "ipd.bed.view"
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
         ],
-        "permissions_mode": "all",
+        "permissions_mode": "any",
         "access": null
       }
     ],
@@ -1199,14 +1259,49 @@
   },
   "workflows": [
     {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
+    {
       "slug": "cost-estimates-and-tariff",
       "title": "Cost estimates, the tariff and ward transfers (MSDS)",
       "recipe": "get_workflow_recipe('cost-estimates-and-tariff')"
     },
     {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
+    },
+    {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "facility-compliance-equipment-drills",
+      "title": "Licences, equipment maintenance and mock drills (MSDS)",
+      "recipe": "get_workflow_recipe('facility-compliance-equipment-drills')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "recipe": "get_workflow_recipe('infection-control')"
+    },
+    {
       "slug": "inpatient-and-discharge",
       "title": "Admission, beds, nursing & discharge",
       "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
     }
   ],
   "scenarios": [

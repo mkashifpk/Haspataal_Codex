@@ -121,7 +121,9 @@ export interface EntryPatch {
   roster_date?: string | null;
   shift_pattern_id?: number | null;
   duty_area?: "Ward" | "Department" | "Emergency" | "OT" | "Facility" | "Other" | null;
+  /** The ward (GET /beds/matrix?include_beds=false) */
   ward_id?: number | null;
+  /** The department (GET /admin/departments) */
   department_id?: number | null;
   zone_label?: string | null;
   bed_ids?: number[] | null;
@@ -138,7 +140,9 @@ export interface CopyIn {
   source_to: string;
   /** Where the copy starts, e.g. next Monday */
   target_from: string;
+  /** The ward (GET /beds/matrix?include_beds=false) */
   ward_id?: number | null;
+  /** The department (GET /admin/departments) */
   department_id?: number | null;
   staff_category?: "Clinical" | "Nursing" | "Administrative" | "Technical" | "SupportZeroInterface" | "Visiting" | null;
   /** Move everyone's pattern on by this many days within the period, wrapping round: 1 on a week makes each rest day move to the next weekday, so rest days (and Sunday duty) rotate week by week */
@@ -339,6 +343,57 @@ export interface RollCallSkippedOut {
   reason: string;
 }
 
+export interface BedMatrixOut {
+  wards: WardOccupancyOut[];
+  /** Ward name -> available beds */
+  summary: Record<string, number>;
+  /** Only with include_beds=true */
+  beds?: BedMatrixBedOut[] | null;
+}
+
+/** A ward's bed counts (view v_bed_matrix). */
+export interface WardOccupancyOut {
+  ward_id: number;
+  code: string;
+  name: string;
+  ward_type: "General" | "Private" | "SemiPrivate" | "ICU" | "CCU" | "NICU" | "Surgical" | "Pediatric" | "Maternity" | "Emergency" | "Isolation" | "Other";
+  gender_restriction: "male" | "female" | "any";
+  total_beds: number;
+  available: number;
+  reserved: number;
+  occupied: number;
+  /** Beds being cleaned or waiting for discharge clearance */
+  turnover: number;
+  out_of_service: number;
+}
+
+export interface BedMatrixBedOut {
+  bed_id: number;
+  ward_id: number;
+  label: string;
+  current_state: "Available" | "Reserved" | "Occupied" | "Dirty" | "Cleaning" | "OutOfService";
+  state_changed_at: string;
+  is_overflow_allowed: boolean;
+  admission_id: number | null;
+  /** Only with with_patients=true */
+  patient_name: string | null;
+  /** Only with with_patients=true */
+  mrn: string | null;
+  admission_status: "AdmissionPending" | "Waitlisted" | "BedReserved" | "CodeRedActive" | "Admitted" | "DischargeInProgress" | "Discharged" | "Cancelled" | null;
+  is_overflow: boolean | null;
+  /** The discharge stage the patient in this bed waits for */
+  discharge_blocked_on: string | null;
+}
+
+export interface DepartmentOut {
+  department_id: number;
+  code: string;
+  name: string;
+  is_clinical: boolean;
+  is_active: boolean;
+  row_version: number;
+}
+
 /** Roster entries for a date range (planner grid, a week by default) — GET /api/v1/rosters (who may call: holders of roster.manage.all or roster.manage.nursing or roster.manage.support or roster.view.all). */
 export function listEntriesRosters(query?: { date_from?: string | null; date_to?: string | null; ward_id?: number | null; department_id?: number | null; employee_id?: number | null; staff_category?: "Clinical" | "Nursing" | "Administrative" | "Technical" | "SupportZeroInterface" | "Visiting" | null; include_cancelled?: boolean }): Promise<RosterRangeOut> {
   return api<RosterRangeOut>("GET", withQuery(`/rosters`, query), undefined);
@@ -402,4 +457,14 @@ export function rollCallSheet(query?: { roster_date?: string | null; shift_patte
 /** Mark rostered staff present (no badge station) — POST /api/v1/rosters/roll-call (who may call: holders of attendance.roll_call). */
 export function takeRollCall(body: RollCallIn): Promise<RollCallOut> {
   return api<RollCallOut>("POST", `/rosters/roll-call`, body, { idempotent: true });
+}
+
+/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record). */
+export function bedMatrix(query?: { include_beds?: boolean }): Promise<BedMatrixOut> {
+  return api<BedMatrixOut>("GET", withQuery(`/beds/matrix`, query), undefined);
+}
+
+/** Departments — GET /api/v1/admin/departments (who may call: any logged-in user). */
+export function departments(): Promise<DepartmentOut[]> {
+  return api<DepartmentOut[]>("GET", `/admin/departments`, undefined);
 }

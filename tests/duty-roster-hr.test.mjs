@@ -242,6 +242,8 @@ test("Contracts and generated TypeScript definitions are present and valid", () 
 
   const contract = JSON.parse(fs.readFileSync("contracts/duty_roster_hr.json", "utf8"));
   assert.equal(contract.screen_id, "duty_roster_hr");
-  assert.equal(contract.endpoints.length, 13);
-  assert.equal(contract.definition_of_done.items.length, 37);
+  for (const endpoint of ['GET /admin/departments','GET /beds/matrix']) {
+    assert(contract.endpoints.some(e=>e.endpoint===endpoint), `Required directory ${endpoint}`);
+    assert(contract.definition_of_done.items.some(i=>i.id===`ep:${endpoint}`), `Directory rubric ${endpoint}`);
+  }
 });

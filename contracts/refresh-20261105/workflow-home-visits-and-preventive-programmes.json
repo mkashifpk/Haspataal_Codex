@@ -1,0 +1,168 @@
+{
+  "slug": "home-visits-and-preventive-programmes",
+  "title": "Home visits and preventive programmes",
+  "summary": "Whether the establishment provides home visits, the notice for display either way and every visit made; the preventive programmes it offers, the list for display, each patient's enrolment and the services given from the programme's card.",
+  "order": 99,
+  "workflow": "The clinic manual, indicators 26 and 32 (decisions 29-30)",
+  "workspaces": [
+    "owner_dashboard",
+    "quality",
+    "doctor",
+    "triage"
+  ],
+  "file": "home-visits-and-preventive-programmes.md",
+  "markdown": "# Home visits and preventive programmes\n\n| Source | What the surveyor checks | Haspataal |\n|---|---|---|\n| Clinic indicator 32 (PDF p66) | The home-visit policy is displayed and followed; displaying that home visits are **not** provided also meets it | The `home_visits` service, `GET /home-visits/notice/pdf`, `POST /home-visits`, `GET /home-visits` |\n| Clinic indicator 26 (PDF p57) | The displayed list of the preventive services provided (immunization, family planning, TB-DOTS, malaria, dengue...); those portrayed follow their guidelines. Applies only when portrayed | The `preventive_programmes` service, `/preventive-programmes`, `GET /preventive-programmes/list/pdf`, the enrolments and their entries |\n\nNeither is compulsory: an establishment that offers neither displays the two notices and is done. Both are services of\nthe establishment, switched on and off on the facility settings screen ([Facility profile and\nservices](facility-profile-and-services.md)); new work is refused while a service is not Active\n(`CAPABILITY_INACTIVE`), and the records stay readable after.\n\nWho: the **Owner**, the **Hospital Admin** and the **Quality Officer** keep the policy and the programmes\n(`homevisit.view`, `programme.manage`); **doctors** and **nurses** record home visits (`homevisit.record`) and give\nthe programmes' services (`programme.give`, read with `programme.view`).\n\n## 1. Home visits\n\n### The policy (Owner, Hospital Admin)\n\n1. `GET /home-visits/policy`: `provided`, the service's `state`, the `arrangements` and the `notice` text.\n2. To provide them: `PUT /admin/settings/home_visit_arrangements {\"value\": \"Monday to Saturday, 2-5 pm, within 5 km;\n   ask at the reception; the doctor goes with the home-visit kit\"}`, then switch the `home_visits` service on with\n   `POST /establishment/changes/preview` and `POST /establishment/changes` (`{\"capabilities\": [{\"capability\":\n   \"home_visits\", \"state\": \"Active\"}], ...}`). The preview lists `CAPABILITY_PREREQUISITE` until the arrangements are\n   written and someone holds `homevisit.record`.\n3. `GET /home-visits/notice/pdf` after every change: \"Home visits are provided.\" with the arrangements, or \"Home visits\n   are not provided by this establishment.\" Display it.\n\n### A visit (doctor, nurse)\n\n4. `POST /home-visits` with an `Idempotency-Key`:\n\n   ```json\n   {\"patient_id\": 12, \"requested_by\": \"The patient's son, Bilal\", \"requested_at\": \"2026-10-14T09:00:00+05:00\",\n    \"reason\": \"Bedridden after a stroke; fever since yesterday\", \"address\": \"House 4, Street 9, Lahore\",\n    \"visited_at\": \"2026-10-14T15:30:00+05:00\", \"examination_consent\": \"VerbalObtained\",\n    \"history\": \"Fever 38.6 C since yesterday\", \"examination\": \"Chest clear, sacral skin intact\",\n    \"assessment\": \"Viral fever\", \"care_given\": \"Paracetamol advised; fluids\", \"outcome\": \"ManagedAtHome\"}\n   ```\n\n   The examination consent is asked on purpose (three buttons, none selected); `examination` only with\n   `VerbalObtained`. `outcome`: `ManagedAtHome`, `AskedToAttend` or `Referred` (with `referred_to`). The visit is\n   signed with the author's stamp and never edited.\n\n### The register (Quality Officer)\n\n5. `GET /home-visits?date_from=&date_to=` (newest first, `before_id` to continue) and `GET /home-visits/{id}`: every\n   row read is logged as access to the patient's record.\n\n## 2. Preventive programmes\n\n### The programmes offered (Quality Officer, Owner)\n\n1. `GET /preventive-programmes` (`include_inactive=true` for those no longer offered).\n2. `POST /preventive-programmes` with an `Idempotency-Key`:\n\n   ```json\n   {\"name\": \"Childhood immunization (EPI)\", \"kind\": \"Immunization\",\n    \"national_programme\": \"Expanded Programme on Immunization, Punjab\",\n    \"guideline\": \"The programme's schedule card as issued to the establishment\",\n    \"services\": [\"BCG\", \"OPV-0\", \"Pentavalent-1\"]}\n   ```\n\n   `PROGRAMME_EXISTS` for a name in use. **Haspataal ships no national schedule and computes no due date**: the\n   services are the establishment's own words and the dates come from the programme's card.\n3. `PATCH /preventive-programmes/{id}` with `expected_version`: reword the services (past entries keep theirs), or\n   `is_offered: false` (no new enrolment; the open ones continue).\n4. Switch the `preventive_programmes` service on (`POST /establishment/changes`); it needs one programme offered and\n   someone holding `programme.give`.\n5. `GET /preventive-programmes/list/pdf`: the list to display (or \"No preventive programme is provided\").\n6. `GET /preventive-programmes/{id}/register?date_from=&date_to=`: the programme's register of a period, newest\n   first with `before_id`; every row read is logged.\n\n### A patient (doctor, nurse)\n\n7. `GET /patients/{patient_id}/programmes`: the patient's enrolments, each with its entries.\n8. `POST /patients/{patient_id}/programmes {\"programme_id\": 3, \"card_number\": \"EPI-LHR-0042\"}` with an\n   `Idempotency-Key`. `PROGRAMME_ENROLLED` while the patient's enrolment in it is open.\n9. `POST /programme-enrolments/{enrolment_id}/entries {\"service\": \"BCG\", \"given_at\": \"...\", \"batch_number\": \"B-2291\",\n   \"next_due_on\": \"2026-11-25\"}` with an `Idempotency-Key`: one of the programme's services, never in the future, the\n   next date as the card says (never suggested by the frontend).\n10. `POST /programme-enrolments/{enrolment_id}/close {\"status\": \"TransferredOut\", \"note\": \"BHU Kot Lakhpat, with the\n    card\"}`: `Completed`, `TransferredOut` (where to) or `Discontinued` (why). Afterwards\n    `PROGRAMME_ENROLMENT_CLOSED`; enrol again to continue.\n11. `GET /preventive-programmes/due?on=2026-11-25`: open enrolments whose card says the next service is due, with the\n    mobile number to call.\n\n### Stopping a programme service\n\nWhile `preventive_programmes` is **Retiring**, no new enrolment is accepted, but the patients already enrolled keep\nreceiving their services (keep 'Record service' and 'Close'). It becomes **Retired** only when every enrolment is\ncompleted, transferred or discontinued: the preview lists the open ones (`CAPABILITY_WORK_OUTSTANDING`). Nothing is\ndeleted; the history stays readable.\n\n## Errors\n\n| Code | When | What to show |\n|---|---|---|\n| `CAPABILITY_INACTIVE` | The service is not Active (or Retiring, for a new enrolment) | \"Home visits / preventive programmes are not provided here (Settings, facility)\" |\n| `CAPABILITY_PREREQUISITE` (preview) | The arrangements or a programme are missing | The preview's message, with a link |\n| `PROGRAMME_EXISTS` | A programme's name is in use | Highlight the name |\n| `PROGRAMME_ENROLLED` | The patient's enrolment is still open | Open it instead |\n| `PROGRAMME_ENROLMENT_CLOSED` | The enrolment ended | \"Enrol again to continue\" |\n| `VALIDATION_ERROR` | Findings without consent, a referral without where, a future time, a service the programme does not list | The message |",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/home-visits/notice/pdf",
+          "summary": "The home-visit notice to display (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/home-visits",
+          "summary": "Record a home visit"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/home-visits",
+          "summary": "The register of home visits"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/preventive-programmes/list/pdf",
+          "summary": "The list of preventive services to display (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "The policy (Owner, Hospital Admin)",
+      "anchor": "the-policy-owner-hospital-admin",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/home-visits/policy",
+          "summary": "Whether home visits are provided, and how"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/settings/{key}",
+          "summary": "Change a policy setting (type-checked, audited)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/establishment/changes/preview",
+          "summary": "Preview a change of profile or services (nothing is saved)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/establishment/changes",
+          "summary": "Apply a change of profile or services"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/home-visits/notice/pdf",
+          "summary": "The home-visit notice to display (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "A visit (doctor, nurse)",
+      "anchor": "a-visit-doctor-nurse",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/home-visits",
+          "summary": "Record a home visit"
+        }
+      ]
+    },
+    {
+      "heading": "The register (Quality Officer)",
+      "anchor": "the-register-quality-officer",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/home-visits",
+          "summary": "The register of home visits"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/home-visits/{home_visit_id}",
+          "summary": "One home visit"
+        }
+      ]
+    },
+    {
+      "heading": "The programmes offered (Quality Officer, Owner)",
+      "anchor": "the-programmes-offered-quality-officer-owner",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/preventive-programmes",
+          "summary": "The preventive programmes offered"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/preventive-programmes",
+          "summary": "Add a preventive programme"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/preventive-programmes/{programme_id}",
+          "summary": "Change a programme or stop offering it"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/establishment/changes",
+          "summary": "Apply a change of profile or services"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/preventive-programmes/list/pdf",
+          "summary": "The list of preventive services to display (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/preventive-programmes/{programme_id}/register",
+          "summary": "A programme's register of a period"
+        }
+      ]
+    },
+    {
+      "heading": "A patient (doctor, nurse)",
+      "anchor": "a-patient-doctor-nurse",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/{patient_id}/programmes",
+          "summary": "A patient's preventive programmes"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/programmes",
+          "summary": "Enrol a patient in a programme"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/programme-enrolments/{enrolment_id}/entries",
+          "summary": "Record a service given"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/programme-enrolments/{enrolment_id}/close",
+          "summary": "Complete, transfer out or discontinue an enrolment"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/preventive-programmes/due",
+          "summary": "The patients due for their next service"
+        }
+      ]
+    }
+  ]
+}

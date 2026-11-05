@@ -1,3 +1,12 @@
+import { WasteLog } from './screens/WasteLog';
+import { DirectoryPermissions } from './DirectoryPicker';
+import { resetDevDataset } from './dev-dataset';
+if(__BUILD_IS_DEV__)resetDevDataset(localStorage);
+import { MockDrills } from './screens/MockDrills';
+import { ComplianceRegister } from './screens/ComplianceRegister';
+import { screenNavigation, handbookPermits } from "./screen-navigation";
+import { deliveredHelpScreens } from "./foundation-help";
+import { help as handbookHelp } from "./help";
 import { MedicationAdministration } from './screens/MedicationAdministration';
 import { VerbalOrders } from './screens/VerbalOrders';
 import { VitalsFlowsheet } from './screens/VitalsFlowsheet';
@@ -72,6 +81,7 @@ import { LeaveApprovals } from './screens/LeaveApprovals';
 import { SelfService } from './screens/SelfService';
 import { Payroll } from './screens/Payroll';
 import { OpsConsole } from './screens/OpsConsole';
+import { EquipmentMaintenance } from "./screens/EquipmentMaintenance";
 import { BadgeStationKiosk } from './screens/BadgeStationKiosk';
 import { LabAdmin } from './screens/LabAdmin';
 import { PharmacyStorageLog } from './screens/PharmacyStorageLog';
@@ -151,6 +161,8 @@ import { createMetadataFlight } from "./metadata-flight";
 import { createBootstrapSeed } from "./bootstrap-seed";
 type WorkspaceSnapshot = {establishment:EstablishmentOut;settings:any;me:MeOut;permittedWorkspaces:MeOut["workspaces"]};
 const labels: Record<string, [string, string, string]> = {
+  equipment_maintenance: ["Medical equipment and maintenance", "طبی آلات اور دیکھ بھال", "⚙"],
+  equipment_maintenance_ops: ["Medical equipment and maintenance", "طبی آلات اور دیکھ بھال", "⚙"],
  patient_education_ward: ["Ward health education","وارڈ میں صحت کی رہنمائی","◉"],
  mar: ["Medication administration record","دوا دینے کا ریکارڈ","▤"],
  verbal_orders_ward: ["Verbal and telephone orders","زبانی اور ٹیلی فون احکام","▤"],
@@ -385,6 +397,7 @@ export function App() {
   const [querySelection,setQuerySelection]=useState<{userId:number;prescriptionId:number;itemId?:number|null}>();
   const [pharmacySelection,setPharmacySelection]=useState<{userId:number;prescriptionId:number;assistance?:CharityHandoff}>();
   const [clinicalSelection,setClinicalSelection]=useState<{userId:number;ticketId:number}>();
+  const [hrEmployeeEntry,setHrEmployeeEntry]=useState<{userId:number;employeeId:number}>();
   const [user, setUser] = useState<MeOut | null>(null),
     [server, setServer] = useState<any>(),
     [connected, setConnected] = useState(false),
@@ -417,6 +430,10 @@ export function App() {
     [notice, setNotice] = useState(""),
     [booting, setBooting] = useState(true),
     [clock, setClock] = useState(Date.now());
+  useEffect(() => {
+    if (["Finish or retry the pending action before leaving this screen.", "Finish or retry the pending action before changing workspace."].includes(notice)
+      && !document.querySelector('[data-write-pending="true"]')) setNotice("");
+  }, [clock, notice]);
   const [sessionRecovery, setSessionRecovery] = useState<string | null>(null),
     [sessionPassword, setSessionPassword] = useState(""),
     [sessionBusy, setSessionBusy] = useState(false),
@@ -839,6 +856,7 @@ export function App() {
     if(next === "imaging_quality_setup" && est?.views.screens.find(s=>s.screen_id===next)?.view === "setup" && !(fromFacility && screen === "facility_profile" && user?.permissions.includes("establishment.manage"))) return false;
     if (frontDeskScreens.has(next) && !workspace) return false;
     const routeOutline = next === "imaging_quality_setup" && fromFacility && facilitySetupPage ? facilitySetupOutline : outline;
+    if (user && !["login", "connect_server", "settings", "help_center"].includes(next) && !handbookPermits(routeOutline, next)) return false;
     const required: Record<string, string[]> = {
       radiology_worklist: ["imaging.order.update", "imaging.order.view"],
       rx_queue: ["pharmacy.queue.view", "prescription.view"],
@@ -970,7 +988,7 @@ export function App() {
         "hidden",
     ) || [];
   const workspaceReady = !!user && !!outline && !!est && !!meta && readyContext?.userId === user.user_id && readyContext.workspace === workspace && readyContext.epoch === metadataEpoch.current;
-  const nav = (workspaceReady ? [
+  const legacyNav = (workspaceReady ? [
     "app_shell",
     "workspace_picker",
     "notifications",
@@ -1137,6 +1155,9 @@ export function App() {
       (id !== "ot_settlement" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er","patient_programmes_triage","transfusion_bedside_er"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
+  const nav = screenNavigation(legacyNav, outline, est, deliveredHelpScreens, workspaceReady);
+  const navigationLabel = (id: string, index: 0 | 1 | 2) => labels[id]?.[index] ?? (index === 2 ? "•" : index === 1 ? handbookHelp[id]?.titleUr ?? id : handbookHelp[id]?.title ?? id);
+
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
   )?.view;
@@ -1207,6 +1228,11 @@ export function App() {
             </button>
           )}
           {!user && server && (
+            <button data-help="shell.kiosk" onClick={() => navigate(screen === "badge_station_kiosk" ? "login" : "badge_station_kiosk")}>
+              {screen === "badge_station_kiosk" ? t("Sign in", "لاگ ان") : t("Badge station", "بیج اسٹیشن")}
+            </button>
+          )}
+          {!user && server && (
             <button
               data-help="shell.settings"
               onClick={() =>
@@ -1260,12 +1286,13 @@ export function App() {
               {nav.map((id) => (
                 <button
                   data-help="shell.navigation"
+                  data-screen-target={id}
                   className={screen === id ? "active" : ""}
                   key={id}
                   onClick={() => navigate(id)}
                 >
-                  <span aria-hidden="true">{labels[id][2]}</span>
-                  {labels[id][ur ? 1 : 0]}
+                  <span aria-hidden="true">{navigationLabel(id, 2)}</span>
+                  {navigationLabel(id, ur ? 1 : 0)}
                   {id === "notifications" && unread !== undefined && (
                     <b>{unread}</b>
                   )}
@@ -1282,7 +1309,7 @@ export function App() {
             </div>
           </aside>
         )}
-        <main id="content">
+        <DirectoryPermissions.Provider value={user?.permissions ?? []}><main id="content">
           <ErrorBox error={error} />
           {!!referenceError && user && <section className="notice" data-help="shell.navigation">
             <p>{t("Some reference lists could not be loaded. Retry to refresh them.", "بعض حوالہ جاتی فہرستیں حاصل نہیں ہو سکیں۔ تازہ کرنے کے لیے دوبارہ کوشش کریں۔")}</p>
@@ -1291,7 +1318,7 @@ export function App() {
           </section>}
           {notice && (
             <p className="notice" role="status">
-              {notice}
+              {notice === "Finish or retry the pending action before leaving this screen." ? t(notice, "اس اسکرین سے جانے سے پہلے زیر التوا عمل مکمل یا اصل دوبارہ کوشش کریں۔") : notice === "Finish or retry the pending action before changing workspace." ? t(notice, "ورک اسپیس بدلنے سے پہلے زیر التوا عمل مکمل یا اصل دوبارہ کوشش کریں۔") : notice}
             </p>
           )}
           {ur && (
@@ -1311,7 +1338,9 @@ export function App() {
           ) : user?.must_change_password ? (
             <ChangePassword onDone={refreshState} />
           ) : !user ? (
-            screen === "settings" ? (
+            screen === "badge_station_kiosk" ? (
+              <BadgeStationKiosk onOpenHelp={() => { setHelpPage("badge_station_kiosk"); setHelpOpen(true); }} />
+            ) : screen === "settings" ? (
               <Settings
                 user={null}
                 prefs={prefs}
@@ -1433,8 +1462,8 @@ export function App() {
                           onClick={() => navigate(id)}
                           key={id}
                         >
-                          <span className="home-icon">{labels[id][2]}</span>
-                          <h2>{labels[id][ur ? 1 : 0]}</h2>
+                          <span className="home-icon">{navigationLabel(id, 2)}</span>
+                          <h2>{navigationLabel(id, ur ? 1 : 0)}</h2>
                           <span>
                             {id === "notifications" && unread !== undefined
                               ? `${unread} unread`
@@ -1525,9 +1554,9 @@ export function App() {
               {screen === 'transfusion_bedside_ot' && est && <TransfusionBedsideOT key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'drug_recalls' && <DrugRecalls key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'risk_dashboard' && <RiskDashboard key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
-              {screen === 'onboarding_wizard' && <OnboardingWizard key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
+              {screen === 'onboarding_wizard' && <OnboardingWizard key={user.user_id} initialEmployeeId={hrEmployeeEntry?.userId===user.user_id?hrEmployeeEntry.employeeId:undefined} onClearInitial={()=>setHrEmployeeEntry(undefined)} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'it_console' && <ITConsole key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
-              {screen === 'staff_directory' && <StaffDirectory key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
+              {screen === 'staff_directory' && <StaffDirectory key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s,id)=>{if(nav.includes(s)&&navigate(s)&&id)setHrEmployeeEntry({userId:user.user_id,employeeId:id});}} />}
               {screen === 'badges' && <Badges key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'id_card' && <IdCard key={user.user_id} currentUser={user} establishment={est} permissions={user.permissions} onNavigateToStaff={(id) => navigate('staff_directory')} />}
               {screen === 'duty_roster_hr' && <DutyRosterHr key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
@@ -1539,6 +1568,10 @@ export function App() {
               {screen === 'self_service' && <SelfService key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === 'payroll' && <Payroll key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === 'ops_console' && <OpsConsole key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
+              {screen === "waste_log_ops" && <WasteLog key={user.user_id} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "mock_drills_ops" && <MockDrills key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "compliance_register_ops" && <ComplianceRegister key={user.user_id} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {(screen === "equipment_maintenance" || screen === "equipment_maintenance_ops") && <EquipmentMaintenance key={user.user_id + screen} screenId={screen} timeZone={meta?.hospital_timezone} user={user} establishment={est} connected={connected} lang={prefs.language === "ur" ? "ur" : "en"} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'badge_station_kiosk' && <BadgeStationKiosk onOpenHelp={() => { setHelpPage('badge_station_kiosk'); setHelpOpen(true); }} />}
               {screen === 'owner_dashboard' && <OwnerDashboard key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'diagnostic_partners' && <DiagnosticPartners key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
@@ -1705,7 +1738,7 @@ export function App() {
               )}
             </>
           )}
-        </main>
+        </main></DirectoryPermissions.Provider>
       </div>
       <footer className="statusbar">
         <span>{server?.current || "No server selected"}</span>

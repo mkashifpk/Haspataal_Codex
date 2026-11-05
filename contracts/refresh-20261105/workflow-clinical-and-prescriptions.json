@@ -1,0 +1,290 @@
+{
+  "slug": "clinical-and-prescriptions",
+  "title": "Consultation, e-prescriptions & pharmacy dispensing",
+  "summary": "EMR notes with correction-only edits, formulary with live stock, FEFO partial dispensing, OTC, Zakat.",
+  "order": 99,
+  "workflow": "§3.1–§3.6",
+  "workspaces": [
+    "doctor",
+    "pharmacy",
+    "pharmacy_admin"
+  ],
+  "file": "clinical-and-prescriptions.md",
+  "markdown": "# Consultation, prescriptions & pharmacy\n\n## Clinical note\n\n1. `POST /clinical-encounters {\"ticket_id\", \"chief_complaint\", …}` (draft) → `PATCH` while drafting. Send an\n   `Idempotency-Key` (one per note, the same on a retry), so a lost answer never leaves two notes.\n   **Examination consent**: before examining, the doctor asks the patient (or a parent or relative) and records\n   `examination_consent`: `VerbalObtained` (printed as \"VCO\"), `Declined` or `NotExamined`. The last two leave the\n   examination empty (`VALIDATION_ERROR`). Offer three unselected buttons, never a default. The server stamps who and\n   when (`examination_consent_stamp`). Under the **Clinic** profile an OPD or follow-up note is finalized only with it\n   (`EXAMINATION_CONSENT_REQUIRED`; the clinic manual, indicator 41). A hospital records it when it wishes.\n   **A clinic's complete note** (the clinic manual, indicator 28: the record shows the history, the findings, the\n   diagnosis and the treatment or referral): under the Clinic profile an OPD or follow-up note is also finalized only\n   with the complaint (or history), the examination findings when VCO was obtained, a diagnosis and the plan.\n   `CONSULTATION_INCOMPLETE` lists what is empty in `details.missing`; keep the draft and mark those fields.\n2. `POST /clinical-encounters/{id}/finalize` → immutable; ticket becomes `Examined`. Diagnosis codes (`icd_codes`) come\n   from the ICD picker and must be in the active code list; they come back with titles in `icd_terms`\n   ([ICD coding](icd-coding.md)).\n3. Later changes: `POST /clinical-encounters/{id}/correction {\"reason\", …}` (history kept; with an\n   `Idempotency-Key` too).\n4. Writes after refund/void/death are refused (`CLINICAL_LOCKOUT`) or flagged for risk review.\n5. Print a finalized note: `GET /clinical-encounters/{id}/print-payload` (A4, `printer_role` document) or its\n   `pdf_url` (`GET /clinical-encounters/{id}/pdf`). A draft is not printed (`ENCOUNTER_NOT_FINAL`).\n\n### A bedside procedure note (MSDS IMS 150)\n\nA procedure done outside the theatre (a chest drain, a central line, a lumbar puncture, suturing) is a note of type\n`Procedure` on the visit or the admission, with the structured `procedure`:\n\n1. `POST /clinical-encounters`\n   ```json\n   { \"ticket_id\": 912, \"encounter_type\": \"Procedure\",\n     \"procedure\": { \"procedure_name\": \"Intercostal chest drain\", \"site\": \"Right chest, 5th intercostal space\",\n                    \"indication\": \"Tension pneumothorax after decompression\", \"anaesthesia\": \"Local\",\n                    \"consent_id\": 77, \"assistant_employee_id\": 14, \"started_at\": \"2026-10-03T09:10:00+05:00\" } }\n   ```\n   The consent comes from the consent register (the patient's own, see [consent](consent.md)); the assistant is picked\n   with `GET /staff/lookup?q=` (the badge facts of active staff).\n   The procedure's informed consent (`procedure.consent_id`) from the patient's signed consents,\n   `GET /consents?patient_id=`.\n2. While a draft: `PATCH /clinical-encounters/{id} {\"procedure\": {\"technique\", \"findings\", \"specimens\", \"complications\",\n   \"condition_at_end\", \"ended_at\"}}` (only the fields sent change). `procedure.missing` lists what signing still needs.\n3. `POST /clinical-encounters/{id}/finalize` signs it only with the findings, the specimens (\"None\" if nothing was\n   removed) and the patient's condition at the end: `PROCEDURE_NOTE_INCOMPLETE` with `details.missing` otherwise. The\n   provider is the note's author (its stamp). Signed, the procedure is frozen; a correction uses `\"field\": \"procedure\"`.\n4. The note prints with the procedure first; the record review and the inspection pack count it.\n\n### The author stamp (MSDS IMS 147)\n\nEvery clinical entry names its author with a **stamp**: name, designation and specialty, PMDC/PNC registration, and\nthe date and time, as the author's staff record stood at that moment (a later promotion or name change does not\nrewrite an old printout). The same object (`name`, `designation`, `registration`, `at`, `text`) appears on screen and\non paper; print `text` under the entry:\n\n| Where | Field |\n|---|---|\n| clinical note (and each correction) | `author_stamp` (who finalized it; null while a draft) |\n| prescription | `prescriber_stamp` (printed above the signature line of the slip) |\n| lab result | `performed_stamp` (technician) and `verified_stamp` (verifier) |\n| radiology report | `reported_stamp` |\n| nursing note | `author_stamp` (PNC number) |\n| admission | `details_stamp` (who recorded the reason and diagnosis) |\n\nThe discharge summary and the death certificate freeze their signer's stamp when signed (`signer_*`, `certifier_*`).\n\n## E-prescription (§3.1–§3.3)\n\nOffer Hospital Pharmacy only while dispensing is Active (`GET /establishment`, `x-capability-gates`); otherwise offer\nonly the printed slip for an outside pharmacy (`destination: \"ExternalMarket\"`, `CAPABILITY_INACTIVE` otherwise).\n\n* `GET /drugs/search?q=amox` → formulary with `stock_status` (`InStock` / `Low` / `OutOfStock`) — colour it\n  and keep it live with `pharmacy.stock.updated`.\n* `POST /prescriptions`\n  ```json\n  { \"ticket_id\": 42, \"destination\": \"HospitalPharmacy\",\n    \"items\": [ { \"drug_id\": 5, \"qty_prescribed\": 12, \"dose_text\": \"500 mg\", \"route\": \"Oral\",\n                 \"frequency_code\": \"TDS\", \"duration_days\": 4 } ] }\n  ```\n  `destination: \"ExternalMarket\"` names a drug of the list (`drug_id`: its high-alert, look-alike and restricted\n  checks follow it, and an inpatient's dose of it is charted with them) or a free-text drug (`external_drug_name`) when\n  it is not on the list, and only prints a slip\n  (`GET /prescriptions/{id}/print-payload`, with the prescriber's stamp above the signature line); it never enters\n  the pharmacy queue.\n  The prescription is written in the consultation (its `ticket_id` and `encounter_id`) or for an inpatient (the stay's\n  `admission_id`); `patient_id` follows from either.\n* An **outpatient** line (an OPD or ER visit, either destination) needs `dose_text`, `route`, `frequency_code` and\n  `duration_days`; a single STAT dose (`is_stat`) needs the dose and the route. Otherwise the answer is\n  `PRESCRIPTION_INCOMPLETE`, and `details.lines` lists each line's missing fields. The quantity never stands in for\n  the duration. Send the consultation's `encounter_id`: the printout then carries its clinical context.\n* The printout (`GET /prescriptions/{id}/print-payload`) is the standard prescription of the clinic manual (indicator\n  33). It carries:\n  - the patient's particulars in `fields.patient`: s/o d/o w/o, age, gender, address, contact, allergies, and the\n    number of the visit;\n  - the consultation's complaint, findings, provisional diagnosis, weight and \"VCO\" in `fields.consultation`;\n  - each medicine with its directions in words (\"1 tablet oral twice a day for 5 days\");\n  - the prescriber's stamp with the PM&DC number and a signature line;\n  - the letterhead of the day it was written (`fields.hospital`).\n\n  Particulars that were not recorded print as blanks to fill by hand.\n* **Handing it over** is recorded, never inferred from printing: `POST /prescriptions/{id}/handover`\n  `{\"handed_to\": \"Patient\" | \"Attendant\", \"attendant_name\", \"copy_kept\": \"Electronic\" | \"CarbonCopy\" | \"Scan\",\n  \"document_id\"}`. A scan is the signed copy uploaded to the patient's documents (`doc_type` Prescription). The\n  prescription's `handovers` lists every handover. The prescriber (`prescription.create`) or the dispenser\n  (`pharmacy.dispense`) records it.\n  The scan is uploaded with `POST /patients/{patient_id}/documents`: its answer is the `document_id`.\n* Inpatient orders (`admission_id`) need `dose_text`, `route`, `frequency_code` (or `is_prn` / `is_stat`)\n  and `start_at` — the MAR is generated from them (`MEDICATION_ORDER_INVALID` otherwise).\n* Medication safety ([medication safety](medication-safety.md), MSDS 52, 56, 70): each medicine carries\n  `high_alert_category` (show it red), `is_restricted` and `lasa_with` (\"looks like …\"). Only a PMDC doctor, or a\n  clinician with the Prescribing privilege, prescribes, and a restricted medicine needs RestrictedPrescribing\n  (`PRESCRIBER_NOT_AUTHORIZED`). `self_administration: true` lets an inpatient take an oral, inhaled or topical\n  medicine that is not high-alert themselves. A nurse writes down a verbal or telephone order with\n  `POST /prescriptions/verbal`; the doctor countersigns it (`POST /prescriptions/{id}/countersign`) and answers the\n  pharmacist's queries (`POST /prescription-queries/{query_id}/answer`).\n\n## Dispensing (§3.2)\n\nThe Pharmacy Admin also has a queue-only view: `GET /prescriptions/pending`. Its `rx_queue` page and F1 help are\nlisted in `GET /meta/handbook?workspace=pharmacy_admin`; use only the returned tasks. Opening a prescription's detail\nrequires `prescription.view`, and dispensing has its own permission. Do not offer those actions to a queue-only user.\n\n1. `GET /prescriptions/pending` (event `pharmacy.prescription.pending`), Code Red first.\n2. `POST /prescriptions/{id}/dispense` with `Idempotency-Key`:\n   ```json\n   { \"items\": [ { \"prescription_item_id\": 9, \"qty\": 7 } ], \"payment_mode\": \"Cash\" }\n   ```\n   * Partial quantities are fine (\"Dispense Now\"); the prescription becomes `PartiallyDispensed` and the\n     patient returns for the rest without a new prescription.\n   * **Batches are chosen by the server, First-Expired-First-Out** — never ask the pharmacist.\n   * OPD is cash-and-carry (`OPD_PHARMACY_CREDIT_NOT_ALLOWED`); inpatients go to the running IPD bill\n     automatically; staff purchases can use `StaffPayrollDeduction` (deducted in payroll).\n   * A high-alert medicine needs a second person's check: `checker_username` / `checker_password` in the body\n     (`HIGH_ALERT_CHECK_REQUIRED`, MSDS 57). A recalled batch is never picked.\n   * An unclear or unsafe order: raise a query instead (`POST /prescriptions/{id}/queries`); the line waits for the\n     doctor's answer (`PRESCRIPTION_QUERY_OPEN`). See [medication safety](medication-safety.md).\n   * The lines (`prescription_item_id`) come from the prescription, `GET /prescriptions/{prescription_id}` (`items`).\n3. Receipt: `GET /dispensations/{id}/receipt-payload`; one label per medicine: `GET /dispensations/{id}/labels`\n   (MSDS 61).\n\n### Pharmacy discharge clearance\n\nRead `GET /admissions/{admission_id}/discharge-status` with `ipd.discharge.clear_pharmacy`. Confirm `patient_name`,\n`mrn` and `admission_number`, and offer clearance only when `blocked_on` is `PharmacyClearance`. The response includes\nthe admission `status` and the stages' status, actor and time, without the clinical admission or invoice.\nBefore discharge starts, `started` is false and `stages` is empty. A nonexistent admission answers `NOT_FOUND`.\nClear with `POST /admissions/{admission_id}/discharge/{stage}/clear`, stage `PharmacyClearance`.\nAfter a lost answer, read discharge-status again: a Cleared pharmacy stage with `cleared_by_name` and `cleared_at`\nconfirms clearance. Never automatically repeat the write or use the broader admission read for reconciliation.\n\n## OTC (§3.5)\n\n`POST /otc-sales {\"items\": [{\"barcode\": \"8964000100017\", \"qty\": 10}], \"method\": \"Cash\"}` with\n`Idempotency-Key`. Prescription-only drugs → `OTC_PRESCRIPTION_REQUIRED`: *\"Prescription required.\nCannot sell via OTC.\"*\n\n## The pharmacy's cash drawer (decisions 51)\n\nThe pharmacy's cash (dispensing with `payment_mode` Cash, an OTC sale with `method` Cash) goes into the pharmacist's\n**own open shift at the Pharmacy Counter** (node `PharmacyCounter`), never into a drawer the same person has open at\nanother counter. Card and the other payment modes need no shift.\n\n1. Before offering Cash: `GET /finance/cash-shifts/mine?node=PharmacyCounter`. Null means no pharmacy drawer is open:\n   show Cash as unavailable with *Open your cash shift at the Pharmacy Counter* and a link to My cash shift (Card still\n   works). The unfiltered `GET /finance/cash-shifts/mine` may show a shift at another counter: it does not count here.\n2. My cash shift is in the Pharmacy workspace's navigation (`also_uses` of `GET /meta/workspaces`; listed by\n   `GET /meta/handbook?workspace=pharmacy`). It opens the shift with the node of `GET /terminals/whoami` `cash_node`,\n   as everywhere: `POST /finance/cash-shifts/open {\"node\": \"PharmacyCounter\", \"opening_float\": 1500}`. On a PC whose\n   `cash_node` is not `PharmacyCounter`, say that this PC is not set up for pharmacy cash and that IT must map it to the\n   Pharmacy Counter; never let the user pick the counter, never borrow another person's shift.\n3. A refusal `SHIFT_NOT_OPEN` (nothing sold, no stock or money moved) carries `details.node` `PharmacyCounter` and\n   `details.open_shift`: null when the pharmacist has no drawer open, or `{shift_id, node}` of their drawer at another\n   counter (\"Your drawer is open at Main Reception; the pharmacy's cash needs your Pharmacy Counter drawer\").\n4. The close is the same as at every counter: `POST /finance/cash-shifts/{shift_id}/close {\"declared_cash\"}`\n   ([cash shifts](finance-and-owner.md)).\n\n## Zakat / social welfare (§3.4)\n\n`POST /pharmacy/charity-override-request {\"prescription_id\", \"fund_type\": \"Zakat\", \"reason\",\n\"approver_username\", \"approver_password\"}` — the Zakat officer co-signs at the counter (or omit the\ncredentials to queue it). Then dispense with `payment_mode: \"CharityZakat\"` and `charity_approval_id`.\nCharity is an expense, never drawer cash.\nThe request is for the prescription at the counter (the one opened from `GET /prescriptions/pending`).\n\n## Back office (§3.6)\n\nBatch intake `POST /pharmacy-admin/batches` (boxes × units per box, total cost → unit cost), supplier\ninvoices, `low-stock`, `near-expiry`, `profit-dashboard`, write-offs `POST /pharmacy-admin/batches/{id}/adjust`.\nThe medicine of a batch from `GET /drugs/search`.\n\n**Returns to the supplier** (decisions 47): stock that goes back (expired, near expiry, recalled, damaged, excess,\nwrongly supplied) is not written off but returned, so the supplier's credit reaches the accounts.\n\n1. `POST /pharmacy-admin/batches/{batch_id}/supplier-returns {\"qty\": 40, \"reason\": \"NearExpiry\", \"note\": \"Collected by\n   the distributor's rider\"}` (`vendor_id` defaults to the supplier of the batch's invoice; a recalled batch:\n   `\"reason\": \"Recall\", \"recall_id\": 7`). The units leave the batch, their value at cost becomes a claim on the\n   supplier, and the answer is the return with `status` Returned (`INSUFFICIENT_STOCK` beyond what is in the pharmacy).\n   With reason Recall, the open recall from `GET /drug-recalls`.\n2. Print the return note for the goods: `GET /pharmacy-admin/supplier-returns/{return_id}/pdf`.\n3. `GET /pharmacy-admin/supplier-returns` (`status`, `vendor_id`): the returns and where each stands; the accountant\n   confirms the credit note ([finance](finance-and-owner.md)).\nNew drugs may be flagged high-alert or restricted at once (`high_alert_category`, `is_restricted`); the lists, the\nlook-alike pairs, recalls and the written policy are in [medication safety](medication-safety.md).\nWard indents from head nurses arrive in `/approvals` (partial approval: `items[].qty_approved`).",
+  "steps": [
+    {
+      "heading": "Clinical note",
+      "anchor": "clinical-note",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/clinical-encounters",
+          "summary": "Write a clinical note (draft or finalize=true)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/clinical-encounters/{encounter_id}/finalize",
+          "summary": "Commit the note (immutable afterwards)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/clinical-encounters/{encounter_id}/correction",
+          "summary": "Append a visible correction entry"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/clinical-encounters/{encounter_id}/print-payload",
+          "summary": "Printable clinical note with the author's stamp"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/clinical-encounters/{encounter_id}/pdf",
+          "summary": "The finalized clinical note as a PDF"
+        }
+      ]
+    },
+    {
+      "heading": "A bedside procedure note (MSDS IMS 150)",
+      "anchor": "a-bedside-procedure-note-msds-ims-150",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/clinical-encounters",
+          "summary": "Write a clinical note (draft or finalize=true)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/consents",
+          "summary": "The consent register"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/clinical-encounters/{encounter_id}",
+          "summary": "Edit your DRAFT note"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/clinical-encounters/{encounter_id}/finalize",
+          "summary": "Commit the note (immutable afterwards)"
+        }
+      ]
+    },
+    {
+      "heading": "E-prescription (§3.1–§3.3)",
+      "anchor": "e-prescription-3-1-3-3",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/establishment",
+          "summary": "The establishment's profile and services, with the configuration revision"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drugs/search",
+          "summary": "Formulary search with live stock colour"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions",
+          "summary": "E-prescription (hospital pharmacy or external slip)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/prescriptions/{prescription_id}/print-payload",
+          "summary": "Printable prescription slip"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/handover",
+          "summary": "Record that the prescription was handed to the patient and how its copy is kept"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/patients/{patient_id}/documents",
+          "summary": "Upload a patient document (PDF/JPEG/PNG)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/verbal",
+          "summary": "Write down a verbal or telephone order"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/countersign",
+          "summary": "Countersign my verbal order"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescription-queries/{query_id}/answer",
+          "summary": "Answer the pharmacist's query"
+        }
+      ]
+    },
+    {
+      "heading": "Dispensing (§3.2)",
+      "anchor": "dispensing-3-2",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/prescriptions/pending",
+          "summary": "Pharmacist queue (chronological; Code Red first)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/meta/handbook",
+          "summary": "The end-user handbook's outline for the logged-in employee (only what they may use)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/dispense",
+          "summary": "Dispense Now (partial allowed, FEFO)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/queries",
+          "summary": "Query an unclear or unsafe order"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/prescriptions/{prescription_id}",
+          "summary": "Prescription with remaining quantities and stock per line"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/dispensations/{dispensation_id}/receipt-payload",
+          "summary": "Pharmacy receipt print payload"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/dispensations/{dispensation_id}/labels",
+          "summary": "The labels of a dispensation"
+        }
+      ]
+    },
+    {
+      "heading": "Pharmacy discharge clearance",
+      "anchor": "pharmacy-discharge-clearance",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/discharge-status",
+          "summary": "Which clearance stage the discharge is blocked on"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/discharge/{stage}/clear",
+          "summary": "Clear a discharge stage (in order)"
+        }
+      ]
+    },
+    {
+      "heading": "OTC (§3.5)",
+      "anchor": "otc-3-5",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/otc-sales",
+          "summary": "OTC mode sale to a walk-in customer"
+        }
+      ]
+    },
+    {
+      "heading": "The pharmacy's cash drawer (decisions 51)",
+      "anchor": "the-pharmacy-s-cash-drawer-decisions-51",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/cash-shifts/mine",
+          "summary": "My open shift (if any)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/meta/workspaces",
+          "summary": "UI workspaces and the screens each should contain"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/meta/handbook",
+          "summary": "The end-user handbook's outline for the logged-in employee (only what they may use)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/terminals/whoami",
+          "summary": "Identify this terminal (location + mapped printers) — works before login"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/cash-shifts/open",
+          "summary": "Open my cash shift at a counter"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/cash-shifts/{shift_id}/close",
+          "summary": "Close shift → PendingCollection"
+        }
+      ]
+    },
+    {
+      "heading": "Zakat / social welfare (§3.4)",
+      "anchor": "zakat-social-welfare-3-4",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/pharmacy/charity-override-request",
+          "summary": "Zakat / social-welfare override"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/prescriptions/pending",
+          "summary": "Pharmacist queue (chronological; Code Red first)"
+        }
+      ]
+    },
+    {
+      "heading": "Back office (§3.6)",
+      "anchor": "back-office-3-6",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/pharmacy-admin/batches",
+          "summary": "Batch intake (boxes × units, invoice cost → unit cost)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/pharmacy-admin/batches/{batch_id}/adjust",
+          "summary": "Write off / adjust a batch (expiry, damage)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drugs/search",
+          "summary": "Formulary search with live stock colour"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/pharmacy-admin/batches/{batch_id}/supplier-returns",
+          "summary": "Return units of a batch to its supplier"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drug-recalls",
+          "summary": "The recall register"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/pharmacy-admin/supplier-returns/{return_id}/pdf",
+          "summary": "The return note that goes with the goods (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/pharmacy-admin/supplier-returns",
+          "summary": "Returns to suppliers, newest first"
+        }
+      ]
+    }
+  ]
+}

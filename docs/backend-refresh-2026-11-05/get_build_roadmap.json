@@ -1,0 +1,2048 @@
+{
+  "unknowns": [],
+  "how": "Build Phase 0 (the capabilities) with the shell, then the phases in order, each screen after the screens it depends on. get_build_roadmap(screen_id=...) shows one screen's dependencies with their evidence; get_screen_bundle(screen_id) has everything to build it.",
+  "phase_0_capabilities": [
+    {
+      "capability": "realtime",
+      "what": "One WebSocket per window, resume_from, de-duplication, Live / Reconnecting (guide realtime)",
+      "screens": 157,
+      "first_needed_by": "login"
+    },
+    {
+      "capability": "patient_context",
+      "what": "The patient banner: identifiers and flags, refreshed by patient.merged and death.recorded",
+      "screens": 85,
+      "first_needed_by": "report_incident"
+    },
+    {
+      "capability": "idempotent_writes",
+      "what": "One Idempotency-Key per user action, reused on retries (guide idempotency-and-concurrency)",
+      "screens": 187,
+      "first_needed_by": "settings"
+    },
+    {
+      "capability": "versioned_edits",
+      "what": "expected_version on edits, the VERSION_CONFLICT dialog (guide idempotency-and-concurrency)",
+      "screens": 62,
+      "first_needed_by": "patient_search"
+    },
+    {
+      "capability": "approvals",
+      "what": "Frozen records awaiting approval, unfrozen by approval.resolved",
+      "screens": 7,
+      "first_needed_by": "registration"
+    },
+    {
+      "capability": "printing",
+      "what": "Print payloads by printer role, A4 from fields, PDFs (guide printing-and-hardware)",
+      "screens": 52,
+      "first_needed_by": "registration"
+    },
+    {
+      "capability": "file_downloads",
+      "what": "PDF and file downloads; sets of documents by the pdf_download preference, never a ZIP",
+      "screens": 116,
+      "first_needed_by": "report_incident"
+    },
+    {
+      "capability": "scanner",
+      "what": "Keyboard-wedge scanner input routed to the screen's scan fields (guide printing-and-hardware)",
+      "screens": 28,
+      "first_needed_by": "queue_management"
+    },
+    {
+      "capability": "uploads",
+      "what": "multipart/form-data uploads (scans of signed forms, documents)",
+      "screens": 21,
+      "first_needed_by": "registration"
+    },
+    {
+      "capability": "f1_help",
+      "what": "F1 and a visible Help button open this screen's handbook page (English and Urdu), also from a field or a dialog, keeping unsaved input; only the pages GET /meta/handbook lists (guide end-user-handbook)",
+      "screens": 269,
+      "first_needed_by": "connect_server"
+    },
+    {
+      "capability": "zoom",
+      "what": "Ctrl/Cmd +, - and 0 and the Settings slider move one zoom state clamped to 100-250 %, saved as ui_scale_pct (guides ui-quality Q4 and electron-integration)",
+      "screens": 269,
+      "first_needed_by": "connect_server"
+    }
+  ],
+  "phases": [
+    {
+      "id": "P1",
+      "title": "Shell",
+      "goal": "Every demo account can connect, log in, land, switch workspaces, see notifications, approve, report an incident, change settings and open help; the admin sets up the establishment's profile and services (nothing clinical starts on a new installation before that).",
+      "exit_criteria": [
+        "Each demo account logs in and lands in its workspace; demo.owner sees the launcher with two workspaces.",
+        "A forced password change works (PASSWORD_CHANGE_REQUIRED).",
+        "The licence and maintenance banners appear and clear (system.license, system.maintenance).",
+        "session.revoked returns every window to the login screen.",
+        "Help opens with only the pages GET /meta/handbook lists for the user, and F1 opens the current screen's page from anywhere, inside a field or a dialog too.",
+        "Ctrl/Cmd plus, minus and zero and the Settings slider zoom between 100 and 250 percent, one state, restored after logging in again.",
+        "An approver sees and decides a pending approval (scenario opd.refund_pending_approval).",
+        "The admin previews and applies a change of profile or services; on establishment.changed every window redraws its launcher and menus from GET /establishment views (a clinic sees no ward, theatre or ER workspace; a retired service's screens become records) and hides the new work of a service that is not Active (CAPABILITY_INACTIVE never reaches a user)."
+      ],
+      "screens": [
+        {
+          "screen": "connect_server",
+          "position": 1,
+          "points": 45,
+          "done": false
+        },
+        {
+          "screen": "login",
+          "position": 2,
+          "points": 65,
+          "done": false
+        },
+        {
+          "screen": "app_shell",
+          "position": 3,
+          "points": 64,
+          "done": false
+        },
+        {
+          "screen": "settings",
+          "position": 4,
+          "points": 73,
+          "done": false
+        },
+        {
+          "screen": "notifications",
+          "position": 5,
+          "points": 47,
+          "done": false
+        },
+        {
+          "screen": "help_center",
+          "position": 6,
+          "points": 45,
+          "done": false
+        },
+        {
+          "screen": "approval_queue",
+          "position": 7,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "charity_approvals",
+          "position": 8,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "report_incident",
+          "position": 9,
+          "points": 78,
+          "done": false
+        },
+        {
+          "screen": "facility_profile",
+          "position": 10,
+          "points": 83,
+          "done": false
+        },
+        {
+          "screen": "workspace_picker",
+          "position": 11,
+          "points": 50,
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "title": "Outpatient front desk and consultation",
+      "goal": "The OPD revenue loop: open the shift, find or register, pay, queue; the doctor sees the patient live, writes a coded note and prescribes.",
+      "exit_criteria": [
+        "demo.reception opens a shift, registers a new patient with cash and the slip prints (scenarios cash.shift_open, opd.new_patient_paid).",
+        "demo.doctor's queue updates without polling; the doctor calls the patient, finalises a note with an ICD code, prescribes and orders a test.",
+        "The discount ceiling, refund → approval → cash-back, deferral and version-conflict states work (scenarios opd.discount_over_ceiling, opd.refund_pending_approval, opd.ticket_deferred, patient.version_conflict)."
+      ],
+      "screens": [
+        {
+          "screen": "my_cash_shift",
+          "position": 12,
+          "points": 49,
+          "done": false
+        },
+        {
+          "screen": "patient_search",
+          "position": 13,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "registration",
+          "position": 14,
+          "points": 88,
+          "done": false
+        },
+        {
+          "screen": "queue_management",
+          "position": 15,
+          "points": 60,
+          "done": false
+        },
+        {
+          "screen": "refund_waiver_credit",
+          "position": 16,
+          "points": 61,
+          "done": false
+        },
+        {
+          "screen": "cash_back_prompts",
+          "position": 17,
+          "points": 46,
+          "done": false
+        },
+        {
+          "screen": "receivables",
+          "position": 18,
+          "points": 52,
+          "done": false
+        },
+        {
+          "screen": "patient_documents",
+          "position": 19,
+          "points": 46,
+          "done": false
+        },
+        {
+          "screen": "tariff_display",
+          "position": 20,
+          "points": 35,
+          "done": false
+        },
+        {
+          "screen": "doctor_queue",
+          "position": 21,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "icd_picker",
+          "position": 22,
+          "points": 49,
+          "done": false
+        },
+        {
+          "screen": "consultation",
+          "position": 23,
+          "points": 135,
+          "done": false
+        },
+        {
+          "screen": "eprescription",
+          "position": 24,
+          "points": 70,
+          "done": false
+        },
+        {
+          "screen": "lab_orders_results",
+          "position": 25,
+          "points": 109,
+          "done": false
+        },
+        {
+          "screen": "external_referral",
+          "position": 26,
+          "points": 57,
+          "done": false
+        },
+        {
+          "screen": "referral_register",
+          "position": 27,
+          "points": 40,
+          "done": false
+        },
+        {
+          "screen": "patient_education",
+          "position": 28,
+          "points": 44,
+          "done": false
+        },
+        {
+          "screen": "patient_programmes",
+          "position": 29,
+          "points": 63,
+          "done": false
+        },
+        {
+          "screen": "home_visit_record",
+          "position": 30,
+          "points": 50,
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "title": "Pharmacy and diagnostics",
+      "goal": "The prescription reaches the pharmacy and is dispensed; tests are ordered, sampled, resulted, verified and published; critical results are told.",
+      "exit_criteria": [
+        "demo.pharmacist dispenses a prescription (FEFO, a partial dispense, a high-alert second check) and prints the labels.",
+        "demo.labtech scans a sample and submits a result; demo.labverifier publishes it.",
+        "A critical value opens a critical result that is told, read back and acknowledged.",
+        "Imaging is ordered, performed and reported."
+      ],
+      "screens": [
+        {
+          "screen": "rx_queue",
+          "position": 31,
+          "points": 41,
+          "done": false
+        },
+        {
+          "screen": "dispense",
+          "position": 32,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "order_queries",
+          "position": 33,
+          "points": 49,
+          "done": false
+        },
+        {
+          "screen": "otc",
+          "position": 34,
+          "points": 46,
+          "done": false
+        },
+        {
+          "screen": "charity_override",
+          "position": 35,
+          "points": 39,
+          "done": false
+        },
+        {
+          "screen": "lab_only_walkin",
+          "position": 36,
+          "points": 63,
+          "done": false
+        },
+        {
+          "screen": "lab_bench",
+          "position": 37,
+          "points": 83,
+          "done": false
+        },
+        {
+          "screen": "lab_verification",
+          "position": 38,
+          "points": 66,
+          "done": false
+        },
+        {
+          "screen": "critical_results_bench",
+          "position": 39,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "critical_results_verifier",
+          "position": 40,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "critical_results_doctor",
+          "position": 41,
+          "points": 49,
+          "done": false
+        },
+        {
+          "screen": "lab_send_outs",
+          "position": 42,
+          "points": 61,
+          "done": false
+        },
+        {
+          "screen": "diagnostic_services_list",
+          "position": 43,
+          "points": 32,
+          "done": false
+        },
+        {
+          "screen": "imaging_quality_setup",
+          "position": 44,
+          "points": 55,
+          "done": false
+        },
+        {
+          "screen": "radiology_worklist",
+          "position": 45,
+          "points": 81,
+          "done": false
+        },
+        {
+          "screen": "critical_results_radiology",
+          "position": 46,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "imaging_outsourced",
+          "position": 47,
+          "points": 50,
+          "done": false
+        },
+        {
+          "screen": "imaging_repeats",
+          "position": 48,
+          "points": 41,
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "P4",
+      "title": "Inpatient journey",
+      "goal": "Admit, allocate a bed, consent, estimate, nurse (roster, vitals, the MAR with the bedside checks), move, discharge.",
+      "exit_criteria": [
+        "A doctor requests an admission (scenario ipd.admission_pending); admissions allocates a bed, prints the wristband, records the general consent and explains the estimate.",
+        "The nurse sees the bed on My beds, records vitals and gives a high-alert dose with a wristband scan and a second checker.",
+        "The patient moves to another ward (estimate prompt) and is discharged through every stage in order."
+      ],
+      "screens": [
+        {
+          "screen": "duty_roster",
+          "position": 49,
+          "points": 94,
+          "done": false
+        },
+        {
+          "screen": "roll_call",
+          "position": 50,
+          "points": 43,
+          "done": false
+        },
+        {
+          "screen": "pending_admissions",
+          "position": 51,
+          "points": 98,
+          "done": false
+        },
+        {
+          "screen": "bed_matrix",
+          "position": 52,
+          "points": 47,
+          "done": false
+        },
+        {
+          "screen": "wristbands_admissions",
+          "position": 53,
+          "points": 54,
+          "done": false
+        },
+        {
+          "screen": "consents_admissions",
+          "position": 54,
+          "points": 95,
+          "done": false
+        },
+        {
+          "screen": "cost_estimates_admissions",
+          "position": 55,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "cost_estimates_billing",
+          "position": 56,
+          "points": 74,
+          "done": false
+        },
+        {
+          "screen": "explain_estimate",
+          "position": 57,
+          "points": 46,
+          "done": false
+        },
+        {
+          "screen": "doctor_inpatients",
+          "position": 58,
+          "points": 94,
+          "done": false
+        },
+        {
+          "screen": "treating_doctors",
+          "position": 59,
+          "points": 49,
+          "done": false
+        },
+        {
+          "screen": "my_beds",
+          "position": 60,
+          "points": 59,
+          "done": false
+        },
+        {
+          "screen": "patient_education_ward",
+          "position": 61,
+          "points": 46,
+          "done": false
+        },
+        {
+          "screen": "nursing_assessment",
+          "position": 62,
+          "points": 46,
+          "done": false
+        },
+        {
+          "screen": "vitals_tracker",
+          "position": 63,
+          "points": 63,
+          "done": false
+        },
+        {
+          "screen": "mar",
+          "position": 64,
+          "points": 81,
+          "done": false
+        },
+        {
+          "screen": "verbal_orders_ward",
+          "position": 65,
+          "points": 55,
+          "done": false
+        },
+        {
+          "screen": "medication_orders_doctor",
+          "position": 66,
+          "points": 58,
+          "done": false
+        },
+        {
+          "screen": "wristbands_ward",
+          "position": 67,
+          "points": 54,
+          "done": false
+        },
+        {
+          "screen": "own_medicines_ward",
+          "position": 68,
+          "points": 52,
+          "done": false
+        },
+        {
+          "screen": "own_medicines_pharmacy",
+          "position": 69,
+          "points": 45,
+          "done": false
+        },
+        {
+          "screen": "critical_results_ward",
+          "position": 70,
+          "points": 39,
+          "done": false
+        },
+        {
+          "screen": "consents_ward",
+          "position": 71,
+          "points": 95,
+          "done": false
+        },
+        {
+          "screen": "consents_doctor",
+          "position": 72,
+          "points": 93,
+          "done": false
+        },
+        {
+          "screen": "blood_sources",
+          "position": 73,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "blood_request",
+          "position": 74,
+          "points": 64,
+          "done": false
+        },
+        {
+          "screen": "blood_bank",
+          "position": 75,
+          "points": 102,
+          "done": false
+        },
+        {
+          "screen": "blood_donors",
+          "position": 76,
+          "points": 58,
+          "done": false
+        },
+        {
+          "screen": "donor_assessment",
+          "position": 77,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "blood_collection",
+          "position": 78,
+          "points": 50,
+          "done": false
+        },
+        {
+          "screen": "blood_center_lab",
+          "position": 79,
+          "points": 66,
+          "done": false
+        },
+        {
+          "screen": "blood_center_release",
+          "position": 80,
+          "points": 64,
+          "done": false
+        },
+        {
+          "screen": "transfusion_bedside",
+          "position": 81,
+          "points": 74,
+          "done": false
+        },
+        {
+          "screen": "maternity_policy",
+          "position": 82,
+          "points": 60,
+          "done": false
+        },
+        {
+          "screen": "obstetric_assessment",
+          "position": 83,
+          "points": 61,
+          "done": false
+        },
+        {
+          "screen": "newborn_registration",
+          "position": 84,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "labour_register",
+          "position": 85,
+          "points": 70,
+          "done": false
+        },
+        {
+          "screen": "medication_safety_ward",
+          "position": 86,
+          "points": 49,
+          "done": false
+        },
+        {
+          "screen": "ward_transfer",
+          "position": 87,
+          "points": 48,
+          "done": false
+        },
+        {
+          "screen": "ward_transfer_head_nurse",
+          "position": 88,
+          "points": 44,
+          "done": false
+        },
+        {
+          "screen": "ward_indent",
+          "position": 89,
+          "points": 52,
+          "done": false
+        },
+        {
+          "screen": "discharge_summary",
+          "position": 90,
+          "points": 73,
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "P5",
+      "title": "Emergency, deaths and medico-legal cases",
+      "goal": "Triage by the hospital's scale, the ER board, Code Red end to end, the trauma identity merge, medico-legal cases, death and the body's release.",
+      "exit_criteria": [
+        "A Code Red interrupts the destination, pharmacy and OT terminals and a retried press admits nobody twice (scenario er.code_red_incoming).",
+        "The temporary trauma profile is merged into the permanent record later (scenario patient.trauma_unmerged).",
+        "An ER visit is triaged by the hospital's scale and the board shows the waits.",
+        "A medico-legal case is opened; a death is recorded and certified, and the body handed over."
+      ],
+      "screens": [
+        {
+          "screen": "triage_scale",
+          "position": 91,
+          "points": 55,
+          "done": false
+        },
+        {
+          "screen": "er_board",
+          "position": 92,
+          "points": 65,
+          "done": false
+        },
+        {
+          "screen": "er_visit",
+          "position": 93,
+          "points": 87,
+          "done": false
+        },
+        {
+          "screen": "code_red",
+          "position": 94,
+          "points": 69,
+          "done": false
+        },
+        {
+          "screen": "trauma_merge",
+          "position": 95,
+          "points": 45,
+          "done": false
+        },
+        {
+          "screen": "wristbands_er",
+          "position": 96,
+          "points": 54,
+          "done": false
+        },
+        {
+          "screen": "verbal_orders_er",
+          "position": 97,
+          "points": 55,
+          "done": false
+        },
+        {
+          "screen": "critical_results_er",
+          "position": 98,
+          "points": 39,
+          "done": false
+        },
+        {
+          "screen": "consents_triage",
+          "position": 99,
+          "points": 95,
+          "done": false
+        },
+        {
+          "screen": "er_board_doctor",
+          "position": 100,
+          "points": 65,
+          "done": false
+        },
+        {
+          "screen": "er_visit_doctor",
+          "position": 101,
+          "points": 87,
+          "done": false
+        },
+        {
+          "screen": "mlc_cases",
+          "position": 102,
+          "points": 78,
+          "done": false
+        },
+        {
+          "screen": "mlc_cases_doctor",
+          "position": 103,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "death_record",
+          "position": 104,
+          "points": 93,
+          "done": false
+        },
+        {
+          "screen": "body_release_ward",
+          "position": 105,
+          "points": 54,
+          "done": false
+        },
+        {
+          "screen": "body_release_er",
+          "position": 106,
+          "points": 54,
+          "done": false
+        },
+        {
+          "screen": "patient_programmes_triage",
+          "position": 107,
+          "points": 63,
+          "done": false
+        },
+        {
+          "screen": "transfusion_bedside_er",
+          "position": 108,
+          "points": 74,
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "P6",
+      "title": "Theatre and sterile supply",
+      "goal": "From the OT request to settlement, with the safety checklist, anaesthesia, recovery and traceable sterile packs.",
+      "exit_criteria": [
+        "A load is sterilised and released, and its packs issued.",
+        "An operation is scheduled, assessed, consented, signed in, timed out and signed out; consumables and packs are scanned.",
+        "The anaesthesia record, the operative note and the recovery discharge are completed; the settlement is finalised."
+      ],
+      "screens": [
+        {
+          "screen": "clinical_privileges",
+          "position": 109,
+          "points": 55,
+          "done": false
+        },
+        {
+          "screen": "theatre_checklist_setup",
+          "position": 110,
+          "points": 52,
+          "done": false
+        },
+        {
+          "screen": "cssd_setup",
+          "position": 111,
+          "points": 75,
+          "done": false
+        },
+        {
+          "screen": "cssd_board",
+          "position": 112,
+          "points": 67,
+          "done": false
+        },
+        {
+          "screen": "cssd_stock",
+          "position": 113,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "ot_scheduling",
+          "position": 114,
+          "points": 72,
+          "done": false
+        },
+        {
+          "screen": "ot_board",
+          "position": 115,
+          "points": 36,
+          "done": false
+        },
+        {
+          "screen": "pre_anaesthesia_clinic",
+          "position": 116,
+          "points": 107,
+          "done": false
+        },
+        {
+          "screen": "consents_anaesthesia",
+          "position": 117,
+          "points": 95,
+          "done": false
+        },
+        {
+          "screen": "safety_checklist",
+          "position": 118,
+          "points": 79,
+          "done": false
+        },
+        {
+          "screen": "safety_checklist_admin",
+          "position": 119,
+          "points": 79,
+          "done": false
+        },
+        {
+          "screen": "safety_checklist_anaesthesia",
+          "position": 120,
+          "points": 79,
+          "done": false
+        },
+        {
+          "screen": "ot_consumables_nurse",
+          "position": 121,
+          "points": 50,
+          "done": false
+        },
+        {
+          "screen": "ot_intraop",
+          "position": 122,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "sterile_packs_ot",
+          "position": 123,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "sterile_packs_ot_admin",
+          "position": 124,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "sterile_packs_ward",
+          "position": 125,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "anaesthesia_record",
+          "position": 126,
+          "points": 69,
+          "done": false
+        },
+        {
+          "screen": "surgical_record_surgeon",
+          "position": 127,
+          "points": 123,
+          "done": false
+        },
+        {
+          "screen": "recovery_board",
+          "position": 128,
+          "points": 65,
+          "done": false
+        },
+        {
+          "screen": "recovery_board_admin",
+          "position": 129,
+          "points": 65,
+          "done": false
+        },
+        {
+          "screen": "recovery_board_anaesthesia",
+          "position": 130,
+          "points": 65,
+          "done": false
+        },
+        {
+          "screen": "transfusion_bedside_ot",
+          "position": 131,
+          "points": 74,
+          "done": false
+        },
+        {
+          "screen": "ot_settlement",
+          "position": 132,
+          "points": 49,
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "P7",
+      "title": "Finance, billing and back offices",
+      "goal": "Reconciliation, prices and panels, the pharmacy and laboratory back office, the owner's view.",
+      "exit_criteria": [
+        "A shift is reconciled and a payable settled.",
+        "A price change shows at registration.",
+        "A batch is received and a recall run.",
+        "The owner's figures reflect the day's work."
+      ],
+      "screens": [
+        {
+          "screen": "accountant_cockpit",
+          "position": 133,
+          "points": 83,
+          "done": false
+        },
+        {
+          "screen": "billing_admin",
+          "position": 134,
+          "points": 67,
+          "done": false
+        },
+        {
+          "screen": "pharmacy_admin",
+          "position": 135,
+          "points": 82,
+          "done": false
+        },
+        {
+          "screen": "medication_safety_setup",
+          "position": 136,
+          "points": 54,
+          "done": false
+        },
+        {
+          "screen": "drug_recalls",
+          "position": 137,
+          "points": 66,
+          "done": false
+        },
+        {
+          "screen": "pharmacy_storage_log",
+          "position": 138,
+          "points": 54,
+          "done": false
+        },
+        {
+          "screen": "lab_admin",
+          "position": 139,
+          "points": 88,
+          "done": false
+        },
+        {
+          "screen": "diagnostic_partners",
+          "position": 140,
+          "points": 44,
+          "done": false
+        },
+        {
+          "screen": "owner_dashboard",
+          "position": 141,
+          "points": 41,
+          "done": false
+        },
+        {
+          "screen": "risk_dashboard",
+          "position": 142,
+          "points": 48,
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "P8",
+      "title": "People, facility and IT",
+      "goal": "Onboarding to provisioning, badges and ID cards, rosters and attendance, leave, payroll, self-service, facility operations, the badge kiosk, maintenance.",
+      "exit_criteria": [
+        "A new employee is onboarded, provisioned and badged.",
+        "A roster with a duty swap is planned.",
+        "Attendance flags appear and a leave request is approved; payroll is generated.",
+        "A badge scan at the kiosk cleans a bed; a work order is created and completed."
+      ],
+      "screens": [
+        {
+          "screen": "onboarding_wizard",
+          "position": 143,
+          "points": 69,
+          "done": false
+        },
+        {
+          "screen": "it_console",
+          "position": 144,
+          "points": 182,
+          "done": false
+        },
+        {
+          "screen": "staff_directory",
+          "position": 145,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "badges",
+          "position": 146,
+          "points": 47,
+          "done": false
+        },
+        {
+          "screen": "id_card",
+          "position": 147,
+          "points": 33,
+          "done": false
+        },
+        {
+          "screen": "duty_roster_hr",
+          "position": 148,
+          "points": 100,
+          "done": false
+        },
+        {
+          "screen": "support_roster",
+          "position": 149,
+          "points": 100,
+          "done": false
+        },
+        {
+          "screen": "attendance",
+          "position": 150,
+          "points": 66,
+          "done": false
+        },
+        {
+          "screen": "holiday_calendar",
+          "position": 151,
+          "points": 44,
+          "done": false
+        },
+        {
+          "screen": "holiday_calendar_admin",
+          "position": 152,
+          "points": 44,
+          "done": false
+        },
+        {
+          "screen": "leave_approvals",
+          "position": 153,
+          "points": 40,
+          "done": false
+        },
+        {
+          "screen": "self_service",
+          "position": 154,
+          "points": 87,
+          "done": false
+        },
+        {
+          "screen": "payroll",
+          "position": 155,
+          "points": 54,
+          "done": false
+        },
+        {
+          "screen": "ops_console",
+          "position": 156,
+          "points": 92,
+          "done": false
+        },
+        {
+          "screen": "badge_station_kiosk",
+          "position": 157,
+          "points": 45,
+          "done": false
+        },
+        {
+          "screen": "equipment_maintenance",
+          "position": 158,
+          "points": 91,
+          "done": false
+        },
+        {
+          "screen": "equipment_maintenance_ops",
+          "position": 159,
+          "points": 91,
+          "done": false
+        },
+        {
+          "screen": "compliance_register_ops",
+          "position": 160,
+          "points": 73,
+          "done": false
+        },
+        {
+          "screen": "mock_drills_ops",
+          "position": 161,
+          "points": 63,
+          "done": false
+        },
+        {
+          "screen": "waste_log_ops",
+          "position": 162,
+          "points": 49,
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "P9A",
+      "title": "Patient-safety programme",
+      "goal": "Complaints and incidents from every desk to closure, investigations, the action register.",
+      "exit_criteria": [
+        "A complaint is recorded at reception, acknowledged, resolved, appealed and decided.",
+        "An incident is reported, reviewed, analysed and closed with an action."
+      ],
+      "screens": [
+        {
+          "screen": "my_investigations",
+          "position": 163,
+          "points": 68,
+          "done": false
+        },
+        {
+          "screen": "my_complaint_investigations",
+          "position": 164,
+          "points": 60,
+          "done": false
+        },
+        {
+          "screen": "my_actions",
+          "position": 165,
+          "points": 44,
+          "done": false
+        },
+        {
+          "screen": "record_complaint_reception",
+          "position": 166,
+          "points": 64,
+          "done": false
+        },
+        {
+          "screen": "record_complaint_admissions",
+          "position": 167,
+          "points": 69,
+          "done": false
+        },
+        {
+          "screen": "record_complaint_er",
+          "position": 168,
+          "points": 69,
+          "done": false
+        },
+        {
+          "screen": "record_complaint_ward",
+          "position": 169,
+          "points": 69,
+          "done": false
+        },
+        {
+          "screen": "complaints_register",
+          "position": 170,
+          "points": 103,
+          "done": false
+        },
+        {
+          "screen": "complaint_appeals",
+          "position": 171,
+          "points": 50,
+          "done": false
+        },
+        {
+          "screen": "complaint_statistics",
+          "position": 172,
+          "points": 62,
+          "done": false
+        },
+        {
+          "screen": "complaint_statistics_owner",
+          "position": 173,
+          "points": 62,
+          "done": false
+        },
+        {
+          "screen": "incident_types",
+          "position": 174,
+          "points": 45,
+          "done": false
+        },
+        {
+          "screen": "incident_register",
+          "position": 175,
+          "points": 80,
+          "done": false
+        },
+        {
+          "screen": "incident_register_owner",
+          "position": 176,
+          "points": 80,
+          "done": false
+        },
+        {
+          "screen": "incident_screening",
+          "position": 177,
+          "points": 59,
+          "done": false
+        },
+        {
+          "screen": "incident_statistics",
+          "position": 178,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "incident_statistics_owner",
+          "position": 179,
+          "points": 56,
+          "done": false
+        },
+        {
+          "screen": "action_register",
+          "position": 180,
+          "points": 49,
+          "done": false
+        },
+        {
+          "screen": "qa_rounds",
+          "position": 181,
+          "points": 78,
+          "done": false
+        },
+        {
+          "screen": "qa_rounds_owner",
+          "position": 182,
+          "points": 78,
+          "done": false
+        },
+        {
+          "screen": "record_feedback_reception",
+          "position": 183,
+          "points": 49,
+          "done": false
+        },
+        {
+          "screen": "patient_feedback",
+          "position": 184,
+          "points": 61,
+          "done": false
+        },
+        {
+          "screen": "education_materials",
+          "position": 185,
+          "points": 45,
+          "done": false
+        },
+        {
+          "screen": "home_visit_policy",
+          "position": 186,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "home_visit_register",
+          "position": 187,
+          "points": 45,
+          "done": false
+        },
+        {
+          "screen": "preventive_programmes_setup",
+          "position": 188,
+          "points": 59,
+          "done": false
+        },
+        {
+          "screen": "adr_report",
+          "position": 189,
+          "points": 61,
+          "done": false
+        },
+        {
+          "screen": "blood_registers",
+          "position": 190,
+          "points": 69,
+          "done": false
+        },
+        {
+          "screen": "blood_center_registers",
+          "position": 191,
+          "points": 42,
+          "done": false
+        },
+        {
+          "screen": "obstetric_register",
+          "position": 192,
+          "points": 50,
+          "done": false
+        },
+        {
+          "screen": "labour_register_columns",
+          "position": 193,
+          "points": 44,
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "P9B",
+      "title": "Records and clinical statistics",
+      "goal": "The consent register, record reviews, the deaths and medico-legal registers, ICD statistics, ER, diagnostics, medication, estimate and surgical statistics.",
+      "exit_criteria": [
+        "A review cycle is planned, sampled, reviewed and reported, its deficiencies closed.",
+        "Every statistics screen shows the demo data the earlier phases recorded."
+      ],
+      "screens": [
+        {
+          "screen": "consent_policy_setup",
+          "position": 194,
+          "points": 58,
+          "done": false
+        },
+        {
+          "screen": "consent_register",
+          "position": 195,
+          "points": 48,
+          "done": false
+        },
+        {
+          "screen": "consent_register_owner",
+          "position": 196,
+          "points": 48,
+          "done": false
+        },
+        {
+          "screen": "record_review_cycles",
+          "position": 197,
+          "points": 77,
+          "done": false
+        },
+        {
+          "screen": "record_review_worklist_doctor",
+          "position": 198,
+          "points": 49,
+          "done": false
+        },
+        {
+          "screen": "record_review_worklist_nursing",
+          "position": 199,
+          "points": 49,
+          "done": false
+        },
+        {
+          "screen": "record_deficiencies_doctor",
+          "position": 200,
+          "points": 41,
+          "done": false
+        },
+        {
+          "screen": "record_deficiencies_nursing",
+          "position": 201,
+          "points": 41,
+          "done": false
+        },
+        {
+          "screen": "record_review_report",
+          "position": 202,
+          "points": 79,
+          "done": false
+        },
+        {
+          "screen": "record_review_overview",
+          "position": 203,
+          "points": 122,
+          "done": false
+        },
+        {
+          "screen": "mortality_review",
+          "position": 204,
+          "points": 48,
+          "done": false
+        },
+        {
+          "screen": "death_register",
+          "position": 205,
+          "points": 62,
+          "done": false
+        },
+        {
+          "screen": "mlc_register",
+          "position": 206,
+          "points": 67,
+          "done": false
+        },
+        {
+          "screen": "mlc_register_quality",
+          "position": 207,
+          "points": 41,
+          "done": false
+        },
+        {
+          "screen": "icd_code_lists",
+          "position": 208,
+          "points": 44,
+          "done": false
+        },
+        {
+          "screen": "disease_statistics",
+          "position": 209,
+          "points": 39,
+          "done": false
+        },
+        {
+          "screen": "disease_statistics_owner",
+          "position": 210,
+          "points": 39,
+          "done": false
+        },
+        {
+          "screen": "er_register",
+          "position": 211,
+          "points": 39,
+          "done": false
+        },
+        {
+          "screen": "er_statistics",
+          "position": 212,
+          "points": 38,
+          "done": false
+        },
+        {
+          "screen": "er_statistics_owner",
+          "position": 213,
+          "points": 38,
+          "done": false
+        },
+        {
+          "screen": "lab_quality",
+          "position": 214,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "radiology_quality",
+          "position": 215,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "diagnostics_quality",
+          "position": 216,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "owner_diagnostics",
+          "position": 217,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "diagnostic_correlation",
+          "position": 218,
+          "points": 46,
+          "done": false
+        },
+        {
+          "screen": "medication_statistics",
+          "position": 219,
+          "points": 46,
+          "done": false
+        },
+        {
+          "screen": "estimate_statistics",
+          "position": 220,
+          "points": 41,
+          "done": false
+        },
+        {
+          "screen": "surgical_statistics",
+          "position": 221,
+          "points": 39,
+          "done": false
+        },
+        {
+          "screen": "surgical_statistics_owner",
+          "position": 222,
+          "points": 39,
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "P9C",
+      "title": "Infection control, people quality and facility compliance",
+      "goal": "Infection surveillance and rates, quality indicators and benchmarks, committees, personnel files, appraisals, compliance and drills.",
+      "exit_criteria": [
+        "An infection case is confirmed; wound surveillance runs; an audit is recorded.",
+        "Committee minutes are approved; a personnel file reaches complete."
+      ],
+      "screens": [
+        {
+          "screen": "report_infection_doctor",
+          "position": 223,
+          "points": 42,
+          "done": false
+        },
+        {
+          "screen": "report_infection_ward",
+          "position": 224,
+          "points": 44,
+          "done": false
+        },
+        {
+          "screen": "infection_cases",
+          "position": 225,
+          "points": 50,
+          "done": false
+        },
+        {
+          "screen": "ssi_surveillance",
+          "position": 226,
+          "points": 44,
+          "done": false
+        },
+        {
+          "screen": "ipc_audits",
+          "position": 227,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "waste_log",
+          "position": 228,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "infection_statistics_ipc",
+          "position": 229,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "infection_statistics",
+          "position": 230,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "infection_statistics_owner",
+          "position": 231,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "staff_training_ipc",
+          "position": 232,
+          "points": 58,
+          "done": false
+        },
+        {
+          "screen": "quality_indicator_targets",
+          "position": 233,
+          "points": 37,
+          "done": false
+        },
+        {
+          "screen": "quality_indicators",
+          "position": 234,
+          "points": 45,
+          "done": false
+        },
+        {
+          "screen": "quality_indicators_owner",
+          "position": 235,
+          "points": 45,
+          "done": false
+        },
+        {
+          "screen": "my_committees",
+          "position": 236,
+          "points": 46,
+          "done": false
+        },
+        {
+          "screen": "committees_quality",
+          "position": 237,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "committees_ipc",
+          "position": 238,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "committees_owner",
+          "position": 239,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "orientation_job_descriptions",
+          "position": 240,
+          "points": 75,
+          "done": false
+        },
+        {
+          "screen": "staff_training_hr",
+          "position": 241,
+          "points": 64,
+          "done": false
+        },
+        {
+          "screen": "appraisals_hr",
+          "position": 242,
+          "points": 76,
+          "done": false
+        },
+        {
+          "screen": "appraise_staff_doctor",
+          "position": 243,
+          "points": 65,
+          "done": false
+        },
+        {
+          "screen": "appraise_staff_head_nurse",
+          "position": 244,
+          "points": 65,
+          "done": false
+        },
+        {
+          "screen": "discipline_health_hr",
+          "position": 245,
+          "points": 51,
+          "done": false
+        },
+        {
+          "screen": "personnel_files_hr",
+          "position": 246,
+          "points": 60,
+          "done": false
+        },
+        {
+          "screen": "personnel_files_quality",
+          "position": 247,
+          "points": 52,
+          "done": false
+        },
+        {
+          "screen": "personnel_files_owner",
+          "position": 248,
+          "points": 52,
+          "done": false
+        },
+        {
+          "screen": "my_personnel_record",
+          "position": 249,
+          "points": 46,
+          "done": false
+        },
+        {
+          "screen": "compliance_register_quality",
+          "position": 250,
+          "points": 73,
+          "done": false
+        },
+        {
+          "screen": "mock_drills_quality",
+          "position": 251,
+          "points": 63,
+          "done": false
+        },
+        {
+          "screen": "equipment_write_off",
+          "position": 252,
+          "points": 57,
+          "done": false
+        },
+        {
+          "screen": "equipment_requisitions",
+          "position": 253,
+          "points": 74,
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "P10",
+      "title": "PHC inspection",
+      "goal": "The category, readiness, the inspection pack, the CPSA documents, the inspector's read-only login and the staff's preparation for the surveyors' questions.",
+      "exit_criteria": [
+        "The category is confirmed and the PHC number appears on printouts.",
+        "Readiness is shown; the pack downloads as separate PDFs or one combined PDF by the user's preference, never a ZIP.",
+        "demo.inspector sees only the read-only documents.",
+        "A member of staff practises the questions of their role; a supervisor records a mock interview."
+      ],
+      "screens": [
+        {
+          "screen": "msds_authorized_personnel",
+          "position": 254,
+          "points": 39,
+          "done": false
+        },
+        {
+          "screen": "msds_readiness",
+          "position": 255,
+          "points": 61,
+          "done": false
+        },
+        {
+          "screen": "msds_readiness_owner",
+          "position": 256,
+          "points": 61,
+          "done": false
+        },
+        {
+          "screen": "msds_inspection_pack",
+          "position": 257,
+          "points": 82,
+          "done": false
+        },
+        {
+          "screen": "msds_inspection_pack_owner",
+          "position": 258,
+          "points": 82,
+          "done": false
+        },
+        {
+          "screen": "phc_cpsa_documents",
+          "position": 259,
+          "points": 90,
+          "done": false
+        },
+        {
+          "screen": "phc_cpsa_documents_owner",
+          "position": 260,
+          "points": 90,
+          "done": false
+        },
+        {
+          "screen": "phc_inspector_accounts",
+          "position": 261,
+          "points": 49,
+          "done": false
+        },
+        {
+          "screen": "inspection_home",
+          "position": 262,
+          "points": 50,
+          "done": false
+        },
+        {
+          "screen": "msds_inspection_pack_inspector",
+          "position": 263,
+          "points": 72,
+          "done": false
+        },
+        {
+          "screen": "phc_cpsa_documents_inspector",
+          "position": 264,
+          "points": 66,
+          "done": false
+        },
+        {
+          "screen": "interview_practice",
+          "position": 265,
+          "points": 79,
+          "done": false
+        },
+        {
+          "screen": "mock_interviews",
+          "position": 266,
+          "points": 70,
+          "done": false
+        },
+        {
+          "screen": "interview_bank",
+          "position": 267,
+          "points": 62,
+          "done": false
+        },
+        {
+          "screen": "interview_readiness",
+          "position": 268,
+          "points": 62,
+          "done": false
+        },
+        {
+          "screen": "interview_readiness_owner",
+          "position": 269,
+          "points": 62,
+          "done": false
+        }
+      ]
+    }
+  ],
+  "go_live_setup": [
+    "it_console",
+    "onboarding_wizard",
+    "badges",
+    "billing_admin",
+    "lab_admin",
+    "diagnostic_partners",
+    "pharmacy_admin",
+    "medication_safety_setup",
+    "holiday_calendar_admin",
+    "duty_roster",
+    "duty_roster_hr",
+    "support_roster",
+    "triage_scale",
+    "consent_policy_setup",
+    "theatre_checklist_setup",
+    "clinical_privileges",
+    "cssd_setup",
+    "imaging_quality_setup",
+    "quality_indicator_targets",
+    "incident_types",
+    "icd_code_lists",
+    "facility_profile"
+  ],
+  "go_live_note": "Configuration screens a real hospital needs before its first patient; the demo seed fills their data during development.",
+  "next_ready": [
+    {
+      "screen": "connect_server",
+      "phase": "P1",
+      "position": 1,
+      "points": 45
+    },
+    {
+      "screen": "login",
+      "phase": "P1",
+      "position": 2,
+      "points": 65
+    },
+    {
+      "screen": "app_shell",
+      "phase": "P1",
+      "position": 3,
+      "points": 64
+    },
+    {
+      "screen": "settings",
+      "phase": "P1",
+      "position": 4,
+      "points": 73
+    },
+    {
+      "screen": "notifications",
+      "phase": "P1",
+      "position": 5,
+      "points": 47
+    }
+  ],
+  "sessions": [
+    {
+      "session": 1,
+      "screens": [
+        "connect_server",
+        "login",
+        "app_shell",
+        "settings",
+        "notifications",
+        "help_center"
+      ],
+      "points": 339
+    },
+    {
+      "session": 2,
+      "screens": [
+        "approval_queue",
+        "charity_approvals",
+        "report_incident",
+        "facility_profile",
+        "workspace_picker"
+      ],
+      "points": 318
+    },
+    {
+      "session": 3,
+      "screens": [
+        "my_cash_shift",
+        "patient_search",
+        "registration",
+        "queue_management",
+        "refund_waiver_credit"
+      ],
+      "points": 314
+    },
+    {
+      "session": 4,
+      "screens": [
+        "cash_back_prompts",
+        "receivables",
+        "patient_documents",
+        "tariff_display",
+        "doctor_queue",
+        "icd_picker"
+      ],
+      "points": 279
+    },
+    {
+      "session": 5,
+      "screens": [
+        "consultation",
+        "eprescription",
+        "lab_orders_results"
+      ],
+      "points": 314
+    },
+    {
+      "session": 6,
+      "screens": [
+        "external_referral",
+        "referral_register",
+        "patient_education",
+        "patient_programmes",
+        "home_visit_record",
+        "rx_queue"
+      ],
+      "points": 295
+    },
+    {
+      "session": 7,
+      "screens": [
+        "dispense",
+        "order_queries",
+        "otc",
+        "charity_override",
+        "lab_only_walkin"
+      ],
+      "points": 273
+    },
+    {
+      "session": 8,
+      "screens": [
+        "lab_bench",
+        "lab_verification",
+        "critical_results_bench",
+        "critical_results_verifier",
+        "critical_results_doctor"
+      ],
+      "points": 310
+    },
+    {
+      "session": 9,
+      "screens": [
+        "lab_send_outs",
+        "diagnostic_services_list",
+        "imaging_quality_setup",
+        "radiology_worklist",
+        "critical_results_radiology",
+        "imaging_outsourced"
+      ],
+      "points": 335
+    },
+    {
+      "session": 10,
+      "screens": [
+        "imaging_repeats",
+        "duty_roster",
+        "roll_call",
+        "pending_admissions",
+        "bed_matrix"
+      ],
+      "points": 323
+    },
+    {
+      "session": 11,
+      "screens": [
+        "wristbands_admissions",
+        "consents_admissions",
+        "cost_estimates_admissions",
+        "cost_estimates_billing",
+        "explain_estimate"
+      ],
+      "points": 345
+    },
+    {
+      "session": 12,
+      "screens": [
+        "doctor_inpatients",
+        "treating_doctors",
+        "my_beds",
+        "patient_education_ward",
+        "nursing_assessment"
+      ],
+      "points": 294
+    }
+  ],
+  "dependencies": {
+    "ordering": 275,
+    "hand_offs": 101,
+    "candidates": 326,
+    "forward": 0,
+    "hand_off_loops": []
+  },
+  "coverage": {
+    "screens": 269,
+    "placed": 269,
+    "not_placed": [],
+    "unknown_in_roadmap": []
+  },
+  "completed_from": "your self-reported progress",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7"
+}

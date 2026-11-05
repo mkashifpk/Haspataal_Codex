@@ -1,0 +1,120 @@
+{
+  "slug": "operating-theater",
+  "title": "Operating theater",
+  "summary": "Digital request queue, double-booking-proof scheduling, live board, consumable scanning, one-click settlement & commission split.",
+  "order": 99,
+  "workflow": "§5.1–§5.5",
+  "workspaces": [
+    "doctor",
+    "ot_admin",
+    "ot_nurse",
+    "anaesthesia",
+    "finance_accountant",
+    "super_admin"
+  ],
+  "file": "operating-theater.md",
+  "markdown": "# Operating theater\n\n1. **Provision** (Super Admin, once): `POST /ot/theaters {\"code\": \"OT1\", \"name\": \"Main OT 1\"}`.\n2. **Request** (surgeon): `POST /ot/bookings {\"patient_id\", \"procedure_name\", \"service_id\"?, \"booking_type\": \"Scheduled\"}`\n   → `Requested` (priority: CodeRed > Emergency > Scheduled).\n   The patient from `GET /patients/search`, the service from `GET /finance/service-catalog?category=OT`, the primary\n   surgeon from `GET /staff/lookup?license_type=PMDC` (default: the requesting surgeon).\n3. **Schedule** (OT admin): `GET /ot/queue`, `GET /ot/calendar?start&end`, then\n   `POST /ot/bookings/{id}/schedule {\"ot_id\", \"scheduled_start\", \"duration_minutes\", \"procedure_price\"?}`.\n   The turnover buffer is added automatically; overlapping blocks are impossible (database exclusion\n   constraint → `OT_DOUBLE_BOOKING`). The price is frozen once scheduled.\n   Another surgeon from `GET /staff/lookup?license_type=PMDC`.\n4. **Live board** (every terminal): `GET /ot/status-board` + `ot.status.updated` — 🟢 Available /\n   🔴 In-Surgery / 🟡 Cleaning-Prep / ⚠ Emergency hold, \"Appendectomy - Dr. Tariq\", no patient names.\n5. **Intra-op**: `POST /ot/bookings/{id}/start`; scan consumables\n   `POST /ot/bookings/{id}/consumables {\"barcode\": \"8964…\", \"qty\": 2}` (pharmacy stock leaves FEFO; cost and\n   retail are snapshotted); mistakes `POST /ot/consumables/{id}/reverse {\"reason\"}`;\n   `POST /ot/bookings/{id}/complete-surgery` (→ Cleaning), `…/complete-cleaning` (→ Available).\n   The clinical record of the operation runs alongside: the surgeon's pre-operative note, the pre-anaesthesia\n   assessment, the safety checklist, the anaesthesia record, the operative note, recovery\n   ([Surgical care](surgical-care.md)). The operation cannot be completed before the sign out of the checklist\n   (`OT_CHECKLIST_INCOMPLETE`); a patient who had an anaesthetist is then in recovery.\n   Without a barcode, the formulary item from `GET /drugs/search`.\n6. **Post-op settlement** (one irreversible action):\n   * `POST /ot/bookings/{id}/settlement-preview {\"participants\": [{\"employee_id\", \"role_in_ot\": \"PrimarySurgeon\"}, …]}`\n     (the team named at the time out, `GET /ot/bookings/{id}/surgical-record` → `checklist`, is a good default; anyone\n     else is picked with `GET /staff/lookup?q=`)\n     → gross (procedure − discount + consumables), consumables cost, net profit, each commission with\n     its basis (\"30% of gross 120100\"), hospital net. A person listed in two roles (for example primary and\n     assistant surgeon) earns their contract's share once per role listed: the owner's rule (audit F-14). List a\n     person in one role unless they really did both.\n   * `POST /ot/bookings/{id}/finalize` (same body) — bills the patient (IPD running bill or a finalized\n     OT invoice), records the settlement, accrues **regular staff** commissions for the next payroll and\n     puts **visiting consultants** straight into the Accountant's AP queue (\"Dr. Tariq - Appendectomy -\n     Rs. 36,030\"). All or nothing. Commissions above net profit → `OT_COMMISSION_CAP_EXCEEDED` unless\n     `commission_cap_override_reason` is given (flagged for review). Twice → `OT_ALREADY_SETTLED`.\n7. **Pay the consultant**: Accountant `POST /finance/ap/{ap_id}/settle {\"method\": \"Cash\"}` (\"Settle Payment\").\n\nContracts (one-time per consultant, Billing Admin; the consultant picked with `GET /staff/lookup?q=`): `POST /finance/consultant-contracts\n{\"employee_id\", \"rule_type\": \"PercentGross\" | \"PercentNet\" | \"FixedFee\", \"percentage\" | \"amount\", \"effective_from\"}`.\n\nCode Red with `needs_ot: true` places an `EmergencyHold` on the free theater with the longest window\n(`ot.emergency_hold`); price it later during scheduling and start it directly.",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/theaters",
+          "summary": "Provision an operating theater (Super Admin)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings",
+          "summary": "Surgeon requests OT time (digital queue)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/service-catalog",
+          "summary": "Hospital service prices (lab prices live in the lab catalogue)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/queue",
+          "summary": "Requested bookings waiting for a theater (priority first)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/calendar",
+          "summary": "Calendar blocks for a time window"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/schedule",
+          "summary": "Assign theater + time block (double-booking impossible)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/status-board",
+          "summary": "Live OT board (🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/start",
+          "summary": "Patient in theater → 🔴 In-Surgery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/consumables",
+          "summary": "Scan a consumable into the surgery"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/consumables/{consumable_id}/reverse",
+          "summary": "Undo a mistaken scan (mirrored reversal row)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/complete-surgery",
+          "summary": "Surgery finished → 🟡 Cleaning-Prep"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drugs/search",
+          "summary": "Formulary search with live stock colour"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/settlement-preview",
+          "summary": "Show the split math before finalizing (no changes)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/bookings/{booking_id}/surgical-record",
+          "summary": "The surgical record of an operation"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/finalize",
+          "summary": "Finalize Surgery & Trigger Split (atomic)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/ap/{ap_id}/settle",
+          "summary": "Settle Payment (vendor / contractor / visiting consultant)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/consultant-contracts",
+          "summary": "One-time commission rule per consultant (workflow §5.5)"
+        }
+      ]
+    }
+  ]
+}

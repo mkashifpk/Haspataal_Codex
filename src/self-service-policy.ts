@@ -28,12 +28,14 @@ export function getSelfServiceCapabilityView(
   userRole?: string
 ): SelfServiceCapabilityView {
   const perms = new Set(userPermissions || []);
-  const canView = perms.has("self.profile.view") || perms.has("*") || true; // Available to all staff
-  const canRequestLeave = perms.has("self.leave.request") || perms.has("*") || true;
-  const canSwapRoster = perms.has("self.roster.swap") || perms.has("*") || true;
-  const canReportIssue = perms.has("ops.workorder.report") || perms.has("*") || true;
+  const screens=establishment?.views?.screens;
+  const view=Array.isArray(screens)?screens.find((s:any)=>s.screen_id==='self_service')?.view??'full':'hidden';
+  const canView = view!=='hidden' && perms.has("self.profile.view");
+  const canRequestLeave = view==='full' && perms.has("self.leave.request");
+  const canSwapRoster = view==='full' && perms.has("self.roster.swap");
+  const canReportIssue = view==='full' && perms.has("ops.workorder.report");
 
-  if (establishment?.views?.screens && !establishment.views.screens.includes("self_service")) {
+  if (!canView) {
     return {
       mode: "hidden",
       reason: "Self-service staff portal is not enabled for this facility profile.",
@@ -44,7 +46,7 @@ export function getSelfServiceCapabilityView(
     };
   }
 
-  const mode: SelfServiceMode = (canRequestLeave || canSwapRoster) ? "full" : "records";
+  const mode: SelfServiceMode = (canRequestLeave || canSwapRoster || canReportIssue) ? "full" : "records";
 
   return {
     mode,

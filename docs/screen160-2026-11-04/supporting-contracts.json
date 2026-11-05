@@ -1,0 +1,844 @@
+{
+  "equipment": {
+    "method": "GET",
+    "path": "/api/v1/facility/equipment",
+    "summary": "The equipment inventory",
+    "tags": [
+      "Facility: licences, equipment, drills"
+    ],
+    "permissions": [
+      "facility.view",
+      "facility.equipment.manage",
+      "facility.maintenance.record"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "The medical equipment (FMS 122) with its next due date and overdue plans; the overdue first. Register a new item\nas an asset (`POST /ops/assets`), then give it its equipment record (`PUT /facility/equipment/{asset_id}`).\n\n**Required permission:** `facility.view OR facility.equipment.manage OR facility.maintenance.record`\n\n**Required permission:** `facility.view OR facility.equipment.manage OR facility.maintenance.record`",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "maintenance_admin",
+      "ops_admin",
+      "owner",
+      "quality_officer"
+    ],
+    "parameters": [
+      {
+        "name": "medical_only",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "type": "boolean",
+          "default": true,
+          "title": "Medical Only"
+        }
+      },
+      {
+        "name": "department_id",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        }
+      },
+      {
+        "name": "overdue_only",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "type": "boolean",
+          "default": false,
+          "title": "Overdue Only"
+        }
+      },
+      {
+        "name": "include_disposed",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "type": "boolean",
+          "default": false,
+          "title": "Include Disposed"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[EquipmentOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "EquipmentOut",
+            "properties": {
+              "asset_id": {
+                "type": "integer",
+                "title": "Asset Id"
+              },
+              "asset_tag": {
+                "type": "string",
+                "title": "Asset Tag"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name"
+              },
+              "category": {
+                "type": "string",
+                "title": "Category"
+              },
+              "serial_no": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Serial No"
+              },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Location"
+              },
+              "department_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Department Id"
+              },
+              "department_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Department Name"
+              },
+              "ward_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ward Id"
+              },
+              "ward_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ward Name"
+              },
+              "ot_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ot Id",
+                "description": "The operating theatre the item belongs to (CPSA 5)"
+              },
+              "ot_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ot Name"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Active",
+                  "UnderRepair",
+                  "OutOfService",
+                  "Disposed",
+                  "Lost"
+                ],
+                "title": "Status"
+              },
+              "is_medical": {
+                "type": "boolean",
+                "title": "Is Medical"
+              },
+              "manufacturer": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Manufacturer"
+              },
+              "model": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Model"
+              },
+              "supplier_vendor_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Supplier Vendor Id"
+              },
+              "supplier_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Supplier Name"
+              },
+              "purchase_date": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Purchase Date"
+              },
+              "commissioned_on": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Commissioned On",
+                "description": "Tested at installation (FMS 122 ii b): the Commissioning visit"
+              },
+              "warranty_until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Warranty Until"
+              },
+              "maintained_by": {
+                "type": "string",
+                "enum": [
+                  "InHouse",
+                  "Contractor",
+                  "Mixed"
+                ],
+                "title": "Maintained By"
+              },
+              "service_vendor_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Service Vendor Id"
+              },
+              "service_vendor_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Service Vendor Name"
+              },
+              "service_contract_ref": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Service Contract Ref"
+              },
+              "service_contract_until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Service Contract Until"
+              },
+              "contract_expired": {
+                "type": "boolean",
+                "title": "Contract Expired"
+              },
+              "disposed_on": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Disposed On"
+              },
+              "disposal_method": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "Scrapped",
+                      "Sold",
+                      "Donated",
+                      "ReturnedToSupplier",
+                      "Transferred"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Disposal Method"
+              },
+              "disposal_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Disposal Reason"
+              },
+              "disposal_approved_by_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Disposal Approved By Name"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              },
+              "next_due": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Next Due",
+                "description": "The earliest due date of its active plans"
+              },
+              "overdue_plans": {
+                "type": "integer",
+                "title": "Overdue Plans"
+              },
+              "active_plans": {
+                "type": "integer",
+                "title": "Active Plans"
+              }
+            },
+            "type": "object",
+            "required": [
+              "asset_id",
+              "asset_tag",
+              "name",
+              "category",
+              "serial_no",
+              "location",
+              "department_id",
+              "department_name",
+              "ward_id",
+              "ward_name",
+              "ot_id",
+              "ot_name",
+              "status",
+              "is_medical",
+              "manufacturer",
+              "model",
+              "supplier_vendor_id",
+              "supplier_name",
+              "purchase_date",
+              "commissioned_on",
+              "warranty_until",
+              "maintained_by",
+              "service_vendor_id",
+              "service_vendor_name",
+              "service_contract_ref",
+              "service_contract_until",
+              "contract_expired",
+              "disposed_on",
+              "disposal_method",
+              "disposal_reason",
+              "disposal_approved_by_name",
+              "row_version",
+              "next_due",
+              "overdue_plans",
+              "active_plans"
+            ]
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/facility/equipment",
+        "query": {
+          "department_id": 2
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "asset_id": 1,
+              "asset_tag": "XR-01",
+              "name": "Digital X-ray unit",
+              "category": "Imaging",
+              "serial_no": null,
+              "location": null,
+              "department_id": 2,
+              "department_name": "Radiology",
+              "ward_id": null,
+              "ward_name": null,
+              "ot_id": null,
+              "ot_name": null,
+              "status": "Active",
+              "is_medical": true,
+              "manufacturer": "Shimadzu",
+              "model": "RADspeed",
+              "supplier_vendor_id": 1,
+              "supplier_name": "MedServ Pvt Ltd",
+              "purchase_date": null,
+              "commissioned_on": "2026-09-04",
+              "warranty_until": "2027-04-22",
+              "maintained_by": "Mixed",
+              "service_vendor_id": 1,
+              "service_vendor_name": "MedServ Pvt Ltd",
+              "service_contract_ref": "AMC-2026-14",
+              "service_contract_until": "2026-10-03",
+              "contract_expired": true,
+              "disposed_on": null,
+              "disposal_method": null,
+              "disposal_reason": null,
+              "disposal_approved_by_name": null,
+              "row_version": 5,
+              "next_due": "2026-10-11",
+              "overdue_plans": 0,
+              "active_plans": 3
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-04T07:25:00.195494+00:00"
+          },
+          "request_id": "885b74efc4dd417a80668df07c8a49d8"
+        }
+      }
+    },
+    "errors": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "equipment_maintenance",
+      "equipment_maintenance_ops",
+      "equipment_write_off"
+    ],
+    "used_by_workflows": [
+      "facility-compliance-equipment-drills"
+    ],
+    "typescript_example": "// The equipment inventory  (permissions: facility.view, facility.equipment.manage, facility.maintenance.record)\nexport const listEquipment = () =>\n  api(\"GET\", `/facility/equipment`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "facility.view",
+        "facility.equipment.manage",
+        "facility.maintenance.record"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of facility.view or facility.equipment.manage or facility.maintenance.record",
+      "roles_allowed": [
+        "clinic_director",
+        "hospital_admin",
+        "hospital_director",
+        "maintenance_admin",
+        "ops_admin",
+        "owner",
+        "quality_officer"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [],
+      "search": [],
+      "filters": [
+        {
+          "name": "medical_only",
+          "required": false,
+          "type": "boolean",
+          "default": true
+        },
+        {
+          "name": "department_id",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "overdue_only",
+          "required": false,
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "name": "include_disposed",
+          "required": false,
+          "type": "boolean",
+          "default": false
+        }
+      ],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "departments": {
+    "method": "GET",
+    "path": "/api/v1/admin/departments",
+    "summary": "Departments",
+    "tags": [
+      "Super Admin"
+    ],
+    "permissions": [],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "access": {
+      "authentication": "user",
+      "permissions": [],
+      "permissions_mode": "all",
+      "who": "any logged-in user"
+    },
+    "description": "",
+    "roles_allowed": [],
+    "parameters": [],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[DepartmentOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "DepartmentOut",
+            "properties": {
+              "department_id": {
+                "type": "integer",
+                "title": "Department Id"
+              },
+              "code": {
+                "type": "string",
+                "title": "Code"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name"
+              },
+              "is_clinical": {
+                "type": "boolean",
+                "title": "Is Clinical"
+              },
+              "is_active": {
+                "type": "boolean",
+                "title": "Is Active"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              }
+            },
+            "type": "object",
+            "required": [
+              "department_id",
+              "code",
+              "name",
+              "is_clinical",
+              "is_active",
+              "row_version"
+            ]
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admin/departments"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "department_id": 1,
+              "code": "CARD",
+              "name": "Cardiology & Vascular",
+              "is_clinical": true,
+              "is_active": true,
+              "row_version": 2
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:34:24.417658+00:00"
+          },
+          "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+        }
+      }
+    },
+    "errors": [],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "ipc_audits",
+      "it_console"
+    ],
+    "used_by_workflows": [],
+    "typescript_example": "// Departments  (permissions: any logged-in user)\nexport const departments = () =>\n  api(\"GET\", `/admin/departments`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [],
+      "search": [],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": []
+  }
+}

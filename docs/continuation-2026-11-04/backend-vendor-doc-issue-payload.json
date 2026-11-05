@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-1104-equipment-vendor-lookup-doc-v1",
+  "agent": "Codex",
+  "kind": "Documentation",
+  "severity": "Low",
+  "title": "Equipment screen bundles omit the existing vendor lookup needed for contractor fields",
+  "endpoint": "GET /finance/vendors",
+  "screen_id": "equipment_maintenance",
+  "workflow": "facility-compliance-equipment-drills",
+  "build": "index-O27FYLR1.js; base 6cd3b4d plus audited equipment implementation",
+  "actual": "Both equipment_maintenance and equipment_maintenance_ops full bundles (contract f253171154eef6044fa2, knowledge bbf3ad4e2e48dc00) contain 13 endpoints including the staff picker but never mention /finance/vendors in any section. Their schema requires vendor_id for contractor plans/visits. Screen generate_typescript likewise omits the vendor lookup. get_endpoint GET /finance/vendors used_by_screens lists pharmacy_admin,waste_log,waste_log_ops only. The route exists and works: demo.maintenance GET /finance/vendors returned200 request ba4ebebd9dde41a18d026d2d36ae5fac, including an active biomedical contractor. There is no reproduced runtime API failure or missing permission.",
+  "expected": "Please link the existing authenticated GET /finance/vendors directory from both equipment screen bundles (endpoints/lookup guidance/handbook), generated screen client and test plan so an agent can build a named supplier/contractor picker without entering or guessing IDs. get_screen_bundle describes itself as the complete per-screen contract, including all endpoints and value lists; supplier_vendor_id,service_vendor_id and contractor plan/visit vendor_id depend on this directory, just as employee_id depends on included GET /facility/staff.",
+  "steps": "1. get_screen_bundle equipment_maintenance and equipment_maintenance_ops with max_chars200000; neither has omitted sections; search every returned section for /finance/vendors (zero matches). 2. Inspect MaintenancePlanIn/MaintenanceRecordIn cross-field rules requiring vendor_id and GET /facility/staff already included for employee_id. 3. generate_typescript(kind=screen,name=equipment_maintenance): 13 functions, no vendors lookup. 4. search_api vendors -> GET /finance/vendors; get_endpoint says any logged-in user. sandbox_call GET /finance/vendors as demo.maintenance ->200. Existing backend reports checked2026-11-04: no open duplicate.",
+  "evidence": "Source contracts/equipment_maintenance.json and contracts/equipment_maintenance_ops.json were fetched in full on2026-11-04. Fresh endpoint contract saved at docs/continuation-2026-11-04/equipment-vendor-contract.json; live read request ba4ebebd9dde41a18d026d2d36ae5fac. No secrets or patient data. Frontend is adding a typed supporting GET and real vendor choices; no mocks, fabricated vendor identifiers or new backend endpoint needed. This report concerns MCP catalogue/documentation completeness only, not a broken runtime workflow."
+}

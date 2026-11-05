@@ -1,0 +1,531 @@
+{
+  "screen": "my_beds",
+  "title": "My beds this shift",
+  "cases": [
+    {
+      "id": "case:GET /ipd/my-beds",
+      "call": "GET /api/v1/ipd/my-beds",
+      "summary": "Ward nurse: my rostered beds this shift (doses due, last vitals)",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/ipd/my-beds"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "roster_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "zone_label": "Bay A",
+                  "ward_id": 2,
+                  "ward_name": "General Ward",
+                  "bed_id": 2,
+                  "bed_label": "GW-1",
+                  "current_state": "Occupied",
+                  "admission_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "doses_due_next_hour": 0,
+                  "last_vitals_at": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:38:45.129587+00:00"
+              },
+              "request_id": "4f69b404383d443fb0e32455d6565ea4"
+            }
+          },
+          "errors_seen": [
+            "PASSWORD_CHANGE_REQUIRED"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "PASSWORD_CHANGE_REQUIRED"
+      ]
+    },
+    {
+      "id": "case:GET /self/roster",
+      "call": "GET /api/v1/self/roster",
+      "summary": "My duties (two weeks from today by default)",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/roster"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "roster_id": 5,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-02",
+                  "shift_pattern_id": 2,
+                  "shift_name": "Evening",
+                  "start_time": "14:00:00",
+                  "end_time": "20:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": 1,
+                  "row_version": 1,
+                  "bed_ids": []
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-29T02:40:41.599318+00:00"
+              },
+              "request_id": "5c305e9719de4fc0a201e0efb960e802"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "phc_inspector"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /beds/{bed_id}/mark-cleaned",
+      "call": "POST /api/v1/beds/{bed_id}/mark-cleaned",
+      "summary": "Confirm a bed was cleaned (where no badge station records it)",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "ops_admin",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/beds/2/mark-cleaned"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "outcome": "BedCleaned",
+                "bed_id": 2,
+                "admission_id": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:38:34.638651+00:00"
+              },
+              "request_id": "6bf4c821f7a84cdc8a092ec410f73502"
+            }
+          },
+          "events_emitted": [
+            "admission.discharge.stage_changed",
+            "bed.state_changed",
+            "bed.waitlist.notification"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /admissions/{admission_id}/discharge-summary/print-payload",
+      "call": "GET /api/v1/admissions/{admission_id}/discharge-summary/print-payload",
+      "summary": "Printable discharge summary, or referral slip for a transfer",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "radiologist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/discharge-summary/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "discharge_summary",
+                "printer_role": "document",
+                "paper_width_mm": 210,
+                "fields": {
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": "",
+                    "phc_number": "",
+                    "issue_line": "Issued 14-Oct-2026 15:38; this copy printed 14-Oct-2026 15:38"
+                  },
+                  "title": "DISCHARGE SUMMARY",
+                  "admission": {
+                    "admission_id": 1,
+                    "admission_number": "ADM-2026-00001",
+                    "admission_status": "Admitted",
+                    "admission_type": "Standard",
+                    "patient_id": 1,
+                    "mrn": "MRN-2026-000001",
+                    "patient_name": "Ali Khan",
+                    "gender": "male",
+                    "age_years": 40,
+                    "dob": null,
+                    "requested_at": "2026-10-14T10:38:26.460181+00:00",
+                    "admitted_at": "2026-10-14T10:38:26.495594+00:00",
+                    "discharged_at": null,
+                    "ward_name": "General Ward",
+                    "bed_label": "GW-1",
+                    "primary_doctor_name": "Dr Ahmed",
+                    "admission_reason": "Fever and productive cough for 5 days, SpO2 91% on air",
+                    "provisional_diagnosis": "Community-acquired pneumonia"
+                  },
+                  "summary": {
+                    "summary_id": 1,
+                    "admission_id": 1,
+                    "patient_id": 1,
+                    "outcome": "Home",
+                    "condition_at_discharge": "Improved",
+                    "reason_for_admission": "Fever and productive cough for 5 days, SpO2 91% on air",
+                    "final_diagnosis": "Right lower lobe pneumonia",
+                    "icd_codes": [
+                      "CA40.Z"
+                    ],
+                    "significant_findings": "Chest X-ray: right lower lobe consolidation",
+                    "procedures_and_treatment": "IV ceftriaxone for 5 days, oxygen for 2 days",
+                    "response_to_treatment": "Afebrile from day 3, off oxygen on day 2",
+                    "discharge_medications": "Amoxicillin-clavulanate 625 mg TDS for 5 days",
+                    "follow_up_instructions": "OPD review in one week; return at once if breathless",
+                    "follow_up_date": "2026-12-01",
+                    "receiving_hospital": null,
+                    "transfer_reason": null,
+                    "transfer_arrangements": null,
+                    "outcome_note": null,
+                    "status": "Final",
+                    "created_by": 1,
+                    "created_by_name": "Dr Ahmed",
+                    "created_at": "2026-10-14T10:38:26.781771+00:00",
+                    "signed_by": 1,
+                    "signed_at": "2026-10-14T10:38:26.829819+00:00",
+                    "signer_name": "Dr Ahmed",
+                    "signer_designation": "Doctor",
+                    "signer_license": "PMDC PMDC-46468",
+                    "row_version": 3,
+                    "icd_terms": [
+                      {
+                        "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                        "code": "CA40.Z",
+                        "title": "Pneumonia, organism unspecified",
+                        "system": "ICD-11"
+                      }
+                    ]
+                  },
+                  "corrections": [
+                    {
+                      "correction_id": 1,
+                      "field": "discharge_medications",
+                      "correction_text": "Amoxicillin-clavulanate 625 mg BD, not TDS",
+                      "correction_reason": "Dose misread",
+                      "corrected_by_name": "Dr Ahmed",
+                      "created_at": "2026-10-14T10:38:26.854081+00:00"
+                    }
+                  ]
+                },
+                "text": "                                    Haspataal Hospital\n                                 Issued 14-Oct-2026 15:38\n                           this copy printed 14-Oct-2026 15:38\n                                    DISCHARGE SUMMARY\n------------------------------------------------------------------------------------------\nPatient                                                     Ali Khan (MRN MRN-2…",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"56.920mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"116\" height=\"116\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m1 0h1m1 0h2m1 0h1m1 0h1m2 0h7m-25 1h1m5 0h1m2 0h5m4 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m4 0h2m2 0h1m2 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h1m1 0h1m5 0h1m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h5m1 0h1m1 0h1m1 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m1 0h1m1 0h2m2 0…",
+                "pdf_url": "/api/v1/admissions/1/discharge-summary/pdf"
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:38:26.879222+00:00"
+              },
+              "request_id": "46a61bed6b64472b81ff848aed372ae4"
+            }
+          },
+          "errors_seen": [
+            "DISCHARGE_SUMMARY_NOT_FINAL"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DISCHARGE_SUMMARY_NOT_FINAL",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /admissions/{admission_id}/discharge-summary/pdf",
+      "call": "GET /api/v1/admissions/{admission_id}/discharge-summary/pdf",
+      "summary": "The signed discharge summary as a PDF",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "radiologist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/discharge-summary/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 3141
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DISCHARGE_SUMMARY_NOT_FINAL",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /staff/lookup",
+      "call": "GET /api/v1/staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/staff/lookup",
+            "query": {
+              "q": "sana look"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 2,
+                  "emp_number": "EMP-2026-0002",
+                  "full_name": "Sana Lookuptest",
+                  "designation": "Officer",
+                  "department_name": null,
+                  "license_type": "PNC",
+                  "user_id": 2,
+                  "registration": "PNC PNC-31852"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-11-05T01:52:33.483546+00:00"
+              },
+              "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
+            }
+          },
+          "errors_seen": [
+            "UNAUTHENTICATED",
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "UNAUTHENTICATED",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=my_beds].view = full (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "open_work",
+      "set_up": "GET /establishment answers views.screens[screen_id=my_beds].view = open_work (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+    },
+    {
+      "view": "records",
+      "set_up": "GET /establishment answers views.screens[screen_id=my_beds].view = records (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+    },
+    {
+      "view": "hidden",
+      "set_up": "GET /establishment answers views.screens[screen_id=my_beds].view = hidden (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/my_beds",
+  "workspace_guide": "get_handbook_outline('ward_nurse')",
+  "realtime": [
+    {
+      "event": "vitals.due",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "medication.due",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Sort by urgency: overdue vitals / due doses first.",
+    "A discharging patient: print the signed discharge summary (A4) and explain the medicines and follow-up.",
+    "Where no badge station records cleaning, 'Bed cleaned' confirms it and may name the cleaner (cleaned_by_employee_id).",
+    "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id my_beds (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

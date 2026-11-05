@@ -2,6 +2,12 @@
 // api(): the helper from get_guide("envelope-and-errors"). Types come from the declared request and response models.
 import { api } from "./api";
 
+const withQuery = (path: string, q?: Record<string, unknown>) => {
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
+  return s ? `${path}?${s}` : path;
+};
+
 /** Wizard step 1 — Demographics. CNIC is strictly required for employees (unlike patients). */
 export interface EmployeeIn {
   full_name: string;
@@ -149,10 +155,11 @@ export interface Step1In {
 
 /** Job taxonomy & finance: department, designation, supervisor ("Reports To"), salary, contract. A fixed default shift with its weekly day off is set with POST /hr/employees/{id}/shift (staff on the duty roster have none). */
 export interface Step2In {
+  /** The department (GET /admin/departments) */
   department_id?: number | null;
   designation?: string | null;
   specialty?: string | null;
-  /** Builds the reporting hierarchy (leave approvals route here) */
+  /** Builds the reporting hierarchy (leave approvals route here) (GET /staff/lookup) */
   supervisor_id?: number | null;
   base_salary?: number | string | null;
   contract_type?: "Permanent" | "Contract" | "Visiting" | null;
@@ -187,6 +194,31 @@ export interface EmployeeDocumentUploadOut {
   content_type: "application/pdf" | "image/jpeg" | "image/png";
   size_bytes: number | null;
   uploaded_at: string;
+}
+
+export interface DepartmentOut {
+  department_id: number;
+  code: string;
+  name: string;
+  is_clinical: boolean;
+  is_active: boolean;
+  row_version: number;
+}
+
+/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration their stamp prints, nothing else. */
+export interface StaffLookupOut {
+  /** The id a form's staff field takes (contrast_doctor_id, employee_id, ...) */
+  employee_id: number;
+  emp_number: string;
+  full_name: string;
+  designation: string;
+  department_name: string | null;
+  /** The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none */
+  license_type: "PMDC" | "PNC" | "Other" | null;
+  /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
+  registration: string | null;
+  /** Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62) */
+  user_id: number | null;
 }
 
 /** Wizard step 1: create the profile (EMP number generated) — POST /api/v1/hr/employees (who may call: holders of hr.employee.create). */
@@ -227,4 +259,14 @@ export function submit(employee_id: number): Promise<EmployeeDetailOut> {
 /** Full profile incl. documents, qualifications, submit checklist — GET /api/v1/hr/employees/{employee_id} (who may call: holders of hr.employee.view). */
 export function getHrEmployees(employee_id: number): Promise<EmployeeDetailOut> {
   return api<EmployeeDetailOut>("GET", `/hr/employees/${employee_id}`, undefined);
+}
+
+/** Departments — GET /api/v1/admin/departments (who may call: any logged-in user). */
+export function departments(): Promise<DepartmentOut[]> {
+  return api<DepartmentOut[]>("GET", `/admin/departments`, undefined);
+}
+
+/** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
+export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
+  return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
 }

@@ -2,6 +2,12 @@
 // api(): the helper from get_guide("envelope-and-errors"). Types come from the declared request and response models.
 import { api } from "./api";
 
+const withQuery = (path: string, q?: Record<string, unknown>) => {
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
+  return s ? `${path}?${s}` : path;
+};
+
 export interface CodeRedIn {
   /** Known patient; omit for an unidentified trauma patient */
   patient_id?: number | null;
@@ -9,10 +15,11 @@ export interface CodeRedIn {
   temp_identifier?: string | null;
   gender?: "male" | "female" | "other" | "unknown";
   approx_age_years?: number | null;
-  /** Destination ward; or ward_type */
+  /** Destination ward; or ward_type (GET /beds/matrix?include_beds=false) */
   ward_id?: number | null;
   ward_type?: "ICU" | "CCU" | "Emergency" | "Surgical" | "General" | null;
   needs_ot?: boolean;
+  /** With needs_ot: the theatre to hold (GET /ot/theaters) */
   ot_id?: number | null;
   procedure_name?: string | null;
   eta_minutes?: number | null;
@@ -247,6 +254,68 @@ export interface MergedProfileOut {
   temp_identifier: string | null;
 }
 
+export interface MlcCaseTypeOut {
+  case_type_id: number;
+  code: string;
+  name: string;
+  description: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface TheaterOut {
+  ot_id: number;
+  code: string;
+  name: string;
+  theater_type: string;
+  current_state: "Available" | "EmergencyHold" | "InSurgery" | "CleaningPrep" | "OutOfService";
+  state_changed_at: string;
+  is_active: boolean;
+  row_version: number;
+}
+
+export interface BedMatrixOut {
+  wards: WardOccupancyOut[];
+  /** Ward name -> available beds */
+  summary: Record<string, number>;
+  /** Only with include_beds=true */
+  beds?: BedMatrixBedOut[] | null;
+}
+
+/** A ward's bed counts (view v_bed_matrix). */
+export interface WardOccupancyOut {
+  ward_id: number;
+  code: string;
+  name: string;
+  ward_type: "General" | "Private" | "SemiPrivate" | "ICU" | "CCU" | "NICU" | "Surgical" | "Pediatric" | "Maternity" | "Emergency" | "Isolation" | "Other";
+  gender_restriction: "male" | "female" | "any";
+  total_beds: number;
+  available: number;
+  reserved: number;
+  occupied: number;
+  /** Beds being cleaned or waiting for discharge clearance */
+  turnover: number;
+  out_of_service: number;
+}
+
+export interface BedMatrixBedOut {
+  bed_id: number;
+  ward_id: number;
+  label: string;
+  current_state: "Available" | "Reserved" | "Occupied" | "Dirty" | "Cleaning" | "OutOfService";
+  state_changed_at: string;
+  is_overflow_allowed: boolean;
+  admission_id: number | null;
+  /** Only with with_patients=true */
+  patient_name: string | null;
+  /** Only with with_patients=true */
+  mrn: string | null;
+  admission_status: "AdmissionPending" | "Waitlisted" | "BedReserved" | "CodeRedActive" | "Admitted" | "DischargeInProgress" | "Discharged" | "Cancelled" | null;
+  is_overflow: boolean | null;
+  /** The discharge stage the patient in this bed waits for */
+  discharge_blocked_on: string | null;
+}
+
 /** CODE RED / Emergency Admit (one click) — POST /api/v1/admissions/code-red (who may call: holders of ipd.admission.code_red). */
 export function codeRed(body: CodeRedIn): Promise<CodeRedOut> {
   return api<CodeRedOut>("POST", `/admissions/code-red`, body, { idempotent: true });
@@ -260,4 +329,19 @@ export function arrived(admission_id: number): Promise<AdmissionDetailOut> {
 /** Create a temporary trauma profile ('Unknown Male 1') — POST /api/v1/patients/trauma (who may call: holders of ipd.admission.code_red or patient.create). */
 export function trauma(body: TraumaCreate): Promise<PatientDetailOut> {
   return api<PatientDetailOut>("POST", `/patients/trauma`, body, { idempotent: true });
+}
+
+/** Medico-legal case types — GET /api/v1/mlc/case-types (who may call: holders of mlc.case.manage or mlc.register.view or mlc.setup.manage). */
+export function caseTypes(query?: { include_inactive?: boolean }): Promise<MlcCaseTypeOut[]> {
+  return api<MlcCaseTypeOut[]>("GET", withQuery(`/mlc/case-types`, query), undefined);
+}
+
+/** All theaters (incl. out-of-service) — GET /api/v1/ot/theaters (who may call: holders of ot.status.view or cssd.operate or facility.equipment.manage). */
+export function theaters(): Promise<TheaterOut[]> {
+  return api<TheaterOut[]>("GET", `/ot/theaters`, undefined);
+}
+
+/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record). */
+export function bedMatrix(query?: { include_beds?: boolean }): Promise<BedMatrixOut> {
+  return api<BedMatrixOut>("GET", withQuery(`/beds/matrix`, query), undefined);
 }

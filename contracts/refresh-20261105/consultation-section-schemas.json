@@ -1,0 +1,6032 @@
+{
+  "screen_id": "consultation",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "schemas": {
+    "AdmissionDetailOut": {
+      "properties": {
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "photo_document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Photo Document Id",
+          "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "requested_ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested Ward Id"
+        },
+        "requested_ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested Ward Name"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "bed_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Id"
+        },
+        "bed_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Label"
+        },
+        "primary_doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Id",
+          "description": "The treating doctor's employee id; null for a Code Red no doctor has taken over yet (decisions 57): show 'Doctor: waiting'"
+        },
+        "primary_doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Name"
+        },
+        "admission_type": {
+          "type": "string",
+          "enum": [
+            "Standard",
+            "Emergency",
+            "CodeRed",
+            "Overflow",
+            "Planned"
+          ],
+          "title": "Admission Type"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AdmissionPending",
+            "Waitlisted",
+            "BedReserved",
+            "CodeRedActive",
+            "Admitted",
+            "DischargeInProgress",
+            "Discharged",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "billing_category": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Panel"
+          ],
+          "title": "Billing Category"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "is_billing_confirmed": {
+          "type": "boolean",
+          "title": "Is Billing Confirmed"
+        },
+        "is_billing_deferred": {
+          "type": "boolean",
+          "title": "Is Billing Deferred"
+        },
+        "is_overflow": {
+          "type": "boolean",
+          "title": "Is Overflow"
+        },
+        "overflow_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Overflow Reason"
+        },
+        "eta_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Eta Minutes"
+        },
+        "source_ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Ticket Id"
+        },
+        "admission_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Reason",
+          "description": "Why the patient was admitted (MSDS 149); null only on a Code Red admission not yet recorded"
+        },
+        "provisional_diagnosis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provisional Diagnosis"
+        },
+        "initial_care_plan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Initial Care Plan"
+        },
+        "details_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who recorded the reason and diagnosis, and when (MSDS 147)"
+        },
+        "admission_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Notes",
+          "description": "For the admissions desk (not clinical)"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "reserved_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reserved At"
+        },
+        "admitted_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admitted At"
+        },
+        "discharge_initiated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharge Initiated At"
+        },
+        "discharged_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharged At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "discharge": {
+          "$ref": "#/components/schemas/DischargeStatusOut"
+        },
+        "invoice": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AdmissionInvoiceOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The running IPD bill"
+        }
+      },
+      "type": "object",
+      "required": [
+        "admission_id",
+        "admission_number",
+        "patient_id",
+        "photo_document_id",
+        "mrn",
+        "patient_name",
+        "gender",
+        "age_years",
+        "requested_ward_id",
+        "requested_ward_name",
+        "ward_id",
+        "ward_name",
+        "bed_id",
+        "bed_label",
+        "primary_doctor_id",
+        "primary_doctor_name",
+        "admission_type",
+        "status",
+        "billing_category",
+        "panel_id",
+        "is_billing_confirmed",
+        "is_billing_deferred",
+        "is_overflow",
+        "overflow_reason",
+        "eta_minutes",
+        "source_ticket_id",
+        "admission_reason",
+        "provisional_diagnosis",
+        "initial_care_plan",
+        "details_stamp",
+        "admission_notes",
+        "requested_at",
+        "reserved_at",
+        "admitted_at",
+        "discharge_initiated_at",
+        "discharged_at",
+        "row_version",
+        "discharge",
+        "invoice"
+      ],
+      "title": "AdmissionDetailOut"
+    },
+    "AdmissionIn": {
+      "properties": {
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id",
+          "description": "OPD visit the admission comes from"
+        },
+        "requested_ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested Ward Id",
+          "description": "The ward the doctor asks for (optional): an open ward of GET /beds/matrix; none leaves it to the admissions desk"
+        },
+        "primary_doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Id",
+          "description": "The treating doctor (default: the requesting doctor): an active doctor registered with the PMDC, GET /staff/lookup?license_type=PMDC"
+        },
+        "admission_type": {
+          "type": "string",
+          "enum": [
+            "Standard",
+            "Emergency",
+            "Planned"
+          ],
+          "title": "Admission Type",
+          "default": "Standard"
+        },
+        "admission_reason": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Admission Reason",
+          "description": "Why the patient is admitted (MSDS 149)",
+          "examples": [
+            "Fever and productive cough for 5 days, SpO2 91% on air"
+          ]
+        },
+        "provisional_diagnosis": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 2,
+          "title": "Provisional Diagnosis",
+          "description": "The working diagnosis (MSDS 149)",
+          "examples": [
+            "Community-acquired pneumonia"
+          ]
+        },
+        "initial_care_plan": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Initial Care Plan",
+          "description": "The first plan of care (optional; else the first inpatient note states it)"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes",
+          "description": "For the admissions desk (not clinical)"
+        },
+        "vitals_interval_minutes": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 1440,
+              "minimum": 15
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Vitals Interval Minutes"
+        }
+      },
+      "type": "object",
+      "required": [
+        "admission_reason",
+        "provisional_diagnosis"
+      ],
+      "title": "AdmissionIn"
+    },
+    "AdmissionInvoiceOut": {
+      "properties": {
+        "invoice_id": {
+          "type": "integer",
+          "title": "Invoice Id"
+        },
+        "invoice_no": {
+          "type": "string",
+          "title": "Invoice No"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Open",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "gross_total": {
+          "type": "number",
+          "title": "Gross Total"
+        },
+        "net_payable": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Payable"
+        },
+        "amount_paid": {
+          "type": "number",
+          "title": "Amount Paid"
+        }
+      },
+      "type": "object",
+      "required": [
+        "invoice_id",
+        "invoice_no",
+        "status",
+        "gross_total",
+        "net_payable",
+        "amount_paid"
+      ],
+      "title": "AdmissionInvoiceOut"
+    },
+    "AdmissionSummaryOut": {
+      "properties": {
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AdmissionPending",
+            "Waitlisted",
+            "BedReserved",
+            "CodeRedActive",
+            "Admitted",
+            "DischargeInProgress",
+            "Discharged",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "admission_type": {
+          "type": "string",
+          "enum": [
+            "Standard",
+            "Emergency",
+            "CodeRed",
+            "Overflow",
+            "Planned"
+          ],
+          "title": "Admission Type"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "bed_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Label"
+        },
+        "admitted_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admitted At"
+        },
+        "discharged_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharged At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "admission_id",
+        "admission_number",
+        "patient_id",
+        "status",
+        "admission_type",
+        "ward_name",
+        "bed_label",
+        "admitted_at",
+        "discharged_at"
+      ],
+      "title": "AdmissionSummaryOut"
+    },
+    "ApprovalOut": {
+      "properties": {
+        "request_id": {
+          "type": "integer",
+          "title": "Request Id"
+        },
+        "approval_type": {
+          "type": "string",
+          "enum": [
+            "Refund",
+            "VIPWaiverPreConsult",
+            "VIPWaiverPostConsult",
+            "PatientCredit",
+            "PharmacyCharityOverride",
+            "LargeCashDrop",
+            "WardIndent",
+            "APPayment",
+            "PolicyChange",
+            "PrivilegedAccess"
+          ],
+          "title": "Approval Type"
+        },
+        "required_permission": {
+          "type": "string",
+          "title": "Required Permission",
+          "description": "Who may decide: every holder of this permission sees the request"
+        },
+        "requester_id": {
+          "type": "integer",
+          "title": "Requester Id"
+        },
+        "requester_name": {
+          "type": "string",
+          "title": "Requester Name"
+        },
+        "subject_type": {
+          "type": "string",
+          "title": "Subject Type"
+        },
+        "subject_id": {
+          "type": "integer",
+          "title": "Subject Id"
+        },
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id"
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Amount"
+        },
+        "summary": {
+          "type": "string",
+          "title": "Summary"
+        },
+        "payload_jsonb": {
+          "additionalProperties": true,
+          "type": "object",
+          "title": "Payload Jsonb",
+          "description": "Type-specific details the approver needs to decide"
+        },
+        "is_elevated": {
+          "type": "boolean",
+          "title": "Is Elevated",
+          "description": "Needs the elevated approver (e.g. a large refund)"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Pending",
+            "Approved",
+            "Rejected",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "decided_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided By"
+        },
+        "decided_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided By Name"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided At"
+        },
+        "decision_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decision Note"
+        },
+        "solo_self_approved": {
+          "type": "boolean",
+          "title": "Solo Self Approved",
+          "description": "Decided by its own requester, the Owner of a solo practice (audit H-5); a risk item records it"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "can_decide": {
+          "type": "boolean",
+          "title": "Can Decide",
+          "description": "Whether you may approve or reject it now, by the rule the decision applies: show the buttons only when true (a type's own rule may still refuse, e.g. a large cash drop's decider is never the shift's cashier: DUAL_CONTROL_SAME_PERSON)"
+        },
+        "decide_blocked": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "decided",
+                "missing_permission",
+                "own_request"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decide Blocked",
+          "description": "Why you may not decide it, when can_decide is false; null when you may"
+        },
+        "self_decision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "forbidden",
+                "allowed_with_note"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Self Decision",
+          "description": "On your own pending request: forbidden, or allowed_with_note for the Owner of a solo practice (solo_practice_mode on, nobody else holds the permission; a note is required and a risk item records it); null on anyone else's request or a decided one"
+        }
+      },
+      "type": "object",
+      "required": [
+        "request_id",
+        "approval_type",
+        "required_permission",
+        "requester_id",
+        "requester_name",
+        "subject_type",
+        "subject_id",
+        "patient_id",
+        "amount",
+        "summary",
+        "payload_jsonb",
+        "is_elevated",
+        "status",
+        "decided_by",
+        "decided_by_name",
+        "decided_at",
+        "decision_note",
+        "solo_self_approved",
+        "requested_at",
+        "can_decide",
+        "decide_blocked",
+        "self_decision"
+      ],
+      "title": "ApprovalOut",
+      "description": "An approval request (service.APPROVAL_COLS)."
+    },
+    "ApprovalSummaryOut": {
+      "properties": {
+        "request_id": {
+          "type": "integer",
+          "title": "Request Id"
+        },
+        "approval_type": {
+          "type": "string",
+          "enum": [
+            "Refund",
+            "VIPWaiverPreConsult",
+            "VIPWaiverPostConsult",
+            "PatientCredit",
+            "PharmacyCharityOverride",
+            "LargeCashDrop",
+            "WardIndent",
+            "APPayment",
+            "PolicyChange",
+            "PrivilegedAccess"
+          ],
+          "title": "Approval Type"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Pending",
+            "Approved",
+            "Rejected",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "summary": {
+          "type": "string",
+          "title": "Summary"
+        }
+      },
+      "type": "object",
+      "required": [
+        "request_id",
+        "approval_type",
+        "status",
+        "requested_at",
+        "summary"
+      ],
+      "title": "ApprovalSummaryOut",
+      "description": "The pending approval that currently locks a subject (e.g. an OPD ticket)."
+    },
+    "AuthorStampOut": {
+      "properties": {
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation",
+          "description": "Designation and specialty, e.g. \"Medical Officer, General Medicine\""
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "Council registration, e.g. \"PMDC 12345-P\" or \"PNC 67890\""
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At",
+          "description": "When the entry was signed, reported or verified"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "The printed line: name, designation, registration, date and time"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "user_id",
+        "name",
+        "designation",
+        "registration",
+        "at",
+        "text"
+      ],
+      "title": "AuthorStampOut",
+      "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
+    },
+    "BedMatrixBedOut": {
+      "properties": {
+        "bed_id": {
+          "type": "integer",
+          "title": "Bed Id"
+        },
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "current_state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "Reserved",
+            "Occupied",
+            "Dirty",
+            "Cleaning",
+            "OutOfService"
+          ],
+          "title": "Current State"
+        },
+        "state_changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Changed At"
+        },
+        "is_overflow_allowed": {
+          "type": "boolean",
+          "title": "Is Overflow Allowed"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "patient_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Name",
+          "description": "Only with with_patients=true"
+        },
+        "mrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mrn",
+          "description": "Only with with_patients=true"
+        },
+        "admission_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "AdmissionPending",
+                "Waitlisted",
+                "BedReserved",
+                "CodeRedActive",
+                "Admitted",
+                "DischargeInProgress",
+                "Discharged",
+                "Cancelled"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Status"
+        },
+        "is_overflow": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Is Overflow"
+        },
+        "discharge_blocked_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharge Blocked On",
+          "description": "The discharge stage the patient in this bed waits for"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bed_id",
+        "ward_id",
+        "label",
+        "current_state",
+        "state_changed_at",
+        "is_overflow_allowed",
+        "admission_id",
+        "patient_name",
+        "mrn",
+        "admission_status",
+        "is_overflow",
+        "discharge_blocked_on"
+      ],
+      "title": "BedMatrixBedOut"
+    },
+    "BedMatrixOut": {
+      "properties": {
+        "wards": {
+          "items": {
+            "$ref": "#/components/schemas/WardOccupancyOut"
+          },
+          "type": "array",
+          "title": "Wards"
+        },
+        "summary": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "type": "object",
+          "title": "Summary",
+          "description": "Ward name -> available beds"
+        },
+        "beds": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/components/schemas/BedMatrixBedOut"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Beds",
+          "description": "Only with include_beds=true"
+        }
+      },
+      "type": "object",
+      "required": [
+        "wards",
+        "summary"
+      ],
+      "title": "BedMatrixOut"
+    },
+    "CashBackPromptOut": {
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Refund",
+            "WaiverRefund"
+          ],
+          "title": "Kind"
+        },
+        "id": {
+          "type": "integer",
+          "title": "Id",
+          "description": "The refund disbursement or waiver refund order to confirm"
+        },
+        "amount": {
+          "type": "number",
+          "title": "Amount"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message"
+        }
+      },
+      "type": "object",
+      "required": [
+        "kind",
+        "id",
+        "amount",
+        "message"
+      ],
+      "title": "CashBackPromptOut",
+      "description": "Money reception must hand back when the slip is scanned (an approved refund or waiver)."
+    },
+    "ClinicalNotePrintFieldsOut": {
+      "properties": {
+        "hospital": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "title": "Hospital",
+          "description": "name, address, phone, phc_number (empty until confirmed)"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "visit_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Visit Number",
+          "description": "The OPD ticket or admission number"
+        },
+        "encounter": {
+          "$ref": "#/components/schemas/EncounterDetailOut"
+        }
+      },
+      "type": "object",
+      "required": [
+        "hospital",
+        "title",
+        "visit_number",
+        "encounter"
+      ],
+      "title": "ClinicalNotePrintFieldsOut",
+      "description": "The fields of a printed clinical note (`GET /clinical-encounters/{id}/print-payload`)."
+    },
+    "ConsentBriefOut": {
+      "properties": {
+        "consent_id": {
+          "type": "integer",
+          "title": "Consent Id"
+        },
+        "consent_number": {
+          "type": "string",
+          "title": "Consent Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "form_code": {
+          "type": "string",
+          "title": "Form Code"
+        },
+        "form_title": {
+          "type": "string",
+          "title": "Form Title"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Procedure",
+            "Anaesthesia",
+            "Transfusion",
+            "HighRiskTreatment",
+            "AgainstMedicalAdvice",
+            "Other"
+          ],
+          "title": "Category"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Given",
+            "Refused",
+            "Withdrawn",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "English",
+            "Urdu",
+            "Punjabi",
+            "Saraiki",
+            "Pashto",
+            "Sindhi",
+            "Balochi"
+          ],
+          "title": "Language"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "booking_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Number"
+        },
+        "procedure_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Procedure Name"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Signed",
+                "EmergencyNote",
+                "VerbalRefusal"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mode"
+        },
+        "signer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Patient",
+                "DecisionMaker"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer"
+        },
+        "signer_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Name"
+        },
+        "signer_relationship": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Guardian",
+                "Attorney",
+                "Spouse",
+                "Child",
+                "Parent",
+                "Sibling",
+                "OtherRelative",
+                "CareProvider"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Relationship"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided At"
+        },
+        "obtained_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Obtained By Name"
+        },
+        "document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Id"
+        },
+        "scanned_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scanned At"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "consent_id",
+        "consent_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "form_code",
+        "form_title",
+        "category",
+        "status",
+        "language",
+        "admission_id",
+        "admission_number",
+        "booking_id",
+        "booking_number",
+        "procedure_name",
+        "mode",
+        "signer",
+        "signer_name",
+        "signer_relationship",
+        "decided_at",
+        "obtained_by_name",
+        "document_id",
+        "scanned_at",
+        "created_at"
+      ],
+      "title": "ConsentBriefOut"
+    },
+    "DischargeStageOut": {
+      "properties": {
+        "clearance_id": {
+          "type": "integer",
+          "title": "Clearance Id"
+        },
+        "stage": {
+          "type": "string",
+          "enum": [
+            "ClinicalDischarge",
+            "PharmacyClearance",
+            "NursingMARVerification",
+            "BillingSettlement",
+            "OpsCleaning"
+          ],
+          "title": "Stage"
+        },
+        "sequence_no": {
+          "type": "integer",
+          "title": "Sequence No"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Pending",
+            "Cleared",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "cleared_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cleared By"
+        },
+        "cleared_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cleared By Name"
+        },
+        "cleared_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cleared At"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        },
+        "physically_cleaned_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Physically Cleaned At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "clearance_id",
+        "stage",
+        "sequence_no",
+        "status",
+        "cleared_by",
+        "cleared_by_name",
+        "cleared_at",
+        "note",
+        "physically_cleaned_at"
+      ],
+      "title": "DischargeStageOut"
+    },
+    "DischargeStatusOut": {
+      "properties": {
+        "stages": {
+          "items": {
+            "$ref": "#/components/schemas/DischargeStageOut"
+          },
+          "type": "array",
+          "title": "Stages"
+        },
+        "blocked_on": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ClinicalDischarge",
+                "PharmacyClearance",
+                "NursingMARVerification",
+                "BillingSettlement",
+                "OpsCleaning"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blocked On",
+          "description": "The first pending stage (the one to clear next)"
+        },
+        "started": {
+          "type": "boolean",
+          "title": "Started"
+        },
+        "complete": {
+          "type": "boolean",
+          "title": "Complete"
+        }
+      },
+      "type": "object",
+      "required": [
+        "stages",
+        "blocked_on",
+        "started",
+        "complete"
+      ],
+      "title": "DischargeStatusOut"
+    },
+    "EncounterCorrectionIn": {
+      "properties": {
+        "field": {
+          "type": "string",
+          "enum": [
+            "chief_complaint",
+            "history",
+            "examination",
+            "diagnosis",
+            "clinical_note",
+            "plan",
+            "procedure",
+            "general"
+          ],
+          "title": "Field",
+          "default": "general"
+        },
+        "correction_text": {
+          "type": "string",
+          "maxLength": 10000,
+          "minLength": 1,
+          "title": "Correction Text"
+        },
+        "correction_reason": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Correction Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "correction_text",
+        "correction_reason"
+      ],
+      "title": "EncounterCorrectionIn"
+    },
+    "EncounterCorrectionOut": {
+      "properties": {
+        "correction_id": {
+          "type": "integer",
+          "title": "Correction Id"
+        },
+        "field": {
+          "type": "string",
+          "enum": [
+            "chief_complaint",
+            "history",
+            "examination",
+            "diagnosis",
+            "clinical_note",
+            "plan",
+            "procedure",
+            "general"
+          ],
+          "title": "Field"
+        },
+        "correction_text": {
+          "type": "string",
+          "title": "Correction Text"
+        },
+        "correction_reason": {
+          "type": "string",
+          "title": "Correction Reason"
+        },
+        "corrected_by": {
+          "type": "integer",
+          "title": "Corrected By"
+        },
+        "corrected_by_name": {
+          "type": "string",
+          "title": "Corrected By Name"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "author_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut"
+        }
+      },
+      "type": "object",
+      "required": [
+        "correction_id",
+        "field",
+        "correction_text",
+        "correction_reason",
+        "corrected_by",
+        "corrected_by_name",
+        "created_at",
+        "author_stamp"
+      ],
+      "title": "EncounterCorrectionOut"
+    },
+    "EncounterDetailOut": {
+      "properties": {
+        "encounter_id": {
+          "type": "integer",
+          "title": "Encounter Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "doctor_id": {
+          "type": "integer",
+          "title": "Doctor Id"
+        },
+        "doctor_name": {
+          "type": "string",
+          "title": "Doctor Name"
+        },
+        "encounter_type": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "ER",
+            "CodeRed",
+            "Procedure",
+            "FollowUp"
+          ],
+          "title": "Encounter Type"
+        },
+        "chief_complaint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Chief Complaint"
+        },
+        "history": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "History"
+        },
+        "examination": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examination"
+        },
+        "diagnosis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Diagnosis"
+        },
+        "icd_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Icd Codes"
+        },
+        "icd_terms": {
+          "items": {
+            "$ref": "#/components/schemas/IcdTermOut"
+          },
+          "type": "array",
+          "title": "Icd Terms",
+          "description": "The codes with their titles and WHO URIs"
+        },
+        "clinical_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clinical Note"
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan"
+        },
+        "vitals_jsonb": {
+          "additionalProperties": true,
+          "type": "object",
+          "title": "Vitals Jsonb",
+          "description": "Vital sign code -> value"
+        },
+        "examination_consent": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "VerbalObtained",
+                "Declined",
+                "NotExamined"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examination Consent",
+          "description": "The patient's permission before the examination (VerbalObtained = 'VCO'); null: not recorded"
+        },
+        "examination_consent_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examination Consent At"
+        },
+        "examination_consent_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who recorded it"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Final",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "is_post_discharge": {
+          "type": "boolean",
+          "title": "Is Post Discharge"
+        },
+        "is_post_death": {
+          "type": "boolean",
+          "title": "Is Post Death"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "finalized_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finalized At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "author_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who finalized the note (null while it is a draft)"
+        },
+        "procedure": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/ProcedureDetailsOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A 'Procedure' note's procedure; null for the other types"
+        },
+        "corrections": {
+          "items": {
+            "$ref": "#/components/schemas/EncounterCorrectionOut"
+          },
+          "type": "array",
+          "title": "Corrections"
+        }
+      },
+      "type": "object",
+      "required": [
+        "encounter_id",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "ticket_id",
+        "admission_id",
+        "doctor_id",
+        "doctor_name",
+        "encounter_type",
+        "chief_complaint",
+        "history",
+        "examination",
+        "diagnosis",
+        "icd_codes",
+        "icd_terms",
+        "clinical_note",
+        "plan",
+        "vitals_jsonb",
+        "examination_consent",
+        "examination_consent_at",
+        "examination_consent_stamp",
+        "status",
+        "is_post_discharge",
+        "is_post_death",
+        "created_at",
+        "finalized_at",
+        "row_version",
+        "author_stamp",
+        "procedure",
+        "corrections"
+      ],
+      "title": "EncounterDetailOut"
+    },
+    "EncounterIn": {
+      "properties": {
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id",
+          "description": "Optional when ticket_id/admission_id is given"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id",
+          "description": "OPD visit (required for OPD/FollowUp)"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id",
+          "description": "Inpatient stay (required for IPD/CodeRed)"
+        },
+        "encounter_type": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "ER",
+            "CodeRed",
+            "Procedure",
+            "FollowUp"
+          ],
+          "title": "Encounter Type",
+          "default": "OPD"
+        },
+        "chief_complaint": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Chief Complaint"
+        },
+        "history": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 10000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "History"
+        },
+        "examination": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 10000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examination"
+        },
+        "diagnosis": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Diagnosis"
+        },
+        "icd_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 20,
+          "title": "Icd Codes",
+          "description": "ICD-11 or ICD-10 codes from the ICD picker (GET /icd/codes); each must be in the active code list"
+        },
+        "clinical_note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 20000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clinical Note"
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 10000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan"
+        },
+        "vitals": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Vitals",
+          "description": "e.g. {\"bp\":\"120/80\",\"hr\":72,\"temp_c\":37.0,\"spo2\":98}"
+        },
+        "examination_consent": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "VerbalObtained",
+                "Declined",
+                "NotExamined"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examination Consent",
+          "description": "The patient's permission before the physical examination, asked on purpose and never pre-filled: VerbalObtained (printed 'VCO'), Declined, NotExamined (Declined and NotExamined leave the examination empty). Required to finalize an OPD or follow-up note under the Clinic profile (EXAMINATION_CONSENT_REQUIRED)"
+        },
+        "procedure": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/ProcedureIn"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "encounter_type Procedure only: the procedure done (MSDS IMS 150)"
+        },
+        "finalize": {
+          "type": "boolean",
+          "title": "Finalize",
+          "description": "Commit immediately (Submit Consultation)",
+          "default": false
+        }
+      },
+      "type": "object",
+      "title": "EncounterIn"
+    },
+    "EncounterOut": {
+      "properties": {
+        "encounter_id": {
+          "type": "integer",
+          "title": "Encounter Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "doctor_id": {
+          "type": "integer",
+          "title": "Doctor Id"
+        },
+        "doctor_name": {
+          "type": "string",
+          "title": "Doctor Name"
+        },
+        "encounter_type": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "ER",
+            "CodeRed",
+            "Procedure",
+            "FollowUp"
+          ],
+          "title": "Encounter Type"
+        },
+        "chief_complaint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Chief Complaint"
+        },
+        "history": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "History"
+        },
+        "examination": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examination"
+        },
+        "diagnosis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Diagnosis"
+        },
+        "icd_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Icd Codes"
+        },
+        "icd_terms": {
+          "items": {
+            "$ref": "#/components/schemas/IcdTermOut"
+          },
+          "type": "array",
+          "title": "Icd Terms",
+          "description": "The codes with their titles and WHO URIs"
+        },
+        "clinical_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clinical Note"
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan"
+        },
+        "vitals_jsonb": {
+          "additionalProperties": true,
+          "type": "object",
+          "title": "Vitals Jsonb",
+          "description": "Vital sign code -> value"
+        },
+        "examination_consent": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "VerbalObtained",
+                "Declined",
+                "NotExamined"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examination Consent",
+          "description": "The patient's permission before the examination (VerbalObtained = 'VCO'); null: not recorded"
+        },
+        "examination_consent_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examination Consent At"
+        },
+        "examination_consent_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who recorded it"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Final",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "is_post_discharge": {
+          "type": "boolean",
+          "title": "Is Post Discharge"
+        },
+        "is_post_death": {
+          "type": "boolean",
+          "title": "Is Post Death"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "finalized_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finalized At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "author_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who finalized the note (null while it is a draft)"
+        },
+        "procedure": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/ProcedureDetailsOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A 'Procedure' note's procedure; null for the other types"
+        }
+      },
+      "type": "object",
+      "required": [
+        "encounter_id",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "ticket_id",
+        "admission_id",
+        "doctor_id",
+        "doctor_name",
+        "encounter_type",
+        "chief_complaint",
+        "history",
+        "examination",
+        "diagnosis",
+        "icd_codes",
+        "icd_terms",
+        "clinical_note",
+        "plan",
+        "vitals_jsonb",
+        "examination_consent",
+        "examination_consent_at",
+        "examination_consent_stamp",
+        "status",
+        "is_post_discharge",
+        "is_post_death",
+        "created_at",
+        "finalized_at",
+        "row_version",
+        "author_stamp",
+        "procedure"
+      ],
+      "title": "EncounterOut",
+      "description": "A clinical encounter (service.ENC_COLS). A finalized note is read-only; changes are corrections."
+    },
+    "EncounterPatch": {
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Version"
+        },
+        "chief_complaint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Chief Complaint"
+        },
+        "history": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "History"
+        },
+        "examination": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examination"
+        },
+        "diagnosis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Diagnosis"
+        },
+        "icd_codes": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Icd Codes"
+        },
+        "clinical_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clinical Note"
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan"
+        },
+        "vitals": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Vitals"
+        },
+        "examination_consent": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "VerbalObtained",
+                "Declined",
+                "NotExamined"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examination Consent",
+          "description": "The patient's permission before the physical examination, asked on purpose and never pre-filled: VerbalObtained (printed 'VCO'), Declined, NotExamined (Declined and NotExamined leave the examination empty). Required to finalize an OPD or follow-up note under the Clinic profile (EXAMINATION_CONSENT_REQUIRED)"
+        },
+        "procedure": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/ProcedurePatch"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A 'Procedure' note's procedure: the fields sent change"
+        }
+      },
+      "type": "object",
+      "title": "EncounterPatch"
+    },
+    "EncounterSummaryOut": {
+      "properties": {
+        "encounter_id": {
+          "type": "integer",
+          "title": "Encounter Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "encounter_type": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "ER",
+            "CodeRed",
+            "Procedure",
+            "FollowUp"
+          ],
+          "title": "Encounter Type"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Final",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "chief_complaint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Chief Complaint"
+        },
+        "diagnosis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Diagnosis"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "finalized_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finalized At"
+        },
+        "doctor_name": {
+          "type": "string",
+          "title": "Doctor Name"
+        },
+        "corrections": {
+          "type": "integer",
+          "title": "Corrections",
+          "description": "Number of corrections to the finalized note"
+        }
+      },
+      "type": "object",
+      "required": [
+        "encounter_id",
+        "patient_id",
+        "encounter_type",
+        "status",
+        "chief_complaint",
+        "diagnosis",
+        "created_at",
+        "finalized_at",
+        "doctor_name",
+        "corrections"
+      ],
+      "title": "EncounterSummaryOut"
+    },
+    "Envelope_AdmissionDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/AdmissionDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[AdmissionDetailOut]"
+    },
+    "Envelope_BedMatrixOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/BedMatrixOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[BedMatrixOut]"
+    },
+    "Envelope_EncounterDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/EncounterDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[EncounterDetailOut]"
+    },
+    "Envelope_IcdBrowseOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/IcdBrowseOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[IcdBrowseOut]"
+    },
+    "Envelope_IcdDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/IcdDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[IcdDetailOut]"
+    },
+    "Envelope_IcdReleasesOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/IcdReleasesOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[IcdReleasesOut]"
+    },
+    "Envelope_IcdSearchOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/IcdSearchOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[IcdSearchOut]"
+    },
+    "Envelope_MasterSummaryOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/MasterSummaryOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[MasterSummaryOut]"
+    },
+    "Envelope_OpdTicketDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/OpdTicketDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[OpdTicketDetailOut]"
+    },
+    "Envelope_PrintOut_ClinicalNotePrintFieldsOut__": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PrintOut_ClinicalNotePrintFieldsOut_"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PrintOut[ClinicalNotePrintFieldsOut]]"
+    },
+    "Envelope_WaiverRequestOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/WaiverRequestOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[WaiverRequestOut]"
+    },
+    "Envelope_list_ConsentBriefOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/ConsentBriefOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[ConsentBriefOut]]"
+    },
+    "Envelope_list_EncounterOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/EncounterOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[EncounterOut]]"
+    },
+    "Envelope_list_OpdDoctorOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/OpdDoctorOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[OpdDoctorOut]]"
+    },
+    "Envelope_list_PatientDocumentOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PatientDocumentOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PatientDocumentOut]]"
+    },
+    "Envelope_list_StaffLookupOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/StaffLookupOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[StaffLookupOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "IcdAncestorOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "chapter",
+            "block",
+            "category"
+          ],
+          "title": "Kind"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uri"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "kind",
+        "title",
+        "uri"
+      ],
+      "title": "IcdAncestorOut"
+    },
+    "IcdBrowseOut": {
+      "properties": {
+        "code_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Code System"
+        },
+        "release_label": {
+          "type": "string",
+          "title": "Release Label"
+        },
+        "parent": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/IcdEntryOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The node whose children these are (null: the chapters)"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/components/schemas/IcdEntryOut"
+          },
+          "type": "array",
+          "title": "Items"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code_system",
+        "release_label",
+        "parent",
+        "items"
+      ],
+      "title": "IcdBrowseOut"
+    },
+    "IcdDetailOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code",
+          "description": "A category's code; a block's id; a chapter's number"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "chapter",
+            "block",
+            "category"
+          ],
+          "title": "Kind"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uri"
+        },
+        "chapter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Chapter"
+        },
+        "parent_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Code"
+        },
+        "depth": {
+          "type": "integer",
+          "title": "Depth"
+        },
+        "is_leaf": {
+          "type": "boolean",
+          "title": "Is Leaf"
+        },
+        "is_residual": {
+          "type": "boolean",
+          "title": "Is Residual",
+          "description": "An \"other specified\" or \"unspecified\" category: prefer a specific one"
+        },
+        "code_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Code System"
+        },
+        "release_label": {
+          "type": "string",
+          "title": "Release Label"
+        },
+        "ancestors": {
+          "items": {
+            "$ref": "#/components/schemas/IcdAncestorOut"
+          },
+          "type": "array",
+          "title": "Ancestors",
+          "description": "Chapter first, down to the parent"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/components/schemas/IcdEntryOut"
+          },
+          "type": "array",
+          "title": "Children"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "kind",
+        "title",
+        "uri",
+        "chapter",
+        "parent_code",
+        "depth",
+        "is_leaf",
+        "is_residual",
+        "code_system",
+        "release_label",
+        "ancestors",
+        "children"
+      ],
+      "title": "IcdDetailOut"
+    },
+    "IcdEntryOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code",
+          "description": "A category's code; a block's id; a chapter's number"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "chapter",
+            "block",
+            "category"
+          ],
+          "title": "Kind"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uri"
+        },
+        "chapter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Chapter"
+        },
+        "parent_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Code"
+        },
+        "depth": {
+          "type": "integer",
+          "title": "Depth"
+        },
+        "is_leaf": {
+          "type": "boolean",
+          "title": "Is Leaf"
+        },
+        "is_residual": {
+          "type": "boolean",
+          "title": "Is Residual",
+          "description": "An \"other specified\" or \"unspecified\" category: prefer a specific one"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "kind",
+        "title",
+        "uri",
+        "chapter",
+        "parent_code",
+        "depth",
+        "is_leaf",
+        "is_residual"
+      ],
+      "title": "IcdEntryOut"
+    },
+    "IcdReleaseOut": {
+      "properties": {
+        "release_id": {
+          "type": "integer",
+          "title": "Release Id"
+        },
+        "code_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Code System"
+        },
+        "release_label": {
+          "type": "string",
+          "title": "Release Label",
+          "description": "e.g. \"2026-01\" (ICD-11) or \"2019\" (ICD-10)"
+        },
+        "language": {
+          "type": "string",
+          "title": "Language"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "Bundled",
+            "Imported"
+          ],
+          "title": "Source",
+          "description": "Bundled: shipped with the product (ICD-11); Imported: loaded by the hospital (its licensed ICD-10, or a newer ICD-11)"
+        },
+        "source_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source File"
+        },
+        "source_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Sha256"
+        },
+        "licence_note": {
+          "type": "string",
+          "title": "Licence Note",
+          "description": "The licence the list is used under; show it where the list is used"
+        },
+        "code_count": {
+          "type": "integer",
+          "title": "Code Count",
+          "description": "Codable categories"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "description": "The list the picker searches and new codes are checked against"
+        },
+        "loaded_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Loaded By"
+        },
+        "loaded_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Loaded By Name"
+        },
+        "loaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Loaded At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "release_id",
+        "code_system",
+        "release_label",
+        "language",
+        "source",
+        "source_file",
+        "source_sha256",
+        "licence_note",
+        "code_count",
+        "is_active",
+        "loaded_by",
+        "loaded_by_name",
+        "loaded_at",
+        "row_version"
+      ],
+      "title": "IcdReleaseOut"
+    },
+    "IcdReleasesOut": {
+      "properties": {
+        "coding_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Coding System",
+          "description": "The classification doctors code in (setting icd_coding_system)"
+        },
+        "releases": {
+          "items": {
+            "$ref": "#/components/schemas/IcdReleaseOut"
+          },
+          "type": "array",
+          "title": "Releases"
+        },
+        "icd11_citation": {
+          "type": "string",
+          "title": "Icd11 Citation",
+          "description": "The attribution the ICD-11 licence requires on screens and reports that use it"
+        }
+      },
+      "type": "object",
+      "required": [
+        "coding_system",
+        "releases",
+        "icd11_citation"
+      ],
+      "title": "IcdReleasesOut"
+    },
+    "IcdSearchItemOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code",
+          "description": "A category's code; a block's id; a chapter's number"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "chapter",
+            "block",
+            "category"
+          ],
+          "title": "Kind"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uri"
+        },
+        "chapter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Chapter"
+        },
+        "parent_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Code"
+        },
+        "depth": {
+          "type": "integer",
+          "title": "Depth"
+        },
+        "is_leaf": {
+          "type": "boolean",
+          "title": "Is Leaf"
+        },
+        "is_residual": {
+          "type": "boolean",
+          "title": "Is Residual",
+          "description": "An \"other specified\" or \"unspecified\" category: prefer a specific one"
+        },
+        "parent_title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Title",
+          "description": "The block or category above, to tell similar titles apart"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "kind",
+        "title",
+        "uri",
+        "chapter",
+        "parent_code",
+        "depth",
+        "is_leaf",
+        "is_residual",
+        "parent_title"
+      ],
+      "title": "IcdSearchItemOut"
+    },
+    "IcdSearchOut": {
+      "properties": {
+        "code_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Code System"
+        },
+        "release_label": {
+          "type": "string",
+          "title": "Release Label"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/components/schemas/IcdSearchItemOut"
+          },
+          "type": "array",
+          "title": "Items"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code_system",
+        "release_label",
+        "items"
+      ],
+      "title": "IcdSearchOut"
+    },
+    "IcdTermOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "System"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uri",
+          "description": "ICD-11: the WHO URI of the entity (null for ICD-10)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "system",
+        "title",
+        "uri"
+      ],
+      "title": "IcdTermOut",
+      "description": "A code as stored in a record, with its title and WHO URI from the code list (the ICD-11 licence asks for code,\ntitle and URI together wherever codes are sent). `title` is null only for a code no list has."
+    },
+    "InvoiceDetailOut": {
+      "properties": {
+        "invoice_id": {
+          "type": "integer",
+          "title": "Invoice Id"
+        },
+        "invoice_no": {
+          "type": "string",
+          "title": "Invoice No"
+        },
+        "invoice_type": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "Pharmacy",
+            "Lab",
+            "Imaging",
+            "OT",
+            "OTC",
+            "Other"
+          ],
+          "title": "Invoice Type"
+        },
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "walkin_customer_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Walkin Customer Name"
+        },
+        "walkin_customer_mobile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Walkin Customer Mobile"
+        },
+        "gross_total": {
+          "type": "number",
+          "title": "Gross Total"
+        },
+        "discount_total": {
+          "type": "number",
+          "title": "Discount Total"
+        },
+        "net_payable": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Payable",
+          "description": "Null while the invoice is a draft"
+        },
+        "amount_paid": {
+          "type": "number",
+          "title": "Amount Paid"
+        },
+        "amount_refunded": {
+          "type": "number",
+          "title": "Amount Refunded"
+        },
+        "waiver_amount": {
+          "type": "number",
+          "title": "Waiver Amount"
+        },
+        "waiver_dispensed_amount": {
+          "type": "number",
+          "title": "Waiver Dispensed Amount"
+        },
+        "credit_amount": {
+          "type": "number",
+          "title": "Credit Amount"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Open",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "is_locked": {
+          "type": "boolean",
+          "title": "Is Locked",
+          "description": "Locked while an approval (waiver, credit, refund) is pending"
+        },
+        "locked_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Locked Reason"
+        },
+        "finalized_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finalized At"
+        },
+        "business_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Business Date"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "lines": {
+          "items": {
+            "$ref": "#/components/schemas/InvoiceLineOut"
+          },
+          "type": "array",
+          "title": "Lines"
+        },
+        "balance_due": {
+          "type": "number",
+          "title": "Balance Due"
+        }
+      },
+      "type": "object",
+      "required": [
+        "invoice_id",
+        "invoice_no",
+        "invoice_type",
+        "patient_id",
+        "admission_id",
+        "ticket_id",
+        "panel_id",
+        "employee_id",
+        "walkin_customer_name",
+        "walkin_customer_mobile",
+        "gross_total",
+        "discount_total",
+        "net_payable",
+        "amount_paid",
+        "amount_refunded",
+        "waiver_amount",
+        "waiver_dispensed_amount",
+        "credit_amount",
+        "status",
+        "is_locked",
+        "locked_reason",
+        "finalized_at",
+        "business_date",
+        "created_at",
+        "row_version",
+        "lines",
+        "balance_due"
+      ],
+      "title": "InvoiceDetailOut",
+      "description": "An invoice with its lines and what is still due (billing.invoice_with_lines)."
+    },
+    "InvoiceLineOut": {
+      "properties": {
+        "invoice_item_id": {
+          "type": "integer",
+          "title": "Invoice Item Id"
+        },
+        "line_type": {
+          "type": "string",
+          "enum": [
+            "Consultation",
+            "Service",
+            "Drug",
+            "LabTest",
+            "Imaging",
+            "OTProcedure",
+            "OTConsumable",
+            "RoomCharge",
+            "Reversal"
+          ],
+          "title": "Line Type"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "qty": {
+          "type": "number",
+          "title": "Qty"
+        },
+        "unit_price": {
+          "type": "number",
+          "title": "Unit Price"
+        },
+        "line_total": {
+          "type": "number",
+          "title": "Line Total"
+        },
+        "bed_day": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Day"
+        },
+        "reverses_item_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reverses Item Id",
+          "description": "Set on a reversal line: the line it cancels"
+        },
+        "reversal_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reversal Reason"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "invoice_item_id",
+        "line_type",
+        "description",
+        "qty",
+        "unit_price",
+        "line_total",
+        "bed_day",
+        "reverses_item_id",
+        "reversal_reason",
+        "created_at"
+      ],
+      "title": "InvoiceLineOut"
+    },
+    "LabResultSummaryOut": {
+      "properties": {
+        "result_id": {
+          "type": "integer",
+          "title": "Result Id"
+        },
+        "test_name": {
+          "type": "string",
+          "title": "Test Name"
+        },
+        "metrics_jsonb": {
+          "additionalProperties": true,
+          "type": "object",
+          "title": "Metrics Jsonb",
+          "description": "Metric code -> value, as entered"
+        },
+        "flags_jsonb": {
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "N",
+              "L",
+              "H",
+              "CL",
+              "CH",
+              "C"
+            ]
+          },
+          "type": "object",
+          "title": "Flags Jsonb",
+          "description": "Numeric metric key -> its flag (text metrics have none)"
+        },
+        "has_critical_value": {
+          "type": "boolean",
+          "title": "Has Critical Value"
+        },
+        "published_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Published At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "result_id",
+        "test_name",
+        "metrics_jsonb",
+        "flags_jsonb",
+        "has_critical_value",
+        "published_at"
+      ],
+      "title": "LabResultSummaryOut"
+    },
+    "MasterSummaryOut": {
+      "properties": {
+        "master_patient_id": {
+          "type": "integer",
+          "title": "Master Patient Id"
+        },
+        "patient_ids": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array",
+          "title": "Patient Ids"
+        },
+        "encounters": {
+          "items": {
+            "$ref": "#/components/schemas/EncounterSummaryOut"
+          },
+          "type": "array",
+          "title": "Encounters"
+        },
+        "admissions": {
+          "items": {
+            "$ref": "#/components/schemas/AdmissionSummaryOut"
+          },
+          "type": "array",
+          "title": "Admissions"
+        },
+        "prescriptions": {
+          "items": {
+            "$ref": "#/components/schemas/PrescriptionSummaryOut"
+          },
+          "type": "array",
+          "title": "Prescriptions"
+        },
+        "lab_results": {
+          "items": {
+            "$ref": "#/components/schemas/LabResultSummaryOut"
+          },
+          "type": "array",
+          "title": "Lab Results"
+        }
+      },
+      "type": "object",
+      "required": [
+        "master_patient_id",
+        "patient_ids",
+        "encounters",
+        "admissions",
+        "prescriptions",
+        "lab_results"
+      ],
+      "title": "MasterSummaryOut",
+      "description": "Clinical history across the patient's merge chain (trauma merge, workflow section 2.4)."
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "OpdDoctorOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "registration": {
+          "type": "string",
+          "title": "Registration",
+          "description": "The council registration as the author stamp prints it, e.g. 'PMDC 12345-P'"
+        },
+        "waiting": {
+          "type": "integer",
+          "title": "Waiting",
+          "description": "Patients waiting for this doctor now, their department's unassigned ones included"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "full_name",
+        "designation",
+        "department_id",
+        "department_name",
+        "registration",
+        "waiting"
+      ],
+      "title": "OpdDoctorOut",
+      "description": "A doctor who sees an OPD queue: a re-route's target, a slip's doctor (workflow §1.4)."
+    },
+    "OpdQueueEntryOut": {
+      "properties": {
+        "queue_id": {
+          "type": "integer",
+          "title": "Queue Id"
+        },
+        "queue_group": {
+          "type": "string",
+          "title": "Queue Group",
+          "description": "doctor:<id> or department:<id>"
+        },
+        "token_no": {
+          "type": "integer",
+          "title": "Token No"
+        },
+        "token_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Token Date"
+        },
+        "priority": {
+          "type": "integer",
+          "title": "Priority"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Active",
+            "Suspended",
+            "Deferred",
+            "Rerouted",
+            "Completed",
+            "Cancelled",
+            "Expired"
+          ],
+          "title": "Status"
+        },
+        "queued_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Queued At"
+        },
+        "called_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Called At"
+        },
+        "rerouted_from_queue_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rerouted From Queue Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "queue_id",
+        "queue_group",
+        "token_no",
+        "token_date",
+        "priority",
+        "status",
+        "queued_at",
+        "called_at",
+        "rerouted_from_queue_id"
+      ],
+      "title": "OpdQueueEntryOut",
+      "description": "The ticket's latest queue entry."
+    },
+    "OpdTicketDetailOut": {
+      "properties": {
+        "ticket_id": {
+          "type": "integer",
+          "title": "Ticket Id"
+        },
+        "ticket_number": {
+          "type": "string",
+          "title": "Ticket Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Id",
+          "description": "Null for a department-level ticket (no doctor chosen)"
+        },
+        "doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Name"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Service Id"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "WalkIn",
+            "Emergency",
+            "CodeRed",
+            "Referred",
+            "ReturnVisit"
+          ],
+          "title": "Source"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Issued",
+            "Waiting",
+            "InConsultation",
+            "Examined",
+            "Completed",
+            "Deferred",
+            "Expired",
+            "Forfeited",
+            "Refunded",
+            "Void",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "payment_status": {
+          "type": "string",
+          "enum": [
+            "Unpaid",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "PanelBilled"
+          ],
+          "title": "Payment Status"
+        },
+        "approval_lock": {
+          "type": "string",
+          "enum": [
+            "None",
+            "RefundPending",
+            "WaiverPending",
+            "CreditPending"
+          ],
+          "title": "Approval Lock"
+        },
+        "gross_amount": {
+          "type": "number",
+          "title": "Gross Amount"
+        },
+        "discount_amount": {
+          "type": "number",
+          "title": "Discount Amount"
+        },
+        "net_payable": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Payable"
+        },
+        "discount_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discount Reason"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Issued At"
+        },
+        "paid_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Paid At"
+        },
+        "valid_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Valid Until",
+          "description": "The slip is valid for re-entry until then (set when settled)"
+        },
+        "called_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Called At"
+        },
+        "examined_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examined At"
+        },
+        "completed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed At"
+        },
+        "deferred_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deferred At"
+        },
+        "reactivated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reactivated At"
+        },
+        "expired_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expired At"
+        },
+        "voided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Voided At"
+        },
+        "void_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Void Reason"
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled At"
+        },
+        "is_clinical_locked": {
+          "type": "boolean",
+          "title": "Is Clinical Locked",
+          "description": "Clinical notes are frozen (e.g. after an approved refund)"
+        },
+        "clinical_lock_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clinical Lock Reason"
+        },
+        "is_emergency_bypass": {
+          "type": "boolean",
+          "title": "Is Emergency Bypass"
+        },
+        "is_ar_block_overridden": {
+          "type": "boolean",
+          "title": "Is Ar Block Overridden"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "queue": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/OpdQueueEntryOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "invoice": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/InvoiceDetailOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending_approval": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/ApprovalSummaryOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cash_back_prompts": {
+          "items": {
+            "$ref": "#/components/schemas/CashBackPromptOut"
+          },
+          "type": "array",
+          "title": "Cash Back Prompts"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ticket_id",
+        "ticket_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "gender",
+        "age_years",
+        "dob",
+        "doctor_id",
+        "doctor_name",
+        "department_id",
+        "department_name",
+        "service_id",
+        "source",
+        "status",
+        "payment_status",
+        "approval_lock",
+        "gross_amount",
+        "discount_amount",
+        "net_payable",
+        "discount_reason",
+        "issued_at",
+        "paid_at",
+        "valid_until",
+        "called_at",
+        "examined_at",
+        "completed_at",
+        "deferred_at",
+        "reactivated_at",
+        "expired_at",
+        "voided_at",
+        "void_reason",
+        "cancelled_at",
+        "is_clinical_locked",
+        "clinical_lock_reason",
+        "is_emergency_bypass",
+        "is_ar_block_overridden",
+        "row_version",
+        "queue",
+        "invoice",
+        "pending_approval",
+        "cash_back_prompts"
+      ],
+      "title": "OpdTicketDetailOut",
+      "description": "A ticket with its queue entry, invoice, pending approval and cash-back prompts (service.get_ticket)."
+    },
+    "PatientDocumentOut": {
+      "properties": {
+        "document_id": {
+          "type": "integer",
+          "title": "Document Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "application/pdf",
+            "image/jpeg",
+            "image/png"
+          ],
+          "title": "Content Type"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "title": "Size Bytes"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought by the patient from another hospital, laboratory or clinic: show it labelled as an outside document, never as a result of this hospital"
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "The hospital, laboratory or clinic that issued an outside document"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document (the test, the report, the visit)"
+        },
+        "is_verified": {
+          "type": "boolean",
+          "title": "Is Verified"
+        },
+        "uploaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Uploaded At"
+        },
+        "uploaded_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uploaded By"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_id",
+        "patient_id",
+        "doc_type",
+        "title",
+        "content_type",
+        "size_bytes",
+        "is_outside",
+        "source_facility",
+        "document_date",
+        "is_verified",
+        "uploaded_at",
+        "uploaded_by"
+      ],
+      "title": "PatientDocumentOut"
+    },
+    "PostConsultWaiverIn": {
+      "properties": {
+        "reason": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Reason"
+        },
+        "encounter_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Encounter Id",
+          "description": "Defaults to the latest finalized note of this visit"
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "title": "PostConsultWaiverIn"
+    },
+    "PrescriptionSummaryOut": {
+      "properties": {
+        "prescription_id": {
+          "type": "integer",
+          "title": "Prescription Id"
+        },
+        "prescription_number": {
+          "type": "string",
+          "title": "Prescription Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "CodeRed",
+            "ER"
+          ],
+          "title": "Source"
+        },
+        "destination": {
+          "type": "string",
+          "enum": [
+            "HospitalPharmacy",
+            "ExternalMarket"
+          ],
+          "title": "Destination"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Active",
+            "PartiallyDispensed",
+            "FullyDispensed",
+            "Cancelled",
+            "Replaced",
+            "ExternalPrinted"
+          ],
+          "title": "Status"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "prescriber_name": {
+          "type": "string",
+          "title": "Prescriber Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "prescription_id",
+        "prescription_number",
+        "patient_id",
+        "source",
+        "destination",
+        "status",
+        "created_at",
+        "prescriber_name"
+      ],
+      "title": "PrescriptionSummaryOut"
+    },
+    "PrintOut_ClinicalNotePrintFieldsOut_": {
+      "properties": {
+        "document_type": {
+          "type": "string",
+          "enum": [
+            "autopsy_order",
+            "bed_labels",
+            "blood_component_label",
+            "blood_donation_labels",
+            "clinical_note",
+            "complaint_letter",
+            "complaints_notice",
+            "consent_form",
+            "cost_estimate",
+            "cssd_labels",
+            "death_certificate",
+            "discharge_summary",
+            "dispensing_label",
+            "dose_label",
+            "id_card",
+            "imaging_report",
+            "lab_label",
+            "lab_report",
+            "mlc_intimation",
+            "opd_slip",
+            "pharmacy_receipt",
+            "prescription",
+            "referral_slip",
+            "send_out_manifest",
+            "surgical_record",
+            "triage_algorithm",
+            "wristband"
+          ],
+          "title": "Document Type"
+        },
+        "printer_role": {
+          "type": "string",
+          "enum": [
+            "receipt",
+            "label",
+            "document",
+            "card"
+          ],
+          "title": "Printer Role",
+          "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+        },
+        "paper_width_mm": {
+          "type": "integer",
+          "title": "Paper Width Mm"
+        },
+        "fields": {
+          "$ref": "#/components/schemas/ClinicalNotePrintFieldsOut",
+          "description": "The document's data, for frontends that render their own layout"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Text",
+          "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+        },
+        "barcode_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode Svg"
+        },
+        "qr_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Qr Svg"
+        },
+        "pdf_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pdf Url"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_type",
+        "printer_role",
+        "paper_width_mm",
+        "fields",
+        "text",
+        "barcode_svg",
+        "qr_svg",
+        "pdf_url"
+      ],
+      "title": "PrintOut[ClinicalNotePrintFieldsOut]"
+    },
+    "ProcedureDetailsOut": {
+      "properties": {
+        "procedure_name": {
+          "type": "string",
+          "title": "Procedure Name"
+        },
+        "site": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Site"
+        },
+        "indication": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Indication"
+        },
+        "anaesthesia": {
+          "type": "string",
+          "enum": [
+            "None",
+            "Local",
+            "Sedation",
+            "Regional",
+            "General"
+          ],
+          "title": "Anaesthesia"
+        },
+        "consent_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consent Id"
+        },
+        "consent_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consent Number"
+        },
+        "assistant_employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Assistant Employee Id"
+        },
+        "assistant_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Assistant Name"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Started At"
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ended At"
+        },
+        "technique": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Technique"
+        },
+        "findings": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Findings"
+        },
+        "specimens": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Specimens"
+        },
+        "complications": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Complications"
+        },
+        "condition_at_end": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Condition At End"
+        },
+        "missing": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Missing",
+          "description": "What signing still needs: findings, specimens, condition_at_end"
+        }
+      },
+      "type": "object",
+      "required": [
+        "procedure_name",
+        "site",
+        "indication",
+        "anaesthesia",
+        "consent_id",
+        "consent_number",
+        "assistant_employee_id",
+        "assistant_name",
+        "started_at",
+        "ended_at",
+        "technique",
+        "findings",
+        "specimens",
+        "complications",
+        "condition_at_end",
+        "missing"
+      ],
+      "title": "ProcedureDetailsOut",
+      "description": "The procedure of a 'Procedure' note (MSDS IMS 150): the provider is the note's author (its stamp)."
+    },
+    "ProcedureIn": {
+      "properties": {
+        "procedure_name": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 2,
+          "title": "Procedure Name",
+          "examples": [
+            "Intercostal chest drain"
+          ]
+        },
+        "site": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Site",
+          "description": "Site and side, e.g. 'Right chest, 5th intercostal space'"
+        },
+        "indication": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Indication"
+        },
+        "anaesthesia": {
+          "type": "string",
+          "enum": [
+            "None",
+            "Local",
+            "Sedation",
+            "Regional",
+            "General"
+          ],
+          "title": "Anaesthesia",
+          "default": "None"
+        },
+        "consent_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consent Id",
+          "description": "The informed consent of the consent register (the patient's own) (GET /consents?patient_id=)"
+        },
+        "assistant_employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Assistant Employee Id"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Started At"
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ended At"
+        },
+        "technique": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Technique",
+          "description": "The steps, the devices and their sizes"
+        },
+        "findings": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Findings",
+          "description": "Required to sign"
+        },
+        "specimens": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Specimens",
+          "description": "What was removed and where it went, or 'None'. Required to sign"
+        },
+        "complications": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Complications"
+        },
+        "condition_at_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Condition At End",
+          "description": "The patient's condition at the end. Required to sign"
+        }
+      },
+      "type": "object",
+      "required": [
+        "procedure_name"
+      ],
+      "title": "ProcedureIn",
+      "description": "The structured part of a 'Procedure' note (MSDS IMS 150): a procedure done outside the theatre (a chest drain, a\ncentral line, a lumbar puncture). Signing needs findings, specimens and condition_at_end (PROCEDURE_NOTE_INCOMPLETE)."
+    },
+    "ProcedurePatch": {
+      "properties": {
+        "procedure_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300,
+              "minLength": 2
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Procedure Name"
+        },
+        "site": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Site"
+        },
+        "indication": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Indication"
+        },
+        "anaesthesia": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "None",
+                "Local",
+                "Sedation",
+                "Regional",
+                "General"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anaesthesia"
+        },
+        "consent_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consent Id",
+          "description": "The informed consent of the consent register (the patient's own) (GET /consents?patient_id=)"
+        },
+        "assistant_employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Assistant Employee Id"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Started At"
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ended At"
+        },
+        "technique": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Technique"
+        },
+        "findings": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Findings"
+        },
+        "specimens": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Specimens"
+        },
+        "complications": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Complications"
+        },
+        "condition_at_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Condition At End"
+        }
+      },
+      "type": "object",
+      "title": "ProcedurePatch",
+      "description": "Only the fields sent change (a draft's procedure)."
+    },
+    "RerouteIn": {
+      "properties": {
+        "target_doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target Doctor Id"
+        },
+        "target_department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target Department Id"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Reason",
+          "examples": [
+            "Patient needs cardiology, not general medicine"
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "title": "RerouteIn"
+    },
+    "StaffLookupOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id",
+          "description": "The id a form's staff field takes (contrast_doctor_id, employee_id, ...)"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "license_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "PMDC",
+                "PNC",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "License Type",
+          "description": "The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none"
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id",
+          "description": "Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "department_name",
+        "license_type",
+        "registration",
+        "user_id"
+      ],
+      "title": "StaffLookupOut",
+      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    },
+    "WaiverRequestOut": {
+      "properties": {
+        "waiver_request_id": {
+          "type": "integer",
+          "title": "Waiver Request Id"
+        },
+        "approval": {
+          "$ref": "#/components/schemas/ApprovalOut"
+        },
+        "ticket": {
+          "$ref": "#/components/schemas/OpdTicketDetailOut"
+        }
+      },
+      "type": "object",
+      "required": [
+        "waiver_request_id",
+        "approval",
+        "ticket"
+      ],
+      "title": "WaiverRequestOut"
+    },
+    "WardOccupancyOut": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "ward_type": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Private",
+            "SemiPrivate",
+            "ICU",
+            "CCU",
+            "NICU",
+            "Surgical",
+            "Pediatric",
+            "Maternity",
+            "Emergency",
+            "Isolation",
+            "Other"
+          ],
+          "title": "Ward Type"
+        },
+        "gender_restriction": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "any"
+          ],
+          "title": "Gender Restriction"
+        },
+        "total_beds": {
+          "type": "integer",
+          "title": "Total Beds"
+        },
+        "available": {
+          "type": "integer",
+          "title": "Available"
+        },
+        "reserved": {
+          "type": "integer",
+          "title": "Reserved"
+        },
+        "occupied": {
+          "type": "integer",
+          "title": "Occupied"
+        },
+        "turnover": {
+          "type": "integer",
+          "title": "Turnover",
+          "description": "Beds being cleaned or waiting for discharge clearance"
+        },
+        "out_of_service": {
+          "type": "integer",
+          "title": "Out Of Service"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id",
+        "code",
+        "name",
+        "ward_type",
+        "gender_restriction",
+        "total_beds",
+        "available",
+        "reserved",
+        "occupied",
+        "turnover",
+        "out_of_service"
+      ],
+      "title": "WardOccupancyOut",
+      "description": "A ward's bed counts (view v_bed_matrix)."
+    }
+  },
+  "unknowns": []
+}

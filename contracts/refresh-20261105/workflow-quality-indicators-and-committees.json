@@ -1,0 +1,148 @@
+{
+  "slug": "quality-indicators-and-committees",
+  "title": "Clinical quality indicators and committees (MSDS)",
+  "summary": "The clinical quality indicators counted from the records every month (patient assessment, the diagnostic services, invasive procedures, medicines, anaesthesia, blood, the medical records, outcomes and safety) against the hospital's own benchmarks, frozen monthly for the trend; the inpatient nutrition screening and nursing care plan they measure; the hospital's committees with their terms of reference, members, meetings, minutes approved by the chair and the actions decided.",
+  "order": 99,
+  "workflow": "MSDS CQI 93-105; IPC 85; FMS 123",
+  "workspaces": [
+    "quality",
+    "owner_dashboard",
+    "infection_control",
+    "ward_nurse",
+    "head_nurse",
+    "doctor"
+  ],
+  "file": "quality-indicators-and-committees.md",
+  "markdown": "# Clinical quality indicators and committees (MSDS)\n\n| MSDS | What is checked | Haspataal |\n|---|---|---|\n| CQI 93, 94 | A quality improvement committee that meets, with minutes (issues, activities, outcomes) | The **committees** (seeded: QIC, IPCC, PTC, MMC, MRC, ESC, CPC), **meetings**, **minutes** approved by the chair, their **actions** |\n| CQI 99-105 | Indicators monitored against benchmarks: assessments, diagnostics, procedures, medicines, anaesthesia, blood, records, outcomes | 43 **indicators** counted from the records, **benchmarks** set by the hospital, the monthly **report** and the **trend** |\n| CQI 99 c, d | The nutrition screening and the nursing care plan of inpatients | `POST /admissions/{admission_id}/nutrition-screenings`, `PUT /admissions/{admission_id}/nursing-care-plan` (the record review checks them) |\n\nWho: **Quality Officer, owner** (`quality.indicator.view`, `quality.indicator.manage`, `committee.view`,\n`committee.manage`); **committee members** read their committees and, as chair, approve the minutes; **ward nurses**\n(`ipd.nursing_assessment.record`) screen nutrition and write the care plan.\n\n## 1. The nursing assessment of inpatients (ward nurses)\n\n1. `GET /admissions/{admission_id}/nursing-assessment`: the screenings, the care plan, what is due\n   (`nutrition_screening_hours`, `nursing_care_plan_hours` after admission).\n2. `POST /admissions/{admission_id}/nutrition-screenings` (MUST scores; append-only)\n   ```json\n   { \"bmi_score\": 1, \"weight_loss_score\": 0, \"acute_disease_score\": 2, \"plan\": \"Dietitian referral; weekly weight\" }\n   ```\n   A total above 0 needs a plan.\n3. `PUT /admissions/{admission_id}/nursing-care-plan {\"problems\", \"goals\", \"interventions\", \"evaluation\"?,\n   \"expected_version\"?}` (versioned: every change is kept).\n\n## 2. The indicators (Quality Officer, owner)\n\n1. The tiles: `GET /quality/indicators?date_from=&date_to=` (default this month): each indicator with its numerator,\n   denominator, value, benchmark and Met / NotMet / NoTarget / NoData; group by `group`.\n2. One indicator month by month: `GET /quality/indicators/{code}/trend?months=12` (the months that ended are frozen on\n   `quality_indicator_freeze_day` by job quality.indicators, as the committee saw them).\n3. Benchmarks: `GET /quality/indicator-targets`, `PUT /quality/indicator-targets/{code} {\"target\": 95, \"note\":\n   \"PHC benchmark\"}`.\n4. The monthly report for the committee: `GET /quality/indicators/pdf`.\n\n## 3. Committees and minutes\n\n1. `GET /committees` (`is_due` when the next meeting is due); one: `GET /committees/{committee_id}`; add:\n   `POST /committees {\"code\", \"name\", \"kind\", \"terms_of_reference\", \"meets_every_months\", \"members\": [{\"user_id\",\n   \"role\": \"Chair\", \"represents\"}]}`; change (members replace the list): `PATCH /committees/{committee_id}`.\n2. Schedule: `POST /committees/{committee_id}/meetings {\"held_on\", \"venue\", \"agenda\"}`.\n3. Write the minutes after the meeting (a draft): `PUT /committee-meetings/{meeting_id}`\n   ```json\n   { \"attendees\": [{\"user_id\": 12, \"role\": \"Chair\"}, {\"name\": \"Dr Saleem\", \"represents\": \"Surgery\"}],\n     \"issues\": \"Two medication errors in September ...\", \"activities\": \"Indicators report reviewed; hand hygiene 78 %\",\n     \"outcomes\": \"Second check for IV antibiotics from 1 October\" }\n   ```\n4. The chair (or a committee manager) approves: `POST /committee-meetings/{meeting_id}/finalize`\n   (`MEETING_MINUTES_INCOMPLETE` lists what is missing; then `MEETING_FINAL`).\n5. The actions decided: `POST /committee-meetings/{meeting_id}/actions` (the hospital's action register, see\n   [incidents](incidents-and-sentinel-events.md)); the minutes: `GET /committee-meetings/{meeting_id}/pdf`;\n   one meeting: `GET /committee-meetings/{meeting_id}`. The worker reminds the managers when a committee is due.\n   An action's department comes from `GET /admin/departments`.",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/nutrition-screenings",
+          "summary": "Screen an inpatient for nutrition"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admissions/{admission_id}/nursing-care-plan",
+          "summary": "Write or update the nursing care plan"
+        }
+      ]
+    },
+    {
+      "heading": "1. The nursing assessment of inpatients (ward nurses)",
+      "anchor": "1-the-nursing-assessment-of-inpatients-ward-nurses",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/nursing-assessment",
+          "summary": "The nursing assessment: nutrition screenings and the nursing care plan"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/nutrition-screenings",
+          "summary": "Screen an inpatient for nutrition"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admissions/{admission_id}/nursing-care-plan",
+          "summary": "Write or update the nursing care plan"
+        }
+      ]
+    },
+    {
+      "heading": "2. The indicators (Quality Officer, owner)",
+      "anchor": "2-the-indicators-quality-officer-owner",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/indicators",
+          "summary": "The clinical quality indicators of a period"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/indicators/{code}/trend",
+          "summary": "One indicator month by month"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/indicator-targets",
+          "summary": "The hospital's benchmarks for the indicators"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/quality/indicator-targets/{code}",
+          "summary": "Set the hospital's benchmark for an indicator"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/indicators/pdf",
+          "summary": "The clinical quality indicators report (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "3. Committees and minutes",
+      "anchor": "3-committees-and-minutes",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/committees",
+          "summary": "The committees"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/committees/{committee_id}",
+          "summary": "A committee and its meetings"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/committees",
+          "summary": "Add a committee"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/committees/{committee_id}",
+          "summary": "Change a committee (terms of reference, members)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/committees/{committee_id}/meetings",
+          "summary": "Schedule a meeting"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/committee-meetings/{meeting_id}",
+          "summary": "Write the minutes (draft)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/committee-meetings/{meeting_id}/finalize",
+          "summary": "Approve the minutes (final)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/committee-meetings/{meeting_id}/actions",
+          "summary": "Record an action the meeting decided"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/committee-meetings/{meeting_id}/pdf",
+          "summary": "The minutes (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/committee-meetings/{meeting_id}",
+          "summary": "A meeting and its minutes"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        }
+      ]
+    }
+  ]
+}

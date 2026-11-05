@@ -1,0 +1,110 @@
+{
+  "slug": "external-referrals",
+  "title": "External referrals and the emergency contact list",
+  "summary": "Refer an outpatient or emergency patient to another facility with a letter kept in the record, the transport, the care on the way and the receiving facility's acknowledgement when our staff take the patient; the register of the past 12 months; one emergency and referral contact list, printed for display.",
+  "order": 99,
+  "workflow": "The clinic manual, indicators 29-30 (decisions 22-23)",
+  "workspaces": [
+    "doctor",
+    "quality",
+    "owner_dashboard"
+  ],
+  "file": "external-referrals.md",
+  "markdown": "# External referrals and the emergency contact list\n\n| Source | What the surveyor checks | Haspataal |\n|---|---|---|\n| Clinic indicator 29 (PDF p61-64) | Written referral SOPs; a written communication with the reasons, date, time and the receiving facility, a copy in the record; a note when the patient chose to go; the receiving facility's acknowledgement when the clinic's staff took the patient; care during the transfer documented; the records of the past 12 months | `POST /referrals`, the letter (`GET /referrals/{id}/pdf`), `POST /referrals/{id}/acknowledge`, the register (`GET /referrals`) |\n| Clinic indicator 30 (PDF p62, p64) | The contact numbers of the referral facilities, medico-legal authorities, police, ambulance/rescue and social services, available to staff and displayed in public | The contact list (`/mlc/contacts`, with every kind) and its printout for display (`GET /mlc/contacts/pdf`) |\n\nWho: the **doctor** (`referral.create`) refers, records the acknowledgement and cancels; the register is for the\n**Quality Officer**, the **Owner** and **Reception** (`referral.view`). The contact list is kept by whoever sets up the\nmedico-legal cases (`mlc.setup.manage`).\n\n## 1. Refer out (doctor)\n\n1. From the consultation or the emergency visit: `POST /referrals` with an `Idempotency-Key`. Example:\n\n   ```json\n   {\"ticket_id\": 41, \"encounter_id\": 77, \"destination_contact_id\": 12, \"destination_department\": \"Cardiology\",\n    \"reason\": \"Chest pain with ST elevation\", \"urgency\": \"Emergency\",\n    \"clinical_summary\": \"Central chest pain 2 h, sweating; ECG ST elevation V1-V4; provisional diagnosis anterior MI\",\n    \"treatment_given\": \"Aspirin 300 mg chewed\", \"transport\": \"WithStaff\", \"escort_name\": \"Nurse Saima\",\n    \"care_during_transfer\": \"Oxygen 4 L/min, IV line, monitored\"}\n   ```\n\n   - The source is `ticket_id`, `er_visit_id` or `encounter_id`. An inpatient's consultation is refused\n     (`VALIDATION_ERROR`): inpatients leave through the admission's transfer or referral slip.\n   - The receiving facility comes from the contact list, or `destination_name` when the patient chooses it\n     (`at_patient_request: true`). An unknown or retired contact answers `REFERENCE_NOT_FOUND`.\n   - `WithStaff` needs `escort_name`. The referral then shows `acknowledgement_pending` until step 3.\n2. Print the letter: `GET /referrals/{id}/pdf` (the letterhead of its own day; the referring doctor's stamp with the\n   PM&DC number; a signature line and a line for whoever receives the patient).\n3. The receiving facility received the patient: `POST /referrals/{id}/acknowledge`\n   `{\"acknowledged_by_name\", \"acknowledged_at\", \"note\"}`.\n4. It did not happen: `POST /referrals/{id}/cancel {\"reason\"}`. An acknowledged or cancelled referral is closed\n   (`REFERRAL_CLOSED`). The letter is never rewritten: cancel it and write a new one.\n\nInternal re-routing to another doctor of the same establishment is **not** a referral: see\n[OPD reception](opd-reception.md).\n\n## 2. The register (Quality Officer, Owner, Reception)\n\n`GET /referrals?date_from=&date_to=&status=&acknowledgement_pending=` gives newest first, by default the last 12\nmonths, which is what the surveyor asks for. Every row is the patient's record, and every read is logged.\n\n## 3. The emergency and referral contact list\n\nOne list serves both the medico-legal cases and the clinic's displayed contacts: `GET /mlc/contacts`,\n`POST /mlc/contacts`, `PATCH /mlc/contacts/{id}`. Its kinds are:\n\n- `ReferralHospital`, `HealthOffice`, `TraumaCentre`, `BloodBank`;\n- `PoliceStation`, `RescueService`, `FireBrigade`, `PoliceEmergency`;\n- `Ambulance`, `SocialService`, `MlrHospital`.\n\n\"Police emergency 15\" and \"Rescue 1122\" come seeded; add the local hospitals, the police station, the blood bank and\nthe ambulances. Print it for display with `GET /mlc/contacts/pdf`.",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/referrals",
+          "summary": "Refer an outpatient or emergency patient to another facility"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/referrals/{referral_id}/pdf",
+          "summary": "The referral letter (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/referrals/{referral_id}/acknowledge",
+          "summary": "Record the receiving facility's acknowledgement"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/referrals",
+          "summary": "The referral register (default: the last 12 months)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/mlc/contacts/pdf",
+          "summary": "The emergency and referral contact list to display (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "1. Refer out (doctor)",
+      "anchor": "1-refer-out-doctor",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/referrals",
+          "summary": "Refer an outpatient or emergency patient to another facility"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/referrals/{referral_id}/pdf",
+          "summary": "The referral letter (PDF)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/referrals/{referral_id}/acknowledge",
+          "summary": "Record the receiving facility's acknowledgement"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/referrals/{referral_id}/cancel",
+          "summary": "Cancel a referral that did not happen"
+        }
+      ]
+    },
+    {
+      "heading": "2. The register (Quality Officer, Owner, Reception)",
+      "anchor": "2-the-register-quality-officer-owner-reception",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/referrals",
+          "summary": "The referral register (default: the last 12 months)"
+        }
+      ]
+    },
+    {
+      "heading": "3. The emergency and referral contact list",
+      "anchor": "3-the-emergency-and-referral-contact-list",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/mlc/contacts",
+          "summary": "Police stations and MLR hospitals (contact list)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mlc/contacts",
+          "summary": "Add a contact: police station, MLR hospital, referral hospital, rescue, ambulance, ..."
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/mlc/contacts/{contact_id}",
+          "summary": "Update or retire a contact"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/mlc/contacts/pdf",
+          "summary": "The emergency and referral contact list to display (PDF)"
+        }
+      ]
+    }
+  ]
+}

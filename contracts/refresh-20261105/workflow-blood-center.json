@@ -1,0 +1,247 @@
+{
+  "slug": "blood-center",
+  "title": "Blood center",
+  "summary": "The hospital's own blood center under its PBTA licence - donors registered once for life, the doctor's assessment against the binding minimums, written consent, deferral and telling the donor why, the collection and the donor's reaction, every donation's five screens and its group, components in quarantine, the clearance, the release into the hospital blood bank by two people, discards, labels, the quarterly return and the registers.",
+  "order": 99,
+  "workflow": "The Punjab Blood Transfusion Safety Act 2016; the PBTA Standards and guidelines for blood establishments 2015 (decisions 48)",
+  "workspaces": [
+    "lab_admin",
+    "lab_tech",
+    "doctor",
+    "lab_verifier",
+    "quality"
+  ],
+  "file": "blood-center.md",
+  "markdown": "# Blood center\n\nA hospital that runs its own blood center (owner decision B1, decisions 48) switches on the service `blood_center`;\nevery other hospital receives blood from licensed sources only ([Blood transfusion](blood-transfusion.md)). The center\nreleases its components into **this hospital's** blood bank, where the blood bank's own chain applies (compatibility,\nissue, the bedside, reactions).\n\n| Source (one-based PDF pages) | What it requires | Haspataal |\n|---|---|---|\n| The Act s.2(k), s.10(2)(b) (p4, p11) | Voluntary, unpaid donors only | Accepted needs the donor's declaration of no payment (`unpaid_declared`, never pre-ticked) |\n| Standards ch.2 S.1.1 (p15) | Every donor registered (name, age, CNIC or another identification, a contact), a donor number for life, a donation number on the bag and tubes | `POST /blood-center/donors` (`BLOOD_DONOR_EXISTS` for an identification already registered); the donation number on the labels |\n| ch.2 S.1.2.4 (p15); ch.1 S.1.9 (p12) | Written consent before donation; donor selection by a PMDC-registered doctor | `consent_signed` required for Accepted; `BLOOD_DONOR_DOCTOR_REQUIRED` unless the doctor's staff record has a PMDC registration |\n| ch.2 S.2.3 (p16-18) | Medical history, examination and haemoglobin; age 18 (a first-time donor at most 60); Hb 13.0 g/dL men, 12.5 women; 3 or 4 months between donations | The database refuses Accepted against these (`BLOOD_DONOR_INELIGIBLE`, the message names each) |\n| The Act s.10(2)(c)-(e) (p11) | The Authority's deferral criteria; the reasons told to the donor by a PMDC-registered professional, with counselling | Deferrals with the reason and period; how the donor was told, by whom, recorded once |\n| ch.2 S.3, S.5.4 (p18-21) | The collection: the bag and its lot, at most 450 +/- 45 ml; every donation (unsuccessful ones with why); adverse reactions with the action | `POST /blood-center/donations/{id}/collection`; a Severe reaction is an incident at once (the Act s.13) |\n| The Act s.10(2)(f) (p11); ch.4 S.1-S.3 (p34-36) | Every donation screened for HBsAg, anti-HCV, anti-HIV, syphilis, malaria; a reactive screen repeated on the bag; ABO and RhD at least twice, ABO forward and reverse | `POST /blood-center/donations/{id}/tests`; the clearance refuses until complete (`BLOOD_DONATION_TESTS_INCOMPLETE`) |\n| ch.3 S.3.4, S.9.1, S.5.10 (p26-29); the SOP on labelling | Everything in quarantine until the tests are done and approved by a designated person; unit verification before stock; a second technician checks the label | Release only after the clearance, by `blood_center.release` with a second person's credentials |\n| ch.3 S.1.5, S.1.7, G.2 (p24, p31-32) | Platelets and fresh frozen plasma within 8 hours; shelf lives 35 days, 5 days, 12 months | `BLOOD_PROCESSING_TIME_EXCEEDED`; the expiry is refused beyond the shelf life |\n| The Act s.12 (p13); ch.1 S.1.14 (p12) | Records of donors, deferrals, donations, components, screening results, kept 15 years, traceable to the donor and the recipient; quarterly data to the Authority | Nothing is deleted; `GET /blood-center/donations/{id}` from the donor to the patients; `GET /blood-center/return` |\n\n**Not in this release:** distribution of components to other hospitals' blood banks under contract (the Act\ns.10(2)(m)), apheresis collection, component quality-control sampling (the laboratory's quality system). A clinical\nlead reviews the minimums and the workflow before a hospital relies on it (open decision H26).\n\nThe service `blood_center` needs `blood_transfusion` Active and is hospital-only. It becomes Active in the facility\nsettings ([Facility profile and services](facility-profile-and-services.md)) once the center's own source with its PBTA\nlicence exists, and someone holds each of `blood_center.donor.assess` (a PMDC-registered doctor),\n`blood_center.process` and `blood_center.release`. New donors and donations are refused while it is not Active\n(`CAPABILITY_INACTIVE`); while Retiring, the donations already started continue to their end.\n\nWho: **lab technicians and verifiers** register donors (`blood_center.donor.register`), collect (`blood_center.collect`),\nrecord results and prepare components (`blood_center.process`); **doctors** assess, defer and tell donors\n(`blood_center.donor.assess`); **verifiers and the Lab Admin** clear and release (`blood_center.release`); the\n**Quality Officer** and the clinical and laboratory staff read (`blood_center.view`).\n\n## 1. The center's own source and the service (Lab Admin, Hospital Admin)\n\n1. `POST /blood/sources` with an `Idempotency-Key`: `kind` `OwnBloodCenter`, the center's `name` and PBTA\n   `licence_number`. One active own center (`BLOOD_SOURCE_EXISTS` for a second).\n2. `POST /establishment/changes/preview` then `POST /establishment/changes` with `blood_center` → `Active`; the preview\n   lists `CAPABILITY_PREREQUISITE` (`own_blood_center`, `donor_doctor`, `blood_center_staff`, `blood_center_release`)\n   until they exist.\n\n## 2. The donor (lab technician)\n\n3. `GET /blood-center/donors?q=`: search first by the donor number, the CNIC, the mobile number or a part of the name\n   (`q` at least 2 characters: there is no list of every donor; each donor shown is logged as a read).\n4. `POST /blood-center/donors` with an `Idempotency-Key`: `full_name`, `sex` (`Male` | `Female`: the criteria differ),\n   `date_of_birth`, `id_kind` (`CNIC` | `Passport` | `ProofOfRegistration` | `Other`), `id_number`, at least one of\n   `phone`, `email`, `address`. `BLOOD_DONOR_EXISTS`, `VALIDATION_ERROR`, `CAPABILITY_INACTIVE`.\n5. `GET /blood-center/donors/{donor_id}`: `deferred_now`, `permanently_deferred`, `may_donate_from`, the deferrals and\n   donations (a logged read). `PATCH /blood-center/donors/{donor_id}` with `expected_version` and a `reason` corrects\n   the particulars.\n\n## 3. The assessment (doctor)\n\n6. `POST /blood-center/donations` with an `Idempotency-Key`: `donor_id`, `donation_kind` (`Voluntary`, or\n   `Replacement` / `Autologous` with `for_patient_id`), `venue` (`BloodCenter`, or `Camp` with `venue_note`),\n   `history_completed`, `history_note`, `weight_kg`, `hb_g_dl`, `hb_method`, the vital signs, and `outcome`:\n   * `Accepted` with `consent_signed` and `unpaid_declared` (separate boxes, never pre-ticked). `BLOOD_DONOR_INELIGIBLE`\n     names each minimum not met: offer \"Defer\" instead. `BLOOD_DONOR_DEFERRED` while a deferral is in force.\n   * `Deferred` with `deferral`: `kind` `Temporary` (with `deferred_until`, the last day) or `Permanent`, the `reason`,\n     and `told` (`communicated_at`, `communication` `InPerson` | `Phone` | `Letter`, `counselled`) when the doctor told\n     the donor at once.\n   `BLOOD_DONOR_DOCTOR_REQUIRED`, `BLOOD_DONATION_STATE` (another donation of the donor in progress),\n   `BLOOD_DONOR_REACTIVE_UNRESOLVED` (an earlier donation was repeat-reactive and no doctor has recorded a decision\n   since: record the deferral first, §7).\n   * A replacement or autologous donation's patient from `GET /patients/search`.\n7. A deferral later (`POST /blood-center/donors/{donor_id}/deferrals` with an `Idempotency-Key`, `donation_id` when a\n   donation showed it); `POST /blood-center/deferrals/{deferral_id}/inform` records how the donor was told, once\n   (`BLOOD_DEFERRAL_RECORDED`); `POST /blood-center/deferrals/{deferral_id}/revoke` only for one entered in error, with\n   why. The PBTA SOP's lists of deferral conditions are the doctor's guidance: show them, never apply them.\n\n## 4. The collection (lab technician)\n\n8. `GET /blood-center/donations?status=Accepted`: the donors waiting.\n9. `GET /blood-center/donations/{donation_id}/labels`: the bar-coded donation number for each bag and the two tubes,\n   printed at the donor's side; no donor name on a bag.\n10. `POST /blood-center/donations/{donation_id}/collection`: `outcome` `Collected` (`bag_type`, `bag_lot`,\n    `anticoagulant`, `started_at`, `ended_at`, `volume_ml`: at most 495, a donor under 50 kg at most weight x 9 ml +\n    10 %) or `Unsuccessful` (`unsuccessful_reason`); `donor_reaction` with `reaction_action`; `Severe` also needs\n    `reaction_harm` and creates the incident `BLOOD_DONOR_REACTION` (`reaction_incident_number`; the Authority is\n    informed from the incident register). A collection starts after its own assessment and at most 24 hours later:\n    `BLOOD_ASSESSMENT_EXPIRED` means record it `Unsuccessful` and assess the donor again; `BLOOD_DONOR_DEFERRED`\n    means a deferral was recorded since. `BLOOD_DONATION_STATE`, `VALIDATION_ERROR`.\n\n## 5. The laboratory (lab technician)\n\n11. `GET /blood-center/donations?status=Collected`, then `GET /blood-center/donations/{donation_id}`.\n12. `POST /blood-center/donations/{donation_id}/components` with an `Idempotency-Key`: `components` (each `component`,\n    `volume_ml`, `expires_at` from the bag's label (left out: the PBTA's shelf life, for whole blood and red cells only\n    from a CPDA-1 bag), `prepared_at`); whole blood kept whole, or red cells, plasma and\n    platelets (within 8 hours of the venepuncture), cryoprecipitate from the plasma (which becomes `Processed`).\n    `BLOOD_COMPONENT_EXISTS`, `BLOOD_PROCESSING_TIME_EXCEEDED`, `BLOOD_DONATION_STATE`, `VALIDATION_ERROR`.\n13. `POST /blood-center/donations/{donation_id}/tests` with an `Idempotency-Key`: `results`, each `marker`, `sample`\n    (`Initial`, or `Repeat` for a second determination or a reactive screen repeated on the bag), `method`, `kit_lot`,\n    `result`. A reactive screen: show \"Repeat on another sample from the bag\", in red.\n14. `GET /blood-center/components`: the quarantine, oldest first; `POST /blood-center/components/{component_id}/discard`\n    with the `reason` (`Other` with a note). `BLOOD_COMPONENT_STATE`.\n\n## 6. The clearance and the release (lab verifier, designated person)\n\n15. `POST /blood-center/donations/{donation_id}/clearance`: `outcome` `Cleared` (the database takes ABO and RhD from the\n    results), `Reactive` (a screen was reactive and each reactive screen was repeated on another sample from the bag;\n    its components are discarded at once; `blood_center.donation.reactive` tells the doctors), or `Rejected` with the\n    `note` why (a group that stays anomalous, information after donation).\n    `BLOOD_DONATION_TESTS_INCOMPLETE`, `BLOOD_DONATION_REACTIVE`, `BLOOD_GROUP_DISCREPANCY`, `BLOOD_DONATION_STATE`.\n16. `GET /blood-center/components/{component_id}/label`: the label (number, establishment and licence, component,\n    ABO and RhD, volume and anticoagulant, expiry, storage, CAUTION), once the donation is cleared.\n17. `POST /blood-center/components/{component_id}/release` with an `Idempotency-Key`: the second person who checked the\n    label types `checker_username` and `checker_password` (`STEP_UP_REQUIRED`, `DUAL_CONTROL_SAME_PERSON`). The answer's\n    `unit_number` (`<donation number>-RC` ...) is the unit now in the blood bank (`GET /blood/units/{unit_id}`: its\n    `donation_number` leads back). `BLOOD_CENTER_SOURCE_REQUIRED`, `BLOOD_UNIT_EXPIRED`, `CAPABILITY_INACTIVE`.\n    `blood_center.component.released` refreshes the blood bank's stock.\n\n## 7. Reactive donors (doctor)\n\n18. `GET /blood-center/donations?status=Reactive`: tell each repeat-reactive donor in private, refer them for\n    confirmation: `POST /blood-center/donors/{donor_id}/deferrals` (`Permanent`, the `donation_id`) and\n    `POST /blood-center/deferrals/{deferral_id}/inform` with `referred_to`. Until a doctor records a deferral after\n    that donation, the donor is not accepted again (`BLOOD_DONOR_REACTIVE_UNRESOLVED`).\n\n## 8. The return and the registers (Quality Officer)\n\n19. `GET /blood-center/return?date_from=&date_to=` (at most 366 days): donors, collections by kind, donations by state,\n    deferrals, infections by screen (first test and repeat), components prepared, released and discarded, whole blood\n    not used, donors' and patients' reactions: the quarterly data for the Authority.\n20. `GET /blood-center/registers/pdf?date_from=&date_to=`: the return and the donor and collection, screening, and\n    blood products and discard registers (donors by number, age and sex, never by name). `EXPORT_TOO_LARGE`.\n\n## 9. Retiring the service\n\n`blood_center` → `Retiring` stops new donors and donations; `Retired` is refused while donations are in progress,\ncomponents wait in quarantine or a repeat-reactive donor has not been told (`donations_in_progress`,\n`components_in_quarantine`, `donors_to_inform`: the preview names how each ends). The records stay readable.",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/donors",
+          "summary": "Register a blood donor"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/donations/{donation_id}/collection",
+          "summary": "Record the collection"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/donations/{donation_id}/tests",
+          "summary": "Record test results"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/donations/{donation_id}",
+          "summary": "One donation, from the donor to the patients"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/return",
+          "summary": "The return to the Authority (figures)"
+        }
+      ]
+    },
+    {
+      "heading": "1. The center's own source and the service (Lab Admin, Hospital Admin)",
+      "anchor": "1-the-center-s-own-source-and-the-service-lab-admin-hospital-admin",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/blood/sources",
+          "summary": "Add a blood source"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/establishment/changes/preview",
+          "summary": "Preview a change of profile or services (nothing is saved)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/establishment/changes",
+          "summary": "Apply a change of profile or services"
+        }
+      ]
+    },
+    {
+      "heading": "2. The donor (lab technician)",
+      "anchor": "2-the-donor-lab-technician",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/donors",
+          "summary": "Find blood donors"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/donors",
+          "summary": "Register a blood donor"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/donors/{donor_id}",
+          "summary": "One donor's record"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/blood-center/donors/{donor_id}",
+          "summary": "Correct a donor's particulars"
+        }
+      ]
+    },
+    {
+      "heading": "3. The assessment (doctor)",
+      "anchor": "3-the-assessment-doctor",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/donations",
+          "summary": "Assess a donor: accept or defer"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/donors/{donor_id}/deferrals",
+          "summary": "Defer a donor"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/deferrals/{deferral_id}/inform",
+          "summary": "Record how the donor was told"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/deferrals/{deferral_id}/revoke",
+          "summary": "Revoke a deferral entered in error"
+        }
+      ]
+    },
+    {
+      "heading": "4. The collection (lab technician)",
+      "anchor": "4-the-collection-lab-technician",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/donations",
+          "summary": "Donations and the worklists"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/donations/{donation_id}/labels",
+          "summary": "The donation number labels for the bags and tubes"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/donations/{donation_id}/collection",
+          "summary": "Record the collection"
+        }
+      ]
+    },
+    {
+      "heading": "5. The laboratory (lab technician)",
+      "anchor": "5-the-laboratory-lab-technician",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/donations",
+          "summary": "Donations and the worklists"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/donations/{donation_id}",
+          "summary": "One donation, from the donor to the patients"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/donations/{donation_id}/components",
+          "summary": "Prepare components into quarantine"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/donations/{donation_id}/tests",
+          "summary": "Record test results"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/components",
+          "summary": "The quarantine and the components"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/components/{component_id}/discard",
+          "summary": "Discard a component in quarantine"
+        }
+      ]
+    },
+    {
+      "heading": "6. The clearance and the release (lab verifier, designated person)",
+      "anchor": "6-the-clearance-and-the-release-lab-verifier-designated-person",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/donations/{donation_id}/clearance",
+          "summary": "Clear a donation, or record it reactive"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/components/{component_id}/label",
+          "summary": "A component's label"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/components/{component_id}/release",
+          "summary": "Release a component into the blood bank"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood/units/{unit_id}",
+          "summary": "One unit and its whole chain"
+        }
+      ]
+    },
+    {
+      "heading": "7. Reactive donors (doctor)",
+      "anchor": "7-reactive-donors-doctor",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/donations",
+          "summary": "Donations and the worklists"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/donors/{donor_id}/deferrals",
+          "summary": "Defer a donor"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/blood-center/deferrals/{deferral_id}/inform",
+          "summary": "Record how the donor was told"
+        }
+      ]
+    },
+    {
+      "heading": "8. The return and the registers (Quality Officer)",
+      "anchor": "8-the-return-and-the-registers-quality-officer",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/return",
+          "summary": "The return to the Authority (figures)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/blood-center/registers/pdf",
+          "summary": "The return and the registers (PDF)"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4751 @@
+{
+  "screen_id": "registration",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "schemas": {
+    "ApprovalSummaryOut": {
+      "properties": {
+        "request_id": {
+          "type": "integer",
+          "title": "Request Id"
+        },
+        "approval_type": {
+          "type": "string",
+          "enum": [
+            "Refund",
+            "VIPWaiverPreConsult",
+            "VIPWaiverPostConsult",
+            "PatientCredit",
+            "PharmacyCharityOverride",
+            "LargeCashDrop",
+            "WardIndent",
+            "APPayment",
+            "PolicyChange",
+            "PrivilegedAccess"
+          ],
+          "title": "Approval Type"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Pending",
+            "Approved",
+            "Rejected",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "summary": {
+          "type": "string",
+          "title": "Summary"
+        }
+      },
+      "type": "object",
+      "required": [
+        "request_id",
+        "approval_type",
+        "status",
+        "requested_at",
+        "summary"
+      ],
+      "title": "ApprovalSummaryOut",
+      "description": "The pending approval that currently locks a subject (e.g. an OPD ticket)."
+    },
+    "Body_upload_document_api_v1_patients__patient_id__documents_post": {
+      "properties": {
+        "file": {
+          "type": "string",
+          "contentMediaType": "application/octet-stream",
+          "title": "File"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title",
+          "description": "What it is, e.g. 'CBC' or 'Chest X-ray report'"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought from another hospital, laboratory or clinic",
+          "default": false
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "Who issued the outside document (required with is_outside)"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document"
+        }
+      },
+      "type": "object",
+      "required": [
+        "file",
+        "doc_type"
+      ],
+      "title": "Body_upload_document_api_v1_patients__patient_id__documents_post"
+    },
+    "CashBackPromptOut": {
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Refund",
+            "WaiverRefund"
+          ],
+          "title": "Kind"
+        },
+        "id": {
+          "type": "integer",
+          "title": "Id",
+          "description": "The refund disbursement or waiver refund order to confirm"
+        },
+        "amount": {
+          "type": "number",
+          "title": "Amount"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message"
+        }
+      },
+      "type": "object",
+      "required": [
+        "kind",
+        "id",
+        "amount",
+        "message"
+      ],
+      "title": "CashBackPromptOut",
+      "description": "Money reception must hand back when the slip is scanned (an approved refund or waiver)."
+    },
+    "Envelope_PatientDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PatientDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PatientDetailOut]"
+    },
+    "Envelope_PatientDocumentUploadOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PatientDocumentUploadOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PatientDocumentUploadOut]"
+    },
+    "Envelope_PrintOut_OpdSlipFieldsOut__": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PrintOut_OpdSlipFieldsOut_"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PrintOut[OpdSlipFieldsOut]]"
+    },
+    "Envelope_ReceptionDashboardOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/ReceptionDashboardOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[ReceptionDashboardOut]"
+    },
+    "Envelope_RegistrationOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/RegistrationOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[RegistrationOut]"
+    },
+    "Envelope_TicketPaymentOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/TicketPaymentOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[TicketPaymentOut]"
+    },
+    "Envelope_list_OpdDoctorOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/OpdDoctorOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[OpdDoctorOut]]"
+    },
+    "Envelope_list_PanelOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PanelOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PanelOut]]"
+    },
+    "Envelope_list_PatientDocumentOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PatientDocumentOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PatientDocumentOut]]"
+    },
+    "Envelope_list_PatientSearchHitOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PatientSearchHitOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PatientSearchHitOut]]"
+    },
+    "Envelope_list_ServiceListItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/ServiceListItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[ServiceListItemOut]]"
+    },
+    "Envelope_list_StaffLookupOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/StaffLookupOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[StaffLookupOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "InvoiceDetailOut": {
+      "properties": {
+        "invoice_id": {
+          "type": "integer",
+          "title": "Invoice Id"
+        },
+        "invoice_no": {
+          "type": "string",
+          "title": "Invoice No"
+        },
+        "invoice_type": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "Pharmacy",
+            "Lab",
+            "Imaging",
+            "OT",
+            "OTC",
+            "Other"
+          ],
+          "title": "Invoice Type"
+        },
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "walkin_customer_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Walkin Customer Name"
+        },
+        "walkin_customer_mobile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Walkin Customer Mobile"
+        },
+        "gross_total": {
+          "type": "number",
+          "title": "Gross Total"
+        },
+        "discount_total": {
+          "type": "number",
+          "title": "Discount Total"
+        },
+        "net_payable": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Payable",
+          "description": "Null while the invoice is a draft"
+        },
+        "amount_paid": {
+          "type": "number",
+          "title": "Amount Paid"
+        },
+        "amount_refunded": {
+          "type": "number",
+          "title": "Amount Refunded"
+        },
+        "waiver_amount": {
+          "type": "number",
+          "title": "Waiver Amount"
+        },
+        "waiver_dispensed_amount": {
+          "type": "number",
+          "title": "Waiver Dispensed Amount"
+        },
+        "credit_amount": {
+          "type": "number",
+          "title": "Credit Amount"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Open",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "is_locked": {
+          "type": "boolean",
+          "title": "Is Locked",
+          "description": "Locked while an approval (waiver, credit, refund) is pending"
+        },
+        "locked_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Locked Reason"
+        },
+        "finalized_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finalized At"
+        },
+        "business_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Business Date"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "lines": {
+          "items": {
+            "$ref": "#/components/schemas/InvoiceLineOut"
+          },
+          "type": "array",
+          "title": "Lines"
+        },
+        "balance_due": {
+          "type": "number",
+          "title": "Balance Due"
+        }
+      },
+      "type": "object",
+      "required": [
+        "invoice_id",
+        "invoice_no",
+        "invoice_type",
+        "patient_id",
+        "admission_id",
+        "ticket_id",
+        "panel_id",
+        "employee_id",
+        "walkin_customer_name",
+        "walkin_customer_mobile",
+        "gross_total",
+        "discount_total",
+        "net_payable",
+        "amount_paid",
+        "amount_refunded",
+        "waiver_amount",
+        "waiver_dispensed_amount",
+        "credit_amount",
+        "status",
+        "is_locked",
+        "locked_reason",
+        "finalized_at",
+        "business_date",
+        "created_at",
+        "row_version",
+        "lines",
+        "balance_due"
+      ],
+      "title": "InvoiceDetailOut",
+      "description": "An invoice with its lines and what is still due (billing.invoice_with_lines)."
+    },
+    "InvoiceLineOut": {
+      "properties": {
+        "invoice_item_id": {
+          "type": "integer",
+          "title": "Invoice Item Id"
+        },
+        "line_type": {
+          "type": "string",
+          "enum": [
+            "Consultation",
+            "Service",
+            "Drug",
+            "LabTest",
+            "Imaging",
+            "OTProcedure",
+            "OTConsumable",
+            "RoomCharge",
+            "Reversal"
+          ],
+          "title": "Line Type"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "qty": {
+          "type": "number",
+          "title": "Qty"
+        },
+        "unit_price": {
+          "type": "number",
+          "title": "Unit Price"
+        },
+        "line_total": {
+          "type": "number",
+          "title": "Line Total"
+        },
+        "bed_day": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Day"
+        },
+        "reverses_item_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reverses Item Id",
+          "description": "Set on a reversal line: the line it cancels"
+        },
+        "reversal_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reversal Reason"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "invoice_item_id",
+        "line_type",
+        "description",
+        "qty",
+        "unit_price",
+        "line_total",
+        "bed_day",
+        "reverses_item_id",
+        "reversal_reason",
+        "created_at"
+      ],
+      "title": "InvoiceLineOut"
+    },
+    "MergedProfileOut": {
+      "properties": {
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "registration_type": {
+          "type": "string",
+          "enum": [
+            "Regular",
+            "LabOnly",
+            "TraumaTemp",
+            "Merged"
+          ],
+          "title": "Registration Type"
+        },
+        "temp_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp Identifier"
+        }
+      },
+      "type": "object",
+      "required": [
+        "patient_id",
+        "mrn",
+        "full_name",
+        "registration_type",
+        "temp_identifier"
+      ],
+      "title": "MergedProfileOut",
+      "description": "Another record of the same person, merged into this one (e.g. a trauma registration)."
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "OpdDoctorOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "registration": {
+          "type": "string",
+          "title": "Registration",
+          "description": "The council registration as the author stamp prints it, e.g. 'PMDC 12345-P'"
+        },
+        "waiting": {
+          "type": "integer",
+          "title": "Waiting",
+          "description": "Patients waiting for this doctor now, their department's unassigned ones included"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "full_name",
+        "designation",
+        "department_id",
+        "department_name",
+        "registration",
+        "waiting"
+      ],
+      "title": "OpdDoctorOut",
+      "description": "A doctor who sees an OPD queue: a re-route's target, a slip's doctor (workflow §1.4)."
+    },
+    "OpdQueueEntryOut": {
+      "properties": {
+        "queue_id": {
+          "type": "integer",
+          "title": "Queue Id"
+        },
+        "queue_group": {
+          "type": "string",
+          "title": "Queue Group",
+          "description": "doctor:<id> or department:<id>"
+        },
+        "token_no": {
+          "type": "integer",
+          "title": "Token No"
+        },
+        "token_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Token Date"
+        },
+        "priority": {
+          "type": "integer",
+          "title": "Priority"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Active",
+            "Suspended",
+            "Deferred",
+            "Rerouted",
+            "Completed",
+            "Cancelled",
+            "Expired"
+          ],
+          "title": "Status"
+        },
+        "queued_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Queued At"
+        },
+        "called_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Called At"
+        },
+        "rerouted_from_queue_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rerouted From Queue Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "queue_id",
+        "queue_group",
+        "token_no",
+        "token_date",
+        "priority",
+        "status",
+        "queued_at",
+        "called_at",
+        "rerouted_from_queue_id"
+      ],
+      "title": "OpdQueueEntryOut",
+      "description": "The ticket's latest queue entry."
+    },
+    "OpdSlipFieldsOut": {
+      "properties": {
+        "hospital_name": {
+          "type": "string",
+          "title": "Hospital Name"
+        },
+        "ticket_number": {
+          "type": "string",
+          "title": "Ticket Number"
+        },
+        "token_no": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Token No"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Name"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Issued At"
+        },
+        "valid_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Valid Until"
+        },
+        "gross_amount": {
+          "type": "number",
+          "title": "Gross Amount"
+        },
+        "discount_amount": {
+          "type": "number",
+          "title": "Discount Amount"
+        },
+        "net_payable": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Payable"
+        },
+        "amount_paid": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Amount Paid"
+        },
+        "payment_status": {
+          "type": "string",
+          "enum": [
+            "Unpaid",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "PanelBilled"
+          ],
+          "title": "Payment Status"
+        },
+        "cash_back_prompts": {
+          "items": {
+            "$ref": "#/components/schemas/CashBackPromptOut"
+          },
+          "type": "array",
+          "title": "Cash Back Prompts"
+        }
+      },
+      "type": "object",
+      "required": [
+        "hospital_name",
+        "ticket_number",
+        "token_no",
+        "patient_name",
+        "mrn",
+        "doctor_name",
+        "department_name",
+        "issued_at",
+        "valid_until",
+        "gross_amount",
+        "discount_amount",
+        "net_payable",
+        "amount_paid",
+        "payment_status",
+        "cash_back_prompts"
+      ],
+      "title": "OpdSlipFieldsOut"
+    },
+    "OpdTicketDetailOut": {
+      "properties": {
+        "ticket_id": {
+          "type": "integer",
+          "title": "Ticket Id"
+        },
+        "ticket_number": {
+          "type": "string",
+          "title": "Ticket Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Id",
+          "description": "Null for a department-level ticket (no doctor chosen)"
+        },
+        "doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Name"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Service Id"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "WalkIn",
+            "Emergency",
+            "CodeRed",
+            "Referred",
+            "ReturnVisit"
+          ],
+          "title": "Source"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Issued",
+            "Waiting",
+            "InConsultation",
+            "Examined",
+            "Completed",
+            "Deferred",
+            "Expired",
+            "Forfeited",
+            "Refunded",
+            "Void",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "payment_status": {
+          "type": "string",
+          "enum": [
+            "Unpaid",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "PanelBilled"
+          ],
+          "title": "Payment Status"
+        },
+        "approval_lock": {
+          "type": "string",
+          "enum": [
+            "None",
+            "RefundPending",
+            "WaiverPending",
+            "CreditPending"
+          ],
+          "title": "Approval Lock"
+        },
+        "gross_amount": {
+          "type": "number",
+          "title": "Gross Amount"
+        },
+        "discount_amount": {
+          "type": "number",
+          "title": "Discount Amount"
+        },
+        "net_payable": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Payable"
+        },
+        "discount_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discount Reason"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Issued At"
+        },
+        "paid_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Paid At"
+        },
+        "valid_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Valid Until",
+          "description": "The slip is valid for re-entry until then (set when settled)"
+        },
+        "called_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Called At"
+        },
+        "examined_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examined At"
+        },
+        "completed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed At"
+        },
+        "deferred_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deferred At"
+        },
+        "reactivated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reactivated At"
+        },
+        "expired_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expired At"
+        },
+        "voided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Voided At"
+        },
+        "void_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Void Reason"
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled At"
+        },
+        "is_clinical_locked": {
+          "type": "boolean",
+          "title": "Is Clinical Locked",
+          "description": "Clinical notes are frozen (e.g. after an approved refund)"
+        },
+        "clinical_lock_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clinical Lock Reason"
+        },
+        "is_emergency_bypass": {
+          "type": "boolean",
+          "title": "Is Emergency Bypass"
+        },
+        "is_ar_block_overridden": {
+          "type": "boolean",
+          "title": "Is Ar Block Overridden"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "queue": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/OpdQueueEntryOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "invoice": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/InvoiceDetailOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending_approval": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/ApprovalSummaryOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cash_back_prompts": {
+          "items": {
+            "$ref": "#/components/schemas/CashBackPromptOut"
+          },
+          "type": "array",
+          "title": "Cash Back Prompts"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ticket_id",
+        "ticket_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "gender",
+        "age_years",
+        "dob",
+        "doctor_id",
+        "doctor_name",
+        "department_id",
+        "department_name",
+        "service_id",
+        "source",
+        "status",
+        "payment_status",
+        "approval_lock",
+        "gross_amount",
+        "discount_amount",
+        "net_payable",
+        "discount_reason",
+        "issued_at",
+        "paid_at",
+        "valid_until",
+        "called_at",
+        "examined_at",
+        "completed_at",
+        "deferred_at",
+        "reactivated_at",
+        "expired_at",
+        "voided_at",
+        "void_reason",
+        "cancelled_at",
+        "is_clinical_locked",
+        "clinical_lock_reason",
+        "is_emergency_bypass",
+        "is_ar_block_overridden",
+        "row_version",
+        "queue",
+        "invoice",
+        "pending_approval",
+        "cash_back_prompts"
+      ],
+      "title": "OpdTicketDetailOut",
+      "description": "A ticket with its queue entry, invoice, pending approval and cash-back prompts (service.get_ticket)."
+    },
+    "OpdTicketOut": {
+      "properties": {
+        "ticket_id": {
+          "type": "integer",
+          "title": "Ticket Id"
+        },
+        "ticket_number": {
+          "type": "string",
+          "title": "Ticket Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Id",
+          "description": "Null for a department-level ticket (no doctor chosen)"
+        },
+        "doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Name"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Service Id"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "WalkIn",
+            "Emergency",
+            "CodeRed",
+            "Referred",
+            "ReturnVisit"
+          ],
+          "title": "Source"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Issued",
+            "Waiting",
+            "InConsultation",
+            "Examined",
+            "Completed",
+            "Deferred",
+            "Expired",
+            "Forfeited",
+            "Refunded",
+            "Void",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "payment_status": {
+          "type": "string",
+          "enum": [
+            "Unpaid",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "PanelBilled"
+          ],
+          "title": "Payment Status"
+        },
+        "approval_lock": {
+          "type": "string",
+          "enum": [
+            "None",
+            "RefundPending",
+            "WaiverPending",
+            "CreditPending"
+          ],
+          "title": "Approval Lock"
+        },
+        "gross_amount": {
+          "type": "number",
+          "title": "Gross Amount"
+        },
+        "discount_amount": {
+          "type": "number",
+          "title": "Discount Amount"
+        },
+        "net_payable": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Payable"
+        },
+        "discount_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discount Reason"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Issued At"
+        },
+        "paid_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Paid At"
+        },
+        "valid_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Valid Until",
+          "description": "The slip is valid for re-entry until then (set when settled)"
+        },
+        "called_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Called At"
+        },
+        "examined_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examined At"
+        },
+        "completed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed At"
+        },
+        "deferred_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deferred At"
+        },
+        "reactivated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reactivated At"
+        },
+        "expired_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expired At"
+        },
+        "voided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Voided At"
+        },
+        "void_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Void Reason"
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled At"
+        },
+        "is_clinical_locked": {
+          "type": "boolean",
+          "title": "Is Clinical Locked",
+          "description": "Clinical notes are frozen (e.g. after an approved refund)"
+        },
+        "clinical_lock_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clinical Lock Reason"
+        },
+        "is_emergency_bypass": {
+          "type": "boolean",
+          "title": "Is Emergency Bypass"
+        },
+        "is_ar_block_overridden": {
+          "type": "boolean",
+          "title": "Is Ar Block Overridden"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ticket_id",
+        "ticket_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "gender",
+        "age_years",
+        "dob",
+        "doctor_id",
+        "doctor_name",
+        "department_id",
+        "department_name",
+        "service_id",
+        "source",
+        "status",
+        "payment_status",
+        "approval_lock",
+        "gross_amount",
+        "discount_amount",
+        "net_payable",
+        "discount_reason",
+        "issued_at",
+        "paid_at",
+        "valid_until",
+        "called_at",
+        "examined_at",
+        "completed_at",
+        "deferred_at",
+        "reactivated_at",
+        "expired_at",
+        "voided_at",
+        "void_reason",
+        "cancelled_at",
+        "is_clinical_locked",
+        "clinical_lock_reason",
+        "is_emergency_bypass",
+        "is_ar_block_overridden",
+        "row_version"
+      ],
+      "title": "OpdTicketOut",
+      "description": "An OPD ticket with its patient, doctor and department (service.TICKET_COLS)."
+    },
+    "OutstandingBannerOut": {
+      "properties": {
+        "has_outstanding_ar": {
+          "type": "boolean",
+          "title": "Has Outstanding Ar"
+        },
+        "outstanding_ar_balance": {
+          "type": "number",
+          "title": "Outstanding Ar Balance"
+        },
+        "ar_block_applies": {
+          "type": "boolean",
+          "title": "Ar Block Applies",
+          "description": "True: reception blocks a new OPD slip unless ER bypass or an override"
+        },
+        "banner_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Banner Text",
+          "description": "Show it prominently, e.g. \"OUTSTANDING BALANCE: RS. 2,500\""
+        }
+      },
+      "type": "object",
+      "required": [
+        "has_outstanding_ar",
+        "outstanding_ar_balance",
+        "ar_block_applies",
+        "banner_text"
+      ],
+      "title": "OutstandingBannerOut",
+      "description": "Outstanding dues of the patient's whole merge chain (workflow sections 1.2 and 1.9)."
+    },
+    "PanelOut": {
+      "properties": {
+        "panel_id": {
+          "type": "integer",
+          "title": "Panel Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "panel_type": {
+          "type": "string",
+          "enum": [
+            "SehatSahulat",
+            "Zakat",
+            "GovernmentEmployee",
+            "Corporate",
+            "Other"
+          ],
+          "title": "Panel Type"
+        },
+        "discount_pct": {
+          "type": "number",
+          "title": "Discount Pct"
+        },
+        "is_credit_panel": {
+          "type": "boolean",
+          "title": "Is Credit Panel"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "panel_id",
+        "code",
+        "name",
+        "panel_type",
+        "discount_pct",
+        "is_credit_panel",
+        "is_active",
+        "row_version"
+      ],
+      "title": "PanelOut"
+    },
+    "PatientCreate": {
+      "properties": {
+        "full_name": {
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Full Name",
+          "examples": [
+            "Muhammad Ali"
+          ]
+        },
+        "gender": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "other",
+            "unknown"
+          ],
+          "title": "Gender"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 150,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "mobile": {
+          "type": "string",
+          "pattern": "^\\+?[0-9][0-9 -]{6,19}$",
+          "title": "Mobile",
+          "examples": [
+            "0300-1234567"
+          ]
+        },
+        "billing_category": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Panel"
+          ],
+          "title": "Billing Category",
+          "default": "Cash"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id",
+          "description": "The panel (GET /finance/panels)"
+        },
+        "panel_member_no": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 50
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Member No"
+        },
+        "cnic": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cnic",
+          "examples": [
+            "35202-1234567-1"
+          ]
+        },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
+        },
+        "father_or_husband_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Father Or Husband Name"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "emergency_contact_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Name"
+        },
+        "emergency_contact_phone": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Phone"
+        },
+        "blood_group": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Group"
+        },
+        "allergies": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Allergies"
+        },
+        "linked_employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Linked Employee Id",
+          "description": "Staff member registering as a patient (payroll deduction)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "full_name",
+        "gender",
+        "mobile"
+      ],
+      "title": "PatientCreate",
+      "description": "Full registration. REQUIRED: full_name, gender, dob OR age_years, mobile, billing_category\n(+ panel_id when billing_category = Panel). Everything else is optional."
+    },
+    "PatientDetailOut": {
+      "properties": {
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "photo_document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Photo Document Id",
+          "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "registration_type": {
+          "type": "string",
+          "enum": [
+            "Regular",
+            "LabOnly",
+            "TraumaTemp",
+            "Merged"
+          ],
+          "title": "Registration Type"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "father_or_husband_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Father Or Husband Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "age_recorded_on": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Recorded On",
+          "description": "When age_years was recorded (the age grows from that date)"
+        },
+        "mobile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mobile"
+        },
+        "cnic": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cnic"
+        },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "emergency_contact_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Name"
+        },
+        "emergency_contact_phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Phone"
+        },
+        "blood_group": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Group"
+        },
+        "allergies": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Allergies"
+        },
+        "billing_category": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Panel"
+          ],
+          "title": "Billing Category"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "panel_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Name"
+        },
+        "panel_member_no": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Member No"
+        },
+        "temp_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp Identifier",
+          "description": "Unknown-trauma label, e.g. \"Unknown Male 3\""
+        },
+        "merged_into_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Merged Into Id"
+        },
+        "linked_employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Linked Employee Id"
+        },
+        "is_deceased": {
+          "type": "boolean",
+          "title": "Is Deceased"
+        },
+        "death_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Death Id",
+          "description": "The death record (GET /deaths/{death_id}) when the death is recorded"
+        },
+        "death_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Death At"
+        },
+        "mlc_numbers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Mlc Numbers",
+          "description": "Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked)"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "outstanding": {
+          "$ref": "#/components/schemas/OutstandingBannerOut"
+        },
+        "master_patient_id": {
+          "type": "integer",
+          "title": "Master Patient Id",
+          "description": "The record every merged profile points to"
+        },
+        "merged_profiles": {
+          "items": {
+            "$ref": "#/components/schemas/MergedProfileOut"
+          },
+          "type": "array",
+          "title": "Merged Profiles"
+        }
+      },
+      "type": "object",
+      "required": [
+        "patient_id",
+        "photo_document_id",
+        "mrn",
+        "registration_type",
+        "full_name",
+        "father_or_husband_name",
+        "gender",
+        "dob",
+        "age_years",
+        "age_recorded_on",
+        "mobile",
+        "cnic",
+        "upmrn",
+        "address",
+        "emergency_contact_name",
+        "emergency_contact_phone",
+        "blood_group",
+        "allergies",
+        "billing_category",
+        "panel_id",
+        "panel_name",
+        "panel_member_no",
+        "temp_identifier",
+        "merged_into_id",
+        "linked_employee_id",
+        "is_deceased",
+        "death_id",
+        "death_at",
+        "mlc_numbers",
+        "created_at",
+        "row_version",
+        "outstanding",
+        "master_patient_id",
+        "merged_profiles"
+      ],
+      "title": "PatientDetailOut"
+    },
+    "PatientDocumentOut": {
+      "properties": {
+        "document_id": {
+          "type": "integer",
+          "title": "Document Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "application/pdf",
+            "image/jpeg",
+            "image/png"
+          ],
+          "title": "Content Type"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "title": "Size Bytes"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought by the patient from another hospital, laboratory or clinic: show it labelled as an outside document, never as a result of this hospital"
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "The hospital, laboratory or clinic that issued an outside document"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document (the test, the report, the visit)"
+        },
+        "is_verified": {
+          "type": "boolean",
+          "title": "Is Verified"
+        },
+        "uploaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Uploaded At"
+        },
+        "uploaded_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uploaded By"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_id",
+        "patient_id",
+        "doc_type",
+        "title",
+        "content_type",
+        "size_bytes",
+        "is_outside",
+        "source_facility",
+        "document_date",
+        "is_verified",
+        "uploaded_at",
+        "uploaded_by"
+      ],
+      "title": "PatientDocumentOut"
+    },
+    "PatientDocumentUploadOut": {
+      "properties": {
+        "document_id": {
+          "type": "integer",
+          "title": "Document Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "application/pdf",
+            "image/jpeg",
+            "image/png"
+          ],
+          "title": "Content Type"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "title": "Size Bytes"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought by the patient from another hospital, laboratory or clinic: show it labelled as an outside document, never as a result of this hospital"
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "The hospital, laboratory or clinic that issued an outside document"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document (the test, the report, the visit)"
+        },
+        "uploaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Uploaded At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_id",
+        "patient_id",
+        "doc_type",
+        "title",
+        "content_type",
+        "size_bytes",
+        "is_outside",
+        "source_facility",
+        "document_date",
+        "uploaded_at"
+      ],
+      "title": "PatientDocumentUploadOut",
+      "description": "The stored document (download it with GET /patient-documents/{document_id}/download)."
+    },
+    "PatientSearchHitOut": {
+      "properties": {
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "photo_document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Photo Document Id",
+          "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "registration_type": {
+          "type": "string",
+          "enum": [
+            "Regular",
+            "LabOnly",
+            "TraumaTemp",
+            "Merged"
+          ],
+          "title": "Registration Type"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "father_or_husband_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Father Or Husband Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "age_recorded_on": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Recorded On",
+          "description": "When age_years was recorded (the age grows from that date)"
+        },
+        "mobile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mobile"
+        },
+        "cnic": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cnic"
+        },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "emergency_contact_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Name"
+        },
+        "emergency_contact_phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Phone"
+        },
+        "blood_group": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Group"
+        },
+        "allergies": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Allergies"
+        },
+        "billing_category": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Panel"
+          ],
+          "title": "Billing Category"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "panel_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Name"
+        },
+        "panel_member_no": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Member No"
+        },
+        "temp_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp Identifier",
+          "description": "Unknown-trauma label, e.g. \"Unknown Male 3\""
+        },
+        "merged_into_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Merged Into Id"
+        },
+        "linked_employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Linked Employee Id"
+        },
+        "is_deceased": {
+          "type": "boolean",
+          "title": "Is Deceased"
+        },
+        "death_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Death Id",
+          "description": "The death record (GET /deaths/{death_id}) when the death is recorded"
+        },
+        "death_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Death At"
+        },
+        "mlc_numbers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Mlc Numbers",
+          "description": "Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked)"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "outstanding": {
+          "$ref": "#/components/schemas/OutstandingBannerOut"
+        },
+        "matched_merged_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/MergedProfileOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The profile merged into this record that the search matched when this record itself did not (an old slip's MRN, a trauma label such as \"Unknown Male 3\", a duplicate's name or numbers): say \"Found by MRN-…, merged into this record\". Null when this record matched"
+        }
+      },
+      "type": "object",
+      "required": [
+        "patient_id",
+        "photo_document_id",
+        "mrn",
+        "registration_type",
+        "full_name",
+        "father_or_husband_name",
+        "gender",
+        "dob",
+        "age_years",
+        "age_recorded_on",
+        "mobile",
+        "cnic",
+        "upmrn",
+        "address",
+        "emergency_contact_name",
+        "emergency_contact_phone",
+        "blood_group",
+        "allergies",
+        "billing_category",
+        "panel_id",
+        "panel_name",
+        "panel_member_no",
+        "temp_identifier",
+        "merged_into_id",
+        "linked_employee_id",
+        "is_deceased",
+        "death_id",
+        "death_at",
+        "mlc_numbers",
+        "created_at",
+        "row_version",
+        "outstanding",
+        "matched_merged_profile"
+      ],
+      "title": "PatientSearchHitOut",
+      "description": "A person the search found, always as their master record (merged profiles are never hits of their own)."
+    },
+    "PaymentIn": {
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Card",
+            "BankTransfer"
+          ],
+          "title": "Method",
+          "default": "Cash"
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Amount",
+          "description": "Defaults to the full amount due"
+        },
+        "reference_no": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 60
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference No",
+          "description": "Card slip / bank reference"
+        }
+      },
+      "type": "object",
+      "title": "PaymentIn"
+    },
+    "PaymentOut": {
+      "properties": {
+        "payment_id": {
+          "type": "integer",
+          "title": "Payment Id"
+        },
+        "receipt_no": {
+          "type": "string",
+          "title": "Receipt No"
+        },
+        "payment_type": {
+          "type": "string",
+          "enum": [
+            "Collection",
+            "Refund",
+            "WaiverDispensation",
+            "ARCollection"
+          ],
+          "title": "Payment Type"
+        },
+        "amount": {
+          "type": "number",
+          "title": "Amount"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Card",
+            "BankTransfer",
+            "PanelCredit",
+            "PayrollDeduction",
+            "Charity"
+          ],
+          "title": "Method"
+        },
+        "invoice_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Invoice Id"
+        },
+        "shift_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Shift Id"
+        },
+        "collected_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Collected At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "payment_id",
+        "receipt_no",
+        "payment_type",
+        "amount",
+        "method",
+        "invoice_id",
+        "shift_id",
+        "collected_at"
+      ],
+      "title": "PaymentOut",
+      "description": "One money movement: a collection, refund, waiver cash-back or AR settlement, with its receipt number."
+    },
+    "PrintOut_OpdSlipFieldsOut_": {
+      "properties": {
+        "document_type": {
+          "type": "string",
+          "enum": [
+            "autopsy_order",
+            "bed_labels",
+            "blood_component_label",
+            "blood_donation_labels",
+            "clinical_note",
+            "complaint_letter",
+            "complaints_notice",
+            "consent_form",
+            "cost_estimate",
+            "cssd_labels",
+            "death_certificate",
+            "discharge_summary",
+            "dispensing_label",
+            "dose_label",
+            "id_card",
+            "imaging_report",
+            "lab_label",
+            "lab_report",
+            "mlc_intimation",
+            "opd_slip",
+            "pharmacy_receipt",
+            "prescription",
+            "referral_slip",
+            "send_out_manifest",
+            "surgical_record",
+            "triage_algorithm",
+            "wristband"
+          ],
+          "title": "Document Type"
+        },
+        "printer_role": {
+          "type": "string",
+          "enum": [
+            "receipt",
+            "label",
+            "document",
+            "card"
+          ],
+          "title": "Printer Role",
+          "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+        },
+        "paper_width_mm": {
+          "type": "integer",
+          "title": "Paper Width Mm"
+        },
+        "fields": {
+          "$ref": "#/components/schemas/OpdSlipFieldsOut",
+          "description": "The document's data, for frontends that render their own layout"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Text",
+          "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+        },
+        "barcode_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode Svg"
+        },
+        "qr_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Qr Svg"
+        },
+        "pdf_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pdf Url"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_type",
+        "printer_role",
+        "paper_width_mm",
+        "fields",
+        "text",
+        "barcode_svg",
+        "qr_svg",
+        "pdf_url"
+      ],
+      "title": "PrintOut[OpdSlipFieldsOut]"
+    },
+    "QueueBoardEntryOut": {
+      "properties": {
+        "queue_id": {
+          "type": "integer",
+          "title": "Queue Id"
+        },
+        "ticket_id": {
+          "type": "integer",
+          "title": "Ticket Id"
+        },
+        "ticket_number": {
+          "type": "string",
+          "title": "Ticket Number"
+        },
+        "token_no": {
+          "type": "integer",
+          "title": "Token No"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Issued",
+            "Waiting",
+            "InConsultation",
+            "Examined",
+            "Completed",
+            "Deferred",
+            "Expired",
+            "Forfeited",
+            "Refunded",
+            "Void",
+            "Cancelled"
+          ],
+          "title": "Status",
+          "description": "The ticket's status"
+        },
+        "priority": {
+          "type": "integer",
+          "title": "Priority"
+        },
+        "payment_status": {
+          "type": "string",
+          "enum": [
+            "Unpaid",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "PanelBilled"
+          ],
+          "title": "Payment Status"
+        },
+        "approval_lock": {
+          "type": "string",
+          "enum": [
+            "None",
+            "RefundPending",
+            "WaiverPending",
+            "CreditPending"
+          ],
+          "title": "Approval Lock"
+        }
+      },
+      "type": "object",
+      "required": [
+        "queue_id",
+        "ticket_id",
+        "ticket_number",
+        "token_no",
+        "patient_name",
+        "status",
+        "priority",
+        "payment_status",
+        "approval_lock"
+      ],
+      "title": "QueueBoardEntryOut"
+    },
+    "QueueBoardOut": {
+      "properties": {
+        "queue_group": {
+          "type": "string",
+          "title": "Queue Group"
+        },
+        "doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Id"
+        },
+        "doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Name"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "waiting": {
+          "type": "integer",
+          "title": "Waiting"
+        },
+        "in_consultation": {
+          "type": "integer",
+          "title": "In Consultation"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/components/schemas/QueueBoardEntryOut"
+          },
+          "type": "array",
+          "title": "Entries"
+        }
+      },
+      "type": "object",
+      "required": [
+        "queue_group",
+        "doctor_id",
+        "doctor_name",
+        "department_id",
+        "department_name",
+        "waiting",
+        "in_consultation",
+        "entries"
+      ],
+      "title": "QueueBoardOut",
+      "description": "One live queue (a doctor's, or a department's for tickets without a doctor)."
+    },
+    "ReceptionCashBackOut": {
+      "properties": {
+        "ticket_id": {
+          "type": "integer",
+          "title": "Ticket Id"
+        },
+        "ticket_number": {
+          "type": "string",
+          "title": "Ticket Number"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Refund",
+            "WaiverRefund"
+          ],
+          "title": "Kind"
+        },
+        "id": {
+          "type": "integer",
+          "title": "Id"
+        },
+        "amount": {
+          "type": "number",
+          "title": "Amount"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ticket_id",
+        "ticket_number",
+        "kind",
+        "id",
+        "amount"
+      ],
+      "title": "ReceptionCashBackOut"
+    },
+    "ReceptionDashboardOut": {
+      "properties": {
+        "queues": {
+          "items": {
+            "$ref": "#/components/schemas/QueueBoardOut"
+          },
+          "type": "array",
+          "title": "Queues"
+        },
+        "deferred": {
+          "items": {
+            "$ref": "#/components/schemas/OpdTicketOut"
+          },
+          "type": "array",
+          "title": "Deferred"
+        },
+        "awaiting_approval": {
+          "items": {
+            "$ref": "#/components/schemas/OpdTicketOut"
+          },
+          "type": "array",
+          "title": "Awaiting Approval",
+          "description": "Tickets locked by a pending refund, waiver or credit"
+        },
+        "cash_back_prompts": {
+          "items": {
+            "$ref": "#/components/schemas/ReceptionCashBackOut"
+          },
+          "type": "array",
+          "title": "Cash Back Prompts"
+        }
+      },
+      "type": "object",
+      "required": [
+        "queues",
+        "deferred",
+        "awaiting_approval",
+        "cash_back_prompts"
+      ],
+      "title": "ReceptionDashboardOut"
+    },
+    "RegistrationIn": {
+      "properties": {
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id",
+          "description": "Existing patient (GET /patients/search)"
+        },
+        "new_patient": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/PatientCreate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Full intake form for a new patient"
+        },
+        "doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Id",
+          "description": "Target doctor (employee id); or give department_id"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Service Id",
+          "description": "Override the consultation service/fee"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "WalkIn",
+            "Emergency",
+            "Referred",
+            "ReturnVisit"
+          ],
+          "title": "Source",
+          "default": "WalkIn"
+        },
+        "discount_amount": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            }
+          ],
+          "title": "Discount Amount",
+          "description": "Within your discount ceiling (else request a waiver)",
+          "default": "0"
+        },
+        "discount_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discount Reason"
+        },
+        "payment": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/PaymentIn"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Pay now. Omit to issue an unpaid slip (e.g. to request a waiver/credit)."
+        },
+        "emergency_bypass": {
+          "type": "boolean",
+          "title": "Emergency Bypass",
+          "description": "ER/Trauma: skip the outstanding-dues block and payment-before-queue",
+          "default": false
+        },
+        "ar_override_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ar Override Reason",
+          "description": "Needs permission opd.ticket.ar_override when dues block applies"
+        }
+      },
+      "type": "object",
+      "title": "RegistrationIn",
+      "description": "Atomic front-desk registration: (new or existing) patient → OPD ticket → invoice →\npayment → queue token. Send an `Idempotency-Key` header so a retry never double-charges."
+    },
+    "RegistrationOut": {
+      "properties": {
+        "ticket_id": {
+          "type": "integer",
+          "title": "Ticket Id"
+        },
+        "ticket_number": {
+          "type": "string",
+          "title": "Ticket Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Id",
+          "description": "Null for a department-level ticket (no doctor chosen)"
+        },
+        "doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Name"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Service Id"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "WalkIn",
+            "Emergency",
+            "CodeRed",
+            "Referred",
+            "ReturnVisit"
+          ],
+          "title": "Source"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Issued",
+            "Waiting",
+            "InConsultation",
+            "Examined",
+            "Completed",
+            "Deferred",
+            "Expired",
+            "Forfeited",
+            "Refunded",
+            "Void",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "payment_status": {
+          "type": "string",
+          "enum": [
+            "Unpaid",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "PanelBilled"
+          ],
+          "title": "Payment Status"
+        },
+        "approval_lock": {
+          "type": "string",
+          "enum": [
+            "None",
+            "RefundPending",
+            "WaiverPending",
+            "CreditPending"
+          ],
+          "title": "Approval Lock"
+        },
+        "gross_amount": {
+          "type": "number",
+          "title": "Gross Amount"
+        },
+        "discount_amount": {
+          "type": "number",
+          "title": "Discount Amount"
+        },
+        "net_payable": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Payable"
+        },
+        "discount_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discount Reason"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Issued At"
+        },
+        "paid_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Paid At"
+        },
+        "valid_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Valid Until",
+          "description": "The slip is valid for re-entry until then (set when settled)"
+        },
+        "called_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Called At"
+        },
+        "examined_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examined At"
+        },
+        "completed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed At"
+        },
+        "deferred_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deferred At"
+        },
+        "reactivated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reactivated At"
+        },
+        "expired_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expired At"
+        },
+        "voided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Voided At"
+        },
+        "void_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Void Reason"
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled At"
+        },
+        "is_clinical_locked": {
+          "type": "boolean",
+          "title": "Is Clinical Locked",
+          "description": "Clinical notes are frozen (e.g. after an approved refund)"
+        },
+        "clinical_lock_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clinical Lock Reason"
+        },
+        "is_emergency_bypass": {
+          "type": "boolean",
+          "title": "Is Emergency Bypass"
+        },
+        "is_ar_block_overridden": {
+          "type": "boolean",
+          "title": "Is Ar Block Overridden"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "queue": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/OpdQueueEntryOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "invoice": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/InvoiceDetailOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending_approval": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/ApprovalSummaryOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cash_back_prompts": {
+          "items": {
+            "$ref": "#/components/schemas/CashBackPromptOut"
+          },
+          "type": "array",
+          "title": "Cash Back Prompts"
+        },
+        "payment": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/PaymentOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "queue_entry_created": {
+          "type": "boolean",
+          "title": "Queue Entry Created"
+        },
+        "print_payload": {
+          "$ref": "#/components/schemas/PrintOut_OpdSlipFieldsOut_"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ticket_id",
+        "ticket_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "gender",
+        "age_years",
+        "dob",
+        "doctor_id",
+        "doctor_name",
+        "department_id",
+        "department_name",
+        "service_id",
+        "source",
+        "status",
+        "payment_status",
+        "approval_lock",
+        "gross_amount",
+        "discount_amount",
+        "net_payable",
+        "discount_reason",
+        "issued_at",
+        "paid_at",
+        "valid_until",
+        "called_at",
+        "examined_at",
+        "completed_at",
+        "deferred_at",
+        "reactivated_at",
+        "expired_at",
+        "voided_at",
+        "void_reason",
+        "cancelled_at",
+        "is_clinical_locked",
+        "clinical_lock_reason",
+        "is_emergency_bypass",
+        "is_ar_block_overridden",
+        "row_version",
+        "queue",
+        "invoice",
+        "pending_approval",
+        "cash_back_prompts",
+        "payment",
+        "queue_entry_created",
+        "print_payload"
+      ],
+      "title": "RegistrationOut",
+      "description": "The new ticket after registration, with the payment taken, whether it is queued, and the slip to print."
+    },
+    "ServiceListItemOut": {
+      "properties": {
+        "service_id": {
+          "type": "integer",
+          "title": "Service Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "OT",
+            "Imaging",
+            "RoomCharge",
+            "Procedure",
+            "Other"
+          ],
+          "title": "Category"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Id"
+        },
+        "default_price": {
+          "type": "number",
+          "title": "Default Price"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "service_id",
+        "code",
+        "name",
+        "category",
+        "department_id",
+        "doctor_id",
+        "default_price",
+        "is_active",
+        "row_version",
+        "department_name",
+        "doctor_name"
+      ],
+      "title": "ServiceListItemOut"
+    },
+    "StaffLookupOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id",
+          "description": "The id a form's staff field takes (contrast_doctor_id, employee_id, ...)"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "license_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "PMDC",
+                "PNC",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "License Type",
+          "description": "The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none"
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id",
+          "description": "Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "department_name",
+        "license_type",
+        "registration",
+        "user_id"
+      ],
+      "title": "StaffLookupOut",
+      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."
+    },
+    "TicketPayIn": {
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Card",
+            "BankTransfer"
+          ],
+          "title": "Method",
+          "default": "Cash"
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Amount",
+          "description": "Defaults to the full amount due"
+        },
+        "reference_no": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 60
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference No",
+          "description": "Card slip / bank reference"
+        }
+      },
+      "type": "object",
+      "title": "TicketPayIn"
+    },
+    "TicketPaymentOut": {
+      "properties": {
+        "payment": {
+          "$ref": "#/components/schemas/PaymentOut"
+        },
+        "ticket": {
+          "$ref": "#/components/schemas/OpdTicketDetailOut"
+        }
+      },
+      "type": "object",
+      "required": [
+        "payment",
+        "ticket"
+      ],
+      "title": "TicketPaymentOut",
+      "description": "A payment (or cash handed back) and the ticket afterwards."
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    }
+  },
+  "unknowns": []
+}

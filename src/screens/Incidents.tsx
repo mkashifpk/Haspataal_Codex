@@ -1,4 +1,5 @@
 import { StaffPicker } from "../StaffPicker";
+import { DirectoryPicker,canReadDirectory } from '../DirectoryPicker';
 import { tr } from "../i18n";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -8,7 +9,7 @@ import {
   hospitalTimeZoneError,
 } from "../hospital-time";
 import * as incidents from "../generated/report_incident";
-import contract from "../../contracts/report_incident.json";
+import contract from "../generated/report_incident-form.json";
 import { api, call } from "../bridge";
 import {
   writeAttempt,
@@ -47,6 +48,7 @@ function Lookup({
     [busy, setBusy] = useState(false),
     [chosen, setChosen] = useState("");
   const lookupGeneration = useRef(0);
+  if(!allowed) return null;
   return (
     <div className="lookup">
       <Field label={label}>
@@ -218,6 +220,7 @@ export function Incidents({
   const selected = r.data?.types.find((t) => t.type_code === type);
   const schema = contract.schemas.IncidentIn.properties;
   const can = (p: string) => user.permissions.includes(p);
+  const setReference=(field:string,value:string)=>setIds(old=>{const next={...old};if(value)next[field]=Number(value);else delete next[field];return next;});
   const enumSelect = (
     key: "kind" | "harm" | "affected" | "ot_phase" | "medication_stage",
     label: string,
@@ -312,7 +315,7 @@ export function Incidents({
             if (body.department_id)
               body.department_id = Number(body.department_id);
             else delete body.department_id;
-            if (affected === "Patient" && !body.patient_id)
+            if (affected === "Patient" && canReadDirectory('/patients/search',user.permissions) && !body.patient_id)
               throw new Error("Select the affected patient first.");
             if (affected === "Staff" && !body.employee_id)
               throw new Error("Select the affected staff member first.");
@@ -377,7 +380,7 @@ export function Incidents({
             <Field label={tr("Department")}>
               <select data-help="incident.whenwhere" name="department_id">
                 <option value="">{tr("Not recorded")}</option>
-                {r.data?.departments.map((d) => (
+                {r.data?.departments.filter(d=>d.is_active).map((d) => (
                   <option key={d.department_id} value={d.department_id}>
                     {d.name}
                   </option>
@@ -401,7 +404,7 @@ export function Incidents({
               idField="patient_id"
               labelFields={["mrn", "full_name", "mobile"]}
               onSelect={(id) => setIds({ ...ids, patient_id: id })}
-              allowed={can("patient.search")}
+              allowed={canReadDirectory('/patients/search',user.permissions)}
             />
           )}{" "}
           {affected === "Staff" && (
@@ -419,6 +422,9 @@ export function Incidents({
               }
             />
           )}{" "}
+          <DirectoryPicker path="/beds/matrix?include_beds=false" idField="ward_id" list="wards" data-help="incident.whenwhere" value={ids.ward_id ?? ''} onChange={e=>setReference('ward_id',e.target.value)}/>
+          {affected==='Patient'&&<DirectoryPicker path="/admissions?status=Admitted" idField="admission_id" data-help="incident.reference" value={ids.admission_id ?? ''} onChange={e=>setReference('admission_id',e.target.value)}/>}
+          {!canReadDirectory('/patients/search',user.permissions)&&affected==='Patient'&&<p>{tr('Describe the patient in What happened. Your permissions do not allow patient lookup.')}</p>}
           {selected?.area === "Medication" && (
             <div className="form-grid">
               <Lookup
@@ -427,7 +433,7 @@ export function Incidents({
                 idField="drug_id"
                 labelFields={["name", "strength", "form"]}
                 onSelect={(id) => setIds({ ...ids, drug_id: id })}
-                allowed={can("pharmacy.formulary.view")}
+                allowed={canReadDirectory('/drugs/search',user.permissions)}
               />
               {enumSelect("medication_stage", "Medication stage")}
             </div>
@@ -445,7 +451,7 @@ export function Incidents({
                   "procedure_name",
                 ]}
                 onSelect={(id) => setIds({ ...ids, booking_id: id })}
-                allowed={can("ot.booking.view") || can("ot.booking.manage")}
+                allowed={canReadDirectory('/ot/bookings',user.permissions)}
               />
               {enumSelect("ot_phase", "Phase of operation")}
             </div>
@@ -461,11 +467,7 @@ export function Incidents({
               idField="death_id"
               labelFields={["death_number", "patient_name", "mrn"]}
               onSelect={(id) => setIds({ ...ids, death_id: id })}
-              allowed={[
-                "death.record",
-                "death.register.view",
-                "death.body.release",
-              ].some(can)}
+              allowed={canReadDirectory('/deaths',user.permissions)}
             />
           </details>
           <Field
@@ -507,7 +509,7 @@ export function Incidents({
             disabled={
               busy ||
               (affected === "Staff" && !ids.employee_id) ||
-              (affected === "Patient" && !ids.patient_id)
+              (affected === "Patient" && canReadDirectory('/patients/search',user.permissions) && !ids.patient_id)
             }
           >
             {tr("Submit incident report")}

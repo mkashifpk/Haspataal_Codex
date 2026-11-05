@@ -1,3 +1,5 @@
+import {ConsentScanUpload} from "./ConsentScanUpload";
+import {DirectoryPicker} from "../DirectoryPicker";
 import React, { useEffect, useState, useMemo } from "react";
 import {
   Empty,
@@ -123,6 +125,7 @@ export function DeathRecord({
   });
 
   // Autopsy Forms
+  const [autopsyDocument,setAutopsyDocument]=useState<{patient_id:number;document_id:number}>();
   const [autopsyReqForm, setAutopsyReqForm] = useState<Partial<AutopsyRequestIn>>({
     request_reasons: "",
   });
@@ -146,6 +149,7 @@ export function DeathRecord({
   } = useLoad(() => deathRegister({ limit: 100 }), []);
 
   // 2. Load Selected Death Details
+  const [scanPending,setScanPending]=useState(false);
   const [detailData, setDetailData] = useState<DeathViewOut | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<unknown>(null);
@@ -295,7 +299,7 @@ export function DeathRecord({
 
   // Handle Save Draft (PUT /deaths/{id})
   const handleSaveDraft = () => {
-    if (!detailData) return;
+    if (!detailData||scanPending||write.blocked) return;
     const errs = validateDeathDraft(draftState, detailData.patient);
     if (Object.keys(errs).length > 0) {
       setValidationErrors(errs);
@@ -374,7 +378,7 @@ export function DeathRecord({
 
   // Handle Autopsy Report
   const handleAutopsyReportSubmit = () => {
-    if (!detailData) return;
+    if (!detailData||scanPending||write.blocked) return;
     const errs = validateAutopsyReport(autopsyRepForm);
     if (Object.keys(errs).length > 0) {
       setValidationErrors(errs);
@@ -384,7 +388,7 @@ export function DeathRecord({
     write.start({
       path: `/deaths/${detailData.death.death_id}/autopsy/report`,
       method: "POST",
-      body: autopsyRepForm,
+      body: {...autopsyRepForm,report_document_id:autopsyDocument?.patient_id===detailData.death.patient_id?autopsyDocument.document_id:undefined},
       permission: "death.record",
       protection: "idempotent",
       label: `Record autopsy report for ${detailData.death.death_number}`,
@@ -407,7 +411,7 @@ export function DeathRecord({
   };
 
   return (
-    <div className="container-fluid p-3" data-screen-id={screenId} style={{ minHeight: "100vh" }}>
+    <div data-write-pending={write.blocked||scanPending} className="container-fluid p-3" data-screen-id={screenId} style={{ minHeight: "100vh" }}>
       {/* Retiring / Service View Banner (rule:81b46f9cf6) */}
       {view.banner && (
         <div className="alert alert-warning d-flex align-items-center mb-3" role="alert">
@@ -586,7 +590,8 @@ export function DeathRecord({
                     className={selectedDeathId === row.death_id ? "table-active" : ""}
                     style={{ cursor: "pointer" }}
                     onClick={() => {
-                      setSelectedDeathId(row.death_id);
+                      if(scanPending||write.blocked)return;
+                        setSelectedDeathId(row.death_id);
                       setDetailModalOpen(true);
                     }}
                   >
@@ -638,7 +643,8 @@ export function DeathRecord({
                         type="button"
                         className="btn btn-outline-primary btn-sm"
                         onClick={() => {
-                          setSelectedDeathId(row.death_id);
+                          if(scanPending||write.blocked)return;
+                        setSelectedDeathId(row.death_id);
                           setDetailModalOpen(true);
                         }}
                         data-help="death_record.btn_view_certificate"
@@ -1508,14 +1514,12 @@ export function DeathRecord({
                   <label className="form-label small fw-bold mb-1">
                     {t("Patient ID (System ID)", "مریض کا شناختی نمبر")} <span className="text-danger">*</span>
                   </label>
-                  <input
-                    type="number"
+                  <DirectoryPicker
                     className="form-control form-control-sm"
                     value={recordForm.patient_id || ""}
                     onChange={(e) => setRecordForm({ ...recordForm, patient_id: Number(e.target.value) })}
-                    placeholder="e.g. 1042"
                     data-help="death_record.input_patient_id"
-                  />
+                   path="/patients/search" idField="patient_id" search />
                 </div>
 
                 <div className="mb-2">
@@ -1786,11 +1790,13 @@ export function DeathRecord({
                 <button
                   type="button"
                   className="btn-close btn-close-white"
-                  onClick={() => setAutopsyRepModalOpen(false)}
+                  onClick={() => {if(!scanPending&&!write.blocked)setAutopsyRepModalOpen(false);}}
                   data-help="death_record.btn_close_autopsy_rep"
                 />
               </div>
               <div className="modal-body p-3">
+      {detailData&&user.permissions.includes('patient.document.upload')&&<ConsentScanUpload key={detailData.death.patient_id} patientId={detailData.death.patient_id} consentNumber={detailData.death.death_number} docType="AutopsyReport" disabled={write.blocked} onPending={setScanPending} onUploaded={v=>setAutopsyDocument({patient_id:v.patient_id,document_id:v.document_id})}/>}
+      {autopsyDocument?.patient_id===detailData?.death.patient_id&&<p>{t('This patient’s scan is uploaded and will be attached when you confirm the report.','اس مریض کی اسکین اپ لوڈ ہے؛ رپورٹ کی تصدیق پر منسلک ہو گی۔')}</p>}
                 {validationErrors.performed_at && <div className="text-danger small mb-2">{validationErrors.performed_at}</div>}
                 {validationErrors.findings && <div className="text-danger small mb-2">{validationErrors.findings}</div>}
                 {validationErrors.correlation && <div className="text-danger small mb-2">{validationErrors.correlation}</div>}
@@ -1849,7 +1855,7 @@ export function DeathRecord({
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
-                  onClick={() => setAutopsyRepModalOpen(false)}
+                  onClick={() => {if(!scanPending&&!write.blocked)setAutopsyRepModalOpen(false);}}
                   data-help="death_record.btn_cancel_autopsy_rep"
                 >
                   {t("Cancel", "منسوخ")}
@@ -1858,7 +1864,7 @@ export function DeathRecord({
                   type="button"
                   className="btn btn-success btn-sm fw-bold"
                   onClick={handleAutopsyReportSubmit}
-                  disabled={write.busy}
+                  disabled={write.blocked||scanPending}
                   data-help="death_record.btn_submit_autopsy_rep"
                 >
                   {t("Submit Autopsy Report", "رپورٹ جمع کریں")}

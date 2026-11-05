@@ -114,12 +114,12 @@ export function getPack(pack_code: string): Promise<PackOut> {
   return api<PackOut>("GET", `/cssd/packs/${pack_code}`, undefined);
 }
 
-/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view or cssd.operate or infection.control.manage). */
+/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record). */
 export function bedMatrix(query?: { include_beds?: boolean }): Promise<BedMatrixOut> {
   return api<BedMatrixOut>("GET", withQuery(`/beds/matrix`, query), undefined);
 }
 
-/** All theaters (incl. out-of-service) — GET /api/v1/ot/theaters (who may call: holders of ot.status.view or cssd.operate). */
+/** All theaters (incl. out-of-service) — GET /api/v1/ot/theaters (who may call: holders of ot.status.view or cssd.operate or facility.equipment.manage). */
 export function theaters(): Promise<TheaterOut[]> {
   return api<TheaterOut[]>("GET", `/ot/theaters`, undefined);
 }

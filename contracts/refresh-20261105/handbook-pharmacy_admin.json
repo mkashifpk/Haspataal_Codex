@@ -1,0 +1,3147 @@
+{
+  "unknowns": [],
+  "workspaces": [
+    {
+      "page": "workspaces/pharmacy_admin",
+      "workspace": "pharmacy_admin",
+      "label": "Pharmacy Admin",
+      "label_ur": "فارمیسی ایڈمن",
+      "description": "Batch intake, supplier invoices, low-stock/near-expiry widgets, profit, indent approval.",
+      "roles": [
+        "pharmacy_admin"
+      ],
+      "demo_accounts": [
+        "demo.pharmadmin"
+      ],
+      "screens": [
+        {
+          "page": "screens/pharmacy_admin",
+          "screen_id": "pharmacy_admin",
+          "title": "Pharmacy back office",
+          "purpose": "Batch intake, supplier invoices, low stock / near expiry, profit, write-offs.",
+          "tasks": [
+            {
+              "id": "pharmacy_admin::POST /pharmacy-admin/drugs",
+              "task": "Add a formulary drug",
+              "call": "POST /pharmacy-admin/drugs",
+              "is_action": true,
+              "permissions": [
+                "pharmacy.drug.manage"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::POST /pharmacy-admin/batches",
+              "task": "Batch intake (boxes × units, invoice cost → unit cost)",
+              "call": "POST /pharmacy-admin/batches",
+              "is_action": true,
+              "permissions": [
+                "pharmacy.stock.receive"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::POST /pharmacy-admin/batches/{batch_id}/adjust",
+              "task": "Write off / adjust a batch (expiry, damage)",
+              "call": "POST /pharmacy-admin/batches/{batch_id}/adjust",
+              "is_action": true,
+              "permissions": [
+                "pharmacy.stock.adjust"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::POST /pharmacy-admin/vendor-invoices",
+              "task": "Record a supplier invoice (→ Accounts Payable)",
+              "call": "POST /pharmacy-admin/vendor-invoices",
+              "is_action": true,
+              "permissions": [
+                "pharmacy.vendor_invoice.manage"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::GET /pharmacy-admin/vendor-invoices",
+              "task": "Supplier invoices and amounts owed",
+              "call": "GET /pharmacy-admin/vendor-invoices",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.vendor_invoice.manage",
+                "finance.ap.view"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::GET /pharmacy-admin/low-stock",
+              "task": "Low-stock widget",
+              "call": "GET /pharmacy-admin/low-stock",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.stock.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::GET /pharmacy-admin/near-expiry",
+              "task": "Near-expiry widget (money at risk)",
+              "call": "GET /pharmacy-admin/near-expiry",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.stock.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::GET /pharmacy-admin/profit-dashboard",
+              "task": "Gross revenue − COGS = net profit (live)",
+              "call": "GET /pharmacy-admin/profit-dashboard",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.dashboard.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::GET /finance/vendors",
+              "task": "Vendors",
+              "call": "GET /finance/vendors",
+              "is_action": false,
+              "permissions": [],
+              "permissions_mode": "all",
+              "access": "any logged-in user"
+            },
+            {
+              "id": "pharmacy_admin::POST /pharmacy-admin/batches/{batch_id}/supplier-returns",
+              "task": "Return units of a batch to its supplier",
+              "call": "POST /pharmacy-admin/batches/{batch_id}/supplier-returns",
+              "is_action": true,
+              "permissions": [
+                "pharmacy.supplier_return.record"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::GET /pharmacy-admin/supplier-returns",
+              "task": "Returns to suppliers, newest first",
+              "call": "GET /pharmacy-admin/supplier-returns",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.supplier_return.record",
+                "finance.supplier_credit.confirm",
+                "finance.ap.view"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::GET /pharmacy-admin/supplier-returns/{return_id}",
+              "task": "One return to a supplier",
+              "call": "GET /pharmacy-admin/supplier-returns/{return_id}",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.supplier_return.record",
+                "finance.supplier_credit.confirm",
+                "finance.ap.view"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::GET /pharmacy-admin/supplier-returns/{return_id}/pdf",
+              "task": "The return note that goes with the goods (PDF)",
+              "call": "GET /pharmacy-admin/supplier-returns/{return_id}/pdf",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.supplier_return.record",
+                "finance.supplier_credit.confirm"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::GET /drug-recalls",
+              "task": "The recall register",
+              "call": "GET /drug-recalls",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.recall.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "pharmacy_admin::GET /drugs/search",
+              "task": "Formulary search with live stock colour",
+              "call": "GET /drugs/search",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.formulary.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "Batch intake: boxes × units per box and total invoice cost; the server derives unit cost.",
+            "Return to the supplier (expired, near expiry, recalled, damaged, excess, wrongly supplied): from a batch, the quantity, the reason and a note (POST /pharmacy-admin/batches/{batch_id}/supplier-returns; a recalled batch with reason Recall and its recall_id), then print the return note for the goods. Show each return's status: Returned until the accountant confirms the credit note, then Credited or Refused (decisions 47).",
+            "A new drug may be high-alert (high_alert_category) or restricted (is_restricted) from the start; never both high-alert and OTC."
+          ],
+          "updates_by_itself_on": [
+            "pharmacy.low_stock"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "INSUFFICIENT_STOCK",
+              "message": "Not enough stock available.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "NOT_FOUND",
+              "message": "The requested resource was not found.",
+              "ui_action": "Say 'not found'; refresh the list."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/medication_safety_setup",
+          "screen_id": "medication_safety_setup",
+          "title": "High-alert and look-alike medicines",
+          "purpose": "Keep the high-alert categories, the restricted medicines and the look-alike pairs; print the list and the medication policy.",
+          "tasks": [
+            {
+              "id": "medication_safety_setup::GET /medication-safety/high-alert-list",
+              "task": "The high-alert, restricted and look-alike medicines",
+              "call": "GET /medication-safety/high-alert-list",
+              "is_action": false,
+              "permissions": [
+                "medication.safety.view",
+                "medication.safety.configure"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "medication_safety_setup::GET /medication-safety/high-alert-list/pdf",
+              "task": "The high-alert list to display, as a PDF",
+              "call": "GET /medication-safety/high-alert-list/pdf",
+              "is_action": false,
+              "permissions": [
+                "medication.safety.view",
+                "medication.safety.configure"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "medication_safety_setup::PATCH /medication-safety/drugs/{drug_id}",
+              "task": "Set a medicine's high-alert category or restriction",
+              "call": "PATCH /medication-safety/drugs/{drug_id}",
+              "is_action": true,
+              "permissions": [
+                "medication.safety.configure"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "medication_safety_setup::POST /medication-safety/lasa-pairs",
+              "task": "Pair two look-alike or sound-alike medicines",
+              "call": "POST /medication-safety/lasa-pairs",
+              "is_action": true,
+              "permissions": [
+                "medication.safety.configure"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "medication_safety_setup::PATCH /medication-safety/lasa-pairs/{pair_id}",
+              "task": "Change or retire a look-alike pair",
+              "call": "PATCH /medication-safety/lasa-pairs/{pair_id}",
+              "is_action": true,
+              "permissions": [
+                "medication.safety.configure"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "medication_safety_setup::GET /medication-safety/policy/pdf",
+              "task": "The written medication policy as a PDF",
+              "call": "GET /medication-safety/policy/pdf",
+              "is_action": false,
+              "permissions": [
+                "medication.safety.view",
+                "medication.safety.configure"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "medication_safety_setup::GET /drugs/search",
+              "task": "Formulary search with live stock colour",
+              "call": "GET /drugs/search",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.formulary.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "Flag from the formulary search: high_alert_category (null clears it; never on an OTC medicine) and is_restricted. Pair look-alikes with a note on how to tell them apart; retire a pair with is_active false.",
+            "Print the list again after every change and replace it at the nursing stations and the pharmacy."
+          ],
+          "updates_by_itself_on": [],
+          "errors_the_user_can_meet": [
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "LASA_PAIR_EXISTS",
+              "message": "These two medicines are already paired (details.pair_id).",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/drug_recalls",
+          "screen_id": "drug_recalls",
+          "title": "Batch recalls",
+          "purpose": "Open a recall, see where the batches went, remove the stock, contact the patients, close it.",
+          "tasks": [
+            {
+              "id": "drug_recalls::POST /drug-recalls",
+              "task": "Open a batch recall",
+              "call": "POST /drug-recalls",
+              "is_action": true,
+              "permissions": [
+                "pharmacy.recall.manage"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "drug_recalls::GET /drug-recalls",
+              "task": "The recall register",
+              "call": "GET /drug-recalls",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.recall.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "drug_recalls::GET /drug-recalls/{recall_id}",
+              "task": "A recall and where its batches went",
+              "call": "GET /drug-recalls/{recall_id}",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.recall.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "drug_recalls::POST /drug-recalls/{recall_id}/remove-stock",
+              "task": "Remove the recalled stock left",
+              "call": "POST /drug-recalls/{recall_id}/remove-stock",
+              "is_action": true,
+              "permissions": [
+                "pharmacy.recall.manage"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "drug_recalls::PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+              "task": "Record a contact with a patient of a recall",
+              "call": "PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+              "is_action": true,
+              "permissions": [
+                "pharmacy.recall.manage"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "drug_recalls::POST /drug-recalls/{recall_id}/close",
+              "task": "Close a recall",
+              "call": "POST /drug-recalls/{recall_id}/close",
+              "is_action": true,
+              "permissions": [
+                "pharmacy.recall.manage"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "drug_recalls::POST /drug-recalls/{recall_id}/cancel",
+              "task": "Cancel a recall opened by mistake",
+              "call": "POST /drug-recalls/{recall_id}/cancel",
+              "is_action": true,
+              "permissions": [
+                "pharmacy.recall.manage"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "drug_recalls::GET /drugs/{drug_id}/stock-status",
+              "task": "Drug stock with batches in FEFO order",
+              "call": "GET /drugs/{drug_id}/stock-status",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.formulary.view",
+                "pharmacy.stock.view"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "drug_recalls::GET /drugs/search",
+              "task": "Formulary search with live stock colour",
+              "call": "GET /drugs/search",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.formulary.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "Open: the medicine, the batches (from GET /drugs/{drug_id}/stock-status, or all_batches), the source and reference (the DRAP alert), the class, the reason, contact_patients. The batches are blocked at once everywhere; the wards and the pharmacy are alerted.",
+            "Detail: per batch what is left in the pharmacy and on each ward and what was dispensed, given and used in theatre; the people who received it with their phone numbers. 'Remove stock' writes off every unit left (the note: returned to the supplier or destroyed). Record each contact (Contacted, Unreachable, NotNeeded with a note).",
+            "Close when can_close (RECALL_NOT_COMPLETE shows what is left). Opened by mistake: Cancel (the batches are released).",
+            "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id drug_recalls (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+          ],
+          "updates_by_itself_on": [
+            "pharmacy.recall.updated"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "BATCH_RECALLED",
+              "message": "This batch is recalled: it cannot be dispensed, sent to a ward, used in theatre or given.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "NOT_FOUND",
+              "message": "The requested resource was not found.",
+              "ui_action": "Say 'not found'; refresh the list."
+            },
+            {
+              "code": "RECALL_NOT_COMPLETE",
+              "message": "The recall cannot close yet: stock of the batches is left, or patients are still to be contacted.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "RECALL_STATE_INVALID",
+              "message": "The recall cannot change that way.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "REFERENCE_NOT_FOUND",
+              "message": "A referenced record does not exist.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "STOCK_BATCH_MISMATCH",
+              "message": "The batch does not belong to this item.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/pharmacy_storage_log",
+          "screen_id": "pharmacy_storage_log",
+          "title": "Medicine storage log",
+          "purpose": "The twice-daily temperature and humidity readings of every medicine store, refrigerator and freezer, the readings out of range and the action taken, and the register for the surveyor.",
+          "tasks": [
+            {
+              "id": "pharmacy_storage_log::POST /pharmacy/storage-checks",
+              "task": "Record a temperature (and humidity) reading of a medicine store, refrigerator or freezer",
+              "call": "POST /pharmacy/storage-checks",
+              "is_action": true,
+              "permissions": [
+                "pharmacy.storage.record"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "pharmacy_storage_log::GET /pharmacy/storage-checks",
+              "task": "The storage log",
+              "call": "GET /pharmacy/storage-checks",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.stock.view",
+                "medication.safety.view",
+                "pharmacy.storage.record"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "pharmacy_storage_log::GET /pharmacy/storage-checks/summary",
+              "task": "The storage log by storage area: readings, out of range, days with the full routine",
+              "call": "GET /pharmacy/storage-checks/summary",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.stock.view",
+                "medication.safety.view",
+                "pharmacy.storage.record"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "pharmacy_storage_log::GET /pharmacy/storage-checks/register/pdf",
+              "task": "The storage register of a period as a PDF (MSDS MOM 58)",
+              "call": "GET /pharmacy/storage-checks/register/pdf",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.stock.view",
+                "medication.safety.view",
+                "pharmacy.storage.record"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "pharmacy_storage_log::GET /beds/matrix",
+              "task": "Live bed matrix (counts per ward + optional bed list)",
+              "call": "GET /beds/matrix",
+              "is_action": false,
+              "permissions": [
+                "ipd.bed.view",
+                "cssd.operate",
+                "infection.control.manage",
+                "complaint.manage",
+                "incident.view",
+                "facility.drill.manage",
+                "roster.manage.all",
+                "facility.equipment.manage",
+                "pharmacy.storage.record"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "Record: storage_area (pick from the areas already used, or type a new one: keep one spelling per place), kind (Room / Refrigerator / Freezer / ColdChainBox), the ward for a ward cupboard, temperature, humidity (optional), own limits only for a place with its own range (a vaccine box). The limits of the kind come from the settings (pharmacy_room_*_c, pharmacy_fridge_*_c, pharmacy_freezer_*_c).",
+            "Out of range: the form demands action_taken (STORAGE_CHECK_ACTION_REQUIRED); show the row red; the event pharmacy.storage.out_of_range reaches the pharmacists at once.",
+            "Summary tiles per area: readings, out of range, lowest, highest, days with both readings of the day (expected checks_per_day = 2); a day with one reading or none is a gap to explain to the surveyor.",
+            "Print the register for the period the surveyor asks (PDF). Ward nurses record their own ward's cupboard and refrigerator from the ward screens with the same POST."
+          ],
+          "updates_by_itself_on": [
+            "pharmacy.storage.out_of_range"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "BED_NO_LONGER_AVAILABLE",
+              "message": "Bed was reserved by another terminal.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "REFERENCE_NOT_FOUND",
+              "message": "A referenced record does not exist.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "STORAGE_CHECK_ACTION_REQUIRED",
+              "message": "The reading is out of range: record the action taken.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        }
+      ],
+      "linked_screens": [
+        {
+          "screen_id": "report_incident",
+          "page": "screens/report_incident",
+          "title": "Report an incident",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations",
+          "title": "Incidents I investigate",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations",
+          "title": "Complaints I investigate",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_actions",
+          "page": "screens/my_actions",
+          "title": "My actions",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "connect_server",
+          "page": "screens/connect_server",
+          "title": "Connect to server (first run / server unreachable)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "login",
+          "page": "screens/login",
+          "title": "Login",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker",
+          "title": "Workspace launcher",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "settings",
+          "page": "screens/settings",
+          "title": "Settings (avatar or Ctrl+,)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "help_center",
+          "page": "screens/help_center",
+          "title": "Help: the end-user handbook",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "notifications",
+          "page": "screens/notifications",
+          "title": "Notification bell",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker",
+          "title": "ICD code picker (component)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue",
+          "title": "Approval queue",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "app_shell",
+          "page": "screens/app_shell",
+          "title": "App shell (every workspace)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "rx_queue",
+          "page": "screens/rx_queue",
+          "title": "Prescription queue",
+          "reason": "also_uses"
+        },
+        {
+          "screen_id": "ot_board",
+          "page": "screens/ot_board",
+          "title": "Live OT status board",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_committees",
+          "page": "screens/my_committees",
+          "title": "My committees",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice",
+          "title": "PHC inspection interview practice",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews",
+          "title": "Mock PHC interviews",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record",
+          "title": "My personnel record",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions",
+          "title": "Equipment requisitions",
+          "reason": "shared"
+        }
+      ],
+      "workspace_page_sections": [
+        "A day in each role",
+        "Complete job-task index",
+        "Detailed role-specific FAQ",
+        "Handovers, exceptions and troubleshooting",
+        "Glossary and guided practice"
+      ],
+      "faq_tasks": [
+        {
+          "id": "pharmacy_admin::POST /pharmacy-admin/drugs",
+          "task": "Add a formulary drug",
+          "call": "POST /pharmacy-admin/drugs",
+          "is_action": true,
+          "permissions": [
+            "pharmacy.drug.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::POST /pharmacy-admin/batches",
+          "task": "Batch intake (boxes × units, invoice cost → unit cost)",
+          "call": "POST /pharmacy-admin/batches",
+          "is_action": true,
+          "permissions": [
+            "pharmacy.stock.receive"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::POST /pharmacy-admin/batches/{batch_id}/adjust",
+          "task": "Write off / adjust a batch (expiry, damage)",
+          "call": "POST /pharmacy-admin/batches/{batch_id}/adjust",
+          "is_action": true,
+          "permissions": [
+            "pharmacy.stock.adjust"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::POST /pharmacy-admin/vendor-invoices",
+          "task": "Record a supplier invoice (→ Accounts Payable)",
+          "call": "POST /pharmacy-admin/vendor-invoices",
+          "is_action": true,
+          "permissions": [
+            "pharmacy.vendor_invoice.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::GET /pharmacy-admin/vendor-invoices",
+          "task": "Supplier invoices and amounts owed",
+          "call": "GET /pharmacy-admin/vendor-invoices",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.vendor_invoice.manage",
+            "finance.ap.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::GET /pharmacy-admin/low-stock",
+          "task": "Low-stock widget",
+          "call": "GET /pharmacy-admin/low-stock",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.stock.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::GET /pharmacy-admin/near-expiry",
+          "task": "Near-expiry widget (money at risk)",
+          "call": "GET /pharmacy-admin/near-expiry",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.stock.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::GET /pharmacy-admin/profit-dashboard",
+          "task": "Gross revenue − COGS = net profit (live)",
+          "call": "GET /pharmacy-admin/profit-dashboard",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.dashboard.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::GET /finance/vendors",
+          "task": "Vendors",
+          "call": "GET /finance/vendors",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::POST /pharmacy-admin/batches/{batch_id}/supplier-returns",
+          "task": "Return units of a batch to its supplier",
+          "call": "POST /pharmacy-admin/batches/{batch_id}/supplier-returns",
+          "is_action": true,
+          "permissions": [
+            "pharmacy.supplier_return.record"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::GET /pharmacy-admin/supplier-returns",
+          "task": "Returns to suppliers, newest first",
+          "call": "GET /pharmacy-admin/supplier-returns",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.supplier_return.record",
+            "finance.supplier_credit.confirm",
+            "finance.ap.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::GET /pharmacy-admin/supplier-returns/{return_id}",
+          "task": "One return to a supplier",
+          "call": "GET /pharmacy-admin/supplier-returns/{return_id}",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.supplier_return.record",
+            "finance.supplier_credit.confirm",
+            "finance.ap.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::GET /pharmacy-admin/supplier-returns/{return_id}/pdf",
+          "task": "The return note that goes with the goods (PDF)",
+          "call": "GET /pharmacy-admin/supplier-returns/{return_id}/pdf",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.supplier_return.record",
+            "finance.supplier_credit.confirm"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::GET /drug-recalls",
+          "task": "The recall register",
+          "call": "GET /drug-recalls",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.recall.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "pharmacy_admin::GET /drugs/search",
+          "task": "Formulary search with live stock colour",
+          "call": "GET /drugs/search",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.formulary.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "pharmacy_admin",
+          "page": "screens/pharmacy_admin"
+        },
+        {
+          "id": "medication_safety_setup::GET /medication-safety/high-alert-list",
+          "task": "The high-alert, restricted and look-alike medicines",
+          "call": "GET /medication-safety/high-alert-list",
+          "is_action": false,
+          "permissions": [
+            "medication.safety.view",
+            "medication.safety.configure"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "medication_safety_setup",
+          "page": "screens/medication_safety_setup"
+        },
+        {
+          "id": "medication_safety_setup::GET /medication-safety/high-alert-list/pdf",
+          "task": "The high-alert list to display, as a PDF",
+          "call": "GET /medication-safety/high-alert-list/pdf",
+          "is_action": false,
+          "permissions": [
+            "medication.safety.view",
+            "medication.safety.configure"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "medication_safety_setup",
+          "page": "screens/medication_safety_setup"
+        },
+        {
+          "id": "medication_safety_setup::PATCH /medication-safety/drugs/{drug_id}",
+          "task": "Set a medicine's high-alert category or restriction",
+          "call": "PATCH /medication-safety/drugs/{drug_id}",
+          "is_action": true,
+          "permissions": [
+            "medication.safety.configure"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "medication_safety_setup",
+          "page": "screens/medication_safety_setup"
+        },
+        {
+          "id": "medication_safety_setup::POST /medication-safety/lasa-pairs",
+          "task": "Pair two look-alike or sound-alike medicines",
+          "call": "POST /medication-safety/lasa-pairs",
+          "is_action": true,
+          "permissions": [
+            "medication.safety.configure"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "medication_safety_setup",
+          "page": "screens/medication_safety_setup"
+        },
+        {
+          "id": "medication_safety_setup::PATCH /medication-safety/lasa-pairs/{pair_id}",
+          "task": "Change or retire a look-alike pair",
+          "call": "PATCH /medication-safety/lasa-pairs/{pair_id}",
+          "is_action": true,
+          "permissions": [
+            "medication.safety.configure"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "medication_safety_setup",
+          "page": "screens/medication_safety_setup"
+        },
+        {
+          "id": "medication_safety_setup::GET /medication-safety/policy/pdf",
+          "task": "The written medication policy as a PDF",
+          "call": "GET /medication-safety/policy/pdf",
+          "is_action": false,
+          "permissions": [
+            "medication.safety.view",
+            "medication.safety.configure"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "medication_safety_setup",
+          "page": "screens/medication_safety_setup"
+        },
+        {
+          "id": "medication_safety_setup::GET /drugs/search",
+          "task": "Formulary search with live stock colour",
+          "call": "GET /drugs/search",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.formulary.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "medication_safety_setup",
+          "page": "screens/medication_safety_setup"
+        },
+        {
+          "id": "drug_recalls::POST /drug-recalls",
+          "task": "Open a batch recall",
+          "call": "POST /drug-recalls",
+          "is_action": true,
+          "permissions": [
+            "pharmacy.recall.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "drug_recalls",
+          "page": "screens/drug_recalls"
+        },
+        {
+          "id": "drug_recalls::GET /drug-recalls",
+          "task": "The recall register",
+          "call": "GET /drug-recalls",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.recall.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "drug_recalls",
+          "page": "screens/drug_recalls"
+        },
+        {
+          "id": "drug_recalls::GET /drug-recalls/{recall_id}",
+          "task": "A recall and where its batches went",
+          "call": "GET /drug-recalls/{recall_id}",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.recall.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "drug_recalls",
+          "page": "screens/drug_recalls"
+        },
+        {
+          "id": "drug_recalls::POST /drug-recalls/{recall_id}/remove-stock",
+          "task": "Remove the recalled stock left",
+          "call": "POST /drug-recalls/{recall_id}/remove-stock",
+          "is_action": true,
+          "permissions": [
+            "pharmacy.recall.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "drug_recalls",
+          "page": "screens/drug_recalls"
+        },
+        {
+          "id": "drug_recalls::PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+          "task": "Record a contact with a patient of a recall",
+          "call": "PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+          "is_action": true,
+          "permissions": [
+            "pharmacy.recall.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "drug_recalls",
+          "page": "screens/drug_recalls"
+        },
+        {
+          "id": "drug_recalls::POST /drug-recalls/{recall_id}/close",
+          "task": "Close a recall",
+          "call": "POST /drug-recalls/{recall_id}/close",
+          "is_action": true,
+          "permissions": [
+            "pharmacy.recall.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "drug_recalls",
+          "page": "screens/drug_recalls"
+        },
+        {
+          "id": "drug_recalls::POST /drug-recalls/{recall_id}/cancel",
+          "task": "Cancel a recall opened by mistake",
+          "call": "POST /drug-recalls/{recall_id}/cancel",
+          "is_action": true,
+          "permissions": [
+            "pharmacy.recall.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "drug_recalls",
+          "page": "screens/drug_recalls"
+        },
+        {
+          "id": "drug_recalls::GET /drugs/{drug_id}/stock-status",
+          "task": "Drug stock with batches in FEFO order",
+          "call": "GET /drugs/{drug_id}/stock-status",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.formulary.view",
+            "pharmacy.stock.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "drug_recalls",
+          "page": "screens/drug_recalls"
+        },
+        {
+          "id": "drug_recalls::GET /drugs/search",
+          "task": "Formulary search with live stock colour",
+          "call": "GET /drugs/search",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.formulary.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "drug_recalls",
+          "page": "screens/drug_recalls"
+        },
+        {
+          "id": "pharmacy_storage_log::POST /pharmacy/storage-checks",
+          "task": "Record a temperature (and humidity) reading of a medicine store, refrigerator or freezer",
+          "call": "POST /pharmacy/storage-checks",
+          "is_action": true,
+          "permissions": [
+            "pharmacy.storage.record"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "pharmacy_storage_log",
+          "page": "screens/pharmacy_storage_log"
+        },
+        {
+          "id": "pharmacy_storage_log::GET /pharmacy/storage-checks",
+          "task": "The storage log",
+          "call": "GET /pharmacy/storage-checks",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.stock.view",
+            "medication.safety.view",
+            "pharmacy.storage.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "pharmacy_storage_log",
+          "page": "screens/pharmacy_storage_log"
+        },
+        {
+          "id": "pharmacy_storage_log::GET /pharmacy/storage-checks/summary",
+          "task": "The storage log by storage area: readings, out of range, days with the full routine",
+          "call": "GET /pharmacy/storage-checks/summary",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.stock.view",
+            "medication.safety.view",
+            "pharmacy.storage.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "pharmacy_storage_log",
+          "page": "screens/pharmacy_storage_log"
+        },
+        {
+          "id": "pharmacy_storage_log::GET /pharmacy/storage-checks/register/pdf",
+          "task": "The storage register of a period as a PDF (MSDS MOM 58)",
+          "call": "GET /pharmacy/storage-checks/register/pdf",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.stock.view",
+            "medication.safety.view",
+            "pharmacy.storage.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "pharmacy_storage_log",
+          "page": "screens/pharmacy_storage_log"
+        },
+        {
+          "id": "pharmacy_storage_log::GET /beds/matrix",
+          "task": "Live bed matrix (counts per ward + optional bed list)",
+          "call": "GET /beds/matrix",
+          "is_action": false,
+          "permissions": [
+            "ipd.bed.view",
+            "cssd.operate",
+            "infection.control.manage",
+            "complaint.manage",
+            "incident.view",
+            "facility.drill.manage",
+            "roster.manage.all",
+            "facility.equipment.manage",
+            "pharmacy.storage.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "pharmacy_storage_log",
+          "page": "screens/pharmacy_storage_log"
+        },
+        {
+          "id": "report_incident::GET /incident-types",
+          "task": "What to report: the incident types",
+          "call": "GET /incident-types",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::POST /incidents",
+          "task": "Report an incident, an adverse event or a near miss",
+          "call": "POST /incidents",
+          "is_action": true,
+          "permissions": [
+            "incident.report"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /incidents",
+          "task": "The incident register",
+          "call": "GET /incidents",
+          "is_action": false,
+          "permissions": [
+            "incident.view",
+            "incident.report",
+            "ot.clinical_statistics.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /incidents/{incident_id}",
+          "task": "One incident",
+          "call": "GET /incidents/{incident_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "incident.view, the reporter and the investigator; ot.clinical_statistics.view for theatre adverse events",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /incidents/sentinel-list/pdf",
+          "task": "The list of sentinel events and how to report (PDF)",
+          "call": "GET /incidents/sentinel-list/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /staff/lookup",
+          "task": "Find a staff member for a form (badge facts only)",
+          "call": "GET /staff/lookup",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /patients/search",
+          "task": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
+          "call": "GET /patients/search",
+          "is_action": false,
+          "permissions": [
+            "patient.search"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /admissions",
+          "task": "Admissions (default: all live ones; admissions desk queue)",
+          "call": "GET /admissions",
+          "is_action": false,
+          "permissions": [
+            "ipd.admission.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /ot/bookings",
+          "task": "Bookings (mine=true for a surgeon's own list)",
+          "call": "GET /ot/bookings",
+          "is_action": false,
+          "permissions": [
+            "ot.booking.view",
+            "ot.booking.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /deaths",
+          "task": "The death register",
+          "call": "GET /deaths",
+          "is_action": false,
+          "permissions": [
+            "death.register.view",
+            "death.record",
+            "death.body.release"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /drugs/search",
+          "task": "Formulary search with live stock colour",
+          "call": "GET /drugs/search",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.formulary.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /beds/matrix",
+          "task": "Live bed matrix (counts per ward + optional bed list)",
+          "call": "GET /beds/matrix",
+          "is_action": false,
+          "permissions": [
+            "ipd.bed.view",
+            "cssd.operate",
+            "infection.control.manage",
+            "complaint.manage",
+            "incident.view",
+            "facility.drill.manage",
+            "roster.manage.all",
+            "facility.equipment.manage",
+            "pharmacy.storage.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "my_investigations::GET /incidents",
+          "task": "The incident register",
+          "call": "GET /incidents",
+          "is_action": false,
+          "permissions": [
+            "incident.view",
+            "incident.report",
+            "ot.clinical_statistics.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /incidents/{incident_id}",
+          "task": "One incident",
+          "call": "GET /incidents/{incident_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "incident.view, the reporter and the investigator; ot.clinical_statistics.view for theatre adverse events",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::PUT /incidents/{incident_id}/analysis",
+          "task": "Save the analysis (a draft until signed)",
+          "call": "PUT /incidents/{incident_id}/analysis",
+          "is_action": true,
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::POST /incidents/{incident_id}/analysis/sign",
+          "task": "Sign the analysis (final)",
+          "call": "POST /incidents/{incident_id}/analysis/sign",
+          "is_action": true,
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::POST /incidents/{incident_id}/actions",
+          "task": "Record a corrective or preventive action",
+          "call": "POST /incidents/{incident_id}/actions",
+          "is_action": true,
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /quality/record-review/people",
+          "task": "Who can review records or own an action",
+          "call": "GET /quality/record-review/people",
+          "is_action": false,
+          "permissions": [
+            "quality.review.manage",
+            "committee.manage",
+            "infection.control.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /incidents/{incident_id}/pdf",
+          "task": "The incident report with its analysis and actions (PDF)",
+          "call": "GET /incidents/{incident_id}/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "incident.view, the reporter and the investigator; ot.clinical_statistics.view for theatre adverse events",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /staff/lookup",
+          "task": "Find a staff member for a form (badge facts only)",
+          "call": "GET /staff/lookup",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /complaints",
+          "task": "The complaints register",
+          "call": "GET /complaints",
+          "is_action": false,
+          "permissions": [
+            "complaint.view",
+            "complaint.manage",
+            "complaint.register"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /complaints/{complaint_id}",
+          "task": "One complaint",
+          "call": "GET /complaints/{complaint_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.view or complaint.manage, the person who received the complaint and its investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::POST /complaints/{complaint_id}/findings",
+          "task": "Write the findings of the investigation",
+          "call": "POST /complaints/{complaint_id}/findings",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.manage or the complaint's named investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::POST /complaints/{complaint_id}/updates",
+          "task": "Record a contact with the complainant (progress, more time)",
+          "call": "POST /complaints/{complaint_id}/updates",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.manage or the complaint's named investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::POST /complaints/{complaint_id}/actions",
+          "task": "Record a corrective or preventive action",
+          "call": "POST /complaints/{complaint_id}/actions",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.manage or the complaint's named investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /staff/lookup",
+          "task": "Find a staff member for a form (badge facts only)",
+          "call": "GET /staff/lookup",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_actions::GET /quality/actions",
+          "task": "The action register (mine: the actions I own)",
+          "call": "GET /quality/actions",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the actions they own (mine is forced without quality.action.view or quality.action.manage)",
+          "screen_id": "my_actions",
+          "page": "screens/my_actions"
+        },
+        {
+          "id": "my_actions::GET /quality/actions/{action_id}",
+          "task": "One action",
+          "call": "GET /quality/actions/{action_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the action's owner, the person who recorded it, quality.action.view or quality.action.manage",
+          "screen_id": "my_actions",
+          "page": "screens/my_actions"
+        },
+        {
+          "id": "my_actions::POST /quality/actions/{action_id}/complete",
+          "task": "Close an action: done with the evidence, or cancelled",
+          "call": "POST /quality/actions/{action_id}/complete",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the action's owner or quality.action.manage",
+          "screen_id": "my_actions",
+          "page": "screens/my_actions"
+        },
+        {
+          "id": "connect_server::GET /meta/server-info",
+          "task": "How terminals reach and trust this server — works before login",
+          "call": "GET /meta/server-info",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "connect_server",
+          "page": "screens/connect_server"
+        },
+        {
+          "id": "connect_server::GET /terminals/whoami",
+          "task": "Identify this terminal (location + mapped printers) — works before login",
+          "call": "GET /terminals/whoami",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "connect_server",
+          "page": "screens/connect_server"
+        },
+        {
+          "id": "login::POST /auth/login",
+          "task": "Log in (returns tokens, profile, roles, workspaces)",
+          "call": "POST /auth/login",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /terminals/whoami",
+          "task": "Identify this terminal (location + mapped printers) — works before login",
+          "call": "GET /terminals/whoami",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::POST /auth/change-password",
+          "task": "Change own password",
+          "call": "POST /auth/change-password",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /meta/license",
+          "task": "The server's license state: show a banner when it needs attention — works before login",
+          "call": "GET /meta/license",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /health/live",
+          "task": "Is the server there? (unauthenticated, no database)",
+          "call": "GET /health/live",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /health",
+          "task": "Server health (unauthenticated; used by the login screen)",
+          "call": "GET /health",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "workspace_picker::GET /auth/workspaces",
+          "task": "Workspaces the user may open (multi-role launch screen)",
+          "call": "GET /auth/workspaces",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker"
+        },
+        {
+          "id": "workspace_picker::GET /auth/me",
+          "task": "Current user, roles, permissions, workspaces, preferences",
+          "call": "GET /auth/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker"
+        },
+        {
+          "id": "workspace_picker::GET /establishment",
+          "task": "The establishment's profile and services, with the configuration revision",
+          "call": "GET /establishment",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker"
+        },
+        {
+          "id": "settings::GET /settings/sections",
+          "task": "The Settings window: the tiers and sections this caller may open (also before login)",
+          "call": "GET /settings/sections",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login); a logged-in caller also gets what their permissions open",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /settings/me",
+          "task": "My preferences (theme, language, UI scale, PDF download)",
+          "call": "GET /settings/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::PUT /settings/me",
+          "task": "Update my preferences (only the fields you send)",
+          "call": "PUT /settings/me",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::POST /settings/me/change-password",
+          "task": "Change my password (same as /auth/change-password)",
+          "call": "POST /settings/me/change-password",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/settings",
+          "task": "Hospital policy settings",
+          "call": "GET /admin/settings",
+          "is_action": false,
+          "permissions": [
+            "admin.settings.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::PUT /admin/settings/{key}",
+          "task": "Change a policy setting (type-checked, audited)",
+          "call": "PUT /admin/settings/{key}",
+          "is_action": true,
+          "permissions": [
+            "admin.settings.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::POST /admin/change-requests",
+          "task": "Request a control-setting or privileged-access change (applied at once for an Owner)",
+          "call": "POST /admin/change-requests",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "admin.settings.manage for a setting, admin.user.manage for a user's roles, admin.role_matrix.update for a role's permissions (the service checks)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/change-requests",
+          "task": "Control-setting and privileged-access change requests",
+          "call": "GET /admin/change-requests",
+          "is_action": false,
+          "permissions": [
+            "admin.settings.manage",
+            "admin.user.manage",
+            "admin.role_matrix.update",
+            "approval.policy_change.approve",
+            "approval.privileged_access.approve"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/change-requests/{change_request_id}",
+          "task": "One control-setting or privileged-access change request",
+          "call": "GET /admin/change-requests/{change_request_id}",
+          "is_action": false,
+          "permissions": [
+            "admin.settings.manage",
+            "admin.user.manage",
+            "admin.role_matrix.update",
+            "approval.policy_change.approve",
+            "approval.privileged_access.approve"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/users",
+          "task": "Search users",
+          "call": "GET /admin/users",
+          "is_action": false,
+          "permissions": [
+            "admin.user.manage",
+            "admin.user.provision"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "help_center::GET /meta/handbook",
+          "task": "The end-user handbook's outline for the logged-in employee (only what they may use)",
+          "call": "GET /meta/handbook",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "help_center",
+          "page": "screens/help_center"
+        },
+        {
+          "id": "help_center::GET /settings/me",
+          "task": "My preferences (theme, language, UI scale, PDF download)",
+          "call": "GET /settings/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "help_center",
+          "page": "screens/help_center"
+        },
+        {
+          "id": "notifications::GET /notifications",
+          "task": "My notifications (newest first)",
+          "call": "GET /notifications",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "notifications::GET /notifications/unread-count",
+          "task": "Badge count",
+          "call": "GET /notifications/unread-count",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "notifications::POST /notifications/{notification_id}/read",
+          "task": "Mark one as read",
+          "call": "POST /notifications/{notification_id}/read",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "notifications::POST /notifications/read-all",
+          "task": "Mark everything as read",
+          "call": "POST /notifications/read-all",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "icd_picker::GET /icd/codes",
+          "task": "ICD picker: search codes by code or words",
+          "call": "GET /icd/codes",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "icd_picker::GET /icd/browse",
+          "task": "ICD picker: browse chapters, blocks, categories",
+          "call": "GET /icd/browse",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "icd_picker::GET /icd/codes/{code}",
+          "task": "One ICD code with its place in the tree",
+          "call": "GET /icd/codes/{code}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "icd_picker::GET /icd/releases",
+          "task": "The ICD code lists loaded",
+          "call": "GET /icd/releases",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "approval_queue::GET /approvals",
+          "task": "Approval queue visible to me (or my own requests with mine=true)",
+          "call": "GET /approvals",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the pending requests whose required_permission they hold, or their own with mine=true",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::GET /approvals/{request_id}",
+          "task": "One approval request",
+          "call": "GET /approvals/{request_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the request's requester or a holder of its required_permission; anyone else gets FORBIDDEN",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::POST /approvals/{request_id}/approve",
+          "task": "Approve (applies the effect atomically)",
+          "call": "POST /approvals/{request_id}/approve",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "a holder of the request's required_permission while the request's can_decide is true (decide_blocked says why not); never its requester (SELF_APPROVAL_FORBIDDEN, self_decision forbidden), except the Owner of a solo practice who alone can decide their own refund, waiver or credit, with a note (self_decision allowed_with_note); a large cash drop is never approved by the cashier of its shift (DUAL_CONTROL_SAME_PERSON)",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::POST /approvals/{request_id}/reject",
+          "task": "Reject (unfreezes the subject)",
+          "call": "POST /approvals/{request_id}/reject",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "a holder of the request's required_permission while the request's can_decide is true (decide_blocked says why not); never its requester (SELF_APPROVAL_FORBIDDEN, self_decision forbidden), except the Owner of a solo practice who alone can decide their own refund, waiver or credit, with a note (self_decision allowed_with_note); a large cash drop is never approved by the cashier of its shift (DUAL_CONTROL_SAME_PERSON)",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::POST /approvals/{request_id}/cancel",
+          "task": "Requester withdraws a pending request",
+          "call": "POST /approvals/{request_id}/cancel",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the requester only",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "app_shell::POST /auth/refresh",
+          "task": "Rotate the refresh token and get a new access token",
+          "call": "POST /auth/refresh",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::POST /auth/logout",
+          "task": "End this session (or all sessions)",
+          "call": "POST /auth/logout",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/enums",
+          "task": "All enumerated values, introspected from database CHECK constraints",
+          "call": "GET /meta/enums",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/settings",
+          "task": "Non-sensitive hospital settings for UI display",
+          "call": "GET /meta/settings",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/workspaces",
+          "task": "UI workspaces and the screens each should contain",
+          "call": "GET /meta/workspaces",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/error-codes",
+          "task": "Every error code the API can return",
+          "call": "GET /meta/error-codes",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/events",
+          "task": "Realtime WebSocket event catalogue",
+          "call": "GET /meta/events",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "rx_queue::GET /prescriptions/pending",
+          "task": "Pharmacist queue (chronological; Code Red first)",
+          "call": "GET /prescriptions/pending",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.queue.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "rx_queue",
+          "page": "screens/rx_queue"
+        },
+        {
+          "id": "rx_queue::GET /prescriptions/{prescription_id}",
+          "task": "Prescription with remaining quantities and stock per line",
+          "call": "GET /prescriptions/{prescription_id}",
+          "is_action": false,
+          "permissions": [
+            "prescription.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "rx_queue",
+          "page": "screens/rx_queue"
+        },
+        {
+          "id": "ot_board::GET /ot/status-board",
+          "task": "Live OT board (🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep)",
+          "call": "GET /ot/status-board",
+          "is_action": false,
+          "permissions": [
+            "ot.status.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "ot_board",
+          "page": "screens/ot_board"
+        },
+        {
+          "id": "my_committees::GET /committees",
+          "task": "The committees",
+          "call": "GET /committees",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the committees they are a member of (all with committee.view or committee.manage)",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::GET /committees/{committee_id}",
+          "task": "A committee and its meetings",
+          "call": "GET /committees/{committee_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::GET /committee-meetings/{meeting_id}",
+          "task": "A meeting and its minutes",
+          "call": "GET /committee-meetings/{meeting_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::POST /committee-meetings/{meeting_id}/finalize",
+          "task": "Approve the minutes (final)",
+          "call": "POST /committee-meetings/{meeting_id}/finalize",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the chair of the committee or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::GET /committee-meetings/{meeting_id}/pdf",
+          "task": "The minutes (PDF)",
+          "call": "GET /committee-meetings/{meeting_id}/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/my-deck",
+          "task": "My practice deck: the question of the day and what to rehearse now",
+          "call": "GET /msds/interview-prep/my-deck",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/questions/{key}",
+          "task": "One question: other ways of asking, the model answer with the hospital's facts, key points, follow-ups, pitfalls, what to show",
+          "call": "GET /msds/interview-prep/questions/{key}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::POST /msds/interview-prep/rehearsals",
+          "task": "Record how well I knew a question (Knew, Partly, DidNotKnow)",
+          "call": "POST /msds/interview-prep/rehearsals",
+          "is_action": true,
+          "permissions": [
+            "msds.interview.practice"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/my-progress",
+          "task": "My readiness: questions known, chapter by chapter, my streak and my last mock interview",
+          "call": "GET /msds/interview-prep/my-progress",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/questions",
+          "task": "The PHC inspection interview questions (filter by role, chapter, indicator, type, words)",
+          "call": "GET /msds/interview-prep/questions",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/roles",
+          "task": "The roles and how many inspection interview questions each rehearses",
+          "call": "GET /msds/interview-prep/roles",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/pocket-guide/pdf",
+          "task": "A role's pocket guide: questions, key points and model answers (PDF)",
+          "call": "GET /msds/interview-prep/pocket-guide/pdf",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/pocket-guide",
+          "task": "A role's pocket guide as a print payload, in English or Urdu",
+          "call": "GET /msds/interview-prep/pocket-guide",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/mock-interviews",
+          "task": "Mock interviews, newest first (staff who do not conduct them see their own)",
+          "call": "GET /msds/interview-prep/mock-interviews",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "task": "One mock interview: each answer and the actions it raised",
+          "call": "GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/staff",
+          "task": "The staff to question in a mock interview (with or without a login)",
+          "call": "GET /msds/interview-prep/staff",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.conduct"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/mock-interviews/plan",
+          "task": "The questions to put in a mock interview: the member of staff's weak points first",
+          "call": "GET /msds/interview-prep/mock-interviews/plan",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.conduct"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::POST /msds/interview-prep/mock-interviews",
+          "task": "Record a mock PHC interview: each answer Met, PartlyMet or NotMet, and the actions for the gaps",
+          "call": "POST /msds/interview-prep/mock-interviews",
+          "is_action": true,
+          "permissions": [
+            "msds.interview.conduct"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/mock-interviews",
+          "task": "Mock interviews, newest first (staff who do not conduct them see their own)",
+          "call": "GET /msds/interview-prep/mock-interviews",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "task": "One mock interview: each answer and the actions it raised",
+          "call": "GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/roles",
+          "task": "The roles and how many inspection interview questions each rehearses",
+          "call": "GET /msds/interview-prep/roles",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/questions/{key}",
+          "task": "One question: other ways of asking, the model answer with the hospital's facts, key points, follow-ups, pitfalls, what to show",
+          "call": "GET /msds/interview-prep/questions/{key}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /quality/actions",
+          "task": "The action register (mine: the actions I own)",
+          "call": "GET /quality/actions",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the actions they own (mine is forced without quality.action.view or quality.action.manage)",
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/me",
+          "task": "My personnel record",
+          "call": "GET /personnel/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/appraisals/{appraisal_id}",
+          "task": "One appraisal",
+          "call": "GET /personnel/appraisals/{appraisal_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "personnel.view or personnel.manage, the appraiser and the member of staff appraised",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::POST /personnel/appraisals/{appraisal_id}/acknowledge",
+          "task": "The member of staff's comments and acknowledgement",
+          "call": "POST /personnel/appraisals/{appraisal_id}/acknowledge",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the member of staff appraised, or personnel.manage from the signed paper",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/appraisals/{appraisal_id}/pdf",
+          "task": "The appraisal (PDF)",
+          "call": "GET /personnel/appraisals/{appraisal_id}/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "personnel.view or personnel.manage, the appraiser and the member of staff appraised",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/appraisal-policy/pdf",
+          "task": "The performance appraisal system (PDF)",
+          "call": "GET /personnel/appraisal-policy/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "equipment_requisitions::GET /facility/equipment-requisitions",
+          "task": "The equipment requisitions",
+          "call": "GET /facility/equipment-requisitions",
+          "is_action": false,
+          "permissions": [
+            "facility.view",
+            "facility.equipment.request",
+            "facility.equipment.evaluate",
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /facility/equipment-requisitions/{requisition_id}",
+          "task": "One equipment requisition with its models and their evaluations",
+          "call": "GET /facility/equipment-requisitions/{requisition_id}",
+          "is_action": false,
+          "permissions": [
+            "facility.view",
+            "facility.equipment.request",
+            "facility.equipment.evaluate",
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions",
+          "task": "Ask for equipment with its specification and justification",
+          "call": "POST /facility/equipment-requisitions",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.request"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/options",
+          "task": "Add a model on offer",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/options",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.request"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/evaluations",
+          "task": "Evaluate a model you will use",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/evaluations",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.evaluate"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/decide",
+          "task": "Decide on one evaluated model",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/decide",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/purchased",
+          "task": "Record the purchase in the equipment register",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/purchased",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/cancel",
+          "task": "Cancel a requisition",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/cancel",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.request",
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /finance/vendors",
+          "task": "Vendors",
+          "call": "GET /finance/vendors",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /facility/equipment",
+          "task": "The equipment inventory",
+          "call": "GET /facility/equipment",
+          "is_action": false,
+          "permissions": [
+            "facility.view",
+            "facility.equipment.manage",
+            "facility.maintenance.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /committees",
+          "task": "The committees",
+          "call": "GET /committees",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the committees they are a member of (all with committee.view or committee.manage)",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /committees/{committee_id}",
+          "task": "A committee and its meetings",
+          "call": "GET /committees/{committee_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        }
+      ],
+      "faq_role_coverage": [
+        {
+          "role": "pharmacy_admin",
+          "task_ids": [
+            "pharmacy_admin::POST /pharmacy-admin/drugs",
+            "pharmacy_admin::POST /pharmacy-admin/batches",
+            "pharmacy_admin::POST /pharmacy-admin/batches/{batch_id}/adjust",
+            "pharmacy_admin::POST /pharmacy-admin/vendor-invoices",
+            "pharmacy_admin::GET /pharmacy-admin/vendor-invoices",
+            "pharmacy_admin::GET /pharmacy-admin/low-stock",
+            "pharmacy_admin::GET /pharmacy-admin/near-expiry",
+            "pharmacy_admin::GET /pharmacy-admin/profit-dashboard",
+            "pharmacy_admin::GET /finance/vendors",
+            "pharmacy_admin::POST /pharmacy-admin/batches/{batch_id}/supplier-returns",
+            "pharmacy_admin::GET /pharmacy-admin/supplier-returns",
+            "pharmacy_admin::GET /pharmacy-admin/supplier-returns/{return_id}",
+            "pharmacy_admin::GET /pharmacy-admin/supplier-returns/{return_id}/pdf",
+            "pharmacy_admin::GET /drug-recalls",
+            "pharmacy_admin::GET /drugs/search",
+            "medication_safety_setup::GET /medication-safety/high-alert-list",
+            "medication_safety_setup::GET /medication-safety/high-alert-list/pdf",
+            "medication_safety_setup::PATCH /medication-safety/drugs/{drug_id}",
+            "medication_safety_setup::POST /medication-safety/lasa-pairs",
+            "medication_safety_setup::PATCH /medication-safety/lasa-pairs/{pair_id}",
+            "medication_safety_setup::GET /medication-safety/policy/pdf",
+            "medication_safety_setup::GET /drugs/search",
+            "drug_recalls::POST /drug-recalls",
+            "drug_recalls::GET /drug-recalls",
+            "drug_recalls::GET /drug-recalls/{recall_id}",
+            "drug_recalls::POST /drug-recalls/{recall_id}/remove-stock",
+            "drug_recalls::PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}",
+            "drug_recalls::POST /drug-recalls/{recall_id}/close",
+            "drug_recalls::POST /drug-recalls/{recall_id}/cancel",
+            "drug_recalls::GET /drugs/{drug_id}/stock-status",
+            "drug_recalls::GET /drugs/search",
+            "pharmacy_storage_log::POST /pharmacy/storage-checks",
+            "pharmacy_storage_log::GET /pharmacy/storage-checks",
+            "pharmacy_storage_log::GET /pharmacy/storage-checks/summary",
+            "pharmacy_storage_log::GET /pharmacy/storage-checks/register/pdf",
+            "pharmacy_storage_log::GET /beds/matrix",
+            "report_incident::GET /incident-types",
+            "report_incident::POST /incidents",
+            "report_incident::GET /incidents",
+            "report_incident::GET /incidents/{incident_id}",
+            "report_incident::GET /incidents/sentinel-list/pdf",
+            "report_incident::GET /staff/lookup",
+            "report_incident::GET /admin/departments",
+            "report_incident::GET /drugs/search",
+            "report_incident::GET /beds/matrix",
+            "my_investigations::GET /incidents",
+            "my_investigations::GET /incidents/{incident_id}",
+            "my_investigations::PUT /incidents/{incident_id}/analysis",
+            "my_investigations::POST /incidents/{incident_id}/analysis/sign",
+            "my_investigations::POST /incidents/{incident_id}/actions",
+            "my_investigations::GET /incidents/{incident_id}/pdf",
+            "my_investigations::GET /admin/departments",
+            "my_investigations::GET /staff/lookup",
+            "my_complaint_investigations::GET /complaints/{complaint_id}",
+            "my_complaint_investigations::POST /complaints/{complaint_id}/findings",
+            "my_complaint_investigations::POST /complaints/{complaint_id}/updates",
+            "my_complaint_investigations::POST /complaints/{complaint_id}/actions",
+            "my_complaint_investigations::GET /admin/departments",
+            "my_complaint_investigations::GET /staff/lookup",
+            "my_actions::GET /quality/actions",
+            "my_actions::GET /quality/actions/{action_id}",
+            "my_actions::POST /quality/actions/{action_id}/complete",
+            "connect_server::GET /meta/server-info",
+            "connect_server::GET /terminals/whoami",
+            "login::POST /auth/login",
+            "login::GET /terminals/whoami",
+            "login::POST /auth/change-password",
+            "login::GET /meta/license",
+            "login::GET /health/live",
+            "login::GET /health",
+            "workspace_picker::GET /auth/workspaces",
+            "workspace_picker::GET /auth/me",
+            "workspace_picker::GET /establishment",
+            "settings::GET /settings/sections",
+            "settings::GET /settings/me",
+            "settings::PUT /settings/me",
+            "settings::POST /settings/me/change-password",
+            "settings::POST /admin/change-requests",
+            "help_center::GET /meta/handbook",
+            "help_center::GET /settings/me",
+            "notifications::GET /notifications",
+            "notifications::GET /notifications/unread-count",
+            "notifications::POST /notifications/{notification_id}/read",
+            "notifications::POST /notifications/read-all",
+            "icd_picker::GET /icd/codes",
+            "icd_picker::GET /icd/browse",
+            "icd_picker::GET /icd/codes/{code}",
+            "icd_picker::GET /icd/releases",
+            "approval_queue::GET /approvals",
+            "approval_queue::GET /approvals/{request_id}",
+            "approval_queue::POST /approvals/{request_id}/approve",
+            "approval_queue::POST /approvals/{request_id}/reject",
+            "approval_queue::POST /approvals/{request_id}/cancel",
+            "app_shell::POST /auth/refresh",
+            "app_shell::POST /auth/logout",
+            "app_shell::GET /meta/enums",
+            "app_shell::GET /meta/settings",
+            "app_shell::GET /meta/workspaces",
+            "app_shell::GET /meta/error-codes",
+            "app_shell::GET /meta/events",
+            "rx_queue::GET /prescriptions/pending",
+            "my_committees::GET /committees",
+            "my_committees::GET /committees/{committee_id}",
+            "my_committees::GET /committee-meetings/{meeting_id}",
+            "my_committees::POST /committee-meetings/{meeting_id}/finalize",
+            "my_committees::GET /committee-meetings/{meeting_id}/pdf",
+            "interview_practice::GET /msds/interview-prep/my-deck",
+            "interview_practice::GET /msds/interview-prep/questions/{key}",
+            "interview_practice::POST /msds/interview-prep/rehearsals",
+            "interview_practice::GET /msds/interview-prep/my-progress",
+            "interview_practice::GET /msds/interview-prep/questions",
+            "interview_practice::GET /msds/interview-prep/roles",
+            "interview_practice::GET /msds/interview-prep/pocket-guide/pdf",
+            "interview_practice::GET /msds/interview-prep/pocket-guide",
+            "interview_practice::GET /msds/interview-prep/mock-interviews",
+            "interview_practice::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+            "mock_interviews::GET /msds/interview-prep/staff",
+            "mock_interviews::GET /msds/interview-prep/mock-interviews/plan",
+            "mock_interviews::POST /msds/interview-prep/mock-interviews",
+            "mock_interviews::GET /msds/interview-prep/mock-interviews",
+            "mock_interviews::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+            "mock_interviews::GET /msds/interview-prep/roles",
+            "mock_interviews::GET /msds/interview-prep/questions/{key}",
+            "mock_interviews::GET /quality/actions",
+            "mock_interviews::GET /admin/departments",
+            "my_personnel_record::GET /personnel/me",
+            "my_personnel_record::GET /personnel/appraisals/{appraisal_id}",
+            "my_personnel_record::POST /personnel/appraisals/{appraisal_id}/acknowledge",
+            "my_personnel_record::GET /personnel/appraisals/{appraisal_id}/pdf",
+            "my_personnel_record::GET /personnel/appraisal-policy/pdf",
+            "equipment_requisitions::GET /facility/equipment-requisitions",
+            "equipment_requisitions::GET /facility/equipment-requisitions/{requisition_id}",
+            "equipment_requisitions::POST /facility/equipment-requisitions",
+            "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/options",
+            "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/evaluations",
+            "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/cancel",
+            "equipment_requisitions::GET /finance/vendors",
+            "equipment_requisitions::GET /admin/departments",
+            "equipment_requisitions::GET /committees",
+            "equipment_requisitions::GET /committees/{committee_id}"
+          ]
+        }
+      ],
+      "faq_seed": [
+        {
+          "id": "pharmacy_admin:error:INSUFFICIENT_STOCK",
+          "workspace": "pharmacy_admin",
+          "screen_id": "pharmacy_admin",
+          "kind": "error",
+          "code": "INSUFFICIENT_STOCK",
+          "entity": null,
+          "question": "The Pharmacy back office screen says \"Not enough stock available.\" (INSUFFICIENT_STOCK). Why, and what do I do?"
+        },
+        {
+          "id": "pharmacy_admin:state:supplier_return",
+          "workspace": "pharmacy_admin",
+          "screen_id": "pharmacy_admin",
+          "kind": "state",
+          "code": null,
+          "entity": "supplier_return",
+          "question": "What do the states of a supplier return mean (Returned, Credited, Refused), and what moves it from one to the next?"
+        },
+        {
+          "id": "pharmacy_admin:error:LASA_PAIR_EXISTS",
+          "workspace": "pharmacy_admin",
+          "screen_id": "medication_safety_setup",
+          "kind": "error",
+          "code": "LASA_PAIR_EXISTS",
+          "entity": null,
+          "question": "The High-alert and look-alike medicines screen says \"These two medicines are already paired (details.pair_id).\" (LASA_PAIR_EXISTS). Why, and what do I do?"
+        },
+        {
+          "id": "pharmacy_admin:error:BATCH_RECALLED",
+          "workspace": "pharmacy_admin",
+          "screen_id": "drug_recalls",
+          "kind": "error",
+          "code": "BATCH_RECALLED",
+          "entity": null,
+          "question": "The Batch recalls screen says \"This batch is recalled: it cannot be dispensed, sent to a ward, used in theatre or given.\" (BATCH_RECALLED). Why, and what do I do?"
+        },
+        {
+          "id": "pharmacy_admin:error:STOCK_BATCH_MISMATCH",
+          "workspace": "pharmacy_admin",
+          "screen_id": "drug_recalls",
+          "kind": "error",
+          "code": "STOCK_BATCH_MISMATCH",
+          "entity": null,
+          "question": "The Batch recalls screen says \"The batch does not belong to this item.\" (STOCK_BATCH_MISMATCH). Why, and what do I do?"
+        },
+        {
+          "id": "pharmacy_admin:error:RECALL_STATE_INVALID",
+          "workspace": "pharmacy_admin",
+          "screen_id": "drug_recalls",
+          "kind": "error",
+          "code": "RECALL_STATE_INVALID",
+          "entity": null,
+          "question": "The Batch recalls screen says \"The recall cannot change that way.\" (RECALL_STATE_INVALID). Why, and what do I do?"
+        },
+        {
+          "id": "pharmacy_admin:state:drug_recall",
+          "workspace": "pharmacy_admin",
+          "screen_id": "drug_recalls",
+          "kind": "state",
+          "code": null,
+          "entity": "drug_recall",
+          "question": "What do the states of a drug recall mean (Open, Closed, Cancelled), and what moves it from one to the next?"
+        },
+        {
+          "id": "pharmacy_admin:error:RECALL_NOT_COMPLETE",
+          "workspace": "pharmacy_admin",
+          "screen_id": "drug_recalls",
+          "kind": "error",
+          "code": "RECALL_NOT_COMPLETE",
+          "entity": null,
+          "question": "The Batch recalls screen says \"The recall cannot close yet: stock of the batches is left, or patients are still to be contacted.\" (RECALL_NOT_COMPLETE). Why, and what do I do?"
+        },
+        {
+          "id": "pharmacy_admin:error:STORAGE_CHECK_ACTION_REQUIRED",
+          "workspace": "pharmacy_admin",
+          "screen_id": "pharmacy_storage_log",
+          "kind": "error",
+          "code": "STORAGE_CHECK_ACTION_REQUIRED",
+          "entity": null,
+          "question": "The Medicine storage log screen says \"The reading is out of range: record the action taken.\" (STORAGE_CHECK_ACTION_REQUIRED). Why, and what do I do?"
+        },
+        {
+          "id": "pharmacy_admin:error:BED_NO_LONGER_AVAILABLE",
+          "workspace": "pharmacy_admin",
+          "screen_id": "pharmacy_storage_log",
+          "kind": "error",
+          "code": "BED_NO_LONGER_AVAILABLE",
+          "entity": null,
+          "question": "The Medicine storage log screen says \"Bed was reserved by another terminal.\" (BED_NO_LONGER_AVAILABLE). Why, and what do I do?"
+        }
+      ],
+      "faq_requirement": "Write a detailed How do I...? answer for each supported task, with prerequisites, steps, outcomes, recovery and handovers; follow W2 and W3. Answer every question of faq_seed too.",
+      "coverage_note": "Catalogue minimum, conditional on access rules and the actual records. Add frontend-only tasks, controls and other authorized screens used by the app. This is not runtime authorization."
+    }
+  ],
+  "rbac": "the help site shows only the pages GET /meta/handbook lists for the logged-in user",
+  "languages": [
+    "en",
+    "ur"
+  ],
+  "screen_requirements": [
+    {
+      "id": "S1",
+      "title": "Purpose and audience",
+      "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+    },
+    {
+      "id": "S2",
+      "title": "Step by step (one per task, where to click)",
+      "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+    },
+    {
+      "id": "S3",
+      "title": "Every control and its effects",
+      "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+    },
+    {
+      "id": "S4",
+      "title": "States and feedback",
+      "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+    },
+    {
+      "id": "S5",
+      "title": "Messages, mistakes and recovery",
+      "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+    },
+    {
+      "id": "S6",
+      "title": "Language and visual examples",
+      "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+    },
+    {
+      "id": "S7",
+      "title": "Related help and delivery",
+      "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+    }
+  ],
+  "workspace_requirements": [
+    {
+      "id": "W1",
+      "title": "A day in each role",
+      "instruction": "Explain the workspace's purpose and each role that uses it, how to enter or switch workspaces, start and finish a\nshift, and the typical order of work. State what the role may do and what requires another role, without presenting\nrole names as the app's permission checks. Include shared and linked screens needed to finish the job."
+    },
+    {
+      "id": "W2",
+      "title": "Complete job-task index",
+      "instruction": "List every job task supported for each role in this workspace. Map each task to a detailed FAQ answer and the\nrelevant screen instructions. Reconcile this inventory with the catalogue's tasks, permissions, playbooks, shared\nscreens and the actual UI, including frontend-only tasks. Do not claim that a list of API operations alone covers\neverything staff need to learn. Mark unsupported requests explicitly rather than inventing a workflow."
+    },
+    {
+      "id": "W3",
+      "title": "Detailed role-specific FAQ",
+      "instruction": "For every supported task answer \"How do I ...?\" in the user's language. Each answer must give when to use it,\nprerequisites, exact navigation and labels, ordered steps, what each action changes, the expected outcome, common\nmistakes/refusals and recovery, approvals or handovers and links to screen help. Include exceptions and follow-up\nquestions from the tested journey. Shared answers may be linked, but distinguish differences between roles and\npermissions. Short generic advice or an unexplained link is insufficient.\n\nThis FAQ is compulsory for every supported role in the workspace, including its shared tasks. Missing answers,\nmissing English/Urdu coverage or an unreviewed FAQ keep the workspace unfinished, even when its API calls work.\n\nThe FAQ answers at least every question of `faq_seed` for the workspace (`GET /meta/handbook?workspace=<code>` →\n`faq_seed`; the MCP server's `get_handbook_outline` gives the same list): one per error a screen of the workspace can\nmeet and one per state machine its screens move. They are the minimum, not the whole FAQ."
+    },
+    {
+      "id": "W4",
+      "title": "Handovers, exceptions and troubleshooting",
+      "instruction": "Explain what to do when work is waiting for another role, who acts next, how to find the request later and how to\nrecognize completion or refusal. Cover the workspace's applicable problems: unavailable devices or network, a locked\nsession, conflicting edits, a correction, an uncertain submission and an unfinished shift. Refer to the hospital's\napproved downtime procedure where required; do not invent clinical or financial policy."
+    },
+    {
+      "id": "W5",
+      "title": "Glossary and guided practice",
+      "instruction": "Define the workspace's staff-facing terms consistently with the UI. Provide a complete practice journey using newly\ncreated synthetic records on the DEV server, covering the relevant screens, role boundaries and help navigation.\nA named human reviewer must follow the [workspace acceptance checklist](17-workspace-review-checklist.md)\nusing the handbook and check that the FAQ enables the role's work. Keep both languages, screenshots, task index\nand help links current with the implemented workspace."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7"
+}

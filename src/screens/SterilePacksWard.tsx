@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import type { EstablishmentOut } from "../generated/facility_profile";
 import {
-  usePack,
+  use as usePack,
   getPack,
   listPacks,
   PackOut,
   PackUseIn,
 } from "../generated/sterile_packs_ot";
-import { listAdmissions, AdmissionOut } from "../generated/doctor_inpatients";
+import {myBeds, type MyBedOut} from '../generated/my_beds';
 import {
   getSterilePacksScreenView,
   canUsePack,
@@ -51,7 +51,7 @@ export const SterilePacksWard: React.FC<SterilePacksWardProps> = ({
   const canView = useMemo(() => canViewPacks(currentUser), [currentUser]);
 
   // Ward admissions queue for context
-  const [admissions, setAdmissions] = useState<AdmissionOut[]>([]);
+  const [admissions, setAdmissions] = useState<MyBedOut[]>([]);
   const [selectedAdmissionId, setSelectedAdmissionId] = useState<number | null>(null);
   const [admissionSearch, setAdmissionSearch] = useState("");
 
@@ -80,7 +80,7 @@ export const SterilePacksWard: React.FC<SterilePacksWardProps> = ({
   // Fetch active ward admissions
   const loadAdmissions = useCallback(async () => {
     try {
-      const data = await listAdmissions();
+      const data = (await myBeds()).filter(row=>row.admission_id!==null);
       setAdmissions(data);
       if (data.length > 0 && !selectedAdmissionId) {
         setSelectedAdmissionId(data[0].admission_id);
@@ -226,9 +226,9 @@ export const SterilePacksWard: React.FC<SterilePacksWardProps> = ({
       const query = admissionSearch.toLowerCase();
       const matchSearch =
         !query ||
-        a.patient_name.toLowerCase().includes(query) ||
-        a.mrn.toLowerCase().includes(query) ||
-        a.admission_number.toLowerCase().includes(query) ||
+        (a.patient_name??"").toLowerCase().includes(query) ||
+        (a.mrn??"").toLowerCase().includes(query) ||
+        String(a.admission_id??"").toLowerCase().includes(query) ||
         (a.ward_name && a.ward_name.toLowerCase().includes(query)) ||
         (a.bed_label && a.bed_label.toLowerCase().includes(query));
       return matchSearch;
@@ -426,7 +426,7 @@ export const SterilePacksWard: React.FC<SterilePacksWardProps> = ({
                         <span className="font-mono">{a.mrn}</span> • {a.ward_name || "General Ward"}
                       </div>
                       <div className="text-gray-700 font-medium truncate mt-0.5 font-mono text-[11px]">
-                        Admission #{a.admission_number}
+                        Admission #{a.admission_id}
                       </div>
                     </button>
                   );
@@ -459,7 +459,7 @@ export const SterilePacksWard: React.FC<SterilePacksWardProps> = ({
                 </div>
                 <div>
                   <span className="text-slate-400">Admission:</span>{" "}
-                  <span className="font-mono font-medium">{selectedAdmission.admission_number}</span>
+                  <span className="font-mono font-medium">{selectedAdmission.admission_id}</span>
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 {
   "screen_id": "pharmacy_storage_log",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -224,6 +224,14 @@
       }
     ],
     "related_workflows": [
+      "complaints",
+      "cost-estimates-and-tariff",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "incidents-and-sentinel-events",
+      "infection-control",
+      "inpatient-and-discharge",
       "medication-safety"
     ]
   },
@@ -234,7 +242,7 @@
     "workspace": "pharmacy_admin",
     "phase": "P7",
     "position": 138,
-    "points": 51,
+    "points": 54,
     "capabilities": [
       "realtime",
       "idempotent_writes",
@@ -248,29 +256,35 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 51,
+    "points": 54,
     "items": [
       {
         "id": "ep:POST /pharmacy/storage-checks",
         "label": "POST /pharmacy/storage-checks",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /pharmacy/storage-checks",
         "label": "GET /pharmacy/storage-checks",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /pharmacy/storage-checks/summary",
         "label": "GET /pharmacy/storage-checks/summary",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /pharmacy/storage-checks/register/pdf",
         "label": "GET /pharmacy/storage-checks/register/pdf",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /beds/matrix",
+        "label": "GET /beds/matrix",
         "points": 3,
         "claimed": false
       },
@@ -278,61 +292,61 @@
         "id": "ev:pharmacy.storage.out_of_range",
         "label": "pharmacy.storage.out_of_range",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:09925ecb70",
         "label": "Record: storage_area (pick from the areas already used, or type a new one: keep one spelling per place), kind (Room / Refrigerator / Freezer / ColdChainBox), the ward for a ward cupboard, temperature, humidity (optional), own limits only for a place with its own range (a vaccine box). The limits of the kind come from the settings (pharmacy_room_*_c, pharmacy_fridge_*_c, pharmacy_freezer_*_c).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:e66d8b92db",
         "label": "Out of range: the form demands action_taken (STORAGE_CHECK_ACTION_REQUIRED); show the row red; the event pharmacy.storage.out_of_range reaches the pharmacists at once.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:ac70d74fb1",
         "label": "Summary tiles per area: readings, out of range, lowest, highest, days with both readings of the day (expected checks_per_day = 2); a day with one reading or none is a gap to explain to the surveyor.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:1b0e847e97",
         "label": "Print the register for the period the surveyor asks (PDF). Ward nurses record their own ward's cupboard and refrigerator from the ward screens with the same POST.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
         "label": "Test plan passed",
         "points": 4,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -362,13 +376,13 @@
         "id": "q:character",
         "label": "Design principles applied",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:editor",
         "label": "Editor's pass",
         "points": 2,
-        "claimed": false
+        "claimed": true
       }
     ],
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
@@ -535,7 +549,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "The ward whose cupboard or refrigerator it is; null for the pharmacy"
+            "description": "The ward whose cupboard or refrigerator it is; null for the pharmacy (GET /beds/matrix?include_beds=false)"
           },
           {
             "pointer": "/temperature_c",
@@ -1078,6 +1092,146 @@
           "application/octet-stream"
         ]
       }
+    },
+    {
+      "endpoint": "GET /beds/matrix",
+      "summary": "Live bed matrix (counts per ward + optional bed list)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "BED_NO_LONGER_AVAILABLE",
+          "http_status": 409,
+          "message": "Bed was reserved by another terminal.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "bed_id",
+            "current_state"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/allocate-bed"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "include_beds",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "title": "Include Beds"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_BedMatrixOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "include_beds",
+            "required": false,
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        "note": null
+      }
     }
   ],
   "realtime": {
@@ -1098,7 +1252,8 @@
         "refresh": [
           "GET /pharmacy/storage-checks",
           "GET /pharmacy/storage-checks/summary",
-          "GET /pharmacy/storage-checks/register/pdf"
+          "GET /pharmacy/storage-checks/register/pdf",
+          "GET /beds/matrix"
         ]
       }
     ],
@@ -1107,6 +1262,80 @@
   "handoffs": [],
   "patient_context": null,
   "value_lists": [
+    {
+      "values": [
+        "AdmissionPending",
+        "Waitlisted",
+        "BedReserved",
+        "CodeRedActive",
+        "Admitted",
+        "DischargeInProgress",
+        "Discharged",
+        "Cancelled"
+      ],
+      "column": "admissions.status",
+      "used_at": "GET /beds/matrix.beds[].admission_status",
+      "labels": {
+        "AdmissionPending": "Admission pending",
+        "Waitlisted": "Waitlisted",
+        "BedReserved": "Bed reserved",
+        "CodeRedActive": "Code red active",
+        "Admitted": "Admitted",
+        "DischargeInProgress": "Discharge in progress",
+        "Discharged": "Discharged",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "Available",
+        "Reserved",
+        "Occupied",
+        "Dirty",
+        "Cleaning",
+        "OutOfService"
+      ],
+      "column": "beds.current_state",
+      "used_at": "GET /beds/matrix.beds[].current_state",
+      "labels": {
+        "Available": "Available",
+        "Reserved": "Reserved",
+        "Occupied": "Occupied",
+        "Dirty": "Dirty",
+        "Cleaning": "Cleaning",
+        "OutOfService": "Out of service"
+      },
+      "state_machine": "bed",
+      "final_states": [],
+      "transitions": {
+        "Available": [
+          "Reserved",
+          "Occupied",
+          "OutOfService"
+        ],
+        "Reserved": [
+          "Occupied",
+          "Available"
+        ],
+        "Occupied": [
+          "Dirty"
+        ],
+        "Dirty": [
+          "Cleaning",
+          "Available",
+          "OutOfService"
+        ],
+        "Cleaning": [
+          "Available",
+          "Dirty",
+          "OutOfService"
+        ],
+        "OutOfService": [
+          "Available",
+          "Dirty"
+        ]
+      }
+    },
     {
       "values": [
         "Room",
@@ -1121,6 +1350,52 @@
         "Refrigerator": "Refrigerator",
         "Freezer": "Freezer",
         "ColdChainBox": "Cold chain box"
+      }
+    },
+    {
+      "values": [
+        "male",
+        "female",
+        "any"
+      ],
+      "column": "wards.gender_restriction",
+      "used_at": "GET /beds/matrix.wards[].gender_restriction",
+      "labels": {
+        "male": "Male",
+        "female": "Female",
+        "any": "Any"
+      }
+    },
+    {
+      "values": [
+        "General",
+        "Private",
+        "SemiPrivate",
+        "ICU",
+        "CCU",
+        "NICU",
+        "Surgical",
+        "Pediatric",
+        "Maternity",
+        "Emergency",
+        "Isolation",
+        "Other"
+      ],
+      "column": "wards.ward_type",
+      "used_at": "GET /beds/matrix.wards[].ward_type",
+      "labels": {
+        "General": "General",
+        "Private": "Private",
+        "SemiPrivate": "Semi private",
+        "ICU": "ICU",
+        "CCU": "CCU",
+        "NICU": "NICU",
+        "Surgical": "Surgical",
+        "Pediatric": "Pediatric",
+        "Maternity": "Maternity",
+        "Emergency": "Emergency",
+        "Isolation": "Isolation",
+        "Other": "Other"
       }
     }
   ],
@@ -1161,6 +1436,7 @@
       "ur": "فارمیسی ایڈمن"
     },
     "error_messages": {
+      "BED_NO_LONGER_AVAILABLE": "Bed was reserved by another terminal.",
       "FORBIDDEN": "You do not have permission to do this.",
       "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
       "STORAGE_CHECK_ACTION_REQUIRED": "The reading is out of range: record the action taken.",
@@ -1178,17 +1454,25 @@
       "pharmacy_admin"
     ],
     "partial": [
+      "super_admin",
       "owner",
       "hospital_admin",
       "hospital_director",
       "clinic_director",
+      "receptionist",
+      "admissions_officer",
       "triage_nurse",
       "doctor",
       "clinical_specialist",
       "surgeon",
       "anaesthetist",
       "ot_nurse",
-      "quality_officer"
+      "hr_admin",
+      "maintenance_admin",
+      "ops_admin",
+      "quality_officer",
+      "ipc_nurse",
+      "cssd_technician"
     ],
     "page_for": [
       "ward_nurse",
@@ -1335,6 +1619,50 @@
           "triage_nurse",
           "ward_nurse"
         ]
+      },
+      {
+        "id": "case:GET /beds/matrix",
+        "call": "GET /api/v1/beds/matrix",
+        "summary": "Live bed matrix (counts per ward + optional bed list)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "employee_self",
+            "lab_admin"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "BED_NO_LONGER_AVAILABLE",
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
       }
     ],
     "service_cases": [],
@@ -1375,8 +1703,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -1460,6 +1788,25 @@
         ],
         "permissions_mode": "any",
         "access": null
+      },
+      {
+        "id": "pharmacy_storage_log::GET /beds/matrix",
+        "task": "Live bed matrix (counts per ward + optional bed list)",
+        "call": "GET /beds/matrix",
+        "is_action": false,
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
+        ],
+        "permissions_mode": "any",
+        "access": null
       }
     ],
     "rules_to_explain": [
@@ -1472,6 +1819,11 @@
       "pharmacy.storage.out_of_range"
     ],
     "errors_the_user_can_meet": [
+      {
+        "code": "BED_NO_LONGER_AVAILABLE",
+        "message": "Bed was reserved by another terminal.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
       {
         "code": "FORBIDDEN",
         "message": "You do not have permission to do this.",
@@ -1552,6 +1904,46 @@
     "workspace_guide": "get_handbook_outline('pharmacy_admin')"
   },
   "workflows": [
+    {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
+    {
+      "slug": "cost-estimates-and-tariff",
+      "title": "Cost estimates, the tariff and ward transfers (MSDS)",
+      "recipe": "get_workflow_recipe('cost-estimates-and-tariff')"
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
+    },
+    {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "facility-compliance-equipment-drills",
+      "title": "Licences, equipment maintenance and mock drills (MSDS)",
+      "recipe": "get_workflow_recipe('facility-compliance-equipment-drills')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "recipe": "get_workflow_recipe('infection-control')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
     {
       "slug": "medication-safety",
       "title": "Medication safety (MSDS)",
@@ -1728,9 +2120,9 @@
             "ward_name": null,
             "recorded_at": "2026-10-04T07:46:03.564874+00:00",
             "temperature_c": 24.5,
-            "humidity_pct": 55.0,
-            "min_c": 10.0,
-            "max_c": 25.0,
+            "humidity_pct": 55,
+            "min_c": 10,
+            "max_c": 25,
             "within_range": true,
             "action_taken": null,
             "recorded_by": 1,
@@ -1758,10 +2150,10 @@
               "ward_id": null,
               "ward_name": null,
               "recorded_at": "2026-10-04T07:46:03.618774+00:00",
-              "temperature_c": -20.0,
+              "temperature_c": -20,
               "humidity_pct": null,
-              "min_c": -30.0,
-              "max_c": -15.0,
+              "min_c": -30,
+              "max_c": -15,
               "within_range": true,
               "action_taken": null,
               "recorded_by": 1,
@@ -1776,8 +2168,8 @@
               "recorded_at": "2026-10-04T07:46:03.601341+00:00",
               "temperature_c": 6.5,
               "humidity_pct": null,
-              "min_c": 2.0,
-              "max_c": 7.0,
+              "min_c": 2,
+              "max_c": 7,
               "within_range": true,
               "action_taken": null,
               "recorded_by": 1,
@@ -1792,8 +2184,8 @@
               "recorded_at": "2026-10-04T07:46:03.587919+00:00",
               "temperature_c": 9.5,
               "humidity_pct": null,
-              "min_c": 2.0,
-              "max_c": 8.0,
+              "min_c": 2,
+              "max_c": 8,
               "within_range": false,
               "action_taken": "Door ajar: closed, insulin checked",
               "recorded_by": 2,
@@ -1846,8 +2238,8 @@
                 "ward_name": null,
                 "checks": 1,
                 "out_of_range": 0,
-                "min_seen": -20.0,
-                "max_seen": -20.0,
+                "min_seen": -20,
+                "max_seen": -20,
                 "last_at": "2026-10-04T07:46:03.618774+00:00",
                 "days_checked": 1,
                 "days_complete": 0
@@ -1884,9 +2276,280 @@
         "content_type": "application/pdf",
         "bytes": 3810
       }
+    },
+    "GET /beds/matrix": {
+      "request": {
+        "path": "/api/v1/beds/matrix"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "wards": [
+              {
+                "ward_id": 2,
+                "code": "GW",
+                "name": "General Ward",
+                "ward_type": "General",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 0,
+                "reserved": 0,
+                "occupied": 1,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 1,
+                "code": "ICU",
+                "name": "ICU",
+                "ward_type": "ICU",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 1,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              }
+            ],
+            "summary": {
+              "General Ward": 0,
+              "ICU": 1
+            },
+            "beds": [
+              {
+                "bed_id": 1,
+                "ward_id": 1,
+                "label": "ICU-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 2,
+                "ward_id": 2,
+                "label": "GW-1",
+                "current_state": "Occupied",
+                "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": 1,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": "Admitted",
+                "is_overflow": false,
+                "discharge_blocked_on": null
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:22.967241+00:00"
+          },
+          "request_id": "802131a929b14db0a0c8033474e8d271"
+        }
+      }
     }
   },
   "schemas": {
+    "BedMatrixBedOut": {
+      "properties": {
+        "bed_id": {
+          "type": "integer",
+          "title": "Bed Id"
+        },
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "current_state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "Reserved",
+            "Occupied",
+            "Dirty",
+            "Cleaning",
+            "OutOfService"
+          ],
+          "title": "Current State"
+        },
+        "state_changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Changed At"
+        },
+        "is_overflow_allowed": {
+          "type": "boolean",
+          "title": "Is Overflow Allowed"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "patient_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Name",
+          "description": "Only with with_patients=true"
+        },
+        "mrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mrn",
+          "description": "Only with with_patients=true"
+        },
+        "admission_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "AdmissionPending",
+                "Waitlisted",
+                "BedReserved",
+                "CodeRedActive",
+                "Admitted",
+                "DischargeInProgress",
+                "Discharged",
+                "Cancelled"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Status"
+        },
+        "is_overflow": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Is Overflow"
+        },
+        "discharge_blocked_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharge Blocked On",
+          "description": "The discharge stage the patient in this bed waits for"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bed_id",
+        "ward_id",
+        "label",
+        "current_state",
+        "state_changed_at",
+        "is_overflow_allowed",
+        "admission_id",
+        "patient_name",
+        "mrn",
+        "admission_status",
+        "is_overflow",
+        "discharge_blocked_on"
+      ],
+      "title": "BedMatrixBedOut"
+    },
+    "BedMatrixOut": {
+      "properties": {
+        "wards": {
+          "items": {
+            "$ref": "#/components/schemas/WardOccupancyOut"
+          },
+          "type": "array",
+          "title": "Wards"
+        },
+        "summary": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "type": "object",
+          "title": "Summary",
+          "description": "Ward name -> available beds"
+        },
+        "beds": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/components/schemas/BedMatrixBedOut"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Beds",
+          "description": "Only with include_beds=true"
+        }
+      },
+      "type": "object",
+      "required": [
+        "wards",
+        "summary"
+      ],
+      "title": "BedMatrixOut"
+    },
+    "Envelope_BedMatrixOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/BedMatrixOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[BedMatrixOut]"
+    },
     "Envelope_StorageCheckOut_": {
       "properties": {
         "data": {
@@ -2124,14 +2787,14 @@
             }
           ],
           "title": "Ward Id",
-          "description": "The ward whose cupboard or refrigerator it is; null for the pharmacy"
+          "description": "The ward whose cupboard or refrigerator it is; null for the pharmacy (GET /beds/matrix?include_beds=false)"
         },
         "temperature_c": {
           "anyOf": [
             {
               "type": "number",
-              "maximum": 60.0,
-              "minimum": -40.0
+              "maximum": 60,
+              "minimum": -40
             },
             {
               "type": "string",
@@ -2145,8 +2808,8 @@
           "anyOf": [
             {
               "type": "number",
-              "maximum": 100.0,
-              "minimum": 0.0
+              "maximum": 100,
+              "minimum": 0
             },
             {
               "type": "string",
@@ -2458,6 +3121,90 @@
         "type"
       ],
       "title": "ValidationError"
+    },
+    "WardOccupancyOut": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "ward_type": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Private",
+            "SemiPrivate",
+            "ICU",
+            "CCU",
+            "NICU",
+            "Surgical",
+            "Pediatric",
+            "Maternity",
+            "Emergency",
+            "Isolation",
+            "Other"
+          ],
+          "title": "Ward Type"
+        },
+        "gender_restriction": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "any"
+          ],
+          "title": "Gender Restriction"
+        },
+        "total_beds": {
+          "type": "integer",
+          "title": "Total Beds"
+        },
+        "available": {
+          "type": "integer",
+          "title": "Available"
+        },
+        "reserved": {
+          "type": "integer",
+          "title": "Reserved"
+        },
+        "occupied": {
+          "type": "integer",
+          "title": "Occupied"
+        },
+        "turnover": {
+          "type": "integer",
+          "title": "Turnover",
+          "description": "Beds being cleaned or waiting for discharge clearance"
+        },
+        "out_of_service": {
+          "type": "integer",
+          "title": "Out Of Service"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id",
+        "code",
+        "name",
+        "ward_type",
+        "gender_restriction",
+        "total_beds",
+        "available",
+        "reserved",
+        "occupied",
+        "turnover",
+        "out_of_service"
+      ],
+      "title": "WardOccupancyOut",
+      "description": "A ward's bed counts (view v_bed_matrix)."
     }
   },
   "unknowns": [

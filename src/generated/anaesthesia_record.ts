@@ -451,20 +451,23 @@ export interface IncidentIn {
   harm?: "NoHarm" | "Mild" | "Moderate" | "Severe" | "Death";
   occurred_at: string;
   affected: "Patient" | "Staff" | "Visitor" | "None";
+  /** The patient (GET /patients/search) */
   patient_id?: number | null;
-  /** The admission it happened in (the patient follows from it) */
+  /** The admission it happened in (the patient follows from it) (GET /admissions) */
   admission_id?: number | null;
   /** The staff member harmed (affected Staff) */
   employee_id?: number | null;
-  /** A theatre adverse event: the operation (with ot_phase) */
+  /** A theatre adverse event: the operation (with ot_phase) (GET /ot/bookings) */
   booking_id?: number | null;
   ot_phase?: "BeforeInduction" | "Induction" | "Maintenance" | "Emergence" | "Recovery" | "AfterRecovery" | null;
-  /** A medication error or an adverse drug reaction: the medicine */
+  /** A medication error or an adverse drug reaction: the medicine (GET /drugs/search) */
   drug_id?: number | null;
   medication_stage?: "Prescribing" | "Transcribing" | "Dispensing" | "Administration" | "Monitoring" | null;
-  /** An unexpected death: the death record */
+  /** An unexpected death: the death record (GET /deaths?patient_id=) */
   death_id?: number | null;
+  /** The department (GET /admin/departments) */
   department_id?: number | null;
+  /** The ward (GET /beds/matrix?include_beds=false) */
   ward_id?: number | null;
   location?: string | null;
   /** What happened: facts, not opinions or blame */
@@ -620,6 +623,8 @@ export interface StaffLookupOut {
   license_type: "PMDC" | "PNC" | "Other" | null;
   /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
   registration: string | null;
+  /** Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62) */
+  user_id: number | null;
 }
 
 /** The surgical record of an operation — GET /api/v1/ot/bookings/{booking_id}/surgical-record (who may call: holders of ot.clinical.view). */

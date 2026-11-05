@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 /**
  * Screen 137: drug_recalls
  * "Batch recalls"
@@ -1094,15 +1095,12 @@ export const DrugRecalls: React.FC<DrugRecallsProps> = ({
                   Drug ID (Formulary Medicine) *
                 </label>
                 <div className="flex gap-2">
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder="Enter Drug ID (e.g. 1)"
+                  <DirectoryPicker
                     value={drugLookupId}
                     onChange={(e) => setDrugLookupId(e.target.value)}
                     className="flex-1 border border-gray-300 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm dark:bg-gray-800"
                     data-help="drug_recalls.lookup_drug_id_input"
-                  />
+                   path="/drugs/search" idField="drug_id" search />
                   <button
                     type="button"
                     onClick={handleLookupDrugStock}

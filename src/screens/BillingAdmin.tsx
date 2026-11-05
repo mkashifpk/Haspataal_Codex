@@ -1,3 +1,4 @@
+import {DirectoryPicker} from "../DirectoryPicker";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   serviceCatalog,
@@ -1039,14 +1040,12 @@ export const BillingAdmin: React.FC<BillingAdminProps> = ({
             <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center space-x-3">
                 <label className="text-xs font-semibold text-slate-600">Filter by Employee ID:</label>
-                <input
-                  type="number"
+                <DirectoryPicker
                   data-help="billing_admin.contract_employee_filter"
                   value={contractEmployeeFilter}
                   onChange={(e) => setContractEmployeeFilter(e.target.value)}
-                  placeholder="e.g. 5"
                   className="text-xs border border-slate-300 rounded-md px-3 py-1.5 w-32 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
+                 path="/staff/lookup" idField="employee_id" search />
                 <button
                   type="button"
                   data-help="billing_admin.apply_contract_filter_btn"
@@ -1652,8 +1651,7 @@ export const BillingAdmin: React.FC<BillingAdminProps> = ({
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     User ID (صارف شناختی نمبر)
                   </label>
-                  <input
-                    type="number"
+                  <DirectoryPicker
                     data-help="billing_admin.policy_user_id_input"
                     value={policyForm.user_id ?? ""}
                     onChange={(e) =>
@@ -1663,9 +1661,8 @@ export const BillingAdmin: React.FC<BillingAdminProps> = ({
                         role_code: e.target.value ? null : policyForm.role_code,
                       })
                     }
-                    placeholder="e.g. 10"
                     className="w-full text-xs border border-slate-300 rounded-md px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
+                   path="/staff/lookup" idField="user_id" search userId />
                 </div>
               </div>
 

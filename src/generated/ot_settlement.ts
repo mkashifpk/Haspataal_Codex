@@ -163,6 +163,8 @@ export interface StaffLookupOut {
   license_type: "PMDC" | "PNC" | "Other" | null;
   /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
   registration: string | null;
+  /** Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62) */
+  user_id: number | null;
 }
 
 /** Show the split math before finalizing (no changes) — POST /api/v1/ot/bookings/{booking_id}/settlement-preview (who may call: holders of ot.finalize or ot.contract.view). */
@@ -184,14 +186,3 @@ export function contracts(query?: { employee_id?: number | null }): Promise<Cont
 export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
   return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
 }
-
-/** Get booking details with consumables and settlement — GET /api/v1/ot/bookings/{booking_id} */
-export function getBookingDetail(booking_id: number): Promise<OtBookingDetailOut> {
-  return api<OtBookingDetailOut>("GET", `/ot/bookings/${booking_id}`, undefined);
-}
-
-/** List OT bookings (e.g. for post-op settlement selection) — GET /api/v1/ot/bookings */
-export function listBookings(query?: { status?: string; date?: string; patient_id?: number }): Promise<OtBookingDetailOut[]> {
-  return api<OtBookingDetailOut[]>("GET", withQuery(`/ot/bookings`, query), undefined);
-}
-

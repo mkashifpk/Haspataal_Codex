@@ -19,7 +19,7 @@ export interface SessionInfo {
 export interface Establishment {
   services?: Array<{ code: string; status: string }>;
   views?: {
-    screens?: string[];
+    screens?: Array<{ screen_id: string; view: string }>;
     [key: string]: any;
   };
   [key: string]: any;
@@ -47,7 +47,7 @@ export function getPayrollCapabilityView(
   session: SessionInfo | null,
   establishment?: Establishment | null
 ): PayrollCapabilityView {
-  if (!session || !session.roles) {
+  if (!session) {
     return {
       mode: "hidden",
       canRun: false,
@@ -59,9 +59,8 @@ export function getPayrollCapabilityView(
     };
   }
 
-  // Check establishment service capability gate if present
-  const hrService = establishment?.services?.find((s: any) => s.code === "hr" || s.code === "payroll");
-  if (hrService && hrService.status === "Inactive") {
+  const screenView = establishment?.views?.screens?.find(s => s.screen_id === "payroll")?.view;
+  if (screenView === "hidden") {
     return {
       mode: "hidden",
       canRun: false,
@@ -69,17 +68,15 @@ export function getPayrollCapabilityView(
       canFinalize: false,
       canMarkPaid: false,
       canCancel: false,
-      reason: "Payroll service is currently inactive in this facility",
+      reason: "Payroll is hidden by the server's current screen view",
     };
   }
 
   const permissions = session.permissions || [];
-  const canRun = permissions.includes("hr.payroll.run") || session.roles.includes("hr_admin");
+  const canRun = screenView !== "records" && permissions.includes("hr.payroll.run");
   const canView =
     canRun ||
-    permissions.includes("hr.payroll.view") ||
-    session.roles.includes("hr_admin") ||
-    session.roles.includes("accountant");
+    permissions.includes("hr.payroll.view");
 
   if (!canView) {
     return {

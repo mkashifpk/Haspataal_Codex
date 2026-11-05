@@ -13,7 +13,7 @@ export interface StorageCheckIn {
   /** Always the same spelling for the same place: the register groups by it */
   storage_area: string;
   storage_kind: "Room" | "Refrigerator" | "Freezer" | "ColdChainBox";
-  /** The ward whose cupboard or refrigerator it is; null for the pharmacy */
+  /** The ward whose cupboard or refrigerator it is; null for the pharmacy (GET /beds/matrix?include_beds=false) */
   ward_id?: number | null;
   /** Degrees Celsius, one decimal */
   temperature_c: number | string;
@@ -81,6 +81,48 @@ export interface StorageAreaSummaryOut {
   days_complete: number;
 }
 
+export interface BedMatrixOut {
+  wards: WardOccupancyOut[];
+  /** Ward name -> available beds */
+  summary: Record<string, number>;
+  /** Only with include_beds=true */
+  beds?: BedMatrixBedOut[] | null;
+}
+
+/** A ward's bed counts (view v_bed_matrix). */
+export interface WardOccupancyOut {
+  ward_id: number;
+  code: string;
+  name: string;
+  ward_type: "General" | "Private" | "SemiPrivate" | "ICU" | "CCU" | "NICU" | "Surgical" | "Pediatric" | "Maternity" | "Emergency" | "Isolation" | "Other";
+  gender_restriction: "male" | "female" | "any";
+  total_beds: number;
+  available: number;
+  reserved: number;
+  occupied: number;
+  /** Beds being cleaned or waiting for discharge clearance */
+  turnover: number;
+  out_of_service: number;
+}
+
+export interface BedMatrixBedOut {
+  bed_id: number;
+  ward_id: number;
+  label: string;
+  current_state: "Available" | "Reserved" | "Occupied" | "Dirty" | "Cleaning" | "OutOfService";
+  state_changed_at: string;
+  is_overflow_allowed: boolean;
+  admission_id: number | null;
+  /** Only with with_patients=true */
+  patient_name: string | null;
+  /** Only with with_patients=true */
+  mrn: string | null;
+  admission_status: "AdmissionPending" | "Waitlisted" | "BedReserved" | "CodeRedActive" | "Admitted" | "DischargeInProgress" | "Discharged" | "Cancelled" | null;
+  is_overflow: boolean | null;
+  /** The discharge stage the patient in this bed waits for */
+  discharge_blocked_on: string | null;
+}
+
 /** Record a temperature (and humidity) reading of a medicine store, refrigerator or freezer — POST /api/v1/pharmacy/storage-checks (who may call: holders of pharmacy.storage.record). */
 export function recordStorageCheck(body: StorageCheckIn): Promise<StorageCheckOut> {
   return api<StorageCheckOut>("POST", `/pharmacy/storage-checks`, body, { idempotent: true });
@@ -99,4 +141,9 @@ export function storageSummary(query?: { date_from?: string | null; date_to?: st
 /** The storage register of a period as a PDF (MSDS MOM 58) — GET /api/v1/pharmacy/storage-checks/register/pdf (who may call: holders of pharmacy.stock.view or medication.safety.view or pharmacy.storage.record). */
 export function storageRegisterPdf(query?: { date_from?: string | null; date_to?: string | null }): Promise<unknown> {
   return api<unknown>("GET", withQuery(`/pharmacy/storage-checks/register/pdf`, query), undefined);
+}
+
+/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record). */
+export function bedMatrix(query?: { include_beds?: boolean }): Promise<BedMatrixOut> {
+  return api<BedMatrixOut>("GET", withQuery(`/beds/matrix`, query), undefined);
 }

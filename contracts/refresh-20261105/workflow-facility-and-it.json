@@ -1,0 +1,241 @@
+{
+  "slug": "facility-and-it",
+  "title": "Facility operations, badge stations & IT administration",
+  "summary": "Work orders to AP, overhead logging, zero-interface badge stations, provisioning, role matrix, terminal mapping, server health, kill switch.",
+  "order": 99,
+  "workflow": "§6.8, §6.9, §8, §9",
+  "workspaces": [
+    "ops_admin",
+    "maintenance",
+    "super_admin",
+    "self_service"
+  ],
+  "file": "facility-and-it.md",
+  "markdown": "# Facility operations, badge stations & IT\n\n## Work orders (§6.9)\n\n1. Staff with `ops.workorder.report` (most clinical and support roles, and *My Workspace*; `who_can` lists them):\n   `POST /ops/work-orders {\"category\": \"Plumbing\", \"description\", \"location_text\" | \"ward_id\" | \"asset_id\"}` (\"Report Issue\").\n   The ward from `GET /beds/matrix?include_beds=false`, the asset from `GET /ops/assets` (without what it cost unless\n   the reporter may view assets), or the place typed (`location_text`, as the self-service screen does).\n2. Maintenance: `POST /ops/work-orders/{id}/assign {\"vendor_id\" | \"employee_id\", \"estimated_cost\"}` → `start` (the\n   employee picked with `GET /staff/lookup?q=`, the contractor with `GET /finance/vendors?vendor_type=Contractor`).\n3. \"Job Complete\": `POST /ops/work-orders/{id}/complete {\"final_cost\"}` — a contractor job with a cost goes\n   straight to the Accountant's AP queue (`PendingPayment`); maintenance can never pay.\n4. Accountant settles → work order `Paid`. Live via `work_order.updated`.\n\nAssets: `GET /ops/assets`, `POST /ops/assets`, `PUT /ops/assets/{asset_id}` (the tag, the place, the status). Medical\nequipment (`is_medical`) also has its equipment record, its maintenance and calibration plans, its visits and its\nformal write-off under `/facility/equipment` ([licences, equipment and drills](facility-compliance-equipment-drills.md));\nan asset is never set to `Disposed` here: the owner writes it off there.\nThe department from `GET /admin/departments`, the ward from `GET /beds/matrix?include_beds=false`.\n\n## Overheads (§7.4, §8.1)\n\n`GET /ops/utility-categories` → `POST /ops/utility-logs {\"category_id\", \"vendor_id\", \"billing_period\": \"2026-09\", \"qty\", \"cost\"}`\n(the provider from `GET /finance/vendors?vendor_type=UtilityProvider`)\n→ payable + expense in today's P&L.\n\n## Zero-interface staff & badge stations (§6.8, §8.2)\n\nNo logins. Staff present a badge (RFID card, a QR printed on the ID card, or a biometric enrolment) at a badge\nstation, which posts `POST /badge-stations/scans` (header `X-Station-Key`). Bed-cleaning stations flip Dirty\nbeds to Available (or record the cleaning until discharge billing clears); the staff-entrance station records\nattendance. Hospitals without RFID hardware use barcode-scanner kiosks and printed QR badges. The Ops live\nfeed: `GET /ops/facility-feed` + `ops.badge.scan`. Ops Admin rosters the support staff in the duty roster\n(`POST /rosters`, scope `roster.manage.support`) and takes roll call where there is no station. Full playbook:\n[Duty rosters, roll call, badges & attendance](duty-rosters-and-attendance.md).\n\n## IT / Super Admin (§9)\n\n* **Go-live, once: the first Owner.** A new installation has only the Super Admin of the setup, who has no HR rights\n  (§6.2), so nobody could onboard staff. `GET /admin/first-owner` → `needed`: while true, open the console on \"Create\n  the first Owner\": `POST /admin/first-owner {\"full_name\", \"cnic\", \"mobile\", \"roles\": [\"hr_admin\"]}` (owner is always\n  given; in a small clinic add the owner's clinical role, e.g. `\"doctor\"`). It answers the login with its temporary\n  password (shown once: print the slip) and the new staff record. Never again afterwards (`FIRST_OWNER_EXISTS`, the\n  database refuses it too): every later member of staff, owners included, comes through HR's wizard and provisioning.\n  The Owner's personnel file lists the CNIC copy as missing until HR or the Owner uploads it.\n* **Provisioning**: `GET /admin/provisioning-queue`, `POST /admin/users` (temp password once), roles\n  `PUT /admin/users/{id}/roles`, `reset-password`, `active`, `revoke-sessions`. Nobody changes their own roles\n  (`SELF_ROLE_CHANGE_FORBIDDEN`), and the last active Owner keeps the role (`LAST_OWNER`).\n* **Role matrix**: `GET /admin/role-matrix`, `PUT /admin/roles/{code}/permissions` — effective on the next\n  request of every logged-in user (no re-login). Super Admin cannot lose its admin permissions.\n* **Control settings and privileged access**: control settings (`is_control`), privileged roles (`owner`,\n  `hospital_admin`, `billing_admin`, `accountant`, `hospital_director`, `clinic_director`) and their sensitive\n  permissions belong to an Owner (`POLICY_CHANGE_APPROVAL_REQUIRED`, `PRIVILEGED_ACCESS_APPROVAL_REQUIRED`). Anyone else\n  submits `POST /admin/change-requests` (`kind`: `Setting` | `UserRoles` | `RolePermissions`, `reason`), which waits for\n  an Owner in the approvals queue (`PolicyChange`, `PrivilegedAccess`); a value of the wrong type or outside the\n  setting's range is refused at once (`VALIDATION_ERROR`: the login's protection, `login_max_failures` 3-20,\n  `login_lockout_minutes` 5-1440 and `password_min_length` 8-64, and `inspector_access_max_days` 1-60 are control\n  settings with ranges), and inspects requests with\n  `GET /admin/change-requests` and `GET /admin/change-requests/{change_request_id}`.\n  A `UserRoles` request names the user from `GET /admin/users`.\n* **Hardware**: printers `/admin/printers`, terminals `/admin/terminals` (MAC → location, receipt/label/\n  document/card printers, cash counter), badge stations `PUT /admin/badge-stations/{id}` (`device_type`\n  RFIDReader | BarcodeScanner | BiometricTerminal) + `POST …/rotate-key` (key shown once), bed QR stickers for\n  ward cleaning kiosks `GET /admin/wards/{id}/bed-labels`.\n* **Master data**: departments, wards, beds (`POST /admin/wards/{id}/beds {\"labels\": […]}`), OTs.\n  `GET /admin/wards` lists every ward, open and closed, with the fields `PUT /admin/wards/{ward_id}` takes (send them\n  all), `beds`, `beds_in_use` (labels) and `waitlisted`. `is_active: false` closes a ward (decisions 55): its beds\n  leave the bed matrix and take no patient until it is reopened with `is_active: true`. Only an empty ward is closed:\n  `WARD_IN_USE` (409, not retryable) while a bed is Reserved, Occupied, Dirty or Cleaning or a patient waits on its\n  waitlist; show `details.beds_in_use` and `details.waitlisted`, and offer the close only when the list shows both\n  empty.\n  A ward's bed-day charge (`room_charge_service_id`) from `GET /finance/service-catalog?category=RoomCharge`.\n* **Server health** (read-only): `GET /admin/server-health` — CPU/RAM/disk, DB size & connections,\n  pool, worker leader, job status, last backup.\n* **Settings**: `GET /admin/settings`, `PUT /admin/settings/{key} {\"value\"}` (type-checked, audited);\n  maintenance mode `PUT /admin/maintenance {\"enabled\", \"message\"}` (IT only: `admin.maintenance.manage`).\n* **Kill switch** (§9.5): `POST /admin/kill-switch {\"reason\", \"confirm\": \"FORCE GLOBAL LOGOUT\"}` — every\n  session in the hospital ends; show it as a dangerous, emergency-only red button.\n* **Audit**: `GET /admin/audit-log`, `GET /admin/login-events`.\n\nServer-level operations (restarting services, backups, logs) live in the **Control Center** on the\nserver itself (`http://127.0.0.1:9000`), not in the API.",
+  "steps": [
+    {
+      "heading": "Work orders (§6.9)",
+      "anchor": "work-orders-6-9",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/ops/work-orders",
+          "summary": "\"Report Issue\" (staff with ops.workorder.report)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ops/assets",
+          "summary": "Asset monitor"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ops/work-orders/{wo_id}/assign",
+          "summary": "Assign staff or a contractor (+ estimate)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/vendors",
+          "summary": "Vendors"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ops/work-orders/{wo_id}/complete",
+          "summary": "\"Job Complete\" → contractor payment request to AP"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ops/assets",
+          "summary": "Register an asset"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/ops/assets/{asset_id}",
+          "summary": "Update an asset / change its status"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        }
+      ]
+    },
+    {
+      "heading": "Overheads (§7.4, §8.1)",
+      "anchor": "overheads-7-4-8-1",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/ops/utility-categories",
+          "summary": "Overhead categories (electricity, diesel, oxygen...)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ops/utility-logs",
+          "summary": "Log a utility / overhead bill (→ AP + live P&L)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/vendors",
+          "summary": "Vendors"
+        }
+      ]
+    },
+    {
+      "heading": "Zero-interface staff & badge stations (§6.8, §8.2)",
+      "anchor": "zero-interface-staff-badge-stations-6-8-8-2",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/badge-stations/scans",
+          "summary": "A badge was presented at a station (station-authenticated, no user login)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ops/facility-feed",
+          "summary": "Live facility feed (badge scans); poll with since_id or use WS ops.badge.scan"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/rosters",
+          "summary": "Roster one or many duties (all or nothing)"
+        }
+      ]
+    },
+    {
+      "heading": "IT / Super Admin (§9)",
+      "anchor": "it-super-admin-9",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/first-owner",
+          "summary": "Whether this installation still needs its first Owner"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admin/first-owner",
+          "summary": "Create the installation's first Owner (once; temporary password shown ONCE)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/provisioning-queue",
+          "summary": "Employees HR submitted, awaiting a login (pane 1)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admin/users",
+          "summary": "Provision a login (temporary password shown ONCE)"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/users/{user_id}/roles",
+          "summary": "Replace a user's roles (effective on the next request)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/role-matrix",
+          "summary": "Roles × permissions (pane 2)"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/roles/{role_code}/permissions",
+          "summary": "Replace a role's permissions (pushed live to all sessions)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admin/change-requests",
+          "summary": "Request a control-setting or privileged-access change (applied at once for an Owner)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/change-requests",
+          "summary": "Control-setting and privileged-access change requests"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/change-requests/{change_request_id}",
+          "summary": "One control-setting or privileged-access change request"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/users",
+          "summary": "Search users"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/badge-stations/{station_id}",
+          "summary": "Register / update a badge station"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/wards/{ward_id}/bed-labels",
+          "summary": "Bed QR stickers for ward-level bed-cleaning stations (label printer)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admin/wards/{ward_id}/beds",
+          "summary": "Add beds to a ward (bulk)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/wards",
+          "summary": "Wards, open and closed"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/wards/{ward_id}",
+          "summary": "Update a ward"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/finance/service-catalog",
+          "summary": "Hospital service prices (lab prices live in the lab catalogue)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/server-health",
+          "summary": "CPU/RAM, DB pool, last backup, worker heartbeat (pane 4, read-only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/settings",
+          "summary": "Hospital policy settings"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/settings/{key}",
+          "summary": "Change a policy setting (type-checked, audited)"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/maintenance",
+          "summary": "Maintenance mode on/off (non-admins get 503 MAINTENANCE)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admin/kill-switch",
+          "summary": "FORCE GLOBAL TOKEN EXPIRY — every session in the hospital ends (emergency)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/audit-log",
+          "summary": "Audit trail (filterable)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/login-events",
+          "summary": "Login successes / failures (security review)"
+        }
+      ]
+    }
+  ]
+}

@@ -786,12 +786,26 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "patient_id",
@@ -853,6 +867,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -887,6 +902,18 @@
             "resource"
           ],
           "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -972,6 +999,46 @@
             "required"
           ],
           "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "PATIENT_CNIC_EXISTS",
+          "http_status": 409,
+          "message": "A patient with this CNIC already exists.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "PATIENT_UPMRN_EXISTS",
+          "http_status": 409,
+          "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "constraint"
+          ],
+          "details_from": "POST /api/v1/patients"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         },
         {
           "code": "WORKSPACE_NOT_ALLOWED",
@@ -1102,7 +1169,8 @@
             "pointer": "/panel_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The panel (GET /finance/panels)"
           },
           {
             "pointer": "/panel_member_no",
@@ -1117,6 +1185,14 @@
             "required": false,
             "nullable": true,
             "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
+          },
+          {
+            "pointer": "/upmrn",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$",
+            "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
           },
           {
             "pointer": "/father_or_husband_name",
@@ -1215,6 +1291,42 @@
       "idempotency_key": true,
       "errors": [
         {
+          "code": "INVOICE_LOCKED",
+          "http_status": 409,
+          "message": "The invoice is locked pending approval.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "INVOICE_NOT_PAYABLE",
+          "http_status": 409,
+          "message": "This invoice cannot take payments.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "OVERPAYMENT",
+          "http_status": 422,
+          "message": "The payment exceeds the balance due.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
           "code": "SHIFT_NOT_OPEN",
           "http_status": 409,
           "message": "Open a cash shift before handling cash.",
@@ -1227,6 +1339,30 @@
             "status"
           ],
           "details_from": "POST /api/v1/finance/cash-shifts/{shift_id}/close"
+        },
+        {
+          "code": "TICKET_NOT_ACTIVE",
+          "http_status": 409,
+          "message": "This ticket is no longer active; a new visit needs a new ticket.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1421,6 +1557,30 @@
           "details_from": "POST /api/v1/reception/registrations"
         },
         {
+          "code": "LAB_ONLY_QUEUE_FORBIDDEN",
+          "http_status": 409,
+          "message": "Lab-only walk-in patients cannot enter doctor queues.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "OVERPAYMENT",
+          "http_status": 422,
+          "message": "The payment exceeds the balance due.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
           "code": "PATIENT_MERGED_CANNOT_TRANSACT",
           "http_status": 409,
           "message": "This patient record was merged; use the master record.",
@@ -1460,6 +1620,19 @@
             "status"
           ],
           "details_from": "POST /api/v1/finance/cash-shifts/{shift_id}/close"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1523,7 +1696,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "Existing patient (from /patients/search)"
+            "description": "Existing patient (GET /patients/search)"
           },
           {
             "pointer": "/new_patient/full_name",
@@ -1582,7 +1755,8 @@
             "pointer": "/new_patient/panel_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The panel (GET /finance/panels)"
           },
           {
             "pointer": "/new_patient/panel_member_no",
@@ -1597,6 +1771,14 @@
             "required": false,
             "nullable": true,
             "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
+          },
+          {
+            "pointer": "/new_patient/upmrn",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$",
+            "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
           },
           {
             "pointer": "/new_patient/father_or_husband_name",
@@ -1785,7 +1967,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "category",
@@ -1865,7 +2060,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "ticket_id",
@@ -2065,6 +2273,28 @@
           }
         },
         {
+          "name": "license_type",
+          "in": "query",
+          "required": false,
+          "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "PMDC",
+                  "PNC"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+            "title": "License Type"
+          }
+        },
+        {
           "name": "limit",
           "in": "query",
           "required": false,
@@ -2128,6 +2358,16 @@
             "required": false,
             "type": "integer",
             "description": "Only this department"
+          },
+          {
+            "name": "license_type",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PMDC",
+              "PNC"
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)"
           }
         ],
         "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
@@ -6063,7 +6303,8 @@
               "type": "null"
             }
           ],
-          "title": "Panel Id"
+          "title": "Panel Id",
+          "description": "The panel (GET /finance/panels)"
         },
         "panel_member_no": {
           "anyOf": [
@@ -6091,6 +6332,19 @@
           "examples": [
             "35202-1234567-1"
           ]
+        },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
         },
         "father_or_husband_name": {
           "anyOf": [
@@ -6318,6 +6572,18 @@
           ],
           "title": "Cnic"
         },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+        },
         "address": {
           "anyOf": [
             {
@@ -6534,6 +6800,7 @@
         "age_recorded_on",
         "mobile",
         "cnic",
+        "upmrn",
         "address",
         "emergency_contact_name",
         "emergency_contact_phone",
@@ -7275,7 +7542,7 @@
             }
           ],
           "title": "Patient Id",
-          "description": "Existing patient (from /patients/search)"
+          "description": "Existing patient (GET /patients/search)"
         },
         "new_patient": {
           "anyOf": [
@@ -7970,7 +8237,8 @@
       "properties": {
         "employee_id": {
           "type": "integer",
-          "title": "Employee Id"
+          "title": "Employee Id",
+          "description": "The id a form's staff field takes (contrast_doctor_id, employee_id, ...)"
         },
         "emp_number": {
           "type": "string",
@@ -7994,6 +8262,47 @@
             }
           ],
           "title": "Department Name"
+        },
+        "license_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "PMDC",
+                "PNC",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "License Type",
+          "description": "The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none"
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id",
+          "description": "Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62)"
         }
       },
       "type": "object",
@@ -8002,10 +8311,13 @@
         "emp_number",
         "full_name",
         "designation",
-        "department_name"
+        "department_name",
+        "license_type",
+        "registration",
+        "user_id"
       ],
       "title": "StaffLookupOut",
-      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge, nothing else."
+      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."
     },
     "TicketPayIn": {
       "properties": {

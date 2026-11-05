@@ -1,0 +1,1211 @@
+{
+  "screen": "mlc_cases",
+  "title": "Medico-legal cases",
+  "cases": [
+    {
+      "id": "case:GET /mlc/cases",
+      "call": "GET /api/v1/mlc/cases",
+      "summary": "The medico-legal case register",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/cases",
+            "query": {
+              "overdue": "true"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "mlc_id": 1,
+                  "mlc_number": "MLC-2026-00001",
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "case_type_name": "Assault",
+                  "arrived_at": "2026-09-28T19:43:09.808522+00:00",
+                  "brought_by": "Relatives",
+                  "police_station_name": null,
+                  "police_informed_at": null,
+                  "police_reference": null,
+                  "mlr_status": "Pending",
+                  "status": "Open",
+                  "police_intimation_overdue": true,
+                  "death_number": null,
+                  "created_by_name": "u2a8907e294"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-28T21:43:09.875765+00:00"
+              },
+              "request_id": "06b0996208b04e7f86257b4cacbfb36c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /mlc/cases",
+      "call": "POST /api/v1/mlc/cases",
+      "summary": "Open a medico-legal case",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/cases",
+            "body": {
+              "patient_id": 1,
+              "ticket_id": 1,
+              "case_type_id": 2,
+              "arrived_at": "2026-09-28T19:43:09.808522+00:00",
+              "brought_by": "Relatives",
+              "brought_by_name": "Bilal (brother)",
+              "alleged_history": "Hit on the head with a stick in a land dispute an hour ago",
+              "history_given_by": "the patient's brother"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "mlc_id": 1,
+                "mlc_number": "MLC-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "age_years": 40,
+                "cnic": null,
+                "address": null,
+                "ticket_id": 1,
+                "ticket_number": "OPD-2026-000001",
+                "admission_id": null,
+                "admission_number": null,
+                "admission_status": null,
+                "ward_name": null,
+                "case_type_id": 2,
+                "case_type_code": "ASSAULT",
+                "case_type_name": "Assault",
+                "arrived_at": "2026-09-28T19:43:09.808522+00:00",
+                "brought_by": "Relatives",
+                "brought_by_name": "Bilal (brother)",
+                "brought_by_phone": null,
+                "alleged_history": "Hit on the head with a stick in a land dispute an hour ago",
+                "history_given_by": "the patient's brother",
+                "examination_findings": null,
+                "police_station_id": null,
+                "police_station_name": null,
+                "police_station_phone": null,
+                "police_informed_at": null,
+                "police_informed_by": null,
+                "police_informed_by_name": null,
+                "police_informed_how": null,
+                "police_informed_to": null,
+                "police_reference": null,
+                "investigating_officer": null,
+                "mlr_status": "Pending",
+                "mlr_number": null,
+                "mlr_issued_at": null,
+                "mlr_document_id": null,
+                "referred_to_id": null,
+                "referred_to_name": null,
+                "mlr_note": null,
+                "status": "Open",
+                "closed_at": null,
+                "closed_by_name": null,
+                "closure_note": null,
+                "created_by": 8,
+                "created_by_name": "u2a8907e294",
+                "created_at": "2026-09-28T21:43:09.812111+00:00",
+                "row_version": 1,
+                "police_intimation_overdue": true,
+                "death_id": null,
+                "death_number": null,
+                "evidence": []
+              },
+              "meta": {
+                "server_time": "2026-09-28T21:43:09.850968+00:00"
+              },
+              "request_id": "19b6da185a084583b965705c4d359f82"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "MLC_CONTACT_TYPE_INVALID",
+        "PATIENT_MERGED_CANNOT_TRANSACT",
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /mlc/cases/{mlc_id}",
+      "call": "GET /api/v1/mlc/cases/{mlc_id}",
+      "summary": "A medico-legal case",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/cases/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "mlc_id": 1,
+                "mlc_number": "MLC-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "age_years": 40,
+                "cnic": null,
+                "address": null,
+                "ticket_id": 1,
+                "ticket_number": "OPD-2026-000001",
+                "admission_id": null,
+                "admission_number": null,
+                "admission_status": null,
+                "ward_name": null,
+                "case_type_id": 2,
+                "case_type_code": "ASSAULT",
+                "case_type_name": "Assault",
+                "arrived_at": "2026-09-28T19:43:09.808522+00:00",
+                "brought_by": "Relatives",
+                "brought_by_name": "Bilal (brother)",
+                "brought_by_phone": null,
+                "alleged_history": "Hit on the head with a stick in a land dispute an hour ago",
+                "history_given_by": "the patient's brother",
+                "examination_findings": "Lacerated wound 4 cm on the scalp, bone not exposed",
+                "police_station_id": 1,
+                "police_station_name": "Police Station Civil Lines",
+                "police_station_phone": "042-99200001",
+                "police_informed_at": "2026-09-28T21:43:09.930930+00:00",
+                "police_informed_by": 1,
+                "police_informed_by_name": "Dr Ahmed",
+                "police_informed_how": "Phone",
+                "police_informed_to": "Duty officer ASI Aslam",
+                "police_reference": "DD No. 17",
+                "investigating_officer": "SI Tariq",
+                "mlr_status": "Referred",
+                "mlr_number": null,
+                "mlr_issued_at": null,
+                "mlr_document_id": null,
+                "referred_to_id": 2,
+                "referred_to_name": "District Headquarters Hospital",
+                "mlr_note": null,
+                "status": "Closed",
+                "closed_at": "2026-09-28T21:43:10.082915+00:00",
+                "closed_by_name": "Dr Ahmed",
+                "closure_note": "Referred to the DHQ for the MLR",
+                "created_by": 8,
+                "created_by_name": "u2a8907e294",
+                "created_at": "2026-09-28T21:43:09.812111+00:00",
+                "row_version": 5,
+                "police_intimation_overdue": false,
+                "death_id": null,
+                "death_number": null,
+                "evidence": [
+                  {
+                    "evidence_id": 1,
+                    "description": "Blood-stained shirt, sealed in a paper bag",
+                    "seal_number": "S-114",
+                    "handed_to": "ASI Aslam, belt 2231",
+                    "receipt_reference": "Receipt 45",
+                    "handed_at": "2026-09-28T21:43:09.975531+00:00",
+                    "handed_by_name": "Dr Ahmed"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-28T21:43:10.301398+00:00"
+              },
+              "request_id": "5aeb231d4d6b4cffb2713ddf039b1987"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:PATCH /mlc/cases/{mlc_id}",
+      "call": "PATCH /api/v1/mlc/cases/{mlc_id}",
+      "summary": "Update an open medico-legal case",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/cases/1",
+            "body": {
+              "examination_findings": "Lacerated wound 4 cm on the scalp, bone not exposed",
+              "investigating_officer": "SI Tariq",
+              "mlr_status": "Referred",
+              "referred_to_id": 2,
+              "expected_version": 3
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "mlc_id": 1,
+                "mlc_number": "MLC-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "age_years": 40,
+                "cnic": null,
+                "address": null,
+                "ticket_id": 1,
+                "ticket_number": "OPD-2026-000001",
+                "admission_id": null,
+                "admission_number": null,
+                "admission_status": null,
+                "ward_name": null,
+                "case_type_id": 2,
+                "case_type_code": "ASSAULT",
+                "case_type_name": "Assault",
+                "arrived_at": "2026-09-28T19:43:09.808522+00:00",
+                "brought_by": "Relatives",
+                "brought_by_name": "Bilal (brother)",
+                "brought_by_phone": null,
+                "alleged_history": "Hit on the head with a stick in a land dispute an hour ago",
+                "history_given_by": "the patient's brother",
+                "examination_findings": "Lacerated wound 4 cm on the scalp, bone not exposed",
+                "police_station_id": 1,
+                "police_station_name": "Police Station Civil Lines",
+                "police_station_phone": "042-99200001",
+                "police_informed_at": "2026-09-28T21:43:09.930930+00:00",
+                "police_informed_by": 1,
+                "police_informed_by_name": "Dr Ahmed",
+                "police_informed_how": "Phone",
+                "police_informed_to": "Duty officer ASI Aslam",
+                "police_reference": "DD No. 17",
+                "investigating_officer": "SI Tariq",
+                "mlr_status": "Referred",
+                "mlr_number": null,
+                "mlr_issued_at": null,
+                "mlr_document_id": null,
+                "referred_to_id": 2,
+                "referred_to_name": "District Headquarters Hospital",
+                "mlr_note": null,
+                "status": "Open",
+                "closed_at": null,
+                "closed_by_name": null,
+                "closure_note": null,
+                "created_by": 8,
+                "created_by_name": "u2a8907e294",
+                "created_at": "2026-09-28T21:43:09.812111+00:00",
+                "row_version": 4,
+                "police_intimation_overdue": false,
+                "death_id": null,
+                "death_number": null,
+                "evidence": [
+                  {
+                    "evidence_id": 1,
+                    "description": "Blood-stained shirt, sealed in a paper bag",
+                    "seal_number": "S-114",
+                    "handed_to": "ASI Aslam, belt 2231",
+                    "receipt_reference": "Receipt 45",
+                    "handed_at": "2026-09-28T21:43:09.975531+00:00",
+                    "handed_by_name": "Dr Ahmed"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-28T21:43:10.024847+00:00"
+              },
+              "request_id": "d70f67d4bd4d44afa4cc2dd55432557a"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "MLC_CLOSED",
+            "MLC_CONTACT_TYPE_INVALID"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "MLC_CLOSED",
+        "MLC_CONTACT_TYPE_INVALID",
+        "MLC_POLICE_ALREADY_INFORMED",
+        "VALIDATION_ERROR"
+      ],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    },
+    {
+      "id": "case:POST /mlc/cases/{mlc_id}/police-intimation",
+      "call": "POST /api/v1/mlc/cases/{mlc_id}/police-intimation",
+      "summary": "Record that the police were informed",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/cases/1/police-intimation",
+            "body": {
+              "police_station_id": 1,
+              "informed_how": "Phone",
+              "informed_to": "Duty officer ASI Aslam",
+              "police_reference": "DD No. 17"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "mlc_id": 1,
+                "mlc_number": "MLC-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "age_years": 40,
+                "cnic": null,
+                "address": null,
+                "ticket_id": 1,
+                "ticket_number": "OPD-2026-000001",
+                "admission_id": null,
+                "admission_number": null,
+                "admission_status": null,
+                "ward_name": null,
+                "case_type_id": 2,
+                "case_type_code": "ASSAULT",
+                "case_type_name": "Assault",
+                "arrived_at": "2026-09-28T19:43:09.808522+00:00",
+                "brought_by": "Relatives",
+                "brought_by_name": "Bilal (brother)",
+                "brought_by_phone": null,
+                "alleged_history": "Hit on the head with a stick in a land dispute an hour ago",
+                "history_given_by": "the patient's brother",
+                "examination_findings": null,
+                "police_station_id": 1,
+                "police_station_name": "Police Station Civil Lines",
+                "police_station_phone": "042-99200001",
+                "police_informed_at": "2026-09-28T21:43:09.930930+00:00",
+                "police_informed_by": 1,
+                "police_informed_by_name": "Dr Ahmed",
+                "police_informed_how": "Phone",
+                "police_informed_to": "Duty officer ASI Aslam",
+                "police_reference": "DD No. 17",
+                "investigating_officer": null,
+                "mlr_status": "Pending",
+                "mlr_number": null,
+                "mlr_issued_at": null,
+                "mlr_document_id": null,
+                "referred_to_id": null,
+                "referred_to_name": null,
+                "mlr_note": null,
+                "status": "Open",
+                "closed_at": null,
+                "closed_by_name": null,
+                "closure_note": null,
+                "created_by": 8,
+                "created_by_name": "u2a8907e294",
+                "created_at": "2026-09-28T21:43:09.812111+00:00",
+                "row_version": 3,
+                "police_intimation_overdue": false,
+                "death_id": null,
+                "death_number": null,
+                "evidence": []
+              },
+              "meta": {
+                "server_time": "2026-09-28T21:43:09.962477+00:00"
+              },
+              "request_id": "3a277983b575419db8d4cd81ec469243"
+            }
+          },
+          "errors_seen": [
+            "MLC_CONTACT_TYPE_INVALID",
+            "MLC_POLICE_ALREADY_INFORMED"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "MLC_CLOSED",
+        "MLC_CONTACT_TYPE_INVALID",
+        "MLC_POLICE_ALREADY_INFORMED",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /mlc/cases/{mlc_id}/evidence",
+      "call": "POST /api/v1/mlc/cases/{mlc_id}/evidence",
+      "summary": "Record evidence handed to the police",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/cases/1/evidence",
+            "body": {
+              "description": "Blood-stained shirt, sealed in a paper bag",
+              "seal_number": "S-114",
+              "handed_to": "ASI Aslam, belt 2231",
+              "receipt_reference": "Receipt 45"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "mlc_id": 1,
+                "mlc_number": "MLC-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "age_years": 40,
+                "cnic": null,
+                "address": null,
+                "ticket_id": 1,
+                "ticket_number": "OPD-2026-000001",
+                "admission_id": null,
+                "admission_number": null,
+                "admission_status": null,
+                "ward_name": null,
+                "case_type_id": 2,
+                "case_type_code": "ASSAULT",
+                "case_type_name": "Assault",
+                "arrived_at": "2026-09-28T19:43:09.808522+00:00",
+                "brought_by": "Relatives",
+                "brought_by_name": "Bilal (brother)",
+                "brought_by_phone": null,
+                "alleged_history": "Hit on the head with a stick in a land dispute an hour ago",
+                "history_given_by": "the patient's brother",
+                "examination_findings": null,
+                "police_station_id": 1,
+                "police_station_name": "Police Station Civil Lines",
+                "police_station_phone": "042-99200001",
+                "police_informed_at": "2026-09-28T21:43:09.930930+00:00",
+                "police_informed_by": 1,
+                "police_informed_by_name": "Dr Ahmed",
+                "police_informed_how": "Phone",
+                "police_informed_to": "Duty officer ASI Aslam",
+                "police_reference": "DD No. 17",
+                "investigating_officer": null,
+                "mlr_status": "Pending",
+                "mlr_number": null,
+                "mlr_issued_at": null,
+                "mlr_document_id": null,
+                "referred_to_id": null,
+                "referred_to_name": null,
+                "mlr_note": null,
+                "status": "Open",
+                "closed_at": null,
+                "closed_by_name": null,
+                "closure_note": null,
+                "created_by": 8,
+                "created_by_name": "u2a8907e294",
+                "created_at": "2026-09-28T21:43:09.812111+00:00",
+                "row_version": 3,
+                "police_intimation_overdue": false,
+                "death_id": null,
+                "death_number": null,
+                "evidence": [
+                  {
+                    "evidence_id": 1,
+                    "description": "Blood-stained shirt, sealed in a paper bag",
+                    "seal_number": "S-114",
+                    "handed_to": "ASI Aslam, belt 2231",
+                    "receipt_reference": "Receipt 45",
+                    "handed_at": "2026-09-28T21:43:09.975531+00:00",
+                    "handed_by_name": "Dr Ahmed"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-28T21:43:09.998474+00:00"
+              },
+              "request_id": "3a139a898d15481ca0158d378d0fdde2"
+            }
+          },
+          "errors_seen": [
+            "MLC_CLOSED"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "MLC_CLOSED",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /mlc/cases/{mlc_id}/close",
+      "call": "POST /api/v1/mlc/cases/{mlc_id}/close",
+      "summary": "Close a medico-legal case",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/cases/1/close",
+            "body": {
+              "note": "Referred to the DHQ for the MLR"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "mlc_id": 1,
+                "mlc_number": "MLC-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "age_years": 40,
+                "cnic": null,
+                "address": null,
+                "ticket_id": 1,
+                "ticket_number": "OPD-2026-000001",
+                "admission_id": null,
+                "admission_number": null,
+                "admission_status": null,
+                "ward_name": null,
+                "case_type_id": 2,
+                "case_type_code": "ASSAULT",
+                "case_type_name": "Assault",
+                "arrived_at": "2026-09-28T19:43:09.808522+00:00",
+                "brought_by": "Relatives",
+                "brought_by_name": "Bilal (brother)",
+                "brought_by_phone": null,
+                "alleged_history": "Hit on the head with a stick in a land dispute an hour ago",
+                "history_given_by": "the patient's brother",
+                "examination_findings": "Lacerated wound 4 cm on the scalp, bone not exposed",
+                "police_station_id": 1,
+                "police_station_name": "Police Station Civil Lines",
+                "police_station_phone": "042-99200001",
+                "police_informed_at": "2026-09-28T21:43:09.930930+00:00",
+                "police_informed_by": 1,
+                "police_informed_by_name": "Dr Ahmed",
+                "police_informed_how": "Phone",
+                "police_informed_to": "Duty officer ASI Aslam",
+                "police_reference": "DD No. 17",
+                "investigating_officer": "SI Tariq",
+                "mlr_status": "Referred",
+                "mlr_number": null,
+                "mlr_issued_at": null,
+                "mlr_document_id": null,
+                "referred_to_id": 2,
+                "referred_to_name": "District Headquarters Hospital",
+                "mlr_note": null,
+                "status": "Closed",
+                "closed_at": "2026-09-28T21:43:10.082915+00:00",
+                "closed_by_name": "Dr Ahmed",
+                "closure_note": "Referred to the DHQ for the MLR",
+                "created_by": 8,
+                "created_by_name": "u2a8907e294",
+                "created_at": "2026-09-28T21:43:09.812111+00:00",
+                "row_version": 5,
+                "police_intimation_overdue": false,
+                "death_id": null,
+                "death_number": null,
+                "evidence": [
+                  {
+                    "evidence_id": 1,
+                    "description": "Blood-stained shirt, sealed in a paper bag",
+                    "seal_number": "S-114",
+                    "handed_to": "ASI Aslam, belt 2231",
+                    "receipt_reference": "Receipt 45",
+                    "handed_at": "2026-09-28T21:43:09.975531+00:00",
+                    "handed_by_name": "Dr Ahmed"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-28T21:43:10.102176+00:00"
+              },
+              "request_id": "fc27d5da2a4f4e63a38b4a7fa41498ec"
+            }
+          },
+          "errors_seen": [
+            "MLC_NOT_READY_TO_CLOSE"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "MLC_CLOSED",
+        "MLC_NOT_READY_TO_CLOSE",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /mlc/cases/{mlc_id}/print-payload",
+      "call": "GET /api/v1/mlc/cases/{mlc_id}/print-payload",
+      "summary": "The intimation to the police station (A4)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/cases/1/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "mlc_intimation",
+                "printer_role": "document",
+                "paper_width_mm": 210,
+                "fields": {
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": "",
+                    "phc_number": "",
+                    "issue_line": "Issued 14-Oct-2026 14:08; this copy printed 14-Oct-2026 16:08 (reprint)"
+                  },
+                  "case": {
+                    "mlc_id": 1,
+                    "mlc_number": "MLC-2026-00001",
+                    "patient_id": 1,
+                    "mrn": "MRN-2026-000001",
+                    "patient_name": "Ali Khan",
+                    "father_or_husband_name": null,
+                    "gender": "male",
+                    "age_years": 40,
+                    "cnic": null,
+                    "address": null,
+                    "ticket_id": 1,
+                    "ticket_number": "OPD-2026-000001",
+                    "admission_id": null,
+                    "admission_number": null,
+                    "admission_status": null,
+                    "ward_name": null,
+                    "case_type_id": 2,
+                    "case_type_code": "ASSAULT",
+                    "case_type_name": "Assault",
+                    "arrived_at": "2026-10-14T09:08:52.968043+00:00",
+                    "brought_by": "Relatives",
+                    "brought_by_name": "Bilal (brother)",
+                    "brought_by_phone": null,
+                    "alleged_history": "Hit on the head with a stick in a land dispute an hour ago",
+                    "history_given_by": "the patient's brother",
+                    "examination_findings": "Lacerated wound 4 cm on the scalp, bone not exposed",
+                    "police_station_id": 3,
+                    "police_station_name": "Police Station Civil Lines",
+                    "police_station_phone": "042-99200001",
+                    "police_informed_at": "2026-10-14T11:08:53.195718+00:00",
+                    "police_informed_by": 1,
+                    "police_informed_by_name": "Dr Ahmed",
+                    "police_informed_how": "Phone",
+                    "police_informed_to": "Duty officer ASI Aslam",
+                    "police_reference": "DD No. 17",
+                    "investigating_officer": "SI Tariq",
+                    "mlr_status": "Referred",
+                    "mlr_number": null,
+                    "mlr_issued_at": null,
+                    "mlr_document_id": null,
+                    "referred_to_id": 4,
+                    "referred_to_name": "District Headquarters Hospital",
+                    "mlr_note": null,
+                    "status": "Open",
+                    "closed_at": null,
+                    "closed_by_name": null,
+                    "closure_note": null,
+                    "created_by": 8,
+                    "created_by_name": "uc2a57a80b3",
+                    "created_at": "2026-10-14T11:08:52.973594+00:00",
+                    "row_version": 4,
+                    "police_intimation_overdue": false,
+                    "death_id": null,
+                    "death_number": null,
+                    "evidence": [
+                      {
+                        "evidence_id": 1,
+                        "description": "Blood-stained shirt, sealed in a paper bag",
+                        "seal_number": "S-114",
+                        "handed_to": "ASI Aslam, belt 2231",
+                        "receipt_reference": "Receipt 45",
+                        "handed_at": "2026-10-14T11:08:53.303641+00:00",
+                        "handed_by_name": "Dr Ahmed"
+                      }
+                    ]
+                  }
+                },
+                "text": "                                    Haspataal Hospital\n                                 Issued 14-Oct-2026 14:08\n                      this copy printed 14-Oct-2026 16:08 (reprint)\n                       MEDICO-LEGAL CASE: INTIMATION TO THE POLICE\n------------------------------------------------------------------------------------------\nMLC number                                                   …",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"56.920mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                "qr_svg": null,
+                "pdf_url": null
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:08:53.426666+00:00"
+              },
+              "request_id": "27150828a591407c8f1d7e550df56131"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /mlc/case-types",
+      "call": "GET /api/v1/mlc/case-types",
+      "summary": "Medico-legal case types",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/case-types"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "case_type_id": 1,
+                  "code": "RTA",
+                  "name": "Road traffic accident",
+                  "description": "Any injury from a road traffic accident",
+                  "sort_order": 10,
+                  "is_active": true
+                },
+                {
+                  "case_type_id": 2,
+                  "code": "ASSAULT",
+                  "name": "Assault",
+                  "description": "Injury from a fight or an attack with a blunt or sharp weapon",
+                  "sort_order": 20,
+                  "is_active": true
+                },
+                {
+                  "case_type_id": 3,
+                  "code": "FIREARM",
+                  "name": "Firearm injury",
+                  "description": "Gunshot or pellet wound, whatever the history",
+                  "sort_order": 30,
+                  "is_active": true
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-28T21:43:04.422275+00:00"
+              },
+              "request_id": "3c1232e69b83468db074bb84aaaa46a6"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /mlc/contacts",
+      "call": "GET /api/v1/mlc/contacts",
+      "summary": "Police stations and MLR hospitals (contact list)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/contacts"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "contact_id": 2,
+                  "contact_type": "MlrHospital",
+                  "name": "District Headquarters Hospital",
+                  "district": "Lahore",
+                  "phone": null,
+                  "alt_phone": null,
+                  "address": null,
+                  "notes": null,
+                  "is_active": true
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-28T21:43:04.413300+00:00"
+              },
+              "request_id": "070f596e36b34426ace5f31a7744b295"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /patients/{patient_id}/documents",
+      "call": "POST /api/v1/patients/{patient_id}/documents",
+      "summary": "Upload a patient document (PDF/JPEG/PNG)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/1/documents",
+            "multipart": {
+              "file": "<file>",
+              "doc_type": "CNIC"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "document_id": 1,
+                "patient_id": 1,
+                "doc_type": "CNIC",
+                "title": null,
+                "content_type": "application/pdf",
+                "size_bytes": 31,
+                "is_outside": false,
+                "source_facility": null,
+                "document_date": null,
+                "uploaded_at": "2026-10-13T11:27:11.017375+00:00"
+              },
+              "meta": {
+                "server_time": "2026-10-13T11:27:11.028856+00:00"
+              },
+              "request_id": "16803b23adfa4ca89f6674d80ff160a0"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "IDEMPOTENCY_CONFLICT",
+            "NOT_FOUND",
+            "PAYLOAD_TOO_LARGE",
+            "UNSUPPORTED_MEDIA_TYPE",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "IDEMPOTENCY_CONFLICT",
+        "NOT_FOUND",
+        "PAYLOAD_TOO_LARGE",
+        "UNSUPPORTED_MEDIA_TYPE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=mlc_cases].view = full (emergency_department): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "open_work",
+      "set_up": "GET /establishment answers views.screens[screen_id=mlc_cases].view = open_work (emergency_department): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+    },
+    {
+      "view": "records",
+      "set_up": "GET /establishment answers views.screens[screen_id=mlc_cases].view = records (emergency_department): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+    },
+    {
+      "view": "hidden",
+      "set_up": "GET /establishment answers views.screens[screen_id=mlc_cases].view = hidden (emergency_department): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/mlc_cases",
+  "workspace_guide": "get_handbook_outline('triage')",
+  "realtime": [
+    {
+      "event": "notification.created",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Offer 'Open MLC' from the emergency visit whenever the complaint matches a case type (GET /mlc/case-types). An unknown patient gets a trauma profile first (POST /patients/trauma).",
+    "Write the history as alleged, in the teller's words, and who told it; the examination may follow later (PATCH).",
+    "Not brought by the police: 'Inform police' at once (police-intimation: station from GET /mlc/contacts, how, to whom, their reference). It is recorded once and never changes. Keep police_intimation_overdue cases in red at the top.",
+    "Print the intimation for the police station (print-payload, A4) and hand over evidence item by item, each signed for (evidence: seal number, officer, receipt).",
+    "Settle the medico-legal report: IssuedHere (number, date; upload the copy as a MedicoLegalReport document), Referred (the designated hospital) or NotRequired (why); then 'Close' (MLC_NOT_READY_TO_CLOSE lists details.missing).",
+    "Every screen of this patient shows the MLC number (patient.mlc_numbers).",
+    "Exists for the service emergency_department (work): show it as GET /establishment views.screens says for screen_id mlc_cases (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

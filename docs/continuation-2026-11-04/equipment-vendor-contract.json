@@ -1,0 +1,289 @@
+{
+  "method": "GET",
+  "path": "/api/v1/finance/vendors",
+  "summary": "Vendors",
+  "tags": [
+    "Finance"
+  ],
+  "permissions": [],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "access": {
+    "authentication": "user",
+    "permissions": [],
+    "permissions_mode": "all",
+    "who": "any logged-in user"
+  },
+  "description": "",
+  "roles_allowed": [],
+  "parameters": [
+    {
+      "name": "vendor_type",
+      "in": "query",
+      "required": false,
+      "description": "",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Vendor Type"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[list[VendorOut]]",
+    "properties": {
+      "data": {
+        "items": {
+          "title": "VendorOut",
+          "properties": {
+            "vendor_id": {
+              "type": "integer",
+              "title": "Vendor Id"
+            },
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "vendor_type": {
+              "type": "string",
+              "enum": [
+                "PharmacySupplier",
+                "ReagentSupplier",
+                "EquipmentSupplier",
+                "UtilityProvider",
+                "Contractor",
+                "Other"
+              ],
+              "title": "Vendor Type"
+            },
+            "contact_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Contact Name"
+            },
+            "phone": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Phone"
+            },
+            "address": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Address"
+            },
+            "tax_number": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tax Number"
+            },
+            "cnic": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cnic"
+            },
+            "is_active": {
+              "type": "boolean",
+              "title": "Is Active"
+            },
+            "row_version": {
+              "type": "integer",
+              "title": "Row Version"
+            }
+          },
+          "type": "object",
+          "required": [
+            "vendor_id",
+            "name",
+            "vendor_type",
+            "contact_name",
+            "phone",
+            "address",
+            "tax_number",
+            "cnic",
+            "is_active",
+            "row_version"
+          ]
+        },
+        "type": "array",
+        "title": "Data"
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/finance/vendors",
+      "query": {
+        "vendor_type": "PharmacySupplier"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "vendor_id": 1,
+            "name": "MedSupply",
+            "vendor_type": "PharmacySupplier",
+            "contact_name": null,
+            "phone": "0421234567",
+            "address": null,
+            "tax_number": null,
+            "cnic": null,
+            "is_active": true,
+            "row_version": 1
+          }
+        ],
+        "meta": {
+          "server_time": "2026-09-27T17:36:41.047443+00:00"
+        },
+        "request_id": "0376c42d633d406db3283d3c1b66acaf"
+      }
+    }
+  },
+  "errors": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "pharmacy_admin",
+    "waste_log",
+    "waste_log_ops"
+  ],
+  "used_by_workflows": [],
+  "typescript_example": "// Vendors  (permissions: any logged-in user)\nexport const vendors = () =>\n  api(\"GET\", `/finance/vendors`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "list",
+    "paging": [],
+    "search": [],
+    "filters": [
+      {
+        "name": "vendor_type",
+        "required": false,
+        "type": "string"
+      }
+    ],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

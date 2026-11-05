@@ -1,0 +1,663 @@
+{
+  "screen": "attendance",
+  "title": "Attendance",
+  "cases": [
+    {
+      "id": "case:GET /hr/attendance",
+      "call": "GET /api/v1/hr/attendance",
+      "summary": "Daily attendance flags (Present / Late / Absent / HalfDay / Leave)",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/attendance",
+            "query": {
+              "date_from": "2026-09-26",
+              "date_to": "2026-09-26",
+              "employee_id": 4
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "attendance_date": "2026-09-26",
+                  "employee_id": 4,
+                  "emp_number": "EMP-2026-0004",
+                  "full_name": "Sana Tariq",
+                  "department_name": null,
+                  "status": "Late",
+                  "first_punch": "2026-09-26T03:40:00+00:00",
+                  "last_punch": null,
+                  "worked_minutes": 0,
+                  "late_minutes": 40
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:37:07.803187+00:00"
+              },
+              "request_id": "f07627450be24064b2493670cf50c608"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /hr/attendance/punches",
+      "call": "GET /api/v1/hr/attendance/punches",
+      "summary": "Raw punches of one employee for one duty date",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/attendance/punches",
+            "query": {
+              "employee_id": 5,
+              "day": "2026-09-27"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "attendance_log_id": 1,
+                  "employee_id": 5,
+                  "badge_code": null,
+                  "station_id": null,
+                  "punch_time": "2026-09-27T17:37:45.365692+00:00",
+                  "punch_type": "In",
+                  "source": "Manual",
+                  "manual_reason": "reader offline",
+                  "entered_by": 1,
+                  "attendance_date": "2026-09-27",
+                  "created_at": "2026-09-27T17:37:45.367825+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:37:45.402385+00:00"
+              },
+              "request_id": "30d3f3ef765d499eb02b3eb0cbee915f"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /hr/attendance/manual",
+      "call": "POST /api/v1/hr/attendance/manual",
+      "summary": "Manual punch correction (reasoned, audited)",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/attendance/manual",
+            "body": {
+              "employee_id": 4,
+              "punch_time": "2026-09-26T08:40:00+05:00",
+              "reason": "reader offline"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "attendance_log_id": 1,
+                "employee_id": 4,
+                "badge_code": null,
+                "station_id": null,
+                "punch_time": "2026-09-26T03:40:00+00:00",
+                "punch_type": "In",
+                "source": "Manual",
+                "manual_reason": "reader offline",
+                "entered_by": 1,
+                "attendance_date": "2026-09-26",
+                "created_at": "2026-09-27T17:37:07.762860+00:00"
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:07.794893+00:00"
+              },
+              "request_id": "821f58038694469e8a086e923457e165"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "attendance.flagged"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /hr/attendance/compute",
+      "call": "POST /api/v1/hr/attendance/compute",
+      "summary": "(Re)compute the daily flags for a date (the worker does this nightly)",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/attendance/compute",
+            "query": {
+              "day": "2026-09-25"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "summary_id": 3,
+                  "employee_id": 1,
+                  "attendance_date": "2026-09-25",
+                  "shift_pattern_id": null,
+                  "first_punch": null,
+                  "last_punch": null,
+                  "worked_minutes": 0,
+                  "late_minutes": 0,
+                  "status": "Off",
+                  "computed_at": "2026-09-27T17:45:16.971201+00:00",
+                  "row_version": 1,
+                  "inserted": true
+                },
+                {
+                  "summary_id": 4,
+                  "employee_id": 2,
+                  "attendance_date": "2026-09-25",
+                  "shift_pattern_id": null,
+                  "first_punch": null,
+                  "last_punch": null,
+                  "worked_minutes": 0,
+                  "late_minutes": 0,
+                  "status": "Off",
+                  "computed_at": "2026-09-27T17:45:16.971201+00:00",
+                  "row_version": 1,
+                  "inserted": true
+                },
+                {
+                  "summary_id": 5,
+                  "employee_id": 3,
+                  "attendance_date": "2026-09-25",
+                  "shift_pattern_id": null,
+                  "first_punch": null,
+                  "last_punch": null,
+                  "worked_minutes": 0,
+                  "late_minutes": 0,
+                  "status": "Off",
+                  "computed_at": "2026-09-27T17:45:16.971201+00:00",
+                  "row_version": 1,
+                  "inserted": true
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:45:16.980602+00:00"
+              },
+              "request_id": "0b1aac722cd14b739d6483d1d66c1a28"
+            }
+          },
+          "events_emitted": [
+            "attendance.flagged"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /hr/employees/{employee_id}/shift",
+      "call": "POST /api/v1/hr/employees/{employee_id}/shift",
+      "summary": "Set the default shift from a date (or roster-only)",
+      "happy_path": {
+        "as_one_of": [
+          "hr_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/employees/4/shift",
+            "body": {
+              "shift_pattern_id": 4,
+              "effective_from": "2020-01-01"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "assignment_id": 1,
+                "employee_id": 4,
+                "shift_pattern_id": 4,
+                "effective_from": "2020-01-01",
+                "effective_to": null,
+                "weekly_off_days": null,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:07.758590+00:00"
+              },
+              "request_id": "683005609f6c4271933feb295d1aa2f6"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /holidays",
+      "call": "GET /api/v1/holidays",
+      "summary": "Public holidays of a year (or a date range)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/holidays",
+            "query": {
+              "date_from": "2026-09-20",
+              "date_to": "2026-11-26"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "holiday_id": 1,
+                  "holiday_date": "2026-09-22",
+                  "name": "Eid ul Fitr (day 1)",
+                  "notes": null,
+                  "is_active": true,
+                  "created_by": 5,
+                  "created_at": "2026-09-27T17:45:33.464256+00:00",
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:45:33.504491+00:00"
+              },
+              "request_id": "a6458079c5e54908a12674ab321bc864"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /rosters/roll-call",
+      "call": "GET /api/v1/rosters/roll-call",
+      "summary": "Roll-call sheet: who is rostered today and who has arrived",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters/roll-call"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "roster_date": "2026-09-29",
+                "entries": [
+                  {
+                    "roster_id": 1,
+                    "employee_id": 1,
+                    "emp_number": "EMP-2026-0001",
+                    "full_name": "Nurse Amna",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "roster_date": "2026-09-29",
+                    "shift_pattern_id": 5,
+                    "shift_name": "Day",
+                    "start_time": "00:00:00",
+                    "end_time": "23:59:00",
+                    "duty_area": "Ward",
+                    "ward_id": 1,
+                    "ward_name": "Roster Ward",
+                    "department_id": null,
+                    "department_name": null,
+                    "zone_label": null,
+                    "is_on_call": false,
+                    "notes": null,
+                    "status": "Active",
+                    "cancel_reason": null,
+                    "swap_id": null,
+                    "row_version": 1,
+                    "bed_ids": [],
+                    "first_in": null,
+                    "first_source": null
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:52:02.249675+00:00"
+              },
+              "request_id": "11d6deadf28342f9a75c74ecc93e124f"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /rosters/roll-call",
+      "call": "POST /api/v1/rosters/roll-call",
+      "summary": "Mark rostered staff present (no badge station)",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/rosters/roll-call",
+            "body": {
+              "roster_date": "2026-09-27",
+              "present": [
+                {
+                  "employee_id": 1
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "roster_date": "2026-09-27",
+                "recorded": [
+                  {
+                    "attendance_log_id": 1,
+                    "employee_id": 1,
+                    "badge_code": null,
+                    "station_id": null,
+                    "punch_time": "2026-09-27T17:45:07.230283+00:00",
+                    "punch_type": "In",
+                    "source": "RollCall",
+                    "manual_reason": null,
+                    "entered_by": 3,
+                    "attendance_date": "2026-09-27",
+                    "created_at": "2026-09-27T17:45:07.227303+00:00"
+                  }
+                ],
+                "skipped": []
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:45:07.276809+00:00"
+              },
+              "request_id": "8915d72b85e048bcab881d9a737e6b42"
+            }
+          },
+          "errors_seen": [
+            "ROLL_CALL_NOT_ROSTERED",
+            "ROSTER_DATE_CLOSED",
+            "ROSTER_OUT_OF_SCOPE",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "attendance.flagged"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ROLL_CALL_NOT_ROSTERED",
+        "ROSTER_DATE_CLOSED",
+        "ROSTER_EMPLOYEE_INACTIVE",
+        "ROSTER_OUT_OF_SCOPE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /hr/shift-patterns",
+      "call": "GET /api/v1/hr/shift-patterns",
+      "summary": "Shift patterns",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/hr/shift-patterns"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "shift_pattern_id": 1,
+                  "name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "grace_minutes": 10,
+                  "half_day_after_minutes": 120,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "shift_pattern_id": 4,
+                  "name": "Morning 08-16",
+                  "start_time": "08:00:00",
+                  "end_time": "16:00:00",
+                  "grace_minutes": 15,
+                  "half_day_after_minutes": 120,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "shift_pattern_id": 2,
+                  "name": "Evening",
+                  "start_time": "14:00:00",
+                  "end_time": "20:00:00",
+                  "grace_minutes": 10,
+                  "half_day_after_minutes": 120,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:37:45.304301+00:00"
+              },
+              "request_id": "e83330e10908494aa41763cac64ee681"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/attendance",
+  "workspace_guide": "get_handbook_outline('hr')",
+  "realtime": [
+    {
+      "event": "attendance.flagged",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Show each punch's source (Badge, RollCall, Manual): manual corrections always carry their reason.",
+    "Holiday and Off are paid rest days: a public holiday, a weekly day off of the person's default shift (weekly_off_days: each person has their own, there is no hospital-wide day off) or a day a roster-only person is not rostered. A default shift is set with its weekly_off_days (required).",
+    "Punches are grouped by duty date (attendance_date): a night shift's morning exit is listed under the evening it started. A correction may name that date when the automatic choice is wrong.",
+    "Staff planned on the roster should have no default shift (shift_pattern_id null); otherwise their rest days show as Absent."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

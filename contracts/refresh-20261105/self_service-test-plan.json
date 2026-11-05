@@ -1,0 +1,1774 @@
+{
+  "screen": "self_service",
+  "title": "My workspace",
+  "cases": [
+    {
+      "id": "case:POST /self/leave-requests",
+      "call": "POST /api/v1/self/leave-requests",
+      "summary": "Request leave (routes to my supervisor)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/leave-requests",
+            "body": {
+              "leave_type": "Annual",
+              "from_date": "2026-12-01",
+              "to_date": "2026-12-02"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "leave_request_id": 1,
+                "employee_id": 5,
+                "leave_type": "Annual",
+                "from_date": "2026-12-01",
+                "to_date": "2026-12-02",
+                "days": 2,
+                "reason": null,
+                "approver_employee_id": 4,
+                "status": "Pending",
+                "decided_by": null,
+                "decided_at": null,
+                "decision_note": null,
+                "requested_at": "2026-09-27T17:37:12.051512+00:00",
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:12.064626+00:00"
+              },
+              "request_id": "888c0a8b741744a1ae75dfcbac2e3455"
+            }
+          },
+          "errors_seen": [
+            "LEAVE_INSUFFICIENT_BALANCE"
+          ],
+          "events_emitted": [
+            "leave.requested",
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "LEAVE_INSUFFICIENT_BALANCE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /self/leave-requests",
+      "call": "GET /api/v1/self/leave-requests",
+      "summary": "My leave requests",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/leave-requests"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "leave_request_id": 1,
+                  "employee_id": 5,
+                  "leave_type": "Annual",
+                  "from_date": "2026-12-01",
+                  "to_date": "2026-12-01",
+                  "days": 1,
+                  "reason": null,
+                  "approver_employee_id": 4,
+                  "status": "Pending",
+                  "decided_by": null,
+                  "decided_at": null,
+                  "decision_note": null,
+                  "requested_at": "2026-09-27T17:37:45.415319+00:00",
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:37:45.434965+00:00"
+              },
+              "request_id": "cc3d30c3bc69408db2460de8d42cc65b"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /self/leave-requests/{leave_request_id}/cancel",
+      "call": "POST /api/v1/self/leave-requests/{leave_request_id}/cancel",
+      "summary": "Withdraw my pending request",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/leave-requests/1/cancel"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "leave_request_id": 1,
+                "employee_id": 5,
+                "leave_type": "Casual",
+                "from_date": "2027-01-10",
+                "to_date": "2027-01-10",
+                "days": 1,
+                "reason": null,
+                "approver_employee_id": 4,
+                "status": "Cancelled",
+                "decided_by": 5,
+                "decided_at": "2026-09-27T17:37:59.963721+00:00",
+                "decision_note": "withdrawn",
+                "requested_at": "2026-09-27T17:37:59.933997+00:00",
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:59.970656+00:00"
+              },
+              "request_id": "1c0f7e99a2114680a26bf51786bd21d0"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "LEAVE_ALREADY_DECIDED"
+          ],
+          "events_emitted": [
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "LEAVE_ALREADY_DECIDED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /self/leave-balances",
+      "call": "GET /api/v1/self/leave-balances",
+      "summary": "My leave balances",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/leave-balances",
+            "query": {
+              "year": 2026
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "leave_type": "Annual",
+                  "year": 2026,
+                  "opening": 2,
+                  "accrued": 0,
+                  "carried_forward": 0,
+                  "used": 2,
+                  "available": 0
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:37:12.126933+00:00"
+              },
+              "request_id": "aea987d570c146de8b90e2562d4d8cfe"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "phc_inspector"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /self/profile",
+      "call": "GET /api/v1/self/profile",
+      "summary": "My employee profile, payslips and attendance",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/profile"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "employee_id": 5,
+                "emp_number": "EMP-2026-0005",
+                "full_name": "Staff 22360",
+                "father_or_husband_name": null,
+                "cnic": "70651-4742050-7",
+                "dob": null,
+                "gender": null,
+                "mobile": "03001234567",
+                "email": null,
+                "address": null,
+                "blood_group": null,
+                "department_id": null,
+                "department_name": null,
+                "designation": "Officer",
+                "specialty": null,
+                "supervisor_id": 4,
+                "supervisor_name": "Staff 4026",
+                "base_salary": 100000,
+                "contract_type": "Permanent",
+                "shift_pattern_id": null,
+                "employment_status": "Active",
+                "staff_category": "Administrative",
+                "is_clinical_staff": false,
+                "license_type": null,
+                "license_number": null,
+                "joined_on": null,
+                "left_on": null,
+                "onboarding_step": 1,
+                "row_version": 1,
+                "created_at": "2026-09-27T17:37:45.332833+00:00",
+                "qualifications": [],
+                "contract": null,
+                "user": {
+                  "user_id": 5,
+                  "username": "u80c4e4170d",
+                  "is_active": true
+                },
+                "badges": [],
+                "schedule": {
+                  "shift_pattern_id": null,
+                  "shift_name": null,
+                  "effective_from": null,
+                  "weekly_off_days": [
+                    7
+                  ]
+                },
+                "checklist": {
+                  "ready": false,
+                  "missing": [
+                    "CNIC document"
+                  ]
+                },
+                "payslips": []
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:45.461092+00:00"
+              },
+              "request_id": "e29cfaedb4b244bdb017c377ee83e063"
+            }
+          },
+          "errors_seen": [
+            "ACCOUNT_DISABLED"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "phc_inspector"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ACCOUNT_DISABLED"
+      ]
+    },
+    {
+      "id": "case:GET /self/payslips/{payroll_item_id}",
+      "call": "GET /api/v1/self/payslips/{payroll_item_id}",
+      "summary": "One of my payslips",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/payslips/4"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "payroll_item_id": 4,
+                "run_id": 1,
+                "employee_id": 4,
+                "base_salary": 30000,
+                "period_days": 30,
+                "unpaid_absence_days": 1.5,
+                "unpaid_absence_deduction": 1500,
+                "internal_credit_deduction": 0,
+                "accrued_commissions": 2500,
+                "extra_duty_days": 0,
+                "extra_duty_pay": 0,
+                "other_additions": 0,
+                "other_deductions": 0,
+                "net_payable": 31000,
+                "run_number": "PR-2026-001",
+                "period_start": "2026-06-01",
+                "period_end": "2026-06-30",
+                "run_status": "Paid",
+                "emp_number": "EMP-2026-0004",
+                "full_name": "Staff 32475",
+                "designation": "Officer",
+                "department_name": null,
+                "lines": [
+                  {
+                    "line_kind": "Deduction",
+                    "category": "UnpaidAbsence",
+                    "amount": 1500,
+                    "description": "1.5 unpaid day(s)"
+                  },
+                  {
+                    "line_kind": "Addition",
+                    "category": "Commission",
+                    "amount": 2500,
+                    "description": "OT commission"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:41:53.458053+00:00"
+              },
+              "request_id": "20ea6ddf59264bffb043bbd80a7f23ec"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "phc_inspector"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /self/roster",
+      "call": "GET /api/v1/self/roster",
+      "summary": "My duties (two weeks from today by default)",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/roster"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "roster_id": 5,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-02",
+                  "shift_pattern_id": 2,
+                  "shift_name": "Evening",
+                  "start_time": "14:00:00",
+                  "end_time": "20:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": 1,
+                  "row_version": 1,
+                  "bed_ids": []
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-29T02:40:41.599318+00:00"
+              },
+              "request_id": "5c305e9719de4fc0a201e0efb960e802"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "phc_inspector"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /holidays",
+      "call": "GET /api/v1/holidays",
+      "summary": "Public holidays of a year (or a date range)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/holidays",
+            "query": {
+              "date_from": "2026-09-20",
+              "date_to": "2026-11-26"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "holiday_id": 1,
+                  "holiday_date": "2026-09-22",
+                  "name": "Eid ul Fitr (day 1)",
+                  "notes": null,
+                  "is_active": true,
+                  "created_by": 5,
+                  "created_at": "2026-09-27T17:45:33.464256+00:00",
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:45:33.504491+00:00"
+              },
+              "request_id": "a6458079c5e54908a12674ab321bc864"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /self/roster/swap-options",
+      "call": "GET /api/v1/self/roster/swap-options",
+      "summary": "Colleagues who could work one of my duties",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/roster/swap-options",
+            "query": {
+              "roster_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "duty": {
+                  "roster_id": 1,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-01",
+                  "shift_pattern_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": []
+                },
+                "colleagues": [
+                  {
+                    "employee_id": 7,
+                    "emp_number": "EMP-2026-0007",
+                    "full_name": "Nurse Bushra",
+                    "designation": "Officer",
+                    "department_name": null,
+                    "their_duties": [
+                      {
+                        "roster_id": 2,
+                        "roster_date": "2026-10-02",
+                        "shift_name": "Evening",
+                        "start_time": "14:00:00",
+                        "end_time": "20:00:00",
+                        "duty_area": "Ward",
+                        "ward_name": "Roster Ward",
+                        "you_can_work_it": true
+                      }
+                    ]
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:41.443824+00:00"
+              },
+              "request_id": "88bd5a5a78a5420fbc06e25d43fb446a"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "SWAP_DUTY_STARTED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /self/roster/swaps",
+      "call": "POST /api/v1/self/roster/swaps",
+      "summary": "Ask a colleague to work one of my duties (cover or swap)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/roster/swaps",
+            "body": {
+              "roster_id": 1,
+              "covering_employee_id": 7,
+              "return_roster_id": 2,
+              "reason": "Family emergency"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "swap_id": 1,
+                "status": "Requested",
+                "reason": "Family emergency",
+                "roster_id": 1,
+                "return_roster_id": 2,
+                "requester_employee_id": 1,
+                "requester_name": "Nurse Amna",
+                "covering_employee_id": 7,
+                "covering_name": "Nurse Bushra",
+                "staff_category": "Nursing",
+                "requested_at": "2026-09-29T02:40:41.486972+00:00",
+                "responded_at": null,
+                "response_note": null,
+                "responded_by_name": null,
+                "decided_at": null,
+                "decision_note": null,
+                "decided_by_name": null,
+                "closed_at": null,
+                "cover_roster_id": null,
+                "return_cover_roster_id": null,
+                "row_version": 1,
+                "kind": "Swap",
+                "duty": {
+                  "roster_id": 1,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-01",
+                  "shift_pattern_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": []
+                },
+                "return_duty": {
+                  "roster_id": 2,
+                  "employee_id": 7,
+                  "emp_number": "EMP-2026-0007",
+                  "full_name": "Nurse Bushra",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-02",
+                  "shift_pattern_id": 2,
+                  "shift_name": "Evening",
+                  "start_time": "14:00:00",
+                  "end_time": "20:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": []
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:41.505190+00:00"
+              },
+              "request_id": "53b8ded7847e4441baf17ad428687c10"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "ROSTER_CONFLICT",
+            "SWAP_COLLEAGUE_INELIGIBLE",
+            "SWAP_DUTY_STARTED",
+            "SWAP_EXISTS"
+          ],
+          "events_emitted": [
+            "notification.created",
+            "roster.swap.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "ROSTER_CONFLICT",
+        "ROSTER_ON_LEAVE",
+        "SWAP_COLLEAGUE_INELIGIBLE",
+        "SWAP_DUTY_STARTED",
+        "SWAP_EXISTS",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /self/roster/swaps",
+      "call": "GET /api/v1/self/roster/swaps",
+      "summary": "Swap requests I made or was asked (open first)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/roster/swaps"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "swap_id": 1,
+                  "status": "Requested",
+                  "reason": "Family emergency",
+                  "roster_id": 1,
+                  "return_roster_id": 2,
+                  "requester_employee_id": 1,
+                  "requester_name": "Nurse Amna",
+                  "covering_employee_id": 7,
+                  "covering_name": "Nurse Bushra",
+                  "staff_category": "Nursing",
+                  "requested_at": "2026-09-29T02:40:41.486972+00:00",
+                  "responded_at": null,
+                  "response_note": null,
+                  "responded_by_name": null,
+                  "decided_at": null,
+                  "decision_note": null,
+                  "decided_by_name": null,
+                  "closed_at": null,
+                  "cover_roster_id": null,
+                  "return_cover_roster_id": null,
+                  "row_version": 1,
+                  "kind": "Swap",
+                  "duty": {
+                    "roster_id": 1,
+                    "employee_id": 1,
+                    "emp_number": "EMP-2026-0001",
+                    "full_name": "Nurse Amna",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "roster_date": "2026-10-01",
+                    "shift_pattern_id": 1,
+                    "shift_name": "Morning",
+                    "start_time": "08:00:00",
+                    "end_time": "14:00:00",
+                    "duty_area": "Ward",
+                    "ward_id": 1,
+                    "ward_name": "Roster Ward",
+                    "department_id": null,
+                    "department_name": null,
+                    "zone_label": null,
+                    "is_on_call": false,
+                    "notes": null,
+                    "status": "Active",
+                    "cancel_reason": null,
+                    "swap_id": null,
+                    "row_version": 1,
+                    "bed_ids": []
+                  },
+                  "return_duty": {
+                    "roster_id": 2,
+                    "employee_id": 7,
+                    "emp_number": "EMP-2026-0007",
+                    "full_name": "Nurse Bushra",
+                    "designation": "Officer",
+                    "staff_category": "Nursing",
+                    "roster_date": "2026-10-02",
+                    "shift_pattern_id": 2,
+                    "shift_name": "Evening",
+                    "start_time": "14:00:00",
+                    "end_time": "20:00:00",
+                    "duty_area": "Ward",
+                    "ward_id": 1,
+                    "ward_name": "Roster Ward",
+                    "department_id": null,
+                    "department_name": null,
+                    "zone_label": null,
+                    "is_on_call": false,
+                    "notes": null,
+                    "status": "Active",
+                    "cancel_reason": null,
+                    "swap_id": null,
+                    "row_version": 1,
+                    "bed_ids": []
+                  },
+                  "my_role": "Colleague"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-29T02:40:41.525513+00:00"
+              },
+              "request_id": "944967dd17de4423a137e2b9b1f98b15"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /self/roster/swaps/{swap_id}/accept",
+      "call": "POST /api/v1/self/roster/swaps/{swap_id}/accept",
+      "summary": "Agree to work a colleague's duty",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/roster/swaps/1/accept",
+            "body": {
+              "note": "Happy to help"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "swap_id": 1,
+                "status": "Accepted",
+                "reason": "Family emergency",
+                "roster_id": 1,
+                "return_roster_id": 2,
+                "requester_employee_id": 1,
+                "requester_name": "Nurse Amna",
+                "covering_employee_id": 7,
+                "covering_name": "Nurse Bushra",
+                "staff_category": "Nursing",
+                "requested_at": "2026-09-29T02:40:41.486972+00:00",
+                "responded_at": "2026-09-29T02:40:41.533158+00:00",
+                "response_note": "Happy to help",
+                "responded_by_name": "Nurse Bushra",
+                "decided_at": null,
+                "decision_note": null,
+                "decided_by_name": null,
+                "closed_at": null,
+                "cover_roster_id": null,
+                "return_cover_roster_id": null,
+                "row_version": 2,
+                "kind": "Swap",
+                "duty": {
+                  "roster_id": 1,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-01",
+                  "shift_pattern_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": []
+                },
+                "return_duty": {
+                  "roster_id": 2,
+                  "employee_id": 7,
+                  "emp_number": "EMP-2026-0007",
+                  "full_name": "Nurse Bushra",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-02",
+                  "shift_pattern_id": 2,
+                  "shift_name": "Evening",
+                  "start_time": "14:00:00",
+                  "end_time": "20:00:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": []
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:41.544619+00:00"
+              },
+              "request_id": "7752b1ee3d1547a8a1d1b908ba7a3368"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ],
+          "events_emitted": [
+            "notification.created",
+            "roster.changed",
+            "roster.swap.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "ROSTER_CONFLICT",
+        "ROSTER_ON_LEAVE",
+        "SWAP_DUTY_STARTED",
+        "SWAP_TRANSITION_INVALID",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /self/roster/swaps/{swap_id}/decline",
+      "call": "POST /api/v1/self/roster/swaps/{swap_id}/decline",
+      "summary": "Say no to a colleague's request",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/roster/swaps/1/decline",
+            "body": {
+              "note": "I am away"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "swap_id": 1,
+                "status": "Declined",
+                "reason": "Child unwell",
+                "roster_id": 1,
+                "return_roster_id": null,
+                "requester_employee_id": 1,
+                "requester_name": "Nurse Amna",
+                "covering_employee_id": 7,
+                "covering_name": "Nurse Kiran",
+                "staff_category": "Nursing",
+                "requested_at": "2026-09-29T02:40:47.263849+00:00",
+                "responded_at": "2026-09-29T02:40:47.305952+00:00",
+                "response_note": "I am away",
+                "responded_by_name": "Nurse Kiran",
+                "decided_at": null,
+                "decision_note": null,
+                "decided_by_name": null,
+                "closed_at": "2026-09-29T02:40:47.305952+00:00",
+                "cover_roster_id": null,
+                "return_cover_roster_id": null,
+                "row_version": 2,
+                "kind": "Cover",
+                "duty": {
+                  "roster_id": 1,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-01",
+                  "shift_pattern_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "duty_area": "Department",
+                  "ward_id": null,
+                  "ward_name": null,
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": []
+                },
+                "return_duty": null
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:47.315857+00:00"
+              },
+              "request_id": "b53c0320a6494f4b86a6de02bf5a61d8"
+            }
+          },
+          "events_emitted": [
+            "notification.created",
+            "roster.swap.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "SWAP_TRANSITION_INVALID",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /self/roster/swaps/{swap_id}/cancel",
+      "call": "POST /api/v1/self/roster/swaps/{swap_id}/cancel",
+      "summary": "Withdraw my swap request (before approval)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/self/roster/swaps/2/cancel"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "swap_id": 2,
+                "status": "Cancelled",
+                "reason": "Child unwell",
+                "roster_id": 1,
+                "return_roster_id": null,
+                "requester_employee_id": 1,
+                "requester_name": "Nurse Amna",
+                "covering_employee_id": 7,
+                "covering_name": "Nurse Kiran",
+                "staff_category": "Nursing",
+                "requested_at": "2026-09-29T02:40:47.321088+00:00",
+                "responded_at": null,
+                "response_note": null,
+                "responded_by_name": null,
+                "decided_at": null,
+                "decision_note": null,
+                "decided_by_name": null,
+                "closed_at": "2026-09-29T02:40:47.331669+00:00",
+                "cover_roster_id": null,
+                "return_cover_roster_id": null,
+                "row_version": 2,
+                "kind": "Cover",
+                "duty": {
+                  "roster_id": 1,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-10-01",
+                  "shift_pattern_id": 1,
+                  "shift_name": "Morning",
+                  "start_time": "08:00:00",
+                  "end_time": "14:00:00",
+                  "duty_area": "Department",
+                  "ward_id": null,
+                  "ward_name": null,
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": []
+                },
+                "return_duty": null
+              },
+              "meta": {
+                "server_time": "2026-09-29T02:40:47.337069+00:00"
+              },
+              "request_id": "061aa80a3ae44331b53b2bab073d6cf1"
+            }
+          },
+          "events_emitted": [
+            "notification.created",
+            "roster.swap.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "SWAP_TRANSITION_INVALID",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /ops/work-orders",
+      "call": "POST /api/v1/ops/work-orders",
+      "summary": "\"Report Issue\" (staff with ops.workorder.report)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_nurse",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/ops/work-orders",
+            "body": {
+              "category": "Plumbing",
+              "description": "Leaking tap in OPD washroom",
+              "location_text": "OPD"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "work_order_id": 1,
+                "wo_number": "WO-2026-00001",
+                "wo_type": "ExternalContractor",
+                "category": "Plumbing",
+                "priority": "Normal",
+                "description": "Leaking tap in OPD washroom",
+                "location_text": "OPD",
+                "ward_id": null,
+                "asset_id": null,
+                "assigned_employee_id": null,
+                "assigned_vendor_id": null,
+                "estimated_cost": null,
+                "final_cost": null,
+                "status": "Reported",
+                "reported_by": 4,
+                "reported_at": "2026-09-27T17:37:30.913697+00:00",
+                "completed_by": null,
+                "completed_at": null,
+                "row_version": 1,
+                "vendor_name": null,
+                "assigned_employee_name": null,
+                "asset_name": null,
+                "ward_name": null,
+                "reported_by_name": "ue0b568c0f5",
+                "ap_id": null,
+                "payable_status": null,
+                "history": [
+                  {
+                    "from_status": null,
+                    "to_status": "Reported",
+                    "note": null,
+                    "at": "2026-09-27T17:37:30.913697+00:00",
+                    "actor": "ue0b568c0f5"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:30.955119+00:00"
+              },
+              "request_id": "0a5deb5007a946f49149bb251544828b"
+            }
+          },
+          "events_emitted": [
+            "work_order.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /ops/assets",
+      "call": "GET /api/v1/ops/assets",
+      "summary": "Asset monitor",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_nurse",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/ops/assets"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "asset_id": 2,
+                  "asset_tag": "GEN-01",
+                  "name": "Generator",
+                  "category": "Generator",
+                  "serial_no": null,
+                  "location": null,
+                  "department_id": null,
+                  "ward_id": null,
+                  "status": "Active",
+                  "purchase_date": null,
+                  "purchase_cost": null,
+                  "notes": null,
+                  "is_medical": false,
+                  "row_version": 1,
+                  "department_name": null,
+                  "ward_name": null,
+                  "open_work_orders": 0
+                },
+                {
+                  "asset_id": 1,
+                  "asset_tag": "VENT-01",
+                  "name": "ICU ventilator 1",
+                  "category": "Ventilator",
+                  "serial_no": null,
+                  "location": null,
+                  "department_id": null,
+                  "ward_id": null,
+                  "status": "UnderRepair",
+                  "purchase_date": null,
+                  "purchase_cost": null,
+                  "notes": null,
+                  "is_medical": false,
+                  "row_version": 2,
+                  "department_name": null,
+                  "ward_name": null,
+                  "open_work_orders": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:28:17.085438+00:00"
+              },
+              "request_id": "377a1e7be11d421f9049dc34be31344b"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/self_service",
+  "workspace_guide": "get_handbook_outline('self_service')",
+  "realtime": [
+    {
+      "event": "roster.swap.updated",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "notification.created",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "My duties (GET /self/roster): the days without a duty are my rest days.",
+    "'Ask a colleague' on a duty that has not started: GET /self/roster/swap-options?roster_id=… lists colleagues free for it (same department first). Cover = they work it; Swap = pick one of their_duties with you_can_work_it true, which you work in return. A reason is required (e.g. a family emergency).",
+    "Requests to me (my_role Colleague, status Requested): Accept or Decline. Then the roster manager approves; the roster changes only then. I may withdraw my own request until it is approved; one still open when the duty starts expires."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

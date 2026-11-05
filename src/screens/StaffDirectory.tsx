@@ -59,7 +59,7 @@ export interface StaffDirectoryProps {
   establishment?: EstablishmentOut | null;
   connected?: boolean;
   timeZone?: string;
-  onNavigateScreen?: (screenId: string) => void;
+  onNavigateScreen?: (screenId: string,employeeId?:number) => void;
 }
 
 interface TreeNode extends OrgChartNodeOut {
@@ -74,8 +74,8 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({
 }) => {
   // Capability gating
   const capability: StaffDirectoryCapabilityView = useMemo(
-    () => getStaffDirectoryCapabilityView(establishment),
-    [establishment]
+    () => getStaffDirectoryCapabilityView(establishment,user?.permissions ?? []),
+    [establishment,user?.permissions]
   );
 
   // Active Tab: 'directory' | 'org_chart'
@@ -134,7 +134,7 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({
 
   // 1. Fetch Employee List
   const fetchEmployees = useCallback(async () => {
-    if (!capability.canViewDirectory) return;
+    if (!capability.canViewDirectory) {setEmployees([]);setEmployeeDetail(null);return;}
     setLoadingList(true);
     setListError(null);
     try {
@@ -992,7 +992,7 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({
                           <button
                             type="button"
                             className="btn btn-sm btn-warning"
-                            onClick={() => onNavigateScreen("onboarding_wizard")}
+                            onClick={() => onNavigateScreen("onboarding_wizard",employeeDetail.employee_id)}
                             data-help="staff_directory.open_wizard"
                           >
                             Open Onboarding Wizard

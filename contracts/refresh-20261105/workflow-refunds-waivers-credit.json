@@ -1,0 +1,118 @@
+{
+  "slug": "refunds-waivers-credit",
+  "title": "Refunds, VIP waivers & credit (Udhaar)",
+  "summary": "Every privileged money override is request → locked subject → approver → mandatory cash-back prompt.",
+  "order": 99,
+  "workflow": "§1.6–§1.9",
+  "workspaces": [
+    "reception",
+    "finance_accountant",
+    "billing_admin",
+    "owner_dashboard"
+  ],
+  "file": "refunds-waivers-credit.md",
+  "markdown": "# Refunds, VIP waivers & credit\n\nAll three follow the **approval-ping pattern**: the front desk requests, the subject is frozen\n(`approval_lock`), an approver with the right permission decides in `/approvals`, and any cash owed\nto the patient appears as a **mandatory cash-back prompt** at the counter.\n\n## Refund (patient-initiated, §1.6)\n\n1. `POST /opd-tickets/{id}/refund-request {\"reason_code\": \"DoctorUnavailable\", \"note\": \"doctor called away\"}`\n   → `ticket.approval_lock = \"RefundPending\"`; the patient disappears from the doctor's screen.\n2. Approver (`approval.refund.approve`; after clinical activity `approval.refund_elevated.approve`, see below):\n   `POST /approvals/{request_id}/approve`. The ticket becomes `Refunded` and **clinically locked**:\n   any clinical write answers `CLINICAL_LOCKOUT` — *\"Patient ticket has been refunded. Cannot add clinical\n   data without an active billing slip.\"* (show verbatim).\n3. Counter: `ticket.cash_back_prompts[]` (also event `refund.ready`) → hand over the cash →\n   `POST /opd-tickets/{id}/refund/confirm-dispensation`. Cash leaves the counter's open shift.\n\nIf the visit already has clinical activity (a note or prescription), the request is marked\n**CLINICAL ACTIVITY EXISTS**, needs the *elevated* approver (owner) and is flagged for risk review;\nprefer the post-consultation VIP waiver below in that case.\n\n## Post-consultation VIP waiver (§1.7)\n\nPatient already examined, owner/doctor decides not to charge:\n`POST /opd-tickets/{id}/vip-waiver-post-consult {\"reason\"}` → approval (`approval.waiver.approve`) →\nticket `payment_status: \"Waivered\"` (NOT Refunded — waived visits are excluded from fraud sweeps)\n→ `waiver.refund_order.ready` → counter hands back the cash →\n`POST /opd-tickets/{id}/waiver-refund/confirm-dispensation`.\n\n## Pre-consultation VIP waiver (§1.8)\n\nUnpaid slip (`payment` omitted at registration) → `POST /opd-tickets/{id}/vip-waiver-request\n{\"reason\", \"waiver_pct\": 100}` → on approval the ticket is queued free (the ledger books gross revenue\nand a discount/waiver contra entry).\n\n## Credit / Udhaar (§1.9)\n\n`POST /opd-tickets/{id}/credit-request {\"amount_paid_now\": 400, \"reason\": \"short of cash\"}` (with\n`Idempotency-Key`). The paid-now part is collected immediately; on approval\n(`approval.credit.approve`) the rest becomes a receivable, the ticket is `CreditAuthorized` and queued.\nFrom then on `GET /patients/search` shows the **OUTSTANDING BALANCE** banner and new slips are blocked\nuntil settled (`POST /finance/ar/{ar_id}/settle`) — except Emergency.\n\n## Approver screens\n\n`GET /approvals` (queue for my permissions, elevated first; `mine=true`: my own requests),\n`GET /approvals/{request_id}` to open one, `approve` / `reject` (note required) / requester `cancel`. Nobody\napproves their own request (`SELF_APPROVAL_FORBIDDEN`), except the Owner of a one-person clinic (below). Every request in these answers says what you may do with it:\nshow Approve and Reject only when `can_decide` is true; `decide_blocked` says why not (`own_request`,\n`missing_permission`, `decided`), so the queue never has to fail a decision to find out. The decision takes no\nco-signer: a large cash drop is simply never approved by the cashier of its shift (`DUAL_CONTROL_SAME_PERSON`). A request opens only for its requester and the holders of\nits `required_permission` (the people the queue and its notifications show it to); anyone else gets `FORBIDDEN`.\nOffer the link only to them: an `approval_request_id` shown on another screen (a ward indent) is no reason to open it.\n\n## A one-person clinic (solo practice)\n\nThe approver is never the requester. One exception: with the Owner's `solo_practice_mode` on (a control setting) and\nnobody else able to approve, the Owner approves their own refund, waiver or credit request with a note (the request\nsays so in advance: `self_decision` is `allowed_with_note`, otherwise `forbidden`; `solo_practice_mode` is also in\n`GET /meta/settings`):\n`POST /approvals/{request_id}/approve {\"note\": \"...\"}`. Without the note: `VALIDATION_ERROR`. In any other case\n`SELF_APPROVAL_FORBIDDEN`, whose `details` say why (`solo_practice_mode`, `owner`, `other_approvers`). The approval\nthen shows `solo_self_approved: true`; each one is a risk item (`SOLO_SELF_APPROVAL`), and the Owner hears the month's\ncount on the first of the next month.",
+  "steps": [
+    {
+      "heading": "Refund (patient-initiated, §1.6)",
+      "anchor": "refund-patient-initiated-1-6",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-tickets/{ticket_id}/refund-request",
+          "summary": "Initiate Refund (needs approval)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/approvals/{request_id}/approve",
+          "summary": "Approve (applies the effect atomically)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-tickets/{ticket_id}/refund/confirm-dispensation",
+          "summary": "Hand the approved refund back (cash-out)"
+        }
+      ]
+    },
+    {
+      "heading": "Post-consultation VIP waiver (§1.7)",
+      "anchor": "post-consultation-vip-waiver-1-7",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-tickets/{ticket_id}/vip-waiver-post-consult",
+          "summary": "Doctor: Convert to VIP Waiver (after committing notes)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-tickets/{ticket_id}/waiver-refund/confirm-dispensation",
+          "summary": "Confirm Dispensation of waiver cash-back"
+        }
+      ]
+    },
+    {
+      "heading": "Pre-consultation VIP waiver (§1.8)",
+      "anchor": "pre-consultation-vip-waiver-1-8",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-tickets/{ticket_id}/vip-waiver-request",
+          "summary": "Request VIP / 100% waiver BEFORE consultation (needs approval)"
+        }
+      ]
+    },
+    {
+      "heading": "Credit / Udhaar (§1.9)",
+      "anchor": "credit-udhaar-1-9",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/opd-tickets/{ticket_id}/credit-request",
+          "summary": "Request Credit / Partial Payment"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/finance/ar/{ar_id}/settle",
+          "summary": "Settle Debt (patient returns to pay)"
+        }
+      ]
+    },
+    {
+      "heading": "Approver screens",
+      "anchor": "approver-screens",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/approvals",
+          "summary": "Approval queue visible to me (or my own requests with mine=true)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/approvals/{request_id}",
+          "summary": "One approval request"
+        }
+      ]
+    },
+    {
+      "heading": "A one-person clinic (solo practice)",
+      "anchor": "a-one-person-clinic-solo-practice",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/meta/settings",
+          "summary": "Non-sensitive hospital settings for UI display"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/approvals/{request_id}/approve",
+          "summary": "Approve (applies the effect atomically)"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+# Historical DEV test - retired after database reset
+
+This source is evidence only. Rewrite it to discover/create fresh records before reactivation. Never replay old keys, IDs or event cursors.
+
+```javascript
+import fs from 'node:fs';let s=fs.readFileSync('scripts/consents-delivery-current-read-check.mjs','utf8').replaceAll('artifacts/consents-delivery-current-read-check.json','artifacts/consents-delivery-final-read-check.json').replaceAll('consents-delivery-current-read-actor','consents-delivery-final-read-actor');const anchor=" for(const language of ['en','ur'])";const i=s.indexOf(anchor);if(i<0)throw Error('No render anchor');s=s.slice(0,i)+` const snapshot=JSON.parse(fs.readFileSync('docs/consents-ui-evidence-2026-10-28.json')).runs.flatMap(r=>r.requests||[]).find(r=>r.path.endsWith('/print-payload')&&r.result?.data?.fields?.consent?.status==='Draft'&&r.result.data.fields.consent.language==='Urdu').result.data;
+ await s.app.evaluate(async({BrowserWindow},{snapshot,target})=>{const make=process.getBuiltinModule('module').createRequire(process.cwd()+'/package.json'),owner=BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().startsWith('app://terminal'));const out=await make('./electron/consent-print.cjs').printConsent(snapshot,{}, {owner,pdf:true});process.getBuiltinModule('fs').writeFileSync(target,out.bytes);},{snapshot,target:path.resolve('artifacts/consent-draft-layout-qa.pdf')});
+`+s.slice(i);fs.writeFileSync('scripts/consents-delivery-final-read-check.mjs',s);
+
+```

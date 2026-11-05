@@ -1,7 +1,7 @@
 {
   "screen_id": "billing_admin",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -233,18 +233,27 @@
       }
     ],
     "related_workflows": [
+      "clinic-quality-and-education",
       "clinical-and-prescriptions",
+      "complaints",
       "consent",
       "diagnostic-services",
       "duty-rosters-and-attendance",
       "facility-and-it",
+      "facility-compliance-equipment-drills",
       "finance-and-owner",
+      "hr-and-payroll",
       "incidents-and-sentinel-events",
+      "infection-control",
       "inpatient-and-discharge",
       "laboratory-and-radiology",
+      "medical-record-review",
+      "medication-safety",
       "opd-reception",
       "operating-theater",
-      "personnel-records"
+      "personnel-records",
+      "phc-interview-prep",
+      "quality-indicators-and-committees"
     ]
   },
   "rules_in_force": null,
@@ -254,20 +263,64 @@
     "workspace": "billing_admin",
     "phase": "P7",
     "position": 134,
-    "points": 64,
+    "points": 67,
     "capabilities": [
       "idempotent_writes",
       "versioned_edits",
       "f1_help",
       "zoom"
     ],
-    "depends_on": [],
+    "depends_on": [
+      {
+        "from": "billing_admin",
+        "to": "it_console",
+        "kind": "data_candidate",
+        "evidence": "it reads admin/departments, which POST /admin/departments on it_console creates",
+        "ordering": false,
+        "forward": true
+      }
+    ],
     "needed_by": [
+      {
+        "from": "it_console",
+        "to": "billing_admin",
+        "kind": "data_candidate",
+        "evidence": "it reads finance/service-catalog, which POST /finance/service-catalog on billing_admin creates",
+        "ordering": false
+      },
+      {
+        "from": "lab_orders_results",
+        "to": "billing_admin",
+        "kind": "data_candidate",
+        "evidence": "it reads finance/service-catalog, which POST /finance/service-catalog on billing_admin creates",
+        "ordering": false
+      },
+      {
+        "from": "ot_scheduling",
+        "to": "billing_admin",
+        "kind": "data_candidate",
+        "evidence": "it reads finance/service-catalog, which POST /finance/service-catalog on billing_admin creates",
+        "ordering": false
+      },
       {
         "from": "ot_settlement",
         "to": "billing_admin",
         "kind": "data_candidate",
         "evidence": "it reads finance/consultant-contracts, which POST /finance/consultant-contracts on billing_admin creates",
+        "ordering": false
+      },
+      {
+        "from": "patient_search",
+        "to": "billing_admin",
+        "kind": "data_candidate",
+        "evidence": "it reads finance/panels, which POST /finance/panels on billing_admin creates",
+        "ordering": false
+      },
+      {
+        "from": "pending_admissions",
+        "to": "billing_admin",
+        "kind": "data_candidate",
+        "evidence": "it reads finance/panels, which POST /finance/panels on billing_admin creates",
         "ordering": false
       },
       {
@@ -282,71 +335,77 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 64,
+    "points": 67,
     "items": [
       {
         "id": "ep:GET /finance/service-catalog",
         "label": "GET /finance/service-catalog",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /finance/service-catalog",
         "label": "POST /finance/service-catalog",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PATCH /finance/service-catalog/{service_id}",
         "label": "PATCH /finance/service-catalog/{service_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /finance/panels",
         "label": "GET /finance/panels",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /finance/panels",
         "label": "POST /finance/panels",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /finance/panel-discounts",
         "label": "POST /finance/panel-discounts",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /finance/discount-policies",
         "label": "GET /finance/discount-policies",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PUT /finance/discount-policies",
         "label": "PUT /finance/discount-policies",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /finance/consultant-contracts",
         "label": "GET /finance/consultant-contracts",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /finance/consultant-contracts",
         "label": "POST /finance/consultant-contracts",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /staff/lookup",
         "label": "GET /staff/lookup",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /admin/departments",
+        "label": "GET /admin/departments",
         "points": 3,
         "claimed": false
       },
@@ -354,37 +413,37 @@
         "id": "rule:55973e6dbd",
         "label": "Price changes never alter issued tickets/invoices (prices are snapshotted).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
         "label": "Test plan passed",
         "points": 4,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -414,13 +473,13 @@
         "id": "q:character",
         "label": "Design principles applied",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:editor",
         "label": "Editor's pass",
         "points": 2,
-        "claimed": false
+        "claimed": true
       }
     ],
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
@@ -635,7 +694,8 @@
             "pointer": "/department_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The department (GET /admin/departments)"
           },
           {
             "pointer": "/doctor_id",
@@ -1245,7 +1305,8 @@
             "pointer": "/user_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The user the policy is for, instead of a role (GET /staff/lookup → user_id)"
           },
           {
             "pointer": "/max_discount_pct",
@@ -1702,6 +1763,40 @@
         ],
         "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
       }
+    },
+    {
+      "endpoint": "GET /admin/departments",
+      "summary": "Departments",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DepartmentOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
     }
   ],
   "realtime": {
@@ -2084,6 +2179,19 @@
         "as_one_of": [
           "any logged-in user"
         ]
+      },
+      {
+        "id": "case:GET /admin/departments",
+        "call": "GET /api/v1/admin/departments",
+        "summary": "Departments",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
       }
     ],
     "service_cases": [],
@@ -2124,8 +2232,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -2267,6 +2375,15 @@
         "permissions": [],
         "permissions_mode": "all",
         "access": "any logged-in user"
+      },
+      {
+        "id": "billing_admin::GET /admin/departments",
+        "task": "Departments",
+        "call": "GET /admin/departments",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
       }
     ],
     "rules_to_explain": [
@@ -2365,9 +2482,19 @@
   },
   "workflows": [
     {
+      "slug": "clinic-quality-and-education",
+      "title": "QA rounds, patient feedback and health education",
+      "recipe": "get_workflow_recipe('clinic-quality-and-education')"
+    },
+    {
       "slug": "clinical-and-prescriptions",
       "title": "Consultation, e-prescriptions & pharmacy dispensing",
       "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
     },
     {
       "slug": "consent",
@@ -2390,14 +2517,29 @@
       "recipe": "get_workflow_recipe('facility-and-it')"
     },
     {
+      "slug": "facility-compliance-equipment-drills",
+      "title": "Licences, equipment maintenance and mock drills (MSDS)",
+      "recipe": "get_workflow_recipe('facility-compliance-equipment-drills')"
+    },
+    {
       "slug": "finance-and-owner",
       "title": "Cash shifts, payables, receivables, owner dashboards & risk",
       "recipe": "get_workflow_recipe('finance-and-owner')"
     },
     {
+      "slug": "hr-and-payroll",
+      "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
+      "recipe": "get_workflow_recipe('hr-and-payroll')"
+    },
+    {
       "slug": "incidents-and-sentinel-events",
       "title": "Incidents, sentinel events and the action register (MSDS)",
       "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "recipe": "get_workflow_recipe('infection-control')"
     },
     {
       "slug": "inpatient-and-discharge",
@@ -2408,6 +2550,16 @@
       "slug": "laboratory-and-radiology",
       "title": "Laboratory & radiology",
       "recipe": "get_workflow_recipe('laboratory-and-radiology')"
+    },
+    {
+      "slug": "medical-record-review",
+      "title": "Medical record review (MSDS IMS-3)",
+      "recipe": "get_workflow_recipe('medical-record-review')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
     },
     {
       "slug": "opd-reception",
@@ -2423,6 +2575,16 @@
       "slug": "personnel-records",
       "title": "Personnel records (MSDS)",
       "recipe": "get_workflow_recipe('personnel-records')"
+    },
+    {
+      "slug": "phc-interview-prep",
+      "title": "PHC inspection interviews: daily practice, mock interviews, model answers and readiness",
+      "recipe": "get_workflow_recipe('phc-interview-prep')"
+    },
+    {
+      "slug": "quality-indicators-and-committees",
+      "title": "Clinical quality indicators and committees (MSDS)",
+      "recipe": "get_workflow_recipe('quality-indicators-and-committees')"
     }
   ],
   "scenarios": [],
@@ -2592,7 +2754,7 @@
               "category": "Imaging",
               "department_id": null,
               "doctor_id": null,
-              "default_price": 1800.0,
+              "default_price": 1800,
               "is_active": true,
               "row_version": 2,
               "department_name": null,
@@ -2626,7 +2788,7 @@
             "category": "Imaging",
             "department_id": null,
             "doctor_id": null,
-            "default_price": 1500.0,
+            "default_price": 1500,
             "is_active": true,
             "row_version": 1
           },
@@ -2655,7 +2817,7 @@
             "category": "Imaging",
             "department_id": null,
             "doctor_id": null,
-            "default_price": 1800.0,
+            "default_price": 1800,
             "is_active": true,
             "row_version": 2
           },
@@ -2679,7 +2841,7 @@
               "code": "SEHAT",
               "name": "Sehat Sahulat",
               "panel_type": "SehatSahulat",
-              "discount_pct": 10.0,
+              "discount_pct": 10,
               "is_credit_panel": false,
               "is_active": true,
               "row_version": 1
@@ -2710,7 +2872,7 @@
             "code": "SEHAT",
             "name": "Sehat Sahulat",
             "panel_type": "SehatSahulat",
-            "discount_pct": 10.0,
+            "discount_pct": 10,
             "is_credit_panel": false,
             "is_active": true,
             "row_version": 1
@@ -2739,7 +2901,7 @@
             "panel_discount_id": 1,
             "panel_id": 1,
             "service_id": null,
-            "discount_pct": 20.0,
+            "discount_pct": 20,
             "effective_from": "2026-01-01",
             "effective_to": "2026-12-31",
             "row_version": 1
@@ -2763,7 +2925,7 @@
               "policy_id": 2,
               "role_code": "cashier",
               "user_id": null,
-              "max_discount_pct": 5.0,
+              "max_discount_pct": 5,
               "max_discount_amount": null,
               "is_active": true,
               "row_version": 1
@@ -2772,7 +2934,7 @@
               "policy_id": 4,
               "role_code": "receptionist",
               "user_id": null,
-              "max_discount_pct": 20.0,
+              "max_discount_pct": 20,
               "max_discount_amount": null,
               "is_active": true,
               "row_version": 1
@@ -2800,7 +2962,7 @@
             "policy_id": 3,
             "role_code": "receptionist",
             "user_id": null,
-            "max_discount_pct": 15.0,
+            "max_discount_pct": 15,
             "max_discount_amount": null,
             "is_active": true,
             "row_version": 1
@@ -2828,7 +2990,7 @@
               "employee_id": 2,
               "rule_type": "FixedFee",
               "terms_jsonb": {
-                "amount": 5000.0
+                "amount": 5000
               },
               "effective_from": "2026-06-01",
               "effective_to": null,
@@ -2844,7 +3006,7 @@
               "employee_id": 2,
               "rule_type": "PercentGross",
               "terms_jsonb": {
-                "percentage": 30.0
+                "percentage": 30
               },
               "effective_from": "2026-01-01",
               "effective_to": "2026-05-31",
@@ -2881,7 +3043,7 @@
             "employee_id": 2,
             "rule_type": "PercentGross",
             "terms_jsonb": {
-              "percentage": 30.0
+              "percentage": 30
             },
             "effective_from": "2026-01-01",
             "effective_to": null,
@@ -2915,13 +3077,38 @@
               "designation": "Officer",
               "department_name": null,
               "license_type": "PNC",
-              "registration": "PNC PNC-8403"
+              "user_id": 2,
+              "registration": "PNC PNC-31852"
             }
           ],
           "meta": {
-            "server_time": "2026-10-27T15:29:53.668901+00:00"
+            "server_time": "2026-11-05T01:52:33.483546+00:00"
           },
-          "request_id": "4e2ee3a40faa41c195bc2aa08edaa30b"
+          "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
+        }
+      }
+    },
+    "GET /admin/departments": {
+      "request": {
+        "path": "/api/v1/admin/departments"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "department_id": 1,
+              "code": "CARD",
+              "name": "Cardiology & Vascular",
+              "is_clinical": true,
+              "is_active": true,
+              "row_version": 2
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:34:24.417658+00:00"
+          },
+          "request_id": "0fb46c874eb4440b84f3f45f315569b9"
         }
       }
     }
@@ -2946,7 +3133,7 @@
           "anyOf": [
             {
               "type": "number",
-              "exclusiveMinimum": 0.0
+              "exclusiveMinimum": 0
             },
             {
               "type": "string",
@@ -2963,8 +3150,8 @@
           "anyOf": [
             {
               "type": "number",
-              "maximum": 100.0,
-              "exclusiveMinimum": 0.0
+              "maximum": 100,
+              "exclusiveMinimum": 0
             },
             {
               "type": "string",
@@ -3201,6 +3388,44 @@
       "title": "ContractOut",
       "description": "A consultant's commission rule (workflow section 5.5)."
     },
+    "DepartmentOut": {
+      "properties": {
+        "department_id": {
+          "type": "integer",
+          "title": "Department Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "is_clinical": {
+          "type": "boolean",
+          "title": "Is Clinical"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "department_id",
+        "code",
+        "name",
+        "is_clinical",
+        "is_active",
+        "row_version"
+      ],
+      "title": "DepartmentOut"
+    },
     "DiscountPolicyIn": {
       "properties": {
         "role_code": {
@@ -3223,14 +3448,15 @@
               "type": "null"
             }
           ],
-          "title": "User Id"
+          "title": "User Id",
+          "description": "The user the policy is for, instead of a role (GET /staff/lookup → user_id)"
         },
         "max_discount_pct": {
           "anyOf": [
             {
               "type": "number",
-              "maximum": 100.0,
-              "minimum": 0.0
+              "maximum": 100,
+              "minimum": 0
             },
             {
               "type": "string",
@@ -3243,7 +3469,7 @@
           "anyOf": [
             {
               "type": "number",
-              "minimum": 0.0
+              "minimum": 0
             },
             {
               "type": "string",
@@ -3457,6 +3683,31 @@
       ],
       "title": "Envelope[list[ContractListItemOut]]"
     },
+    "Envelope_list_DepartmentOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/DepartmentOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[DepartmentOut]]"
+    },
     "Envelope_list_DiscountPolicyOut__": {
       "properties": {
         "data": {
@@ -3641,8 +3892,8 @@
           "anyOf": [
             {
               "type": "number",
-              "maximum": 100.0,
-              "minimum": 0.0
+              "maximum": 100,
+              "minimum": 0
             },
             {
               "type": "string",
@@ -3764,8 +4015,8 @@
           "anyOf": [
             {
               "type": "number",
-              "maximum": 100.0,
-              "minimum": 0.0
+              "maximum": 100,
+              "minimum": 0
             },
             {
               "type": "string",
@@ -3875,7 +4126,7 @@
           "anyOf": [
             {
               "type": "number",
-              "minimum": 0.0
+              "minimum": 0
             },
             {
               "type": "string",
@@ -3893,7 +4144,8 @@
               "type": "null"
             }
           ],
-          "title": "Department Id"
+          "title": "Department Id",
+          "description": "The department (GET /admin/departments)"
         },
         "doctor_id": {
           "anyOf": [
@@ -4121,7 +4373,7 @@
           "anyOf": [
             {
               "type": "number",
-              "minimum": 0.0
+              "minimum": 0
             },
             {
               "type": "string",
@@ -4206,6 +4458,18 @@
           ],
           "title": "Registration",
           "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id",
+          "description": "Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62)"
         }
       },
       "type": "object",
@@ -4216,7 +4480,8 @@
         "designation",
         "department_name",
         "license_type",
-        "registration"
+        "registration",
+        "user_id"
       ],
       "title": "StaffLookupOut",
       "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."

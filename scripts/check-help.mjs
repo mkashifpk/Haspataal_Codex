@@ -157,6 +157,7 @@ export function checkHelp({
     "src/PMDCStaffPicker.tsx",
     "src/clinical-context.tsx",
     "src/clinical-write.tsx",
+    "src/WasteHandover.tsx",
     "src/clinical-patient.tsx",
     "src/referral-record.tsx",
     "src/ward-admission.tsx",
@@ -301,6 +302,10 @@ export function checkHelp({
       "Payroll",
       "OpsConsole",
       "BadgeStationKiosk",
+      "EquipmentMaintenance",
+      "ComplianceRegister",
+      "MockDrills",
+      "WasteLog",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
@@ -314,7 +319,7 @@ export function checkHelp({
       if (!n || typeof n !== "object") return;
       if (
         n.type === "JSXOpeningElement" &&
-        ["button", "input", "select", "textarea", "a", "summary"].includes(
+        ["button", "input", "select", "textarea", "a", "summary", "DirectoryPicker"].includes(
           n.name.name,
         )
       ) {

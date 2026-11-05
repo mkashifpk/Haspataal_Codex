@@ -177,9 +177,6 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
     listIncidentTypes()
       .then(setIncidentTypes)
       .catch(() => {});
-    lookupStaff({ q: "", limit: 20 })
-      .then(setStaffList)
-      .catch(() => {});
   }, []);
 
   // Real-time synchronization

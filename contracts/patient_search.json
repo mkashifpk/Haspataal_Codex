@@ -1,7 +1,7 @@
 {
   "screen_id": "patient_search",
-  "contract_fingerprint": "90f7a429e5aa519d440f",
-  "knowledge_revision": "f2f42e3079bc34a3",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "c81852646942368c",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "reception",
       "purpose": "Find returning patients by MRN, mobile, CNIC or name; show outstanding dues banner.",
@@ -161,7 +161,7 @@
           "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
         }
       ],
-      "workspace_checklist": "- [ ] **Create:** open your cash shift; register a new patient with *Register + OPD slip* (and one with the full\n  intake form), skip the optional Patient Photo on one and take it on the other; upload a synthetic outside report\n  with its facility and date; a lab-only walk-in; a complaint.\n- [ ] **Read:** find each new patient by MRN, mobile and name; the slip, the queue token, the documents (the outside\n  report labelled as outside) and the dues banner.\n- [ ] **Update / correct:** edit the new patient's demographics, and from a second session the same patient\n  (`VERSION_CONFLICT`); defer the ticket and reactivate it.\n- [ ] **Cancel / delete:** cancel or void an unpaid ticket; request the refund of a paid one, then hand the cash back\n  once approved; merge a trauma profile made in this review into the new patient. Nothing is deleted.\n- [ ] **Refused:** a discount above your ceiling (`DISCOUNT_CEILING_EXCEEDED`, then request the waiver); a PDF as the\n  photo (`UNSUPPORTED_MEDIA_TYPE`); an outside report without its facility (`VALIDATION_ERROR`).\n- [ ] **Hand over:** the ticket reaches the doctor's live queue; the refund and the waiver reach the approval queue;\n  the closed shift reaches the accountant.",
+      "workspace_checklist": "- [ ] **Create:** open your cash shift; register a new patient with *Register + OPD slip* (and one with the full\n  intake form), skip the optional Patient Photo on one and take it on the other; upload a synthetic outside report\n  with its facility and date; a lab-only walk-in; a complaint.\n- [ ] **Read:** find each new patient by MRN, mobile and name; the slip, the queue token, the documents (the outside\n  report labelled as outside) and the dues banner.\n- [ ] **Update / correct:** edit the new patient's demographics, and from a second session the same patient\n  (`VERSION_CONFLICT`); defer the ticket and reactivate it.\n- [ ] **Cancel / delete:** cancel or void an unpaid ticket; request the refund of a paid one, then hand the cash back\n  once approved; merge a trauma profile made in this review into the new patient. Nothing is deleted.\n- [ ] **Refused:** a discount above your ceiling (`DISCOUNT_CEILING_EXCEEDED`, then request the waiver); a PDF as the\n  photo (`UNSUPPORTED_MEDIA_TYPE`); an outside report without its facility (`VALIDATION_ERROR`).\n- [ ] **Hand over:** the ticket reaches the doctor's live queue; the refund and the waiver reach the approval queue;\n  the closed shift reaches the accountant; once the lab verifies the walk-in's result, the open screen refreshes by\n  itself (`lab.result.published`) and the desk prints the report.",
       "operations": {
         "create": [],
         "update_or_correct": [
@@ -229,8 +229,17 @@
       }
     ],
     "related_workflows": [
+      "blood-center",
+      "clinic-quality-and-education",
+      "complaints",
+      "cost-estimates-and-tariff",
       "deaths-and-medico-legal-cases",
+      "emergency-department",
+      "incidents-and-sentinel-events",
+      "infection-control",
+      "inpatient-and-discharge",
       "opd-reception",
+      "operating-theater",
       "phc-inspection",
       "refunds-waivers-credit"
     ]
@@ -242,7 +251,7 @@
     "workspace": "reception",
     "phase": "P2",
     "position": 13,
-    "points": 53,
+    "points": 56,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -251,6 +260,14 @@
       "zoom"
     ],
     "depends_on": [
+      {
+        "from": "patient_search",
+        "to": "billing_admin",
+        "kind": "data_candidate",
+        "evidence": "it reads finance/panels, which POST /finance/panels on billing_admin creates",
+        "ordering": false,
+        "forward": true
+      },
       {
         "from": "patient_search",
         "to": "registration",
@@ -273,7 +290,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 53,
+    "points": 56,
     "items": [
       {
         "id": "ep:PATCH /patients/{patient_id}",
@@ -298,6 +315,12 @@
         "label": "GET /patients/{patient_id}/financial-summary",
         "points": 3,
         "claimed": true
+      },
+      {
+        "id": "ep:GET /finance/panels",
+        "label": "GET /finance/panels",
+        "points": 3,
+        "claimed": false
       },
       {
         "id": "ev:patient.merged",
@@ -461,6 +484,18 @@
             "constraint"
           ],
           "details_from": "POST /api/v1/patients"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         },
         {
           "code": "VERSION_CONFLICT",
@@ -651,7 +686,8 @@
             "pointer": "/panel_id",
             "type": "integer",
             "required": false,
-            "nullable": true
+            "nullable": true,
+            "description": "The panel (GET /finance/panels)"
           },
           {
             "pointer": "/panel_member_no",
@@ -864,7 +900,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "patient_id",
@@ -950,7 +999,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "patient_id",
@@ -993,6 +1055,40 @@
         "filters": [],
         "note": null
       }
+    },
+    {
+      "endpoint": "GET /finance/panels",
+      "summary": "Panels (Sehat Sahulat, Zakat, corporate ...)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_PanelOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
     }
   ],
   "realtime": {
@@ -1011,7 +1107,8 @@
           "POST /patients/{patient_id}/merge"
         ],
         "refresh": [
-          "GET /patients/search"
+          "GET /patients/search",
+          "GET /finance/panels"
         ]
       }
     ],
@@ -1133,6 +1230,24 @@
         "Waivered": "Waivered",
         "Refunded": "Refunded",
         "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "SehatSahulat",
+        "Zakat",
+        "GovernmentEmployee",
+        "Corporate",
+        "Other"
+      ],
+      "column": "panels.panel_type",
+      "used_at": "GET /finance/panels[].panel_type",
+      "labels": {
+        "SehatSahulat": "Sehat sahulat",
+        "Zakat": "Zakat",
+        "GovernmentEmployee": "Government employee",
+        "Corporate": "Corporate",
+        "Other": "Other"
       }
     },
     {
@@ -1318,6 +1433,7 @@
           "PATIENT_CNIC_EXISTS",
           "PATIENT_TYPE_TRANSITION_INVALID",
           "PATIENT_UPMRN_EXISTS",
+          "VALIDATION_ERROR",
           "VERSION_CONFLICT"
         ],
         "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry",
@@ -1387,7 +1503,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "accountant",
           "admissions_officer",
@@ -1431,7 +1549,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "accountant",
           "admissions_officer",
@@ -1459,6 +1579,19 @@
           "triage_nurse",
           "ward_nurse",
           "zakat_officer"
+        ]
+      },
+      {
+        "id": "case:GET /finance/panels",
+        "call": "GET /api/v1/finance/panels",
+        "summary": "Panels (Sehat Sahulat, Zakat, corporate ...)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
         ]
       }
     ],
@@ -1581,6 +1714,15 @@
         ],
         "permissions_mode": "any",
         "access": null
+      },
+      {
+        "id": "patient_search::GET /finance/panels",
+        "task": "Panels (Sehat Sahulat, Zakat, corporate ...)",
+        "call": "GET /finance/panels",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
       }
     ],
     "rules_to_explain": [
@@ -1685,14 +1827,59 @@
   },
   "workflows": [
     {
+      "slug": "blood-center",
+      "title": "Blood center",
+      "recipe": "get_workflow_recipe('blood-center')"
+    },
+    {
+      "slug": "clinic-quality-and-education",
+      "title": "QA rounds, patient feedback and health education",
+      "recipe": "get_workflow_recipe('clinic-quality-and-education')"
+    },
+    {
+      "slug": "complaints",
+      "title": "Complaints (MSDS)",
+      "recipe": "get_workflow_recipe('complaints')"
+    },
+    {
+      "slug": "cost-estimates-and-tariff",
+      "title": "Cost estimates, the tariff and ward transfers (MSDS)",
+      "recipe": "get_workflow_recipe('cost-estimates-and-tariff')"
+    },
+    {
       "slug": "deaths-and-medico-legal-cases",
       "title": "Deaths and medico-legal cases (MSDS)",
       "recipe": "get_workflow_recipe('deaths-and-medico-legal-cases')"
     },
     {
+      "slug": "emergency-department",
+      "title": "The emergency department (MSDS)",
+      "recipe": "get_workflow_recipe('emergency-department')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "recipe": "get_workflow_recipe('infection-control')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
       "slug": "opd-reception",
       "title": "OPD reception, queues & re-routing",
       "recipe": "get_workflow_recipe('opd-reception')"
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
     },
     {
       "slug": "phc-inspection",
@@ -1713,9 +1900,6 @@
       "open_as": "demo.reception"
     }
   ],
-  "unknowns": [],
-  "omitted_sections": [],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
   "decisions": [
     {
       "id": "H02",
@@ -2088,6 +2272,32 @@
           "request_id": "34b4bfe853ac4ceebd71f21f7d56ae58"
         }
       }
+    },
+    "GET /finance/panels": {
+      "request": {
+        "path": "/api/v1/finance/panels"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "panel_id": 1,
+              "code": "SEHAT",
+              "name": "Sehat Sahulat",
+              "panel_type": "SehatSahulat",
+              "discount_pct": 10,
+              "is_credit_panel": false,
+              "is_active": true,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:36:36.431439+00:00"
+          },
+          "request_id": "6c7c15b5aab44317b856c85dbd02d341"
+        }
+      }
     }
   },
   "schemas": {
@@ -2132,6 +2342,31 @@
         "request_id"
       ],
       "title": "Envelope[PatientDetailOut]"
+    },
+    "Envelope_list_PanelOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PanelOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PanelOut]]"
     },
     "Envelope_list_PatientSearchHitOut__": {
       "properties": {
@@ -2431,6 +2666,61 @@
       ],
       "title": "OutstandingBannerOut",
       "description": "Outstanding dues of the patient's whole merge chain (workflow sections 1.2 and 1.9)."
+    },
+    "PanelOut": {
+      "properties": {
+        "panel_id": {
+          "type": "integer",
+          "title": "Panel Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "panel_type": {
+          "type": "string",
+          "enum": [
+            "SehatSahulat",
+            "Zakat",
+            "GovernmentEmployee",
+            "Corporate",
+            "Other"
+          ],
+          "title": "Panel Type"
+        },
+        "discount_pct": {
+          "type": "number",
+          "title": "Discount Pct"
+        },
+        "is_credit_panel": {
+          "type": "boolean",
+          "title": "Is Credit Panel"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "panel_id",
+        "code",
+        "name",
+        "panel_type",
+        "discount_pct",
+        "is_credit_panel",
+        "is_active",
+        "row_version"
+      ],
+      "title": "PanelOut"
     },
     "PatientDetailOut": {
       "properties": {
@@ -3481,7 +3771,8 @@
               "type": "null"
             }
           ],
-          "title": "Panel Id"
+          "title": "Panel Id",
+          "description": "The panel (GET /finance/panels)"
         },
         "panel_member_no": {
           "anyOf": [
@@ -3544,5 +3835,165 @@
       ],
       "title": "ValidationError"
     }
-  }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H17",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "How a CNIC is masked on screen.",
+      "affects": [
+        "patient_search",
+        "registration"
+      ],
+      "meanwhile": "Shown in full to users who may see the patient, as the API returns it."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
 }

@@ -1,0 +1,3827 @@
+{
+  "unknowns": [],
+  "workspaces": [
+    {
+      "page": "workspaces/head_nurse",
+      "workspace": "head_nurse",
+      "label": "Head Nurse",
+      "label_ur": "ہیڈ نرس",
+      "description": "Nursing duty roster (drag & drop nurses onto beds per shift), roll call, supply indents, leave approvals.",
+      "roles": [
+        "head_nurse"
+      ],
+      "demo_accounts": [
+        "demo.headnurse"
+      ],
+      "screens": [
+        {
+          "page": "screens/duty_roster",
+          "screen_id": "duty_roster",
+          "title": "Nursing duty roster",
+          "purpose": "Plan duties by shift: nurses onto wards, zones and beds (drag & drop).",
+          "tasks": [
+            {
+              "id": "duty_roster::GET /rosters",
+              "task": "Roster entries for a date range (planner grid, a week by default)",
+              "call": "GET /rosters",
+              "is_action": false,
+              "permissions": [
+                "roster.manage.all",
+                "roster.manage.nursing",
+                "roster.manage.support",
+                "roster.view.all"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::GET /rosters/staff",
+              "task": "Staff I may roster, with default shift and approved leave in the range",
+              "call": "GET /rosters/staff",
+              "is_action": false,
+              "permissions": [
+                "roster.manage.all",
+                "roster.manage.nursing",
+                "roster.manage.support"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::POST /rosters",
+              "task": "Roster one or many duties (all or nothing)",
+              "call": "POST /rosters",
+              "is_action": true,
+              "permissions": [
+                "roster.manage.all",
+                "roster.manage.nursing",
+                "roster.manage.support"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::PATCH /rosters/{roster_id}",
+              "task": "Change a duty (shift, date, place, beds, on-call, notes)",
+              "call": "PATCH /rosters/{roster_id}",
+              "is_action": true,
+              "permissions": [
+                "roster.manage.all",
+                "roster.manage.nursing",
+                "roster.manage.support"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::POST /rosters/{roster_id}/cancel",
+              "task": "Cancel a duty (reason kept; never deleted)",
+              "call": "POST /rosters/{roster_id}/cancel",
+              "is_action": true,
+              "permissions": [
+                "roster.manage.all",
+                "roster.manage.nursing",
+                "roster.manage.support"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::POST /rosters/copy",
+              "task": "Repeat a period (e.g. last week) from a later date",
+              "call": "POST /rosters/copy",
+              "is_action": true,
+              "permissions": [
+                "roster.manage.all",
+                "roster.manage.nursing",
+                "roster.manage.support"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::GET /rosters/week",
+              "task": "Week check: rest days per person, staff per day and shift",
+              "call": "GET /rosters/week",
+              "is_action": false,
+              "permissions": [
+                "roster.manage.all",
+                "roster.manage.nursing",
+                "roster.manage.support",
+                "roster.view.all"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::GET /rosters/swaps",
+              "task": "Duty swaps of the staff I roster (open ones by default)",
+              "call": "GET /rosters/swaps",
+              "is_action": false,
+              "permissions": [
+                "roster.manage.all",
+                "roster.manage.nursing",
+                "roster.manage.support"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::POST /rosters/swaps",
+              "task": "Record a swap agreed on the ward (staff without a login)",
+              "call": "POST /rosters/swaps",
+              "is_action": true,
+              "permissions": [
+                "roster.manage.all",
+                "roster.manage.nursing",
+                "roster.manage.support"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::POST /rosters/swaps/{swap_id}/approve",
+              "task": "Approve a duty swap",
+              "call": "POST /rosters/swaps/{swap_id}/approve",
+              "is_action": true,
+              "permissions": [
+                "roster.manage.all",
+                "roster.manage.nursing",
+                "roster.manage.support"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::POST /rosters/swaps/{swap_id}/reject",
+              "task": "Reject a duty swap",
+              "call": "POST /rosters/swaps/{swap_id}/reject",
+              "is_action": true,
+              "permissions": [
+                "roster.manage.all",
+                "roster.manage.nursing",
+                "roster.manage.support"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::GET /beds/matrix",
+              "task": "Live bed matrix (counts per ward + optional bed list)",
+              "call": "GET /beds/matrix",
+              "is_action": false,
+              "permissions": [
+                "ipd.bed.view",
+                "cssd.operate",
+                "infection.control.manage",
+                "complaint.manage",
+                "incident.view",
+                "facility.drill.manage",
+                "roster.manage.all",
+                "facility.equipment.manage",
+                "pharmacy.storage.record"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "duty_roster::GET /admin/departments",
+              "task": "Departments",
+              "call": "GET /admin/departments",
+              "is_action": false,
+              "permissions": [],
+              "permissions_mode": "all",
+              "access": "any logged-in user"
+            }
+          ],
+          "rules_to_explain": [
+            "Week grid: one row per shift pattern (GET /rosters/staff → shift_patterns), one column per day; drag staff from the left column onto a cell. Save with POST /rosters (all or nothing: on an error, highlight details.entry_index).",
+            "Grey out the days in each person's `leave`; ROSTER_CONFLICT means the person already works an overlapping shift (a night shift runs into the next morning).",
+            "Mark the public holidays (GET /rosters/staff → holidays): rostering on them is allowed, and rostered staff work as rostered.",
+            "Edit with PATCH (send row_version as expected_version), never delete: cancel with a reason.",
+            "Past days are read-only unless you are HR (ROSTER_DATE_CLOSED).",
+            "The hospital works every day: Sunday is a column like any other (usually with fewer staff), and each person gets their weekly rest day on a different day. Staff on a fixed schedule show their weekly day off (default_weekly_off_days) greyed; rostering them that day makes it a working day.",
+            "'Repeat last week' = POST /rosters/copy; show the `skipped` list with its reasons. Offer 'Repeat, moving everyone's days on' (rotate_days 1): rest days, and Sunday duty, then rotate week by week.",
+            "Week check panel (GET /rosters/week): NoRestDay in amber (each day beyond the allowance is paid as extra duty), NotRostered in grey; under the grid, a row of counts per day and shift from `days`, so a thin Sunday shows before the week starts.",
+            "Swaps tab: GET /rosters/swaps (Accepted = both colleagues agreed, waiting for you) → Approve, or Reject with a reason. For staff without a login, 'Record swap' (POST /rosters/swaps) when the two agreed in person. You never decide a swap you are part of (SWAP_SELF_APPROVAL). Duties taken over show their swap_id.",
+            "Keep the grid live with the roster.changed event, the swaps tab with roster.swap.updated.",
+            "Ward duties: pick the beds each nurse looks after (bed_ids); the nurse then sees them in 'My beds this shift'."
+          ],
+          "updates_by_itself_on": [
+            "roster.changed",
+            "roster.swap.updated"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "BED_NO_LONGER_AVAILABLE",
+              "message": "Bed was reserved by another terminal.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "REFERENCE_NOT_FOUND",
+              "message": "A referenced record does not exist.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "ROSTER_CONFLICT",
+              "message": "This duty overlaps another duty of the same employee.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "ROSTER_DATE_CLOSED",
+              "message": "Rosters of past days can only be changed by HR.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "ROSTER_EMPLOYEE_INACTIVE",
+              "message": "Only active staff can be rostered.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "ROSTER_ENTRY_CANCELLED",
+              "message": "This duty was cancelled: create a new one.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "ROSTER_ON_LEAVE",
+              "message": "The employee is on approved leave that day.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "ROSTER_OUT_OF_SCOPE",
+              "message": "You may not roster this employee (outside your staff scope).",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "SWAP_COLLEAGUE_INELIGIBLE",
+              "message": "Choose an active colleague of the same staff category.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "SWAP_DUTY_STARTED",
+              "message": "A duty is swapped before it starts.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "SWAP_EXISTS",
+              "message": "This duty is already in an open swap request.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "SWAP_SELF_APPROVAL",
+              "message": "Neither of the two colleagues can approve their own duty swap.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "SWAP_TRANSITION_INVALID",
+              "message": "The duty swap cannot move to that state.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "VERSION_CONFLICT",
+              "message": "The record was changed by someone else; reload and try again.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/roll_call",
+          "screen_id": "roll_call",
+          "title": "Roll call",
+          "purpose": "Mark rostered nurses present at the start of a shift where there is no badge station.",
+          "tasks": [
+            {
+              "id": "roll_call::GET /rosters/roll-call",
+              "task": "Roll-call sheet: who is rostered today and who has arrived",
+              "call": "GET /rosters/roll-call",
+              "is_action": false,
+              "permissions": [
+                "attendance.roll_call"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "roll_call::POST /rosters/roll-call",
+              "task": "Mark rostered staff present (no badge station)",
+              "call": "POST /rosters/roll-call",
+              "is_action": true,
+              "permissions": [
+                "attendance.roll_call"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "For wards and hospitals without a badge station: tick who is present at the start of the shift; staff who already scanned a badge show their first_in and cannot be ticked again.",
+            "Send each entry's own roster_date: after midnight the sheet still lists last night's running shift, which belongs to yesterday's date.",
+            "For a late arrival, or an earlier day's shift (HR only), send the actual arrival time (`at`); it must fall within the shift."
+          ],
+          "updates_by_itself_on": [
+            "roster.changed"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "ROLL_CALL_NOT_ROSTERED",
+              "message": "The employee is not rostered on that day.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "ROSTER_DATE_CLOSED",
+              "message": "Rosters of past days can only be changed by HR.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "ROSTER_EMPLOYEE_INACTIVE",
+              "message": "Only active staff can be rostered.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "ROSTER_OUT_OF_SCOPE",
+              "message": "You may not roster this employee (outside your staff scope).",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/ward_indent",
+          "screen_id": "ward_indent",
+          "title": "Ward supply indent",
+          "purpose": "Request stock from central pharmacy; pharmacy admin approves (partial allowed).",
+          "tasks": [
+            {
+              "id": "ward_indent::POST /wards/{ward_id}/indents",
+              "task": "Head Nurse: ward supply requisition (indent)",
+              "call": "POST /wards/{ward_id}/indents",
+              "is_action": true,
+              "permissions": [
+                "ward.indent.create"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "ward_indent::GET /ward-indents/{indent_id}",
+              "task": "One indent with central stock per line",
+              "call": "GET /ward-indents/{indent_id}",
+              "is_action": false,
+              "permissions": [
+                "ward.indent.create",
+                "approval.ward_indent.approve"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "ward_indent::GET /wards/{ward_id}/inventory",
+              "task": "Ward-local stock",
+              "call": "GET /wards/{ward_id}/inventory",
+              "is_action": false,
+              "permissions": [
+                "ward.inventory.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "ward_indent::GET /drugs/search",
+              "task": "Formulary search with live stock colour",
+              "call": "GET /drugs/search",
+              "is_action": false,
+              "permissions": [
+                "pharmacy.formulary.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "ward_indent::POST /wards/{ward_id}/inventory/remove",
+              "task": "Remove stock from a ward (expired, damaged, or returned to the pharmacy)",
+              "call": "POST /wards/{ward_id}/inventory/remove",
+              "is_action": true,
+              "permissions": [
+                "ward.indent.create",
+                "pharmacy.stock.adjust"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "Ward stock shows is_expired and is_recalled in red: never given. Remove expired or damaged stock (POST /wards/{ward_id}/inventory/remove, reason Expiry or Damage: written off) and send unneeded good stock back (ReturnToPharmacy); a recall removes its own batches (MSDS 59, 60).",
+            "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id ward_indent (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+          ],
+          "updates_by_itself_on": [
+            "approval.resolved",
+            "pharmacy.recall.updated"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "BATCH_EXPIRED",
+              "message": "This batch has expired and cannot be issued.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BATCH_RECALLED",
+              "message": "This batch is recalled: it cannot be dispensed, sent to a ward, used in theatre or given.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "INSUFFICIENT_STOCK",
+              "message": "Not enough stock available.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "REFERENCE_NOT_FOUND",
+              "message": "A referenced record does not exist.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/leave_approvals",
+          "screen_id": "leave_approvals",
+          "title": "Leave approvals (supervisor inbox)",
+          "purpose": "Direct reports' leave requests.",
+          "tasks": [
+            {
+              "id": "leave_approvals::GET /hr/leave-requests",
+              "task": "Leave inbox: my direct reports (HR sees all)",
+              "call": "GET /hr/leave-requests",
+              "is_action": false,
+              "permissions": [
+                "hr.leave.approve",
+                "hr.leave.manage"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "leave_approvals::POST /hr/leave-requests/{leave_request_id}/decision",
+              "task": "Supervisor approves / rejects",
+              "call": "POST /hr/leave-requests/{leave_request_id}/decision",
+              "is_action": true,
+              "permissions": [
+                "hr.leave.approve",
+                "hr.leave.manage"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "leave_approvals::GET /hr/employees/{employee_id}/leave-balances",
+              "task": "Leave balances of an employee",
+              "call": "GET /hr/employees/{employee_id}/leave-balances",
+              "is_action": false,
+              "permissions": [
+                "hr.leave.manage",
+                "hr.leave.approve"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [],
+          "updates_by_itself_on": [
+            "leave.requested"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "LEAVE_ALREADY_DECIDED",
+              "message": "The leave request was already decided or withdrawn (details.status).",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "LEAVE_INSUFFICIENT_BALANCE",
+              "message": "Not enough leave balance.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "LEAVE_NOT_YOUR_REPORT",
+              "message": "Only the employee's supervisor can decide this leave.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "SELF_APPROVAL_FORBIDDEN",
+              "message": "You cannot approve your own request.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/appraise_staff_head_nurse",
+          "screen_id": "appraise_staff_head_nurse",
+          "title": "Appraise my staff",
+          "purpose": "Write and sign the probation, annual and ad hoc appraisals of the staff you supervise.",
+          "tasks": [
+            {
+              "id": "appraise_staff_head_nurse::GET /personnel/appraisals/schedule",
+              "task": "Appraisals due",
+              "call": "GET /personnel/appraisals/schedule",
+              "is_action": false,
+              "permissions": [
+                "personnel.view",
+                "personnel.manage",
+                "personnel.appraise"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "appraise_staff_head_nurse::GET /personnel/appraisals",
+              "task": "Appraisals",
+              "call": "GET /personnel/appraisals",
+              "is_action": false,
+              "permissions": [
+                "personnel.view",
+                "personnel.manage",
+                "personnel.appraise"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "appraise_staff_head_nurse::POST /personnel/appraisals",
+              "task": "Start an appraisal (draft)",
+              "call": "POST /personnel/appraisals",
+              "is_action": true,
+              "permissions": [
+                "personnel.appraise",
+                "personnel.manage"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "appraise_staff_head_nurse::GET /personnel/appraisals/{appraisal_id}",
+              "task": "One appraisal",
+              "call": "GET /personnel/appraisals/{appraisal_id}",
+              "is_action": false,
+              "permissions": [],
+              "permissions_mode": "all",
+              "access": "personnel.view or personnel.manage, the appraiser and the member of staff appraised"
+            },
+            {
+              "id": "appraise_staff_head_nurse::PUT /personnel/appraisals/{appraisal_id}",
+              "task": "Write the appraisal",
+              "call": "PUT /personnel/appraisals/{appraisal_id}",
+              "is_action": true,
+              "permissions": [
+                "personnel.appraise",
+                "personnel.manage"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "appraise_staff_head_nurse::POST /personnel/appraisals/{appraisal_id}/sign",
+              "task": "Sign the appraisal",
+              "call": "POST /personnel/appraisals/{appraisal_id}/sign",
+              "is_action": true,
+              "permissions": [
+                "personnel.appraise"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "appraise_staff_head_nurse::POST /personnel/appraisals/{appraisal_id}/cancel",
+              "task": "Cancel a draft appraisal",
+              "call": "POST /personnel/appraisals/{appraisal_id}/cancel",
+              "is_action": true,
+              "permissions": [
+                "personnel.appraise",
+                "personnel.manage"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "appraise_staff_head_nurse::GET /personnel/appraisals/{appraisal_id}/pdf",
+              "task": "The appraisal (PDF)",
+              "call": "GET /personnel/appraisals/{appraisal_id}/pdf",
+              "is_action": false,
+              "permissions": [],
+              "permissions_mode": "all",
+              "access": "personnel.view or personnel.manage, the appraiser and the member of staff appraised"
+            },
+            {
+              "id": "appraise_staff_head_nurse::GET /personnel/appraisal-policy/pdf",
+              "task": "The performance appraisal system (PDF)",
+              "call": "GET /personnel/appraisal-policy/pdf",
+              "is_action": false,
+              "permissions": [],
+              "permissions_mode": "all",
+              "access": "any logged-in user"
+            },
+            {
+              "id": "appraise_staff_head_nurse::GET /staff/lookup",
+              "task": "Find a staff member for a form (badge facts only)",
+              "call": "GET /staff/lookup",
+              "is_action": false,
+              "permissions": [],
+              "permissions_mode": "all",
+              "access": "any logged-in user"
+            }
+          ],
+          "rules_to_explain": [
+            "Open on the schedule: your staff due within 30 days and overdue (red); kind Probation or Annual is decided by the schedule (draft_id: continue the draft).",
+            "The form: the criteria of the answer (criteria) rated 1-5 with comments, both Administrative and Performance; the targets; the overall rating; strengths; development needs and, below Satisfactory, the development plan (APPRAISAL_INCOMPLETE lists what is missing). Ad hoc: the reason (an incident, a complaint).",
+            "Sign: final; print it for the member of staff, who reads, comments and acknowledges (self or HR)."
+          ],
+          "updates_by_itself_on": [],
+          "errors_the_user_can_meet": [
+            {
+              "code": "APPRAISAL_DRAFT_OPEN",
+              "message": "A draft appraisal is open for this member of staff (details.appraisal_id).",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "APPRAISAL_INCOMPLETE",
+              "message": "Rate the administrative factors and the performance, give the overall rating, and a development plan below Satisfactory, before signing.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "APPRAISAL_STATE_INVALID",
+              "message": "The appraisal cannot change that way: a signed appraisal is final but for the member of staff's comments; nobody appraises themselves.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "REFERENCE_NOT_FOUND",
+              "message": "A referenced record does not exist.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "UNAUTHENTICATED",
+              "message": "Authentication is required.",
+              "ui_action": "Refresh the token once; if that fails return to login."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/ward_transfer_head_nurse",
+          "screen_id": "ward_transfer_head_nurse",
+          "title": "Move a patient to another bed or ward",
+          "purpose": "Move a patient between the beds and wards, with the reason.",
+          "tasks": [
+            {
+              "id": "ward_transfer_head_nurse::POST /admissions/{admission_id}/transfer",
+              "task": "Move an inpatient to another bed or ward",
+              "call": "POST /admissions/{admission_id}/transfer",
+              "is_action": true,
+              "permissions": [
+                "ipd.admission.transfer"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "ward_transfer_head_nurse::GET /admissions/{admission_id}/transfers",
+              "task": "The moves of an admission",
+              "call": "GET /admissions/{admission_id}/transfers",
+              "is_action": false,
+              "permissions": [
+                "ipd.admission.view"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "ward_transfer_head_nurse::GET /beds/matrix",
+              "task": "Live bed matrix (counts per ward + optional bed list)",
+              "call": "GET /beds/matrix",
+              "is_action": false,
+              "permissions": [
+                "ipd.bed.view",
+                "cssd.operate",
+                "infection.control.manage",
+                "complaint.manage",
+                "incident.view",
+                "facility.drill.manage",
+                "roster.manage.all",
+                "facility.equipment.manage",
+                "pharmacy.storage.record"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "As at the admissions desk; the desk is told to explain the new estimate.",
+            "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id ward_transfer_head_nurse (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+          ],
+          "updates_by_itself_on": [
+            "admission.transferred"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "ADMISSION_STATE_INVALID",
+              "message": "The admission cannot move to that state.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "BED_NO_LONGER_AVAILABLE",
+              "message": "Bed was reserved by another terminal.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "REFERENCE_NOT_FOUND",
+              "message": "A referenced record does not exist.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/record_review_worklist_nursing",
+          "screen_id": "record_review_worklist_nursing",
+          "title": "My record reviews",
+          "purpose": "Review the medical records assigned to you against the checklist (timeliness, legibility, completeness).",
+          "tasks": [
+            {
+              "id": "record_review_worklist_nursing::GET /quality/record-review-items/mine",
+              "task": "My records to review",
+              "call": "GET /quality/record-review-items/mine",
+              "is_action": false,
+              "permissions": [
+                "quality.review.perform"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "record_review_worklist_nursing::GET /quality/record-review-items/{item_id}",
+              "task": "A sampled record with its checklist and the system's answers",
+              "call": "GET /quality/record-review-items/{item_id}",
+              "is_action": false,
+              "permissions": [
+                "quality.review.perform",
+                "quality.review.manage"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "record_review_worklist_nursing::POST /quality/record-review-items/{item_id}/review",
+              "task": "Submit the review (final)",
+              "call": "POST /quality/record-review-items/{item_id}/review",
+              "is_action": true,
+              "permissions": [
+                "quality.review.perform"
+              ],
+              "permissions_mode": "all",
+              "access": null
+            },
+            {
+              "id": "record_review_worklist_nursing::GET /quality/record-review/criteria",
+              "task": "The review checklist",
+              "call": "GET /quality/record-review/criteria",
+              "is_action": false,
+              "permissions": [
+                "quality.review.manage",
+                "quality.review.view",
+                "quality.review.perform"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "Left: the record (snapshot: notes with author and time, vitals and dose summaries, operations, documents); right: the checklist grouped by category.",
+            "Pre-select each answer from auto_results (Pass → Yes, Fail → No, NA → NA) and show its detail line; the reviewer confirms or changes it. A No, or a changed answer, needs a comment (the field turns red).",
+            "Submitting is final (RECORD_REVIEW_ANSWERS_INCOMPLETE lists details.problems by code). Opening a record is logged as a patient-data access: open it only to review it."
+          ],
+          "updates_by_itself_on": [
+            "notification.created"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "FORBIDDEN",
+              "message": "You do not have permission to do this.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "RECORD_REVIEW_ANSWERS_INCOMPLETE",
+              "message": "Answer every checklist item; explain every No, and every answer that differs from the system check.",
+              "ui_action": "Show field errors from details.fields / the message."
+            },
+            {
+              "code": "RECORD_REVIEW_FROZEN",
+              "message": "This part of the review is final (the sample, a submitted review or a raised deficiency cannot change).",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "RECORD_REVIEW_NOT_ASSIGNED",
+              "message": "This record is assigned to another reviewer.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "RECORD_REVIEW_NOT_OPEN",
+              "message": "This review cycle is not in review.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        },
+        {
+          "page": "screens/record_deficiencies_nursing",
+          "screen_id": "record_deficiencies_nursing",
+          "title": "Record deficiencies to fix",
+          "purpose": "Deficiencies a review found in your records (nursing items: the ward's).",
+          "tasks": [
+            {
+              "id": "record_deficiencies_nursing::GET /quality/record-review-deficiencies",
+              "task": "Record deficiencies (mine: to fix, or raised by me)",
+              "call": "GET /quality/record-review-deficiencies",
+              "is_action": false,
+              "permissions": [
+                "quality.review.manage",
+                "quality.deficiency.resolve",
+                "quality.review.perform"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            },
+            {
+              "id": "record_deficiencies_nursing::POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+              "task": "Resolve a deficiency",
+              "call": "POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+              "is_action": true,
+              "permissions": [
+                "quality.review.manage",
+                "quality.deficiency.resolve",
+                "quality.review.perform"
+              ],
+              "permissions_mode": "any",
+              "access": null
+            }
+          ],
+          "rules_to_explain": [
+            "Fix the record the usual way (a correction entry on the note; records are never edited), then 'Mark corrected' with a note saying what was fixed.",
+            "A badge counts the Open ones (GET ...deficiencies?status=Open); notification category record_deficiency."
+          ],
+          "updates_by_itself_on": [
+            "notification.created"
+          ],
+          "errors_the_user_can_meet": [
+            {
+              "code": "RECORD_DEFICIENCY_NOT_YOURS",
+              "message": "Only the record's author, the nursing supervisors (nursing items) or the Quality Officer can resolve this deficiency.",
+              "ui_action": "Explain and hide the action (check x-permissions)."
+            },
+            {
+              "code": "RECORD_DEFICIENCY_RESOLVED",
+              "message": "This deficiency is already resolved.",
+              "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+            },
+            {
+              "code": "VALIDATION_ERROR",
+              "message": "The request is invalid.",
+              "ui_action": "Show field errors from details.fields / the message."
+            }
+          ],
+          "sections": [
+            "Purpose and audience",
+            "Step by step (one per task, where to click)",
+            "Every control and its effects",
+            "States and feedback",
+            "Messages, mistakes and recovery",
+            "Language and visual examples",
+            "Related help and delivery"
+          ],
+          "requirement_ids": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "delivery": "F1 and contextual screen Help"
+        }
+      ],
+      "linked_screens": [
+        {
+          "screen_id": "report_incident",
+          "page": "screens/report_incident",
+          "title": "Report an incident",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations",
+          "title": "Incidents I investigate",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations",
+          "title": "Complaints I investigate",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_actions",
+          "page": "screens/my_actions",
+          "title": "My actions",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "connect_server",
+          "page": "screens/connect_server",
+          "title": "Connect to server (first run / server unreachable)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "login",
+          "page": "screens/login",
+          "title": "Login",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker",
+          "title": "Workspace launcher",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "settings",
+          "page": "screens/settings",
+          "title": "Settings (avatar or Ctrl+,)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "help_center",
+          "page": "screens/help_center",
+          "title": "Help: the end-user handbook",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "notifications",
+          "page": "screens/notifications",
+          "title": "Notification bell",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker",
+          "title": "ICD code picker (component)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue",
+          "title": "Approval queue",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "app_shell",
+          "page": "screens/app_shell",
+          "title": "App shell (every workspace)",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "ot_board",
+          "page": "screens/ot_board",
+          "title": "Live OT status board",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_committees",
+          "page": "screens/my_committees",
+          "title": "My committees",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice",
+          "title": "PHC inspection interview practice",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews",
+          "title": "Mock PHC interviews",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record",
+          "title": "My personnel record",
+          "reason": "shared"
+        },
+        {
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions",
+          "title": "Equipment requisitions",
+          "reason": "shared"
+        }
+      ],
+      "workspace_page_sections": [
+        "A day in each role",
+        "Complete job-task index",
+        "Detailed role-specific FAQ",
+        "Handovers, exceptions and troubleshooting",
+        "Glossary and guided practice"
+      ],
+      "faq_tasks": [
+        {
+          "id": "duty_roster::GET /rosters",
+          "task": "Roster entries for a date range (planner grid, a week by default)",
+          "call": "GET /rosters",
+          "is_action": false,
+          "permissions": [
+            "roster.manage.all",
+            "roster.manage.nursing",
+            "roster.manage.support",
+            "roster.view.all"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::GET /rosters/staff",
+          "task": "Staff I may roster, with default shift and approved leave in the range",
+          "call": "GET /rosters/staff",
+          "is_action": false,
+          "permissions": [
+            "roster.manage.all",
+            "roster.manage.nursing",
+            "roster.manage.support"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::POST /rosters",
+          "task": "Roster one or many duties (all or nothing)",
+          "call": "POST /rosters",
+          "is_action": true,
+          "permissions": [
+            "roster.manage.all",
+            "roster.manage.nursing",
+            "roster.manage.support"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::PATCH /rosters/{roster_id}",
+          "task": "Change a duty (shift, date, place, beds, on-call, notes)",
+          "call": "PATCH /rosters/{roster_id}",
+          "is_action": true,
+          "permissions": [
+            "roster.manage.all",
+            "roster.manage.nursing",
+            "roster.manage.support"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::POST /rosters/{roster_id}/cancel",
+          "task": "Cancel a duty (reason kept; never deleted)",
+          "call": "POST /rosters/{roster_id}/cancel",
+          "is_action": true,
+          "permissions": [
+            "roster.manage.all",
+            "roster.manage.nursing",
+            "roster.manage.support"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::POST /rosters/copy",
+          "task": "Repeat a period (e.g. last week) from a later date",
+          "call": "POST /rosters/copy",
+          "is_action": true,
+          "permissions": [
+            "roster.manage.all",
+            "roster.manage.nursing",
+            "roster.manage.support"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::GET /rosters/week",
+          "task": "Week check: rest days per person, staff per day and shift",
+          "call": "GET /rosters/week",
+          "is_action": false,
+          "permissions": [
+            "roster.manage.all",
+            "roster.manage.nursing",
+            "roster.manage.support",
+            "roster.view.all"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::GET /rosters/swaps",
+          "task": "Duty swaps of the staff I roster (open ones by default)",
+          "call": "GET /rosters/swaps",
+          "is_action": false,
+          "permissions": [
+            "roster.manage.all",
+            "roster.manage.nursing",
+            "roster.manage.support"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::POST /rosters/swaps",
+          "task": "Record a swap agreed on the ward (staff without a login)",
+          "call": "POST /rosters/swaps",
+          "is_action": true,
+          "permissions": [
+            "roster.manage.all",
+            "roster.manage.nursing",
+            "roster.manage.support"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::POST /rosters/swaps/{swap_id}/approve",
+          "task": "Approve a duty swap",
+          "call": "POST /rosters/swaps/{swap_id}/approve",
+          "is_action": true,
+          "permissions": [
+            "roster.manage.all",
+            "roster.manage.nursing",
+            "roster.manage.support"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::POST /rosters/swaps/{swap_id}/reject",
+          "task": "Reject a duty swap",
+          "call": "POST /rosters/swaps/{swap_id}/reject",
+          "is_action": true,
+          "permissions": [
+            "roster.manage.all",
+            "roster.manage.nursing",
+            "roster.manage.support"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::GET /beds/matrix",
+          "task": "Live bed matrix (counts per ward + optional bed list)",
+          "call": "GET /beds/matrix",
+          "is_action": false,
+          "permissions": [
+            "ipd.bed.view",
+            "cssd.operate",
+            "infection.control.manage",
+            "complaint.manage",
+            "incident.view",
+            "facility.drill.manage",
+            "roster.manage.all",
+            "facility.equipment.manage",
+            "pharmacy.storage.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "duty_roster::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "duty_roster",
+          "page": "screens/duty_roster"
+        },
+        {
+          "id": "roll_call::GET /rosters/roll-call",
+          "task": "Roll-call sheet: who is rostered today and who has arrived",
+          "call": "GET /rosters/roll-call",
+          "is_action": false,
+          "permissions": [
+            "attendance.roll_call"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "roll_call",
+          "page": "screens/roll_call"
+        },
+        {
+          "id": "roll_call::POST /rosters/roll-call",
+          "task": "Mark rostered staff present (no badge station)",
+          "call": "POST /rosters/roll-call",
+          "is_action": true,
+          "permissions": [
+            "attendance.roll_call"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "roll_call",
+          "page": "screens/roll_call"
+        },
+        {
+          "id": "ward_indent::POST /wards/{ward_id}/indents",
+          "task": "Head Nurse: ward supply requisition (indent)",
+          "call": "POST /wards/{ward_id}/indents",
+          "is_action": true,
+          "permissions": [
+            "ward.indent.create"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "ward_indent",
+          "page": "screens/ward_indent"
+        },
+        {
+          "id": "ward_indent::GET /ward-indents/{indent_id}",
+          "task": "One indent with central stock per line",
+          "call": "GET /ward-indents/{indent_id}",
+          "is_action": false,
+          "permissions": [
+            "ward.indent.create",
+            "approval.ward_indent.approve"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "ward_indent",
+          "page": "screens/ward_indent"
+        },
+        {
+          "id": "ward_indent::GET /wards/{ward_id}/inventory",
+          "task": "Ward-local stock",
+          "call": "GET /wards/{ward_id}/inventory",
+          "is_action": false,
+          "permissions": [
+            "ward.inventory.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "ward_indent",
+          "page": "screens/ward_indent"
+        },
+        {
+          "id": "ward_indent::GET /drugs/search",
+          "task": "Formulary search with live stock colour",
+          "call": "GET /drugs/search",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.formulary.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "ward_indent",
+          "page": "screens/ward_indent"
+        },
+        {
+          "id": "ward_indent::POST /wards/{ward_id}/inventory/remove",
+          "task": "Remove stock from a ward (expired, damaged, or returned to the pharmacy)",
+          "call": "POST /wards/{ward_id}/inventory/remove",
+          "is_action": true,
+          "permissions": [
+            "ward.indent.create",
+            "pharmacy.stock.adjust"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "ward_indent",
+          "page": "screens/ward_indent"
+        },
+        {
+          "id": "leave_approvals::GET /hr/leave-requests",
+          "task": "Leave inbox: my direct reports (HR sees all)",
+          "call": "GET /hr/leave-requests",
+          "is_action": false,
+          "permissions": [
+            "hr.leave.approve",
+            "hr.leave.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "leave_approvals",
+          "page": "screens/leave_approvals"
+        },
+        {
+          "id": "leave_approvals::POST /hr/leave-requests/{leave_request_id}/decision",
+          "task": "Supervisor approves / rejects",
+          "call": "POST /hr/leave-requests/{leave_request_id}/decision",
+          "is_action": true,
+          "permissions": [
+            "hr.leave.approve",
+            "hr.leave.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "leave_approvals",
+          "page": "screens/leave_approvals"
+        },
+        {
+          "id": "leave_approvals::GET /hr/employees/{employee_id}/leave-balances",
+          "task": "Leave balances of an employee",
+          "call": "GET /hr/employees/{employee_id}/leave-balances",
+          "is_action": false,
+          "permissions": [
+            "hr.leave.manage",
+            "hr.leave.approve"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "leave_approvals",
+          "page": "screens/leave_approvals"
+        },
+        {
+          "id": "appraise_staff_head_nurse::GET /personnel/appraisals/schedule",
+          "task": "Appraisals due",
+          "call": "GET /personnel/appraisals/schedule",
+          "is_action": false,
+          "permissions": [
+            "personnel.view",
+            "personnel.manage",
+            "personnel.appraise"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "appraise_staff_head_nurse",
+          "page": "screens/appraise_staff_head_nurse"
+        },
+        {
+          "id": "appraise_staff_head_nurse::GET /personnel/appraisals",
+          "task": "Appraisals",
+          "call": "GET /personnel/appraisals",
+          "is_action": false,
+          "permissions": [
+            "personnel.view",
+            "personnel.manage",
+            "personnel.appraise"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "appraise_staff_head_nurse",
+          "page": "screens/appraise_staff_head_nurse"
+        },
+        {
+          "id": "appraise_staff_head_nurse::POST /personnel/appraisals",
+          "task": "Start an appraisal (draft)",
+          "call": "POST /personnel/appraisals",
+          "is_action": true,
+          "permissions": [
+            "personnel.appraise",
+            "personnel.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "appraise_staff_head_nurse",
+          "page": "screens/appraise_staff_head_nurse"
+        },
+        {
+          "id": "appraise_staff_head_nurse::GET /personnel/appraisals/{appraisal_id}",
+          "task": "One appraisal",
+          "call": "GET /personnel/appraisals/{appraisal_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "personnel.view or personnel.manage, the appraiser and the member of staff appraised",
+          "screen_id": "appraise_staff_head_nurse",
+          "page": "screens/appraise_staff_head_nurse"
+        },
+        {
+          "id": "appraise_staff_head_nurse::PUT /personnel/appraisals/{appraisal_id}",
+          "task": "Write the appraisal",
+          "call": "PUT /personnel/appraisals/{appraisal_id}",
+          "is_action": true,
+          "permissions": [
+            "personnel.appraise",
+            "personnel.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "appraise_staff_head_nurse",
+          "page": "screens/appraise_staff_head_nurse"
+        },
+        {
+          "id": "appraise_staff_head_nurse::POST /personnel/appraisals/{appraisal_id}/sign",
+          "task": "Sign the appraisal",
+          "call": "POST /personnel/appraisals/{appraisal_id}/sign",
+          "is_action": true,
+          "permissions": [
+            "personnel.appraise"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "appraise_staff_head_nurse",
+          "page": "screens/appraise_staff_head_nurse"
+        },
+        {
+          "id": "appraise_staff_head_nurse::POST /personnel/appraisals/{appraisal_id}/cancel",
+          "task": "Cancel a draft appraisal",
+          "call": "POST /personnel/appraisals/{appraisal_id}/cancel",
+          "is_action": true,
+          "permissions": [
+            "personnel.appraise",
+            "personnel.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "appraise_staff_head_nurse",
+          "page": "screens/appraise_staff_head_nurse"
+        },
+        {
+          "id": "appraise_staff_head_nurse::GET /personnel/appraisals/{appraisal_id}/pdf",
+          "task": "The appraisal (PDF)",
+          "call": "GET /personnel/appraisals/{appraisal_id}/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "personnel.view or personnel.manage, the appraiser and the member of staff appraised",
+          "screen_id": "appraise_staff_head_nurse",
+          "page": "screens/appraise_staff_head_nurse"
+        },
+        {
+          "id": "appraise_staff_head_nurse::GET /personnel/appraisal-policy/pdf",
+          "task": "The performance appraisal system (PDF)",
+          "call": "GET /personnel/appraisal-policy/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "appraise_staff_head_nurse",
+          "page": "screens/appraise_staff_head_nurse"
+        },
+        {
+          "id": "appraise_staff_head_nurse::GET /staff/lookup",
+          "task": "Find a staff member for a form (badge facts only)",
+          "call": "GET /staff/lookup",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "appraise_staff_head_nurse",
+          "page": "screens/appraise_staff_head_nurse"
+        },
+        {
+          "id": "ward_transfer_head_nurse::POST /admissions/{admission_id}/transfer",
+          "task": "Move an inpatient to another bed or ward",
+          "call": "POST /admissions/{admission_id}/transfer",
+          "is_action": true,
+          "permissions": [
+            "ipd.admission.transfer"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "ward_transfer_head_nurse",
+          "page": "screens/ward_transfer_head_nurse"
+        },
+        {
+          "id": "ward_transfer_head_nurse::GET /admissions/{admission_id}/transfers",
+          "task": "The moves of an admission",
+          "call": "GET /admissions/{admission_id}/transfers",
+          "is_action": false,
+          "permissions": [
+            "ipd.admission.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "ward_transfer_head_nurse",
+          "page": "screens/ward_transfer_head_nurse"
+        },
+        {
+          "id": "ward_transfer_head_nurse::GET /beds/matrix",
+          "task": "Live bed matrix (counts per ward + optional bed list)",
+          "call": "GET /beds/matrix",
+          "is_action": false,
+          "permissions": [
+            "ipd.bed.view",
+            "cssd.operate",
+            "infection.control.manage",
+            "complaint.manage",
+            "incident.view",
+            "facility.drill.manage",
+            "roster.manage.all",
+            "facility.equipment.manage",
+            "pharmacy.storage.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "ward_transfer_head_nurse",
+          "page": "screens/ward_transfer_head_nurse"
+        },
+        {
+          "id": "record_review_worklist_nursing::GET /quality/record-review-items/mine",
+          "task": "My records to review",
+          "call": "GET /quality/record-review-items/mine",
+          "is_action": false,
+          "permissions": [
+            "quality.review.perform"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "record_review_worklist_nursing",
+          "page": "screens/record_review_worklist_nursing"
+        },
+        {
+          "id": "record_review_worklist_nursing::GET /quality/record-review-items/{item_id}",
+          "task": "A sampled record with its checklist and the system's answers",
+          "call": "GET /quality/record-review-items/{item_id}",
+          "is_action": false,
+          "permissions": [
+            "quality.review.perform",
+            "quality.review.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "record_review_worklist_nursing",
+          "page": "screens/record_review_worklist_nursing"
+        },
+        {
+          "id": "record_review_worklist_nursing::POST /quality/record-review-items/{item_id}/review",
+          "task": "Submit the review (final)",
+          "call": "POST /quality/record-review-items/{item_id}/review",
+          "is_action": true,
+          "permissions": [
+            "quality.review.perform"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "record_review_worklist_nursing",
+          "page": "screens/record_review_worklist_nursing"
+        },
+        {
+          "id": "record_review_worklist_nursing::GET /quality/record-review/criteria",
+          "task": "The review checklist",
+          "call": "GET /quality/record-review/criteria",
+          "is_action": false,
+          "permissions": [
+            "quality.review.manage",
+            "quality.review.view",
+            "quality.review.perform"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "record_review_worklist_nursing",
+          "page": "screens/record_review_worklist_nursing"
+        },
+        {
+          "id": "record_deficiencies_nursing::GET /quality/record-review-deficiencies",
+          "task": "Record deficiencies (mine: to fix, or raised by me)",
+          "call": "GET /quality/record-review-deficiencies",
+          "is_action": false,
+          "permissions": [
+            "quality.review.manage",
+            "quality.deficiency.resolve",
+            "quality.review.perform"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "record_deficiencies_nursing",
+          "page": "screens/record_deficiencies_nursing"
+        },
+        {
+          "id": "record_deficiencies_nursing::POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+          "task": "Resolve a deficiency",
+          "call": "POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+          "is_action": true,
+          "permissions": [
+            "quality.review.manage",
+            "quality.deficiency.resolve",
+            "quality.review.perform"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "record_deficiencies_nursing",
+          "page": "screens/record_deficiencies_nursing"
+        },
+        {
+          "id": "report_incident::GET /incident-types",
+          "task": "What to report: the incident types",
+          "call": "GET /incident-types",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::POST /incidents",
+          "task": "Report an incident, an adverse event or a near miss",
+          "call": "POST /incidents",
+          "is_action": true,
+          "permissions": [
+            "incident.report"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /incidents",
+          "task": "The incident register",
+          "call": "GET /incidents",
+          "is_action": false,
+          "permissions": [
+            "incident.view",
+            "incident.report",
+            "ot.clinical_statistics.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /incidents/{incident_id}",
+          "task": "One incident",
+          "call": "GET /incidents/{incident_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "incident.view, the reporter and the investigator; ot.clinical_statistics.view for theatre adverse events",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /incidents/sentinel-list/pdf",
+          "task": "The list of sentinel events and how to report (PDF)",
+          "call": "GET /incidents/sentinel-list/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /staff/lookup",
+          "task": "Find a staff member for a form (badge facts only)",
+          "call": "GET /staff/lookup",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /patients/search",
+          "task": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
+          "call": "GET /patients/search",
+          "is_action": false,
+          "permissions": [
+            "patient.search"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /admissions",
+          "task": "Admissions (default: all live ones; admissions desk queue)",
+          "call": "GET /admissions",
+          "is_action": false,
+          "permissions": [
+            "ipd.admission.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /ot/bookings",
+          "task": "Bookings (mine=true for a surgeon's own list)",
+          "call": "GET /ot/bookings",
+          "is_action": false,
+          "permissions": [
+            "ot.booking.view",
+            "ot.booking.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /deaths",
+          "task": "The death register",
+          "call": "GET /deaths",
+          "is_action": false,
+          "permissions": [
+            "death.register.view",
+            "death.record",
+            "death.body.release"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /drugs/search",
+          "task": "Formulary search with live stock colour",
+          "call": "GET /drugs/search",
+          "is_action": false,
+          "permissions": [
+            "pharmacy.formulary.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "report_incident::GET /beds/matrix",
+          "task": "Live bed matrix (counts per ward + optional bed list)",
+          "call": "GET /beds/matrix",
+          "is_action": false,
+          "permissions": [
+            "ipd.bed.view",
+            "cssd.operate",
+            "infection.control.manage",
+            "complaint.manage",
+            "incident.view",
+            "facility.drill.manage",
+            "roster.manage.all",
+            "facility.equipment.manage",
+            "pharmacy.storage.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "report_incident",
+          "page": "screens/report_incident"
+        },
+        {
+          "id": "my_investigations::GET /incidents",
+          "task": "The incident register",
+          "call": "GET /incidents",
+          "is_action": false,
+          "permissions": [
+            "incident.view",
+            "incident.report",
+            "ot.clinical_statistics.view"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /incidents/{incident_id}",
+          "task": "One incident",
+          "call": "GET /incidents/{incident_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "incident.view, the reporter and the investigator; ot.clinical_statistics.view for theatre adverse events",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::PUT /incidents/{incident_id}/analysis",
+          "task": "Save the analysis (a draft until signed)",
+          "call": "PUT /incidents/{incident_id}/analysis",
+          "is_action": true,
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::POST /incidents/{incident_id}/analysis/sign",
+          "task": "Sign the analysis (final)",
+          "call": "POST /incidents/{incident_id}/analysis/sign",
+          "is_action": true,
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::POST /incidents/{incident_id}/actions",
+          "task": "Record a corrective or preventive action",
+          "call": "POST /incidents/{incident_id}/actions",
+          "is_action": true,
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /quality/record-review/people",
+          "task": "Who can review records or own an action",
+          "call": "GET /quality/record-review/people",
+          "is_action": false,
+          "permissions": [
+            "quality.review.manage",
+            "committee.manage",
+            "infection.control.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /incidents/{incident_id}/pdf",
+          "task": "The incident report with its analysis and actions (PDF)",
+          "call": "GET /incidents/{incident_id}/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "incident.view, the reporter and the investigator; ot.clinical_statistics.view for theatre adverse events",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_investigations::GET /staff/lookup",
+          "task": "Find a staff member for a form (badge facts only)",
+          "call": "GET /staff/lookup",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_investigations",
+          "page": "screens/my_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /complaints",
+          "task": "The complaints register",
+          "call": "GET /complaints",
+          "is_action": false,
+          "permissions": [
+            "complaint.view",
+            "complaint.manage",
+            "complaint.register"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /complaints/{complaint_id}",
+          "task": "One complaint",
+          "call": "GET /complaints/{complaint_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.view or complaint.manage, the person who received the complaint and its investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::POST /complaints/{complaint_id}/findings",
+          "task": "Write the findings of the investigation",
+          "call": "POST /complaints/{complaint_id}/findings",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.manage or the complaint's named investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::POST /complaints/{complaint_id}/updates",
+          "task": "Record a contact with the complainant (progress, more time)",
+          "call": "POST /complaints/{complaint_id}/updates",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.manage or the complaint's named investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::POST /complaints/{complaint_id}/actions",
+          "task": "Record a corrective or preventive action",
+          "call": "POST /complaints/{complaint_id}/actions",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "complaint.manage or the complaint's named investigator",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_complaint_investigations::GET /staff/lookup",
+          "task": "Find a staff member for a form (badge facts only)",
+          "call": "GET /staff/lookup",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_complaint_investigations",
+          "page": "screens/my_complaint_investigations"
+        },
+        {
+          "id": "my_actions::GET /quality/actions",
+          "task": "The action register (mine: the actions I own)",
+          "call": "GET /quality/actions",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the actions they own (mine is forced without quality.action.view or quality.action.manage)",
+          "screen_id": "my_actions",
+          "page": "screens/my_actions"
+        },
+        {
+          "id": "my_actions::GET /quality/actions/{action_id}",
+          "task": "One action",
+          "call": "GET /quality/actions/{action_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the action's owner, the person who recorded it, quality.action.view or quality.action.manage",
+          "screen_id": "my_actions",
+          "page": "screens/my_actions"
+        },
+        {
+          "id": "my_actions::POST /quality/actions/{action_id}/complete",
+          "task": "Close an action: done with the evidence, or cancelled",
+          "call": "POST /quality/actions/{action_id}/complete",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the action's owner or quality.action.manage",
+          "screen_id": "my_actions",
+          "page": "screens/my_actions"
+        },
+        {
+          "id": "connect_server::GET /meta/server-info",
+          "task": "How terminals reach and trust this server — works before login",
+          "call": "GET /meta/server-info",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "connect_server",
+          "page": "screens/connect_server"
+        },
+        {
+          "id": "connect_server::GET /terminals/whoami",
+          "task": "Identify this terminal (location + mapped printers) — works before login",
+          "call": "GET /terminals/whoami",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "connect_server",
+          "page": "screens/connect_server"
+        },
+        {
+          "id": "login::POST /auth/login",
+          "task": "Log in (returns tokens, profile, roles, workspaces)",
+          "call": "POST /auth/login",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /terminals/whoami",
+          "task": "Identify this terminal (location + mapped printers) — works before login",
+          "call": "GET /terminals/whoami",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::POST /auth/change-password",
+          "task": "Change own password",
+          "call": "POST /auth/change-password",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /meta/license",
+          "task": "The server's license state: show a banner when it needs attention — works before login",
+          "call": "GET /meta/license",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /health/live",
+          "task": "Is the server there? (unauthenticated, no database)",
+          "call": "GET /health/live",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "login::GET /health",
+          "task": "Server health (unauthenticated; used by the login screen)",
+          "call": "GET /health",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "login",
+          "page": "screens/login"
+        },
+        {
+          "id": "workspace_picker::GET /auth/workspaces",
+          "task": "Workspaces the user may open (multi-role launch screen)",
+          "call": "GET /auth/workspaces",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker"
+        },
+        {
+          "id": "workspace_picker::GET /auth/me",
+          "task": "Current user, roles, permissions, workspaces, preferences",
+          "call": "GET /auth/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker"
+        },
+        {
+          "id": "workspace_picker::GET /establishment",
+          "task": "The establishment's profile and services, with the configuration revision",
+          "call": "GET /establishment",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "workspace_picker",
+          "page": "screens/workspace_picker"
+        },
+        {
+          "id": "settings::GET /settings/sections",
+          "task": "The Settings window: the tiers and sections this caller may open (also before login)",
+          "call": "GET /settings/sections",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login); a logged-in caller also gets what their permissions open",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /settings/me",
+          "task": "My preferences (theme, language, UI scale, PDF download)",
+          "call": "GET /settings/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::PUT /settings/me",
+          "task": "Update my preferences (only the fields you send)",
+          "call": "PUT /settings/me",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::POST /settings/me/change-password",
+          "task": "Change my password (same as /auth/change-password)",
+          "call": "POST /settings/me/change-password",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/settings",
+          "task": "Hospital policy settings",
+          "call": "GET /admin/settings",
+          "is_action": false,
+          "permissions": [
+            "admin.settings.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::PUT /admin/settings/{key}",
+          "task": "Change a policy setting (type-checked, audited)",
+          "call": "PUT /admin/settings/{key}",
+          "is_action": true,
+          "permissions": [
+            "admin.settings.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::POST /admin/change-requests",
+          "task": "Request a control-setting or privileged-access change (applied at once for an Owner)",
+          "call": "POST /admin/change-requests",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "admin.settings.manage for a setting, admin.user.manage for a user's roles, admin.role_matrix.update for a role's permissions (the service checks)",
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/change-requests",
+          "task": "Control-setting and privileged-access change requests",
+          "call": "GET /admin/change-requests",
+          "is_action": false,
+          "permissions": [
+            "admin.settings.manage",
+            "admin.user.manage",
+            "admin.role_matrix.update",
+            "approval.policy_change.approve",
+            "approval.privileged_access.approve"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/change-requests/{change_request_id}",
+          "task": "One control-setting or privileged-access change request",
+          "call": "GET /admin/change-requests/{change_request_id}",
+          "is_action": false,
+          "permissions": [
+            "admin.settings.manage",
+            "admin.user.manage",
+            "admin.role_matrix.update",
+            "approval.policy_change.approve",
+            "approval.privileged_access.approve"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "settings::GET /admin/users",
+          "task": "Search users",
+          "call": "GET /admin/users",
+          "is_action": false,
+          "permissions": [
+            "admin.user.manage",
+            "admin.user.provision"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "settings",
+          "page": "screens/settings"
+        },
+        {
+          "id": "help_center::GET /meta/handbook",
+          "task": "The end-user handbook's outline for the logged-in employee (only what they may use)",
+          "call": "GET /meta/handbook",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "help_center",
+          "page": "screens/help_center"
+        },
+        {
+          "id": "help_center::GET /settings/me",
+          "task": "My preferences (theme, language, UI scale, PDF download)",
+          "call": "GET /settings/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "help_center",
+          "page": "screens/help_center"
+        },
+        {
+          "id": "notifications::GET /notifications",
+          "task": "My notifications (newest first)",
+          "call": "GET /notifications",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "notifications::GET /notifications/unread-count",
+          "task": "Badge count",
+          "call": "GET /notifications/unread-count",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "notifications::POST /notifications/{notification_id}/read",
+          "task": "Mark one as read",
+          "call": "POST /notifications/{notification_id}/read",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "notifications::POST /notifications/read-all",
+          "task": "Mark everything as read",
+          "call": "POST /notifications/read-all",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "notifications",
+          "page": "screens/notifications"
+        },
+        {
+          "id": "icd_picker::GET /icd/codes",
+          "task": "ICD picker: search codes by code or words",
+          "call": "GET /icd/codes",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "icd_picker::GET /icd/browse",
+          "task": "ICD picker: browse chapters, blocks, categories",
+          "call": "GET /icd/browse",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "icd_picker::GET /icd/codes/{code}",
+          "task": "One ICD code with its place in the tree",
+          "call": "GET /icd/codes/{code}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "icd_picker::GET /icd/releases",
+          "task": "The ICD code lists loaded",
+          "call": "GET /icd/releases",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "icd_picker",
+          "page": "screens/icd_picker"
+        },
+        {
+          "id": "approval_queue::GET /approvals",
+          "task": "Approval queue visible to me (or my own requests with mine=true)",
+          "call": "GET /approvals",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the pending requests whose required_permission they hold, or their own with mine=true",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::GET /approvals/{request_id}",
+          "task": "One approval request",
+          "call": "GET /approvals/{request_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the request's requester or a holder of its required_permission; anyone else gets FORBIDDEN",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::POST /approvals/{request_id}/approve",
+          "task": "Approve (applies the effect atomically)",
+          "call": "POST /approvals/{request_id}/approve",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "a holder of the request's required_permission while the request's can_decide is true (decide_blocked says why not); never its requester (SELF_APPROVAL_FORBIDDEN, self_decision forbidden), except the Owner of a solo practice who alone can decide their own refund, waiver or credit, with a note (self_decision allowed_with_note); a large cash drop is never approved by the cashier of its shift (DUAL_CONTROL_SAME_PERSON)",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::POST /approvals/{request_id}/reject",
+          "task": "Reject (unfreezes the subject)",
+          "call": "POST /approvals/{request_id}/reject",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "a holder of the request's required_permission while the request's can_decide is true (decide_blocked says why not); never its requester (SELF_APPROVAL_FORBIDDEN, self_decision forbidden), except the Owner of a solo practice who alone can decide their own refund, waiver or credit, with a note (self_decision allowed_with_note); a large cash drop is never approved by the cashier of its shift (DUAL_CONTROL_SAME_PERSON)",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "approval_queue::POST /approvals/{request_id}/cancel",
+          "task": "Requester withdraws a pending request",
+          "call": "POST /approvals/{request_id}/cancel",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the requester only",
+          "screen_id": "approval_queue",
+          "page": "screens/approval_queue"
+        },
+        {
+          "id": "app_shell::POST /auth/refresh",
+          "task": "Rotate the refresh token and get a new access token",
+          "call": "POST /auth/refresh",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::POST /auth/logout",
+          "task": "End this session (or all sessions)",
+          "call": "POST /auth/logout",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/enums",
+          "task": "All enumerated values, introspected from database CHECK constraints",
+          "call": "GET /meta/enums",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/settings",
+          "task": "Non-sensitive hospital settings for UI display",
+          "call": "GET /meta/settings",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/workspaces",
+          "task": "UI workspaces and the screens each should contain",
+          "call": "GET /meta/workspaces",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/error-codes",
+          "task": "Every error code the API can return",
+          "call": "GET /meta/error-codes",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "app_shell::GET /meta/events",
+          "task": "Realtime WebSocket event catalogue",
+          "call": "GET /meta/events",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "public: no login (works before login)",
+          "screen_id": "app_shell",
+          "page": "screens/app_shell"
+        },
+        {
+          "id": "ot_board::GET /ot/status-board",
+          "task": "Live OT board (🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep)",
+          "call": "GET /ot/status-board",
+          "is_action": false,
+          "permissions": [
+            "ot.status.view"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "ot_board",
+          "page": "screens/ot_board"
+        },
+        {
+          "id": "my_committees::GET /committees",
+          "task": "The committees",
+          "call": "GET /committees",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the committees they are a member of (all with committee.view or committee.manage)",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::GET /committees/{committee_id}",
+          "task": "A committee and its meetings",
+          "call": "GET /committees/{committee_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::GET /committee-meetings/{meeting_id}",
+          "task": "A meeting and its minutes",
+          "call": "GET /committee-meetings/{meeting_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::POST /committee-meetings/{meeting_id}/finalize",
+          "task": "Approve the minutes (final)",
+          "call": "POST /committee-meetings/{meeting_id}/finalize",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the chair of the committee or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "my_committees::GET /committee-meetings/{meeting_id}/pdf",
+          "task": "The minutes (PDF)",
+          "call": "GET /committee-meetings/{meeting_id}/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "my_committees",
+          "page": "screens/my_committees"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/my-deck",
+          "task": "My practice deck: the question of the day and what to rehearse now",
+          "call": "GET /msds/interview-prep/my-deck",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/questions/{key}",
+          "task": "One question: other ways of asking, the model answer with the hospital's facts, key points, follow-ups, pitfalls, what to show",
+          "call": "GET /msds/interview-prep/questions/{key}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::POST /msds/interview-prep/rehearsals",
+          "task": "Record how well I knew a question (Knew, Partly, DidNotKnow)",
+          "call": "POST /msds/interview-prep/rehearsals",
+          "is_action": true,
+          "permissions": [
+            "msds.interview.practice"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/my-progress",
+          "task": "My readiness: questions known, chapter by chapter, my streak and my last mock interview",
+          "call": "GET /msds/interview-prep/my-progress",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/questions",
+          "task": "The PHC inspection interview questions (filter by role, chapter, indicator, type, words)",
+          "call": "GET /msds/interview-prep/questions",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/roles",
+          "task": "The roles and how many inspection interview questions each rehearses",
+          "call": "GET /msds/interview-prep/roles",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/pocket-guide/pdf",
+          "task": "A role's pocket guide: questions, key points and model answers (PDF)",
+          "call": "GET /msds/interview-prep/pocket-guide/pdf",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/pocket-guide",
+          "task": "A role's pocket guide as a print payload, in English or Urdu",
+          "call": "GET /msds/interview-prep/pocket-guide",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/mock-interviews",
+          "task": "Mock interviews, newest first (staff who do not conduct them see their own)",
+          "call": "GET /msds/interview-prep/mock-interviews",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "interview_practice::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "task": "One mock interview: each answer and the actions it raised",
+          "call": "GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "interview_practice",
+          "page": "screens/interview_practice"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/staff",
+          "task": "The staff to question in a mock interview (with or without a login)",
+          "call": "GET /msds/interview-prep/staff",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.conduct"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/mock-interviews/plan",
+          "task": "The questions to put in a mock interview: the member of staff's weak points first",
+          "call": "GET /msds/interview-prep/mock-interviews/plan",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.conduct"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::POST /msds/interview-prep/mock-interviews",
+          "task": "Record a mock PHC interview: each answer Met, PartlyMet or NotMet, and the actions for the gaps",
+          "call": "POST /msds/interview-prep/mock-interviews",
+          "is_action": true,
+          "permissions": [
+            "msds.interview.conduct"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/mock-interviews",
+          "task": "Mock interviews, newest first (staff who do not conduct them see their own)",
+          "call": "GET /msds/interview-prep/mock-interviews",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "task": "One mock interview: each answer and the actions it raised",
+          "call": "GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/roles",
+          "task": "The roles and how many inspection interview questions each rehearses",
+          "call": "GET /msds/interview-prep/roles",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /msds/interview-prep/questions/{key}",
+          "task": "One question: other ways of asking, the model answer with the hospital's facts, key points, follow-ups, pitfalls, what to show",
+          "call": "GET /msds/interview-prep/questions/{key}",
+          "is_action": false,
+          "permissions": [
+            "msds.interview.practice",
+            "msds.interview.conduct",
+            "msds.interview.manage"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /quality/actions",
+          "task": "The action register (mine: the actions I own)",
+          "call": "GET /quality/actions",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the actions they own (mine is forced without quality.action.view or quality.action.manage)",
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "mock_interviews::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "mock_interviews",
+          "page": "screens/mock_interviews"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/me",
+          "task": "My personnel record",
+          "call": "GET /personnel/me",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user, for their own account (also before a forced password change where allowed)",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/appraisals/{appraisal_id}",
+          "task": "One appraisal",
+          "call": "GET /personnel/appraisals/{appraisal_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "personnel.view or personnel.manage, the appraiser and the member of staff appraised",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::POST /personnel/appraisals/{appraisal_id}/acknowledge",
+          "task": "The member of staff's comments and acknowledgement",
+          "call": "POST /personnel/appraisals/{appraisal_id}/acknowledge",
+          "is_action": true,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the member of staff appraised, or personnel.manage from the signed paper",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/appraisals/{appraisal_id}/pdf",
+          "task": "The appraisal (PDF)",
+          "call": "GET /personnel/appraisals/{appraisal_id}/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "personnel.view or personnel.manage, the appraiser and the member of staff appraised",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "my_personnel_record::GET /personnel/appraisal-policy/pdf",
+          "task": "The performance appraisal system (PDF)",
+          "call": "GET /personnel/appraisal-policy/pdf",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "my_personnel_record",
+          "page": "screens/my_personnel_record"
+        },
+        {
+          "id": "equipment_requisitions::GET /facility/equipment-requisitions",
+          "task": "The equipment requisitions",
+          "call": "GET /facility/equipment-requisitions",
+          "is_action": false,
+          "permissions": [
+            "facility.view",
+            "facility.equipment.request",
+            "facility.equipment.evaluate",
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /facility/equipment-requisitions/{requisition_id}",
+          "task": "One equipment requisition with its models and their evaluations",
+          "call": "GET /facility/equipment-requisitions/{requisition_id}",
+          "is_action": false,
+          "permissions": [
+            "facility.view",
+            "facility.equipment.request",
+            "facility.equipment.evaluate",
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions",
+          "task": "Ask for equipment with its specification and justification",
+          "call": "POST /facility/equipment-requisitions",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.request"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/options",
+          "task": "Add a model on offer",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/options",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.request"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/evaluations",
+          "task": "Evaluate a model you will use",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/evaluations",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.evaluate"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/decide",
+          "task": "Decide on one evaluated model",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/decide",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/purchased",
+          "task": "Record the purchase in the equipment register",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/purchased",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.manage"
+          ],
+          "permissions_mode": "all",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/cancel",
+          "task": "Cancel a requisition",
+          "call": "POST /facility/equipment-requisitions/{requisition_id}/cancel",
+          "is_action": true,
+          "permissions": [
+            "facility.equipment.request",
+            "facility.equipment.decide"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /finance/vendors",
+          "task": "Vendors",
+          "call": "GET /finance/vendors",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /facility/equipment",
+          "task": "The equipment inventory",
+          "call": "GET /facility/equipment",
+          "is_action": false,
+          "permissions": [
+            "facility.view",
+            "facility.equipment.manage",
+            "facility.maintenance.record"
+          ],
+          "permissions_mode": "any",
+          "access": null,
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /admin/departments",
+          "task": "Departments",
+          "call": "GET /admin/departments",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /committees",
+          "task": "The committees",
+          "call": "GET /committees",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "any logged-in user: the committees they are a member of (all with committee.view or committee.manage)",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        },
+        {
+          "id": "equipment_requisitions::GET /committees/{committee_id}",
+          "task": "A committee and its meetings",
+          "call": "GET /committees/{committee_id}",
+          "is_action": false,
+          "permissions": [],
+          "permissions_mode": "all",
+          "access": "the committee's members, committee.view or committee.manage",
+          "screen_id": "equipment_requisitions",
+          "page": "screens/equipment_requisitions"
+        }
+      ],
+      "faq_role_coverage": [
+        {
+          "role": "head_nurse",
+          "task_ids": [
+            "duty_roster::GET /rosters",
+            "duty_roster::GET /rosters/staff",
+            "duty_roster::POST /rosters",
+            "duty_roster::PATCH /rosters/{roster_id}",
+            "duty_roster::POST /rosters/{roster_id}/cancel",
+            "duty_roster::POST /rosters/copy",
+            "duty_roster::GET /rosters/week",
+            "duty_roster::GET /rosters/swaps",
+            "duty_roster::POST /rosters/swaps",
+            "duty_roster::POST /rosters/swaps/{swap_id}/approve",
+            "duty_roster::POST /rosters/swaps/{swap_id}/reject",
+            "duty_roster::GET /beds/matrix",
+            "duty_roster::GET /admin/departments",
+            "roll_call::GET /rosters/roll-call",
+            "roll_call::POST /rosters/roll-call",
+            "ward_indent::POST /wards/{ward_id}/indents",
+            "ward_indent::GET /ward-indents/{indent_id}",
+            "ward_indent::GET /wards/{ward_id}/inventory",
+            "ward_indent::GET /drugs/search",
+            "ward_indent::POST /wards/{ward_id}/inventory/remove",
+            "leave_approvals::GET /hr/leave-requests",
+            "leave_approvals::POST /hr/leave-requests/{leave_request_id}/decision",
+            "leave_approvals::GET /hr/employees/{employee_id}/leave-balances",
+            "appraise_staff_head_nurse::GET /personnel/appraisals/schedule",
+            "appraise_staff_head_nurse::GET /personnel/appraisals",
+            "appraise_staff_head_nurse::POST /personnel/appraisals",
+            "appraise_staff_head_nurse::GET /personnel/appraisals/{appraisal_id}",
+            "appraise_staff_head_nurse::PUT /personnel/appraisals/{appraisal_id}",
+            "appraise_staff_head_nurse::POST /personnel/appraisals/{appraisal_id}/sign",
+            "appraise_staff_head_nurse::POST /personnel/appraisals/{appraisal_id}/cancel",
+            "appraise_staff_head_nurse::GET /personnel/appraisals/{appraisal_id}/pdf",
+            "appraise_staff_head_nurse::GET /personnel/appraisal-policy/pdf",
+            "appraise_staff_head_nurse::GET /staff/lookup",
+            "ward_transfer_head_nurse::POST /admissions/{admission_id}/transfer",
+            "ward_transfer_head_nurse::GET /admissions/{admission_id}/transfers",
+            "ward_transfer_head_nurse::GET /beds/matrix",
+            "record_review_worklist_nursing::GET /quality/record-review-items/mine",
+            "record_review_worklist_nursing::GET /quality/record-review-items/{item_id}",
+            "record_review_worklist_nursing::POST /quality/record-review-items/{item_id}/review",
+            "record_review_worklist_nursing::GET /quality/record-review/criteria",
+            "record_deficiencies_nursing::GET /quality/record-review-deficiencies",
+            "record_deficiencies_nursing::POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+            "report_incident::GET /incident-types",
+            "report_incident::POST /incidents",
+            "report_incident::GET /incidents",
+            "report_incident::GET /incidents/{incident_id}",
+            "report_incident::GET /incidents/sentinel-list/pdf",
+            "report_incident::GET /staff/lookup",
+            "report_incident::GET /admin/departments",
+            "report_incident::GET /patients/search",
+            "report_incident::GET /admissions",
+            "report_incident::GET /deaths",
+            "report_incident::GET /drugs/search",
+            "report_incident::GET /beds/matrix",
+            "my_investigations::GET /incidents",
+            "my_investigations::GET /incidents/{incident_id}",
+            "my_investigations::PUT /incidents/{incident_id}/analysis",
+            "my_investigations::POST /incidents/{incident_id}/analysis/sign",
+            "my_investigations::POST /incidents/{incident_id}/actions",
+            "my_investigations::GET /incidents/{incident_id}/pdf",
+            "my_investigations::GET /admin/departments",
+            "my_investigations::GET /staff/lookup",
+            "my_complaint_investigations::GET /complaints",
+            "my_complaint_investigations::GET /complaints/{complaint_id}",
+            "my_complaint_investigations::POST /complaints/{complaint_id}/findings",
+            "my_complaint_investigations::POST /complaints/{complaint_id}/updates",
+            "my_complaint_investigations::POST /complaints/{complaint_id}/actions",
+            "my_complaint_investigations::GET /admin/departments",
+            "my_complaint_investigations::GET /staff/lookup",
+            "my_actions::GET /quality/actions",
+            "my_actions::GET /quality/actions/{action_id}",
+            "my_actions::POST /quality/actions/{action_id}/complete",
+            "connect_server::GET /meta/server-info",
+            "connect_server::GET /terminals/whoami",
+            "login::POST /auth/login",
+            "login::GET /terminals/whoami",
+            "login::POST /auth/change-password",
+            "login::GET /meta/license",
+            "login::GET /health/live",
+            "login::GET /health",
+            "workspace_picker::GET /auth/workspaces",
+            "workspace_picker::GET /auth/me",
+            "workspace_picker::GET /establishment",
+            "settings::GET /settings/sections",
+            "settings::GET /settings/me",
+            "settings::PUT /settings/me",
+            "settings::POST /settings/me/change-password",
+            "settings::POST /admin/change-requests",
+            "help_center::GET /meta/handbook",
+            "help_center::GET /settings/me",
+            "notifications::GET /notifications",
+            "notifications::GET /notifications/unread-count",
+            "notifications::POST /notifications/{notification_id}/read",
+            "notifications::POST /notifications/read-all",
+            "icd_picker::GET /icd/codes",
+            "icd_picker::GET /icd/browse",
+            "icd_picker::GET /icd/codes/{code}",
+            "icd_picker::GET /icd/releases",
+            "approval_queue::GET /approvals",
+            "approval_queue::GET /approvals/{request_id}",
+            "approval_queue::POST /approvals/{request_id}/approve",
+            "approval_queue::POST /approvals/{request_id}/reject",
+            "approval_queue::POST /approvals/{request_id}/cancel",
+            "app_shell::POST /auth/refresh",
+            "app_shell::POST /auth/logout",
+            "app_shell::GET /meta/enums",
+            "app_shell::GET /meta/settings",
+            "app_shell::GET /meta/workspaces",
+            "app_shell::GET /meta/error-codes",
+            "app_shell::GET /meta/events",
+            "ot_board::GET /ot/status-board",
+            "my_committees::GET /committees",
+            "my_committees::GET /committees/{committee_id}",
+            "my_committees::GET /committee-meetings/{meeting_id}",
+            "my_committees::POST /committee-meetings/{meeting_id}/finalize",
+            "my_committees::GET /committee-meetings/{meeting_id}/pdf",
+            "interview_practice::GET /msds/interview-prep/my-deck",
+            "interview_practice::GET /msds/interview-prep/questions/{key}",
+            "interview_practice::POST /msds/interview-prep/rehearsals",
+            "interview_practice::GET /msds/interview-prep/my-progress",
+            "interview_practice::GET /msds/interview-prep/questions",
+            "interview_practice::GET /msds/interview-prep/roles",
+            "interview_practice::GET /msds/interview-prep/pocket-guide/pdf",
+            "interview_practice::GET /msds/interview-prep/pocket-guide",
+            "interview_practice::GET /msds/interview-prep/mock-interviews",
+            "interview_practice::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+            "mock_interviews::GET /msds/interview-prep/staff",
+            "mock_interviews::GET /msds/interview-prep/mock-interviews/plan",
+            "mock_interviews::POST /msds/interview-prep/mock-interviews",
+            "mock_interviews::GET /msds/interview-prep/mock-interviews",
+            "mock_interviews::GET /msds/interview-prep/mock-interviews/{mock_interview_id}",
+            "mock_interviews::GET /msds/interview-prep/roles",
+            "mock_interviews::GET /msds/interview-prep/questions/{key}",
+            "mock_interviews::GET /quality/actions",
+            "mock_interviews::GET /admin/departments",
+            "my_personnel_record::GET /personnel/me",
+            "my_personnel_record::GET /personnel/appraisals/{appraisal_id}",
+            "my_personnel_record::POST /personnel/appraisals/{appraisal_id}/acknowledge",
+            "my_personnel_record::GET /personnel/appraisals/{appraisal_id}/pdf",
+            "my_personnel_record::GET /personnel/appraisal-policy/pdf",
+            "equipment_requisitions::GET /facility/equipment-requisitions",
+            "equipment_requisitions::GET /facility/equipment-requisitions/{requisition_id}",
+            "equipment_requisitions::POST /facility/equipment-requisitions",
+            "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/options",
+            "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/evaluations",
+            "equipment_requisitions::POST /facility/equipment-requisitions/{requisition_id}/cancel",
+            "equipment_requisitions::GET /finance/vendors",
+            "equipment_requisitions::GET /admin/departments",
+            "equipment_requisitions::GET /committees",
+            "equipment_requisitions::GET /committees/{committee_id}"
+          ]
+        }
+      ],
+      "faq_seed": [
+        {
+          "id": "head_nurse:error:ROSTER_OUT_OF_SCOPE",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"You may not roster this employee (outside your staff scope).\" (ROSTER_OUT_OF_SCOPE). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:ROSTER_CONFLICT",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "ROSTER_CONFLICT",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"This duty overlaps another duty of the same employee.\" (ROSTER_CONFLICT). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:ROSTER_ON_LEAVE",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "ROSTER_ON_LEAVE",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"The employee is on approved leave that day.\" (ROSTER_ON_LEAVE). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:ROSTER_DATE_CLOSED",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "ROSTER_DATE_CLOSED",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"Rosters of past days can only be changed by HR.\" (ROSTER_DATE_CLOSED). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:ROSTER_EMPLOYEE_INACTIVE",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "ROSTER_EMPLOYEE_INACTIVE",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"Only active staff can be rostered.\" (ROSTER_EMPLOYEE_INACTIVE). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:ROSTER_ENTRY_CANCELLED",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "ROSTER_ENTRY_CANCELLED",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"This duty was cancelled: create a new one.\" (ROSTER_ENTRY_CANCELLED). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:SWAP_SELF_APPROVAL",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "SWAP_SELF_APPROVAL",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"Neither of the two colleagues can approve their own duty swap.\" (SWAP_SELF_APPROVAL). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:SWAP_DUTY_STARTED",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "SWAP_DUTY_STARTED",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"A duty is swapped before it starts.\" (SWAP_DUTY_STARTED). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:SWAP_COLLEAGUE_INELIGIBLE",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "SWAP_COLLEAGUE_INELIGIBLE",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"Choose an active colleague of the same staff category.\" (SWAP_COLLEAGUE_INELIGIBLE). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:SWAP_EXISTS",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "SWAP_EXISTS",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"This duty is already in an open swap request.\" (SWAP_EXISTS). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:SWAP_TRANSITION_INVALID",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "SWAP_TRANSITION_INVALID",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"The duty swap cannot move to that state.\" (SWAP_TRANSITION_INVALID). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:BED_NO_LONGER_AVAILABLE",
+          "workspace": "head_nurse",
+          "screen_id": "duty_roster",
+          "kind": "error",
+          "code": "BED_NO_LONGER_AVAILABLE",
+          "entity": null,
+          "question": "The Nursing duty roster screen says \"Bed was reserved by another terminal.\" (BED_NO_LONGER_AVAILABLE). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:ROLL_CALL_NOT_ROSTERED",
+          "workspace": "head_nurse",
+          "screen_id": "roll_call",
+          "kind": "error",
+          "code": "ROLL_CALL_NOT_ROSTERED",
+          "entity": null,
+          "question": "The Roll call screen says \"The employee is not rostered on that day.\" (ROLL_CALL_NOT_ROSTERED). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:BATCH_EXPIRED",
+          "workspace": "head_nurse",
+          "screen_id": "ward_indent",
+          "kind": "error",
+          "code": "BATCH_EXPIRED",
+          "entity": null,
+          "question": "The Ward supply indent screen says \"This batch has expired and cannot be issued.\" (BATCH_EXPIRED). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:BATCH_RECALLED",
+          "workspace": "head_nurse",
+          "screen_id": "ward_indent",
+          "kind": "error",
+          "code": "BATCH_RECALLED",
+          "entity": null,
+          "question": "The Ward supply indent screen says \"This batch is recalled: it cannot be dispensed, sent to a ward, used in theatre or given.\" (BATCH_RECALLED). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:INSUFFICIENT_STOCK",
+          "workspace": "head_nurse",
+          "screen_id": "ward_indent",
+          "kind": "error",
+          "code": "INSUFFICIENT_STOCK",
+          "entity": null,
+          "question": "The Ward supply indent screen says \"Not enough stock available.\" (INSUFFICIENT_STOCK). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:LEAVE_ALREADY_DECIDED",
+          "workspace": "head_nurse",
+          "screen_id": "leave_approvals",
+          "kind": "error",
+          "code": "LEAVE_ALREADY_DECIDED",
+          "entity": null,
+          "question": "The Leave approvals (supervisor inbox) screen says \"The leave request was already decided or withdrawn (details.status).\" (LEAVE_ALREADY_DECIDED). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:LEAVE_NOT_YOUR_REPORT",
+          "workspace": "head_nurse",
+          "screen_id": "leave_approvals",
+          "kind": "error",
+          "code": "LEAVE_NOT_YOUR_REPORT",
+          "entity": null,
+          "question": "The Leave approvals (supervisor inbox) screen says \"Only the employee's supervisor can decide this leave.\" (LEAVE_NOT_YOUR_REPORT). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:SELF_APPROVAL_FORBIDDEN",
+          "workspace": "head_nurse",
+          "screen_id": "leave_approvals",
+          "kind": "error",
+          "code": "SELF_APPROVAL_FORBIDDEN",
+          "entity": null,
+          "question": "The Leave approvals (supervisor inbox) screen says \"You cannot approve your own request.\" (SELF_APPROVAL_FORBIDDEN). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:LEAVE_INSUFFICIENT_BALANCE",
+          "workspace": "head_nurse",
+          "screen_id": "leave_approvals",
+          "kind": "error",
+          "code": "LEAVE_INSUFFICIENT_BALANCE",
+          "entity": null,
+          "question": "The Leave approvals (supervisor inbox) screen says \"Not enough leave balance.\" (LEAVE_INSUFFICIENT_BALANCE). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:state:employee",
+          "workspace": "head_nurse",
+          "screen_id": "leave_approvals",
+          "kind": "state",
+          "code": null,
+          "entity": "employee",
+          "question": "What do the states of a employee mean (Draft, Awaiting_IT_Provisioning, Active, Suspended, Resigned, Terminated), and what moves it from one to the next?"
+        },
+        {
+          "id": "head_nurse:error:APPRAISAL_DRAFT_OPEN",
+          "workspace": "head_nurse",
+          "screen_id": "appraise_staff_head_nurse",
+          "kind": "error",
+          "code": "APPRAISAL_DRAFT_OPEN",
+          "entity": null,
+          "question": "The Appraise my staff screen says \"A draft appraisal is open for this member of staff (details.appraisal_id).\" (APPRAISAL_DRAFT_OPEN). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:APPRAISAL_STATE_INVALID",
+          "workspace": "head_nurse",
+          "screen_id": "appraise_staff_head_nurse",
+          "kind": "error",
+          "code": "APPRAISAL_STATE_INVALID",
+          "entity": null,
+          "question": "The Appraise my staff screen says \"The appraisal cannot change that way: a signed appraisal is final but for the member of staff's comments; nobody appraises themselves.\" (APPRAISAL_STATE_INVALID). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:APPRAISAL_INCOMPLETE",
+          "workspace": "head_nurse",
+          "screen_id": "appraise_staff_head_nurse",
+          "kind": "error",
+          "code": "APPRAISAL_INCOMPLETE",
+          "entity": null,
+          "question": "The Appraise my staff screen says \"Rate the administrative factors and the performance, give the overall rating, and a development plan below Satisfactory, before signing.\" (APPRAISAL_INCOMPLETE). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:ADMISSION_STATE_INVALID",
+          "workspace": "head_nurse",
+          "screen_id": "ward_transfer_head_nurse",
+          "kind": "error",
+          "code": "ADMISSION_STATE_INVALID",
+          "entity": null,
+          "question": "The Move a patient to another bed or ward screen says \"The admission cannot move to that state.\" (ADMISSION_STATE_INVALID). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:RECORD_REVIEW_NOT_ASSIGNED",
+          "workspace": "head_nurse",
+          "screen_id": "record_review_worklist_nursing",
+          "kind": "error",
+          "code": "RECORD_REVIEW_NOT_ASSIGNED",
+          "entity": null,
+          "question": "The My record reviews screen says \"This record is assigned to another reviewer.\" (RECORD_REVIEW_NOT_ASSIGNED). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:RECORD_REVIEW_ANSWERS_INCOMPLETE",
+          "workspace": "head_nurse",
+          "screen_id": "record_review_worklist_nursing",
+          "kind": "error",
+          "code": "RECORD_REVIEW_ANSWERS_INCOMPLETE",
+          "entity": null,
+          "question": "The My record reviews screen says \"Answer every checklist item; explain every No, and every answer that differs from the system check.\" (RECORD_REVIEW_ANSWERS_INCOMPLETE). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:RECORD_REVIEW_FROZEN",
+          "workspace": "head_nurse",
+          "screen_id": "record_review_worklist_nursing",
+          "kind": "error",
+          "code": "RECORD_REVIEW_FROZEN",
+          "entity": null,
+          "question": "The My record reviews screen says \"This part of the review is final (the sample, a submitted review or a raised deficiency cannot change).\" (RECORD_REVIEW_FROZEN). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:RECORD_REVIEW_NOT_OPEN",
+          "workspace": "head_nurse",
+          "screen_id": "record_review_worklist_nursing",
+          "kind": "error",
+          "code": "RECORD_REVIEW_NOT_OPEN",
+          "entity": null,
+          "question": "The My record reviews screen says \"This review cycle is not in review.\" (RECORD_REVIEW_NOT_OPEN). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:RECORD_DEFICIENCY_NOT_YOURS",
+          "workspace": "head_nurse",
+          "screen_id": "record_deficiencies_nursing",
+          "kind": "error",
+          "code": "RECORD_DEFICIENCY_NOT_YOURS",
+          "entity": null,
+          "question": "The Record deficiencies to fix screen says \"Only the record's author, the nursing supervisors (nursing items) or the Quality Officer can resolve this deficiency.\" (RECORD_DEFICIENCY_NOT_YOURS). Why, and what do I do?"
+        },
+        {
+          "id": "head_nurse:error:RECORD_DEFICIENCY_RESOLVED",
+          "workspace": "head_nurse",
+          "screen_id": "record_deficiencies_nursing",
+          "kind": "error",
+          "code": "RECORD_DEFICIENCY_RESOLVED",
+          "entity": null,
+          "question": "The Record deficiencies to fix screen says \"This deficiency is already resolved.\" (RECORD_DEFICIENCY_RESOLVED). Why, and what do I do?"
+        }
+      ],
+      "faq_requirement": "Write a detailed How do I...? answer for each supported task, with prerequisites, steps, outcomes, recovery and handovers; follow W2 and W3. Answer every question of faq_seed too.",
+      "coverage_note": "Catalogue minimum, conditional on access rules and the actual records. Add frontend-only tasks, controls and other authorized screens used by the app. This is not runtime authorization."
+    }
+  ],
+  "rbac": "the help site shows only the pages GET /meta/handbook lists for the logged-in user",
+  "languages": [
+    "en",
+    "ur"
+  ],
+  "screen_requirements": [
+    {
+      "id": "S1",
+      "title": "Purpose and audience",
+      "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+    },
+    {
+      "id": "S2",
+      "title": "Step by step (one per task, where to click)",
+      "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+    },
+    {
+      "id": "S3",
+      "title": "Every control and its effects",
+      "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+    },
+    {
+      "id": "S4",
+      "title": "States and feedback",
+      "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+    },
+    {
+      "id": "S5",
+      "title": "Messages, mistakes and recovery",
+      "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+    },
+    {
+      "id": "S6",
+      "title": "Language and visual examples",
+      "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+    },
+    {
+      "id": "S7",
+      "title": "Related help and delivery",
+      "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+    }
+  ],
+  "workspace_requirements": [
+    {
+      "id": "W1",
+      "title": "A day in each role",
+      "instruction": "Explain the workspace's purpose and each role that uses it, how to enter or switch workspaces, start and finish a\nshift, and the typical order of work. State what the role may do and what requires another role, without presenting\nrole names as the app's permission checks. Include shared and linked screens needed to finish the job."
+    },
+    {
+      "id": "W2",
+      "title": "Complete job-task index",
+      "instruction": "List every job task supported for each role in this workspace. Map each task to a detailed FAQ answer and the\nrelevant screen instructions. Reconcile this inventory with the catalogue's tasks, permissions, playbooks, shared\nscreens and the actual UI, including frontend-only tasks. Do not claim that a list of API operations alone covers\neverything staff need to learn. Mark unsupported requests explicitly rather than inventing a workflow."
+    },
+    {
+      "id": "W3",
+      "title": "Detailed role-specific FAQ",
+      "instruction": "For every supported task answer \"How do I ...?\" in the user's language. Each answer must give when to use it,\nprerequisites, exact navigation and labels, ordered steps, what each action changes, the expected outcome, common\nmistakes/refusals and recovery, approvals or handovers and links to screen help. Include exceptions and follow-up\nquestions from the tested journey. Shared answers may be linked, but distinguish differences between roles and\npermissions. Short generic advice or an unexplained link is insufficient.\n\nThis FAQ is compulsory for every supported role in the workspace, including its shared tasks. Missing answers,\nmissing English/Urdu coverage or an unreviewed FAQ keep the workspace unfinished, even when its API calls work.\n\nThe FAQ answers at least every question of `faq_seed` for the workspace (`GET /meta/handbook?workspace=<code>` →\n`faq_seed`; the MCP server's `get_handbook_outline` gives the same list): one per error a screen of the workspace can\nmeet and one per state machine its screens move. They are the minimum, not the whole FAQ."
+    },
+    {
+      "id": "W4",
+      "title": "Handovers, exceptions and troubleshooting",
+      "instruction": "Explain what to do when work is waiting for another role, who acts next, how to find the request later and how to\nrecognize completion or refusal. Cover the workspace's applicable problems: unavailable devices or network, a locked\nsession, conflicting edits, a correction, an uncertain submission and an unfinished shift. Refer to the hospital's\napproved downtime procedure where required; do not invent clinical or financial policy."
+    },
+    {
+      "id": "W5",
+      "title": "Glossary and guided practice",
+      "instruction": "Define the workspace's staff-facing terms consistently with the UI. Provide a complete practice journey using newly\ncreated synthetic records on the DEV server, covering the relevant screens, role boundaries and help navigation.\nA named human reviewer must follow the [workspace acceptance checklist](17-workspace-review-checklist.md)\nusing the handbook and check that the FAQ enables the role's work. Keep both languages, screenshots, task index\nand help links current with the implemented workspace."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7"
+}

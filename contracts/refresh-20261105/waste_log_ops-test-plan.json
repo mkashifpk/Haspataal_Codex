@@ -1,0 +1,577 @@
+{
+  "screen": "waste_log_ops",
+  "title": "Hospital waste log",
+  "cases": [
+    {
+      "id": "case:POST /infection/waste",
+      "call": "POST /api/v1/infection/waste",
+      "summary": "Record hospital waste",
+      "happy_path": {
+        "as_one_of": [
+          "ipc_nurse",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/infection/waste",
+            "body": {
+              "category": "Infectious",
+              "location": "Surgical ward",
+              "bags": 3,
+              "weight_kg": 12.5,
+              "vendor_id": 1,
+              "manifest_number": "CN-1001",
+              "disposal": "Incineration"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "waste_id": 1,
+                "recorded_on": "2026-11-05",
+                "category": "Infectious",
+                "ward_id": null,
+                "ward_name": null,
+                "department_id": null,
+                "department_name": null,
+                "location": "Surgical ward",
+                "bags": 3,
+                "weight_kg": 12.5,
+                "vendor_id": 1,
+                "vendor_name": "Clean City Waste",
+                "manifest_number": "CN-1001",
+                "disposal": "Incineration",
+                "note": null,
+                "recorded_by_name": "u07d42b941b",
+                "recorded_at": "2026-11-04T21:15:58.811202+00:00",
+                "handed_over_on": "2026-11-05",
+                "handed_over_by_name": "u07d42b941b"
+              },
+              "meta": {
+                "server_time": "2026-11-04T21:15:58.826664+00:00"
+              },
+              "request_id": "1b2c8eb158554f2e9d0dbad73ce5900c"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /infection/waste",
+      "call": "GET /api/v1/infection/waste",
+      "summary": "The waste log",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/infection/waste"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "date_from": "2026-11-01",
+                "date_to": "2026-11-05",
+                "records": [
+                  {
+                    "waste_id": 2,
+                    "recorded_on": "2026-11-05",
+                    "category": "Sharps",
+                    "ward_id": null,
+                    "ward_name": null,
+                    "department_id": null,
+                    "department_name": null,
+                    "location": "Surgical ward",
+                    "bags": null,
+                    "weight_kg": 2,
+                    "vendor_id": null,
+                    "vendor_name": null,
+                    "manifest_number": null,
+                    "disposal": null,
+                    "note": null,
+                    "recorded_by_name": "u07d42b941b",
+                    "recorded_at": "2026-11-04T21:15:58.857702+00:00",
+                    "handed_over_on": null,
+                    "handed_over_by_name": null
+                  },
+                  {
+                    "waste_id": 1,
+                    "recorded_on": "2026-11-05",
+                    "category": "Infectious",
+                    "ward_id": null,
+                    "ward_name": null,
+                    "department_id": null,
+                    "department_name": null,
+                    "location": "Surgical ward",
+                    "bags": 3,
+                    "weight_kg": 12.5,
+                    "vendor_id": 1,
+                    "vendor_name": "Clean City Waste",
+                    "manifest_number": "CN-1001",
+                    "disposal": "Incineration",
+                    "note": null,
+                    "recorded_by_name": "u07d42b941b",
+                    "recorded_at": "2026-11-04T21:15:58.811202+00:00",
+                    "handed_over_on": "2026-11-05",
+                    "handed_over_by_name": "u07d42b941b"
+                  }
+                ],
+                "by_category": [
+                  {
+                    "category": "Infectious",
+                    "weight_kg": 12.5,
+                    "bags": 3,
+                    "handed_over_kg": 12.5
+                  },
+                  {
+                    "category": "Sharps",
+                    "weight_kg": 2,
+                    "bags": 0,
+                    "handed_over_kg": 0
+                  }
+                ],
+                "by_month": [
+                  {
+                    "month": "2026-11-01",
+                    "risk_kg": 14.5,
+                    "non_risk_kg": 0
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-11-04T21:15:58.882888+00:00"
+              },
+              "request_id": "5fede5eab0984a91aaf955f8bd03d7ba"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /finance/vendors",
+      "call": "GET /api/v1/finance/vendors",
+      "summary": "Vendors",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/vendors",
+            "query": {
+              "vendor_type": "PharmacySupplier"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "vendor_id": 1,
+                  "name": "MedSupply",
+                  "vendor_type": "PharmacySupplier",
+                  "contact_name": null,
+                  "phone": "0421234567",
+                  "address": null,
+                  "tax_number": null,
+                  "cnic": null,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:36:41.047443+00:00"
+              },
+              "request_id": "0376c42d633d406db3283d3c1b66acaf"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /infection/waste/handover",
+      "call": "POST /api/v1/infection/waste/handover",
+      "summary": "Hand collected waste over to the contractor",
+      "happy_path": {
+        "as_one_of": [
+          "ipc_nurse",
+          "ops_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/infection/waste/handover",
+            "body": {
+              "waste_ids": [
+                1,
+                2
+              ],
+              "vendor_id": 1,
+              "manifest_number": "CN-2041",
+              "disposal": "Incineration"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "vendor_id": 1,
+                "vendor_name": "Clean City Waste",
+                "manifest_number": "CN-2041",
+                "disposal": "Incineration",
+                "handed_over_on": "2026-11-05",
+                "weight_kg": 8,
+                "records": [
+                  {
+                    "waste_id": 1,
+                    "recorded_on": "2026-11-04",
+                    "category": "Infectious",
+                    "ward_id": null,
+                    "ward_name": null,
+                    "department_id": null,
+                    "department_name": null,
+                    "location": "Surgical ward",
+                    "bags": 2,
+                    "weight_kg": 6.5,
+                    "vendor_id": 1,
+                    "vendor_name": "Clean City Waste",
+                    "manifest_number": "CN-2041",
+                    "disposal": "Incineration",
+                    "note": null,
+                    "recorded_by_name": "u64118fd1b4",
+                    "recorded_at": "2026-11-04T21:16:23.896433+00:00",
+                    "handed_over_on": "2026-11-05",
+                    "handed_over_by_name": "u64118fd1b4"
+                  },
+                  {
+                    "waste_id": 2,
+                    "recorded_on": "2026-11-05",
+                    "category": "Sharps",
+                    "ward_id": null,
+                    "ward_name": null,
+                    "department_id": null,
+                    "department_name": null,
+                    "location": "Surgical ward",
+                    "bags": 2,
+                    "weight_kg": 1.5,
+                    "vendor_id": 1,
+                    "vendor_name": "Clean City Waste",
+                    "manifest_number": "CN-2041",
+                    "disposal": "Incineration",
+                    "note": null,
+                    "recorded_by_name": "u64118fd1b4",
+                    "recorded_at": "2026-11-04T21:16:23.951885+00:00",
+                    "handed_over_on": "2026-11-05",
+                    "handed_over_by_name": "u64118fd1b4"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-11-04T21:16:24.065916+00:00"
+              },
+              "request_id": "6da02d9187284e66ab5ae30313b7bf29"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "REFERENCE_NOT_FOUND",
+            "VALIDATION_ERROR",
+            "WASTE_HANDED_OVER"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR",
+        "WASTE_HANDED_OVER"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /admin/departments",
+      "call": "GET /api/v1/admin/departments",
+      "summary": "Departments",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/departments"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "department_id": 1,
+                  "code": "CARD",
+                  "name": "Cardiology & Vascular",
+                  "is_clinical": true,
+                  "is_active": true,
+                  "row_version": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.417658+00:00"
+              },
+              "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /beds/matrix",
+      "call": "GET /api/v1/beds/matrix",
+      "summary": "Live bed matrix (counts per ward + optional bed list)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/beds/matrix"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "wards": [
+                  {
+                    "ward_id": 2,
+                    "code": "GW",
+                    "name": "General Ward",
+                    "ward_type": "General",
+                    "gender_restriction": "any",
+                    "total_beds": 1,
+                    "available": 0,
+                    "reserved": 0,
+                    "occupied": 1,
+                    "turnover": 0,
+                    "out_of_service": 0
+                  },
+                  {
+                    "ward_id": 1,
+                    "code": "ICU",
+                    "name": "ICU",
+                    "ward_type": "ICU",
+                    "gender_restriction": "any",
+                    "total_beds": 1,
+                    "available": 1,
+                    "reserved": 0,
+                    "occupied": 0,
+                    "turnover": 0,
+                    "out_of_service": 0
+                  }
+                ],
+                "summary": {
+                  "General Ward": 0,
+                  "ICU": 1
+                },
+                "beds": [
+                  {
+                    "bed_id": 1,
+                    "ward_id": 1,
+                    "label": "ICU-1",
+                    "current_state": "Available",
+                    "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                    "is_overflow_allowed": false,
+                    "admission_id": null,
+                    "patient_name": null,
+                    "mrn": null,
+                    "admission_status": null,
+                    "is_overflow": null,
+                    "discharge_blocked_on": null
+                  },
+                  {
+                    "bed_id": 2,
+                    "ward_id": 2,
+                    "label": "GW-1",
+                    "current_state": "Occupied",
+                    "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                    "is_overflow_allowed": false,
+                    "admission_id": 1,
+                    "patient_name": null,
+                    "mrn": null,
+                    "admission_status": "Admitted",
+                    "is_overflow": false,
+                    "discharge_blocked_on": null
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:38:22.967241+00:00"
+              },
+              "request_id": "802131a929b14db0a0c8033474e8d271"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "employee_self",
+          "lab_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "BED_NO_LONGER_AVAILABLE",
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/waste_log_ops",
+  "workspace_guide": "get_handbook_outline('ops_admin')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Weigh each category's bags per area at collection; record the contractor's consignment note at handover."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

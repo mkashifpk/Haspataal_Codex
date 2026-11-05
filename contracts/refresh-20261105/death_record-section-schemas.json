@@ -1,0 +1,4257 @@
+{
+  "screen_id": "death_record",
+  "contract_fingerprint": "15b9937042045e7a0cde",
+  "knowledge_revision": "512e5d299d18f4f7",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "schemas": {
+    "AutopsyCancelIn": {
+      "properties": {
+        "reason": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Reason",
+          "examples": [
+            "The family declined"
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "title": "AutopsyCancelIn"
+    },
+    "AutopsyOut": {
+      "properties": {
+        "autopsy_id": {
+          "type": "integer",
+          "title": "Autopsy Id"
+        },
+        "death_id": {
+          "type": "integer",
+          "title": "Death Id"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Requested",
+            "Authorized",
+            "Reported",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "requested_by": {
+          "type": "integer",
+          "title": "Requested By"
+        },
+        "requested_by_name": {
+          "type": "string",
+          "title": "Requested By Name"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "request_reasons": {
+          "type": "string",
+          "title": "Request Reasons"
+        },
+        "consent_given_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consent Given By"
+        },
+        "consent_relationship": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consent Relationship"
+        },
+        "consent_id_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consent Id Number"
+        },
+        "consent_extent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consent Extent"
+        },
+        "consent_document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Consent Document Id"
+        },
+        "not_medico_legal_certified": {
+          "type": "boolean",
+          "title": "Not Medico Legal Certified"
+        },
+        "authorized_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Authorized By"
+        },
+        "authorized_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Authorized By Name"
+        },
+        "authorized_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Authorized At"
+        },
+        "prosector_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Prosector Name"
+        },
+        "order_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Order Note"
+        },
+        "performed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Performed At"
+        },
+        "findings": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Findings"
+        },
+        "correlation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Confirmed",
+                "MinorDiscrepancy",
+                "MajorDiscrepancy"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correlation"
+        },
+        "correlation_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correlation Note"
+        },
+        "report_document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Report Document Id"
+        },
+        "reported_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reported By"
+        },
+        "reported_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reported By Name"
+        },
+        "reported_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reported At"
+        },
+        "cancel_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancel Reason"
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancelled At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "autopsy_id",
+        "death_id",
+        "status",
+        "requested_by",
+        "requested_by_name",
+        "requested_at",
+        "request_reasons",
+        "consent_given_by",
+        "consent_relationship",
+        "consent_id_number",
+        "consent_extent",
+        "consent_document_id",
+        "not_medico_legal_certified",
+        "authorized_by",
+        "authorized_by_name",
+        "authorized_at",
+        "prosector_name",
+        "order_note",
+        "performed_at",
+        "findings",
+        "correlation",
+        "correlation_note",
+        "report_document_id",
+        "reported_by",
+        "reported_by_name",
+        "reported_at",
+        "cancel_reason",
+        "cancelled_at",
+        "row_version"
+      ],
+      "title": "AutopsyOut",
+      "description": "The clinical autopsy of a death (MSDS 154): the requisition, the consent and the order, the report."
+    },
+    "AutopsyReportIn": {
+      "properties": {
+        "performed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Performed At"
+        },
+        "findings": {
+          "type": "string",
+          "maxLength": 20000,
+          "minLength": 5,
+          "title": "Findings"
+        },
+        "correlation": {
+          "type": "string",
+          "enum": [
+            "Confirmed",
+            "MinorDiscrepancy",
+            "MajorDiscrepancy"
+          ],
+          "title": "Correlation"
+        },
+        "correlation_note": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 5,
+          "title": "Correlation Note",
+          "description": "How the findings bear on the cause of death in the record (MSDS 154 a)"
+        },
+        "report_document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Report Document Id",
+          "description": "The signed report in the patient's documents (AutopsyReport) (POST /patients/{patient_id}/documents)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "performed_at",
+        "findings",
+        "correlation",
+        "correlation_note"
+      ],
+      "title": "AutopsyReportIn"
+    },
+    "AutopsyRequestIn": {
+      "properties": {
+        "request_reasons": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 10,
+          "title": "Request Reasons",
+          "description": "The doubts and questions the autopsy should answer (clinico-pathological correlation)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "request_reasons"
+      ],
+      "title": "AutopsyRequestIn"
+    },
+    "Body_upload_document_api_v1_patients__patient_id__documents_post": {
+      "properties": {
+        "file": {
+          "type": "string",
+          "contentMediaType": "application/octet-stream",
+          "title": "File"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title",
+          "description": "What it is, e.g. 'CBC' or 'Chest X-ray report'"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought from another hospital, laboratory or clinic",
+          "default": false
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "Who issued the outside document (required with is_outside)"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document"
+        }
+      },
+      "type": "object",
+      "required": [
+        "file",
+        "doc_type"
+      ],
+      "title": "Body_upload_document_api_v1_patients__patient_id__documents_post"
+    },
+    "CertifyIn": {
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Version",
+          "description": "row_version of the draft you read"
+        }
+      },
+      "type": "object",
+      "title": "CertifyIn"
+    },
+    "DeathCorrectionIn": {
+      "properties": {
+        "field": {
+          "type": "string",
+          "enum": [
+            "time",
+            "cause",
+            "manner",
+            "external_cause",
+            "surgery",
+            "pregnancy",
+            "infant",
+            "circumstances",
+            "general"
+          ],
+          "title": "Field",
+          "default": "general"
+        },
+        "correction_text": {
+          "type": "string",
+          "maxLength": 5000,
+          "minLength": 1,
+          "title": "Correction Text"
+        },
+        "correction_reason": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Correction Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "correction_text",
+        "correction_reason"
+      ],
+      "title": "DeathCorrectionIn"
+    },
+    "DeathCorrectionOut": {
+      "properties": {
+        "correction_id": {
+          "type": "integer",
+          "title": "Correction Id"
+        },
+        "field": {
+          "type": "string",
+          "enum": [
+            "time",
+            "cause",
+            "manner",
+            "external_cause",
+            "surgery",
+            "pregnancy",
+            "infant",
+            "circumstances",
+            "general"
+          ],
+          "title": "Field"
+        },
+        "correction_text": {
+          "type": "string",
+          "title": "Correction Text"
+        },
+        "correction_reason": {
+          "type": "string",
+          "title": "Correction Reason"
+        },
+        "corrected_by_name": {
+          "type": "string",
+          "title": "Corrected By Name"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "correction_id",
+        "field",
+        "correction_text",
+        "correction_reason",
+        "corrected_by_name",
+        "created_at"
+      ],
+      "title": "DeathCorrectionOut"
+    },
+    "DeathDraftIn": {
+      "properties": {
+        "death_at_estimated": {
+          "type": "boolean",
+          "title": "Death At Estimated",
+          "default": false
+        },
+        "terminal_event": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Terminal Event",
+          "examples": [
+            "Cardiac arrest on the ward; CPR for 30 minutes"
+          ]
+        },
+        "resuscitation_attempted": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resuscitation Attempted"
+        },
+        "expected_death": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Death",
+          "description": "False: an unexpected death (notifies the Quality Officer)"
+        },
+        "mlc_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mlc Id",
+          "description": "The medico-legal case of this death"
+        },
+        "cause_a": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause A",
+          "examples": [
+            "Septic shock"
+          ]
+        },
+        "cause_a_interval": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 50
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause A Interval",
+          "examples": [
+            "2 days"
+          ]
+        },
+        "cause_a_icd": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*[0-9A-Za-z][0-9A-Za-z][0-9][0-9A-Za-z]?(\\.[0-9A-Za-z]{1,4})?\\s*$",
+              "description": "An ICD-11 or ICD-10 code from the ICD picker; it must be in the active code list",
+              "examples": [
+                "CA40.0"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause A Icd"
+        },
+        "cause_b": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause B",
+          "examples": [
+            "Right lower lobe pneumonia"
+          ]
+        },
+        "cause_b_interval": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 50
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause B Interval"
+        },
+        "cause_b_icd": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*[0-9A-Za-z][0-9A-Za-z][0-9][0-9A-Za-z]?(\\.[0-9A-Za-z]{1,4})?\\s*$",
+              "description": "An ICD-11 or ICD-10 code from the ICD picker; it must be in the active code list",
+              "examples": [
+                "CA40.0"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause B Icd"
+        },
+        "cause_c": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause C"
+        },
+        "cause_c_interval": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 50
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause C Interval"
+        },
+        "cause_c_icd": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*[0-9A-Za-z][0-9A-Za-z][0-9][0-9A-Za-z]?(\\.[0-9A-Za-z]{1,4})?\\s*$",
+              "description": "An ICD-11 or ICD-10 code from the ICD picker; it must be in the active code list",
+              "examples": [
+                "CA40.0"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause C Icd"
+        },
+        "cause_d": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause D"
+        },
+        "cause_d_interval": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 50
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause D Interval"
+        },
+        "cause_d_icd": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*[0-9A-Za-z][0-9A-Za-z][0-9][0-9A-Za-z]?(\\.[0-9A-Za-z]{1,4})?\\s*$",
+              "description": "An ICD-11 or ICD-10 code from the ICD picker; it must be in the active code list",
+              "examples": [
+                "CA40.0"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause D Icd"
+        },
+        "other_conditions": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Other Conditions",
+          "examples": [
+            "Type 2 diabetes mellitus"
+          ]
+        },
+        "other_conditions_icd": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string",
+                "pattern": "^\\s*[0-9A-Za-z][0-9A-Za-z][0-9][0-9A-Za-z]?(\\.[0-9A-Za-z]{1,4})?\\s*$",
+                "description": "An ICD-11 or ICD-10 code from the ICD picker; it must be in the active code list",
+                "examples": [
+                  "CA40.0"
+                ]
+              },
+              "type": "array",
+              "maxItems": 10
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Other Conditions Icd"
+        },
+        "manner": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Disease",
+                "Accident",
+                "IntentionalSelfHarm",
+                "Assault",
+                "LegalIntervention",
+                "War",
+                "PendingInvestigation",
+                "CouldNotBeDetermined"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Manner"
+        },
+        "external_cause_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Cause Date"
+        },
+        "external_cause": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Cause",
+          "description": "Required for Accident, IntentionalSelfHarm, Assault, LegalIntervention, War"
+        },
+        "external_cause_place": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Home",
+                "ResidentialInstitution",
+                "SchoolOrPublicBuilding",
+                "SportsArea",
+                "StreetOrHighway",
+                "TradeOrServiceArea",
+                "IndustrialOrConstruction",
+                "Farm",
+                "Other",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Cause Place"
+        },
+        "surgery_within_4_weeks": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Surgery Within 4 Weeks"
+        },
+        "surgery_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Surgery Date"
+        },
+        "surgery_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Surgery Reason"
+        },
+        "pregnancy_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "NotPregnant",
+                "AtDeath",
+                "Within42Days",
+                "Within1Year",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pregnancy Status",
+          "description": "Required for a woman of 10-54 (patient.pregnancy_applies)"
+        },
+        "pregnancy_contributed": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Yes",
+                "No",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pregnancy Contributed"
+        },
+        "multiple_pregnancy": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Multiple Pregnancy"
+        },
+        "hours_survived": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 23,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hours Survived"
+        },
+        "birth_weight_grams": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 8000,
+              "minimum": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Birth Weight Grams"
+        },
+        "gestation_weeks": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 45,
+              "minimum": 20
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gestation Weeks"
+        },
+        "mother_age_years": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 65,
+              "minimum": 9
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mother Age Years"
+        },
+        "maternal_conditions": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Maternal Conditions"
+        },
+        "death_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Death At"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Version",
+          "description": "row_version of the record you read"
+        }
+      },
+      "type": "object",
+      "title": "DeathDraftIn"
+    },
+    "DeathIn": {
+      "properties": {
+        "death_at_estimated": {
+          "type": "boolean",
+          "title": "Death At Estimated",
+          "default": false
+        },
+        "terminal_event": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Terminal Event",
+          "examples": [
+            "Cardiac arrest on the ward; CPR for 30 minutes"
+          ]
+        },
+        "resuscitation_attempted": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resuscitation Attempted"
+        },
+        "expected_death": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Death",
+          "description": "False: an unexpected death (notifies the Quality Officer)"
+        },
+        "mlc_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mlc Id",
+          "description": "The medico-legal case of this death"
+        },
+        "cause_a": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause A",
+          "examples": [
+            "Septic shock"
+          ]
+        },
+        "cause_a_interval": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 50
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause A Interval",
+          "examples": [
+            "2 days"
+          ]
+        },
+        "cause_a_icd": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*[0-9A-Za-z][0-9A-Za-z][0-9][0-9A-Za-z]?(\\.[0-9A-Za-z]{1,4})?\\s*$",
+              "description": "An ICD-11 or ICD-10 code from the ICD picker; it must be in the active code list",
+              "examples": [
+                "CA40.0"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause A Icd"
+        },
+        "cause_b": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause B",
+          "examples": [
+            "Right lower lobe pneumonia"
+          ]
+        },
+        "cause_b_interval": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 50
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause B Interval"
+        },
+        "cause_b_icd": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*[0-9A-Za-z][0-9A-Za-z][0-9][0-9A-Za-z]?(\\.[0-9A-Za-z]{1,4})?\\s*$",
+              "description": "An ICD-11 or ICD-10 code from the ICD picker; it must be in the active code list",
+              "examples": [
+                "CA40.0"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause B Icd"
+        },
+        "cause_c": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause C"
+        },
+        "cause_c_interval": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 50
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause C Interval"
+        },
+        "cause_c_icd": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*[0-9A-Za-z][0-9A-Za-z][0-9][0-9A-Za-z]?(\\.[0-9A-Za-z]{1,4})?\\s*$",
+              "description": "An ICD-11 or ICD-10 code from the ICD picker; it must be in the active code list",
+              "examples": [
+                "CA40.0"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause C Icd"
+        },
+        "cause_d": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause D"
+        },
+        "cause_d_interval": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 50
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause D Interval"
+        },
+        "cause_d_icd": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*[0-9A-Za-z][0-9A-Za-z][0-9][0-9A-Za-z]?(\\.[0-9A-Za-z]{1,4})?\\s*$",
+              "description": "An ICD-11 or ICD-10 code from the ICD picker; it must be in the active code list",
+              "examples": [
+                "CA40.0"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause D Icd"
+        },
+        "other_conditions": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Other Conditions",
+          "examples": [
+            "Type 2 diabetes mellitus"
+          ]
+        },
+        "other_conditions_icd": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string",
+                "pattern": "^\\s*[0-9A-Za-z][0-9A-Za-z][0-9][0-9A-Za-z]?(\\.[0-9A-Za-z]{1,4})?\\s*$",
+                "description": "An ICD-11 or ICD-10 code from the ICD picker; it must be in the active code list",
+                "examples": [
+                  "CA40.0"
+                ]
+              },
+              "type": "array",
+              "maxItems": 10
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Other Conditions Icd"
+        },
+        "manner": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Disease",
+                "Accident",
+                "IntentionalSelfHarm",
+                "Assault",
+                "LegalIntervention",
+                "War",
+                "PendingInvestigation",
+                "CouldNotBeDetermined"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Manner"
+        },
+        "external_cause_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Cause Date"
+        },
+        "external_cause": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Cause",
+          "description": "Required for Accident, IntentionalSelfHarm, Assault, LegalIntervention, War"
+        },
+        "external_cause_place": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Home",
+                "ResidentialInstitution",
+                "SchoolOrPublicBuilding",
+                "SportsArea",
+                "StreetOrHighway",
+                "TradeOrServiceArea",
+                "IndustrialOrConstruction",
+                "Farm",
+                "Other",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Cause Place"
+        },
+        "surgery_within_4_weeks": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Surgery Within 4 Weeks"
+        },
+        "surgery_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Surgery Date"
+        },
+        "surgery_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Surgery Reason"
+        },
+        "pregnancy_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "NotPregnant",
+                "AtDeath",
+                "Within42Days",
+                "Within1Year",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pregnancy Status",
+          "description": "Required for a woman of 10-54 (patient.pregnancy_applies)"
+        },
+        "pregnancy_contributed": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Yes",
+                "No",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pregnancy Contributed"
+        },
+        "multiple_pregnancy": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Multiple Pregnancy"
+        },
+        "hours_survived": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 23,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hours Survived"
+        },
+        "birth_weight_grams": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 8000,
+              "minimum": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Birth Weight Grams"
+        },
+        "gestation_weeks": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 45,
+              "minimum": 20
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gestation Weeks"
+        },
+        "mother_age_years": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 65,
+              "minimum": 9
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mother Age Years"
+        },
+        "maternal_conditions": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Maternal Conditions"
+        },
+        "setting": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Inpatient",
+                "Emergency",
+                "Outpatient",
+                "BroughtDead"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Setting",
+          "description": "Default: Inpatient when the patient is admitted, else Emergency"
+        },
+        "death_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Death At"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id",
+          "description": "The emergency or OPD visit, if any"
+        },
+        "arrived_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Arrived At",
+          "description": "BroughtDead: when the body was received (required)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "death_at"
+      ],
+      "title": "DeathIn"
+    },
+    "DeathPrintFieldsOut": {
+      "properties": {
+        "hospital": {
+          "$ref": "#/components/schemas/HospitalHeaderOut"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "certificate_number": {
+          "type": "string",
+          "title": "Certificate Number"
+        },
+        "death": {
+          "$ref": "#/components/schemas/DeathRecordOut"
+        },
+        "patient": {
+          "$ref": "#/components/schemas/PatientAtDeathOut"
+        },
+        "corrections": {
+          "items": {
+            "$ref": "#/components/schemas/DeathCorrectionOut"
+          },
+          "type": "array",
+          "title": "Corrections"
+        },
+        "autopsy": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AutopsyOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "hospital",
+        "title",
+        "certificate_number",
+        "death",
+        "patient",
+        "corrections",
+        "autopsy"
+      ],
+      "title": "DeathPrintFieldsOut"
+    },
+    "DeathRecordOut": {
+      "properties": {
+        "death_id": {
+          "type": "integer",
+          "title": "Death Id"
+        },
+        "death_number": {
+          "type": "string",
+          "title": "Death Number",
+          "description": "e.g. DTH-2026-00001, printed on the certificate"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "setting": {
+          "type": "string",
+          "enum": [
+            "Inpatient",
+            "Emergency",
+            "Outpatient",
+            "BroughtDead"
+          ],
+          "title": "Setting"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id",
+          "description": "Inpatient: the stay the patient died in"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "bed_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Label"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Id",
+          "description": "The emergency or OPD visit, when there was one"
+        },
+        "ticket_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ticket Number"
+        },
+        "mlc_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mlc Id",
+          "description": "A medico-legal death: its case in the MLC register"
+        },
+        "mlc_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mlc Number"
+        },
+        "mlc_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Open",
+                "Closed"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mlc Status"
+        },
+        "arrived_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Arrived At",
+          "description": "Brought dead: when the body was received"
+        },
+        "death_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Death At"
+        },
+        "death_at_estimated": {
+          "type": "boolean",
+          "title": "Death At Estimated"
+        },
+        "pronounced_by": {
+          "type": "integer",
+          "title": "Pronounced By"
+        },
+        "pronounced_by_name": {
+          "type": "string",
+          "title": "Pronounced By Name"
+        },
+        "pronounced_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Pronounced At"
+        },
+        "terminal_event": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Terminal Event"
+        },
+        "resuscitation_attempted": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Resuscitation Attempted"
+        },
+        "expected_death": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Death",
+          "description": "False: an unexpected death, reviewed as a sentinel event (MSDS 106)"
+        },
+        "cause_a": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause A",
+          "description": "Part I (a): the disease or condition leading directly to death"
+        },
+        "cause_a_interval": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause A Interval",
+          "description": "Approximate interval from onset to death, e.g. \"2 days\""
+        },
+        "cause_a_icd": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause A Icd"
+        },
+        "cause_b": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause B",
+          "description": "Part I (b): due to (or as a consequence of) this"
+        },
+        "cause_b_interval": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause B Interval"
+        },
+        "cause_b_icd": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause B Icd"
+        },
+        "cause_c": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause C"
+        },
+        "cause_c_interval": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause C Interval"
+        },
+        "cause_c_icd": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause C Icd"
+        },
+        "cause_d": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause D"
+        },
+        "cause_d_interval": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause D Interval"
+        },
+        "cause_d_icd": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cause D Icd"
+        },
+        "other_conditions": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Other Conditions",
+          "description": "Part II: other significant conditions contributing to the death"
+        },
+        "other_conditions_icd": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Other Conditions Icd"
+        },
+        "underlying_cause": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Underlying Cause",
+          "description": "The lowest line of Part I filled: the underlying cause as certified"
+        },
+        "underlying_icd": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Underlying Icd"
+        },
+        "underlying_term": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/IcdTermOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The underlying cause's code with its title and WHO URI"
+        },
+        "icd_terms": {
+          "items": {
+            "$ref": "#/components/schemas/IcdTermOut"
+          },
+          "type": "array",
+          "title": "Icd Terms",
+          "description": "Every code on the certificate with its title and WHO URI"
+        },
+        "manner": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Disease",
+                "Accident",
+                "IntentionalSelfHarm",
+                "Assault",
+                "LegalIntervention",
+                "War",
+                "PendingInvestigation",
+                "CouldNotBeDetermined"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Manner"
+        },
+        "external_cause_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Cause Date"
+        },
+        "external_cause": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Cause",
+          "description": "An injury: how it happened; a poisoning: the agent"
+        },
+        "external_cause_place": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Home",
+                "ResidentialInstitution",
+                "SchoolOrPublicBuilding",
+                "SportsArea",
+                "StreetOrHighway",
+                "TradeOrServiceArea",
+                "IndustrialOrConstruction",
+                "Farm",
+                "Other",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Cause Place"
+        },
+        "surgery_within_4_weeks": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Surgery Within 4 Weeks"
+        },
+        "surgery_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Surgery Date"
+        },
+        "surgery_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Surgery Reason"
+        },
+        "pregnancy_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "NotPregnant",
+                "AtDeath",
+                "Within42Days",
+                "Within1Year",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pregnancy Status"
+        },
+        "pregnancy_contributed": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Yes",
+                "No",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pregnancy Contributed"
+        },
+        "multiple_pregnancy": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Multiple Pregnancy"
+        },
+        "hours_survived": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hours Survived",
+          "description": "A baby who died within 24 hours of birth: completed hours"
+        },
+        "birth_weight_grams": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Birth Weight Grams"
+        },
+        "gestation_weeks": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gestation Weeks"
+        },
+        "mother_age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mother Age Years"
+        },
+        "maternal_conditions": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Maternal Conditions",
+          "description": "Perinatal death: the mother's conditions that affected the baby"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Certified"
+          ],
+          "title": "Status"
+        },
+        "certified_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Certified By"
+        },
+        "certified_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Certified At"
+        },
+        "certifier_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Certifier Name"
+        },
+        "certifier_designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Certifier Designation"
+        },
+        "certifier_license": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Certifier License",
+          "description": "e.g. \"PMDC 12345-P\", frozen at certification"
+        },
+        "body_released_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Body Released At"
+        },
+        "body_released_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Body Released By"
+        },
+        "body_released_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Body Released By Name"
+        },
+        "body_released_to": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "NextOfKin",
+                "Police",
+                "Mortuary",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Body Released To"
+        },
+        "receiver_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receiver Name"
+        },
+        "receiver_relationship": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receiver Relationship"
+        },
+        "receiver_id_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receiver Id Number"
+        },
+        "receiver_phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receiver Phone"
+        },
+        "police_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Police Reference"
+        },
+        "release_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Release Note"
+        },
+        "recorded_by": {
+          "type": "integer",
+          "title": "Recorded By"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "death_id",
+        "death_number",
+        "patient_id",
+        "setting",
+        "admission_id",
+        "admission_number",
+        "ward_name",
+        "bed_label",
+        "ticket_id",
+        "ticket_number",
+        "mlc_id",
+        "mlc_number",
+        "mlc_status",
+        "arrived_at",
+        "death_at",
+        "death_at_estimated",
+        "pronounced_by",
+        "pronounced_by_name",
+        "pronounced_at",
+        "terminal_event",
+        "resuscitation_attempted",
+        "expected_death",
+        "cause_a",
+        "cause_a_interval",
+        "cause_a_icd",
+        "cause_b",
+        "cause_b_interval",
+        "cause_b_icd",
+        "cause_c",
+        "cause_c_interval",
+        "cause_c_icd",
+        "cause_d",
+        "cause_d_interval",
+        "cause_d_icd",
+        "other_conditions",
+        "other_conditions_icd",
+        "underlying_cause",
+        "underlying_icd",
+        "underlying_term",
+        "icd_terms",
+        "manner",
+        "external_cause_date",
+        "external_cause",
+        "external_cause_place",
+        "surgery_within_4_weeks",
+        "surgery_date",
+        "surgery_reason",
+        "pregnancy_status",
+        "pregnancy_contributed",
+        "multiple_pregnancy",
+        "hours_survived",
+        "birth_weight_grams",
+        "gestation_weeks",
+        "mother_age_years",
+        "maternal_conditions",
+        "status",
+        "certified_by",
+        "certified_at",
+        "certifier_name",
+        "certifier_designation",
+        "certifier_license",
+        "body_released_at",
+        "body_released_by",
+        "body_released_by_name",
+        "body_released_to",
+        "receiver_name",
+        "receiver_relationship",
+        "receiver_id_number",
+        "receiver_phone",
+        "police_reference",
+        "release_note",
+        "recorded_by",
+        "created_at",
+        "row_version"
+      ],
+      "title": "DeathRecordOut",
+      "description": "A death record: where and when, the WHO cause-of-death certificate (Part I lines a-d with interval and ICD code,\nPart II, manner, external cause, surgery, pregnancy, a baby's details), the certifier's stamp, the handover."
+    },
+    "DeathRegisterRowOut": {
+      "properties": {
+        "death_id": {
+          "type": "integer",
+          "title": "Death Id"
+        },
+        "death_number": {
+          "type": "string",
+          "title": "Death Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "setting": {
+          "type": "string",
+          "enum": [
+            "Inpatient",
+            "Emergency",
+            "Outpatient",
+            "BroughtDead"
+          ],
+          "title": "Setting"
+        },
+        "death_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Death At"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Certified"
+          ],
+          "title": "Status"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "underlying_cause": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Underlying Cause"
+        },
+        "underlying_icd": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Underlying Icd"
+        },
+        "underlying_term": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/IcdTermOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The underlying cause's code with its title and WHO URI"
+        },
+        "manner": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Disease",
+                "Accident",
+                "IntentionalSelfHarm",
+                "Assault",
+                "LegalIntervention",
+                "War",
+                "PendingInvestigation",
+                "CouldNotBeDetermined"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Manner"
+        },
+        "expected_death": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Death"
+        },
+        "mlc_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mlc Number"
+        },
+        "certifier_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Certifier Name"
+        },
+        "certified_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Certified At"
+        },
+        "body_released_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Body Released At"
+        },
+        "body_released_to": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "NextOfKin",
+                "Police",
+                "Mortuary",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Body Released To"
+        },
+        "autopsy_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Requested",
+                "Authorized",
+                "Reported",
+                "Cancelled"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Autopsy Status"
+        }
+      },
+      "type": "object",
+      "required": [
+        "death_id",
+        "death_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "gender",
+        "setting",
+        "death_at",
+        "status",
+        "admission_number",
+        "ward_name",
+        "department_name",
+        "underlying_cause",
+        "underlying_icd",
+        "underlying_term",
+        "manner",
+        "expected_death",
+        "mlc_number",
+        "certifier_name",
+        "certified_at",
+        "body_released_at",
+        "body_released_to",
+        "autopsy_status"
+      ],
+      "title": "DeathRegisterRowOut"
+    },
+    "DeathSuggestionsOut": {
+      "properties": {
+        "conditions": {
+          "items": {
+            "$ref": "#/components/schemas/SuggestedConditionOut"
+          },
+          "type": "array",
+          "title": "Conditions",
+          "description": "Diagnoses written for the stay or visit: offer them for the Part I lines and Part II"
+        },
+        "surgery": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/SuggestedSurgeryOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The last operation of the four weeks before death, if any"
+        }
+      },
+      "type": "object",
+      "required": [
+        "conditions",
+        "surgery"
+      ],
+      "title": "DeathSuggestionsOut"
+    },
+    "DeathViewOut": {
+      "properties": {
+        "death": {
+          "$ref": "#/components/schemas/DeathRecordOut"
+        },
+        "patient": {
+          "$ref": "#/components/schemas/PatientAtDeathOut"
+        },
+        "corrections": {
+          "items": {
+            "$ref": "#/components/schemas/DeathCorrectionOut"
+          },
+          "type": "array",
+          "title": "Corrections"
+        },
+        "autopsy": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AutopsyOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The latest clinical autopsy request, if any"
+        },
+        "suggested": {
+          "$ref": "#/components/schemas/DeathSuggestionsOut"
+        },
+        "missing": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "cause_a",
+              "manner",
+              "expected_death",
+              "surgery_within_4_weeks",
+              "surgery_date",
+              "external_cause",
+              "pregnancy_status"
+            ]
+          },
+          "type": "array",
+          "title": "Missing",
+          "description": "What certification still needs (empty once certified)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "death",
+        "patient",
+        "corrections",
+        "autopsy",
+        "suggested",
+        "missing"
+      ],
+      "title": "DeathViewOut"
+    },
+    "Envelope_DeathViewOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/DeathViewOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[DeathViewOut]"
+    },
+    "Envelope_IcdBrowseOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/IcdBrowseOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[IcdBrowseOut]"
+    },
+    "Envelope_IcdDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/IcdDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[IcdDetailOut]"
+    },
+    "Envelope_IcdReleasesOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/IcdReleasesOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[IcdReleasesOut]"
+    },
+    "Envelope_IcdSearchOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/IcdSearchOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[IcdSearchOut]"
+    },
+    "Envelope_PatientDocumentUploadOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PatientDocumentUploadOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PatientDocumentUploadOut]"
+    },
+    "Envelope_PrintOut_DeathPrintFieldsOut__": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PrintOut_DeathPrintFieldsOut_"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PrintOut[DeathPrintFieldsOut]]"
+    },
+    "Envelope_list_DeathRegisterRowOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/DeathRegisterRowOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[DeathRegisterRowOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "HospitalHeaderOut": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "address": {
+          "type": "string",
+          "title": "Address"
+        },
+        "phone": {
+          "type": "string",
+          "title": "Phone"
+        },
+        "phc_number": {
+          "type": "string",
+          "title": "Phc Number",
+          "description": "The Punjab Healthcare Commission registration / licence number (GET /msds/profile); empty until an admin confirms it"
+        },
+        "issue_line": {
+          "type": "string",
+          "title": "Issue Line",
+          "description": "An issued document: 'Issued <when>; this copy printed <when>', with '(reprint)' an hour or more later; print it under the PHC number. Empty for a report of now"
+        }
+      },
+      "type": "object",
+      "required": [
+        "name",
+        "address",
+        "phone",
+        "phc_number",
+        "issue_line"
+      ],
+      "title": "HospitalHeaderOut"
+    },
+    "IcdAncestorOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "chapter",
+            "block",
+            "category"
+          ],
+          "title": "Kind"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uri"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "kind",
+        "title",
+        "uri"
+      ],
+      "title": "IcdAncestorOut"
+    },
+    "IcdBrowseOut": {
+      "properties": {
+        "code_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Code System"
+        },
+        "release_label": {
+          "type": "string",
+          "title": "Release Label"
+        },
+        "parent": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/IcdEntryOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The node whose children these are (null: the chapters)"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/components/schemas/IcdEntryOut"
+          },
+          "type": "array",
+          "title": "Items"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code_system",
+        "release_label",
+        "parent",
+        "items"
+      ],
+      "title": "IcdBrowseOut"
+    },
+    "IcdDetailOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code",
+          "description": "A category's code; a block's id; a chapter's number"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "chapter",
+            "block",
+            "category"
+          ],
+          "title": "Kind"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uri"
+        },
+        "chapter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Chapter"
+        },
+        "parent_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Code"
+        },
+        "depth": {
+          "type": "integer",
+          "title": "Depth"
+        },
+        "is_leaf": {
+          "type": "boolean",
+          "title": "Is Leaf"
+        },
+        "is_residual": {
+          "type": "boolean",
+          "title": "Is Residual",
+          "description": "An \"other specified\" or \"unspecified\" category: prefer a specific one"
+        },
+        "code_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Code System"
+        },
+        "release_label": {
+          "type": "string",
+          "title": "Release Label"
+        },
+        "ancestors": {
+          "items": {
+            "$ref": "#/components/schemas/IcdAncestorOut"
+          },
+          "type": "array",
+          "title": "Ancestors",
+          "description": "Chapter first, down to the parent"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/components/schemas/IcdEntryOut"
+          },
+          "type": "array",
+          "title": "Children"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "kind",
+        "title",
+        "uri",
+        "chapter",
+        "parent_code",
+        "depth",
+        "is_leaf",
+        "is_residual",
+        "code_system",
+        "release_label",
+        "ancestors",
+        "children"
+      ],
+      "title": "IcdDetailOut"
+    },
+    "IcdEntryOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code",
+          "description": "A category's code; a block's id; a chapter's number"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "chapter",
+            "block",
+            "category"
+          ],
+          "title": "Kind"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uri"
+        },
+        "chapter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Chapter"
+        },
+        "parent_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Code"
+        },
+        "depth": {
+          "type": "integer",
+          "title": "Depth"
+        },
+        "is_leaf": {
+          "type": "boolean",
+          "title": "Is Leaf"
+        },
+        "is_residual": {
+          "type": "boolean",
+          "title": "Is Residual",
+          "description": "An \"other specified\" or \"unspecified\" category: prefer a specific one"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "kind",
+        "title",
+        "uri",
+        "chapter",
+        "parent_code",
+        "depth",
+        "is_leaf",
+        "is_residual"
+      ],
+      "title": "IcdEntryOut"
+    },
+    "IcdReleaseOut": {
+      "properties": {
+        "release_id": {
+          "type": "integer",
+          "title": "Release Id"
+        },
+        "code_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Code System"
+        },
+        "release_label": {
+          "type": "string",
+          "title": "Release Label",
+          "description": "e.g. \"2026-01\" (ICD-11) or \"2019\" (ICD-10)"
+        },
+        "language": {
+          "type": "string",
+          "title": "Language"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "Bundled",
+            "Imported"
+          ],
+          "title": "Source",
+          "description": "Bundled: shipped with the product (ICD-11); Imported: loaded by the hospital (its licensed ICD-10, or a newer ICD-11)"
+        },
+        "source_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source File"
+        },
+        "source_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Sha256"
+        },
+        "licence_note": {
+          "type": "string",
+          "title": "Licence Note",
+          "description": "The licence the list is used under; show it where the list is used"
+        },
+        "code_count": {
+          "type": "integer",
+          "title": "Code Count",
+          "description": "Codable categories"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "description": "The list the picker searches and new codes are checked against"
+        },
+        "loaded_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Loaded By"
+        },
+        "loaded_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Loaded By Name"
+        },
+        "loaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Loaded At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "release_id",
+        "code_system",
+        "release_label",
+        "language",
+        "source",
+        "source_file",
+        "source_sha256",
+        "licence_note",
+        "code_count",
+        "is_active",
+        "loaded_by",
+        "loaded_by_name",
+        "loaded_at",
+        "row_version"
+      ],
+      "title": "IcdReleaseOut"
+    },
+    "IcdReleasesOut": {
+      "properties": {
+        "coding_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Coding System",
+          "description": "The classification doctors code in (setting icd_coding_system)"
+        },
+        "releases": {
+          "items": {
+            "$ref": "#/components/schemas/IcdReleaseOut"
+          },
+          "type": "array",
+          "title": "Releases"
+        },
+        "icd11_citation": {
+          "type": "string",
+          "title": "Icd11 Citation",
+          "description": "The attribution the ICD-11 licence requires on screens and reports that use it"
+        }
+      },
+      "type": "object",
+      "required": [
+        "coding_system",
+        "releases",
+        "icd11_citation"
+      ],
+      "title": "IcdReleasesOut"
+    },
+    "IcdSearchItemOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code",
+          "description": "A category's code; a block's id; a chapter's number"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "chapter",
+            "block",
+            "category"
+          ],
+          "title": "Kind"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uri"
+        },
+        "chapter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Chapter"
+        },
+        "parent_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Code"
+        },
+        "depth": {
+          "type": "integer",
+          "title": "Depth"
+        },
+        "is_leaf": {
+          "type": "boolean",
+          "title": "Is Leaf"
+        },
+        "is_residual": {
+          "type": "boolean",
+          "title": "Is Residual",
+          "description": "An \"other specified\" or \"unspecified\" category: prefer a specific one"
+        },
+        "parent_title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Title",
+          "description": "The block or category above, to tell similar titles apart"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "kind",
+        "title",
+        "uri",
+        "chapter",
+        "parent_code",
+        "depth",
+        "is_leaf",
+        "is_residual",
+        "parent_title"
+      ],
+      "title": "IcdSearchItemOut"
+    },
+    "IcdSearchOut": {
+      "properties": {
+        "code_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Code System"
+        },
+        "release_label": {
+          "type": "string",
+          "title": "Release Label"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/components/schemas/IcdSearchItemOut"
+          },
+          "type": "array",
+          "title": "Items"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code_system",
+        "release_label",
+        "items"
+      ],
+      "title": "IcdSearchOut"
+    },
+    "IcdTermOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "System"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uri",
+          "description": "ICD-11: the WHO URI of the entity (null for ICD-10)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "system",
+        "title",
+        "uri"
+      ],
+      "title": "IcdTermOut",
+      "description": "A code as stored in a record, with its title and WHO URI from the code list (the ICD-11 licence asks for code,\ntitle and URI together wherever codes are sent). `title` is null only for a code no list has."
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "PatientAtDeathOut": {
+      "properties": {
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "father_or_husband_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Father Or Husband Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "cnic": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cnic"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "age_at_death_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age At Death Years"
+        },
+        "age_at_death_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age At Death Days",
+          "description": "Known when the date of birth is"
+        },
+        "pregnancy_applies": {
+          "type": "boolean",
+          "title": "Pregnancy Applies",
+          "description": "A woman of 10-54: the pregnancy question must be answered"
+        },
+        "infant_applies": {
+          "type": "boolean",
+          "title": "Infant Applies",
+          "description": "A baby under one year: show the fetal and infant part of the form"
+        }
+      },
+      "type": "object",
+      "required": [
+        "patient_id",
+        "mrn",
+        "full_name",
+        "father_or_husband_name",
+        "gender",
+        "dob",
+        "cnic",
+        "address",
+        "age_at_death_years",
+        "age_at_death_days",
+        "pregnancy_applies",
+        "infant_applies"
+      ],
+      "title": "PatientAtDeathOut"
+    },
+    "PatientDocumentUploadOut": {
+      "properties": {
+        "document_id": {
+          "type": "integer",
+          "title": "Document Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "doc_type": {
+          "type": "string",
+          "enum": [
+            "Photo",
+            "CNIC",
+            "PanelCard",
+            "Consent",
+            "ReferralLetter",
+            "DeathCertificate",
+            "AutopsyReport",
+            "PostMortemReport",
+            "MedicoLegalReport",
+            "LabReport",
+            "Imaging",
+            "DischargeSummary",
+            "Prescription",
+            "Other"
+          ],
+          "title": "Doc Type"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "application/pdf",
+            "image/jpeg",
+            "image/png"
+          ],
+          "title": "Content Type"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "title": "Size Bytes"
+        },
+        "is_outside": {
+          "type": "boolean",
+          "title": "Is Outside",
+          "description": "Brought by the patient from another hospital, laboratory or clinic: show it labelled as an outside document, never as a result of this hospital"
+        },
+        "source_facility": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Facility",
+          "description": "The hospital, laboratory or clinic that issued an outside document"
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Date",
+          "description": "The date written on the document (the test, the report, the visit)"
+        },
+        "uploaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Uploaded At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_id",
+        "patient_id",
+        "doc_type",
+        "title",
+        "content_type",
+        "size_bytes",
+        "is_outside",
+        "source_facility",
+        "document_date",
+        "uploaded_at"
+      ],
+      "title": "PatientDocumentUploadOut",
+      "description": "The stored document (download it with GET /patient-documents/{document_id}/download)."
+    },
+    "PrintOut_DeathPrintFieldsOut_": {
+      "properties": {
+        "document_type": {
+          "type": "string",
+          "enum": [
+            "autopsy_order",
+            "bed_labels",
+            "blood_component_label",
+            "blood_donation_labels",
+            "clinical_note",
+            "complaint_letter",
+            "complaints_notice",
+            "consent_form",
+            "cost_estimate",
+            "cssd_labels",
+            "death_certificate",
+            "discharge_summary",
+            "dispensing_label",
+            "dose_label",
+            "id_card",
+            "imaging_report",
+            "lab_label",
+            "lab_report",
+            "mlc_intimation",
+            "opd_slip",
+            "pharmacy_receipt",
+            "prescription",
+            "referral_slip",
+            "send_out_manifest",
+            "surgical_record",
+            "triage_algorithm",
+            "wristband"
+          ],
+          "title": "Document Type"
+        },
+        "printer_role": {
+          "type": "string",
+          "enum": [
+            "receipt",
+            "label",
+            "document",
+            "card"
+          ],
+          "title": "Printer Role",
+          "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+        },
+        "paper_width_mm": {
+          "type": "integer",
+          "title": "Paper Width Mm"
+        },
+        "fields": {
+          "$ref": "#/components/schemas/DeathPrintFieldsOut",
+          "description": "The document's data, for frontends that render their own layout"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Text",
+          "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+        },
+        "barcode_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode Svg"
+        },
+        "qr_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Qr Svg"
+        },
+        "pdf_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pdf Url"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_type",
+        "printer_role",
+        "paper_width_mm",
+        "fields",
+        "text",
+        "barcode_svg",
+        "qr_svg",
+        "pdf_url"
+      ],
+      "title": "PrintOut[DeathPrintFieldsOut]"
+    },
+    "SuggestedConditionOut": {
+      "properties": {
+        "text": {
+          "type": "string",
+          "title": "Text"
+        },
+        "icd_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Icd Codes"
+        },
+        "icd_terms": {
+          "items": {
+            "$ref": "#/components/schemas/IcdTermOut"
+          },
+          "type": "array",
+          "title": "Icd Terms"
+        }
+      },
+      "type": "object",
+      "required": [
+        "text",
+        "icd_codes",
+        "icd_terms"
+      ],
+      "title": "SuggestedConditionOut"
+    },
+    "SuggestedSurgeryOut": {
+      "properties": {
+        "surgery_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Surgery Date"
+        },
+        "surgery_reason": {
+          "type": "string",
+          "title": "Surgery Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "surgery_date",
+        "surgery_reason"
+      ],
+      "title": "SuggestedSurgeryOut"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    }
+  },
+  "unknowns": []
+}

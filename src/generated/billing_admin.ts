@@ -27,6 +27,7 @@ export interface ServiceIn {
   name: string;
   category: "OPD" | "IPD" | "OT" | "Imaging" | "RoomCharge" | "Procedure" | "Other";
   default_price: number | string;
+  /** The department (GET /admin/departments) */
   department_id?: number | null;
   /** Consultant-specific OPD fee */
   doctor_id?: number | null;
@@ -102,6 +103,7 @@ export interface DiscountPolicyOut {
 
 export interface DiscountPolicyIn {
   role_code?: string | null;
+  /** The user the policy is for, instead of a role (GET /staff/lookup → user_id) */
   user_id?: number | null;
   max_discount_pct: number | string;
   max_discount_amount?: number | string | null;
@@ -160,6 +162,17 @@ export interface StaffLookupOut {
   license_type: "PMDC" | "PNC" | "Other" | null;
   /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
   registration: string | null;
+  /** Their login, the id a form's user field takes (an action's owner, a signer, the person told); null: no login (decision 62) */
+  user_id: number | null;
+}
+
+export interface DepartmentOut {
+  department_id: number;
+  code: string;
+  name: string;
+  is_clinical: boolean;
+  is_active: boolean;
+  row_version: number;
 }
 
 /** Hospital service prices (lab prices live in the lab catalogue) — GET /api/v1/finance/service-catalog (who may call: any logged-in user). */
@@ -215,4 +228,9 @@ export function addContract(body: ContractIn): Promise<ContractOut> {
 /** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
 export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
   return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
+}
+
+/** Departments — GET /api/v1/admin/departments (who may call: any logged-in user). */
+export function departments(): Promise<DepartmentOut[]> {
+  return api<DepartmentOut[]>("GET", `/admin/departments`, undefined);
 }
