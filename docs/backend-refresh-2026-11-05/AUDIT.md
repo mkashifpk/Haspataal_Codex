@@ -13,7 +13,7 @@ The generated structural changes match the requested waste handover, reagent bat
 - Synthetic MLC scan upload201, lost reply/original-key replay and separate attachment passed. Prescription/autopsy upload transactions remain untested.
 - HR named Draft resume and employee-vs-user supervisor selection passed without saving/re-registering staff.
 - Breadth:73/74 affected built screens passed read/F1/focus/ENUR/250% checks across correct workspace actors. Self-service app path blocked by #55. Read-only checks do not establish full historical CRUD or every screen_test_plan case.
-- #54 (New): sandbox_call inserts an omitted key, so literal no-header test was unavailable; different-key final conflict was tested. #55 (New): self_service advertised for Reception, but auth/workspaces omits it and scoped handbook403. No local authorization bypass.
+- #54 (New, tool limitation): sandbox_call inserts an omitted key. A later Electron HTTPS transport check verified the actual header absent and409 WASTE_HANDED_OVER with details.waste_id; see literal-no-key-evidence.json. Different-key conflict and exact-key replay also passed. #55 (New): self_service advertised for Reception, but auth/workspaces omits it and scoped handbook403. No local authorization bypass.
 - Human fresh-data journeys, native Urdu/editor pass and physical device acceptance remain pending. No review code or human sign-off was fabricated.
 
 ## Screen-by-screen review
@@ -114,3 +114,5 @@ Active departments and wards: IT adds missing entries. Staff search requires2cha
 Historical pre-reset examples are fenced under docs/historical-dev-tests-pre-7429acf and must never be executed. New synthetic provenance/request IDs are in this directory; local config and profiles stay ignored. No real patient, real waste or money was used.
 
 Final checks: 863/863unit tests passed, followed by14/14HR/self-service policy checks after the final policy change. DEV build and release build passed; release verifier confirms the Review code UI and all three attribution headers are absent. Initial release check caught agent documentation imported with a full contract; exact schema-only projections now avoid bundling those instructions. Large bundle warning remains. git diff --check passed. No installer signed/deployed.
+
+Reset follow-up: archived153additional old snapshot/journal consumers (203total), preserving exact source/hashes as historical Markdown. Required package entrypoints and helpers remain. registration-review now rejects pre-reset evidence; registration-check stamps the current dataset in new output. These two registration scripts were syntax-checked; no new registration/payment was run for this harness-only change.

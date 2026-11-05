@@ -1,0 +1,10 @@
+# Historical DEV test - retired after database reset
+
+This source is evidence only. Rewrite it to discover/create fresh records before reactivation. Never replay old keys, IDs or event cursors.
+
+```javascript
+import fs from 'node:fs';import assert from 'node:assert/strict';import {session} from './clinical-test-kit.mjs';
+const s=await session('resume1104-navigation-baseline','demo.hr');
+try {const handbook=await s.native('api',{method:'GET',path:'/meta/handbook?workspace=hr'});const permitted=handbook.workspaces.flatMap(w=>w.screens).map(v=>v.id);const text=await s.p.getByRole('navigation').innerText();const result={permitted_payroll:permitted.includes('payroll'),payroll_visible:/payroll/i.test(text),navigation:text,build:'index-BO_dJrTo.js baseline'};assert(result.permitted_payroll);assert.equal(result.payroll_visible,false);fs.writeFileSync('docs/continuation-2026-11-04/navigation-gap-baseline.json',JSON.stringify(result,null,2));console.log('CONFIRMED: server permits Payroll; baseline HR navigation does not expose its implemented screen.');}finally{await s.close();}
+
+```

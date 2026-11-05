@@ -1,0 +1,21 @@
+# Historical DEV test - retired after database reset
+
+This source is evidence only. Rewrite it to discover/create fresh records before reactivation. Never replay old keys, IDs or event cursors.
+
+```javascript
+// Add explicit native names for existing form-state members which are request fields.
+// This changes accessible validation association only, never request construction.
+import fs from 'node:fs';import {parse} from '@babel/parser';
+const endpoints=JSON.parse(fs.readFileSync('contracts/evening-write-endpoints-2026-10-28.json')),known=new Set();
+function props(v){if(!v||typeof v!=='object')return;for(const k of Object.keys(v.properties||{}))known.add(k);for(const x of Object.values(v))if(x&&typeof x==='object')Array.isArray(x)?x.forEach(props):props(x);}
+endpoints.forEach(x=>props(x.endpoint.request_body));
+const aliases={ward:'ward_id',bed:'bed_id',doctor:'doctor_id',department:'department_id',panel:'panel_id',category:'billing_category',active:'is_active',discountReason:'discount_reason',targetDoctor:'target_doctor_id',estimatedDays:'estimated_days',estimatedCost:'estimated_cost'};
+const files=fs.readdirSync('src/screens').filter(x=>x.endsWith('.tsx')).map(x=>'src/screens/'+x);const report=[];
+for(const file of files){let s=fs.readFileSync(file,'utf8'),edits=[];
+ function member(n){if(!n)return;if(n.type==='TSAsExpression'||n.type==='TSNonNullExpression')return member(n.expression);if(n.type==='LogicalExpression')return member(n.left);if(n.type==='MemberExpression'){if(!n.computed&&n.property.type==='Identifier')return n.property.name;if(n.computed&&n.property.type==='Identifier'&&['body','values'].includes(n.object?.name))return {dynamic:n.property.name};}if(n.type==='Identifier'&&known.has(n.name))return n.name;}
+ function walk(v){if(!v||typeof v!=='object')return;if(v.type==='JSXOpeningElement'&&['input','select','textarea'].includes(v.name.name)&&!v.attributes.some(x=>x.type==='JSXAttribute'&&x.name.name==='name')){const attr=v.attributes.find(x=>x.type==='JSXAttribute'&&['value','checked'].includes(x.name.name)),value=member(attr?.value?.expression);if(value){const key=typeof value==='object'?undefined:(aliases[value]||value.replace(/[A-Z]/g,c=>'_'+c.toLowerCase()));if(value.dynamic||known.has(key)){const name=value.dynamic?` name={${value.dynamic}}`:` name="${key}"`;edits.push({at:v.name.end,text:name,field:key||value.dynamic,line:v.loc.start.line});}}}for(const[k,x]of Object.entries(v))if(!['loc','start','end','extra'].includes(k)){if(Array.isArray(x))x.forEach(walk);else if(x&&typeof x==='object')walk(x);}}
+ walk(parse(s,{sourceType:'module',plugins:['typescript','jsx']}));for(const e of edits.sort((a,b)=>b.at-a.at))s=s.slice(0,e.at)+e.text+s.slice(e.at);if(edits.length){fs.writeFileSync(file,s);report.push({file,fields:edits.map(({line,field})=>({line,field}))});}
+}
+fs.writeFileSync('docs/backend-evening-field-mappings-2026-10-28.json',JSON.stringify(report,null,2)+'\n');console.log('Named '+report.reduce((n,x)=>n+x.fields.length,0)+' native controls across '+report.length+' form components.');
+
+```

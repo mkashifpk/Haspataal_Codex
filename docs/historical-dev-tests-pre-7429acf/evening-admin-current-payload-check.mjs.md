@@ -1,0 +1,27 @@
+# Historical DEV test - retired after database reset
+
+This source is evidence only. Rewrite it to discover/create fresh records before reactivation. Never replay old keys, IDs or event cursors.
+
+```javascript
+import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {build} from 'vite';import {_electron as electron,expect} from 'playwright/test';
+const contract=JSON.parse(fs.readFileSync('src/it-system-contract.json')),missing=JSON.parse(fs.readFileSync('docs/backend-evening-payload-inventory-2026-10-28.json')).filter(x=>x.missing_actual_app_payload);
+const real=label=>JSON.parse(fs.readFileSync('docs/evening-retest/'+fs.readdirSync('docs/evening-retest').find(x=>x.endsWith('-'+label+'-result.json')))).body.data;
+const actor=real('admission-a-created').details_stamp;
+function sample(schema,key=''){
+ if(schema.$ref)return sample(contract.schemas[schema.$ref.split('/').at(-1)],key);
+ if(schema.const!==undefined)return schema.const;if(schema.default!==undefined)return schema.default;
+ if(schema.anyOf){if(schema.anyOf.some(s=>s.type==='null'))return null;return sample(schema.anyOf[0],key);}
+ if(schema.enum)return schema.enum[0];if(schema.examples?.length)return schema.examples[0];
+ if(schema.type==='object')return Object.fromEntries(Object.entries(schema.properties||{}).map(([k,v])=>[k,sample(v,k)]));
+ if(schema.type==='array'){if(/role/.test(key))return ['doctor'];if(/permission/.test(key))return ['admin.ward.manage'];return Array.from({length:schema.minItems||0},()=>sample(schema.items,key));}
+ if(schema.type==='boolean')return false;if(schema.type==='integer'||schema.type==='number'){if(key==='employee_id')return actor.employee_id;if(key==='user_id'||key==='target_user_id')return actor.user_id;return schema.minimum??1;}
+ if(schema.format==='date')return '2026-10-29';if(schema.format==='date-time')return '2026-10-28T00:00:00Z';
+ if(/cnic/.test(key))return '3520212345671';if(/mobile|phone/.test(key))return '03000000000';if(key==='mac')return '02:00:00:00:00:01';if(key==='ip')return '127.0.0.1';
+ if(key==='requested_value')return true;
+ return ('DEMO-VALIDATION-ONLY'+('x'.repeat(schema.minLength||0))).slice(0,schema.maxLength||100);
+}
+const cases=missing.flatMap(x=>{const endpoint=x.method+' '+x.path,op=contract.endpoints.find(e=>e.endpoint===endpoint);if(!op)return [];const ref=op.request_body?.content?.['application/json']?.schema?.$ref,schema=ref?contract.schemas[ref.split('/').at(-1)]:{properties:{}};const body=sample(schema);return [{...x,action:{endpoint,path:x.path,label:'DEMO isolated form payload',body:{...body,__removed_or_misspelt:'MUST BE STRIPPED'}},expected:body}];});
+await build({configFile:false,define:{'process.env.NODE_ENV':'"test"'},build:{lib:{entry:path.resolve('tests/admin-payload-fixture.tsx'),name:'AdminFixture',formats:['iife'],fileName:()=> 'fixture.js'},outDir:'artifacts/admin-component',emptyOutDir:true}});fs.writeFileSync('artifacts/admin-component/index.html','<!doctype html><html><meta charset="utf-8"><div id="root"></div><script src="fixture.js"></script></html>');const env={...process.env};delete env.ELECTRON_RUN_AS_NODE;let app;const out={passed:false,backend_calls:0,cases:[],missing:cases.map(x=>x.action.endpoint)};
+try{app=await electron.launch({args:['scripts/admin-fixture-bootstrap.cjs'],env});const p=await app.firstWindow();await expect(p.getByText('Ready for form case')).toBeVisible();for(const c of cases){await p.evaluate(c=>window.setAdminCase({action:c.action,roles:[{code:'doctor',name:'Doctor'}],permissionsList:[{code:'admin.ward.manage',description:'Manage wards'}],departments:[],printers:[]}),c);await expect(p.getByRole('button',{name:'Review system change',exact:true})).toBeEnabled();await p.locator('form').evaluate(form=>form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));const captured=await p.evaluate(()=>window.adminCaptured);assert(captured?.submitted);const body=captured.body;if(body)assert(!('__removed_or_misspelt'in body));out.cases.push({method:c.method,path:c.path,body,source:'Actual AdminForm submit; isolated renderer using its saved schema and synthetic entered values; no HTTP'});console.log('Captured '+c.action.endpoint);}out.passed=true;}catch(e){out.error=e.stack;throw e;}finally{if(app)await app.close();fs.writeFileSync('docs/backend-evening-admin-current-payloads-2026-10-28.json',JSON.stringify(out,null,2)+'\n');}
+
+```

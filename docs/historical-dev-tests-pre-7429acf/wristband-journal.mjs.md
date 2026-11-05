@@ -1,0 +1,12 @@
+# Historical DEV test - retired after database reset
+
+This source is evidence only. Rewrite it to discover/create fresh records before reactivation. Never replay old keys, IDs or event cursors.
+
+```javascript
+import fs from 'node:fs';
+const file='docs/wristbands-live-2026-10-28.json',input=JSON.parse(fs.readFileSync(process.stdin.fd,'utf8'));
+if(input.result_path)input.result=JSON.parse(fs.readFileSync(input.result_path,'utf8'));
+if(input.action==='init'){if(fs.existsSync(file))throw Error('Reconcile original journal first');fs.writeFileSync(file,JSON.stringify({run:input.run,baseline:'8999b5d',started:new Date().toISOString(),requests:[]},null,2));}
+else{const j=JSON.parse(fs.readFileSync(file));if(input.action==='prepare'){if(j.requests.some(x=>x.label===input.label))throw Error('Original label exists; reconcile');j.requests.push({label:input.label,args:input.args,state:'prepared'});}else{const e=j.requests.find(x=>x.label===input.label);if(!e)throw Error('No original intent');Object.assign(e,{state:input.state,result:input.result});}fs.writeFileSync(file,JSON.stringify(j,null,2));}
+
+```

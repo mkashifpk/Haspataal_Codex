@@ -1,0 +1,37 @@
+# Historical DEV test - retired after database reset
+
+This source is evidence only. Rewrite it to discover/create fresh records before reactivation. Never replay old keys, IDs or event cursors.
+
+```javascript
+// Real DEV synthetic states only. No physical specimen, real patient care or human acceptance.
+import fs from 'node:fs';import crypto from 'node:crypto';import assert from 'node:assert/strict';import {createRequire} from 'node:module';
+import {session,expect,capture} from './clinical-test-kit.mjs';
+const file='docs/lab-cancellation-refusals-evidence-2026-10-24.json';assert(!fs.existsSync(file),'Reconcile original requisitions before another run');
+const j={run:'DEMO-LAB-REFUSALS-'+Date.now(),checks:[],writes:[]};const save=()=>fs.writeFileSync(file,JSON.stringify(j,null,2));save();
+const cfg=JSON.parse(fs.readFileSync('.dev-terminal.json'));const {request,checkedRoot}=createRequire(import.meta.url)('../electron/transport.cjs'),ca=checkedRoot(cfg.ca_pem,cfg.ca_fingerprint_sha256);
+const raw=(method,path,token,body,key)=>request(cfg.server_urls[0]+'/api/v1'+path,{ca,method,body,headers:{...(token?{Authorization:'Bearer '+token}:{}),...(key?{'Idempotency-Key':key}:{}),'X-Haspataal-Developer':'mkashif','X-Haspataal-Implementation':'1'}});
+const login=async username=>{const r=await raw('POST','/auth/login',null,{username,password:'Demo-pass-2026'});assert.equal(r.status,200);return r.body.data.access_token;};
+async function call(method,path,token,body,expected){const a={method,path,body,key:crypto.randomUUID()};if(method!=='GET'){j.pending=a;j.writes.push(a);save();}const r=await raw(method,path,token,body,a.key);if(method!=='GET'){a.status=r.status;a.result=r.body;a.finished=true;if(r.status<500)delete j.pending;save();}if(expected){assert.equal(r.body.error?.code,expected);return r.body;}assert(r.status<400,path+':'+JSON.stringify(r.body));return r.body.data;}
+async function open(s,record){await s.nav('Lab & imaging orders + results');await s.p.getByLabel('OPD slip number',{exact:true}).fill('OPD-2026-000002');await s.p.getByRole('button',{name:'Open slip',exact:true}).click();await s.p.getByRole('button').filter({hasText:record.requisition_number}).first().click();await expect(s.p.locator('main')).toContainText(record.requisition_number);}
+let d,other;
+try{
+ const doctor=await login('demo.doctor'),second=await login('demo.doctor2'),reception=await login('demo.reception'),tech=await login('demo.labtech');
+ const patient=await call('GET','/patients/13',doctor);assert.equal(patient.full_name,'DEMO-P2-CYCLE-1792854112893');const ticket=await call('GET','/opd-tickets/2',doctor);assert.equal(ticket.patient_id,13);assert(!ticket.is_clinical_locked);
+ const tests=await call('GET','/lab/tests',doctor),cbc=tests.find(x=>x.code==='CBC'&&x.is_active);assert(cbc);j.test=cbc;save();
+ j.unsampled=await call('POST','/lab/requisitions',doctor,{ticket_id:2,test_ids:[cbc.test_id],priority:'Routine',clinical_notes:j.run+' unsampled cancellation simulation only; NO specimen or care'});save();
+ j.other_refusal=await call('POST','/lab/requisitions/'+j.unsampled.requisition_id+'/cancel',second,{reason:j.run+' verify another doctor cannot cancel'},'FORBIDDEN');
+ other=await session('lab-cancel-other-doctor','demo.doctor2');await open(other,j.unsampled);await expect(other.p.getByRole('button',{name:'Cancel own unsampled order',exact:true})).toHaveCount(0);other.j.passed=true;await other.close();j.other_session={signed_out:other.j.signed_out,preferences_restored:other.j.preferences_restored,renderer:other.j.renderer};other=undefined;save();
+ d=await session('lab-cancel-owner-doctor','demo.doctor');await open(d,j.unsampled);await d.p.getByRole('button',{name:'Cancel own unsampled order',exact:true}).click();await d.p.getByLabel('Laboratory cancellation reason',{exact:true}).fill(j.run+' own unsampled software-only order cancellation');
+ j.pending={stage:'own unsampled UI cancellation',id:j.unsampled.requisition_id};save();await d.p.getByRole('button',{name:'Confirm laboratory cancellation',exact:true}).click();await expect.poll(async()=>(await d.trace()).requests.some(r=>r.method==='POST'&&r.path.endsWith('/'+j.unsampled.requisition_id+'/cancel')&&r.status===200)).toBe(true);j.unsampled_final=await call('GET','/lab/requisitions/'+j.unsampled.requisition_id,doctor);assert.equal(j.unsampled_final.status,'Cancelled');delete j.pending;save();
+ j.sampled=await call('POST','/lab/requisitions',doctor,{ticket_id:2,test_ids:[cbc.test_id],priority:'Routine',clinical_notes:j.run+' simulated sample state only; NO actual specimen, testing or care'});save();
+ const detail=await call('GET','/lab/requisitions/'+j.sampled.requisition_id,doctor);assert(detail.invoice?.invoice_id);j.invoice=detail.invoice;save();j.payment=await call('POST','/finance/invoices/'+detail.invoice.invoice_id+'/payments',reception,{method:'Card',reference_no:j.run+' virtual software payment'});save();
+ assert(detail.items[0].sample_id);j.sample_id=detail.items[0].sample_id;j.collect=await call('POST','/lab/samples/'+j.sample_id+'/collect',tech,{identity_check:'TwoIdentifiers',identity_note:j.run+' software identity/state simulation only, NO actual specimen'});save();
+ j.sampled_refusal=await call('POST','/lab/requisitions/'+j.sampled.requisition_id+'/cancel',doctor,{reason:j.run+' own sampled order must be refused'},'LAB_ITEM_STATE_INVALID');
+ await open(d,j.sampled);await expect(d.p.getByRole('button',{name:'Cancel own unsampled order',exact:true})).toHaveCount(0);j.sampled_read=await call('GET','/lab/requisitions/'+j.sampled.requisition_id,doctor);assert(j.sampled_read.items.some(i=>i.collected_at));
+ await capture(d,'lab_orders_results');j.checks.push('Actual other-doctor403FORBIDDEN and hidden cancellation; own unsampled UI200Cancelled; after separate virtual Card payment/simulated collected state own cancel409LAB_ITEM_STATE_INVALID and hidden button; EN/UR both themes250%');
+ // End the simulated sample explicitly as a rejected test fixture, not a clinical result.
+ j.rejected=await call('POST','/lab/samples/'+j.sample_id+'/reject',tech,{code:'Other',note:j.run+' synthetic state test ended; NO physical sample or clinical result'});j.final=await call('GET','/lab/requisitions/'+j.sampled.requisition_id,doctor);j.checks.push('Synthetic sample rejected with explicit test note; no lab result/verification/real specimen');j.passed=true;d.j.passed=true;save();
+}catch(e){j.error=e.stack;save();console.error(e.stack);process.exitCode=1;}
+finally{if(other)await other.close();if(d){await d.close();j.doctor_session={renderer:d.j.renderer,preferences_restored:d.j.preferences_restored,signed_out:d.j.signed_out,trace:d.j.trace};}save();console.log(JSON.stringify({passed:j.passed,requisitions:[j.unsampled?.requisition_id,j.sampled?.requisition_id],sample:j.sample_id,error:j.error?.slice(0,200)}));}
+
+```

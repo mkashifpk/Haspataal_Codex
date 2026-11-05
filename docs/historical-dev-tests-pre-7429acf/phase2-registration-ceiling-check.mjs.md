@@ -1,0 +1,36 @@
+# Historical DEV test - retired after database reset
+
+This source is evidence only. Rewrite it to discover/create fresh records before reactivation. Never replay old keys, IDs or event cursors.
+
+```javascript
+// One rejected atomic registration, then ONE new UNPAID visit and separate waiver; no payment.
+import {session,expect,help} from './clinical-test-kit.mjs';import fs from 'node:fs';import assert from 'node:assert/strict';
+const file='docs/phase2-registration-ceiling-check-2026-10-24.json',control='docs/phase2-registration-ceiling-controller-2026-10-24.json';
+const resume=process.argv.includes('--resume-refusal');assert(resume || !fs.existsSync(file),'Reconcile original registration; never repeat pending business actions');
+const j=resume?JSON.parse(fs.readFileSync(file)):{run:'DEMO-P2-CEILING-'+Date.now()},save=()=>fs.writeFileSync(file,JSON.stringify(j,null,2));
+if(resume){assert(j.refusal?.status===403&&!j.refusal_pending&&!j.registration_pending&&!j.registration,'Only confirmed atomic refusal with no registration may resume');j.previous_refusals=[...(j.previous_refusals||[]),j.refusal];}save();
+const s=await session('phase2-registration-ceiling-check','demo.reception'),p=s.p;
+try{
+ const initial=await s.native('api',{method:'GET',path:'/patients/search?q='+encodeURIComponent(j.run)+'&limit=20'});assert.equal(initial.length,0,'Never recreate an existing patient after a missing result');
+ await s.nav('New registration + OPD slip');await p.getByLabel('Full name',{exact:true}).fill(j.run);await p.getByLabel('Age in years',{exact:true}).fill('35');await p.getByLabel('Mobile',{exact:true}).fill('03000000000');
+ const cat=await s.native('api',{method:'GET',path:'/finance/service-catalog?category=OPD'}),service=cat.find(x=>x.is_active&&x.doctor_name==='Dr. Ahmed Khan');assert(service);await p.getByLabel('OPD service',{exact:true}).selectOption(String(service.service_id));
+ await p.getByLabel('Discount amount',{exact:true}).fill('300');await p.getByLabel('Discount reason',{exact:true}).fill(j.run+' software discount-limit verification');await p.getByLabel('Collect full payment now',{exact:true}).check();await p.getByLabel('Payment method',{exact:true}).selectOption('Card');await p.getByLabel('Card / bank reference',{exact:true}).fill(j.run+' simulation');
+ j.refusal_pending=true;save();await p.getByRole('button',{name:'Register and collect payment',exact:true}).click();
+ const prepare=p.getByRole('button',{name:/Prepare unpaid slip (within my limit|with no discount)/});await expect(prepare).toBeVisible();
+ j.refusal=(await s.trace()).requests.find(r=>r.method==='POST'&&r.path==='/api/v1/reception/registrations');assert.equal(j.refusal.status,403);assert.equal(j.refusal.result.error.code,'DISCOUNT_CEILING_EXCEEDED');j.refusal_pending=false;save();
+ const none=await s.native('api',{method:'GET',path:'/patients/search?q='+encodeURIComponent(j.run)+'&limit=20'});assert.equal(none.length,0,'Atomic refusal must not leave a patient');
+ const before=(await s.trace()).requests.filter(r=>r.method!=='GET').length;
+ await prepare.click();await expect(p.getByLabel('Collect full payment now',{exact:true})).not.toBeChecked();await expect(p.getByLabel('Discount amount',{exact:true})).toHaveValue(String(j.refusal.result.error.details.max_amount??0));await expect(p.getByLabel('Full name',{exact:true})).toHaveValue(j.run);
+ assert.equal((await s.trace()).requests.filter(r=>r.method!=='GET').length,before);await help(s,p.getByLabel('Discount amount',{exact:true}),'New registration + OPD slip');
+ j.registration_pending=true;save();await p.getByRole('button',{name:'Issue unpaid OPD slip',exact:true}).click();await expect(p.getByRole('heading',{name:'OPD slip issued',exact:true})).toBeVisible();
+ j.registration=(await s.trace()).requests.filter(r=>r.method==='POST'&&r.path==='/api/v1/reception/registrations').at(-1);assert.equal(j.registration.status,201);assert.equal(j.registration.body.payment,undefined);assert.equal(j.registration.result.data.payment,null);j.registration_pending=false;save();
+ const card=p.getByRole('heading',{name:'Request VIP waiver',exact:true}).locator('..');await card.getByLabel('Waiver percent',{exact:true}).fill('20');await card.getByLabel('Reason',{exact:true}).fill(j.run+' software waiver request only');
+ j.waiver_pending=true;save();await card.getByRole('button',{name:'Request VIP waiver',exact:true}).click();await expect(p.locator('main')).toContainText('Waiver request sent for approval.');
+ j.waiver=(await s.trace()).requests.find(r=>r.method==='POST'&&r.path.endsWith('/vip-waiver-request'));assert.equal(j.waiver.status,201);assert.equal(Number(j.waiver.body.waiver_pct),20);j.waiver_pending=false;j.approval_id=j.waiver.result.data.approval.request_id;j.ready_cleanup=true;save();
+ s.pass('Actual ceiling403 leaves no patient/payment; prepare changes draft only to server max/no-pay; one unpaid201 and separate explicit20% waiver201');console.log('WAIT cancel own approval '+j.approval_id);
+ for(let n=0;n<300;n++){if(fs.existsSync(control)&&JSON.parse(fs.readFileSync(control)).cancelled)break;if(n===299)throw Error('Own test approval cleanup not confirmed');await new Promise(r=>setTimeout(r,2000));}
+ await s.nav('Refund / waiver / credit');await p.getByLabel('OPD slip number',{exact:true}).fill(j.registration.result.data.ticket_number);await p.getByRole('button',{name:'Open slip',exact:true}).click();await p.getByLabel('Request type',{exact:true}).selectOption('void');await p.getByLabel('Reason',{exact:true}).fill(j.run+' cancel unused unpaid software test visit');await p.getByRole('button',{name:'Review request',exact:true}).click();await p.getByRole('dialog').getByRole('button',{name:'Confirm request',exact:true}).click();await expect(p.getByRole('dialog')).toHaveCount(0);await expect(p.locator('main')).toContainText('Void');
+ j.final_ticket=await s.native('api',{method:'GET',path:`/opd-tickets/${j.registration.result.data.ticket_id}`});assert.equal(j.final_ticket.status,'Void');assert.equal(j.final_ticket.invoice.amount_paid,0);j.trace=await s.trace();assert.equal(j.trace.requests.filter(r=>r.path.includes('/payments')).length,0);j.passed=true;save();s.pass('Only own pending waiver cancelled and original unpaid ticket voided through UI; no collection, queue token, duplicate patient or cash handover');
+}catch(e){j.error=e.stack;j.trace=await s.trace();j.failure_ui=await p.locator('body').innerText();save();console.error(e.stack);process.exitCode=1}finally{await s.close();j.finished=new Date().toISOString();save()}
+
+```

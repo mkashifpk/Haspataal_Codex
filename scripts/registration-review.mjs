@@ -9,6 +9,10 @@ const env = {
   HASPATAAL_DEV_CONFIG: path.resolve(".dev-terminal.json"),
   HASPATAAL_TEST_DATA: path.resolve("artifacts/registration-profile"),
 };
+// Never resolve a pre-reset ticket merely because an old numeric ID exists again.
+const currentEvidence=JSON.parse(fs.readFileSync("artifacts/registration-check.json","utf8"));
+assert.equal(currentEvidence.dataset,"2026-11-05:7429acf","Run a fresh registration check for this DEV dataset before reviewing its ticket.");
+assert(currentEvidence.passed&&currentEvidence.finished,"Fresh registration check must have finished successfully.");
 delete env.ELECTRON_RUN_AS_NODE;
 const app = await electron.launch({ args: ["."], env });
 const page = await terminalPage(app);
@@ -23,9 +27,7 @@ try {
     .getByRole("navigation")
     .getByRole("button", { name: "New registration + OPD slip" })
     .click();
-  const evidence = JSON.parse(
-    fs.readFileSync("artifacts/registration-check.json", "utf8"),
-  );
+  const evidence = currentEvidence;
   const ticket = evidence.evidence.find((x) => x.startsWith("OPD-"));
   await page.getByLabel("Open an existing OPD slip").fill(ticket);
   await page.getByRole("button", { name: "Open ticket", exact: true }).click();

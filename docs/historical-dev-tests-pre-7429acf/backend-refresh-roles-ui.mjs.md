@@ -1,0 +1,22 @@
+# Historical DEV test - retired after database reset
+
+This source is evidence only. Rewrite it to discover/create fresh records before reactivation. Never replay old keys, IDs or event cursors.
+
+```javascript
+import fs from 'node:fs';import assert from 'node:assert/strict';import {session,expect,help,capture} from './clinical-test-kit.mjs';
+const root='docs/backend-refresh-2026-10-30/dev/',read=n=>JSON.parse(fs.readFileSync(root+n+'-result.json')).body.data;
+const file='artifacts/backend-refresh-roles-ui.json',j={started:new Date().toISOString(),checks:[]};assert(!fs.existsSync(file),'Reconcile previous role check');const save=()=>fs.writeFileSync(file,JSON.stringify(j,null,2));let s;save();
+try{
+ s=await session('refresh1030-roles-doctor','demo.doctor');s.p.on('dialog',d=>d.accept());await s.nav('Inpatient rounds');await s.p.getByLabel('Rounds',{exact:true}).selectOption('waiting');
+ const waiting=read('code-red-finalwaiting');await expect(s.p.locator('.inpatient-rounds aside')).toContainText(waiting.mrn);await expect.poll(async()=>{const t=await s.trace();return t.requests.some(r=>r.path.includes('/ipd/treating-doctors?waiting=true')&&r.status===200);}).toBe(true);
+ await s.p.locator('.inpatient-rounds aside').getByRole('button').filter({hasText:waiting.mrn}).click();await expect(s.p.locator('main')).toContainText('Doctor: waiting');await expect(s.p.getByRole('button',{name:'Take this patient',exact:true})).toBeEnabled();await capture(s,'doctor_inpatients');j.checks.push('Every doctor waiting round uses new waiting=true endpoint, shows null doctor correctly and offers takeover');await s.close();s=undefined;save();
+ s=await session('refresh1030-roles-admissions','demo.admissions');s.p.on('dialog',d=>d.accept());await s.nav('Cost estimates');const patient=read('patient-a');const work=s.p.locator('section').filter({has:s.p.getByRole('button',{name:'Prepare for this admission',exact:true})}).filter({hasText:patient.mrn}).filter({hasText:'ChangeOfWard'}).last();await work.getByRole('button',{name:'Prepare for this admission',exact:true}).click();
+ await expect(s.p.getByLabel('Actual ward transfer',{exact:true})).toContainText('2500');await expect(s.p.getByLabel('Actual ward transfer',{exact:true})).toContainText('8000');await help(s,s.p.getByLabel('Actual ward transfer',{exact:true}),'Cost estimates');await capture(s,'cost_estimates_admissions');await s.p.getByRole('button',{name:'Close estimate draft',exact:true}).click();
+ await s.nav('Identity wristbands');await expect.poll(async()=>{const t=await s.trace();return t.requests.some(r=>r.path.endsWith('/medication-safety/worklist')&&r.status===200);}).toBe(true);await capture(s,'wristbands_admissions');
+ const at=await s.trace();assert(!at.requests.some(r=>r.path.includes('/transfers')));assert(!at.requests.some(r=>r.method==='POST'&&r.path.endsWith('/cost-estimates')));j.checks.push('Admissions move picker shows both prices; no chart transfer and no business write; desk missing-band worklist200');await s.close();s=undefined;save();
+ s=await session('refresh1030-roles-pharmacy','demo.pharmacist');s.p.on('dialog',d=>d.accept());await s.nav('Dispense');await s.p.getByLabel('Prescription ID',{exact:true}).fill(String(read('rx-prn-injection').prescription_id));await s.p.getByRole('button',{name:'Open prescription',exact:true}).click();await expect(s.p.locator('main')).toContainText(read('rx-prn-injection').prescription_number);await expect(s.p.getByRole('button',{name:'Stop this line',exact:true})).toHaveCount(0);await capture(s,'dispense');j.checks.push('Dispensing reads actual fresh order and has no stop-line action');await s.close();s=undefined;save();
+ s=await session('refresh1030-roles-headnurse','demo.headnurse');s.p.on('dialog',d=>d.accept());await s.nav('Nursing duty roster');await expect.poll(async()=>{const t=await s.trace();return t.requests.some(r=>r.path.includes('/rosters/staff')&&r.status===200);}).toBe(true);const ht=await s.trace();assert(!ht.requests.some(r=>r.path.includes('/hr/shift-patterns')));await capture(s,'duty_roster');j.checks.push('Nursing planner gets shifts from permitted roster staff and never calls HR shift-patterns');await s.close();s=undefined;save();j.passed=true;
+}catch(e){j.error=e.stack;try{j.ui=await s?.p.locator('body').innerText();j.trace=await s?.trace();}catch{}console.error(e.stack);process.exitCode=1;}
+finally{if(s)await s.close();j.finished=new Date().toISOString();save();}
+
+```

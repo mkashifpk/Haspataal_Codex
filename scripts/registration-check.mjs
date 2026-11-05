@@ -134,6 +134,8 @@ try {
     JSON.stringify(
       {
         passed: true,
+        dataset: "2026-11-05:7429acf",
+        finished: new Date().toISOString(),
         checks: [
           "new patient and unpaid ticket",
           "optional photo upload",
