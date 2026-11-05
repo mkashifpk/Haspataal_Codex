@@ -1209,7 +1209,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return await api("GET", "/meta/handbook", undefined, undefined);
     }
     if (action === "clinical-pdf") {
-      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/(?:consents|cost-estimates)\/[1-9]\d*\/pdf|\/admissions\/[1-9]\d*\/discharge-summary\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf|\/facility\/equipment\/plan\/pdf|\/facility\/compliance-documents\/register\/pdf|\/facility\/drills\/[1-9]\d*\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
+      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/(?:consents|cost-estimates|incidents)\/[1-9]\d*\/pdf|\/admissions\/[1-9]\d*\/discharge-summary\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf|\/facility\/equipment\/plan\/pdf|\/facility\/compliance-documents\/register\/pdf|\/facility\/drills\/[1-9]\d*\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
       const op=matchOperation("GET",args.path);
       if(!op || !auth || !permissionAllows(op,auth.user)) throw new Error("You do not have permission to download this document");
       if(Date.now()>auth.expires-60000)await refresh();

@@ -1,6 +1,7 @@
 import { tr, bilingual as t } from "./i18n";
 import {
   useEffect,
+  createContext,
   useRef,
   useState,
   cloneElement,
@@ -152,6 +153,7 @@ export function Modal({
     </dialog>
   );
 }
+export const FieldLabelContext=createContext<string|undefined>(undefined);
 export function Field({
   label,
   children,
@@ -174,11 +176,11 @@ export function Field({
         })
       : children;
   return (
-    <label className="field">
+    <FieldLabelContext.Provider value={label}><label className="field">
       <span>{label}</span>
       {control}
       {hint && <small>{hint}</small>}
-    </label>
+    </label></FieldLabelContext.Provider>
   );
 }
 export function Empty({ children }: { children: ReactNode }) {

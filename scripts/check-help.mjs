@@ -306,6 +306,7 @@ export function checkHelp({
       "ComplianceRegister",
       "MockDrills",
       "WasteLog",
+      "MyInvestigations",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

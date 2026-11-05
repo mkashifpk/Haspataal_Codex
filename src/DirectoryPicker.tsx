@@ -1,6 +1,6 @@
 import {createContext,useContext,useEffect,useRef,useState,type InputHTMLAttributes,type ChangeEvent} from 'react';
 import {api} from './bridge';
-import {ErrorBox} from './components';
+import {ErrorBox,FieldLabelContext} from './components';
 import {bilingual as t} from './i18n';
 import contracts from './directory-access.json';
 export const DirectoryPermissions=createContext<string[]>([]);
@@ -12,7 +12,7 @@ export function canReadDirectory(path:string,permissions:string[]) {
 }
 type Props=Omit<InputHTMLAttributes<HTMLInputElement>,'onChange'> & {path:string;idField:string;list?:string;search?:boolean;userId?:boolean;empty?:string;onChange?:(e:ChangeEvent<HTMLInputElement>)=>void};
 export function DirectoryPicker({path,idField,list,search=false,userId=false,empty,value,onChange,disabled,required,...rest}:Props) {
- const permissions=useContext(DirectoryPermissions),allowed=canReadDirectory(path,permissions);
+ const permissions=useContext(DirectoryPermissions),allowed=canReadDirectory(path,permissions),fieldLabel=useContext(FieldLabelContext),accessibleLabel=rest['aria-label']??fieldLabel;
  const [q,setQ]=useState(''),[rows,setRows]=useState<Record<string,any>[]>(),[busy,setBusy]=useState(false),[error,setError]=useState<unknown>(),[selected,setSelected]=useState('');
  const generation=useRef(0),identity=useRef(path);
  const change=(v:string)=>{setSelected(v);onChange?.({target:{value:v},currentTarget:{value:v}} as ChangeEvent<HTMLInputElement>);};
@@ -30,12 +30,12 @@ export function DirectoryPicker({path,idField,list,search=false,userId=false,emp
  if(!allowed)return null;
  const help=rest['data-help' as keyof typeof rest];
  return <span className="directory-picker">
-  {search&&<input data-help={help} aria-label={t('Search directory by name','نام سے فہرست تلاش کریں')} value={q} disabled={disabled||busy} onChange={e=>{++generation.current;setQ(e.target.value);setRows(undefined);setError(undefined);change('');}} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();void load();}}}/>}
+  {search&&<input data-help={help} aria-label={[accessibleLabel,t('Search directory by name','نام سے فہرست تلاش کریں')].filter(Boolean).join(': ')} value={q} disabled={disabled||busy} onChange={e=>{++generation.current;setQ(e.target.value);setRows(undefined);setError(undefined);change('');}} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();void load();}}}/>}
   <button type="button" data-help={help} disabled={disabled||busy||(search&&q.trim().length<2)} onClick={()=>void load()}>{busy?t('Loading…','فہرست کھل رہی ہے…'):search?t('Find by name','نام سے تلاش کریں'):t('Load choices','فہرست کھولیں')}</button>
   <ErrorBox error={error}/>
-  <select data-help={help} data-field={rest['data-field' as keyof typeof rest]} id={rest.id} name={rest.name} className={rest.className} required={required} disabled={disabled||busy||!rows} value={rows?String(value??selected):''} onChange={e=>change(e.target.value)}>
+  <select aria-label={accessibleLabel} data-help={help} data-field={rest['data-field' as keyof typeof rest]} id={rest.id} name={rest.name} className={rest.className} required={required} disabled={disabled||busy||!rows} value={rows?String(value??selected):''} onChange={e=>change(e.target.value)}>
    <option value="">{t('Choose from the directory','فہرست سے چنیں')}</option>
-   {rows?.map(r=><option key={r[idField]} value={r[idField]}>{[r.full_name??r.name??r.patient_name??r.batch_no??r.title??r.description??r.procedure_name??r.ward_name??r.label??r.booking_number??r.invoice_number??r.admission_number??r.work_order_number??r.emp_number??r.code, r.mrn,r.bed_label,r.expiry_date,r.qty_available!=null?`${r.qty_available} ${r.unit??''}`:null,r.is_expired?t('Expired','میعاد ختم'):null].filter(v=>v!=null&&v!=='').join(' · ')}</option>)}
+   {rows?.map(r=><option key={r[idField]} value={r[idField]}>{[r.full_name??r.display_name??r.name??r.patient_name??r.batch_no??r.title??r.description??r.procedure_name??r.ward_name??r.label??r.booking_number??r.invoice_number??r.admission_number??r.work_order_number??r.emp_number??r.code, r.mrn,r.bed_label,r.expiry_date,r.qty_available!=null?`${r.qty_available} ${r.unit??''}`:null,r.is_expired?t('Expired','میعاد ختم'):null].filter(v=>v!=null&&v!=='').join(' · ')}</option>)}
   </select>
   {rows?.length===0&&<small role="status">{empty??directoryEmpty(path,userId)}</small>}
  </span>;

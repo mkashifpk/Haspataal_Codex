@@ -10,6 +10,101 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  my_investigations: {
+  title: "Incidents I investigate",
+  titleUr: "جن واقعات کی میں تحقیق کرتا ہوں",
+  purpose: "The named investigator opens this screen during the shift to explain an assigned incident without blame; done means a final signed analysis and accountable corrective/preventive work, not a claim that the incident is closed.",
+  purposeUr: "مقرر تحقیق کار اپنی شفٹ میں ذمہ دار واقعے کے اسباب الزام کے بغیر واضح کرتا ہے؛ تکمیل حتمی دستخط شدہ تجزیہ اور ذمہ دار اصلاحی و احتیاطی کام ہے، واقعہ بند کرنے کا دعویٰ نہیں۔",
+  steps: [
+    "The named investigator opens this screen during the shift to explain an assigned incident without blame; done means a final signed analysis and accountable corrective/preventive work, not a claim that the incident is closed.",
+    "The menu appears only with a current UnderReview assignment. Quality names the investigator and sets the due date; an incident notification refreshes assignments. The list is mine=true and UnderReview, with overdue analysis in red. No assignments is a real empty state. At500 the list is bounded; ask Quality to reconcile outstanding work.",
+    "Open investigation rereads the exact incident, original factual report, immediate action, investigator, patient/location where returned and next step. Absent identity stays absent. Check the author stamp; investigation never changes the original report or its Quality classification.",
+    "Edit analysis draft: choose Review or RootCauseAnalysis, write what happened in time order, system causes, lessons/recommendations, disclosure status and who told the patient/family, and any actual external report reference. Blank fields remain not recorded. Save incomplete drafts as you investigate; saving is separate from signing.",
+    "Select all actual contributing factors from the fixed checklist. A sentinel event requires RootCauseAnalysis and at least one system factor beyond Patient or Individual; blame alone is insufficient. Never prefill successful findings.",
+    "Check this incident and the exact action before Save. The version you edited is sent. VERSION_CONFLICT keeps the draft: Refresh, compare the latest saved analysis above, then explicitly Use latest version; keep my draft only after reviewing the difference, or Cancel unsent draft. A newer event never overwrites your input.",
+    "Review and sign analysis displays the saved analysis. Check it, then Sign final analysis. Signing is final; INCIDENT_ANALYSIS_INCOMPLETE lists the exact missing parts. Correct them in a separate draft save before trying a new reviewed sign. Analysis signature is a business record, not a human workspace acceptance review.",
+    "Add corrective / preventive action: choose its type, factual description5–1000characters, responsible person with login, due date and optional active department. Managers use the authorised people directory; other investigators search staff by at least two letters and send the returned user_id, never employee_id. IT provides a missing login or department; HR adds missing staff.",
+    "An action is a separate idempotent write and creates a notified owner task. A lost action reply freezes its original body/key; retry that exact request within24hours. A lost draft save or signature has no safe replay: Read current result, reconcile its version/state, then Result reviewed; return to draft. Never automatically resend or make a replacement because a reply vanished.",
+    "Actions show actual owner, due date, status and overdue flag. Signing moves analysis out of the UnderReview queue while the selected confirmed report remains readable. Completion evidence and incident closure belong to their authorised later workflows; this screen offers no report edit, deletion or incident closure.",
+    "View / print report and Save report PDF independently read the official PDF. Native preview, save cancellation or a printer failure never repeats analysis, signing or actions. Document sets respect Settings PDF preference; no ZIP. Keep the window open during uncertain writes. Offline writes are disabled.",
+    "F1 or visible Help opens field/dialog guidance and restores focus without losing input. English/Urdu and both themes share keyboard/Settings100–250%zoom, reset100%. Urdu, full fresh-data role journeys, editor and device acceptance remain pending a named human review on the DEV portal."
+  ],
+  stepsUr: [
+    "مقرر تحقیق کار اپنی شفٹ میں ذمہ دار واقعے کے اسباب الزام کے بغیر واضح کرتا ہے؛ تکمیل حتمی دستخط شدہ تجزیہ اور ذمہ دار اصلاحی و احتیاطی کام ہے، واقعہ بند کرنے کا دعویٰ نہیں۔",
+    "مینو صرف موجودہ زیر تحقیق ذمہ داری پر آتا ہے۔ کوالٹی تحقیق کار اور آخری تاریخ مقرر کرتا ہے؛ اطلاع فہرست تازہ کرتی ہے۔ صرف میری زیر تحقیق ذمہ داریاں اور سرخ تاخیر دکھتی ہے۔ خالی فہرست درست ہے۔ پانچ سو حد پر کوالٹی سے باقی کام چیک کرائیں۔",
+    "تحقیق کھولیں عین واقعہ، اصل حقائق، فوری اقدام، تحقیق کار، دستیاب مریض یا مقام اور اگلا قدم دوبارہ پڑھتا ہے۔ غائب شناخت غائب رہتی ہے۔ مصنف کی مہر دیکھیں؛ تحقیق اصل رپورٹ یا کوالٹی کی درجہ بندی نہیں بدلتی۔",
+    "تجزیہ مسودہ میں جائزہ یا بنیادی اسباب چنیں، واقعہ وقت کی ترتیب سے، نظام کے اسباب، سبق، سفارشات، اطلاع کی حالت، کس نے خاندان کو بتایا اور اصل بیرونی حوالہ لکھیں۔ خالی حصہ درج نہیں رہتا۔ تحقیق کے دوران نامکمل مسودہ محفوظ ہو سکتا ہے؛ دستخط الگ ہیں۔",
+    "اصل معاون اسباب مقرر فہرست سے چنیں۔ سنگین واقعے میں بنیادی اسباب کا تجزیہ اور مریض یا فرد کے علاوہ نظام کا ایک سبب لازم ہے؛ صرف الزام کافی نہیں۔ کامیابی کے فرضی نتائج نہ بھریں۔",
+    "محفوظ سے پہلے واقعہ اور عین عمل چیک کریں۔ ترمیم والا ورژن جاتا ہے۔ ورژن تنازع پر مسودہ رہتا ہے: تازہ کریں، اوپر نئے تجزیے سے ملائیں، فرق دیکھ کر خود نیا ورژن لے کر مسودہ رکھیں یا غیر ارسال مسودہ چھوڑیں۔ نئی اطلاع اندراج نہیں بدلتی۔",
+    "دستخط کے جائزے میں محفوظ تجزیہ آتا ہے۔ اسے چیک کرکے حتمی دستخط کریں۔ دستخط حتمی ہیں؛ نامکمل تجزیہ غائب حصے بتاتا ہے۔ الگ مسودہ درست اور محفوظ کرکے نیا جائزہ لیں۔ تجزیے کا دستخط کاروباری ریکارڈ ہے، انسانی ورک اسپیس منظوری نہیں۔",
+    "اصلاحی یا احتیاطی عمل میں قسم، پانچ تا ہزار حروف کی اصل تفصیل، لاگ ان والا ذمہ دار، تاریخ اور اختیاری فعال شعبہ چنیں۔ مجاز نگران افراد کی فہرست اور دوسرے تحقیق کار کم از کم دو حروف سے عملہ تلاش کرکے صارف لاگ ان بھیجتے ہیں، ملازم نمبر نہیں۔ غائب لاگ ان یا شعبہ آئی ٹی، عملہ ایچ آر دیتا ہے۔",
+    "عمل الگ محفوظ دوبارہ کوشش والا اندراج اور ذمہ دار کی اطلاع ہے۔ جواب کھو جائے تو اصل متن اور کلید مقفل؛ چوبیس گھنٹوں میں عین وہی درخواست دہرائیں۔ مسودہ یا دستخط کا جواب کھونے پر خودکار دوبارہ ارسال محفوظ نہیں: موجودہ نتیجہ پڑھیں، ورژن و حالت ملائیں پھر چیک کرکے مسودے پر آئیں۔ غائب جواب پر متبادل نہ بنائیں۔",
+    "اقدامات میں اصل ذمہ دار، تاریخ، حالت اور تاخیر ہے۔ دستخط سے تجزیہ زیر تحقیق قطار سے نکلتا ہے مگر منتخب تصدیق شدہ رپورٹ پڑھی جاتی ہے۔ عمل کا ثبوت اور واقعہ بند کرنا ان کے مجاز اگلے کام ہیں؛ یہاں اصل رپورٹ بدلنا، مٹانا یا واقعہ بند کرنا نہیں۔",
+    "رپورٹ دیکھیں، پرنٹ اور پی ڈی ایف محفوظ الگ سرکاری فائل پڑھتے ہیں۔ پیش منظر، منسوخی یا پرنٹر کی خرابی تجزیہ، دستخط یا عمل نہیں دہراتی۔ دستاویزات ترتیبات کی پی ڈی ایف پسند مانتی ہیں؛ زپ نہیں۔ غیر یقینی اندراج پر ونڈو کھلی اور آف لائن ارسال بند ہے۔",
+    "ایف ون یا مدد خانے اور مکالمے کی رہنمائی کھول کر اندراج محفوظ اور فوکس واپس کرتی ہے۔ انگریزی، اردو اور دونوں تھیم میں کی بورڈ و ترتیبات کا مشترک سو تا ڈھائی سو فیصد زوم اور سو ری سیٹ ہے۔ اردو، نئے ریکارڈ کے مکمل کردار سفر، ادارت اور آلات کا نامزد انسانی جائزہ باقی ہے۔"
+  ],
+  faq: [
+    [
+      "Why can I not see this screen?",
+      "A current incident must be assigned to you and UnderReview. Ask Quality to verify the actual assignment; a role name alone never creates one. Empty or failed reads are not proof of a completed investigation."
+    ],
+    [
+      "Can every investigator use the people directory?",
+      "Only when its endpoint permission allows it. Otherwise find an active staff member by name, at least two characters, and choose a returned login. A staff member without a login cannot own the action; ask IT, not for an internal number."
+    ],
+    [
+      "May I sign an incomplete analysis?",
+      "The server refuses and lists details.missing. For sentinel events use RootCauseAnalysis and a real system factor. Explain causes and lessons; do not blame only the patient or an individual. Save corrections first, then review signing separately."
+    ],
+    [
+      "What if another investigator changed it?",
+      "Keep your draft. Refresh compares current saved values/version; deliberately review the difference before using the latest version or discarding. A conflict never permits silent overwrite or automatic resend."
+    ],
+    [
+      "Does signing finish the corrective work?",
+      "No. The analysis becomes final, while each corrective/preventive action has a named owner, due date and later completion evidence. Quality closes the incident under its own prerequisites. This screen cannot delete the report or close the incident."
+    ],
+    [
+      "What must managers and clinical or support investigators check?",
+      "Quality/managers verify assignment and classification separately. Doctors, nurses, allied, administrative and support investigators verify the factual chronology and system factors, record actual disclosure/external references, then assign only real accountable owners. An external reference never submits a DRAP/PHC/police report by itself."
+    ],
+    [
+      "How do I recover a missing answer or failed PDF?",
+      "Keep the original window. Actions retry only their frozen original key/body within retention; versioned saves/signs are reread and reconciled, never automatically replayed. PDF preview/save/print failure repeats only the read/print, not a business action."
+    ]
+  ],
+  faqUr: [
+    [
+      "صفحہ کیوں نہیں آتا؟",
+      "موجودہ واقعہ آپ کے ذمے اور زیر تحقیق ہونا چاہیے۔ کوالٹی اصل ذمہ داری چیک کرے؛ کردار کا نام ذمہ داری نہیں بناتا۔ خالی یا ناکام پڑھائی تکمیل کا ثبوت نہیں۔"
+    ],
+    [
+      "کیا ہر تحقیق کار افراد کی فہرست لے سکتا ہے؟",
+      "صرف متعلقہ اجازت پر۔ ورنہ کم از کم دو حروف سے فعال عملہ تلاش اور واپس آیا لاگ ان چنیں۔ بغیر لاگ ان فرد ذمہ دار نہیں؛ آئی ٹی سے کہیں، اندرونی نمبر نہ مانگیں۔"
+    ],
+    [
+      "نامکمل تجزیہ دستخط ہو سکتا ہے؟",
+      "سرور انکار اور غائب حصے بتاتا ہے۔ سنگین واقعے میں بنیادی اسباب اور اصل نظام کا سبب چنیں۔ اسباب و سبق لکھیں؛ صرف فرد یا مریض کو الزام نہ دیں۔ پہلے اصلاح محفوظ پھر الگ دستخط کا جائزہ لیں۔"
+    ],
+    [
+      "دوسرے نے بدل دیا تو؟",
+      "مسودہ رکھیں۔ تازہ پڑھ کر محفوظ قدریں اور ورژن ملائیں؛ نیا ورژن لینے یا مسودہ چھوڑنے سے پہلے فرق دیکھیں۔ تنازع خودکار ارسال یا خاموش تبدیلی کی اجازت نہیں۔"
+    ],
+    [
+      "دستخط سے اصلاحی کام ختم ہوتا ہے؟",
+      "تجزیہ حتمی ہوتا ہے؛ ہر اصلاحی یا احتیاطی عمل کا ذمہ دار، تاریخ اور بعد کا ثبوت الگ ہے۔ کوالٹی اپنی شرائط پر واقعہ بند کرتا ہے۔ یہاں رپورٹ مٹانا یا واقعہ بند کرنا نہیں۔"
+    ],
+    [
+      "نگران، طبی یا معاون تحقیق کار کیا چیک کریں؟",
+      "کوالٹی اور نگران ذمہ داری و درجہ بندی الگ چیک کریں۔ ڈاکٹر، نرس، متعلقہ، انتظامی اور معاون تحقیق کار اصل ترتیب اور نظام کے اسباب، حقیقی اطلاع و بیرونی حوالہ لکھ کر اصل ذمہ دار چنیں۔ حوالہ لکھنے سے ڈریپ، پی ایچ سی یا پولیس رپورٹ خود نہیں جاتی۔"
+    ],
+    [
+      "غائب جواب یا پی ڈی ایف کی خرابی کیسے ٹھیک ہو؟",
+      "اصل ونڈو رکھیں۔ عمل صرف اصل مقفل کلید و متن مقرر وقت میں دہرائے؛ ورژن والے مسودے یا دستخط دوبارہ پڑھ کر ملائیں، خودکار ارسال نہیں۔ پی ڈی ایف کی خرابی صرف پڑھائی یا پرنٹ دہرائے، اندراج نہیں۔"
+    ]
+  ]
+},
+
   waste_log_ops: {
 title: "Hospital waste log",
 titleUr: "ہسپتال کا فضلہ رجسٹر",

@@ -239,6 +239,7 @@ export async function capture(s, id, verifyLayout = async () => {}) {
     await s.prefs({ language, theme: "Light", ui_scale_pct: 100 });
     await expect(s.p.locator("html")).toHaveAttribute("lang", language);
     await verifyLayout();
+    await s.p.evaluate(() => window.scrollTo(0, 0));
     await s.p.screenshot({ path: `public/handbook/${id}-${language}.png` });
     for (const theme of ["Light", "DarkHighContrast"]) {
       await s.prefs({ language, theme, ui_scale_pct: 250 });

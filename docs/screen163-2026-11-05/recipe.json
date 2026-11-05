@@ -1,0 +1,2428 @@
+{
+  "slug": "incidents-and-sentinel-events",
+  "title": "Incidents, sentinel events and the action register (MSDS)",
+  "workflow": "MSDS CQI 102, 103, 104, 106, 107; COP 40; AAC 25; IMS 162",
+  "workspaces": [
+    "*",
+    "quality",
+    "owner_dashboard",
+    "ot_admin",
+    "anaesthesia"
+  ],
+  "sections": [
+    {
+      "section": "1. Reporting (any workspace)",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/incident-types",
+          "summary": "What to report: the incident types",
+          "permissions": [],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incident-types"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "type_code": "UNEXPECTED_DEATH",
+                  "name": "Unexpected death",
+                  "area": "Clinical",
+                  "sentinel": "Always",
+                  "description": "A death not expected from the illness: an adult, a mother during pregnancy or within 42 days after it, a newborn or an infant",
+                  "sort_order": 10,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "type_code": "SUICIDE",
+                  "name": "Suicide or attempted suicide in the hospital",
+                  "area": "Behaviour",
+                  "sentinel": "Always",
+                  "description": "A patient who took or tried to take their own life while in the hospital",
+                  "sort_order": 20,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "type_code": "WRONG_PATIENT",
+                  "name": "Wrong patient",
+                  "area": "Clinical",
+                  "sentinel": "Always",
+                  "description": "A treatment, test, medicine or procedure given to the wrong patient (report a mix-up caught in time as a near miss)",
+                  "sort_order": 30,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:19:58.887927+00:00"
+              },
+              "request_id": "9cc7d7eaed4f4a4e8216937a99805684"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/incidents",
+          "summary": "Report an incident, an adverse event or a near miss",
+          "permissions": [
+            "incident.report"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/incidents",
+            "body": {
+              "type_code": "DELAY_IN_CARE",
+              "occurred_at": "2026-10-01T07:11:25.324724+00:00",
+              "affected": "Patient",
+              "patient_id": 1,
+              "description": "OPD queue held for a VIP for two hours; a waiting patient's review was delayed",
+              "immediate_action": "Queue order restored"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "incident_id": 1,
+                "incident_number": "INC-2026-00001",
+                "type_code": "DELAY_IN_CARE",
+                "type_name": "Delay or failure in treatment or monitoring",
+                "area": "Clinical",
+                "kind": "Incident",
+                "harm": "NoHarm",
+                "is_sentinel": false,
+                "sentinel_override": null,
+                "occurred_at": "2026-10-01T07:11:25.324724+00:00",
+                "department_id": null,
+                "department_name": null,
+                "ward_id": null,
+                "ward_name": null,
+                "location": null,
+                "affected": "Patient",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "admission_id": null,
+                "admission_number": null,
+                "employee_id": null,
+                "employee_name": null,
+                "booking_id": null,
+                "booking_number": null,
+                "procedure_name": null,
+                "ot_phase": null,
+                "drug_id": null,
+                "drug_name": null,
+                "medication_stage": null,
+                "high_alert": false,
+                "death_id": null,
+                "death_number": null,
+                "description": "OPD queue held for a VIP for two hours; a waiting patient's review was delayed",
+                "immediate_action": "Queue order restored",
+                "screening_key": null,
+                "reporter_confidential": false,
+                "reported_by": 6,
+                "reported_by_name": "Complaints Officer",
+                "reported_at": "2026-10-01T07:11:25.566626+00:00",
+                "report_stamp": {
+                  "at": "2026-10-01T07:11:25.566626+00:00",
+                  "name": "Complaints Officer",
+                  "text": "Complaints Officer, Officer, 01-Oct-2026 12:11",
+                  "user_id": 6,
+                  "designation": "Officer",
+                  "employee_id": 6,
+                  "registration": null
+                },
+                "status": "Reported",
+                "reviewed_at": null,
+                "reviewed_by_name": null,
+                "review_note": null,
+                "investigator_user_id": null,
+                "investigator_name": null,
+                "analysis_due": null,
+                "withdraw_reason": null,
+                "analysis_method": null,
+                "chronology": null,
+                "root_causes": null,
+                "contributing_factors": [],
+                "lessons": null,
+                "disclosure": null,
+                "disclosure_note": null,
+                "external_reference": null,
+                "analysed_at": null,
+                "analysis_stamp": null,
+                "closure_note": null,
+                "closed_at": null,
+                "closure_stamp": null,
+                "row_version": 1,
+                "review_overdue": false,
+                "analysis_overdue": false,
+                "actions": [],
+                "next_step": "Review: confirm the type, the harm and the class, and name the investigator",
+                "can_review": true,
+                "can_withdraw": true,
+                "can_analyse": false,
+                "can_add_action": false,
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:11:25.595836+00:00"
+              },
+              "request_id": "00598659a52f4a5b96ffa9937617dae5"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)",
+          "permissions": [],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/staff/lookup",
+            "query": {
+              "q": "sana look"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 2,
+                  "emp_number": "EMP-2026-0002",
+                  "full_name": "Sana Lookuptest",
+                  "designation": "Officer",
+                  "department_name": null,
+                  "license_type": "PNC",
+                  "user_id": 2,
+                  "registration": "PNC PNC-31852"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-11-05T01:52:33.483546+00:00"
+              },
+              "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments",
+          "permissions": [],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/admin/departments"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "department_id": 1,
+                  "code": "CARD",
+                  "name": "Cardiology & Vascular",
+                  "is_clinical": true,
+                  "is_active": true,
+                  "row_version": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.417658+00:00"
+              },
+              "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)",
+          "permissions": [
+            "ipd.bed.view",
+            "cssd.operate",
+            "infection.control.manage",
+            "complaint.manage",
+            "incident.view",
+            "facility.drill.manage",
+            "roster.manage.all",
+            "facility.equipment.manage",
+            "pharmacy.storage.record"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/beds/matrix"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "wards": [
+                  {
+                    "ward_id": 2,
+                    "code": "GW",
+                    "name": "General Ward",
+                    "ward_type": "General",
+                    "gender_restriction": "any",
+                    "total_beds": 1,
+                    "available": 0,
+                    "reserved": 0,
+                    "occupied": 1,
+                    "turnover": 0,
+                    "out_of_service": 0
+                  },
+                  {
+                    "ward_id": 1,
+                    "code": "ICU",
+                    "name": "ICU",
+                    "ward_type": "ICU",
+                    "gender_restriction": "any",
+                    "total_beds": 1,
+                    "available": 1,
+                    "reserved": 0,
+                    "occupied": 0,
+                    "turnover": 0,
+                    "out_of_service": 0
+                  }
+                ],
+                "summary": {
+                  "General Ward": 0,
+                  "ICU": 1
+                },
+                "beds": [
+                  {
+                    "bed_id": 1,
+                    "ward_id": 1,
+                    "label": "ICU-1",
+                    "current_state": "Available",
+                    "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                    "is_overflow_allowed": false,
+                    "admission_id": null,
+                    "patient_name": null,
+                    "mrn": null,
+                    "admission_status": null,
+                    "is_overflow": null,
+                    "discharge_blocked_on": null
+                  },
+                  {
+                    "bed_id": 2,
+                    "ward_id": 2,
+                    "label": "GW-1",
+                    "current_state": "Occupied",
+                    "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                    "is_overflow_allowed": false,
+                    "admission_id": 1,
+                    "patient_name": null,
+                    "mrn": null,
+                    "admission_status": "Admitted",
+                    "is_overflow": false,
+                    "discharge_blocked_on": null
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:38:22.967241+00:00"
+              },
+              "request_id": "802131a929b14db0a0c8033474e8d271"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drugs/search",
+          "summary": "Formulary search with live stock colour",
+          "permissions": [
+            "pharmacy.formulary.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/drugs/search",
+            "query": {
+              "q": "Insulin"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "drug_id": 3,
+                  "code": "INSN",
+                  "name": "Insulin NPH",
+                  "generic_name": null,
+                  "strength": null,
+                  "form": "Injection",
+                  "unit": "unit",
+                  "schedule": "HospitalOnly",
+                  "is_otc_allowed": false,
+                  "barcode": "8931440574755",
+                  "low_stock_threshold": 0,
+                  "is_active": true,
+                  "high_alert_category": null,
+                  "is_restricted": false,
+                  "lasa_with": [
+                    "Insulin regular"
+                  ],
+                  "qty_available": 50,
+                  "next_expiry": "2099-01-01",
+                  "stock_status": "InStock"
+                },
+                {
+                  "drug_id": 2,
+                  "code": "INSR",
+                  "name": "Insulin regular",
+                  "generic_name": null,
+                  "strength": null,
+                  "form": "Injection",
+                  "unit": "unit",
+                  "schedule": "HospitalOnly",
+                  "is_otc_allowed": false,
+                  "barcode": "8991682543668",
+                  "low_stock_threshold": 0,
+                  "is_active": true,
+                  "high_alert_category": "Insulin",
+                  "is_restricted": false,
+                  "lasa_with": [
+                    "Insulin NPH"
+                  ],
+                  "qty_available": 50,
+                  "next_expiry": "2099-01-01",
+                  "stock_status": "InStock"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:01:45.066819+00:00"
+              },
+              "request_id": "3c9f279059e64b359f9c572408414e0b"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
+          "permissions": [
+            "patient.search"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/patients/search",
+            "query": {
+              "q": "MRN-2026-000001"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "registration_type": "Regular",
+                  "full_name": "Ali Khan",
+                  "father_or_husband_name": null,
+                  "gender": "male",
+                  "dob": null,
+                  "age_years": 40,
+                  "age_recorded_on": "2026-10-24",
+                  "mobile": "03004648043",
+                  "cnic": null,
+                  "upmrn": null,
+                  "address": null,
+                  "emergency_contact_name": null,
+                  "emergency_contact_phone": null,
+                  "blood_group": null,
+                  "allergies": null,
+                  "billing_category": "Cash",
+                  "panel_id": null,
+                  "panel_name": null,
+                  "panel_member_no": null,
+                  "temp_identifier": null,
+                  "merged_into_id": null,
+                  "linked_employee_id": null,
+                  "is_deceased": false,
+                  "created_at": "2026-10-24T10:22:47.211654+00:00",
+                  "row_version": 1,
+                  "death_id": null,
+                  "death_at": null,
+                  "photo_document_id": null,
+                  "mlc_numbers": [],
+                  "matched_merged_profile": null,
+                  "outstanding": {
+                    "has_outstanding_ar": true,
+                    "outstanding_ar_balance": 600,
+                    "ar_block_applies": true,
+                    "banner_text": "OUTSTANDING BALANCE: RS. 600.00"
+                  }
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-24T10:22:47.821541+00:00"
+              },
+              "request_id": "4d98edf634a347f1a9685ccd268ae47f"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions",
+          "summary": "Admissions (default: all live ones; admissions desk queue)",
+          "permissions": [
+            "ipd.admission.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/admissions",
+            "query": {
+              "status": "Admitted"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "admission_id": 1,
+                  "admission_number": "ADM-2026-00001",
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "gender": "male",
+                  "age_years": 40,
+                  "requested_ward_id": 2,
+                  "requested_ward_name": "General Ward",
+                  "ward_id": 2,
+                  "ward_name": "General Ward",
+                  "bed_id": 2,
+                  "bed_label": "GW-1",
+                  "primary_doctor_id": 1,
+                  "primary_doctor_name": "Dr Ahmed",
+                  "admission_type": "Standard",
+                  "status": "Admitted",
+                  "billing_category": "Cash",
+                  "panel_id": null,
+                  "is_billing_confirmed": true,
+                  "is_billing_deferred": false,
+                  "is_overflow": false,
+                  "overflow_reason": null,
+                  "eta_minutes": null,
+                  "source_ticket_id": 1,
+                  "admission_reason": "Fever and productive cough for 5 days, SpO2 91% on air",
+                  "provisional_diagnosis": "Community-acquired pneumonia",
+                  "initial_care_plan": null,
+                  "photo_document_id": null,
+                  "details_stamp": {
+                    "at": "2026-10-13T11:56:42.089182+00:00",
+                    "name": "Dr Ahmed",
+                    "text": "Dr Ahmed, Doctor, PMDC PMDC-53863, 13-Oct-2026 16:56",
+                    "user_id": 1,
+                    "designation": "Doctor",
+                    "employee_id": 1,
+                    "registration": "PMDC PMDC-53863"
+                  },
+                  "admission_notes": null,
+                  "requested_at": "2026-10-13T11:56:42.089182+00:00",
+                  "reserved_at": "2026-10-13T11:56:42.326754+00:00",
+                  "admitted_at": "2026-10-13T11:56:42.326754+00:00",
+                  "discharge_initiated_at": null,
+                  "discharged_at": null,
+                  "row_version": 4
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-13T11:56:42.655142+00:00"
+              },
+              "request_id": "53e93d49b31742449c4f5aa81e7d15b6"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/ot/bookings",
+          "summary": "Bookings (mine=true for a surgeon's own list)",
+          "permissions": [
+            "ot.booking.view",
+            "ot.booking.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/ot/bookings",
+            "query": {
+              "mine": true
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "booking_id": 1,
+                  "booking_number": "OT-2026-00001",
+                  "status": "Requested",
+                  "booking_type": "Scheduled",
+                  "procedure_name": "Appendectomy",
+                  "ot_id": null,
+                  "ot_name": null,
+                  "scheduled_start": null,
+                  "scheduled_end": null,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "surgeon_name": "Dr Tariq",
+                  "is_settled": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:42:59.860722+00:00"
+              },
+              "request_id": "06c687418d12467191ba257b564bc251"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/deaths",
+          "summary": "The death register",
+          "permissions": [
+            "death.register.view",
+            "death.record",
+            "death.body.release"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/deaths",
+            "query": {
+              "status": "Certified",
+              "body_released": "true"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "death_id": 2,
+                  "death_number": "DTH-2026-00001",
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "gender": "male",
+                  "setting": "Inpatient",
+                  "death_at": "2026-09-29T03:33:52.931281+00:00",
+                  "status": "Certified",
+                  "admission_number": "ADM-2026-00001",
+                  "ward_name": "General Ward",
+                  "department_name": "General Medicine",
+                  "underlying_cause": "Right lower lobe pneumonia",
+                  "underlying_icd": "CA40.Z",
+                  "underlying_term": {
+                    "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                    "code": "CA40.Z",
+                    "title": "Pneumonia, organism unspecified",
+                    "system": "ICD-11"
+                  },
+                  "manner": "Disease",
+                  "expected_death": true,
+                  "mlc_number": null,
+                  "certifier_name": "Dr Ahmed",
+                  "certified_at": "2026-09-29T03:43:53.113388+00:00",
+                  "body_released_at": "2026-09-29T03:43:53.172919+00:00",
+                  "body_released_to": "NextOfKin",
+                  "autopsy_status": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-29T03:43:53.327714+00:00"
+              },
+              "request_id": "783124927a68481e8da2a8e1d5c6e07b"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/incidents/sentinel-list/pdf",
+          "summary": "The list of sentinel events and how to report (PDF)",
+          "permissions": [],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/sentinel-list/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 9867
+          }
+        }
+      ]
+    },
+    {
+      "section": "2. Review (Quality Officer)",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/incidents",
+          "summary": "The incident register",
+          "permissions": [
+            "incident.view",
+            "incident.report",
+            "ot.clinical_statistics.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents"
+          },
+          "response": {
+            "status": 200,
+            "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"incident_id\": 3, \"incident_number\": \"INC-2026-00002\", \"type_code\": \"MEDICATION_ERROR\", \"type_name\": \"Medication error\", \"area\": \"Medication\", \"kind\": \"Incident\", \"harm\": \"Moderate\", \"is_sentinel\": false, \"sentinel_override\": null, \"occurred_at\": \"2026-10-01T06:06:22.669376+00:00\", \"department_id\": null, \"department_name\": null, \"ward_id\": null, \"ward_name\": null, \"location\": \"Medical ward, bed 12\", \"affected\": \"Patient\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"admission_id\": null, \"admission_number\": null, \"employee_id\": null, \"employee_name\": null, \"booking_id\": null, \"booking_number\": null, \"procedure_name\": null, \"ot_phase\": null, \"drug_id\": null, \"drug_name\": null, \"medication_stage\": \"Administration\", \"high_alert\": false, \"death_id\": null, \"death_number\": null, \"description\": \"Metformin 500 mg given to the patient in bed 12 instead of bed 11\", \"immediate_action\": \"Blood glucose checked hourly; the doctor informed\", \"screening_key\": null, \"reporter_confidential\": true, \"reported_by\": 6, \"reported_by_name\": \"Nurse Rubina\", \"reported_at\": \"2026-10-01T07:19:50.562305+00:00\", \"report_stamp\": {\"at\": \"2026-10-01T07:19:50.562305+00:00\", \"name\": \"Nurse Rubina\", \"text\": \"Nurse Rubina, Officer, PNC PNC-5210, 01-Oct-2026 12:19\", \"user_id\": 6, \"designation\": \"Officer\", \"employee_id\": 6, \"registration\": \"PNC PNC-5210\"}, \"status\": \"Reported\", \"reviewed_at\": null, \"reviewed_by_name\": null, \"review_note\": null, \"investigator_user_id\": null, \"investigator_name\": null, \"analysis_due\": null, \"withdraw_reason\": null, \"analysis_method\": null, \"chronology\": null, \"root_causes\": null, \"contributing_factors\": [], \"lessons\": null, \"disclosure\": null, \"disclosure_note\": null, \"external_reference\": null, \"analysed_at\": null, \"analysis_stamp\": null, \"closure_note\": null, \"closed_at\": null, \"closure_stamp\": null, \"row_version\": 1, \"review_overdue\": false, \"analysis_overdue\": false}, {\"incident_id\": 2, \"incident_number\": \"INC-2026-00001\", \"type_code\": \"MEDICATION_ERROR\", \"type_name\": \"Medication error\", \"area\": \"Medication\", \"kind\": \"Incident\", \"harm\": \"Moderate\", \"is_sentinel\": false, \"sentinel_override\": null, \"occurred_at\": \"2026-10-01T06:06:22.669376+00:00\", \"department_id\": null, \"department_name\": null, \"ward_id\": null, \"ward_name\": null, \"location\": \"Medical ward, bed 12\", \"affected\": \"Patient\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"admission_id\": null, \"admission_number\": null, \"employee_id\": null, \"employee_name\": null, \"booking_id\": null, \"booking_number\": null, \"procedure_name\": null, \"ot_phase\": null, \"drug_id\": null, \"drug_name\": null, \"medication_stage\": \"Administration\", \"high_alert\": false, \"death_id\": null, \"death_number\": null, \"description\": \"Metformin 500 mg given to the patient in bed 12 instead of bed 11\", \"immediate_action\": \"Blood glucose checked hourly; the doctor informed\", \"screening_key\": null, \"reporter_confidential\": true, \"reported_by\": 6, \"…"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/incidents/{incident_id}",
+          "summary": "One incident",
+          "permissions": [],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/2"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "incident_id": 2,
+                "incident_number": "INC-2026-00001",
+                "type_code": "MEDICATION_ERROR",
+                "type_name": "Medication error",
+                "area": "Medication",
+                "kind": "Incident",
+                "harm": "Mild",
+                "is_sentinel": false,
+                "sentinel_override": null,
+                "occurred_at": "2026-10-01T06:06:22.669376+00:00",
+                "department_id": null,
+                "department_name": null,
+                "ward_id": null,
+                "ward_name": null,
+                "location": "Medical ward, bed 12",
+                "affected": "Patient",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "admission_id": null,
+                "admission_number": null,
+                "employee_id": null,
+                "employee_name": null,
+                "booking_id": null,
+                "booking_number": null,
+                "procedure_name": null,
+                "ot_phase": null,
+                "drug_id": null,
+                "drug_name": null,
+                "medication_stage": "Administration",
+                "high_alert": false,
+                "death_id": null,
+                "death_number": null,
+                "description": "Metformin 500 mg given to the patient in bed 12 instead of bed 11",
+                "immediate_action": "Blood glucose checked hourly; the doctor informed",
+                "screening_key": null,
+                "reporter_confidential": true,
+                "reported_by": null,
+                "reported_by_name": "Confidential",
+                "reported_at": "2026-10-01T07:19:50.451469+00:00",
+                "report_stamp": null,
+                "status": "UnderReview",
+                "reviewed_at": "2026-10-01T07:19:50.616011+00:00",
+                "reviewed_by_name": "Quality Officer",
+                "review_note": "No hypoglycaemia followed",
+                "investigator_user_id": 1,
+                "investigator_name": "Dr Ahmed",
+                "analysis_due": "2026-10-15",
+                "withdraw_reason": null,
+                "analysis_method": null,
+                "chronology": null,
+                "root_causes": null,
+                "contributing_factors": [],
+                "lessons": null,
+                "disclosure": null,
+                "disclosure_note": null,
+                "external_reference": null,
+                "analysed_at": null,
+                "analysis_stamp": null,
+                "closure_note": null,
+                "closed_at": null,
+                "closure_stamp": null,
+                "row_version": 2,
+                "review_overdue": false,
+                "analysis_overdue": false,
+                "actions": [],
+                "next_step": "Dr Ahmed writes and signs the analysis by 15-Oct-2026",
+                "can_review": false,
+                "can_withdraw": false,
+                "can_analyse": true,
+                "can_add_action": true,
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:19:50.650553+00:00"
+              },
+              "request_id": "7d9fed4a49234d3890f2064209b2f6af"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/incidents/{incident_id}/review",
+          "summary": "Review a report: class it and name the investigator",
+          "permissions": [
+            "incident.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/2/review",
+            "body": {
+              "investigator_user_id": 1,
+              "harm": "Mild",
+              "note": "No hypoglycaemia followed"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "incident_id": 2,
+                "incident_number": "INC-2026-00001",
+                "type_code": "MEDICATION_ERROR",
+                "type_name": "Medication error",
+                "area": "Medication",
+                "kind": "Incident",
+                "harm": "Mild",
+                "is_sentinel": false,
+                "sentinel_override": null,
+                "occurred_at": "2026-10-01T06:06:22.669376+00:00",
+                "department_id": null,
+                "department_name": null,
+                "ward_id": null,
+                "ward_name": null,
+                "location": "Medical ward, bed 12",
+                "affected": "Patient",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "admission_id": null,
+                "admission_number": null,
+                "employee_id": null,
+                "employee_name": null,
+                "booking_id": null,
+                "booking_number": null,
+                "procedure_name": null,
+                "ot_phase": null,
+                "drug_id": null,
+                "drug_name": null,
+                "medication_stage": "Administration",
+                "high_alert": false,
+                "death_id": null,
+                "death_number": null,
+                "description": "Metformin 500 mg given to the patient in bed 12 instead of bed 11",
+                "immediate_action": "Blood glucose checked hourly; the doctor informed",
+                "screening_key": null,
+                "reporter_confidential": true,
+                "reported_by": 6,
+                "reported_by_name": "Nurse Rubina",
+                "reported_at": "2026-10-01T07:19:50.451469+00:00",
+                "report_stamp": {
+                  "at": "2026-10-01T07:19:50.451469+00:00",
+                  "name": "Nurse Rubina",
+                  "text": "Nurse Rubina, Officer, PNC PNC-5210, 01-Oct-2026 12:19",
+                  "user_id": 6,
+                  "designation": "Officer",
+                  "employee_id": 6,
+                  "registration": "PNC PNC-5210"
+                },
+                "status": "UnderReview",
+                "reviewed_at": "2026-10-01T07:19:50.616011+00:00",
+                "reviewed_by_name": "Quality Officer",
+                "review_note": "No hypoglycaemia followed",
+                "investigator_user_id": 1,
+                "investigator_name": "Dr Ahmed",
+                "analysis_due": "2026-10-15",
+                "withdraw_reason": null,
+                "analysis_method": null,
+                "chronology": null,
+                "root_causes": null,
+                "contributing_factors": [],
+                "lessons": null,
+                "disclosure": null,
+                "disclosure_note": null,
+                "external_reference": null,
+                "analysed_at": null,
+                "analysis_stamp": null,
+                "closure_note": null,
+                "closed_at": null,
+                "closure_stamp": null,
+                "row_version": 2,
+                "review_overdue": false,
+                "analysis_overdue": false,
+                "actions": [],
+                "next_step": "Dr Ahmed writes and signs the analysis by 15-Oct-2026",
+                "can_review": false,
+                "can_withdraw": true,
+                "can_analyse": true,
+                "can_add_action": true,
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:19:50.633427+00:00"
+              },
+              "request_id": "218c195f0a1740f081774ac759be6c11"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/incidents/{incident_id}/withdraw",
+          "summary": "Withdraw a report that is not an incident",
+          "permissions": [
+            "incident.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/3/withdraw",
+            "body": {
+              "reason": "Duplicate of INC-2026-00001"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "incident_id": 3,
+                "incident_number": "INC-2026-00002",
+                "type_code": "MEDICATION_ERROR",
+                "type_name": "Medication error",
+                "area": "Medication",
+                "kind": "Incident",
+                "harm": "Moderate",
+                "is_sentinel": false,
+                "sentinel_override": null,
+                "occurred_at": "2026-10-01T06:06:22.669376+00:00",
+                "department_id": null,
+                "department_name": null,
+                "ward_id": null,
+                "ward_name": null,
+                "location": "Medical ward, bed 12",
+                "affected": "Patient",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "admission_id": null,
+                "admission_number": null,
+                "employee_id": null,
+                "employee_name": null,
+                "booking_id": null,
+                "booking_number": null,
+                "procedure_name": null,
+                "ot_phase": null,
+                "drug_id": null,
+                "drug_name": null,
+                "medication_stage": "Administration",
+                "high_alert": false,
+                "death_id": null,
+                "death_number": null,
+                "description": "Metformin 500 mg given to the patient in bed 12 instead of bed 11",
+                "immediate_action": "Blood glucose checked hourly; the doctor informed",
+                "screening_key": null,
+                "reporter_confidential": true,
+                "reported_by": 6,
+                "reported_by_name": "Nurse Rubina",
+                "reported_at": "2026-10-01T07:19:50.562305+00:00",
+                "report_stamp": {
+                  "at": "2026-10-01T07:19:50.562305+00:00",
+                  "name": "Nurse Rubina",
+                  "text": "Nurse Rubina, Officer, PNC PNC-5210, 01-Oct-2026 12:19",
+                  "user_id": 6,
+                  "designation": "Officer",
+                  "employee_id": 6,
+                  "registration": "PNC PNC-5210"
+                },
+                "status": "Withdrawn",
+                "reviewed_at": null,
+                "reviewed_by_name": null,
+                "review_note": null,
+                "investigator_user_id": null,
+                "investigator_name": null,
+                "analysis_due": null,
+                "withdraw_reason": "Duplicate of INC-2026-00001",
+                "analysis_method": null,
+                "chronology": null,
+                "root_causes": null,
+                "contributing_factors": [],
+                "lessons": null,
+                "disclosure": null,
+                "disclosure_note": null,
+                "external_reference": null,
+                "analysed_at": null,
+                "analysis_stamp": null,
+                "closure_note": null,
+                "closed_at": null,
+                "closure_stamp": null,
+                "row_version": 2,
+                "review_overdue": false,
+                "analysis_overdue": false,
+                "actions": [],
+                "next_step": null,
+                "can_review": false,
+                "can_withdraw": false,
+                "can_analyse": false,
+                "can_add_action": false,
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:19:50.609246+00:00"
+              },
+              "request_id": "0b969ac5389c45efa1e35ec1fa1e56df"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/incident-types",
+          "summary": "Add an incident type",
+          "permissions": [
+            "incident.manage"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/incident-types",
+            "body": {
+              "type_code": "OXYGEN_SUPPLY_FAILURE",
+              "name": "Oxygen supply failure",
+              "area": "Facility",
+              "sentinel": "Always"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "type_code": "OXYGEN_SUPPLY_FAILURE",
+                "name": "Oxygen supply failure",
+                "area": "Facility",
+                "sentinel": "Always",
+                "description": null,
+                "sort_order": 100,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:19:58.870399+00:00"
+              },
+              "request_id": "ee048919e35443119f227f5e3cfc2c34"
+            }
+          }
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/incident-types/{type_code}",
+          "summary": "Change or retire an incident type",
+          "permissions": [
+            "incident.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incident-types/OXYGEN_SUPPLY_FAILURE",
+            "body": {
+              "is_active": false,
+              "expected_version": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "type_code": "OXYGEN_SUPPLY_FAILURE",
+                "name": "Oxygen supply failure",
+                "area": "Facility",
+                "sentinel": "Always",
+                "description": null,
+                "sort_order": 100,
+                "is_active": false,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:19:58.881828+00:00"
+              },
+              "request_id": "d6be0d74482b43a9bd633b3ce7e0c332"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "3. Analysis and actions (the investigator)",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/incidents",
+          "summary": "The incident register",
+          "permissions": [
+            "incident.view",
+            "incident.report",
+            "ot.clinical_statistics.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents"
+          },
+          "response": {
+            "status": 200,
+            "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"incident_id\": 3, \"incident_number\": \"INC-2026-00002\", \"type_code\": \"MEDICATION_ERROR\", \"type_name\": \"Medication error\", \"area\": \"Medication\", \"kind\": \"Incident\", \"harm\": \"Moderate\", \"is_sentinel\": false, \"sentinel_override\": null, \"occurred_at\": \"2026-10-01T06:06:22.669376+00:00\", \"department_id\": null, \"department_name\": null, \"ward_id\": null, \"ward_name\": null, \"location\": \"Medical ward, bed 12\", \"affected\": \"Patient\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"admission_id\": null, \"admission_number\": null, \"employee_id\": null, \"employee_name\": null, \"booking_id\": null, \"booking_number\": null, \"procedure_name\": null, \"ot_phase\": null, \"drug_id\": null, \"drug_name\": null, \"medication_stage\": \"Administration\", \"high_alert\": false, \"death_id\": null, \"death_number\": null, \"description\": \"Metformin 500 mg given to the patient in bed 12 instead of bed 11\", \"immediate_action\": \"Blood glucose checked hourly; the doctor informed\", \"screening_key\": null, \"reporter_confidential\": true, \"reported_by\": 6, \"reported_by_name\": \"Nurse Rubina\", \"reported_at\": \"2026-10-01T07:19:50.562305+00:00\", \"report_stamp\": {\"at\": \"2026-10-01T07:19:50.562305+00:00\", \"name\": \"Nurse Rubina\", \"text\": \"Nurse Rubina, Officer, PNC PNC-5210, 01-Oct-2026 12:19\", \"user_id\": 6, \"designation\": \"Officer\", \"employee_id\": 6, \"registration\": \"PNC PNC-5210\"}, \"status\": \"Reported\", \"reviewed_at\": null, \"reviewed_by_name\": null, \"review_note\": null, \"investigator_user_id\": null, \"investigator_name\": null, \"analysis_due\": null, \"withdraw_reason\": null, \"analysis_method\": null, \"chronology\": null, \"root_causes\": null, \"contributing_factors\": [], \"lessons\": null, \"disclosure\": null, \"disclosure_note\": null, \"external_reference\": null, \"analysed_at\": null, \"analysis_stamp\": null, \"closure_note\": null, \"closed_at\": null, \"closure_stamp\": null, \"row_version\": 1, \"review_overdue\": false, \"analysis_overdue\": false}, {\"incident_id\": 2, \"incident_number\": \"INC-2026-00001\", \"type_code\": \"MEDICATION_ERROR\", \"type_name\": \"Medication error\", \"area\": \"Medication\", \"kind\": \"Incident\", \"harm\": \"Moderate\", \"is_sentinel\": false, \"sentinel_override\": null, \"occurred_at\": \"2026-10-01T06:06:22.669376+00:00\", \"department_id\": null, \"department_name\": null, \"ward_id\": null, \"ward_name\": null, \"location\": \"Medical ward, bed 12\", \"affected\": \"Patient\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"admission_id\": null, \"admission_number\": null, \"employee_id\": null, \"employee_name\": null, \"booking_id\": null, \"booking_number\": null, \"procedure_name\": null, \"ot_phase\": null, \"drug_id\": null, \"drug_name\": null, \"medication_stage\": \"Administration\", \"high_alert\": false, \"death_id\": null, \"death_number\": null, \"description\": \"Metformin 500 mg given to the patient in bed 12 instead of bed 11\", \"immediate_action\": \"Blood glucose checked hourly; the doctor informed\", \"screening_key\": null, \"reporter_confidential\": true, \"reported_by\": 6, \"…"
+          }
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/incidents/{incident_id}/analysis",
+          "summary": "Save the analysis (a draft until signed)",
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/2/analysis",
+            "body": {
+              "chronology": "08:00 the dose was due; 08:10 given to the patient in bed 12"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "incident_id": 2,
+                "incident_number": "INC-2026-00001",
+                "type_code": "MEDICATION_ERROR",
+                "type_name": "Medication error",
+                "area": "Medication",
+                "kind": "Incident",
+                "harm": "Mild",
+                "is_sentinel": false,
+                "sentinel_override": null,
+                "occurred_at": "2026-10-01T06:06:22.669376+00:00",
+                "department_id": null,
+                "department_name": null,
+                "ward_id": null,
+                "ward_name": null,
+                "location": "Medical ward, bed 12",
+                "affected": "Patient",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "admission_id": null,
+                "admission_number": null,
+                "employee_id": null,
+                "employee_name": null,
+                "booking_id": null,
+                "booking_number": null,
+                "procedure_name": null,
+                "ot_phase": null,
+                "drug_id": null,
+                "drug_name": null,
+                "medication_stage": "Administration",
+                "high_alert": false,
+                "death_id": null,
+                "death_number": null,
+                "description": "Metformin 500 mg given to the patient in bed 12 instead of bed 11",
+                "immediate_action": "Blood glucose checked hourly; the doctor informed",
+                "screening_key": null,
+                "reporter_confidential": true,
+                "reported_by": null,
+                "reported_by_name": "Confidential",
+                "reported_at": "2026-10-01T07:19:50.451469+00:00",
+                "report_stamp": null,
+                "status": "UnderReview",
+                "reviewed_at": "2026-10-01T07:19:50.616011+00:00",
+                "reviewed_by_name": "Quality Officer",
+                "review_note": "No hypoglycaemia followed",
+                "investigator_user_id": 1,
+                "investigator_name": "Dr Ahmed",
+                "analysis_due": "2026-10-15",
+                "withdraw_reason": null,
+                "analysis_method": null,
+                "chronology": "08:00 the dose was due; 08:10 given to the patient in bed 12",
+                "root_causes": null,
+                "contributing_factors": [],
+                "lessons": null,
+                "disclosure": null,
+                "disclosure_note": null,
+                "external_reference": null,
+                "analysed_at": null,
+                "analysis_stamp": null,
+                "closure_note": null,
+                "closed_at": null,
+                "closure_stamp": null,
+                "row_version": 3,
+                "review_overdue": false,
+                "analysis_overdue": false,
+                "actions": [],
+                "next_step": "Dr Ahmed writes and signs the analysis by 15-Oct-2026",
+                "can_review": false,
+                "can_withdraw": false,
+                "can_analyse": true,
+                "can_add_action": true,
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:19:50.692843+00:00"
+              },
+              "request_id": "4bf57c7e5a294a84bf12681061b42f46"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/incidents/{incident_id}/actions",
+          "summary": "Record a corrective or preventive action",
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/incidents/2/actions",
+            "body": {
+              "action_type": "Preventive",
+              "description": "Wristband scanners on every medicine trolley",
+              "owner_user_id": 6,
+              "due_date": "2026-11-13"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "action_id": 1,
+                "action_number": "CAPA-2026-0001",
+                "source": "Incident",
+                "cycle_id": null,
+                "cycle_number": null,
+                "incident_id": 2,
+                "incident_number": "INC-2026-00001",
+                "complaint_id": null,
+                "complaint_number": null,
+                "ipc_audit_id": null,
+                "audit_number": null,
+                "meeting_id": null,
+                "meeting_number": null,
+                "drill_id": null,
+                "drill_number": null,
+                "mock_interview_id": null,
+                "interview_number": null,
+                "qa_round_id": null,
+                "qa_round_number": null,
+                "feedback_id": null,
+                "feedback_number": null,
+                "source_number": "INC-2026-00001",
+                "action_type": "Preventive",
+                "description": "Wristband scanners on every medicine trolley",
+                "criterion_code": null,
+                "department_id": null,
+                "department_name": null,
+                "owner_user_id": 6,
+                "owner_name": "Nurse Rubina",
+                "due_date": "2026-11-13",
+                "status": "Open",
+                "outcome_note": null,
+                "completed_at": null,
+                "completed_by_name": null,
+                "created_by": 1,
+                "created_by_name": "Dr Ahmed",
+                "created_at": "2026-10-14T10:54:28.448864+00:00",
+                "row_version": 1,
+                "is_overdue": false
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:54:28.462681+00:00"
+              },
+              "request_id": "7cd44372c063470ca8a650c24429dab1"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/record-review/people",
+          "summary": "Who can review records or own an action",
+          "permissions": [
+            "quality.review.manage",
+            "committee.manage",
+            "infection.control.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/quality/record-review/people"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "user_id": 1,
+                  "display_name": "Dr Ahmed",
+                  "designation": "Doctor",
+                  "department_name": "General Medicine",
+                  "staff_category": "Clinical",
+                  "can_review": true,
+                  "default_discipline": "Medical"
+                },
+                {
+                  "user_id": 7,
+                  "display_name": "Dr Reviewer",
+                  "designation": "Doctor",
+                  "department_name": null,
+                  "staff_category": "Clinical",
+                  "can_review": true,
+                  "default_discipline": "Medical"
+                },
+                {
+                  "user_id": 2,
+                  "display_name": "Dr Sara",
+                  "designation": "Doctor",
+                  "department_name": "General Medicine",
+                  "staff_category": "Clinical",
+                  "can_review": true,
+                  "default_discipline": "Medical"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-28T16:29:14.861565+00:00"
+              },
+              "request_id": "270dcbd5bcba4d3781b715ca8c500550"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)",
+          "permissions": [],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/staff/lookup",
+            "query": {
+              "q": "sana look"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 2,
+                  "emp_number": "EMP-2026-0002",
+                  "full_name": "Sana Lookuptest",
+                  "designation": "Officer",
+                  "department_name": null,
+                  "license_type": "PNC",
+                  "user_id": 2,
+                  "registration": "PNC PNC-31852"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-11-05T01:52:33.483546+00:00"
+              },
+              "request_id": "3940df21a57e44bfb260d1fc5e0cc048"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments",
+          "permissions": [],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/admin/departments"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "department_id": 1,
+                  "code": "CARD",
+                  "name": "Cardiology & Vascular",
+                  "is_clinical": true,
+                  "is_active": true,
+                  "row_version": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.417658+00:00"
+              },
+              "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/incidents/{incident_id}/analysis/sign",
+          "summary": "Sign the analysis (final)",
+          "permissions": [
+            "incident.report",
+            "incident.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/2/analysis/sign",
+            "body": {}
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "incident_id": 2,
+                "incident_number": "INC-2026-00001",
+                "type_code": "MEDICATION_ERROR",
+                "type_name": "Medication error",
+                "area": "Medication",
+                "kind": "Incident",
+                "harm": "Mild",
+                "is_sentinel": false,
+                "sentinel_override": null,
+                "occurred_at": "2026-10-01T06:06:22.669376+00:00",
+                "department_id": null,
+                "department_name": null,
+                "ward_id": null,
+                "ward_name": null,
+                "location": "Medical ward, bed 12",
+                "affected": "Patient",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "admission_id": null,
+                "admission_number": null,
+                "employee_id": null,
+                "employee_name": null,
+                "booking_id": null,
+                "booking_number": null,
+                "procedure_name": null,
+                "ot_phase": null,
+                "drug_id": null,
+                "drug_name": null,
+                "medication_stage": "Administration",
+                "high_alert": false,
+                "death_id": null,
+                "death_number": null,
+                "description": "Metformin 500 mg given to the patient in bed 12 instead of bed 11",
+                "immediate_action": "Blood glucose checked hourly; the doctor informed",
+                "screening_key": null,
+                "reporter_confidential": true,
+                "reported_by": null,
+                "reported_by_name": "Confidential",
+                "reported_at": "2026-10-01T07:19:50.451469+00:00",
+                "report_stamp": null,
+                "status": "Analysed",
+                "reviewed_at": "2026-10-01T07:19:50.616011+00:00",
+                "reviewed_by_name": "Quality Officer",
+                "review_note": "No hypoglycaemia followed",
+                "investigator_user_id": 1,
+                "investigator_name": "Dr Ahmed",
+                "analysis_due": "2026-10-15",
+                "withdraw_reason": null,
+                "analysis_method": "Review",
+                "chronology": "08:00 the dose was due; 08:10 given to the patient in bed 12",
+                "root_causes": "Two patients with the same surname in adjacent beds; the wristband was not scanned",
+                "contributing_factors": [
+                  "Individual",
+                  "Task"
+                ],
+                "lessons": "Scan the wristband before every dose",
+                "disclosure": "Disclosed",
+                "disclosure_note": "The ward sister told the patient and his son the same day",
+                "external_reference": null,
+                "analysed_at": "2026-10-01T07:19:50.715535+00:00",
+                "analysis_stamp": {
+                  "at": "2026-10-01T07:19:50.715535+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-1206, 01-Oct-2026 12:19",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-1206"
+                },
+                "closure_note": null,
+                "closed_at": null,
+                "closure_stamp": null,
+                "row_version": 5,
+                "review_overdue": false,
+                "analysis_overdue": false,
+                "actions": [],
+                "next_step": "Record the actions, or close with the follow-up",
+                "can_review": false,
+                "can_withdraw": false,
+                "can_analyse": false,
+                "can_add_action": true,
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:19:50.723345+00:00"
+              },
+              "request_id": "ff9337267a6a43d18969beef4a51949c"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "4. The action register (every workspace)",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/actions",
+          "summary": "The action register (mine: the actions I own)",
+          "permissions": [],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/quality/actions",
+            "query": {
+              "source": "Drill"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "action_id": 2,
+                  "action_number": "CAPA-2026-0001",
+                  "source": "Drill",
+                  "cycle_id": null,
+                  "cycle_number": null,
+                  "incident_id": null,
+                  "incident_number": null,
+                  "complaint_id": null,
+                  "complaint_number": null,
+                  "ipc_audit_id": null,
+                  "audit_number": null,
+                  "meeting_id": null,
+                  "meeting_number": null,
+                  "drill_id": 2,
+                  "drill_number": "DRL-2026-0001",
+                  "mock_interview_id": null,
+                  "interview_number": null,
+                  "qa_round_id": null,
+                  "qa_round_number": null,
+                  "feedback_id": null,
+                  "feedback_number": null,
+                  "source_number": "DRL-2026-0001",
+                  "action_type": "Corrective",
+                  "description": "Keep the ER corridor clear: trolleys parked in bay 3",
+                  "criterion_code": null,
+                  "department_id": null,
+                  "department_name": null,
+                  "owner_user_id": 1,
+                  "owner_name": "u11a4cc9599",
+                  "due_date": "2026-10-28",
+                  "status": "Open",
+                  "outcome_note": null,
+                  "completed_at": null,
+                  "completed_by_name": null,
+                  "created_by": 1,
+                  "created_by_name": "u11a4cc9599",
+                  "created_at": "2026-10-14T10:45:50.140140+00:00",
+                  "row_version": 1,
+                  "is_overdue": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T10:45:50.171273+00:00"
+              },
+              "request_id": "f3fa8d75634b4a8899cce1f4dbb92a98"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/actions/{action_id}",
+          "summary": "One action",
+          "permissions": [],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/quality/actions/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "action_id": 1,
+                "action_number": "CAPA-2026-0001",
+                "source": "Incident",
+                "cycle_id": null,
+                "cycle_number": null,
+                "incident_id": 2,
+                "incident_number": "INC-2026-00001",
+                "complaint_id": null,
+                "complaint_number": null,
+                "ipc_audit_id": null,
+                "audit_number": null,
+                "meeting_id": null,
+                "meeting_number": null,
+                "drill_id": null,
+                "drill_number": null,
+                "mock_interview_id": null,
+                "interview_number": null,
+                "qa_round_id": null,
+                "qa_round_number": null,
+                "feedback_id": null,
+                "feedback_number": null,
+                "source_number": "INC-2026-00001",
+                "action_type": "Preventive",
+                "description": "Wristband scanners on every medicine trolley",
+                "criterion_code": null,
+                "department_id": null,
+                "department_name": null,
+                "owner_user_id": 6,
+                "owner_name": "Nurse Rubina",
+                "due_date": "2026-11-13",
+                "status": "Done",
+                "outcome_note": "Two scanners bought and installed; staff shown how to use them",
+                "completed_at": "2026-10-14T10:54:28.497734+00:00",
+                "completed_by_name": "Nurse Rubina",
+                "created_by": 1,
+                "created_by_name": "Dr Ahmed",
+                "created_at": "2026-10-14T10:54:28.448864+00:00",
+                "row_version": 2,
+                "is_overdue": false
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:54:28.616743+00:00"
+              },
+              "request_id": "450aecfd9e474e119b627cba1664f56f"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/actions/{action_id}/complete",
+          "summary": "Close an action: done with the evidence, or cancelled",
+          "permissions": [],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/quality/actions/1/complete",
+            "body": {
+              "status": "Done",
+              "note": "Two scanners bought and installed; staff shown how to use them"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "action_id": 1,
+                "action_number": "CAPA-2026-0001",
+                "source": "Incident",
+                "cycle_id": null,
+                "cycle_number": null,
+                "incident_id": 2,
+                "incident_number": "INC-2026-00001",
+                "complaint_id": null,
+                "complaint_number": null,
+                "ipc_audit_id": null,
+                "audit_number": null,
+                "meeting_id": null,
+                "meeting_number": null,
+                "drill_id": null,
+                "drill_number": null,
+                "mock_interview_id": null,
+                "interview_number": null,
+                "qa_round_id": null,
+                "qa_round_number": null,
+                "feedback_id": null,
+                "feedback_number": null,
+                "source_number": "INC-2026-00001",
+                "action_type": "Preventive",
+                "description": "Wristband scanners on every medicine trolley",
+                "criterion_code": null,
+                "department_id": null,
+                "department_name": null,
+                "owner_user_id": 6,
+                "owner_name": "Nurse Rubina",
+                "due_date": "2026-11-13",
+                "status": "Done",
+                "outcome_note": "Two scanners bought and installed; staff shown how to use them",
+                "completed_at": "2026-10-14T10:54:28.497734+00:00",
+                "completed_by_name": "Nurse Rubina",
+                "created_by": 1,
+                "created_by_name": "Dr Ahmed",
+                "created_at": "2026-10-14T10:54:28.448864+00:00",
+                "row_version": 2,
+                "is_overdue": false
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:54:28.504388+00:00"
+              },
+              "request_id": "c603d6a43a2b49009e4650715b7a6a8d"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/actions/register/pdf",
+          "summary": "The action register for the quality committee (PDF)",
+          "permissions": [
+            "quality.action.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/quality/actions/register/pdf",
+            "query": {
+              "date_from": "2026-10-01",
+              "date_to": "2026-10-01",
+              "source": "Incident"
+            }
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 2730
+          }
+        }
+      ]
+    },
+    {
+      "section": "5. Closure (Quality Officer)",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/incidents/{incident_id}/close",
+          "summary": "Close an incident with the follow-up",
+          "permissions": [
+            "incident.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/2/close",
+            "body": {
+              "closure_note": "Scanners in use on both medical wards since the first of the month"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"incident_id\": 2, \"incident_number\": \"INC-2026-00001\", \"type_code\": \"MEDICATION_ERROR\", \"type_name\": \"Medication error\", \"area\": \"Medication\", \"kind\": \"Incident\", \"harm\": \"Mild\", \"is_sentinel\": false, \"sentinel_override\": null, \"occurred_at\": \"2026-10-14T09:27:43.058316+00:00\", \"department_id\": null, \"department_name\": null, \"ward_id\": null, \"ward_name\": null, \"location\": \"Medical ward, bed 12\", \"affected\": \"Patient\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"admission_id\": null, \"admission_number\": null, \"employee_id\": null, \"employee_name\": null, \"booking_id\": null, \"booking_number\": null, \"procedure_name\": null, \"ot_phase\": null, \"drug_id\": null, \"drug_name\": null, \"medication_stage\": \"Administration\", \"high_alert\": false, \"death_id\": null, \"death_number\": null, \"description\": \"Metformin 500 mg given to the patient in bed 12 instead of bed 11\", \"immediate_action\": \"Blood glucose checked hourly; the doctor informed\", \"screening_key\": null, \"reporter_confidential\": true, \"reported_by\": 6, \"reported_by_name\": \"Nurse Rubina\", \"reported_at\": \"2026-10-14T10:54:28.207515+00:00\", \"report_stamp\": {\"at\": \"2026-10-14T10:54:28.207515+00:00\", \"name\": \"Nurse Rubina\", \"text\": \"Nurse Rubina, Officer, PNC PNC-18913, 14-Oct-2026 15:54\", \"user_id\": 6, \"designation\": \"Officer\", \"employee_id\": 6, \"registration\": \"PNC PNC-18913\"}, \"status\": \"Closed\", \"reviewed_at\": \"2026-10-14T10:54:28.322128+00:00\", \"reviewed_by_name\": \"Quality Officer\", \"review_note\": \"No hypoglycaemia followed\", \"investigator_user_id\": 1, \"investigator_name\": \"Dr Ahmed\", \"analysis_due\": \"2026-10-28\", \"withdraw_reason\": null, \"analysis_method\": \"Review\", \"chronology\": \"08:00 the dose was due; 08:10 given to the patient in bed 12\", \"root_causes\": \"Two patients with the same surname in adjacent beds; the wristband was not scanned\", \"contributing_factors\": [\"Individual\", \"Task\"], \"lessons\": \"Scan the wristband before every dose\", \"disclosure\": \"Disclosed\", \"disclosure_note\": \"The ward sister told the patient and his son the same day\", \"external_reference\": null, \"analysed_at\": \"2026-10-14T10:54:28.424597+00:00\", \"analysis_stamp\": {\"at\": \"2026-10-14T10:54:28.424597+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-13674, 14-Oct-2026 15:54\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-13674\"}, \"closure_note\": \"Scanners in use on both medical wards since the first of the month\", \"closed_at\": \"2026-10-14T10:54:28.511143+00:00\", \"closure_stamp\": {\"at\": \"2026-10-14T10:54:28.511143+00:00\", \"name\": \"Quality Officer\", \"text\": \"Quality Officer, Officer, 14-Oct-2026 15:54\", \"user_id\": 7, \"designation\": \"Officer\", \"employee_id\": 7, \"registration\": null}, \"row_version\": 6, \"review_overdue\": false, \"analysis_overdue\": false, \"actions\": [{\"action_id\": 1, \"action_number\": \"CAPA-2026-0001\", \"source\": \"Incident\", \"cycle_id\": null, \"cycle_number\": null, \"incident_id\": 2, \"incident_number\": \"INC-2026-0…"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/incidents/{incident_id}/pdf",
+          "summary": "The incident report with its analysis and actions (PDF)",
+          "permissions": [],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/2/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 4673
+          }
+        }
+      ]
+    },
+    {
+      "section": "6. The screening list (Quality Officer)",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/incident-screening",
+          "summary": "What the records show that may be a sentinel event",
+          "permissions": [
+            "incident.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incident-screening"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "screening_key": "Death:2",
+                  "kind": "Death",
+                  "found_at": "2026-10-01T07:06:22.669376+00:00",
+                  "patient_id": 2,
+                  "mrn": "MRN-2026-000002",
+                  "patient_name": "Nazir Ahmad",
+                  "admission_id": null,
+                  "booking_id": null,
+                  "death_id": 2,
+                  "suggested_type_code": "UNEXPECTED_DEATH",
+                  "suggested_type_name": "Unexpected death",
+                  "detail": "DTH-2026-00002; recorded by the doctor as unexpected"
+                },
+                {
+                  "screening_key": "Death:1",
+                  "kind": "Death",
+                  "found_at": "2026-10-01T07:06:22.669376+00:00",
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Karim Bakhsh",
+                  "admission_id": null,
+                  "booking_id": null,
+                  "death_id": 1,
+                  "suggested_type_code": "UNEXPECTED_DEATH",
+                  "suggested_type_name": "Unexpected death",
+                  "detail": "DTH-2026-00001; recorded by the doctor as unexpected"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:20:07.125418+00:00"
+              },
+              "request_id": "48293125f87b49afbd0a28fe92adc408"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/incidents",
+          "summary": "Report an incident, an adverse event or a near miss",
+          "permissions": [
+            "incident.report"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/incidents",
+            "body": {
+              "type_code": "DELAY_IN_CARE",
+              "occurred_at": "2026-10-01T07:11:25.324724+00:00",
+              "affected": "Patient",
+              "patient_id": 1,
+              "description": "OPD queue held for a VIP for two hours; a waiting patient's review was delayed",
+              "immediate_action": "Queue order restored"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "incident_id": 1,
+                "incident_number": "INC-2026-00001",
+                "type_code": "DELAY_IN_CARE",
+                "type_name": "Delay or failure in treatment or monitoring",
+                "area": "Clinical",
+                "kind": "Incident",
+                "harm": "NoHarm",
+                "is_sentinel": false,
+                "sentinel_override": null,
+                "occurred_at": "2026-10-01T07:11:25.324724+00:00",
+                "department_id": null,
+                "department_name": null,
+                "ward_id": null,
+                "ward_name": null,
+                "location": null,
+                "affected": "Patient",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "admission_id": null,
+                "admission_number": null,
+                "employee_id": null,
+                "employee_name": null,
+                "booking_id": null,
+                "booking_number": null,
+                "procedure_name": null,
+                "ot_phase": null,
+                "drug_id": null,
+                "drug_name": null,
+                "medication_stage": null,
+                "high_alert": false,
+                "death_id": null,
+                "death_number": null,
+                "description": "OPD queue held for a VIP for two hours; a waiting patient's review was delayed",
+                "immediate_action": "Queue order restored",
+                "screening_key": null,
+                "reporter_confidential": false,
+                "reported_by": 6,
+                "reported_by_name": "Complaints Officer",
+                "reported_at": "2026-10-01T07:11:25.566626+00:00",
+                "report_stamp": {
+                  "at": "2026-10-01T07:11:25.566626+00:00",
+                  "name": "Complaints Officer",
+                  "text": "Complaints Officer, Officer, 01-Oct-2026 12:11",
+                  "user_id": 6,
+                  "designation": "Officer",
+                  "employee_id": 6,
+                  "registration": null
+                },
+                "status": "Reported",
+                "reviewed_at": null,
+                "reviewed_by_name": null,
+                "review_note": null,
+                "investigator_user_id": null,
+                "investigator_name": null,
+                "analysis_due": null,
+                "withdraw_reason": null,
+                "analysis_method": null,
+                "chronology": null,
+                "root_causes": null,
+                "contributing_factors": [],
+                "lessons": null,
+                "disclosure": null,
+                "disclosure_note": null,
+                "external_reference": null,
+                "analysed_at": null,
+                "analysis_stamp": null,
+                "closure_note": null,
+                "closed_at": null,
+                "closure_stamp": null,
+                "row_version": 1,
+                "review_overdue": false,
+                "analysis_overdue": false,
+                "actions": [],
+                "next_step": "Review: confirm the type, the harm and the class, and name the investigator",
+                "can_review": true,
+                "can_withdraw": true,
+                "can_analyse": false,
+                "can_add_action": false,
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:11:25.595836+00:00"
+              },
+              "request_id": "00598659a52f4a5b96ffa9937617dae5"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/incident-screening/dismiss",
+          "summary": "Dismiss a screening item with the reason",
+          "permissions": [
+            "incident.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incident-screening/dismiss",
+            "body": {
+              "screening_key": "Death:2",
+              "reason": "Known severe heart failure, palliative"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "screening_key": "Death:2",
+                "kind": "Death",
+                "found_at": "2026-10-01T07:06:22.669376+00:00",
+                "patient_id": 2,
+                "mrn": "MRN-2026-000002",
+                "patient_name": "Nazir Ahmad",
+                "admission_id": null,
+                "booking_id": null,
+                "death_id": 2,
+                "suggested_type_code": "UNEXPECTED_DEATH",
+                "suggested_type_name": "Unexpected death",
+                "detail": "DTH-2026-00002; recorded by the doctor as unexpected",
+                "dismissed_reason": "Known severe heart failure, palliative"
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:20:07.174817+00:00"
+              },
+              "request_id": "d6abf6100938473d9eb0c9bc3083c0e4"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "6a. The ADR report (Quality Officer)",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/incidents/{incident_id}/adr-report",
+          "summary": "An adverse drug reaction's report (or its pre-filled draft)",
+          "permissions": [
+            "incident.view",
+            "incident.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/1/adr-report"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "complaint_received_on": "2026-10-14",
+                "complaint_source": null,
+                "complaint_source_other": null,
+                "similar_reports": 0,
+                "tests_attached": null,
+                "manufacturer_contacted": false,
+                "manufacturer_contact_details": null,
+                "product_name": "Ceftriaxone 1 g",
+                "active_ingredients": "Ceftriaxone 1 g",
+                "pack_size": null,
+                "registration_number": null,
+                "dosage_form": "Injection",
+                "batch_number": null,
+                "expiry_date": null,
+                "manufacture_date": null,
+                "manufacturer_name": null,
+                "manufacturer_address": null,
+                "manufacturer_phone": null,
+                "manufacturer_fax": null,
+                "incident_id": 1,
+                "incident_number": "INC-2026-00001",
+                "saved": false,
+                "submissions": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:34:20.061051+00:00"
+              },
+              "request_id": "e8059923432446a3a125a378a8ec8901"
+            }
+          }
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/incidents/{incident_id}/adr-report",
+          "summary": "Save the ADR report (the manual's format)",
+          "permissions": [
+            "incident.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/1/adr-report",
+            "body": {
+              "complaint_source": "Patient",
+              "batch_id": 1,
+              "registration_number": "012345",
+              "pack_size": "1 vial",
+              "manufacturer_name": "Example Pharma (Pvt) Ltd",
+              "manufacture_date": "2025-01-15"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "incident_id": 1,
+                "incident_number": "INC-2026-00001",
+                "complaint_received_on": "2026-10-14",
+                "complaint_source": "Patient",
+                "complaint_source_other": null,
+                "similar_reports": 0,
+                "tests_attached": null,
+                "manufacturer_contacted": false,
+                "manufacturer_contact_details": null,
+                "product_name": "Ceftriaxone 1 g",
+                "active_ingredients": "Ceftriaxone 1 g",
+                "pack_size": "1 vial",
+                "registration_number": "012345",
+                "dosage_form": "Injection",
+                "batch_number": "CEFT1-1",
+                "expiry_date": "2099-01-01",
+                "manufacture_date": "2025-01-15",
+                "manufacturer_name": "Example Pharma (Pvt) Ltd",
+                "manufacturer_address": null,
+                "manufacturer_phone": null,
+                "manufacturer_fax": null,
+                "contact_user_id": 6,
+                "contact_stamp": {
+                  "at": "2026-10-14T11:34:20.086273+00:00",
+                  "name": "Quality Officer",
+                  "text": "Quality Officer, Officer, 14-Oct-2026 16:34",
+                  "user_id": 6,
+                  "designation": "Officer",
+                  "employee_id": 6,
+                  "registration": null
+                },
+                "created_at": "2026-10-14T11:34:20.086273+00:00",
+                "row_version": 1,
+                "submissions": [],
+                "saved": true
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:34:20.104171+00:00"
+              },
+              "request_id": "5977b045e1a849468a3a1792ca975f09"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drugs/{drug_id}/stock-status",
+          "summary": "Drug stock with batches in FEFO order",
+          "permissions": [
+            "pharmacy.formulary.view",
+            "pharmacy.stock.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/drugs/1/stock-status"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "drug_id": 1,
+                "code": "AMX-500",
+                "name": "Amoxicillin 500mg",
+                "generic_name": null,
+                "strength": null,
+                "form": "Capsule",
+                "unit": "unit",
+                "schedule": "ScheduleH",
+                "is_otc_allowed": false,
+                "barcode": null,
+                "low_stock_threshold": 0,
+                "is_active": true,
+                "high_alert_category": null,
+                "is_restricted": false,
+                "lasa_with": [],
+                "qty_available": 15,
+                "next_expiry": "2098-01-01",
+                "stock_status": "InStock",
+                "batches": [
+                  {
+                    "batch_id": 2,
+                    "batch_no": "EARLY",
+                    "expiry_date": "2098-01-01",
+                    "qty_available": 5,
+                    "unit_cost": 10,
+                    "retail_price": 20,
+                    "received_at": "2026-09-30T15:28:51.746963+00:00",
+                    "is_expired": false
+                  },
+                  {
+                    "batch_id": 1,
+                    "batch_no": "LATE",
+                    "expiry_date": "2099-01-01",
+                    "qty_available": 10,
+                    "unit_cost": 10,
+                    "retail_price": 20,
+                    "received_at": "2026-09-30T15:28:51.689915+00:00",
+                    "is_expired": false
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:28:52.014186+00:00"
+              },
+              "request_id": "a7701fa19daf4458a570a6d5f88f0bb4"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/incidents/{incident_id}/adr-report/pdf",
+          "summary": "The ADR report in the manual's format (PDF)",
+          "permissions": [
+            "incident.view",
+            "incident.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/1/adr-report/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 3408
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/incidents/{incident_id}/adr-report/submissions",
+          "summary": "Record that the ADR report was sent",
+          "permissions": [
+            "incident.manage"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/incidents/1/adr-report/submissions",
+            "body": {
+              "recipient": "DRAP",
+              "sent_on": "2026-10-14",
+              "reference": "ADR-2026-77"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "incident_id": 1,
+                "incident_number": "INC-2026-00001",
+                "complaint_received_on": "2026-10-14",
+                "complaint_source": "Patient",
+                "complaint_source_other": null,
+                "similar_reports": 1,
+                "tests_attached": null,
+                "manufacturer_contacted": false,
+                "manufacturer_contact_details": null,
+                "product_name": "Ceftriaxone 1 g",
+                "active_ingredients": "Ceftriaxone 1 g",
+                "pack_size": "1 vial",
+                "registration_number": "012345",
+                "dosage_form": "Injection",
+                "batch_number": "CEFT1-1",
+                "expiry_date": "2099-01-01",
+                "manufacture_date": "2025-01-15",
+                "manufacturer_name": "Example Pharma (Pvt) Ltd",
+                "manufacturer_address": null,
+                "manufacturer_phone": null,
+                "manufacturer_fax": null,
+                "contact_user_id": 6,
+                "contact_stamp": {
+                  "at": "2026-10-14T11:34:20.086273+00:00",
+                  "name": "Quality Officer",
+                  "text": "Quality Officer, Officer, 14-Oct-2026 16:34",
+                  "user_id": 6,
+                  "designation": "Officer",
+                  "employee_id": 6,
+                  "registration": null
+                },
+                "created_at": "2026-10-14T11:34:20.086273+00:00",
+                "row_version": 2,
+                "submissions": [
+                  {
+                    "recipient": "DRAP",
+                    "sent_on": "2026-10-14",
+                    "reference": "ADR-2026-77",
+                    "sent_by": 6,
+                    "sent_by_name": "Quality Officer",
+                    "created_at": "2026-10-14T11:34:20.171562+00:00"
+                  }
+                ],
+                "saved": true
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:34:20.184159+00:00"
+              },
+              "request_id": "8f6994ae5b264f8d880493f374a6096d"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "7. The monthly return and the statistics",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/monthly-returns",
+          "summary": "The monthly returns of a register, nil returns included",
+          "permissions": [
+            "incident.view",
+            "complaint.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/quality/monthly-returns",
+            "query": {
+              "kind": "Complaints",
+              "months": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "kind": "Complaints",
+                  "month": "2026-09-01",
+                  "confirmed": false,
+                  "entries": 0,
+                  "numbers": [],
+                  "late_entries": [],
+                  "note": null,
+                  "confirmed_at": null,
+                  "confirmed_by_name": null,
+                  "confirm_stamp": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:11:34.524355+00:00"
+              },
+              "request_id": "e6d240ae19794ff98602df1e13a69096"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/monthly-returns",
+          "summary": "Confirm a month's return (none is an answer too)",
+          "permissions": [
+            "incident.manage",
+            "complaint.manage"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/quality/monthly-returns",
+            "body": {
+              "kind": "Complaints",
+              "month": "2026-09-01"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "kind": "Complaints",
+                "month": "2026-09-01",
+                "confirmed": true,
+                "entries": 0,
+                "numbers": [],
+                "late_entries": [],
+                "note": null,
+                "confirmed_at": "2026-10-01T07:11:34.528158+00:00",
+                "confirmed_by_name": "ua7dfd39882",
+                "confirm_stamp": {
+                  "at": "2026-10-01T07:11:34.528158+00:00",
+                  "name": "Staff 32677",
+                  "text": "Staff 32677, Officer, 01-Oct-2026 12:11",
+                  "user_id": 6,
+                  "designation": "Officer",
+                  "employee_id": 6,
+                  "registration": null
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:11:34.533655+00:00"
+              },
+              "request_id": "ffcccfb91af0479d9d55ea2cc9b7536f"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/incidents/statistics",
+          "summary": "Incident statistics",
+          "permissions": [
+            "incident.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/statistics"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "date_from": "2026-10-01",
+                "date_to": "2026-10-01",
+                "reported": 1,
+                "incidents": 1,
+                "near_misses": 0,
+                "sentinel_events": 0,
+                "patient_days": 0,
+                "reports_per_1000_patient_days": null,
+                "by_area": [
+                  {
+                    "key": "Medication",
+                    "count": 1
+                  }
+                ],
+                "by_harm": [
+                  {
+                    "key": "Mild",
+                    "count": 1
+                  }
+                ],
+                "by_type": [
+                  {
+                    "key": "Medication error",
+                    "count": 1
+                  }
+                ],
+                "by_department": [
+                  {
+                    "key": "Not given",
+                    "count": 1
+                  }
+                ],
+                "by_month": [
+                  {
+                    "month": "2026-10-01",
+                    "incidents": 1,
+                    "near_misses": 0,
+                    "sentinel": 0
+                  }
+                ],
+                "contributing_factors": [
+                  {
+                    "key": "Individual",
+                    "count": 1
+                  },
+                  {
+                    "key": "Task",
+                    "count": 1
+                  }
+                ],
+                "medication": {
+                  "errors": 1,
+                  "by_stage": [
+                    {
+                      "key": "Administration",
+                      "count": 1
+                    }
+                  ],
+                  "adverse_drug_reactions": 0,
+                  "adverse_drug_reactions_high_alert": 0,
+                  "errors_high_alert": 0
+                },
+                "anaesthesia_events": 0,
+                "surgical_events": 0,
+                "transfusion_reactions": 0,
+                "timeliness": {
+                  "review_target_hours": 24,
+                  "reviewed": 1,
+                  "reviewed_in_time": 1,
+                  "reviewed_in_time_pct": 100,
+                  "analysed": 1,
+                  "analysed_by_due_date": 1
+                },
+                "sentinel_list": [],
+                "open_now": {
+                  "reported": 0,
+                  "under_review": 0,
+                  "analysed": 0,
+                  "sentinel": 0
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:19:50.811573+00:00"
+              },
+              "request_id": "88d5d36b48fd4696b7aaeae63540916d"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/incidents/register/pdf",
+          "summary": "The incident register for a period (PDF)",
+          "permissions": [
+            "incident.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/incidents/register/pdf",
+            "query": {
+              "date_from": "2026-10-01",
+              "date_to": "2026-10-01"
+            }
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 2689
+          }
+        }
+      ]
+    }
+  ],
+  "narrative": "get_workflow(slug) has the playbook text with the rules for each step"
+}

@@ -1,4 +1,6 @@
 import { WasteLog } from './screens/WasteLog';
+import {MyInvestigations} from './screens/MyInvestigations';
+import {listIncidents as assignedIncidents} from './generated/my_investigations';
 import { DirectoryPermissions } from './DirectoryPicker';
 import { resetDevDataset } from './dev-dataset';
 if(__BUILD_IS_DEV__)resetDevDataset(localStorage);
@@ -963,7 +965,7 @@ export function App() {
       charity_override: "charity_override",
       approvals: "approval_queue",
       notifications: "notifications",
-      incidents: "report_incident",
+      incidents: investigations.data?.length ? "my_investigations" : "report_incident",
       settings: "settings",
       establishment: "facility_profile",
       cash_shifts: "my_cash_shift",
@@ -988,6 +990,7 @@ export function App() {
         "hidden",
     ) || [];
   const workspaceReady = !!user && !!outline && !!est && !!meta && readyContext?.userId === user.user_id && readyContext.workspace === workspace && readyContext.epoch === metadataEpoch.current;
+  const investigations=useLoad(()=>workspaceReady&&user?.permissions.some(p=>['incident.view','incident.report','ot.clinical_statistics.view'].includes(p))?assignedIncidents({mine:true,status:'UnderReview',limit:500}).then(rows=>rows.filter(r=>r.investigator_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,revision]);
   const legacyNav = (workspaceReady ? [
     "app_shell",
     "workspace_picker",
@@ -1155,7 +1158,7 @@ export function App() {
       (id !== "ot_settlement" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er","patient_programmes_triage","transfusion_bedside_er"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
-  const nav = screenNavigation(legacyNav, outline, est, deliveredHelpScreens, workspaceReady);
+  const nav = screenNavigation(legacyNav, outline, est, deliveredHelpScreens, workspaceReady).filter(id=>id!=='my_investigations'||!!investigations.data?.length||screen==='my_investigations');
   const navigationLabel = (id: string, index: 0 | 1 | 2) => labels[id]?.[index] ?? (index === 2 ? "•" : index === 1 ? handbookHelp[id]?.titleUr ?? id : handbookHelp[id]?.title ?? id);
 
   const view = est?.views.workspaces.find(
@@ -1569,6 +1572,7 @@ export function App() {
               {screen === 'payroll' && <Payroll key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === 'ops_console' && <OpsConsole key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === "waste_log_ops" && <WasteLog key={user.user_id} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === 'my_investigations'&&<MyInvestigations key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id==='my_investigations')?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === "mock_drills_ops" && <MockDrills key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === "compliance_register_ops" && <ComplianceRegister key={user.user_id} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === "equipment_maintenance" || screen === "equipment_maintenance_ops") && <EquipmentMaintenance key={user.user_id + screen} screenId={screen} timeZone={meta?.hospital_timezone} user={user} establishment={est} connected={connected} lang={prefs.language === "ur" ? "ur" : "en"} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
