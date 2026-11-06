@@ -3783,8 +3783,8 @@ export const controlGuides: Record<string, ControlGuide> = {
       "کام کی جگہ کھولیں / نئی ونڈو میں کھولیں",
     ],
     [
-      "One role workspace opens directly. My Workspace is available from your account menu for employees and also in a multiple-duty launcher; it does not count as another role workspace. Guests have no My Workspace. Open workspace changes this window; Open in new window keeps the current work. Only server-permitted workspaces are listed. Unsaved input needs your confirmation; finish pending writes first. Ask HR about a missing employee record and IT about access.",
-      "کردار کی ایک کام کی جگہ خود کھلتی ہے۔ ملازم اکاؤنٹ مینو سے میری کام کی جگہ کھول سکتا ہے؛ متعدد ذمہ داریوں میں کارڈ بھی ہے مگر یہ کرداروں کی گنتی میں نہیں۔ مہمان کو یہ نہیں ملتی۔ کھولیں اسی ونڈو کو بدلتا اور نئی ونڈو پرانا کام رکھتی ہے۔ صرف سرور کی اجازت دکھتی ہے۔ غیر محفوظ اندراج پر تصدیق اور پہلے جاری عمل مکمل کریں۔ ملازم ریکارڈ کے لیے ایچ آر، رسائی کے لیے آئی ٹی سے کہیں۔",
+      "One role workspace opens directly. My Workspace opens in its own window from your account menu for employees and also in a multiple-duty launcher; it does not count as another role workspace. Guests have no My Workspace. A role workspace opens in this window; Open in new window keeps the current work. My Workspace opens a separate employee window with its own F1 handbook. Only server-permitted workspaces are listed. Unsaved input needs your confirmation; finish pending writes first. Ask HR about a missing employee record and IT about access.",
+      "کردار کی ایک کام کی جگہ خود کھلتی ہے۔ ملازم اکاؤنٹ مینو سے میری کام کی جگہ الگ ونڈو میں کھول سکتا ہے؛ متعدد ذمہ داریوں میں کارڈ بھی ہے مگر یہ کرداروں کی گنتی میں نہیں۔ مہمان کو یہ نہیں ملتی۔ کھولیں اسی ونڈو کو بدلتا اور نئی ونڈو پرانا کام رکھتی ہے۔ صرف سرور کی اجازت دکھتی ہے۔ غیر محفوظ اندراج پر تصدیق اور پہلے جاری عمل مکمل کریں۔ ملازم ریکارڈ کے لیے ایچ آر، رسائی کے لیے آئی ٹی سے کہیں۔",
     ],
   ),
   "connection.discover": g(
@@ -4298,8 +4298,8 @@ export const workspaceFocus: Record<string, Bilingual> = {
     "سی ایس ایس ڈی ٹیکنیشن: سامان کے ٹرمینل اور بنیادی اطلاع چیک کریں۔ تصدیق یا واقعے کی رپورٹ لوڈ جاری یا پیک فراہم نہیں کرتی؛ اس کے لیے مجاز سی ایس ایس ڈی طریقہ لیں۔",
   ],
   self_service: [
-    "Employees: use your own preferences, permitted help and notifications, and report incidents only if the account offers that action. Foundation help does not expose another employee's private personnel data or grant administrative access.",
-    "ملازم: اپنی ترتیب، مجاز مدد اور اطلاعات لیں؛ اکاؤنٹ اجازت دے تو واقعہ دیں۔ بنیادی مدد دوسرے کی نجی فائل یا انتظامی رسائی نہیں دیتی۔",
+    "Every employee: open My Workspace in its own window from the account menu (also a card for several duties). The launcher counts role workspaces only; a sole role opens directly, or My Workspace directly when it is the only entry. Guests have none. Use your own preferences, permitted help and notifications, and report incidents only if the account offers that action. Foundation help does not expose another employee's private personnel data or grant administrative access.",
+    "ہر ملازم: اکاؤنٹ مینو سے میرا صفحہ الگ ونڈو میں کھولیں؛ متعدد ذمہ داریوں میں کارڈ بھی ہے۔ لانچر صرف کرداروں کی جگہیں گنتا ہے؛ ایک کردار یا صرف میرا صفحہ ہو تو خود کھلتا ہے۔ مہمان کو یہ نہیں ملتا۔ اپنی ترتیب، مجاز مدد اور اطلاعات لیں؛ اکاؤنٹ اجازت دے تو واقعہ دیں۔ بنیادی مدد دوسرے کی نجی فائل یا انتظامی رسائی نہیں دیتی۔",
   ],
   badge_station: [
     "Badge-station operators: this staff guide does not add a kiosk login. Ask authorized setup staff about station identity or downtime, and use the separate operator job aid for badge tapping. No kiosk workflow is claimed complete by this foundation guide.",

@@ -583,6 +583,17 @@ export function App() {
     });
   }, [metadataFlight, bootstrapSeed, refreshReferences]);
   useEffect(() => {
+    if (!helpOpen || !user || !workspace || !connected) return;
+    const userId = user.user_id, context = workspace, epoch = metadataEpoch.current;
+    let cancelled = false;
+    void api<HandbookOut>('GET', '/meta/handbook?workspace=' + encodeURIComponent(context))
+      .then(value => {
+        if (!cancelled && metadataEpoch.current === epoch && liveState.current.user?.user_id === userId && liveState.current.workspace === context) setOutline(value);
+      })
+      .catch(error => { if (!cancelled) setError(error); });
+    return () => { cancelled = true; };
+  }, [helpOpen, user?.user_id, workspace, connected]);
+  useEffect(() => {
     void refreshState();
     const timer = setInterval(() => setClock(Date.now()), 1000);
     return () => clearInterval(timer);
@@ -1415,7 +1426,7 @@ export function App() {
                           <button
                             data-help="workspace.open"
                             className="primary"
-                            onClick={() => selectWorkspace(w.code)}
+                            onClick={() => selectWorkspace(w.code, w.every_employee)}
                           >
                             {t("Open workspace →", "کام کی جگہ کھولیں")}
                           </button>
@@ -1571,7 +1582,7 @@ export function App() {
               {screen === 'holiday_calendar' && <HolidayCalendar key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} />}
               {screen === 'holiday_calendar_admin' && <HolidayCalendarAdmin key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === 'leave_approvals' && <LeaveApprovals key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
-              {screen === 'self_service' && <SelfService key={user.user_id} lang={prefs.language} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
+              {screen === 'self_service' && <SelfService key={user.user_id} lang={prefs.language} user={user} establishment={est} connected={connected} userPermissions={user.permissions} />}
               {screen === 'payroll' && <Payroll key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === 'ops_console' && <OpsConsole key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === "waste_log_ops" && <WasteLog key={user.user_id} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
@@ -1800,8 +1811,8 @@ export function App() {
               <p role="status">{t("Signing out…", "سائن آؤٹ جاری ہے…")}</p>
             )}
             {visible.filter(w => w.every_employee).map(w => (
-              <button key={w.code} data-help="workspace.open" disabled={logoutBusy}
-                onClick={async () => { if (await selectWorkspace(w.code)) setLogoutOpen(false); }}>
+              <button key={w.code} data-help="workspace.open" disabled={logoutBusy} title={t('Open in new window','نئی ونڈو میں کھولیں')}
+                onClick={async () => { if (await selectWorkspace(w.code, true)) setLogoutOpen(false); }}>
                 {t(w.label, w.label_ur)}
               </button>
             ))}

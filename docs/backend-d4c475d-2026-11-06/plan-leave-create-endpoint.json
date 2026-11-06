@@ -1,0 +1,465 @@
+{
+  "method": "POST",
+  "path": "/api/v1/self/leave-requests",
+  "summary": "Request leave (routes to my supervisor)",
+  "tags": [
+    "HR"
+  ],
+  "permissions": [
+    "self.leave.request"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": true,
+  "description": "`LEAVE_INSUFFICIENT_BALANCE`: not enough leave balance.\n\n**Required permission:** `self.leave.request`\n\n**Required permission:** `self.leave.request`",
+  "roles_allowed": [
+    "admissions_officer",
+    "anaesthetist",
+    "clinical_specialist",
+    "cssd_technician",
+    "doctor",
+    "employee_self",
+    "head_nurse",
+    "hr_admin",
+    "ipc_nurse",
+    "lab_admin",
+    "lab_technician",
+    "lab_verifier",
+    "maintenance_admin",
+    "ops_admin",
+    "ot_admin",
+    "ot_nurse",
+    "pharmacist",
+    "pharmacy_admin",
+    "quality_officer",
+    "radiographer",
+    "radiologist",
+    "receptionist",
+    "surgeon",
+    "triage_nurse",
+    "ward_nurse"
+  ],
+  "parameters": [
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "LeaveIn",
+    "properties": {
+      "leave_type": {
+        "type": "string",
+        "enum": [
+          "Annual",
+          "Casual",
+          "Sick",
+          "Maternity",
+          "Unpaid",
+          "Other"
+        ],
+        "title": "Leave Type"
+      },
+      "from_date": {
+        "type": "string",
+        "format": "date",
+        "title": "From Date"
+      },
+      "to_date": {
+        "type": "string",
+        "format": "date",
+        "title": "To Date"
+      },
+      "half_day": {
+        "type": "boolean",
+        "title": "Half Day",
+        "default": false
+      },
+      "reason": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 500
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Reason"
+      }
+    },
+    "type": "object",
+    "required": [
+      "leave_type",
+      "from_date",
+      "to_date"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[LeaveRequestOut]",
+    "properties": {
+      "data": {
+        "title": "LeaveRequestOut",
+        "properties": {
+          "leave_request_id": {
+            "type": "integer",
+            "title": "Leave Request Id"
+          },
+          "employee_id": {
+            "type": "integer",
+            "title": "Employee Id"
+          },
+          "leave_type": {
+            "type": "string",
+            "enum": [
+              "Annual",
+              "Casual",
+              "Sick",
+              "Maternity",
+              "Unpaid",
+              "Other"
+            ],
+            "title": "Leave Type"
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date",
+            "title": "From Date"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date",
+            "title": "To Date"
+          },
+          "days": {
+            "type": "number",
+            "title": "Days"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "approver_employee_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approver Employee Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Pending",
+              "Approved",
+              "Rejected",
+              "Cancelled"
+            ],
+            "title": "Status"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decision_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Note"
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested At"
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "leave_request_id",
+          "employee_id",
+          "leave_type",
+          "from_date",
+          "to_date",
+          "days",
+          "reason",
+          "approver_employee_id",
+          "status",
+          "decided_by",
+          "decided_at",
+          "decision_note",
+          "requested_at",
+          "row_version"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/self/leave-requests",
+      "body": {
+        "leave_type": "Annual",
+        "from_date": "2026-12-01",
+        "to_date": "2026-12-02"
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "data": {
+          "leave_request_id": 1,
+          "employee_id": 5,
+          "leave_type": "Annual",
+          "from_date": "2026-12-01",
+          "to_date": "2026-12-02",
+          "days": 2,
+          "reason": null,
+          "approver_employee_id": 4,
+          "status": "Pending",
+          "decided_by": null,
+          "decided_at": null,
+          "decision_note": null,
+          "requested_at": "2026-09-27T17:37:12.051512+00:00",
+          "row_version": 1
+        },
+        "meta": {
+          "server_time": "2026-09-27T17:37:12.064626+00:00"
+        },
+        "request_id": "888c0a8b741744a1ae75dfcbac2e3455"
+      }
+    },
+    "errors_seen": [
+      "LEAVE_INSUFFICIENT_BALANCE"
+    ],
+    "events_emitted": [
+      "leave.requested",
+      "notification.created"
+    ]
+  },
+  "errors": [
+    {
+      "code": "LEAVE_INSUFFICIENT_BALANCE",
+      "http_status": 409,
+      "message": "Not enough leave balance.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "LEAVE_INSUFFICIENT_BALANCE"
+  ],
+  "used_by_screens": [
+    "self_service"
+  ],
+  "used_by_workflows": [
+    "hr-and-payroll"
+  ],
+  "typescript_example": "// Request leave (routes to my supervisor)  (permissions: self.leave.request)\nexport const requestLeave = (body) =>\n  api(\"POST\", `/self/leave-requests`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "self.leave.request"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of self.leave.request",
+    "roles_allowed": [
+      "admissions_officer",
+      "anaesthetist",
+      "clinical_specialist",
+      "cssd_technician",
+      "doctor",
+      "employee_self",
+      "head_nurse",
+      "hr_admin",
+      "ipc_nurse",
+      "lab_admin",
+      "lab_technician",
+      "lab_verifier",
+      "maintenance_admin",
+      "ops_admin",
+      "ot_admin",
+      "ot_nurse",
+      "pharmacist",
+      "pharmacy_admin",
+      "quality_officer",
+      "radiographer",
+      "radiologist",
+      "receptionist",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /self/leave-requests",
+    "emits_events": [
+      "leave.requested",
+      "notification.created"
+    ],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [
+    "leave.requested",
+    "notification.created"
+  ],
+  "list": null,
+  "cross_field_rules": {
+    "LeaveIn": [
+      "to_date must be on or after from_date"
+    ]
+  },
+  "errors_detail": [
+    {
+      "code": "LEAVE_INSUFFICIENT_BALANCE",
+      "http_status": 409,
+      "message": "Not enough leave balance.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "available",
+        "pending",
+        "requested"
+      ],
+      "details_from": "POST /api/v1/self/leave-requests"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

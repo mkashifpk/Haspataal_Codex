@@ -1,0 +1,418 @@
+{
+  "method": "POST",
+  "path": "/api/v1/self/leave-requests/{leave_request_id}/cancel",
+  "summary": "Withdraw my pending request",
+  "tags": [
+    "HR"
+  ],
+  "permissions": [
+    "self.leave.request"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "description": "The leave request was already decided or withdrawn (details.status): `LEAVE_ALREADY_DECIDED`.\n\n**Required permission:** `self.leave.request`\n\n**Required permission:** `self.leave.request`",
+  "roles_allowed": [
+    "admissions_officer",
+    "anaesthetist",
+    "clinical_specialist",
+    "cssd_technician",
+    "doctor",
+    "employee_self",
+    "head_nurse",
+    "hr_admin",
+    "ipc_nurse",
+    "lab_admin",
+    "lab_technician",
+    "lab_verifier",
+    "maintenance_admin",
+    "ops_admin",
+    "ot_admin",
+    "ot_nurse",
+    "pharmacist",
+    "pharmacy_admin",
+    "quality_officer",
+    "radiographer",
+    "radiologist",
+    "receptionist",
+    "surgeon",
+    "triage_nurse",
+    "ward_nurse"
+  ],
+  "parameters": [
+    {
+      "name": "leave_request_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Leave Request Id"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[LeaveRequestOut]",
+    "properties": {
+      "data": {
+        "title": "LeaveRequestOut",
+        "properties": {
+          "leave_request_id": {
+            "type": "integer",
+            "title": "Leave Request Id"
+          },
+          "employee_id": {
+            "type": "integer",
+            "title": "Employee Id"
+          },
+          "leave_type": {
+            "type": "string",
+            "enum": [
+              "Annual",
+              "Casual",
+              "Sick",
+              "Maternity",
+              "Unpaid",
+              "Other"
+            ],
+            "title": "Leave Type"
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date",
+            "title": "From Date"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date",
+            "title": "To Date"
+          },
+          "days": {
+            "type": "number",
+            "title": "Days"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "approver_employee_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approver Employee Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Pending",
+              "Approved",
+              "Rejected",
+              "Cancelled"
+            ],
+            "title": "Status"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decision_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Note"
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested At"
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "leave_request_id",
+          "employee_id",
+          "leave_type",
+          "from_date",
+          "to_date",
+          "days",
+          "reason",
+          "approver_employee_id",
+          "status",
+          "decided_by",
+          "decided_at",
+          "decision_note",
+          "requested_at",
+          "row_version"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/self/leave-requests/1/cancel"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "leave_request_id": 1,
+          "employee_id": 5,
+          "leave_type": "Casual",
+          "from_date": "2027-01-10",
+          "to_date": "2027-01-10",
+          "days": 1,
+          "reason": null,
+          "approver_employee_id": 4,
+          "status": "Cancelled",
+          "decided_by": 5,
+          "decided_at": "2026-09-27T17:37:59.963721+00:00",
+          "decision_note": "withdrawn",
+          "requested_at": "2026-09-27T17:37:59.933997+00:00",
+          "row_version": 2
+        },
+        "meta": {
+          "server_time": "2026-09-27T17:37:59.970656+00:00"
+        },
+        "request_id": "1c0f7e99a2114680a26bf51786bd21d0"
+      }
+    },
+    "errors_seen": [
+      "FORBIDDEN",
+      "LEAVE_ALREADY_DECIDED"
+    ],
+    "events_emitted": [
+      "notification.created"
+    ]
+  },
+  "errors": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "LEAVE_ALREADY_DECIDED",
+      "http_status": 409,
+      "message": "The leave request was already decided or withdrawn (details.status).",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "FORBIDDEN",
+    "LEAVE_ALREADY_DECIDED"
+  ],
+  "used_by_screens": [
+    "self_service"
+  ],
+  "used_by_workflows": [],
+  "typescript_example": "// Withdraw my pending request  (permissions: self.leave.request)\nexport const cancelLeave = (leave_request_id, body) =>\n  api(\"POST\", `/self/leave-requests/${leave_request_id}/cancel`, body);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "self.leave.request"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of self.leave.request",
+    "roles_allowed": [
+      "admissions_officer",
+      "anaesthetist",
+      "clinical_specialist",
+      "cssd_technician",
+      "doctor",
+      "employee_self",
+      "head_nurse",
+      "hr_admin",
+      "ipc_nurse",
+      "lab_admin",
+      "lab_technician",
+      "lab_verifier",
+      "maintenance_admin",
+      "ops_admin",
+      "ot_admin",
+      "ot_nurse",
+      "pharmacist",
+      "pharmacy_admin",
+      "quality_officer",
+      "radiographer",
+      "radiologist",
+      "receptionist",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse"
+    ]
+  },
+  "write_semantics": {
+    "protection": "state_guard",
+    "on_lost_answer": "A repeat is refused with LEAVE_ALREADY_DECIDED: the request is decided already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+    "reconcile_with": "GET /self/leave-requests",
+    "refused_with": "LEAVE_ALREADY_DECIDED",
+    "emits_events": [
+      "notification.created"
+    ],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [
+    "notification.created"
+  ],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "any_of",
+        "required"
+      ],
+      "details_from": "POST /api/v1/admin/departments"
+    },
+    {
+      "code": "LEAVE_ALREADY_DECIDED",
+      "http_status": 409,
+      "message": "The leave request was already decided or withdrawn (details.status).",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "status"
+      ],
+      "details_from": "POST /api/v1/self/leave-requests/{leave_request_id}/cancel"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

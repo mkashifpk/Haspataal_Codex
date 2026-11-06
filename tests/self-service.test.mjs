@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  getSelfServiceCapabilityView,
   validateLeaveRequest,
   validateSwapRequest,
   validateIssueReport,
@@ -11,33 +10,6 @@ import {
   isDutyUpcoming,
   SELF_SERVICE_ERROR_MESSAGES
 } from "../src/self-service-policy.ts";
-
-test("self-service capability view assigns full, records, and hidden modes", () => {
-  // Full capability for staff with leave & swap permissions
-  const full = getSelfServiceCapabilityView(
-    { views: { screens: [] } },
-    ["self.profile.view", "self.leave.request", "self.roster.swap", "ops.workorder.report"],
-    "staff_nurse"
-  );
-  assert.equal(full.mode, "full");
-  assert.equal(full.canView, true);
-  assert.equal(full.canRequestLeave, true);
-  assert.equal(full.canSwapRoster, true);
-  assert.equal(full.canReportIssue, true);
-
-  // Hidden mode when facility explicitly excludes self_service
-  const hidden = getSelfServiceCapabilityView(
-    { views: { screens: [{screen_id:"self_service",view:"hidden"}] } },
-    ["self.profile.view"],
-    "staff_nurse"
-  );
-  assert.equal(hidden.mode, "hidden");
-  assert.equal(hidden.canView, false);
-  const read=getSelfServiceCapabilityView({views:{screens:[{screen_id:'self_service',view:'records'}]}},['self.profile.view','ops.workorder.report']);
-  assert.equal(read.mode,'records');assert.equal(read.canReportIssue,false);
-  assert.equal(getSelfServiceCapabilityView({views:{screens:[]}},[]).canView,false);
-  assert.equal(getSelfServiceCapabilityView(undefined,['self.profile.view']).canView,false);
-});
 
 test("validateLeaveRequest validates dates, chronological order, and calculates duration", () => {
   // Missing category fails

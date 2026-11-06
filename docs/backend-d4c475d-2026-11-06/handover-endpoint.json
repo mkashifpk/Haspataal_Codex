@@ -1,0 +1,435 @@
+{
+  "method": "POST",
+  "path": "/api/v1/infection/waste/handover",
+  "summary": "Hand collected waste over to the contractor",
+  "tags": [
+    "Infection prevention and control"
+  ],
+  "permissions": [
+    "infection.waste.record"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": true,
+  "description": "The contractor's consignment note for waste weighed and recorded before it (MSDS IPC 88; backend issue #53): list\nwhat awaits it (`GET /infection/waste?awaiting_handover=true`), choose the collections the note covers and send them\nonce, with the contractor (`GET /finance/vendors?vendor_type=Contractor`), the note's number and the disposal. Each\ncollection is handed over whole and its weight is never entered again; the totals' `handed_over_kg` follow. Send an\nIdempotency-Key: a retry after a lost answer gets the same answer, while the same collections sent again without it\nare refused.\n\n`WASTE_HANDED_OVER`: a collection already carries a consignment note (`details.waste_id`, `manifest_number`,\n`handed_over_on`), which is final. `REFERENCE_NOT_FOUND` (details.field): an unknown collection (`waste_ids`) or\ncontractor. `VALIDATION_ERROR`: a handover in the future, or before a collection's day.\n\n**Required permission:** `infection.waste.record`\n\n**Required permission:** `infection.waste.record`",
+  "roles_allowed": [
+    "ipc_nurse",
+    "ops_admin"
+  ],
+  "parameters": [
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "WasteHandoverIn",
+    "properties": {
+      "waste_ids": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array",
+        "maxItems": 500,
+        "minItems": 1,
+        "title": "Waste Ids",
+        "description": "The collections the note covers (GET /infection/waste?awaiting_handover=true)"
+      },
+      "vendor_id": {
+        "type": "integer",
+        "title": "Vendor Id",
+        "description": "The waste contractor (GET /finance/vendors)"
+      },
+      "manifest_number": {
+        "type": "string",
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "Manifest Number",
+        "description": "The consignment note"
+      },
+      "disposal": {
+        "type": "string",
+        "enum": [
+          "Incineration",
+          "Autoclave",
+          "Encapsulation",
+          "Landfill",
+          "Recycling",
+          "Other"
+        ],
+        "title": "Disposal"
+      },
+      "handed_over_on": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Handed Over On",
+        "description": "Default: today; never before a collection's day"
+      }
+    },
+    "type": "object",
+    "required": [
+      "waste_ids",
+      "vendor_id",
+      "manifest_number",
+      "disposal"
+    ],
+    "description": "The contractor's consignment note for collections recorded before it (backend issue #53)."
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[WasteHandoverOut]",
+    "properties": {
+      "data": {
+        "title": "WasteHandoverOut",
+        "properties": {
+          "vendor_id": {
+            "type": "integer",
+            "title": "Vendor Id"
+          },
+          "vendor_name": {
+            "type": "string",
+            "title": "Vendor Name"
+          },
+          "manifest_number": {
+            "type": "string",
+            "title": "Manifest Number"
+          },
+          "disposal": {
+            "type": "string",
+            "enum": [
+              "Incineration",
+              "Autoclave",
+              "Encapsulation",
+              "Landfill",
+              "Recycling",
+              "Other"
+            ],
+            "title": "Disposal"
+          },
+          "handed_over_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Handed Over On"
+          },
+          "weight_kg": {
+            "type": "number",
+            "title": "Weight Kg",
+            "description": "The weight the note covers: its collections' weights, never entered again"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/WasteRecordOut"
+            },
+            "type": "array",
+            "title": "Records"
+          }
+        },
+        "type": "object",
+        "required": [
+          "vendor_id",
+          "vendor_name",
+          "manifest_number",
+          "disposal",
+          "handed_over_on",
+          "weight_kg",
+          "records"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/infection/waste/handover",
+      "body": {
+        "waste_ids": [
+          1,
+          2
+        ],
+        "vendor_id": 1,
+        "manifest_number": "CN-2041",
+        "disposal": "Incineration"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "vendor_id": 1,
+          "vendor_name": "Clean City Waste",
+          "manifest_number": "CN-2041",
+          "disposal": "Incineration",
+          "handed_over_on": "2026-11-05",
+          "weight_kg": 8,
+          "records": [
+            {
+              "waste_id": 1,
+              "recorded_on": "2026-11-04",
+              "category": "Infectious",
+              "ward_id": null,
+              "ward_name": null,
+              "department_id": null,
+              "department_name": null,
+              "location": "Surgical ward",
+              "bags": 2,
+              "weight_kg": 6.5,
+              "vendor_id": 1,
+              "vendor_name": "Clean City Waste",
+              "manifest_number": "CN-2041",
+              "disposal": "Incineration",
+              "note": null,
+              "recorded_by_name": "u64118fd1b4",
+              "recorded_at": "2026-11-04T21:16:23.896433+00:00",
+              "handed_over_on": "2026-11-05",
+              "handed_over_by_name": "u64118fd1b4"
+            },
+            {
+              "waste_id": 2,
+              "recorded_on": "2026-11-05",
+              "category": "Sharps",
+              "ward_id": null,
+              "ward_name": null,
+              "department_id": null,
+              "department_name": null,
+              "location": "Surgical ward",
+              "bags": 2,
+              "weight_kg": 1.5,
+              "vendor_id": 1,
+              "vendor_name": "Clean City Waste",
+              "manifest_number": "CN-2041",
+              "disposal": "Incineration",
+              "note": null,
+              "recorded_by_name": "u64118fd1b4",
+              "recorded_at": "2026-11-04T21:16:23.951885+00:00",
+              "handed_over_on": "2026-11-05",
+              "handed_over_by_name": "u64118fd1b4"
+            }
+          ]
+        },
+        "meta": {
+          "server_time": "2026-11-04T21:16:24.065916+00:00"
+        },
+        "request_id": "6da02d9187284e66ab5ae30313b7bf29"
+      }
+    },
+    "errors_seen": [
+      "FORBIDDEN",
+      "REFERENCE_NOT_FOUND",
+      "VALIDATION_ERROR",
+      "WASTE_HANDED_OVER"
+    ],
+    "events_emitted": []
+  },
+  "errors": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "WASTE_HANDED_OVER",
+      "http_status": 409,
+      "message": "This waste was already handed over to the contractor: its consignment note is final.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "FORBIDDEN",
+    "REFERENCE_NOT_FOUND",
+    "VALIDATION_ERROR",
+    "WASTE_HANDED_OVER"
+  ],
+  "used_by_screens": [
+    "waste_log",
+    "waste_log_ops"
+  ],
+  "used_by_workflows": [
+    "infection-control"
+  ],
+  "typescript_example": "// Hand collected waste over to the contractor  (permissions: infection.waste.record)\nexport const handOverWaste = (body) =>\n  api(\"POST\", `/infection/waste/handover`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "infection.waste.record"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of infection.waste.record",
+    "roles_allowed": [
+      "ipc_nurse",
+      "ops_admin"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /infection/waste",
+    "emits_events": [],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "any_of",
+        "required"
+      ],
+      "details_from": "POST /api/v1/admin/departments"
+    },
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "ward_id"
+      ],
+      "details_from": "POST /api/v1/pharmacy/storage-checks"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    },
+    {
+      "code": "WASTE_HANDED_OVER",
+      "http_status": 409,
+      "message": "This waste was already handed over to the contractor: its consignment note is final.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "handed_over_on",
+        "manifest_number",
+        "waste_id"
+      ],
+      "details_from": "POST /api/v1/infection/waste/handover"
+    }
+  ]
+}

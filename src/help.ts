@@ -819,6 +819,8 @@ faqUr: [
     purpose: "Comprehensive employee self-service portal for staff across all hospital roles, departments, and wards: (1) Personal duty schedule review and rest-day recognition over dynamic date horizons (GET /self/roster) per statutory Rule rule:907c770e92; (2) Peer-to-peer duty swap and cover requests on upcoming unstarted shifts (POST /self/roster/swaps) with free colleague discovery (GET /self/roster/swap-options) and mandatory operational justification per Rule rule:9274755ac9; (3) Multi-stage shift swap lifecycle and colleague response workflows (POST /self/roster/swaps/{id}/accept, decline, cancel) requiring final roster manager authorization before roster changes take effect per Rule rule:adfadf7120; (4) Statutory leave balance inspection across Annual, Casual, Sick, Maternity, and Unpaid categories (GET /self/leave-balances); (5) Leave request submission to reporting supervisor with half-day options and cancellation of unapproved requests (POST /self/leave-requests); (6) Verified monthly payslip review and printable statements (GET /self/payslips/{id}); (7) Gazetted public holidays schedule consultation (GET /holidays); and (8) Facility maintenance and equipment issue reporting (POST /ops/work-orders).",
     purposeUr: "تمام شعبوں اور وارڈز کے ہسپتال عملے کے لیے جامع سیلف سروس پورٹل: (1) قاعدہ rule:907c770e92 کے تحت ذاتی ڈیوٹی روسٹر اور آرام کے دنوں کا معائنہ (GET /self/roster)؛ (2) قاعدہ rule:9274755ac9 کے تحت آنے والی ڈیوٹیوں کے لیے ساتھی عملے سے کور یا تبادلے کی درخواست (POST /self/roster/swaps, GET /self/roster/swap-options)؛ (3) قاعدہ rule:adfadf7120 کے تحت تبادلہ درخواستوں کی منظوری، استرداد یا تنسیخ کا ضابطہ جس میں روسٹر مینیجر کی حتمی منظوری سے قبل روسٹر تبدیل نہیں ہوتا؛ (4) سالانہ، اتفاقی، طبی اور زچگی رخصت کا لائیو بیلنس لیجر (GET /self/leave-balances)؛ (5) سپروائزر کو رخصت کی باضابطہ درخواست اور زیر التواء درخواست کی واپسی (POST /self/leave-requests)؛ (6) ماہانہ تنخواہ سلپ کا معائنہ اور پرنٹ ایبل اسٹیٹمنٹ (GET /self/payslips/{id})؛ (7) سرکاری اور قومی تعطیلات کی فہرست (GET /holidays)؛ اور (8) ہسپتال سہولیات اور آلات کی خرابی کی فوری رپورٹنگ (POST /ops/work-orders)۔",
     steps: [
+      "Notifications and duty-swap changes refresh the actual lists without replacing your unsent leave or swap draft. If a read fails, the error stays visible and stale duties/actions are hidden; do not treat unavailable duties as rest days. Use Refresh to read again. A confirmed colleague acceptance still waits for the roster manager before any duty moves.",
+      "Every employee reaches My Workspace from the account menu in any window, or its launcher card when several role workspaces are offered. It opens in its own window with its own help and employee context. One role workspace opens directly; My Workspace is not counted. An employee with only My Workspace opens it directly. Guest accounts without an employee record have none. Empty roles mean no role label is recorded.",
       "Review Upcoming Shifts & Rest Days: Open 'My Duties & Rest Days' to inspect scheduled shifts. Under Rule rule:907c770e92, all calendar dates without an assigned shift are highlighted as statutory paid Rest Days.",
       "Ask a Colleague for Shift Cover or Swap: For any upcoming unstarted duty, click 'Ask a Colleague'. Under Rule rule:9274755ac9, review colleagues of the same category free for that date, select Cover or Swap, enter a reason, and submit.",
       "Respond to Requests from Colleagues: In the Swaps sub-panel, review shift cover requests made to you by colleagues. Click 'Accept' to agree or 'Decline' to refuse (Rule rule:adfadf7120).",
@@ -830,6 +832,8 @@ faqUr: [
 "Ward: Wards; IT adds missing wards. Bed selection loads the beds too.",
 "Asset: Assets by name; Maintenance adds a missing asset. A hidden purchase date or cost is absent, never zero."],
     stepsUr: [
+      "اطلاعات اور ڈیوٹی تبادلہ اصل فہرستیں تازہ کرتے ہیں؛ غیر ارسال رخصت یا تبادلہ مسودہ نہیں بدلتا۔ پڑھائی ناکام ہو تو خرابی واضح اور پرانی ڈیوٹی و کارروائیاں چھپی رہتی ہیں؛ دستیاب نہ ہونے کو آرام کا دن نہ سمجھیں۔ تازہ کریں سے دوبارہ پڑھیں۔ ساتھی کی منظوری کے بعد بھی ڈیوٹی بدلنے کے لیے روسٹر مینیجر کی منظوری لازم ہے۔",
+      "ہر ملازم کسی بھی ونڈو کے اکاؤنٹ مینو یا متعدد ذمہ داریوں کے لانچر کارڈ سے میرا صفحہ کھولتا ہے۔ یہ اپنی ونڈو، مدد اور ملازم سیاق میں کھلتا ہے۔ کردار کی ایک جگہ خود کھلتی ہے؛ میرا صفحہ گنتی میں نہیں۔ صرف میرا صفحہ ہو تو وہ خود کھلتا ہے۔ بغیر ملازم ریکارڈ کے مہمان کو یہ نہیں ملتا۔ خالی کرداروں پر کوئی نام نہیں گھڑا جاتا۔",
       "آنے والی ڈیوٹیاں اور آرام کے دن دیکھیں: 'میری ڈیوٹیاں اور آرام کے دن' کھولیں۔ قاعدہ rule:907c770e92 کے تحت جس تاریخ کو ڈیوٹی نہ ہو وہ قانونی آرام کا دن ہے۔",
       "ساتھی سے ڈیوٹی کور یا تبادلہ مانگیں: آنے والی ڈیوٹی پر 'ساتھی سے پوچھیں' دبائیں۔ قاعدہ rule:9274755ac9 کے تحت فارغ ہمکار کا انتخاب کریں، وجہ درج کریں اور درخواست بھیجیں۔",
       "ساتھیوں کی درخواستوں کا جواب دیں: تبادلہ پینل میں موصول ہونے والی درخواستوں پر 'قبول کریں' یا 'انکار کریں' دبائیں (قاعدہ rule:adfadf7120)۔",
@@ -841,6 +845,7 @@ faqUr: [
 "Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔",
 "Asset: اثاثے نام سے؛ دیکھ بھال شعبہ غائب اثاثہ درج کرتا ہے۔ پوشیدہ خرید تاریخ یا قیمت غائب ہے، صفر نہیں۔"],
     faq: [
+      ["Where do employees with clinical, reception, office or support duties find My Workspace?", "Use your account menu in any window. With several role workspaces you can also choose its launcher card. My Workspace opens separately; the original duty window stays open. The server supplies access from your employee record, regardless of your role; HR maintains the employee record and IT resolves access. My Workspace is not another role for the launcher count. Guests without an employee record have no link."],
       [
         "How are weekly rest days determined in continuous 24/7 hospital services (Rule 907c770e92)?",
         "Under statutory Rule rule:907c770e92, hospital inpatient wards, surgical suites, and emergency facilities operate continuously around the clock without facility-wide closure. Staff rotating on duty rosters do not have a uniform Sunday holiday. Instead, the days without a scheduled shift in your roster horizon (GET /self/roster) are legally recognized as your statutory paid rest days.",
@@ -863,6 +868,7 @@ faqUr: [
       ],
 ["How do I find a record, and who adds it if missing?","Ward: Wards; IT adds missing wards. Bed selection loads the beds too. Asset: Assets by name; Maintenance adds a missing asset. A hidden purchase date or cost is absent, never zero."]],
     faqUr: [
+      ["طبی، استقبالیہ، دفتری یا معاون عملہ میرا صفحہ کہاں پاتا ہے؟", "کسی ونڈو کا اکاؤنٹ مینو کھولیں۔ متعدد کرداروں میں لانچر کا کارڈ بھی ہے۔ میرا صفحہ الگ ونڈو میں کھلتا اور اصل ڈیوٹی کھلی رہتی ہے۔ رسائی کردار کے بجائے سرور کے ملازم ریکارڈ سے ہے؛ ایچ آر ریکارڈ اور آئی ٹی رسائی درست کرتے ہیں۔ یہ لانچر کی کردار گنتی میں نہیں۔ بغیر ملازم ریکارڈ کے مہمان کا ربط نہیں۔"],
       [
         "ہسپتال کی 24 گھنٹے سروسز میں ہفتہ وار آرام کے دن کا تعین کیسے ہوتا ہے (قاعدہ 907c770e92)؟",
         "قانونی قاعدہ rule:907c770e92 کے تحت، چونکہ ہسپتال کے ان ڈور وارڈز اور ایمرجنسی 24 گھنٹے کام کرتے ہیں، اس لیے روسٹرڈ عملے کے لیے اتوار کی چھٹی مخصوص نہیں ہوتی۔ آپ کے ڈیوٹی شیڈول (GET /self/roster) میں جن تاریخوں پر کوئی شفٹ درج نہیں ہے، وہ دن قانوناً آپ کے بامعاوضہ ہفتہ وار آرام کے دن (Rest Days) ہیں۔",
@@ -7045,14 +7051,14 @@ consents_doctor: {
       "متعدد ذمہ داریوں والے عملے کے لیے: کام شروع کرنے سے پہلے درست جگہ کھولیں۔",
     steps: [
       "Reopening your current workspace keeps its permitted menu while the server refreshes its guidance. Wait for the workspace to open before choosing a task.",
-      "Choose a workspace card. One role workspace opens directly; My Workspace does not add another duty to that count. Every employee can open My Workspace from the account menu; with several role workspaces it also appears among the cards. Guests without an employee record have no My Workspace.",
+      "Choose a workspace card. One role workspace opens directly; My Workspace does not add another duty to that count. Every employee can open My Workspace in its own window from the account menu; with several role workspaces it also appears among the cards. Guests without an employee record have no My Workspace.",
       "Select Open in new window to keep another duty open alongside this window. Both windows use your session, but each keeps its own workspace context.",
       "A Records badge means history access. Open work means a retiring service can finish existing work but cannot start new work.",
       "The facility controls available workspaces. Changes appear when the server notifies the terminal.",
     ],
     stepsUr: [
       "موجودہ کام کی جگہ دوبارہ کھولنے پر مجاز فہرست برقرار رہتی ہے اور سرور سے رہنمائی تازہ ہوتی ہے۔ کام چننے سے پہلے جگہ کھلنے کا انتظار کریں۔",
-      "کام کی جگہ کا کارڈ چنیں۔ کردار کی ایک جگہ خود کھلتی ہے؛ میری کام کی جگہ اس گنتی میں شامل نہیں۔ ہر ملازم اسے اکاؤنٹ مینو سے کھول سکتا ہے؛ متعدد ذمہ داریوں میں اس کا کارڈ بھی آتا ہے۔ ملازم ریکارڈ کے بغیر مہمان کو یہ جگہ نہیں ملتی۔",
+      "کام کی جگہ کا کارڈ چنیں۔ کردار کی ایک جگہ خود کھلتی ہے؛ میری کام کی جگہ اس گنتی میں شامل نہیں۔ ہر ملازم اسے اکاؤنٹ مینو سے الگ ونڈو میں کھول سکتا ہے؛ متعدد ذمہ داریوں میں اس کا کارڈ بھی آتا ہے۔ ملازم ریکارڈ کے بغیر مہمان کو یہ جگہ نہیں ملتی۔",
       "دوسری ذمہ داری کے لیے نئی ونڈو کھولیں۔ دونوں میں ایک سیشن مگر الگ کام کا سیاق ہوتا ہے۔",
       "ریکارڈز کا مطلب سابقہ معلومات تک رسائی ہے۔ جاری کام کا مطلب موجودہ کام مکمل کرنا ہے، نیا کام شروع کرنا نہیں۔",
       "دستیاب جگہیں ہسپتال کی ترتیبات سے طے ہوتی ہیں۔ سرور کی اطلاع پر تبدیلی ظاہر ہوتی ہے۔",
@@ -7079,7 +7085,7 @@ consents_doctor: {
       "ڈیوٹی کے دوران عملے کے لیے: شناخت، کام کی جگہ، رابطہ اور مشترکہ سہولیات واضح رکھیں۔",
     steps: [
       "After sign-in, Preparing your workspace loads your permitted tasks, settings and workspace handbook. The complete menu appears together; reference lists and the notification badge load in the background. Retry loading reference lists retries only those reads, without signing in or submitting a business action. If a read fails, Retry loading workspace re-reads it without signing in again or creating a patient, payment or visit.",
-      "Check your name and current workspace in the header before working. Use Workspaces to switch duties. Open your account menu for My Workspace: leave, attendance and an asset issue use your employee record. Ask HR about a missing employee record and IT about access; guests have no employee workspace.",
+      "Check your name and current workspace in the header before working. Use Workspaces to switch duties. Open your account menu for My Workspace in its own window: leave, attendance and an asset issue use your employee record. Ask HR about a missing employee record and IT about access; guests have no employee workspace.",
       "Use the side navigation for notifications, approvals, incident reporting and settings. Facility configuration is a separate administrator entry.",
       "Live means the event stream has caught up. Reconnecting means displayed information may be stale. An unreachable-server banner blocks writes while keeping your input.",
       "F1 or Help opens the current screen’s handbook without clearing your form. Close Help to return to the same control.",

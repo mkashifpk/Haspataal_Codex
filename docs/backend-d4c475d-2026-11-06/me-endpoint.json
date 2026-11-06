@@ -1,0 +1,312 @@
+{
+  "method": "GET",
+  "path": "/api/v1/auth/me",
+  "summary": "Current user, roles, permissions, workspaces, preferences",
+  "tags": [
+    "Auth"
+  ],
+  "permissions": [],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "access": {
+    "authentication": "user",
+    "permissions": [],
+    "permissions_mode": "all",
+    "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+  },
+  "description": "",
+  "roles_allowed": [],
+  "parameters": [],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[MeOut]",
+    "properties": {
+      "data": {
+        "title": "MeOut",
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "employee_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Id",
+            "description": "Null for accounts without an employee (e.g. the bootstrap Super Admin)"
+          },
+          "emp_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emp Number"
+          },
+          "designation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Designation"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions"
+          },
+          "workspaces": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceOut"
+            },
+            "type": "array",
+            "title": "Workspaces"
+          },
+          "must_change_password": {
+            "type": "boolean",
+            "title": "Must Change Password"
+          },
+          "preferences": {
+            "$ref": "#/components/schemas/PreferencesOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "username",
+          "display_name",
+          "employee_id",
+          "emp_number",
+          "designation",
+          "department",
+          "roles",
+          "permissions",
+          "workspaces",
+          "must_change_password",
+          "preferences"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/auth/me"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "user_id": 5,
+          "username": "phc.dr.saima.rauf",
+          "display_name": "Dr Saima Rauf",
+          "employee_id": null,
+          "emp_number": null,
+          "designation": null,
+          "department": null,
+          "roles": [
+            "phc_inspector"
+          ],
+          "permissions": [
+            "msds.inspect"
+          ],
+          "workspaces": [
+            {
+              "code": "inspection",
+              "label": "PHC Inspector (read-only)",
+              "label_ur": "پی ایچ سی انسپکٹر",
+              "description": "The Punjab Healthcare Commission's inspector, on a guest login for the days of the inspection (role phc_inspector, the one permission msds.inspect): the hospital's category, the MSDS indicators, the inspection pack and the web portal (CPSA) documents, all read-only; never a patient's chart, money, staff files or the hospital's internal preparation.",
+              "roles": [
+                "phc_inspector"
+              ],
+              "every_employee": false
+            }
+          ],
+          "must_change_password": false,
+          "preferences": {
+            "theme": "Light",
+            "language": "en",
+            "ui_scale_pct": 100,
+            "pdf_download": "Separate",
+            "extra": {}
+          }
+        },
+        "meta": {
+          "server_time": "2026-11-05T19:09:04.638957+00:00"
+        },
+        "request_id": "341214c74b1340b59c90c6ba86e3abf7"
+      }
+    },
+    "errors_seen": [
+      "TOKEN_REVOKED",
+      "WORKSPACE_NOT_ALLOWED"
+    ]
+  },
+  "errors": [
+    {
+      "code": "TOKEN_REVOKED",
+      "http_status": 401,
+      "message": "The session was revoked; log in again.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Refresh the token once; if that fails return to login."
+    },
+    {
+      "code": "WORKSPACE_NOT_ALLOWED",
+      "http_status": 403,
+      "message": "This window's workspace (X-Active-Workspace) is not one of yours.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "TOKEN_REVOKED",
+    "WORKSPACE_NOT_ALLOWED"
+  ],
+  "used_by_screens": [
+    "workspace_picker",
+    "inspection_home"
+  ],
+  "used_by_workflows": [],
+  "typescript_example": "// Current user, roles, permissions, workspaces, preferences  (permissions: any logged-in user)\nexport const meAuth = () =>\n  api(\"GET\", `/auth/me`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "object",
+    "paging": [],
+    "search": [],
+    "filters": [],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "TOKEN_REVOKED",
+      "http_status": 401,
+      "message": "The session was revoked; log in again.",
+      "retryable": false,
+      "ui_action": "Refresh the token once; if that fails return to login.",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "GET /api/v1/auth/workspaces"
+    },
+    {
+      "code": "WORKSPACE_NOT_ALLOWED",
+      "http_status": 403,
+      "message": "This window's workspace (X-Active-Workspace) is not one of yours.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "allowed",
+        "workspace"
+      ],
+      "details_from": "GET /api/v1/auth/me"
+    }
+  ]
+}

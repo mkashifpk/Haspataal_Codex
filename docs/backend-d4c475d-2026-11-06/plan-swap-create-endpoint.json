@@ -1,0 +1,745 @@
+{
+  "method": "POST",
+  "path": "/api/v1/self/roster/swaps",
+  "summary": "Ask a colleague to work one of my duties (cover or swap)",
+  "tags": [
+    "Duty Rosters"
+  ],
+  "permissions": [
+    "self.roster.swap"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": true,
+  "description": "For a personal emergency. The colleague is notified and answers; then a roster manager approves (setting\n`roster_swap_needs_approval`) and the roster changes. Before the duty starts only (`SWAP_DUTY_STARTED`), one open\nrequest per duty (`SWAP_EXISTS`).\n`ROSTER_CONFLICT`: this duty overlaps another duty of the same employee; `SWAP_COLLEAGUE_INELIGIBLE`: choose an\nactive colleague of the same staff category.\n\n`ROSTER_ON_LEAVE`: the colleague is on approved leave that day.\n\n**Required permission:** `self.roster.swap`\n\n**Required permission:** `self.roster.swap`",
+  "roles_allowed": [
+    "admissions_officer",
+    "anaesthetist",
+    "clinical_specialist",
+    "cssd_technician",
+    "doctor",
+    "employee_self",
+    "head_nurse",
+    "hr_admin",
+    "ipc_nurse",
+    "lab_admin",
+    "lab_technician",
+    "lab_verifier",
+    "maintenance_admin",
+    "ops_admin",
+    "ot_admin",
+    "ot_nurse",
+    "pharmacist",
+    "pharmacy_admin",
+    "quality_officer",
+    "radiographer",
+    "radiologist",
+    "receptionist",
+    "surgeon",
+    "triage_nurse",
+    "ward_nurse"
+  ],
+  "parameters": [
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "SwapIn",
+    "properties": {
+      "roster_id": {
+        "type": "integer",
+        "title": "Roster Id",
+        "description": "The duty to be worked by the colleague"
+      },
+      "covering_employee_id": {
+        "type": "integer",
+        "title": "Covering Employee Id",
+        "description": "The colleague (same staff category): GET /self/roster/swap-options"
+      },
+      "return_roster_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Return Roster Id",
+        "description": "For a swap: the colleague's duty the requester works in return; omit for a cover"
+      },
+      "reason": {
+        "type": "string",
+        "maxLength": 500,
+        "minLength": 3,
+        "title": "Reason",
+        "examples": [
+          "Family emergency: my father is in hospital"
+        ]
+      }
+    },
+    "type": "object",
+    "required": [
+      "roster_id",
+      "covering_employee_id",
+      "reason"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[DutySwapOut]",
+    "properties": {
+      "data": {
+        "title": "DutySwapOut",
+        "properties": {
+          "swap_id": {
+            "type": "integer",
+            "title": "Swap Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "Cover",
+              "Swap"
+            ],
+            "title": "Kind"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Requested",
+              "Accepted",
+              "Approved",
+              "Declined",
+              "Rejected",
+              "Cancelled",
+              "Expired"
+            ],
+            "title": "Status"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "roster_id": {
+            "type": "integer",
+            "title": "Roster Id"
+          },
+          "return_roster_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Return Roster Id"
+          },
+          "requester_employee_id": {
+            "type": "integer",
+            "title": "Requester Employee Id"
+          },
+          "requester_name": {
+            "type": "string",
+            "title": "Requester Name"
+          },
+          "covering_employee_id": {
+            "type": "integer",
+            "title": "Covering Employee Id"
+          },
+          "covering_name": {
+            "type": "string",
+            "title": "Covering Name"
+          },
+          "staff_category": {
+            "type": "string",
+            "enum": [
+              "Clinical",
+              "Nursing",
+              "Administrative",
+              "Technical",
+              "SupportZeroInterface",
+              "Visiting"
+            ],
+            "title": "Staff Category"
+          },
+          "duty": {
+            "$ref": "#/components/schemas/RosterEntryOut",
+            "description": "The requester's duty the colleague is asked to work (as it was asked)"
+          },
+          "return_duty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RosterEntryOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The colleague's duty the requester works in exchange"
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested At"
+          },
+          "responded_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responded At"
+          },
+          "response_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Note"
+          },
+          "responded_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responded By Name"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decision_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Note"
+          },
+          "decided_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By Name",
+            "description": "The roster manager (null when no approval was needed)"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "cover_roster_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cover Roster Id",
+            "description": "The colleague's new duty, once approved"
+          },
+          "return_cover_roster_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Return Cover Roster Id",
+            "description": "The requester's new duty of a swap, once approved"
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "swap_id",
+          "kind",
+          "status",
+          "reason",
+          "roster_id",
+          "return_roster_id",
+          "requester_employee_id",
+          "requester_name",
+          "covering_employee_id",
+          "covering_name",
+          "staff_category",
+          "duty",
+          "return_duty",
+          "requested_at",
+          "responded_at",
+          "response_note",
+          "responded_by_name",
+          "decided_at",
+          "decision_note",
+          "decided_by_name",
+          "closed_at",
+          "cover_roster_id",
+          "return_cover_roster_id",
+          "row_version"
+        ],
+        "description": "A duty swap: a cover (one duty) or a swap (the requester works `return_duty` in exchange)."
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/self/roster/swaps",
+      "body": {
+        "roster_id": 1,
+        "covering_employee_id": 7,
+        "return_roster_id": 2,
+        "reason": "Family emergency"
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "data": {
+          "swap_id": 1,
+          "status": "Requested",
+          "reason": "Family emergency",
+          "roster_id": 1,
+          "return_roster_id": 2,
+          "requester_employee_id": 1,
+          "requester_name": "Nurse Amna",
+          "covering_employee_id": 7,
+          "covering_name": "Nurse Bushra",
+          "staff_category": "Nursing",
+          "requested_at": "2026-09-29T02:40:41.486972+00:00",
+          "responded_at": null,
+          "response_note": null,
+          "responded_by_name": null,
+          "decided_at": null,
+          "decision_note": null,
+          "decided_by_name": null,
+          "closed_at": null,
+          "cover_roster_id": null,
+          "return_cover_roster_id": null,
+          "row_version": 1,
+          "kind": "Swap",
+          "duty": {
+            "roster_id": 1,
+            "employee_id": 1,
+            "emp_number": "EMP-2026-0001",
+            "full_name": "Nurse Amna",
+            "designation": "Officer",
+            "staff_category": "Nursing",
+            "roster_date": "2026-10-01",
+            "shift_pattern_id": 1,
+            "shift_name": "Morning",
+            "start_time": "08:00:00",
+            "end_time": "14:00:00",
+            "duty_area": "Ward",
+            "ward_id": 1,
+            "ward_name": "Roster Ward",
+            "department_id": null,
+            "department_name": null,
+            "zone_label": null,
+            "is_on_call": false,
+            "notes": null,
+            "status": "Active",
+            "cancel_reason": null,
+            "swap_id": null,
+            "row_version": 1,
+            "bed_ids": []
+          },
+          "return_duty": {
+            "roster_id": 2,
+            "employee_id": 7,
+            "emp_number": "EMP-2026-0007",
+            "full_name": "Nurse Bushra",
+            "designation": "Officer",
+            "staff_category": "Nursing",
+            "roster_date": "2026-10-02",
+            "shift_pattern_id": 2,
+            "shift_name": "Evening",
+            "start_time": "14:00:00",
+            "end_time": "20:00:00",
+            "duty_area": "Ward",
+            "ward_id": 1,
+            "ward_name": "Roster Ward",
+            "department_id": null,
+            "department_name": null,
+            "zone_label": null,
+            "is_on_call": false,
+            "notes": null,
+            "status": "Active",
+            "cancel_reason": null,
+            "swap_id": null,
+            "row_version": 1,
+            "bed_ids": []
+          }
+        },
+        "meta": {
+          "server_time": "2026-09-29T02:40:41.505190+00:00"
+        },
+        "request_id": "53b8ded7847e4441baf17ad428687c10"
+      }
+    },
+    "errors_seen": [
+      "FORBIDDEN",
+      "ROSTER_CONFLICT",
+      "SWAP_COLLEAGUE_INELIGIBLE",
+      "SWAP_DUTY_STARTED",
+      "SWAP_EXISTS"
+    ],
+    "events_emitted": [
+      "notification.created",
+      "roster.swap.updated"
+    ]
+  },
+  "errors": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "ROSTER_CONFLICT",
+      "http_status": 409,
+      "message": "This duty overlaps another duty of the same employee.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "ROSTER_ON_LEAVE",
+      "http_status": 409,
+      "message": "The employee is on approved leave that day.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "SWAP_COLLEAGUE_INELIGIBLE",
+      "http_status": 409,
+      "message": "Choose an active colleague of the same staff category.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "SWAP_DUTY_STARTED",
+      "http_status": 409,
+      "message": "A duty is swapped before it starts.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "SWAP_EXISTS",
+      "http_status": 409,
+      "message": "This duty is already in an open swap request.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "FORBIDDEN",
+    "ROSTER_CONFLICT",
+    "SWAP_COLLEAGUE_INELIGIBLE",
+    "SWAP_DUTY_STARTED",
+    "SWAP_EXISTS"
+  ],
+  "used_by_screens": [
+    "self_service"
+  ],
+  "used_by_workflows": [
+    "duty-rosters-and-attendance"
+  ],
+  "typescript_example": "// Ask a colleague to work one of my duties (cover or swap)  (permissions: self.roster.swap)\nexport const requestSwap = (body) =>\n  api(\"POST\", `/self/roster/swaps`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "self.roster.swap"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of self.roster.swap",
+    "roles_allowed": [
+      "admissions_officer",
+      "anaesthetist",
+      "clinical_specialist",
+      "cssd_technician",
+      "doctor",
+      "employee_self",
+      "head_nurse",
+      "hr_admin",
+      "ipc_nurse",
+      "lab_admin",
+      "lab_technician",
+      "lab_verifier",
+      "maintenance_admin",
+      "ops_admin",
+      "ot_admin",
+      "ot_nurse",
+      "pharmacist",
+      "pharmacy_admin",
+      "quality_officer",
+      "radiographer",
+      "radiologist",
+      "receptionist",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /self/roster/swaps",
+    "emits_events": [
+      "notification.created",
+      "roster.swap.updated"
+    ],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [
+    "notification.created",
+    "roster.swap.updated"
+  ],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "any_of",
+        "required"
+      ],
+      "details_from": "POST /api/v1/admin/departments"
+    },
+    {
+      "code": "ROSTER_CONFLICT",
+      "http_status": 409,
+      "message": "This duty overlaps another duty of the same employee.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "employee_id",
+        "entry_index",
+        "roster_date",
+        "roster_id",
+        "shift_name"
+      ],
+      "details_from": "POST /api/v1/rosters"
+    },
+    {
+      "code": "ROSTER_ON_LEAVE",
+      "http_status": 409,
+      "message": "The employee is on approved leave that day.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "employee_id",
+        "entry_index",
+        "roster_date"
+      ],
+      "details_from": "POST /api/v1/rosters"
+    },
+    {
+      "code": "SWAP_COLLEAGUE_INELIGIBLE",
+      "http_status": 409,
+      "message": "Choose an active colleague of the same staff category.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "covering_employee_id",
+        "reason"
+      ],
+      "details_from": "POST /api/v1/self/roster/swaps"
+    },
+    {
+      "code": "SWAP_DUTY_STARTED",
+      "http_status": 409,
+      "message": "A duty is swapped before it starts.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "roster_date",
+        "roster_id"
+      ],
+      "details_from": "POST /api/v1/self/roster/swaps"
+    },
+    {
+      "code": "SWAP_EXISTS",
+      "http_status": 409,
+      "message": "This duty is already in an open swap request.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "roster_id"
+      ],
+      "details_from": "POST /api/v1/self/roster/swaps"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

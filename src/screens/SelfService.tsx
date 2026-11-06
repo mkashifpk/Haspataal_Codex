@@ -31,7 +31,6 @@ import {
   reportOpsWorkOrders
 } from "../generated/self_service";
 import {
-  getSelfServiceCapabilityView,
   validateLeaveRequest,
   validateSwapRequest,
   validateIssueReport,
@@ -57,8 +56,6 @@ export interface SelfServiceProps {
     permissions?: string[];
   };
   userPermissions?: string[];
-  currentUserRole?: string;
-  currentEmployeeId?: number | null;
   connected?: boolean;
 }
 
@@ -67,22 +64,20 @@ export const SelfService: React.FC<SelfServiceProps> = ({
   establishment,
   user,
   userPermissions = [],
-  currentUserRole,
-  currentEmployeeId,
   connected = true
 }) => {
   const isUrdu = lang === "ur";
 
-  // Permissions & Capability
+  // Workspace eligibility is server-owned (auth/workspaces and scoped handbook).
+  // Individual write controls still follow their endpoint permissions.
   const effectivePermissions = useMemo(() => {
     return userPermissions.length > 0 ? userPermissions : (user?.permissions || []);
   }, [userPermissions, user?.permissions]);
 
-  const effectiveRole = currentUserRole || user?.role || user?.roles?.[0] || "";
-
-  const capability = useMemo(() => {
-    return getSelfServiceCapabilityView(establishment, effectivePermissions, effectiveRole);
-  }, [establishment, effectivePermissions, effectiveRole]);
+  const writable = establishment?.views?.screens?.find((s:any) => s.screen_id === 'self_service')?.view !== 'records';
+  const canRequestLeave = writable && effectivePermissions.includes('self.leave.request');
+  const canSwapRoster = writable && effectivePermissions.includes('self.roster.swap');
+  const canReportIssue = writable && effectivePermissions.includes('ops.workorder.report');
 
   // Active Tab: "duties" | "leave" | "payslips" | "support"
   const [activeTab, setActiveTab] = useState<"duties" | "leave" | "payslips" | "support">("duties");
@@ -157,7 +152,9 @@ export const SelfService: React.FC<SelfServiceProps> = ({
       setDuties(dutiesList || []);
       setSwaps(swapsList || []);
     } catch (err: any) {
-      // Handled silently or mapped
+      setDuties([]);
+      setSwaps([]);
+      throw err;
     }
   }, [dutiesStartDate, dutiesEndDate]);
 
@@ -171,7 +168,9 @@ export const SelfService: React.FC<SelfServiceProps> = ({
       setLeaveRequests(reqs || []);
       setLeaveBalances(bals || []);
     } catch (err: any) {
-      // Handled silently
+      setLeaveRequests([]);
+      setLeaveBalances([]);
+      throw err;
     }
   }, []);
 
@@ -181,7 +180,8 @@ export const SelfService: React.FC<SelfServiceProps> = ({
       const p = await myProfile();
       setProfile(p);
     } catch (err: any) {
-      // Handled silently
+      setProfile(null);
+      throw err;
     }
   }, []);
 
@@ -191,7 +191,8 @@ export const SelfService: React.FC<SelfServiceProps> = ({
       const list = await listHolidays();
       setHolidays(list || []);
     } catch (err: any) {
-      // Handled silently
+      setHolidays([]);
+      throw err;
     }
   }, []);
 
@@ -227,25 +228,23 @@ export const SelfService: React.FC<SelfServiceProps> = ({
 
   // Realtime Listeners for notification.created and roster.swap.updated
   useEffect(() => {
-    const handleSwapUpdated = () => {
-      setRealtimeNotice(isUrdu ? "ڈیوٹی کے تبادلے کی حالت اپ ڈیٹ ہو گئی ہے۔" : "Duty swap request status updated.");
-      fetchDutiesAndSwaps();
-      setTimeout(() => setRealtimeNotice(null), 5000);
-    };
-
-    const handleNotification = () => {
-      setRealtimeNotice(isUrdu ? "نئی اطلاع موصول ہوئی ہے۔" : "New personal notification received.");
-      fetchDutiesAndSwaps();
-      fetchLeaveData();
-      setTimeout(() => setRealtimeNotice(null), 5000);
-    };
-
-    window.addEventListener("haspataal:roster.swap.updated", handleSwapUpdated);
-    window.addEventListener("haspataal:notification.created", handleNotification);
-
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const unsubscribe = window.terminal.subscribe(event => {
+      const swap = event.type === 'event' && event.event_type === 'roster.swap.updated';
+      const notification = event.type === 'event' && event.event_type === 'notification.created';
+      const resync = event.type === 'stream' && event.resync;
+      if (!swap && !notification && !resync) return;
+      void Promise.all([fetchDutiesAndSwaps(), ...(notification || resync ? [fetchLeaveData()] : [])])
+        .catch(error => setErrorMessage(error?.message || (isUrdu ? 'فہرست تازہ نہیں ہو سکی؛ دوبارہ تازہ کریں۔' : 'Lists could not refresh. Try Refresh.')));
+      if (!resync) {
+        setRealtimeNotice(isUrdu ? 'ذاتی اطلاع یا ڈیوٹی تبادلے کی تازہ معلومات موصول ہوئیں۔' : 'Personal notification or duty swap updated.');
+        clearTimeout(timer);
+        timer = setTimeout(() => setRealtimeNotice(null), 5000);
+      }
+    });
     return () => {
-      window.removeEventListener("haspataal:roster.swap.updated", handleSwapUpdated);
-      window.removeEventListener("haspataal:notification.created", handleNotification);
+      unsubscribe();
+      clearTimeout(timer);
     };
   }, [fetchDutiesAndSwaps, fetchLeaveData, isUrdu]);
 
@@ -299,7 +298,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
       setSuccessMessage(isUrdu ? "تبادلے یا کور کی درخواست کامیابی کے ساتھ بھیج دی گئی۔" : "Shift cover/swap request submitted to colleague.");
       setSwapModalOpen(false);
       setSelectedDutyForSwap(null);
-      fetchDutiesAndSwaps();
+      await fetchDutiesAndSwaps();
     } catch (err: any) {
       const code = err?.code || "NETWORK_ERROR";
       const mapped = SELF_SERVICE_ERROR_MESSAGES[code] || {
@@ -318,7 +317,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
     try {
       await acceptSwap(swapId, {});
       setSuccessMessage(isUrdu ? "ڈیوٹی کور کی درخواست قبول کر لی گئی۔ مینیجر کی منظوری کا انتظار ہے۔" : "Duty swap accepted. Awaiting final roster manager approval.");
-      fetchDutiesAndSwaps();
+      await fetchDutiesAndSwaps();
     } catch (err: any) {
       setErrorMessage(err?.message || "Failed to accept swap.");
     } finally {
@@ -331,7 +330,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
     try {
       await declineSwap(swapId, {});
       setSuccessMessage(isUrdu ? "ڈیوٹی کور کی درخواست مسترد کر دی گئی۔" : "Duty swap request declined.");
-      fetchDutiesAndSwaps();
+      await fetchDutiesAndSwaps();
     } catch (err: any) {
       setErrorMessage(err?.message || "Failed to decline swap.");
     } finally {
@@ -344,7 +343,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
     try {
       await cancelSwap(swapId);
       setSuccessMessage(isUrdu ? "درخواست کامیابی سے منسوخ کر دی گئی۔" : "Swap request cancelled.");
-      fetchDutiesAndSwaps();
+      await fetchDutiesAndSwaps();
     } catch (err: any) {
       setErrorMessage(err?.message || "Failed to cancel swap.");
     } finally {
@@ -373,7 +372,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
         half_day: false,
         reason: ""
       });
-      fetchLeaveData();
+      await fetchLeaveData();
     } catch (err: any) {
       const code = err?.code || "NETWORK_ERROR";
       const mapped = SELF_SERVICE_ERROR_MESSAGES[code] || {
@@ -392,7 +391,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
     try {
       await cancelLeave(leaveId);
       setSuccessMessage(isUrdu ? "رخصت کی درخواست کامیابی سے واپس لے لی گئی۔" : "Leave request withdrawn.");
-      fetchLeaveData();
+      await fetchLeaveData();
     } catch (err: any) {
       setErrorMessage(err?.message || "Failed to withdraw leave request.");
     } finally {
@@ -456,17 +455,6 @@ export const SelfService: React.FC<SelfServiceProps> = ({
     if (!swapOptionsData || !selectedColleagueId) return null;
     return swapOptionsData.colleagues.find(c => c.employee_id === Number(selectedColleagueId));
   }, [swapOptionsData, selectedColleagueId]);
-
-  if (capability.mode === "hidden") {
-    return (
-      <div className="p-6 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 m-4">
-        <h2 className="text-xl font-bold mb-2">
-          {isUrdu ? "سیلف سروس پورٹل غیر فعال ہے" : "Self-Service Unavailable"}
-        </h2>
-        <p>{capability.reason || (isUrdu ? "اس سہولت کے لیے سیلف سروس فعال نہیں ہے۔" : "Self-service staff portal is not enabled for this facility profile.")}</p>
-      </div>
-    );
-  }
 
   return (
     <div className={`p-6 max-w-7xl mx-auto space-y-6 ${isUrdu ? "rtl" : "ltr"}`} dir={isUrdu ? "rtl" : "ltr"}>
@@ -605,7 +593,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
       </div>
 
       {/* Tab 1: Duties & Swaps */}
-      {activeTab === "duties" && (
+      {activeTab === "duties" && !errorMessage && (
         <div className="space-y-6">
           {/* Statutory rest days explanation notice per rule:907c770e92 */}
           <div className="bg-indigo-50 border border-indigo-200 text-indigo-900 p-4 rounded-xl text-sm flex items-start gap-3">
@@ -646,7 +634,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
               <button
                 type="button"
                 data-help="self_service.duties_btn_query"
-                onClick={fetchDutiesAndSwaps}
+                onClick={loadActiveTabData}
                 className="px-3 py-1 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 {isUrdu ? "تلاش کریں" : "Apply Filter"}
@@ -714,7 +702,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
                         )}
 
                         {/* Ask colleague button for upcoming duties (rule:9274755ac9) */}
-                        {isUpcoming && capability.canSwapRoster && (
+                        {isUpcoming && canSwapRoster && (
                           <div className="pt-2 border-t mt-2 flex justify-end">
                             <button
                               type="button"
@@ -845,7 +833,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
                 type="button"
                 data-help="self_service.btn_apply_leave"
                 onClick={() => setApplyLeaveModalOpen(true)}
-                disabled={!capability.canRequestLeave}
+                disabled={!canRequestLeave}
                 className="px-3.5 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm"
               >
                 + {isUrdu ? "نئی رخصت کی درخواست دیں" : "Apply for Leave"}
@@ -1025,7 +1013,7 @@ export const SelfService: React.FC<SelfServiceProps> = ({
               type="button"
               data-help="self_service.btn_open_issue_modal"
               onClick={() => setIssueModalOpen(true)}
-              disabled={!capability.canReportIssue}
+              disabled={!canReportIssue}
               className="px-3.5 py-1.5 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm"
             >
               ⚠️ {isUrdu ? "خرابی یا مرمت کی شکایت درج کریں" : "Report Facility Issue"}

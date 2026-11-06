@@ -11,52 +11,6 @@ import type {
   SelfProfileOut
 } from "./generated/self_service";
 
-export type SelfServiceMode = "full" | "records" | "hidden";
-
-export interface SelfServiceCapabilityView {
-  mode: SelfServiceMode;
-  reason?: string;
-  canView: boolean;
-  canRequestLeave: boolean;
-  canSwapRoster: boolean;
-  canReportIssue: boolean;
-}
-
-export function getSelfServiceCapabilityView(
-  establishment?: any,
-  userPermissions?: string[],
-  userRole?: string
-): SelfServiceCapabilityView {
-  const perms = new Set(userPermissions || []);
-  const screens=establishment?.views?.screens;
-  const view=Array.isArray(screens)?screens.find((s:any)=>s.screen_id==='self_service')?.view??'full':'hidden';
-  const canView = view!=='hidden' && perms.has("self.profile.view");
-  const canRequestLeave = view==='full' && perms.has("self.leave.request");
-  const canSwapRoster = view==='full' && perms.has("self.roster.swap");
-  const canReportIssue = view==='full' && perms.has("ops.workorder.report");
-
-  if (!canView) {
-    return {
-      mode: "hidden",
-      reason: "Self-service staff portal is not enabled for this facility profile.",
-      canView: false,
-      canRequestLeave: false,
-      canSwapRoster: false,
-      canReportIssue: false,
-    };
-  }
-
-  const mode: SelfServiceMode = (canRequestLeave || canSwapRoster || canReportIssue) ? "full" : "records";
-
-  return {
-    mode,
-    canView,
-    canRequestLeave,
-    canSwapRoster,
-    canReportIssue,
-  };
-}
-
 export interface LeaveRequestValidationResult {
   valid: boolean;
   errors: Record<string, string>;

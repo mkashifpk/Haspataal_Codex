@@ -1,0 +1,468 @@
+{
+  "method": "POST",
+  "path": "/api/v1/auth/login",
+  "summary": "Log in (returns tokens, profile, roles, workspaces)",
+  "tags": [
+    "Auth"
+  ],
+  "permissions": [],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "access": {
+    "authentication": "public",
+    "permissions": [],
+    "permissions_mode": "all",
+    "who": "public: no login (works before login)"
+  },
+  "description": "Returns an access token (30 min) and a refresh token (7 days, rotated on every use).\n\n* `must_change_password: true` → show the change-password form first; other endpoints\n  return `PASSWORD_CHANGE_REQUIRED` until then.\n* One workspace → open it; several → show the workspace picker (workflow §11.1).\n* Errors: `INVALID_CREDENTIALS`, `ACCOUNT_LOCKED` (details.retry_after_seconds),\n  `ACCOUNT_DISABLED`, `RATE_LIMITED`.\n\n`ACCOUNT_EXPIRED`: a time-limited login (the PHC inspector's guest account) after its last day.\n`LICENSE_INVALID`: the server's licence is not valid and its grace is over (`details`: state, reason,\ngrace_until, vendor): show it with the vendor's contact details; only IT's super administrator still signs in.",
+  "roles_allowed": [],
+  "parameters": [],
+  "request_body": {
+    "title": "LoginIn",
+    "properties": {
+      "username": {
+        "type": "string",
+        "maxLength": 64,
+        "minLength": 3,
+        "title": "Username",
+        "examples": [
+          "dr.ahmed"
+        ]
+      },
+      "password": {
+        "type": "string",
+        "maxLength": 256,
+        "minLength": 1,
+        "title": "Password",
+        "examples": [
+          "S3cure-Pass!"
+        ]
+      },
+      "terminal_label": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 100
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Terminal Label",
+        "description": "Optional terminal name shown in session lists"
+      }
+    },
+    "type": "object",
+    "required": [
+      "username",
+      "password"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[LoginOut]",
+    "properties": {
+      "data": {
+        "title": "LoginOut",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "description": "Always bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In",
+            "description": "Access token lifetime in seconds"
+          },
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token"
+          },
+          "refresh_expires_in": {
+            "type": "integer",
+            "title": "Refresh Expires In"
+          },
+          "user": {
+            "$ref": "#/components/schemas/MeOut"
+          },
+          "license": {
+            "$ref": "#/components/schemas/LicenseStatusOut",
+            "description": "Show `message` as a banner while `state` is grace or locked"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in",
+          "refresh_token",
+          "refresh_expires_in",
+          "user",
+          "license"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/auth/login",
+      "body": {
+        "username": "u71195ebe7c",
+        "password": "<secret>"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "access_token": "<secret>",
+          "token_type": "bearer",
+          "expires_in": 1800,
+          "refresh_token": "<secret>",
+          "refresh_expires_in": 604800,
+          "user": {
+            "user_id": 1,
+            "username": "u71195ebe7c",
+            "display_name": "Dr Ahmed",
+            "employee_id": 1,
+            "emp_number": "EMP-2026-0001",
+            "designation": "Doctor",
+            "department": null,
+            "roles": [
+              "doctor"
+            ],
+            "permissions": [
+              "blood.request",
+              "blood.transfuse",
+              "blood.view"
+            ],
+            "workspaces": [
+              {
+                "code": "doctor",
+                "label": "Clinical OPD / IPD",
+                "label_ur": "ڈاکٹر",
+                "description": "Live queue, EMR notes, e-prescriptions with live stock, lab/imaging orders, admissions, re-route.",
+                "roles": [
+                  "doctor"
+                ],
+                "every_employee": false
+              },
+              {
+                "code": "self_service",
+                "label": "My Workspace",
+                "label_ur": "میرا صفحہ",
+                "description": "Own leave requests, balances, duties, attendance, issue reporting.",
+                "roles": [],
+                "every_employee": true
+              }
+            ],
+            "must_change_password": false,
+            "preferences": {
+              "theme": "Light",
+              "language": "en",
+              "ui_scale_pct": 100,
+              "pdf_download": "Separate",
+              "extra": {}
+            }
+          },
+          "license": {
+            "state": "dev",
+            "reason": null,
+            "message": "Development build: no license required",
+            "hospital": null,
+            "license_id": null,
+            "grace_until": null,
+            "days_left": null,
+            "expires_at": null,
+            "notice": null,
+            "vendor": {
+              "company": "your Haspataal vendor"
+            },
+            "logins": "all"
+          }
+        },
+        "meta": {
+          "server_time": "2026-11-05T18:21:25.545604+00:00"
+        },
+        "request_id": "37e8be5ade644f449915d383fc884826"
+      }
+    },
+    "errors_seen": [
+      "ACCOUNT_DISABLED",
+      "ACCOUNT_EXPIRED",
+      "ACCOUNT_LOCKED",
+      "INVALID_CREDENTIALS",
+      "LICENSE_INVALID",
+      "RATE_LIMITED"
+    ],
+    "events_emitted": []
+  },
+  "errors": [
+    {
+      "code": "ACCOUNT_DISABLED",
+      "http_status": 403,
+      "message": "This account is disabled.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "ACCOUNT_EXPIRED",
+      "http_status": 403,
+      "message": "This guest account has expired (the PHC inspector's access ended).",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "ACCOUNT_LOCKED",
+      "http_status": 423,
+      "message": "Too many failed attempts; the account is temporarily locked.",
+      "retryable": true,
+      "category": "auth",
+      "ui_action": "Show a countdown from retry_after_seconds."
+    },
+    {
+      "code": "INVALID_CREDENTIALS",
+      "http_status": 401,
+      "message": "Username or password is incorrect.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Refresh the token once; if that fails return to login."
+    },
+    {
+      "code": "LICENSE_INVALID",
+      "http_status": 403,
+      "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "PASSWORD_CHANGE_REQUIRED",
+      "http_status": 403,
+      "message": "You must change your temporary password first.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "RATE_LIMITED",
+      "http_status": 429,
+      "message": "Too many requests; slow down.",
+      "retryable": true,
+      "category": "request",
+      "ui_action": "Back off per Retry-After."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "ACCOUNT_DISABLED",
+    "ACCOUNT_EXPIRED",
+    "ACCOUNT_LOCKED",
+    "INVALID_CREDENTIALS",
+    "LICENSE_INVALID",
+    "RATE_LIMITED"
+  ],
+  "used_by_screens": [
+    "login"
+  ],
+  "used_by_workflows": [],
+  "typescript_example": "// Log in (returns tokens, profile, roles, workspaces)  (permissions: any logged-in user)\nexport const login = (body) =>\n  api(\"POST\", `/auth/login`, body);   // api(): see get_guide('envelope-and-errors')",
+  "write_semantics": {
+    "protection": "repeat_effect",
+    "on_lost_answer": "Repeating this call has another effect: opens another session; the unused one expires. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+    "reconcile_with": null,
+    "emits_events": [],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "ACCOUNT_DISABLED",
+      "http_status": 403,
+      "message": "This account is disabled.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "POST /api/v1/auth/login"
+    },
+    {
+      "code": "ACCOUNT_EXPIRED",
+      "http_status": 403,
+      "message": "This guest account has expired (the PHC inspector's access ended).",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "GET /api/v1/msds/profile"
+    },
+    {
+      "code": "ACCOUNT_LOCKED",
+      "http_status": 423,
+      "message": "Too many failed attempts; the account is temporarily locked.",
+      "retryable": true,
+      "ui_action": "Show a countdown from retry_after_seconds.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "retry_after_seconds"
+      ],
+      "details_from": "POST /api/v1/auth/login"
+    },
+    {
+      "code": "INVALID_CREDENTIALS",
+      "http_status": 401,
+      "message": "Username or password is incorrect.",
+      "retryable": false,
+      "ui_action": "Refresh the token once; if that fails return to login.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "POST /api/v1/auth/login"
+    },
+    {
+      "code": "LICENSE_INVALID",
+      "http_status": 403,
+      "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "grace_until",
+        "reason",
+        "state",
+        "vendor"
+      ],
+      "details_from": "POST /api/v1/auth/login"
+    },
+    {
+      "code": "PASSWORD_CHANGE_REQUIRED",
+      "http_status": 403,
+      "message": "You must change your temporary password first.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "GET /api/v1/auth/workspaces"
+    },
+    {
+      "code": "RATE_LIMITED",
+      "http_status": 429,
+      "message": "Too many requests; slow down.",
+      "retryable": true,
+      "ui_action": "Back off per Retry-After.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "retry_after_seconds"
+      ],
+      "details_from": "POST /api/v1/auth/login"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

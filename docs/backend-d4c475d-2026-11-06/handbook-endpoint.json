@@ -1,0 +1,586 @@
+{
+  "method": "GET",
+  "path": "/api/v1/meta/handbook",
+  "summary": "The end-user handbook's outline for the logged-in employee (only what they may use)",
+  "tags": [
+    "Meta"
+  ],
+  "permissions": [],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "access": {
+    "authentication": "user",
+    "permissions": [],
+    "permissions_mode": "all",
+    "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+  },
+  "description": "The hospital's staff learn the software from the handbook the frontend team ships inside the desktop app as a\nlocalhost-only searchable help site (guide \"The end-user handbook\"). This answer is its table of contents for THIS\nuser: the workspaces (their own first), the screens they may open (a screen of their own workspaces appears when the\nserver lets them call at least one of its endpoints; so does a screen of another workspace that one of theirs also\nuses, `also_uses` of `GET /meta/workspaces`, listed in their workspace with `workspace` still naming its own: the\nOwner's Receivables; any other screen of another workspace only when they may call every endpoint of it that needs a\npermission) and, per screen, the tasks they may do in user words, the rules the page explains and\nthe realtime updates. The help window shows exactly these pages (`page` = `screens/<id>`, `workspaces/<code>`) and\nbuilds its search over them, so nobody reads how to do what they are not allowed to do. Call it after login and\nafter a role change; the \"?\" button of a screen opens `screens/<its id>`.\n\nF1 in a workspace window passes that window's `workspace`: the answer then lists that workspace and the shared screens\nonly, even for a user with several roles (`active_workspace`); without the parameter the window's `X-Active-Workspace`\nheader decides; on the launcher, call it with neither. An\nunknown workspace: `VALIDATION_ERROR`; one that is not the user's: `FORBIDDEN`. The screens and workspaces of a service\nthat shows nothing now (`GET /establishment` views: hidden) are left out, and each screen says what it shows (`view`).\n\n`faq_seed` lists the questions the FAQ of each listed workspace must answer, at least: one per error a screen of the\nworkspace can meet (the errors every screen meets, explained once by the general error help, are left out) and one\nper state machine its screens move. Questions only: the help writes the answers in the user's words.\n\n`print=true` with `workspace` adds `print_edition`: the cover (the hospital, its PHC number and category, the\nworkspace, the version and the date) and the chapters in print order (the workspace page, its screens, the shared\nscreens, the FAQ), from which the app compiles the printable guide of that workspace from the same pages as F1.\n`print=true` without `workspace`: `VALIDATION_ERROR`.",
+  "roles_allowed": [],
+  "parameters": [
+    {
+      "name": "workspace",
+      "in": "query",
+      "required": false,
+      "description": "The workspace of the window F1 was pressed in: the outline and the search then cover that workspace and the shared screens only",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "The workspace of the window F1 was pressed in: the outline and the search then cover that workspace and the shared screens only",
+        "title": "Workspace"
+      }
+    },
+    {
+      "name": "print",
+      "in": "query",
+      "required": false,
+      "description": "With workspace: the cover and the chapters of the printable user guide of that workspace",
+      "schema": {
+        "type": "boolean",
+        "description": "With workspace: the cover and the chapters of the printable user guide of that workspace",
+        "default": false,
+        "title": "Print"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[HandbookOut]",
+    "properties": {
+      "data": {
+        "title": "HandbookOut",
+        "properties": {
+          "user": {
+            "type": "string",
+            "title": "User"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles"
+          },
+          "workspaces": {
+            "items": {
+              "$ref": "#/components/schemas/HandbookWorkspaceOut"
+            },
+            "type": "array",
+            "title": "Workspaces",
+            "description": "The user's own workspaces first"
+          },
+          "shared_screens": {
+            "items": {
+              "$ref": "#/components/schemas/HandbookScreenOut"
+            },
+            "type": "array",
+            "title": "Shared Screens",
+            "description": "Login, the launcher, settings, notifications, approvals ..."
+          },
+          "pages": {
+            "type": "integer",
+            "title": "Pages",
+            "description": "How many help pages this user may open"
+          },
+          "guide": {
+            "type": "string",
+            "title": "Guide"
+          },
+          "active_workspace": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Workspace"
+          },
+          "faq_seed": {
+            "items": {
+              "$ref": "#/components/schemas/FaqSeedOut"
+            },
+            "type": "array",
+            "title": "Faq Seed",
+            "description": "The questions the workspace FAQs must answer (guide 12, W3)"
+          },
+          "print_edition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PrintEditionOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "With print=true and a workspace: the printable guide's cover and chapters"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user",
+          "roles",
+          "workspaces",
+          "shared_screens",
+          "pages",
+          "guide",
+          "active_workspace",
+          "faq_seed",
+          "print_edition"
+        ],
+        "description": "The end-user handbook's outline for the logged-in employee: only the workspaces, screens and tasks they may use.\nThe help site shows exactly these pages and searches only them."
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/meta/handbook"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "user": "u0dac72edf9",
+          "roles": [
+            "cashier"
+          ],
+          "workspaces": [
+            {
+              "code": "finance_cashier",
+              "label": "Cashier",
+              "label_ur": "کیشیئر",
+              "description": "Counter collections, dues settlement, cash-backs.",
+              "page": "workspaces/finance_cashier",
+              "yours": true,
+              "screens": [
+                {
+                  "id": "receivables",
+                  "title": "Outstanding dues (Udhaar)",
+                  "purpose": "Collect old dues, aging, write-offs.",
+                  "workflow": "§1.9",
+                  "workspace": "finance_cashier",
+                  "page": "screens/receivables",
+                  "tasks": [
+                    {
+                      "method": "GET",
+                      "path": "/finance/ar/outstanding",
+                      "summary": "Outstanding Patient Dues queue (with age of debt)",
+                      "is_action": false
+                    },
+                    {
+                      "method": "GET",
+                      "path": "/finance/ar/aging",
+                      "summary": "Receivables aging buckets",
+                      "is_action": false
+                    },
+                    {
+                      "method": "POST",
+                      "path": "/finance/ar/{ar_id}/settle",
+                      "summary": "Settle Debt (patient returns to pay)",
+                      "is_action": true
+                    }
+                  ],
+                  "rules": [
+                    "'Write off' (with its reason) only for finance.ar.write_off: the Owner and the Hospital Admin, who open this screen from their workspace; a cashier collects and settles but never writes off."
+                  ],
+                  "events": [],
+                  "view": "full"
+                }
+              ]
+            },
+            {
+              "code": "admissions",
+              "label": "Admissions Desk",
+              "label_ur": "داخلہ ڈیسک",
+              "description": "Pending admissions, live bed matrix, bed allocation, waitlists, overflow.",
+              "page": "workspaces/admissions",
+              "yours": false,
+              "screens": [
+                {
+                  "id": "record_complaint_admissions",
+                  "title": "Record a complaint",
+                  "purpose": "Record a complaint as it is made, verbally or in writing, and give the complainant the tracking number.",
+                  "workflow": "MSDS PRE 80-82",
+                  "workspace": "admissions",
+                  "page": "screens/record_complaint_admissions",
+                  "tasks": [
+                    {
+                      "method": "POST",
+                      "path": "/complaints",
+                      "summary": "Record a complaint",
+                      "is_action": true
+                    },
+                    {
+                      "method": "GET",
+                      "path": "/complaints",
+                      "summary": "The complaints register",
+                      "is_action": false
+                    },
+                    {
+                      "method": "GET",
+                      "path": "/complaints/{complaint_id}",
+                      "summary": "One complaint",
+                      "is_action": false
+                    }
+                  ],
+                  "rules": [
+                    "Form: how it came (in person, telephone, letter, suggestion box, from the Punjab Healthcare Commission), the complainant and how to reach them (a phone or an address unless anonymous or from the box), the patient (search by MRN) or the admission, the department, the category, the complaint in their words, what they ask for. Send an Idempotency-Key.",
+                    "Give the complainant the complaint_number at once: it is their tracking number. The complaints officer acknowledges it within the day with the name of their contact person.",
+                    "An appeal against the outcome comes to any desk: open the complaint (GET /complaints?mine=true or by number) and 'Record appeal' while can_appeal (COMPLAINT_APPEAL_LATE after the window)."
+                  ],
+                  "events": [],
+                  "view": "full"
+                }
+              ]
+            },
+            {
+              "code": "badge_station",
+              "label": "Badge station kiosk",
+              "label_ur": "بیج اسٹیشن",
+              "description": "Not a user workspace: the full-screen page of a barcode-scanner badge station (no login; authenticated by the station's key).",
+              "page": "workspaces/badge_station",
+              "yours": false,
+              "screens": [
+                {
+                  "id": "badge_station_kiosk",
+                  "title": "Badge station kiosk",
+                  "purpose": "Full-screen page on a PC / tablet with a barcode scanner (or camera): staff show their badge, the page posts the scan and flashes the outcome. No login, no keyboard for the person scanning.",
+                  "workflow": "§6.4, §6.8, §8.2",
+                  "workspace": "badge_station",
+                  "page": "screens/badge_station_kiosk",
+                  "tasks": [
+                    {
+                      "method": "GET",
+                      "path": "/badge-stations/me",
+                      "summary": "Kiosk screen setup: what this station does (station-authenticated)",
+                      "is_action": false
+                    },
+                    {
+                      "method": "POST",
+                      "path": "/badge-stations/scans",
+                      "summary": "A badge was presented at a station (station-authenticated, no user login)",
+                      "is_action": true
+                    }
+                  ],
+                  "rules": [
+                    "Configure once with the station id and its key (X-Station-Key); never show the key.",
+                    "A USB scanner types the code and Enter: keep an invisible input focused; or decode the camera stream.",
+                    "needs_bed_code: collect two scans (bed sticker HMS-BED-… and badge) within 60 s, then post them together."
+                  ],
+                  "events": [],
+                  "view": "full"
+                }
+              ]
+            }
+          ],
+          "shared_screens": [
+            {
+              "id": "report_incident",
+              "title": "Report an incident",
+              "purpose": "Anyone reports an incident, an adverse event or a near miss, the same day, without blame.",
+              "workflow": "MSDS CQI 106, 107",
+              "workspace": "*",
+              "page": "screens/report_incident",
+              "tasks": [
+                {
+                  "method": "GET",
+                  "path": "/incident-types",
+                  "summary": "What to report: the incident types",
+                  "is_action": false
+                },
+                {
+                  "method": "POST",
+                  "path": "/incidents",
+                  "summary": "Report an incident, an adverse event or a near miss",
+                  "is_action": true
+                },
+                {
+                  "method": "GET",
+                  "path": "/incidents",
+                  "summary": "The incident register",
+                  "is_action": false
+                }
+              ],
+              "rules": [
+                "A button on every workspace's toolbar. Form: the type (GET /incident-types, grouped by area, sentinel types marked), incident or near miss, harm, when (now by default) and where (department, ward, place), who was affected (a patient: search by MRN; staff: the employee), what happened (facts, not blame) and what was done at once; 'Keep my name confidential' (reporter_confidential).",
+                "Medication errors: the stage and the medicine; theatre events: the operation and the phase (INCIDENT_DETAILS_REQUIRED). Send an Idempotency-Key: a double click must not report twice.",
+                "After sending: show the incident number and 'The Quality Officer will review it'. 'My reports' = GET /incidents?mine=true."
+              ],
+              "events": [],
+              "view": "full"
+            },
+            {
+              "id": "my_investigations",
+              "title": "Incidents I investigate",
+              "purpose": "The analysis of an incident the Quality Officer asked you to investigate, and its actions.",
+              "workflow": "MSDS CQI 107; AAC 25",
+              "workspace": "*",
+              "page": "screens/my_investigations",
+              "tasks": [
+                {
+                  "method": "GET",
+                  "path": "/incidents",
+                  "summary": "The incident register",
+                  "is_action": false
+                },
+                {
+                  "method": "GET",
+                  "path": "/incidents/{incident_id}",
+                  "summary": "One incident",
+                  "is_action": false
+                },
+                {
+                  "method": "PUT",
+                  "path": "/incidents/{incident_id}/analysis",
+                  "summary": "Save the analysis (a draft until signed)",
+                  "is_action": true
+                }
+              ],
+              "rules": [
+                "List: GET /incidents?mine=true&status=UnderReview (analysis_overdue in red). Show it only to users who have one (notification category incident when named).",
+                "Analysis form (save as you go with PUT): method (RootCauseAnalysis for a sentinel event), what happened in order, root causes, contributing factors (checkboxes of the fixed list), lessons, whether the patient or the family was told and how, any report made outside (DRAP, PHC).",
+                "Sign: INCIDENT_ANALYSIS_INCOMPLETE lists details.missing. A sentinel event needs at least one factor of the system, not only 'Individual' or 'Patient' (MSDS CQI 107: blame alone is not an analysis)."
+              ],
+              "events": [
+                "incident.updated",
+                "notification.created"
+              ],
+              "view": "full"
+            },
+            {
+              "id": "my_complaint_investigations",
+              "title": "Complaints I investigate",
+              "purpose": "The complaints the complaints officer asked you to investigate: the findings, keeping the complainant informed, the actions.",
+              "workflow": "MSDS PRE 81-83",
+              "workspace": "*",
+              "page": "screens/my_complaint_investigations",
+              "tasks": [
+                {
+                  "method": "GET",
+                  "path": "/complaints",
+                  "summary": "The complaints register",
+                  "is_action": false
+                },
+                {
+                  "method": "GET",
+                  "path": "/complaints/{complaint_id}",
+                  "summary": "One complaint",
+                  "is_action": false
+                },
+                {
+                  "method": "POST",
+                  "path": "/complaints/{complaint_id}/findings",
+                  "summary": "Write the findings of the investigation",
+                  "is_action": true
+                }
+              ],
+              "rules": [
+                "List: GET /complaints?mine=true&status=Acknowledged, by answer_due (answer_overdue in red). Show the screen only to users who have one (notification category complaint).",
+                "Findings: what the investigation found (facts, the people spoken to, the records read). The complaints officer conveys the outcome.",
+                "Tell the complainant how it stands, or that it needs more time and until when (Extension), before answer_due."
+              ],
+              "events": [
+                "complaint.updated",
+                "notification.created"
+              ],
+              "view": "full"
+            }
+          ],
+          "pages": 36,
+          "guide": "frontend-docs/guides/12-end-user-handbook.md (the frontend portal: Guides, 'The end-user handbook')",
+          "active_workspace": null,
+          "faq_seed": [
+            {
+              "id": "finance_cashier:error:SHIFT_NOT_OPEN",
+              "workspace": "finance_cashier",
+              "screen_id": "receivables",
+              "kind": "error",
+              "code": "SHIFT_NOT_OPEN",
+              "entity": null,
+              "question": "The Outstanding dues (Udhaar) screen says \"Open a cash shift before handling cash.\" (SHIFT_NOT_OPEN). Why, and what do I do?"
+            },
+            {
+              "id": "admissions:state:complaint",
+              "workspace": "admissions",
+              "screen_id": "record_complaint_admissions",
+              "kind": "state",
+              "code": null,
+              "entity": "complaint",
+              "question": "What do the states of a complaint mean (Received, Acknowledged, Resolved, Appealed, Closed, Withdrawn, NotMaintainable), and what moves it from one to the next?"
+            },
+            {
+              "id": "admissions:error:COMPLAINT_APPEAL_LATE",
+              "workspace": "admissions",
+              "screen_id": "record_complaint_admissions",
+              "kind": "error",
+              "code": "COMPLAINT_APPEAL_LATE",
+              "entity": null,
+              "question": "The Record a complaint screen says \"The appeal window of this complaint has ended.\" (COMPLAINT_APPEAL_LATE). Why, and what do I do?"
+            }
+          ],
+          "print_edition": null
+        },
+        "meta": {
+          "server_time": "2026-10-17T03:21:07.828939+00:00"
+        },
+        "request_id": "0cece6b930324781857c60a58e488626"
+      }
+    },
+    "errors_seen": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ]
+  },
+  "errors": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "FORBIDDEN",
+    "VALIDATION_ERROR"
+  ],
+  "used_by_screens": [
+    "help_center"
+  ],
+  "used_by_workflows": [
+    "clinical-and-prescriptions",
+    "finance-and-owner"
+  ],
+  "typescript_example": "// The end-user handbook's outline for the logged-in employee (only what they may use)  (permissions: any logged-in user)\nexport const endUserHandbook = () =>\n  api(\"GET\", `/meta/handbook`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "object",
+    "paging": [],
+    "search": [],
+    "filters": [
+      {
+        "name": "workspace",
+        "required": false,
+        "type": "string",
+        "description": "The workspace of the window F1 was pressed in: the outline and the search then cover that workspace and the shared screens only"
+      },
+      {
+        "name": "print",
+        "required": false,
+        "type": "boolean",
+        "default": false,
+        "description": "With workspace: the cover and the chapters of the printable user guide of that workspace"
+      }
+    ],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "any_of",
+        "required"
+      ],
+      "details_from": "POST /api/v1/admin/departments"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

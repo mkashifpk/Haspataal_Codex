@@ -1,0 +1,229 @@
+{
+  "method": "GET",
+  "path": "/api/v1/auth/workspaces",
+  "summary": "Workspaces the user may open (multi-role launch screen)",
+  "tags": [
+    "Auth"
+  ],
+  "permissions": [],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "access": {
+    "authentication": "user",
+    "permissions": [],
+    "permissions_mode": "all",
+    "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+  },
+  "description": "The workspaces of the user's active roles and, for every user with an employee record, My Workspace\n(`self_service`, `every_employee` true, `roles` empty unless the role employee_self is held: workflow §6.5); a guest\nlogin (the PHC inspector) has only its role's. One role workspace: open it directly, My Workspace from the user's\nmenu; several: the launcher (workflow §11.1). Each window sends its workspace as `X-Active-Workspace`; one not listed\nhere is refused.",
+  "roles_allowed": [],
+  "parameters": [],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[list[WorkspaceOut]]",
+    "properties": {
+      "data": {
+        "items": {
+          "title": "WorkspaceOut",
+          "properties": {
+            "code": {
+              "type": "string",
+              "title": "Code"
+            },
+            "label": {
+              "type": "string",
+              "title": "Label"
+            },
+            "label_ur": {
+              "type": "string",
+              "title": "Label Ur"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description"
+            },
+            "roles": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Roles",
+              "description": "The user's roles that open this workspace (empty for My Workspace when no role lands there: every employee has it)"
+            },
+            "every_employee": {
+              "type": "boolean",
+              "title": "Every Employee",
+              "description": "True for My Workspace (self_service): every user with an employee record has it, whatever their roles. Open it like any workspace (its window sends X-Active-Workspace: self_service), but do not count it for the launcher: a user with one role workspace opens that one directly and reaches My Workspace from the user's menu"
+            }
+          },
+          "type": "object",
+          "required": [
+            "code",
+            "label",
+            "label_ur",
+            "description",
+            "roles",
+            "every_employee"
+          ]
+        },
+        "type": "array",
+        "title": "Data"
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/auth/workspaces"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "code": "inspection",
+            "label": "PHC Inspector (read-only)",
+            "label_ur": "پی ایچ سی انسپکٹر",
+            "description": "The Punjab Healthcare Commission's inspector, on a guest login for the days of the inspection (role phc_inspector, the one permission msds.inspect): the hospital's category, the MSDS indicators, the inspection pack and the web portal (CPSA) documents, all read-only; never a patient's chart, money, staff files or the hospital's internal preparation.",
+            "roles": [
+              "phc_inspector"
+            ],
+            "every_employee": false
+          }
+        ],
+        "meta": {
+          "server_time": "2026-11-05T19:09:04.651301+00:00"
+        },
+        "request_id": "78036ffb624e42ac9eb19a4862bd4fa3"
+      }
+    },
+    "errors_seen": [
+      "PASSWORD_CHANGE_REQUIRED",
+      "TOKEN_REVOKED"
+    ]
+  },
+  "errors": [
+    {
+      "code": "PASSWORD_CHANGE_REQUIRED",
+      "http_status": 403,
+      "message": "You must change your temporary password first.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "TOKEN_REVOKED",
+      "http_status": 401,
+      "message": "The session was revoked; log in again.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Refresh the token once; if that fails return to login."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "PASSWORD_CHANGE_REQUIRED",
+    "TOKEN_REVOKED"
+  ],
+  "used_by_screens": [
+    "workspace_picker"
+  ],
+  "used_by_workflows": [
+    "hr-and-payroll"
+  ],
+  "typescript_example": "// Workspaces the user may open (multi-role launch screen)  (permissions: any logged-in user)\nexport const workspacesAuth = () =>\n  api(\"GET\", `/auth/workspaces`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "list",
+    "paging": [],
+    "search": [],
+    "filters": [],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "PASSWORD_CHANGE_REQUIRED",
+      "http_status": 403,
+      "message": "You must change your temporary password first.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "GET /api/v1/auth/workspaces"
+    },
+    {
+      "code": "TOKEN_REVOKED",
+      "http_status": 401,
+      "message": "The session was revoked; log in again.",
+      "retryable": false,
+      "ui_action": "Refresh the token once; if that fails return to login.",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "GET /api/v1/auth/workspaces"
+    }
+  ]
+}

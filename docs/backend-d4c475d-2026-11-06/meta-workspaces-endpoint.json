@@ -1,0 +1,222 @@
+{
+  "method": "GET",
+  "path": "/api/v1/meta/workspaces",
+  "summary": "UI workspaces and the screens each should contain",
+  "tags": [
+    "Meta"
+  ],
+  "permissions": [],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "access": {
+    "authentication": "user",
+    "permissions": [],
+    "permissions_mode": "all",
+    "who": "any logged-in user"
+  },
+  "description": "",
+  "roles_allowed": [],
+  "parameters": [],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[list[WorkspaceInfoOut]]",
+    "properties": {
+      "data": {
+        "items": {
+          "title": "WorkspaceInfoOut",
+          "properties": {
+            "code": {
+              "type": "string",
+              "title": "Code"
+            },
+            "label": {
+              "type": "string",
+              "title": "Label"
+            },
+            "label_ur": {
+              "type": "string",
+              "title": "Label Ur"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description"
+            },
+            "screens": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Screens",
+              "description": "The titles of the workspace's screens, from the screen catalogue (GET /meta/handbook and the MCP server give each screen in full)"
+            },
+            "also_uses": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Also Uses",
+              "description": "Screen ids of other workspaces its roles work in (the cashier: my_cash_shift, cash_back_prompts)"
+            },
+            "every_employee": {
+              "type": "boolean",
+              "title": "Every Employee",
+              "description": "True for My Workspace (self_service): every user with an employee record has it, whatever their roles (GET /auth/workspaces lists it for them)",
+              "default": false
+            },
+            "guest": {
+              "type": "boolean",
+              "title": "Guest",
+              "description": "True for the PHC inspector's workspace: its logins are guests without an employee record, so they have no My Workspace",
+              "default": false
+            }
+          },
+          "type": "object",
+          "required": [
+            "code",
+            "label",
+            "label_ur",
+            "description",
+            "screens",
+            "also_uses"
+          ]
+        },
+        "type": "array",
+        "title": "Data"
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/meta/workspaces"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "code": "reception",
+            "also_uses": [],
+            "label": "Reception & Front Desk",
+            "label_ur": "استقبالیہ",
+            "description": "Registration, returning-patient lookup, OPD slips, queue management, refunds/waivers, counter cash.",
+            "screens": [
+              "Patient search (outstanding-dues banner)",
+              "New registration + OPD slip",
+              "Lab-only walk-in"
+            ]
+          },
+          {
+            "code": "doctor",
+            "also_uses": [],
+            "label": "Clinical OPD / IPD",
+            "label_ur": "ڈاکٹر",
+            "description": "Live queue, EMR notes, e-prescriptions with live stock, lab/imaging orders, admissions, re-route.",
+            "screens": [
+              "My live queue (WebSocket)",
+              "Consultation (EMR + quick-action bar: Re-route, Admit, Convert to VIP Waiver)",
+              "E-prescription builder (hospital vs external)"
+            ]
+          },
+          {
+            "code": "admissions",
+            "also_uses": [],
+            "label": "Admissions Desk",
+            "label_ur": "داخلہ ڈیسک",
+            "description": "Pending admissions, live bed matrix, bed allocation, waitlists, overflow.",
+            "screens": [
+              "Bed matrix",
+              "Pending admissions",
+              "Waitlist"
+            ]
+          }
+        ],
+        "meta": {
+          "server_time": "2026-10-09T09:57:44.720355+00:00"
+        },
+        "request_id": "d89dc3a2955f4225be963fa5aa70bac7"
+      }
+    }
+  },
+  "errors": [],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "app_shell"
+  ],
+  "used_by_workflows": [
+    "clinical-and-prescriptions",
+    "finance-and-owner"
+  ],
+  "typescript_example": "// UI workspaces and the screens each should contain  (permissions: any logged-in user)\nexport const workspacesMeta = () =>\n  api(\"GET\", `/meta/workspaces`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "list",
+    "paging": [],
+    "search": [],
+    "filters": [],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": []
+}

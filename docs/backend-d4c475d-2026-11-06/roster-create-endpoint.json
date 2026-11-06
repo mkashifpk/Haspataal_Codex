@@ -1,0 +1,799 @@
+{
+  "method": "POST",
+  "path": "/api/v1/rosters",
+  "summary": "Roster one or many duties (all or nothing)",
+  "tags": [
+    "Duty Rosters"
+  ],
+  "permissions": [
+    "roster.manage.all",
+    "roster.manage.nursing",
+    "roster.manage.support"
+  ],
+  "permissions_mode": "any",
+  "idempotency_key": true,
+  "description": "Refused, with `details.entry_index`, when an entry is outside your scope (`ROSTER_OUT_OF_SCOPE`), overlaps\nanother duty of the same person (`ROSTER_CONFLICT`, also for a night shift running into the next day), falls\non approved leave (`ROSTER_ON_LEAVE`), is for a past date and you are not HR (`ROSTER_DATE_CLOSED`) or names\nsomeone who is not an active employee (`ROSTER_EMPLOYEE_INACTIVE`). The rostered staff with a login get a\nnotification; every open planner gets `roster.changed`.\nAn id in the request body that does not exist: `REFERENCE_NOT_FOUND` (details.field).\n\n**Required permission:** `roster.manage.all OR roster.manage.nursing OR roster.manage.support`\n\n**Required permission:** `roster.manage.all OR roster.manage.nursing OR roster.manage.support`",
+  "roles_allowed": [
+    "head_nurse",
+    "hr_admin",
+    "ops_admin"
+  ],
+  "parameters": [
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "EntriesIn",
+    "properties": {
+      "entries": {
+        "items": {
+          "title": "EntryIn",
+          "properties": {
+            "employee_id": {
+              "type": "integer",
+              "title": "Employee Id"
+            },
+            "roster_date": {
+              "type": "string",
+              "format": "date",
+              "title": "Roster Date",
+              "description": "The date the shift STARTS (a night shift belongs to its start date)"
+            },
+            "shift_pattern_id": {
+              "type": "integer",
+              "title": "Shift Pattern Id",
+              "description": "GET /rosters/staff → shift_patterns (HR: GET /hr/shift-patterns)"
+            },
+            "duty_area": {
+              "type": "string",
+              "enum": [
+                "Ward",
+                "Department",
+                "Emergency",
+                "OT",
+                "Facility",
+                "Other"
+              ],
+              "title": "Duty Area",
+              "default": "Department"
+            },
+            "ward_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ward Id",
+              "description": "Required when duty_area is Ward"
+            },
+            "department_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department Id"
+            },
+            "zone_label": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Zone Label",
+              "examples": [
+                "Bay A",
+                "Main gate",
+                "OPD corridor"
+              ]
+            },
+            "bed_ids": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array",
+              "maxItems": 60,
+              "title": "Bed Ids",
+              "description": "Ward duties: the beds this nurse looks after"
+            },
+            "is_on_call": {
+              "type": "boolean",
+              "title": "Is On Call",
+              "default": false
+            },
+            "notes": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 500
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Notes"
+            }
+          },
+          "type": "object",
+          "required": [
+            "employee_id",
+            "roster_date",
+            "shift_pattern_id"
+          ]
+        },
+        "type": "array",
+        "maxItems": 500,
+        "minItems": 1,
+        "title": "Entries"
+      }
+    },
+    "type": "object",
+    "required": [
+      "entries"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[list[RosterEntryOut]]",
+    "properties": {
+      "data": {
+        "items": {
+          "title": "RosterEntryOut",
+          "properties": {
+            "roster_id": {
+              "type": "integer",
+              "title": "Roster Id"
+            },
+            "employee_id": {
+              "type": "integer",
+              "title": "Employee Id"
+            },
+            "emp_number": {
+              "type": "string",
+              "title": "Emp Number"
+            },
+            "full_name": {
+              "type": "string",
+              "title": "Full Name"
+            },
+            "designation": {
+              "type": "string",
+              "title": "Designation"
+            },
+            "staff_category": {
+              "type": "string",
+              "enum": [
+                "Clinical",
+                "Nursing",
+                "Administrative",
+                "Technical",
+                "SupportZeroInterface",
+                "Visiting"
+              ],
+              "title": "Staff Category"
+            },
+            "roster_date": {
+              "type": "string",
+              "format": "date",
+              "title": "Roster Date"
+            },
+            "shift_pattern_id": {
+              "type": "integer",
+              "title": "Shift Pattern Id"
+            },
+            "shift_name": {
+              "type": "string",
+              "title": "Shift Name"
+            },
+            "start_time": {
+              "type": "string",
+              "format": "time",
+              "title": "Start Time"
+            },
+            "end_time": {
+              "type": "string",
+              "format": "time",
+              "title": "End Time"
+            },
+            "duty_area": {
+              "type": "string",
+              "enum": [
+                "Ward",
+                "Department",
+                "Emergency",
+                "OT",
+                "Facility",
+                "Other"
+              ],
+              "title": "Duty Area"
+            },
+            "ward_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ward Id"
+            },
+            "ward_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ward Name"
+            },
+            "department_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department Id"
+            },
+            "department_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department Name"
+            },
+            "zone_label": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Zone Label"
+            },
+            "is_on_call": {
+              "type": "boolean",
+              "title": "Is On Call"
+            },
+            "notes": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Notes"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "Active",
+                "Cancelled"
+              ],
+              "title": "Status"
+            },
+            "cancel_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cancel Reason"
+            },
+            "swap_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Swap Id",
+              "description": "Taken over from a colleague through this approved duty swap"
+            },
+            "row_version": {
+              "type": "integer",
+              "title": "Row Version"
+            },
+            "bed_ids": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array",
+              "title": "Bed Ids",
+              "description": "The beds of a ward duty (the nurse's \"my beds\")"
+            }
+          },
+          "type": "object",
+          "required": [
+            "roster_id",
+            "employee_id",
+            "emp_number",
+            "full_name",
+            "designation",
+            "staff_category",
+            "roster_date",
+            "shift_pattern_id",
+            "shift_name",
+            "start_time",
+            "end_time",
+            "duty_area",
+            "ward_id",
+            "ward_name",
+            "department_id",
+            "department_name",
+            "zone_label",
+            "is_on_call",
+            "notes",
+            "status",
+            "cancel_reason",
+            "swap_id",
+            "row_version",
+            "bed_ids"
+          ],
+          "description": "One rostered duty (service.ENTRY_COLS). A night shift belongs to the date it starts."
+        },
+        "type": "array",
+        "title": "Data"
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/rosters",
+      "body": {
+        "entries": [
+          {
+            "employee_id": 1,
+            "roster_date": "2026-10-05",
+            "shift_pattern_id": 1,
+            "duty_area": "Ward",
+            "ward_id": 1
+          },
+          {
+            "employee_id": 1,
+            "roster_date": "2026-10-06",
+            "shift_pattern_id": 1,
+            "duty_area": "Ward",
+            "ward_id": 1
+          },
+          {
+            "employee_id": 1,
+            "roster_date": "2026-10-07",
+            "shift_pattern_id": 1,
+            "duty_area": "Ward",
+            "ward_id": 1
+          }
+        ]
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "data": [
+          {
+            "roster_id": 1,
+            "employee_id": 1,
+            "emp_number": "EMP-2026-0001",
+            "full_name": "Nurse Amna",
+            "designation": "Officer",
+            "staff_category": "Nursing",
+            "roster_date": "2026-10-05",
+            "shift_pattern_id": 1,
+            "shift_name": "Morning",
+            "start_time": "08:00:00",
+            "end_time": "14:00:00",
+            "duty_area": "Ward",
+            "ward_id": 1,
+            "ward_name": "Roster Ward",
+            "department_id": null,
+            "department_name": null,
+            "zone_label": null,
+            "is_on_call": false,
+            "notes": null,
+            "status": "Active",
+            "cancel_reason": null,
+            "swap_id": null,
+            "row_version": 1,
+            "bed_ids": []
+          },
+          {
+            "roster_id": 2,
+            "employee_id": 1,
+            "emp_number": "EMP-2026-0001",
+            "full_name": "Nurse Amna",
+            "designation": "Officer",
+            "staff_category": "Nursing",
+            "roster_date": "2026-10-06",
+            "shift_pattern_id": 1,
+            "shift_name": "Morning",
+            "start_time": "08:00:00",
+            "end_time": "14:00:00",
+            "duty_area": "Ward",
+            "ward_id": 1,
+            "ward_name": "Roster Ward",
+            "department_id": null,
+            "department_name": null,
+            "zone_label": null,
+            "is_on_call": false,
+            "notes": null,
+            "status": "Active",
+            "cancel_reason": null,
+            "swap_id": null,
+            "row_version": 1,
+            "bed_ids": []
+          },
+          {
+            "roster_id": 3,
+            "employee_id": 1,
+            "emp_number": "EMP-2026-0001",
+            "full_name": "Nurse Amna",
+            "designation": "Officer",
+            "staff_category": "Nursing",
+            "roster_date": "2026-10-07",
+            "shift_pattern_id": 1,
+            "shift_name": "Morning",
+            "start_time": "08:00:00",
+            "end_time": "14:00:00",
+            "duty_area": "Ward",
+            "ward_id": 1,
+            "ward_name": "Roster Ward",
+            "department_id": null,
+            "department_name": null,
+            "zone_label": null,
+            "is_on_call": false,
+            "notes": null,
+            "status": "Active",
+            "cancel_reason": null,
+            "swap_id": null,
+            "row_version": 1,
+            "bed_ids": []
+          }
+        ],
+        "meta": {
+          "server_time": "2026-09-29T02:40:30.471928+00:00"
+        },
+        "request_id": "d8f8acfaaa99445fa8badd0567d800d8"
+      }
+    },
+    "errors_seen": [
+      "ROSTER_CONFLICT",
+      "ROSTER_DATE_CLOSED",
+      "ROSTER_EMPLOYEE_INACTIVE",
+      "ROSTER_ON_LEAVE",
+      "ROSTER_OUT_OF_SCOPE",
+      "VALIDATION_ERROR"
+    ],
+    "events_emitted": [
+      "notification.created",
+      "roster.changed"
+    ]
+  },
+  "errors": [
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "ROSTER_CONFLICT",
+      "http_status": 409,
+      "message": "This duty overlaps another duty of the same employee.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "ROSTER_DATE_CLOSED",
+      "http_status": 409,
+      "message": "Rosters of past days can only be changed by HR.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "ROSTER_EMPLOYEE_INACTIVE",
+      "http_status": 409,
+      "message": "Only active staff can be rostered.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "ROSTER_ON_LEAVE",
+      "http_status": 409,
+      "message": "The employee is on approved leave that day.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "ROSTER_OUT_OF_SCOPE",
+      "http_status": 403,
+      "message": "You may not roster this employee (outside your staff scope).",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "ROSTER_CONFLICT",
+    "ROSTER_DATE_CLOSED",
+    "ROSTER_EMPLOYEE_INACTIVE",
+    "ROSTER_ON_LEAVE",
+    "ROSTER_OUT_OF_SCOPE",
+    "VALIDATION_ERROR"
+  ],
+  "used_by_screens": [
+    "duty_roster",
+    "duty_roster_hr",
+    "support_roster"
+  ],
+  "used_by_workflows": [
+    "duty-rosters-and-attendance",
+    "facility-and-it",
+    "inpatient-and-discharge"
+  ],
+  "typescript_example": "// Roster one or many duties (all or nothing)  (permissions: roster.manage.all, roster.manage.nursing, roster.manage.support)\nexport const createEntries = (body) =>\n  api(\"POST\", `/rosters`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "roster.manage.all",
+      "roster.manage.nursing",
+      "roster.manage.support"
+    ],
+    "permissions_mode": "any",
+    "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support",
+    "roles_allowed": [
+      "head_nurse",
+      "hr_admin",
+      "ops_admin"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /rosters",
+    "emits_events": [
+      "notification.created",
+      "roster.changed"
+    ],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [
+    "notification.created",
+    "roster.changed"
+  ],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "ward_id"
+      ],
+      "details_from": "POST /api/v1/pharmacy/storage-checks"
+    },
+    {
+      "code": "ROSTER_CONFLICT",
+      "http_status": 409,
+      "message": "This duty overlaps another duty of the same employee.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "employee_id",
+        "entry_index",
+        "roster_date",
+        "roster_id",
+        "shift_name"
+      ],
+      "details_from": "POST /api/v1/rosters"
+    },
+    {
+      "code": "ROSTER_DATE_CLOSED",
+      "http_status": 409,
+      "message": "Rosters of past days can only be changed by HR.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "entry_index",
+        "roster_date"
+      ],
+      "details_from": "POST /api/v1/rosters"
+    },
+    {
+      "code": "ROSTER_EMPLOYEE_INACTIVE",
+      "http_status": 409,
+      "message": "Only active staff can be rostered.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "employee_id",
+        "entry_index",
+        "status"
+      ],
+      "details_from": "POST /api/v1/rosters"
+    },
+    {
+      "code": "ROSTER_ON_LEAVE",
+      "http_status": 409,
+      "message": "The employee is on approved leave that day.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "employee_id",
+        "entry_index",
+        "roster_date"
+      ],
+      "details_from": "POST /api/v1/rosters"
+    },
+    {
+      "code": "ROSTER_OUT_OF_SCOPE",
+      "http_status": 403,
+      "message": "You may not roster this employee (outside your staff scope).",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "employee_id",
+        "entry_index",
+        "staff_category"
+      ],
+      "details_from": "POST /api/v1/rosters"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}
