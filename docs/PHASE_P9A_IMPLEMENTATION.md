@@ -12,9 +12,9 @@ User request: build the remaining Phase P9A screens and report reproduced backen
 |168|record_complaint_er|Implemented/tested4e1df5c (base62d0ee1); proposal354 verified/pending human review. Cross-desk appeal lookup blocked by57; human gates pending|
 |169|record_complaint_ward|Implemented/tested4e1df5c (base62d0ee1); proposal355 verified/pending human review. Cross-desk appeal lookup blocked by57; human gates pending|
 |170|complaints_register|Implemented/tested f3b0ba4; proposal356 verified pending. Backend58/59 and human gates pending|
-|171|complaint_appeals|Implemented/tested; final build/commit/proposal in progress. Human gates pending|
-|172|complaint_statistics|Not started|
-|173|complaint_statistics_owner|Not started|
+|171|complaint_appeals|Implemented/tested3377da0; proposal361 verified pending human review|
+|172|complaint_statistics|Implemented/tested625fb79 (baseedb73e4); proposal362 verified pending human review|
+|173|complaint_statistics_owner|Shared implementation ready; own actor verification in progress|
 |174|incident_types|Not started|
 |175|incident_register|Not started|
 |176|incident_register_owner|Not started|
