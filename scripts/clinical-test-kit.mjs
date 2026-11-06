@@ -6,7 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
 export const expect = baseExpect.configure({ timeout: 30000 });
-export async function session(name, account = "demo.doctor") {
+export async function session(name, account = "demo.doctor", workspaceLabel) {
   fs.mkdirSync("artifacts", { recursive: true });
   const file = `artifacts/${name}.json`;
   if (fs.existsSync(file)) {
@@ -106,6 +106,7 @@ export async function session(name, account = "demo.doctor") {
     await p.getByLabel("Username", { exact: true }).fill(account);
     await p.getByLabel("Password", { exact: true }).fill("Demo-pass-2026");
     await p.getByRole("button", { name: "Sign in →", exact: true }).click();
+    if(workspaceLabel){const card=p.locator('.workspace-card').filter({has:p.getByRole('heading',{name:workspaceLabel,exact:true})});await expect(card).toBeVisible();await card.getByRole('button',{name:'Open workspace →',exact:true}).click();}
     // Retry only the app's explicit read-only bootstrap recovery. Never replay a business action.
     let bootstrapRetries=0;
     await expect.poll(async()=>{if(await p.getByRole('navigation').isVisible())return true;const retry=p.getByRole('button',{name:'Retry loading workspace',exact:true});if(bootstrapRetries<3&&await retry.isVisible()){bootstrapRetries++;await retry.click();}return false;},{timeout:90000,intervals:[500,1000,2000]}).toBe(true);

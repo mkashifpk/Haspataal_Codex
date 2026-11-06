@@ -10,6 +10,77 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  complaint_appeals: {
+  title: "Complaint appeals",
+  titleUr: "شکایت کی اپیلیں",
+  purpose: "The independent authorised officer opens Complaint appeals when a complainant challenges a conveyed outcome. Done means the original complaint, findings, outcome and appeal were reviewed, the actual decision was told and recorded once, and the correct letter is available.",
+  purposeUr: "آزاد مجاز افسر پہنچائے نتیجے پر شکایت کنندہ کی اپیل دیکھتا ہے۔ تکمیل اصل شکایت، تحقیق، جواب و اپیل پڑھنا، اصل فیصلہ بتا کر ایک بار درج کرنا اور صحیح خط دستیاب ہونا ہے۔",
+  steps: [
+    "The independent authorised officer opens Complaint appeals when a complainant challenges a conveyed outcome. Done means the original complaint, findings, outcome and appeal were reviewed, the actual decision was told and recorded once, and the correct letter is available.",
+    "Awaiting appeal decision reads GET /complaints?status=Appealed. Decided appeals reads Closed and shows only records with an appeal decision. Open Review appeal for the current server record. Empty means no matching appeal; a failed read shows its error and Refresh appeals. At1000rows ask IT/Quality for an authorised narrower report; never guess identifiers.",
+    "Read the four panels together: original words and requested outcome, findings and linked safety incident, the original outcome with its author/date and appeal deadline, and the actual appeal. The contact history preserves who told what and how. Missing values mean not recorded, never an invented author or patient.",
+    "Decide only if current server can_decide_appeal permits. The officer who decided the original outcome cannot decide its appeal, even with the general permission. Ask another independent authorised officer; do not borrow a login, replace the complaint or change the original author. COMPLAINT_APPEAL_INDEPENDENT and final-state refusals preserve the draft and reread authority.",
+    "Choose upheld, partly upheld or not upheld without an automatic default. Enter the decision actually conveyed (10–8000characters), choose how the complainant was told, and optionally record the satisfaction they reported. Blank satisfaction is not recorded, not satisfied by default. Review the current record and actual communication, then Record appeal decision once. Confirmation closes the complaint; no edit or second decision is offered.",
+    "If the decision answer is lost, keep this window and draft. Retry original request sends the same frozen body and key within retention; never create a new key or replacement decision. Read current result reconciles that exact complaint. If unclear, stop and ask IT/Quality. The app does not queue offline writes; reconnect/Refresh preserves unsent text and clears the review for checking again. Cancel unsent decision discards only a draft, never a confirmed decision.",
+    "After a confirmed decision, Print appeal letter uses the current-language server paragraphs and the mapped document printer; Preview/Save appeal PDF uses the server’s English PDF. Check tracking number, original and appeal author stamps, recipient, dates and Urdu shaping. Save cancellation or device failure never repeats the decision. Retry the document and ask IT about printer mapping.",
+    "F1 or Help opens this permitted page from the list or decision field, keeps the draft and returns focus. English and Urdu share this workflow; Urdu is a draft pending native-speaker review. Ctrl plus/minus/0 and Settings share100–250%zoom. A named human still reviews fresh synthetic journeys, independence, printed pages and translations; an agent cannot sign that review."
+  ],
+  stepsUr: [
+    "آزاد مجاز افسر پہنچائے نتیجے پر شکایت کنندہ کی اپیل دیکھتا ہے۔ تکمیل اصل شکایت، تحقیق، جواب و اپیل پڑھنا، اصل فیصلہ بتا کر ایک بار درج کرنا اور صحیح خط دستیاب ہونا ہے۔",
+    "منتظر فہرست اپیل شدہ شکایتیں پڑھتی ہے۔ فیصلہ شدہ بند ریکارڈ میں صرف اپیل کے فیصلے دکھاتی ہے۔ جائزہ تازہ سرور ریکارڈ کھولتا ہے۔ خالی یعنی کوئی متعلقہ اپیل نہیں؛ ناکام پڑھائی خرابی و تازہ اپیلیں دیتی ہے۔ ہزار ریکارڈ پر مجاز محدود رپورٹ آئی ٹی یا کوالٹی سے؛ نمبر اندازہ نہیں۔",
+    "چار خانے ساتھ پڑھیں: اصل الفاظ و درخواست، تحقیق و حفاظتی واقعہ، اصل نتیجہ و لکھنے والا، تاریخ اور اپیل مدت، اور اصل اپیل۔ رابطے کی تاریخ کس نے کیا کیسے بتایا رکھتی ہے۔ خالی قدر درج نہیں، فرضی مصنف یا مریض نہیں۔",
+    "فیصلہ صرف موجودہ سرور اجازت پر۔ اصل نتیجہ دینے والا عام اجازت کے باوجود اس کی اپیل نہیں کر سکتا۔ دوسرے آزاد مجاز افسر سے کہیں؛ لاگ ان ادھار، نئی شکایت یا مصنف تبدیلی نہیں۔ آزاد فیصلے اور حتمی حالت کے انکار مسودہ رکھتے اور تازہ اجازت پڑھتے ہیں۔",
+    "درست، جزوی یا نہیں خود چنیں، پیشگی نہیں۔ اصل پہنچایا فیصلہ دس تا آٹھ ہزار حروف، بتایا ذریعہ اور اختیاری اصل اطمینان درج کریں۔ خالی اطمینان درج نہیں، خود مطمئن نہیں۔ موجودہ ریکارڈ و رابطہ پڑھ کر ایک بار فیصلہ کریں۔ تصدیق شکایت بند کرتی؛ ترمیم یا دوسرا فیصلہ نہیں۔",
+    "فیصلے کا جواب غائب ہو تو ونڈو و مسودہ رکھیں۔ اصل درخواست وہی منجمد متن و کلید مدت میں بھیجتی؛ نئی کلید یا بدل فیصلہ نہیں۔ موجودہ نتیجہ عین شکایت ملاتا ہے۔ غیر یقینی میں رک کر آئی ٹی یا کوالٹی۔ آف لائن اندراج جمع نہیں؛ رابطہ یا تازہ پڑھائی مسودہ رکھ کر جائزہ ہٹاتی۔ منسوخی صرف غیر ارسال مسودہ چھوڑتی، ثابت فیصلہ نہیں۔",
+    "تصدیق کے بعد اپیل کا خط موجودہ زبان کی سرور عبارت مقرر پرنٹر سے؛ پی ڈی ایف سرور کی انگریزی نقل۔ نمبر، اصل و اپیل کی مہر، وصول کنندہ، تاریخ و اردو دیکھیں۔ محفوظ منسوخی یا آلے کی خرابی فیصلہ نہیں دہراتی۔ کاغذ پھرلیں اور پرنٹر کو آئی ٹی سے کہیں۔",
+    "ایف ون یا مدد فہرست و فیصلے کے خانے سے یہی مجاز صفحہ، مسودہ محفوظ و فوکس واپس۔ انگریزی و اردو کا ایک عمل؛ اردو اہل زبان کے جائزے تک مسودہ۔ کنٹرول جمع، تفریق، صفر اور سیٹنگ ایک سو تا دو سو پچاس فیصد زوم۔ نامزد انسان نئے فرضی سفر، آزادی، کاغذ و ترجمہ دیکھتا؛ ایجنٹ دستخط نہیں کرتا۔"
+  ],
+  faq: [
+    [
+      "Who decides an appeal?",
+      "An independent officer with the server permission and can_decide_appeal. The original outcome officer is excluded even if otherwise authorised."
+    ],
+    [
+      "Where is a missing appeal?",
+      "Refresh the pending list and ask the complaints officer/original desk to check the recorded appeal and permitted access. The decided list is separate. Do not enter guessed record ids or recreate a complaint."
+    ],
+    [
+      "What if my decision reply disappeared?",
+      "Keep the original window/key and retry that exact request or read its current result. Do not submit a replacement. IT/Quality reconciles uncertainty."
+    ],
+    [
+      "Does printing decide or amend the appeal?",
+      "No. The confirmed decision is final. Printing and server PDF download are separate reads; failure, cancellation or another copy never repeats the decision."
+    ],
+    [
+      "What must the independent reviewer check?",
+      "Read the original words, findings, initial author/outcome, actual appeal and communication together. Do not infer satisfaction or missing facts. Named human/editor/Urdu and device acceptance remain pending."
+    ]
+  ],
+  faqUr: [
+    [
+      "اپیل کا فیصلہ کون؟",
+      "سرور اجازت و موجودہ قابلیت والا آزاد افسر؛ اصل جواب دینے والا دوسری اجازت کے باوجود نہیں۔"
+    ],
+    [
+      "اپیل نہیں ملتی؟",
+      "منتظر فہرست تازہ اور شکایات افسر یا اصل میز سے اندراج و مجاز رسائی چیک۔ فیصلہ شدہ الگ۔ نمبر اندازہ یا شکایت دوبارہ نہیں۔"
+    ],
+    [
+      "فیصلے کا جواب غائب؟",
+      "اصل ونڈو و کلید رکھیں، وہی درخواست یا موجودہ نتیجہ۔ بدل درخواست نہیں۔ آئی ٹی یا کوالٹی غیر یقینی ملاتی ہے۔"
+    ],
+    [
+      "پرنٹ اپیل بدلتا ہے؟",
+      "نہیں۔ ثابت فیصلہ حتمی ہے۔ پرنٹ اور سرور پی ڈی ایف الگ پڑھائی؛ ناکامی، منسوخی یا دوسری نقل فیصلہ نہیں دہراتی۔"
+    ],
+    [
+      "آزاد جائزہ کیا چیک؟",
+      "اصل الفاظ، تحقیق، پہلے مصنف و نتیجے، اصل اپیل اور رابطہ ساتھ۔ اطمینان یا غائب حقائق اندازہ نہیں۔ انسانی، اردو، ادارت اور آلے کا جائزہ باقی۔"
+    ]
+  ]
+},
+
   complaints_register: {
   title: "Complaints register",
   titleUr: "شکایات کا رجسٹر",
