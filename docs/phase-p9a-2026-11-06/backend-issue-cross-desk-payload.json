@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-p9a-complaint-cross-desk-tracking-lookup-20261106",
+  "kind": "MissingWorkflow",
+  "severity": "Medium",
+  "title": "Another complaint desk cannot look up a tracking number to take its appeal",
+  "endpoint": "GET /complaints",
+  "screen_id": "record_complaint_reception",
+  "workflow": "complaints; record_complaint_* rule:4af7b696c6",
+  "build": "d209b79 + current ComplaintIntake DEV index-DQZ/current phase source; contract a4772c79e2249316e1a9",
+  "agent": "Codex",
+  "actual": "Fresh synthetic complaint4 CMP-2026-00004 was received through the Admissions UI and conveyed a synthetic outcome. demo.admissions GET /complaints/4 is200 Resolved can_appeal:true. At the Reception desk, GET /complaints?mine=false&limit=1000 is200 but returns only complaints1,2,3 received by that user; GET /complaints/4 is403 FORBIDDEN. The bundle's GET /complaints has no tracking-number search/filter and no alternative lookup. Therefore a complainant bringing Admissions' tracking number to Reception cannot open the record through the available directory, even within the appeal window. No frontend or appeal POST defect is alleged.",
+  "expected": "Screen rule:4af7b696c6 in all four record_complaint_* bundles says an appeal comes to any desk: open the complaint (GET /complaints?mine=true or by number) and Record appeal while can_appeal. Please provide an authorised exact tracking-number lookup/access path (without revealing a global complaint list), or clarify the rule/workflow if referral to the original desk/officer is intended. I have not broadened permissions, guessed IDs in the UI, or worked around the refusal.",
+  "steps": "1. As demo.admissions create a fresh synthetic complaint through record_complaint_admissions (current run complaint4). 2. As demo.quality acknowledge, record synthetic findings, convey outcome. 3. As demo.admissions GET /complaints/4 confirms Resolved/can_appeal:true. 4. As demo.reception GET /complaints?mine=false&limit=1000 excludes4; direct diagnostic GET /complaints/4 returns403. 5. Compare the bundle's 'any desk ... or by number' rule with the list's available parameters and restricted access.",
+  "evidence": "Fresh Admissions UI complaint4 create201 evidence docs/phase-p9a-2026-11-06/167-ui-journey.json. Quality outcome200 request648b9c14a89b4a07bfb5664140b546b8. Admissions own detail200/can_appealtrue request780ce897af414714835169e100f06c68. Reception list200 own ids[3,2,1] requestf0556d09ad4d44b0b1145a0a8b256a8d. Reception detail403 FORBIDDEN request3189be80fe014829bce5efe513c95ba6. Current endpoint description explicitly restricts non-complaint.view users to received/investigated complaints; list.search is empty and filters have no complaint_number. No secrets, real complaint or patient event. Separate from56's assigned-investigator list permission mismatch."
+}

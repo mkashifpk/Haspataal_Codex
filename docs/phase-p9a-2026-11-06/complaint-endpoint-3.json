@@ -1,0 +1,361 @@
+{
+  "method": "GET",
+  "path": "/api/v1/complaints/{complaint_id}/letter/print-payload",
+  "summary": "A letter to the complainant (print payload)",
+  "tags": [
+    "Complaints"
+  ],
+  "permissions": [],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "access": {
+    "authentication": "user",
+    "permissions": [],
+    "permissions_mode": "all",
+    "who": "complaint.view or complaint.manage, the person who received the complaint and its investigator"
+  },
+  "description": "The acknowledgement, the outcome with the right to appeal, or the appeal decision, in English with the Urdu\nsentences in `fields.urdu` (render right to left on the terminal). `COMPLAINT_STATE_INVALID` before that step.",
+  "roles_allowed": [],
+  "parameters": [
+    {
+      "name": "complaint_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Complaint Id"
+      }
+    },
+    {
+      "name": "letter",
+      "in": "query",
+      "required": true,
+      "description": "",
+      "schema": {
+        "enum": [
+          "Acknowledgement",
+          "Outcome",
+          "AppealOutcome"
+        ],
+        "type": "string",
+        "title": "Letter"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[PrintOut[ComplaintLetterFieldsOut]]",
+    "properties": {
+      "data": {
+        "title": "PrintOut[ComplaintLetterFieldsOut]",
+        "properties": {
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "autopsy_order",
+              "bed_labels",
+              "blood_component_label",
+              "blood_donation_labels",
+              "clinical_note",
+              "complaint_letter",
+              "complaints_notice",
+              "consent_form",
+              "cost_estimate",
+              "cssd_labels",
+              "death_certificate",
+              "discharge_summary",
+              "dispensing_label",
+              "dose_label",
+              "id_card",
+              "imaging_report",
+              "lab_label",
+              "lab_report",
+              "mlc_intimation",
+              "opd_slip",
+              "pharmacy_receipt",
+              "prescription",
+              "referral_slip",
+              "send_out_manifest",
+              "surgical_record",
+              "triage_algorithm",
+              "wristband"
+            ],
+            "title": "Document Type"
+          },
+          "printer_role": {
+            "type": "string",
+            "enum": [
+              "receipt",
+              "label",
+              "document",
+              "card"
+            ],
+            "title": "Printer Role",
+            "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+          },
+          "paper_width_mm": {
+            "type": "integer",
+            "title": "Paper Width Mm"
+          },
+          "fields": {
+            "$ref": "#/components/schemas/ComplaintLetterFieldsOut",
+            "description": "The document's data, for frontends that render their own layout"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text",
+            "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+          },
+          "barcode_svg": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barcode Svg"
+          },
+          "qr_svg": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qr Svg"
+          },
+          "pdf_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pdf Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_type",
+          "printer_role",
+          "paper_width_mm",
+          "fields",
+          "text",
+          "barcode_svg",
+          "qr_svg",
+          "pdf_url"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/complaints/1/letter/print-payload",
+      "query": {
+        "letter": "Acknowledgement"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "document_type": "complaint_letter",
+          "printer_role": "document",
+          "paper_width_mm": 210,
+          "fields": {
+            "hospital": {
+              "name": "Haspataal Hospital",
+              "address": "",
+              "phone": "",
+              "phc_number": "",
+              "issue_line": "Issued 14-Oct-2026 15:34; this copy printed 14-Oct-2026 15:34"
+            },
+            "letter": "Acknowledgement",
+            "complaint_number": "CMP-2026-00001",
+            "complainant_name": "Shahid Mehmood",
+            "english": [
+              "Your complaint CMP-2026-00001 was received on 14-Oct-2026 15:34. Please quote this number whenever you contact us.",
+              "Your contact person at the hospital: Complaints Officer.",
+              "What we will do: The OPD in-charge will check the queue records of that morning and speak to the staff"
+            ],
+            "urdu": [
+              "آپ کی شکایت موصول ہو گئی ہے۔ آپ کا شکایت نمبر CMP-2026-00001 ہے۔ رابطہ کرتے وقت یہ نمبر بتائیں۔",
+              "ہسپتال میں آپ کے رابطہ کار: Complaints Officer",
+              "ہم آپ کو 21-Oct-2026 تک نتیجے سے آگاہ کریں گے، یا مزید وقت درکار ہونے پر آپ کو بتائیں گے۔"
+            ],
+            "desk": "The complaints desk at the main reception",
+            "phone": "",
+            "signed": null
+          },
+          "text": "               Haspataal Hospital\n            Issued 14-Oct-2026 15:34\n      this copy printed 14-Oct-2026 15:34\n   Complaint CMP-2026-00001: Acknowledgement\n------------------------------------------------\nTo: Shahid Mehmood\n\nYour complaint CMP-2026-00001 was received on\n14-Oct-2026 15:34. Please quote this number\nwhenever you contact us.\n\nYour contact person at the hospital: Complaints\nOfficer.\n…",
+          "barcode_svg": null,
+          "qr_svg": null,
+          "pdf_url": "/api/v1/complaints/1/letter/pdf?letter=Acknowledgement"
+        },
+        "meta": {
+          "server_time": "2026-10-14T10:34:05.929986+00:00"
+        },
+        "request_id": "3c07139cedfc43aca537b46a490010e6"
+      }
+    },
+    "errors_seen": [
+      "COMPLAINT_STATE_INVALID"
+    ]
+  },
+  "errors": [
+    {
+      "code": "COMPLAINT_STATE_INVALID",
+      "http_status": 409,
+      "message": "The complaint cannot change that way: what was complained of, the acknowledgement, the outcome and the appeal are recorded once.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "COMPLAINT_STATE_INVALID"
+  ],
+  "used_by_screens": [
+    "complaints_register",
+    "complaint_appeals",
+    "record_complaint_reception",
+    "record_complaint_admissions",
+    "record_complaint_ward",
+    "record_complaint_er"
+  ],
+  "used_by_workflows": [
+    "complaints"
+  ],
+  "typescript_example": "// A letter to the complainant (print payload)  (permissions: any logged-in user)\nexport const letterPayload = (complaint_id) =>\n  api(\"GET\", `/complaints/${complaint_id}/letter/print-payload`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "object",
+    "paging": [],
+    "search": [],
+    "filters": [
+      {
+        "name": "letter",
+        "required": true,
+        "type": "string",
+        "enum": [
+          "Acknowledgement",
+          "Outcome",
+          "AppealOutcome"
+        ]
+      }
+    ],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "COMPLAINT_STATE_INVALID",
+      "http_status": 409,
+      "message": "The complaint cannot change that way: what was complained of, the acknowledgement, the outcome and the appeal are recorded once.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "GET /api/v1/complaints/{complaint_id}/letter/print-payload"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

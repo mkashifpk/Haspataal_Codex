@@ -10,12 +10,12 @@ export function canReadDirectory(path:string,permissions:string[]) {
  if(!entry)return false;
  const a=entry[1];return a.permissions_mode==='any'?a.permissions.some(p=>permissions.includes(p)):a.permissions.every(p=>permissions.includes(p));
 }
-type Props=Omit<InputHTMLAttributes<HTMLInputElement>,'onChange'> & {path:string;idField:string;list?:string;search?:boolean;userId?:boolean;empty?:string;onChange?:(e:ChangeEvent<HTMLInputElement>)=>void};
-export function DirectoryPicker({path,idField,list,search=false,userId=false,empty,value,onChange,disabled,required,...rest}:Props) {
+type Props=Omit<InputHTMLAttributes<HTMLInputElement>,'onChange'> & {path:string;idField:string;list?:string;search?:boolean;userId?:boolean;empty?:string;onRecord?:(row:Record<string,any>|undefined)=>void;onChange?:(e:ChangeEvent<HTMLInputElement>)=>void};
+export function DirectoryPicker({path,idField,list,search=false,userId=false,empty,value,onChange,onRecord,disabled,required,...rest}:Props) {
  const permissions=useContext(DirectoryPermissions),allowed=canReadDirectory(path,permissions),fieldLabel=useContext(FieldLabelContext),accessibleLabel=rest['aria-label']??fieldLabel;
  const [q,setQ]=useState(''),[rows,setRows]=useState<Record<string,any>[]>(),[busy,setBusy]=useState(false),[error,setError]=useState<unknown>(),[selected,setSelected]=useState('');
  const generation=useRef(0),identity=useRef(path);
- const change=(v:string)=>{setSelected(v);onChange?.({target:{value:v},currentTarget:{value:v}} as ChangeEvent<HTMLInputElement>);};
+ const change=(v:string)=>{onRecord?.(rows?.find(r=>String(r[idField])===v));setSelected(v);onChange?.({target:{value:v},currentTarget:{value:v}} as ChangeEvent<HTMLInputElement>);};
  useEffect(()=>{++generation.current;setRows(undefined);setError(undefined);setBusy(false);setQ('');if(identity.current!==path){identity.current=path;change('');}if(!search&&allowed)void load();return()=>{++generation.current};},[path,allowed]);
  async function load(){
   if(!allowed||disabled||(search&&q.trim().length<2))return;

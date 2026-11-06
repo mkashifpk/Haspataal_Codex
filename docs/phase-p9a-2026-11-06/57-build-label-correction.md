@@ -1,0 +1,3 @@
+# Issue57 build label correction
+
+The submitted issue57 build string contains a mistaken renderer token (index-DQZ). It is metadata only; the reported HTTP requests/statuses are saved verbatim. The actual Reception create/appeal bootstrap renderer is ./assets/index-CdTo3ZF1.js; the Admissions/cross-desk source build is ./assets/index-CwJnCmnJ.js. Baseline d209b79 plus the uncommitted ComplaintIntake/native printing changes is correct. This note corrects the local record; the MCP issue API exposes no edit/comment operation, so no backend-side edit is claimed. The tested commit will identify the reviewed implementation.

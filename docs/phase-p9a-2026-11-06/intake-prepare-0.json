@@ -1,0 +1,1270 @@
+{
+  "method": "POST",
+  "path": "/api/v1/complaints/{complaint_id}/acknowledge",
+  "summary": "Acknowledge: the tracking number, the contact person, the course of action",
+  "tags": [
+    "Complaints"
+  ],
+  "permissions": [
+    "complaint.manage"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": true,
+  "description": "Within `complaint_acknowledge_hours` (MSDS PRE 82 ii a): the priority, the contact person, the investigator\n(default: the contact person), the course of action and the date the outcome is due (default\n`complaint_response_days` after receipt); `means` says how the complainant was told (recorded as an update). Or\n`maintainable` false with the reason. Then print the letter (`GET /complaints/{id}/letter/print-payload`).\n`COMPLAINT_STATE_INVALID`: the complaint cannot change that way: what was complained of, the acknowledgement, the\noutcome and the appeal are recorded once.\n\n**Required permission:** `complaint.manage`\n\n**Required permission:** `complaint.manage`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [
+    {
+      "name": "complaint_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Complaint Id"
+      }
+    },
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "ComplaintAcknowledgeIn",
+    "properties": {
+      "maintainable": {
+        "type": "boolean",
+        "title": "Maintainable",
+        "description": "False: not a matter the hospital can investigate (say why)",
+        "default": true
+      },
+      "not_maintainable_reason": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 2000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Not Maintainable Reason"
+      },
+      "priority": {
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "Urgent",
+              "High",
+              "Normal",
+              "Low"
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Priority",
+        "description": "Urgent: a risk to a patient now; High: harm or a serious failure of care"
+      },
+      "contact_user_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Contact User Id",
+        "description": "The contact person named to the complainant"
+      },
+      "investigator_user_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Investigator User Id",
+        "description": "Who investigates (default: the contact person)"
+      },
+      "course_of_action": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 2000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Course Of Action",
+        "examples": [
+          "The ward sister will speak to the staff on duty and check the nursing notes"
+        ]
+      },
+      "response_due": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Response Due",
+        "description": "Default: received + complaint_response_days"
+      },
+      "means": {
+        "type": "string",
+        "enum": [
+          "Telephone",
+          "SMS",
+          "Letter",
+          "Email",
+          "InPerson"
+        ],
+        "title": "Means",
+        "description": "How the complainant was told"
+      },
+      "note": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 2000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Note",
+        "description": "What else was said"
+      }
+    },
+    "type": "object",
+    "required": [
+      "means"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[ComplaintDetailOut]",
+    "properties": {
+      "data": {
+        "title": "ComplaintDetailOut",
+        "properties": {
+          "complaint_id": {
+            "type": "integer",
+            "title": "Complaint Id"
+          },
+          "complaint_number": {
+            "type": "string",
+            "title": "Complaint Number",
+            "description": "The tracking number given to the complainant"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Received At"
+          },
+          "received_by": {
+            "type": "integer",
+            "title": "Received By"
+          },
+          "received_by_name": {
+            "type": "string",
+            "title": "Received By Name"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "InPerson",
+              "Telephone",
+              "Letter",
+              "Email",
+              "SuggestionBox",
+              "HealthCommission",
+              "SocialMedia",
+              "Other"
+            ],
+            "title": "Channel"
+          },
+          "complainant_name": {
+            "type": "string",
+            "title": "Complainant Name"
+          },
+          "complainant_relation": {
+            "type": "string",
+            "enum": [
+              "Patient",
+              "Relative",
+              "Attendant",
+              "Visitor",
+              "Staff",
+              "Anonymous",
+              "Other"
+            ],
+            "title": "Complainant Relation"
+          },
+          "complainant_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Complainant Phone"
+          },
+          "complainant_contact": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Complainant Contact"
+          },
+          "preferred_means": {
+            "type": "string",
+            "enum": [
+              "Telephone",
+              "SMS",
+              "Letter",
+              "Email",
+              "InPerson"
+            ],
+            "title": "Preferred Means"
+          },
+          "patient_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Id"
+          },
+          "mrn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mrn"
+          },
+          "patient_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Name"
+          },
+          "admission_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admission Id"
+          },
+          "admission_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admission Number"
+          },
+          "department_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          },
+          "department_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Name"
+          },
+          "ward_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ward Id"
+          },
+          "ward_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ward Name"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "ClinicalCare",
+              "NursingCare",
+              "StaffAttitude",
+              "Communication",
+              "WaitingTime",
+              "Billing",
+              "Cleanliness",
+              "Food",
+              "Facilities",
+              "Privacy",
+              "Safety",
+              "Medication",
+              "Diagnostics",
+              "Other"
+            ],
+            "title": "Category"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "desired_outcome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Desired Outcome"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Received",
+              "Acknowledged",
+              "Resolved",
+              "Appealed",
+              "Closed",
+              "Withdrawn",
+              "NotMaintainable"
+            ],
+            "title": "Status"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Urgent",
+                  "High",
+                  "Normal",
+                  "Low"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          },
+          "acknowledged_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acknowledged At"
+          },
+          "acknowledged_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acknowledged By Name"
+          },
+          "contact_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact User Id"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name",
+            "description": "The contact person named to the complainant"
+          },
+          "course_of_action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Of Action"
+          },
+          "not_maintainable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Not Maintainable Reason"
+          },
+          "investigator_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Investigator User Id"
+          },
+          "investigator_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Investigator Name"
+          },
+          "response_due": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Due"
+          },
+          "extended_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extended Until"
+          },
+          "extension_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extension Reason"
+          },
+          "answer_due": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer Due",
+            "description": "The date the complainant was given: the extension, else the response due"
+          },
+          "findings": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Findings"
+          },
+          "findings_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Findings At"
+          },
+          "findings_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Findings By Name"
+          },
+          "incident_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incident Id"
+          },
+          "incident_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incident Number"
+          },
+          "upheld": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Upheld",
+                  "PartlyUpheld",
+                  "NotUpheld"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upheld"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
+          },
+          "outcome_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome At"
+          },
+          "outcome_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome By"
+          },
+          "outcome_stamp": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthorStampOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "appeal_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appeal Until"
+          },
+          "appeal_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appeal Text"
+          },
+          "appealed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appealed At"
+          },
+          "appeal_decision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appeal Decision"
+          },
+          "appeal_upheld": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Upheld",
+                  "PartlyUpheld",
+                  "NotUpheld"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appeal Upheld"
+          },
+          "appeal_decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appeal Decided At"
+          },
+          "appeal_stamp": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthorStampOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "satisfaction": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Satisfied",
+                  "PartlySatisfied",
+                  "NotSatisfied",
+                  "NotKnown"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Satisfaction"
+          },
+          "appeal_waived": {
+            "type": "boolean",
+            "title": "Appeal Waived"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "close_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Close Note"
+          },
+          "withdraw_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdraw Reason"
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          },
+          "acknowledgement_overdue": {
+            "type": "boolean",
+            "title": "Acknowledgement Overdue"
+          },
+          "answer_overdue": {
+            "type": "boolean",
+            "title": "Answer Overdue"
+          },
+          "updates": {
+            "items": {
+              "$ref": "#/components/schemas/ComplaintUpdateOut"
+            },
+            "type": "array",
+            "title": "Updates"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/QualityActionOut"
+            },
+            "type": "array",
+            "title": "Actions"
+          },
+          "next_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Step"
+          },
+          "can_acknowledge": {
+            "type": "boolean",
+            "title": "Can Acknowledge"
+          },
+          "can_update": {
+            "type": "boolean",
+            "title": "Can Update"
+          },
+          "can_write_findings": {
+            "type": "boolean",
+            "title": "Can Write Findings"
+          },
+          "can_convey_outcome": {
+            "type": "boolean",
+            "title": "Can Convey Outcome"
+          },
+          "can_appeal": {
+            "type": "boolean",
+            "title": "Can Appeal"
+          },
+          "can_decide_appeal": {
+            "type": "boolean",
+            "title": "Can Decide Appeal"
+          },
+          "can_close": {
+            "type": "boolean",
+            "title": "Can Close"
+          },
+          "can_withdraw": {
+            "type": "boolean",
+            "title": "Can Withdraw"
+          },
+          "can_add_action": {
+            "type": "boolean",
+            "title": "Can Add Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "complaint_id",
+          "complaint_number",
+          "received_at",
+          "received_by",
+          "received_by_name",
+          "channel",
+          "complainant_name",
+          "complainant_relation",
+          "complainant_phone",
+          "complainant_contact",
+          "preferred_means",
+          "patient_id",
+          "mrn",
+          "patient_name",
+          "admission_id",
+          "admission_number",
+          "department_id",
+          "department_name",
+          "ward_id",
+          "ward_name",
+          "category",
+          "description",
+          "desired_outcome",
+          "status",
+          "priority",
+          "acknowledged_at",
+          "acknowledged_by_name",
+          "contact_user_id",
+          "contact_name",
+          "course_of_action",
+          "not_maintainable_reason",
+          "investigator_user_id",
+          "investigator_name",
+          "response_due",
+          "extended_until",
+          "extension_reason",
+          "answer_due",
+          "findings",
+          "findings_at",
+          "findings_by_name",
+          "incident_id",
+          "incident_number",
+          "upheld",
+          "outcome",
+          "outcome_at",
+          "outcome_by",
+          "outcome_stamp",
+          "appeal_until",
+          "appeal_text",
+          "appealed_at",
+          "appeal_decision",
+          "appeal_upheld",
+          "appeal_decided_at",
+          "appeal_stamp",
+          "satisfaction",
+          "appeal_waived",
+          "closed_at",
+          "close_note",
+          "withdraw_reason",
+          "row_version",
+          "acknowledgement_overdue",
+          "answer_overdue",
+          "updates",
+          "actions",
+          "next_step",
+          "can_acknowledge",
+          "can_update",
+          "can_write_findings",
+          "can_convey_outcome",
+          "can_appeal",
+          "can_decide_appeal",
+          "can_close",
+          "can_withdraw",
+          "can_add_action"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/complaints/1/acknowledge",
+      "body": {
+        "priority": "Normal",
+        "contact_user_id": 6,
+        "course_of_action": "The OPD in-charge will check the queue records of that morning and speak to the staff",
+        "means": "Telephone",
+        "investigator_user_id": 7
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "complaint_id": 1,
+          "complaint_number": "CMP-2026-00001",
+          "received_at": "2026-10-01T07:11:25.324724+00:00",
+          "received_by": 3,
+          "received_by_name": "Receptionist",
+          "channel": "InPerson",
+          "complainant_name": "Shahid Mehmood",
+          "complainant_relation": "Relative",
+          "complainant_phone": "03001112233",
+          "complainant_contact": null,
+          "preferred_means": "Telephone",
+          "patient_id": 1,
+          "mrn": "MRN-2026-000001",
+          "patient_name": "Ali Khan",
+          "admission_id": null,
+          "admission_number": null,
+          "department_id": 1,
+          "department_name": "General Medicine",
+          "ward_id": null,
+          "ward_name": null,
+          "category": "WaitingTime",
+          "description": "My father waited four hours in the OPD although he had a token for 10 o'clock",
+          "desired_outcome": "An apology, and a fixed time for his next visit",
+          "status": "Acknowledged",
+          "priority": "Normal",
+          "acknowledged_at": "2026-10-01T07:11:25.473434+00:00",
+          "acknowledged_by_name": "Complaints Officer",
+          "contact_user_id": 6,
+          "contact_name": "Complaints Officer",
+          "course_of_action": "The OPD in-charge will check the queue records of that morning and speak to the staff",
+          "not_maintainable_reason": null,
+          "investigator_user_id": 7,
+          "investigator_name": "OPD In-charge",
+          "response_due": "2026-10-08",
+          "extended_until": null,
+          "extension_reason": null,
+          "answer_due": "2026-10-08",
+          "findings": null,
+          "findings_at": null,
+          "findings_by_name": null,
+          "incident_id": null,
+          "incident_number": null,
+          "upheld": null,
+          "outcome": null,
+          "outcome_at": null,
+          "outcome_by": null,
+          "outcome_stamp": null,
+          "appeal_until": null,
+          "appeal_text": null,
+          "appealed_at": null,
+          "appeal_decision": null,
+          "appeal_upheld": null,
+          "appeal_decided_at": null,
+          "appeal_stamp": null,
+          "satisfaction": null,
+          "appeal_waived": false,
+          "closed_at": null,
+          "close_note": null,
+          "withdraw_reason": null,
+          "row_version": 2,
+          "acknowledgement_overdue": false,
+          "answer_overdue": false,
+          "updates": [
+            {
+              "update_id": 1,
+              "stage": "Acknowledgement",
+              "means": "Telephone",
+              "informed_at": "2026-10-01T07:11:25.473434+00:00",
+              "informed_by_name": "Complaints Officer",
+              "note": "Tracking number CMP-2026-00001; contact person Complaints Officer; next: The OPD in-charge will check the queue records of that morning and speak to the staff; the outcome by 08-Oct-2026."
+            }
+          ],
+          "actions": [],
+          "next_step": "OPD In-charge writes the findings; convey the outcome by 08-Oct-2026, or tell the complainant it needs more time",
+          "can_acknowledge": false,
+          "can_update": true,
+          "can_write_findings": true,
+          "can_convey_outcome": false,
+          "can_appeal": false,
+          "can_decide_appeal": false,
+          "can_close": false,
+          "can_withdraw": true,
+          "can_add_action": true
+        },
+        "meta": {
+          "server_time": "2026-10-01T07:11:25.498556+00:00"
+        },
+        "request_id": "d0050c0b80144286836719a4127b72dd"
+      }
+    },
+    "errors_seen": [
+      "COMPLAINT_STATE_INVALID",
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "events_emitted": [
+      "complaint.updated",
+      "notification.created"
+    ]
+  },
+  "errors": [
+    {
+      "code": "COMPLAINT_STATE_INVALID",
+      "http_status": 409,
+      "message": "The complaint cannot change that way: what was complained of, the acknowledgement, the outcome and the appeal are recorded once.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "COMPLAINT_STATE_INVALID",
+    "FORBIDDEN",
+    "VALIDATION_ERROR"
+  ],
+  "used_by_screens": [
+    "complaints_register"
+  ],
+  "used_by_workflows": [
+    "complaints"
+  ],
+  "typescript_example": "// Acknowledge: the tracking number, the contact person, the course of action  (permissions: complaint.manage)\nexport const acknowledgeComplaints = (complaint_id, body) =>\n  api(\"POST\", `/complaints/${complaint_id}/acknowledge`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "complaint.manage"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of complaint.manage",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /complaints/{complaint_id}",
+    "emits_events": [
+      "complaint.updated",
+      "notification.created"
+    ],
+    "prints": false,
+    "related_state_machine": "complaint"
+  },
+  "emits_events": [
+    "complaint.updated",
+    "notification.created"
+  ],
+  "list": null,
+  "cross_field_rules": {
+    "ComplaintAcknowledgeIn": [
+      "Acknowledging needs the priority, the contact person and the course of action",
+      "Say why the complaint is not maintainable"
+    ]
+  },
+  "errors_detail": [
+    {
+      "code": "COMPLAINT_STATE_INVALID",
+      "http_status": 409,
+      "message": "The complaint cannot change that way: what was complained of, the acknowledgement, the outcome and the appeal are recorded once.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "GET /api/v1/complaints/{complaint_id}/letter/print-payload"
+    },
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "any_of",
+        "required"
+      ],
+      "details_from": "POST /api/v1/admin/departments"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

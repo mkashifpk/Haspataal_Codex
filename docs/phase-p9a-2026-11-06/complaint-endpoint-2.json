@@ -1,0 +1,271 @@
+{
+  "method": "GET",
+  "path": "/api/v1/complaints/notice/print-payload",
+  "summary": "The notice of the right to complain (English and Urdu)",
+  "tags": [
+    "Complaints"
+  ],
+  "permissions": [],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "access": {
+    "authentication": "user",
+    "permissions": [],
+    "permissions_mode": "all",
+    "who": "any logged-in user"
+  },
+  "description": "Put it up at the reception, the waiting areas, the OPD, the wards and the main entrance, or show it on the waiting\nroom screens (MSDS PRE 80). `fields.urdu` renders right to left on the terminal; the desk and the timelines come from\nthe settings.",
+  "roles_allowed": [],
+  "parameters": [],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[PrintOut[ComplaintsNoticeFieldsOut]]",
+    "properties": {
+      "data": {
+        "title": "PrintOut[ComplaintsNoticeFieldsOut]",
+        "properties": {
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "autopsy_order",
+              "bed_labels",
+              "blood_component_label",
+              "blood_donation_labels",
+              "clinical_note",
+              "complaint_letter",
+              "complaints_notice",
+              "consent_form",
+              "cost_estimate",
+              "cssd_labels",
+              "death_certificate",
+              "discharge_summary",
+              "dispensing_label",
+              "dose_label",
+              "id_card",
+              "imaging_report",
+              "lab_label",
+              "lab_report",
+              "mlc_intimation",
+              "opd_slip",
+              "pharmacy_receipt",
+              "prescription",
+              "referral_slip",
+              "send_out_manifest",
+              "surgical_record",
+              "triage_algorithm",
+              "wristband"
+            ],
+            "title": "Document Type"
+          },
+          "printer_role": {
+            "type": "string",
+            "enum": [
+              "receipt",
+              "label",
+              "document",
+              "card"
+            ],
+            "title": "Printer Role",
+            "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+          },
+          "paper_width_mm": {
+            "type": "integer",
+            "title": "Paper Width Mm"
+          },
+          "fields": {
+            "$ref": "#/components/schemas/ComplaintsNoticeFieldsOut",
+            "description": "The document's data, for frontends that render their own layout"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text",
+            "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+          },
+          "barcode_svg": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barcode Svg"
+          },
+          "qr_svg": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qr Svg"
+          },
+          "pdf_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pdf Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_type",
+          "printer_role",
+          "paper_width_mm",
+          "fields",
+          "text",
+          "barcode_svg",
+          "qr_svg",
+          "pdf_url"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/complaints/notice/print-payload"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "document_type": "complaints_notice",
+          "printer_role": "document",
+          "paper_width_mm": 210,
+          "fields": {
+            "hospital": {
+              "name": "Haspataal Hospital",
+              "address": "",
+              "phone": "",
+              "phc_number": "",
+              "issue_line": ""
+            },
+            "title_en": "Your right to complain",
+            "title_ur": "شکایت کا حق",
+            "english": [
+              "You have the right to complain about any service of this hospital, verbally or in writing.",
+              "Where: The complaints desk at the main reception. Any member of staff will also take your complaint.",
+              "Within 0 hours you are given a complaint number and the name of your contact person."
+            ],
+            "urdu": [
+              "آپ کو اس ہسپتال کی کسی بھی سروس کے بارے میں زبانی یا تحریری شکایت کرنے کا حق ہے۔",
+              "شکایت کہاں درج کرائیں: The complaints desk at the main reception۔ ہسپتال کا کوئی بھی ملازم آپ کی شکایت درج کر سکتا ہے۔",
+              "0 گھنٹے کے اندر آپ کو شکایت نمبر اور رابطہ کار کا نام دیا جائے گا۔"
+            ],
+            "desk": "The complaints desk at the main reception",
+            "phone": ""
+          },
+          "text": "               Haspataal Hospital\n             YOUR RIGHT TO COMPLAIN\n------------------------------------------------\n* You have the right to complain about any\nservice of this hospital, verbally or in\nwriting.\n* Where: The complaints desk at the main\nreception. Any member of staff will also take\nyour complaint.\n* Within 0 hours you are given a complaint\nnumber and the name of your contact person…",
+          "barcode_svg": null,
+          "qr_svg": null,
+          "pdf_url": null
+        },
+        "meta": {
+          "server_time": "2026-10-14T10:34:17.124807+00:00"
+        },
+        "request_id": "0d1494db42304800894a8a8a5cfe9a42"
+      }
+    }
+  },
+  "errors": [],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "complaint_statistics",
+    "complaint_statistics_owner",
+    "record_complaint_reception",
+    "record_complaint_admissions",
+    "record_complaint_ward",
+    "record_complaint_er"
+  ],
+  "used_by_workflows": [
+    "complaints"
+  ],
+  "typescript_example": "// The notice of the right to complain (English and Urdu)  (permissions: any logged-in user)\nexport const noticeComplaintsPrintPayload = () =>\n  api(\"GET\", `/complaints/notice/print-payload`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "object",
+    "paging": [],
+    "search": [],
+    "filters": [],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": []
+}

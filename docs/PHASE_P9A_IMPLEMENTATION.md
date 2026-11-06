@@ -6,11 +6,11 @@ User request: build the remaining Phase P9A screens and report reproduced backen
 |---|---|---|
 |163|my_investigations|Previously implemented db216b6; proposal342 pending human review|
 |164|my_complaint_investigations|Implemented/tested3ce23ae; proposal350 verified/pending human review. Non-register investigator list blocked by backend56|
-|165|my_actions|Implementation in progress; requirements/types/quality/design/plan read|
-|166|record_complaint_reception|Not started|
-|167|record_complaint_admissions|Not started|
-|168|record_complaint_er|Not started|
-|169|record_complaint_ward|Not started|
+|165|my_actions|Implemented/tested d209b79; proposal351 verified/pending human review. Full human/editor/translation acceptance pending|
+|166|record_complaint_reception|Implemented/tested; commit and proposal pending. Cross-desk appeal lookup blocked by57; human gates pending|
+|167|record_complaint_admissions|Implemented/tested; commit and proposal pending. Cross-desk appeal lookup blocked by57; human gates pending|
+|168|record_complaint_er|Implemented/tested; commit and proposal pending. Cross-desk appeal lookup blocked by57; human gates pending|
+|169|record_complaint_ward|Implemented/tested; commit and proposal pending. Cross-desk appeal lookup blocked by57; human gates pending|
 |170|complaints_register|Not started|
 |171|complaint_appeals|Not started|
 |172|complaint_statistics|Not started|

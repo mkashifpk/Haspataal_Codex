@@ -1056,6 +1056,19 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       if(printed.bytes){const target=await dialog.showSaveDialog(win,{defaultPath:'Estimate-'+record.data.estimate_number+'.pdf',filters:[{name:'PDF',extensions:['pdf']}]});if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return{ok:true,data:{saved:!target.canceled}};}
       return{ok:true,data:printed};
     }
+    if (action === "print-complaint") {
+      const actor=auth?.user.user_id,workspace=windows.get(win.id),notice=args.kind==='Notice';
+      if(!notice&&(!Number.isSafeInteger(args.complaintId)||args.complaintId<1||!Number.isSafeInteger(args.expectedVersion)||!['Acknowledgement','Outcome','AppealOutcome'].includes(args.kind)))throw Error('Invalid complaint document reference');
+      if(notice&&args.complaintId!=null)throw Error('Invalid complaint notice');
+      let record;if(!notice){record=await api('GET','/complaints/'+args.complaintId,undefined,workspace);if(!record.ok)return record;if(record.data.row_version!==args.expectedVersion)throw Error('The complaint changed. Read it before printing.');}
+      const payload=await api('GET',notice?'/complaints/notice/print-payload':'/complaints/'+args.complaintId+'/letter/print-payload?letter='+args.kind,undefined,workspace);if(!payload.ok)return payload;
+      require('./complaint-print.cjs').assertComplaintPaper(payload.data,record?.data.complaint_number,notice?undefined:args.kind);
+      const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
+      if(!actor||actor!==auth?.user.user_id||workspace!==windows.get(win.id))throw Error('The session changed before complaint printing');
+      const printed=await require('./complaint-print.cjs').printComplaint(payload.data,terminal.data,{owner:win,pdf:!!args.pdf,language:prefs.language});
+      if(printed.bytes){if(actor!==auth?.user.user_id||workspace!==windows.get(win.id))throw Error('The session changed before saving');const target=await dialog.showSaveDialog(win,{defaultPath:notice?'Complaint-notice.pdf':'Complaint-'+record.data.complaint_number+'-'+args.kind+'.pdf',filters:[{name:'PDF',extensions:['pdf']}]});if(actor!==auth?.user.user_id||workspace!==windows.get(win.id))throw Error('The session changed before saving');if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return{ok:true,data:{saved:!target.canceled}};}
+      return{ok:true,data:printed};
+    }
     if (action === "print-consent") {
       if(!Number.isSafeInteger(args.consentId)||args.consentId<1||!Number.isSafeInteger(args.expectedVersion))throw Error('Invalid consent reference');
       const actor=auth?.user.user_id,workspace=windows.get(win.id);

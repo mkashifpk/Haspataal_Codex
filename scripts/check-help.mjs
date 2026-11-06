@@ -309,6 +309,7 @@ export function checkHelp({
       "MyInvestigations",
       "MyComplaintInvestigations",
       "MyActions",
+      "ComplaintIntake",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

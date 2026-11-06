@@ -1,0 +1,543 @@
+{
+  "screen": "complaint_statistics_owner",
+  "title": "Complaint statistics, register and procedure",
+  "cases": [
+    {
+      "id": "case:GET /complaints/statistics",
+      "call": "GET /api/v1/complaints/statistics",
+      "summary": "Complaint statistics",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/complaints/statistics"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "date_from": "2026-10-01",
+                "date_to": "2026-10-01",
+                "received": 1,
+                "handled": 1,
+                "not_maintainable": 0,
+                "withdrawn": 0,
+                "by_channel": [
+                  {
+                    "key": "InPerson",
+                    "count": 1
+                  }
+                ],
+                "by_category": [
+                  {
+                    "key": "WaitingTime",
+                    "count": 1
+                  }
+                ],
+                "by_priority": [
+                  {
+                    "key": "Normal",
+                    "count": 1
+                  }
+                ],
+                "by_department": [
+                  {
+                    "key": "General Medicine",
+                    "count": 1
+                  }
+                ],
+                "by_month": [
+                  {
+                    "month": "2026-10-01",
+                    "received": 1,
+                    "upheld": 1
+                  }
+                ],
+                "acknowledgement_hours": 24,
+                "acknowledged": 1,
+                "acknowledged_in_time": 1,
+                "acknowledged_in_time_pct": 100,
+                "response_days": 7,
+                "answered": 1,
+                "answered_in_time": 1,
+                "answered_in_time_pct": 100,
+                "extended": 1,
+                "answered_by_date_given": 1,
+                "by_upheld": [
+                  {
+                    "key": "Upheld",
+                    "count": 1
+                  }
+                ],
+                "appealed": 1,
+                "appeals_upheld": 1,
+                "by_satisfaction": [
+                  {
+                    "key": "PartlySatisfied",
+                    "count": 1
+                  }
+                ],
+                "incidents_reported": 1,
+                "with_actions": 1,
+                "actions": {
+                  "open": 1,
+                  "done": 0
+                },
+                "open_now": {
+                  "received": 0,
+                  "investigating": 0,
+                  "awaiting_appeal_window": 0,
+                  "appealed": 0,
+                  "overdue": 0
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:11:25.708503+00:00"
+              },
+              "request_id": "37214e82513445c997093d79ec751765"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /complaints/register/pdf",
+      "call": "GET /api/v1/complaints/register/pdf",
+      "summary": "The complaints register for a period (PDF)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/complaints/register/pdf",
+            "query": {
+              "date_from": "2026-10-01",
+              "date_to": "2026-10-01"
+            }
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 2914
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /complaints/policy/pdf",
+      "call": "GET /api/v1/complaints/policy/pdf",
+      "summary": "The written complaints procedure (PDF)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/complaints/policy/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 3719
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /complaints/notice/print-payload",
+      "call": "GET /api/v1/complaints/notice/print-payload",
+      "summary": "The notice of the right to complain (English and Urdu)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/complaints/notice/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "complaints_notice",
+                "printer_role": "document",
+                "paper_width_mm": 210,
+                "fields": {
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": "",
+                    "phc_number": "",
+                    "issue_line": ""
+                  },
+                  "title_en": "Your right to complain",
+                  "title_ur": "شکایت کا حق",
+                  "english": [
+                    "You have the right to complain about any service of this hospital, verbally or in writing.",
+                    "Where: The complaints desk at the main reception. Any member of staff will also take your complaint.",
+                    "Within 0 hours you are given a complaint number and the name of your contact person."
+                  ],
+                  "urdu": [
+                    "آپ کو اس ہسپتال کی کسی بھی سروس کے بارے میں زبانی یا تحریری شکایت کرنے کا حق ہے۔",
+                    "شکایت کہاں درج کرائیں: The complaints desk at the main reception۔ ہسپتال کا کوئی بھی ملازم آپ کی شکایت درج کر سکتا ہے۔",
+                    "0 گھنٹے کے اندر آپ کو شکایت نمبر اور رابطہ کار کا نام دیا جائے گا۔"
+                  ],
+                  "desk": "The complaints desk at the main reception",
+                  "phone": ""
+                },
+                "text": "               Haspataal Hospital\n             YOUR RIGHT TO COMPLAIN\n------------------------------------------------\n* You have the right to complain about any\nservice of this hospital, verbally or in\nwriting.\n* Where: The complaints desk at the main\nreception. Any member of staff will also take\nyour complaint.\n* Within 0 hours you are given a complaint\nnumber and the name of your contact person…",
+                "barcode_svg": null,
+                "qr_svg": null,
+                "pdf_url": null
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:34:17.124807+00:00"
+              },
+              "request_id": "0d1494db42304800894a8a8a5cfe9a42"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /quality/monthly-returns",
+      "call": "GET /api/v1/quality/monthly-returns",
+      "summary": "The monthly returns of a register, nil returns included",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/monthly-returns",
+            "query": {
+              "kind": "Complaints",
+              "months": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "kind": "Complaints",
+                  "month": "2026-09-01",
+                  "confirmed": false,
+                  "entries": 0,
+                  "numbers": [],
+                  "late_entries": [],
+                  "note": null,
+                  "confirmed_at": null,
+                  "confirmed_by_name": null,
+                  "confirm_stamp": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:11:34.524355+00:00"
+              },
+              "request_id": "e6d240ae19794ff98602df1e13a69096"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /quality/monthly-returns",
+      "call": "POST /api/v1/quality/monthly-returns",
+      "summary": "Confirm a month's return (none is an answer too)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/monthly-returns",
+            "body": {
+              "kind": "Complaints",
+              "month": "2026-09-01"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "kind": "Complaints",
+                "month": "2026-09-01",
+                "confirmed": true,
+                "entries": 0,
+                "numbers": [],
+                "late_entries": [],
+                "note": null,
+                "confirmed_at": "2026-10-01T07:11:34.528158+00:00",
+                "confirmed_by_name": "ua7dfd39882",
+                "confirm_stamp": {
+                  "at": "2026-10-01T07:11:34.528158+00:00",
+                  "name": "Staff 32677",
+                  "text": "Staff 32677, Officer, 01-Oct-2026 12:11",
+                  "user_id": 6,
+                  "designation": "Officer",
+                  "employee_id": 6,
+                  "registration": null
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:11:34.533655+00:00"
+              },
+              "request_id": "ffcccfb91af0479d9d55ea2cc9b7536f"
+            }
+          },
+          "errors_seen": [
+            "QUALITY_RETURN_CONFIRMED",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "QUALITY_RETURN_CONFIRMED",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /quality/actions",
+      "call": "GET /api/v1/quality/actions",
+      "summary": "The action register (mine: the actions I own)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/actions",
+            "query": {
+              "source": "Drill"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "action_id": 2,
+                  "action_number": "CAPA-2026-0001",
+                  "source": "Drill",
+                  "cycle_id": null,
+                  "cycle_number": null,
+                  "incident_id": null,
+                  "incident_number": null,
+                  "complaint_id": null,
+                  "complaint_number": null,
+                  "ipc_audit_id": null,
+                  "audit_number": null,
+                  "meeting_id": null,
+                  "meeting_number": null,
+                  "drill_id": 2,
+                  "drill_number": "DRL-2026-0001",
+                  "mock_interview_id": null,
+                  "interview_number": null,
+                  "qa_round_id": null,
+                  "qa_round_number": null,
+                  "feedback_id": null,
+                  "feedback_number": null,
+                  "source_number": "DRL-2026-0001",
+                  "action_type": "Corrective",
+                  "description": "Keep the ER corridor clear: trolleys parked in bay 3",
+                  "criterion_code": null,
+                  "department_id": null,
+                  "department_name": null,
+                  "owner_user_id": 1,
+                  "owner_name": "u11a4cc9599",
+                  "due_date": "2026-10-28",
+                  "status": "Open",
+                  "outcome_note": null,
+                  "completed_at": null,
+                  "completed_by_name": null,
+                  "created_by": 1,
+                  "created_by_name": "u11a4cc9599",
+                  "created_at": "2026-10-14T10:45:50.140140+00:00",
+                  "row_version": 1,
+                  "is_overdue": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T10:45:50.171273+00:00"
+              },
+              "request_id": "f3fa8d75634b4a8899cce1f4dbb92a98"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/complaint_statistics_owner",
+  "workspace_guide": "get_handbook_outline('owner_dashboard')",
+  "realtime": [
+    {
+      "event": "complaint.received",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "complaint.updated",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Tiles: received, acknowledged in time (%), answered in time (%), upheld, appeals, open and overdue now. Charts by month, category, channel, department; satisfaction.",
+    "MSDS PRE 83: show with_actions and the actions (GET /quality/actions?source=Complaint) next to the categories that keep coming back.",
+    "Monthly returns: GET /quality/monthly-returns?kind=Complaints; 'Confirm' the months not confirmed (a nil return is an answer: MSDS PRE 82).",
+    "Print the procedure for approval (it carries the timelines the system enforces) and the notice for every waiting area."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

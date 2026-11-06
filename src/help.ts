@@ -10,6 +10,303 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  record_complaint_reception: {
+  title: "Record a complaint",
+  titleUr: "شکایت درج کریں",
+  purpose: "At Reception, Admissions, ER or the ward, listen to a verbal or written complaint, record the person’s words and give the tracking number immediately. The complaints officer acknowledges within the day, names a contact and arranges investigation and a response. Do not promise an outcome or record a second complaint to obtain a letter.",
+  purposeUr: "استقبالیہ، داخلہ، ایمرجنسی یا وارڈ پر زبانی یا تحریری شکایت سنیں، ان کے الفاظ درج کریں اور فوراً نمبر دیں۔ شکایات افسر اسی دن وصولی کا جواب، رابطہ کار، تحقیق اور جواب کا بندوبست کرتا ہے۔ نتیجے کا وعدہ یا خط لینے کو دوسری شکایت نہ کریں۔",
+  steps: [
+    "At Reception, Admissions, ER or the ward, listen to a verbal or written complaint, record the person’s words and give the tracking number immediately. The complaints officer acknowledges within the day, names a contact and arranges investigation and a response. Do not promise an outcome or record a second complaint to obtain a letter.",
+    "New complaint opens an unsent draft. Choose how it came, the relationship, category and preferred contact method; write the complainant’s name, phone or written address. A phone or address is required unless anonymous or from the suggestion box. Anonymous sends the documented Anonymous name; do not invent patient details.",
+    "Pick the patient by name or MRN from patient search; confirm name, MRN and age/date of birth. Reception registers a missing patient first. Where permitted, choose a current Admitted stay by patient and admission number; the patient follows from the stay. Never type a record id. If you cannot list stays, name the patient in the complaint text.",
+    "Choose the optional department from active departments; IT adds a missing department. The optional ward uses the wards list without beds, only with the server’s directory permissions. IT adds a ward. No permission hides the picker; do not borrow a login or ask for an id.",
+    "Write at least10characters of the complaint in their words and optionally what they ask for. Check the contact and selected records with them, tick the review and Record complaint once. The returned CMP tracking number confirms the record. The complaint is kept as recorded; this desk offers no edit or delete.",
+    "If an answer is lost, keep the window open. Retry original request uses the same frozen body and key within retention; never New complaint for that retry. Read current result can reconcile your list. If still uncertain, ask IT/Quality before replacing anything. Validation stays visible and may be corrected; offline and pending writes lock submission/navigation.",
+    "Refresh complaints rereads your authorised received/assigned list. Find matches a tracking number or name in up to1000loaded rows. Open complaint rereads its contact, due date, status, next step and conveyed outcome. No matches is distinct from a read error; refresh after a read error. Ask the complaints officer about a record another desk received; do not guess an id.",
+    "Record appeal appears only while the current server record permits it. Read the outcome and appeal-until date, enter why the complainant disagrees and how the appeal came, review and Save appeal once. A late or invalid-state refusal rereads the record and keeps the unsent words; do not change dates or record a duplicate complaint. The appeal decision belongs to the authorised officer.",
+    "Print the right-to-complain notice for the desk, or save its PDF. After acknowledgement, outcome or appeal decision, print/save that letter from the same record. The current app language selects the server’s English or right-to-left Urdu paragraphs, without rewriting them. A print/save failure never repeats a complaint or appeal; retry the same document, check the paper, and ask IT about printer mapping. PDF save cancellation changes nothing.",
+    "F1 or Help opens this screen’s instructions from a field or form, retains unsent work and restores focus. English/Urdu and both themes share keyboard/Settings zoom100–250%, reset100%. Cancel unsent draft discards only input, never a saved complaint. Named human fresh-data/Urdu/device review remains required."
+  ],
+  stepsUr: [
+    "استقبالیہ، داخلہ، ایمرجنسی یا وارڈ پر زبانی یا تحریری شکایت سنیں، ان کے الفاظ درج کریں اور فوراً نمبر دیں۔ شکایات افسر اسی دن وصولی کا جواب، رابطہ کار، تحقیق اور جواب کا بندوبست کرتا ہے۔ نتیجے کا وعدہ یا خط لینے کو دوسری شکایت نہ کریں۔",
+    "نئی شکایت غیر ارسال مسودہ کھولتی ہے۔ ذریعہ، رشتہ، زمرہ اور رابطے کا طریقہ چنیں، نام، فون یا پتہ لکھیں۔ گمنام یا تجویز کے ڈبے کے علاوہ فون یا پتہ لازم ہے۔ گمنام کے لیے طے شدہ نام جاتا ہے؛ مریض کی معلومات نہ گھڑیں۔",
+    "مریض نام یا ایم آر این سے تلاش کریں، نام، نمبر اور عمر یا پیدائش ملائیں۔ غائب مریض پہلے استقبالیہ درج کرتا ہے۔ اجازت ہو تو موجودہ داخلہ مریض اور داخلہ نمبر سے چنیں؛ مریض داخلے سے آتا ہے۔ ریکارڈ آئی ڈی نہ لکھیں۔ داخلے کی اجازت نہ ہو تو شکایت کے متن میں مریض کا نام دیں۔",
+    "اختیاری شعبہ فعال فہرست سے چنیں؛ غائب شعبہ آئی ٹی درج کرتا ہے۔ اختیاری وارڈ بغیر بستروں کی فہرست سے، سرور کی اجازت کے ساتھ ہے۔ وارڈ آئی ٹی درج کرتا ہے۔ اجازت نہ ہو تو خانہ نہیں؛ لاگ ان ادھار یا آئی ڈی نہ مانگیں۔",
+    "ان کے الفاظ میں کم از کم دس حروف شکایت اور اختیاری درخواست لکھیں۔ رابطہ اور منتخب ریکارڈ ان سے ملائیں، جائزہ چنیں اور ایک بار درج کریں۔ لوٹا شکایت نمبر اندراج کی تصدیق ہے۔ اصل شکایت محفوظ رہتی؛ اس میز پر بدلنا یا حذف نہیں۔",
+    "جواب غائب ہو تو ونڈو رکھیں۔ اصل درخواست کی دوبارہ کوشش وہی متن و کلید مقرر مدت میں بھیجتی ہے؛ نئی شکایت نہیں۔ موجودہ نتیجہ آپ کی فہرست پڑھتا ہے۔ غیر یقینی میں آئی ٹی یا کوالٹی سے چیک کرائیں۔ توثیق کی خرابی درست کریں؛ آف لائن یا جاری اندراج ارسال و راستہ روکتا ہے۔",
+    "تازہ پڑھیں آپ کی مجاز موصول یا مقرر فہرست لاتا ہے۔ تلاش زیادہ سے زیادہ ہزار ریکارڈ میں نمبر یا نام ملاتی ہے۔ کھولیں رابطہ، تاریخ، حالت، اگلا قدم اور پہنچایا جواب دوبارہ پڑھتا ہے۔ خالی فہرست اور خرابی الگ ہیں؛ خرابی پر تازہ کریں۔ دوسرے میز کی شکایت افسر سے کھلوائیں؛ آئی ڈی کا اندازہ نہیں۔",
+    "اپیل صرف موجودہ سرور اجازت پر ہے۔ جواب اور آخری تاریخ پڑھیں، اختلاف اور ذریعہ لکھیں، جائزہ اور ایک بار محفوظ کریں۔ دیر یا غلط حالت پر تازہ ریکارڈ اور غیر ارسال الفاظ رہتے؛ تاریخ بدلنا یا شکایت کی نقل نہیں۔ فیصلہ مجاز افسر کرتا ہے۔",
+    "میز کے لیے شکایت کے حق کا نوٹس پرنٹ یا پی ڈی ایف محفوظ کریں۔ وصولی، جواب یا اپیل فیصلے کے بعد اسی ریکارڈ کا متعلقہ خط پرنٹ کریں۔ موجودہ زبان سرور کے انگریزی یا دائیں سے بائیں اردو پیراگراف لیتی، متن نہیں بدلتی۔ ناکامی پر شکایت یا اپیل نہ دہرائیں؛ وہی کاغذ پھر پرنٹ، کاغذ چیک اور پرنٹر نقشے کو آئی ٹی سے کہیں۔ محفوظ منسوخ سے کچھ نہیں بدلتا۔",
+    "ایف ون یا مدد خانے یا فارم سے یہی ہدایات، غیر ارسال کام اور فوکس رکھتی ہے۔ انگریزی، اردو اور دونوں تھیم کا کی بورڈ و ترتیبات زوم سو تا ڈھائی سو، ری سیٹ سو ہے۔ مسودہ منسوخ صرف غیر ارسال متن چھوڑتا، محفوظ شکایت نہیں۔ نامزد انسان کا نئے ڈیٹا، اردو اور آلات کا جائزہ لازم ہے۔"
+  ],
+  faq: [
+    [
+      "What does each desk do?",
+      "Reception receives any complaint; Admissions and the ward may select a permitted current stay; ER receives a complaint without delaying urgent care. Each gives the same tracking number immediately and hands acknowledgement/investigation to the complaints officer. Never promise the result."
+    ],
+    [
+      "What if they are anonymous or cannot identify a patient?",
+      "Anonymous and suggestion-box complaints do not require a contact; otherwise obtain a phone or written address. Patient and stay links are optional and permission-based. Preserve their words rather than fabricating a patient or guessing an id."
+    ],
+    [
+      "Who adds a missing directory record?",
+      "Reception registers patients; IT adds departments, wards and logins. HR adds staff. These complaint desks select active named records only. If your permission hides a list, describe the patient or location in the text and ask the complaints officer, not another login."
+    ],
+    [
+      "Can any desk take an appeal?",
+      "Yes, when it can open the authorised complaint and can_appeal is true. Confirm the outcome/window, record the actual words and means once. COMPLAINT_APPEAL_LATE or COMPLAINT_STATE_INVALID requires rereading and referral to the complaints officer; do not backdate or duplicate."
+    ],
+    [
+      "What if saving or printing fails?",
+      "A lost write answer needs the original request/key or a readback, never a replacement action. Printing and PDF saving are separate reads of the same server document; failure/cancellation does not undo the complaint and must not cause another create. Ask IT about mappings and Quality about unclear outcomes."
+    ]
+  ],
+  faqUr: [
+    [
+      "ہر میز کیا کرتا ہے؟",
+      "استقبالیہ ہر شکایت لیتا؛ داخلہ اور وارڈ مجاز موجودہ داخلہ چنتے؛ ایمرجنسی فوری علاج روکے بغیر شکایت لیتی ہے۔ ہر میز فوراً نمبر اور افسر کو اگلا کام دیتا ہے؛ نتیجے کا وعدہ نہیں۔"
+    ],
+    [
+      "گمنام ہوں یا مریض نہ جانیں تو؟",
+      "گمنام یا ڈبے کی شکایت میں رابطہ لازم نہیں؛ ورنہ فون یا پتہ لیں۔ مریض اور داخلے کے ربط اختیاری اور مجاز ہیں۔ الفاظ رکھیں، مریض یا آئی ڈی نہ گھڑیں۔"
+    ],
+    [
+      "غائب فہرست ریکارڈ کون درج کرتا ہے؟",
+      "مریض استقبالیہ، شعبے، وارڈ اور لاگ ان آئی ٹی، عملہ ایچ آر درج کرتا ہے۔ یہاں فعال نام والے ریکارڈ چنیں۔ اجازت نہ ہو تو مریض یا جگہ متن میں لکھ کر شکایات افسر سے کہیں، دوسرے کا لاگ ان نہیں۔"
+    ],
+    [
+      "کیا ہر میز اپیل لیتا ہے؟",
+      "ہاں، مجاز شکایت کھلے اور سرور اجازت دے تو۔ جواب، مدت، اصل الفاظ اور ذریعہ ایک بار درج کریں۔ دیر یا غلط حالت پر تازہ پڑھ کر افسر کو دیں؛ پچھلی تاریخ یا نقل نہیں۔"
+    ],
+    [
+      "محفوظ یا پرنٹ ناکام ہو تو؟",
+      "غائب اندراج جواب کو اصل درخواست و کلید یا تازہ نتیجہ چاہیے، نیا متبادل نہیں۔ پرنٹ اور پی ڈی ایف اسی سرور کاغذ کے الگ اعمال ہیں؛ ناکامی یا منسوخی شکایت نہیں مٹاتی، دوبارہ تخلیق نہیں۔ نقشے کے لیے آئی ٹی اور غیر واضح نتیجے کو کوالٹی سے کہیں۔"
+    ]
+  ]
+},
+  record_complaint_admissions: {
+  title: "Record a complaint",
+  titleUr: "شکایت درج کریں",
+  purpose: "At Reception, Admissions, ER or the ward, listen to a verbal or written complaint, record the person’s words and give the tracking number immediately. The complaints officer acknowledges within the day, names a contact and arranges investigation and a response. Do not promise an outcome or record a second complaint to obtain a letter.",
+  purposeUr: "استقبالیہ، داخلہ، ایمرجنسی یا وارڈ پر زبانی یا تحریری شکایت سنیں، ان کے الفاظ درج کریں اور فوراً نمبر دیں۔ شکایات افسر اسی دن وصولی کا جواب، رابطہ کار، تحقیق اور جواب کا بندوبست کرتا ہے۔ نتیجے کا وعدہ یا خط لینے کو دوسری شکایت نہ کریں۔",
+  steps: [
+    "At Reception, Admissions, ER or the ward, listen to a verbal or written complaint, record the person’s words and give the tracking number immediately. The complaints officer acknowledges within the day, names a contact and arranges investigation and a response. Do not promise an outcome or record a second complaint to obtain a letter.",
+    "New complaint opens an unsent draft. Choose how it came, the relationship, category and preferred contact method; write the complainant’s name, phone or written address. A phone or address is required unless anonymous or from the suggestion box. Anonymous sends the documented Anonymous name; do not invent patient details.",
+    "Pick the patient by name or MRN from patient search; confirm name, MRN and age/date of birth. Reception registers a missing patient first. Where permitted, choose a current Admitted stay by patient and admission number; the patient follows from the stay. Never type a record id. If you cannot list stays, name the patient in the complaint text.",
+    "Choose the optional department from active departments; IT adds a missing department. The optional ward uses the wards list without beds, only with the server’s directory permissions. IT adds a ward. No permission hides the picker; do not borrow a login or ask for an id.",
+    "Write at least10characters of the complaint in their words and optionally what they ask for. Check the contact and selected records with them, tick the review and Record complaint once. The returned CMP tracking number confirms the record. The complaint is kept as recorded; this desk offers no edit or delete.",
+    "If an answer is lost, keep the window open. Retry original request uses the same frozen body and key within retention; never New complaint for that retry. Read current result can reconcile your list. If still uncertain, ask IT/Quality before replacing anything. Validation stays visible and may be corrected; offline and pending writes lock submission/navigation.",
+    "Refresh complaints rereads your authorised received/assigned list. Find matches a tracking number or name in up to1000loaded rows. Open complaint rereads its contact, due date, status, next step and conveyed outcome. No matches is distinct from a read error; refresh after a read error. Ask the complaints officer about a record another desk received; do not guess an id.",
+    "Record appeal appears only while the current server record permits it. Read the outcome and appeal-until date, enter why the complainant disagrees and how the appeal came, review and Save appeal once. A late or invalid-state refusal rereads the record and keeps the unsent words; do not change dates or record a duplicate complaint. The appeal decision belongs to the authorised officer.",
+    "Print the right-to-complain notice for the desk, or save its PDF. After acknowledgement, outcome or appeal decision, print/save that letter from the same record. The current app language selects the server’s English or right-to-left Urdu paragraphs, without rewriting them. A print/save failure never repeats a complaint or appeal; retry the same document, check the paper, and ask IT about printer mapping. PDF save cancellation changes nothing.",
+    "F1 or Help opens this screen’s instructions from a field or form, retains unsent work and restores focus. English/Urdu and both themes share keyboard/Settings zoom100–250%, reset100%. Cancel unsent draft discards only input, never a saved complaint. Named human fresh-data/Urdu/device review remains required."
+  ],
+  stepsUr: [
+    "استقبالیہ، داخلہ، ایمرجنسی یا وارڈ پر زبانی یا تحریری شکایت سنیں، ان کے الفاظ درج کریں اور فوراً نمبر دیں۔ شکایات افسر اسی دن وصولی کا جواب، رابطہ کار، تحقیق اور جواب کا بندوبست کرتا ہے۔ نتیجے کا وعدہ یا خط لینے کو دوسری شکایت نہ کریں۔",
+    "نئی شکایت غیر ارسال مسودہ کھولتی ہے۔ ذریعہ، رشتہ، زمرہ اور رابطے کا طریقہ چنیں، نام، فون یا پتہ لکھیں۔ گمنام یا تجویز کے ڈبے کے علاوہ فون یا پتہ لازم ہے۔ گمنام کے لیے طے شدہ نام جاتا ہے؛ مریض کی معلومات نہ گھڑیں۔",
+    "مریض نام یا ایم آر این سے تلاش کریں، نام، نمبر اور عمر یا پیدائش ملائیں۔ غائب مریض پہلے استقبالیہ درج کرتا ہے۔ اجازت ہو تو موجودہ داخلہ مریض اور داخلہ نمبر سے چنیں؛ مریض داخلے سے آتا ہے۔ ریکارڈ آئی ڈی نہ لکھیں۔ داخلے کی اجازت نہ ہو تو شکایت کے متن میں مریض کا نام دیں۔",
+    "اختیاری شعبہ فعال فہرست سے چنیں؛ غائب شعبہ آئی ٹی درج کرتا ہے۔ اختیاری وارڈ بغیر بستروں کی فہرست سے، سرور کی اجازت کے ساتھ ہے۔ وارڈ آئی ٹی درج کرتا ہے۔ اجازت نہ ہو تو خانہ نہیں؛ لاگ ان ادھار یا آئی ڈی نہ مانگیں۔",
+    "ان کے الفاظ میں کم از کم دس حروف شکایت اور اختیاری درخواست لکھیں۔ رابطہ اور منتخب ریکارڈ ان سے ملائیں، جائزہ چنیں اور ایک بار درج کریں۔ لوٹا شکایت نمبر اندراج کی تصدیق ہے۔ اصل شکایت محفوظ رہتی؛ اس میز پر بدلنا یا حذف نہیں۔",
+    "جواب غائب ہو تو ونڈو رکھیں۔ اصل درخواست کی دوبارہ کوشش وہی متن و کلید مقرر مدت میں بھیجتی ہے؛ نئی شکایت نہیں۔ موجودہ نتیجہ آپ کی فہرست پڑھتا ہے۔ غیر یقینی میں آئی ٹی یا کوالٹی سے چیک کرائیں۔ توثیق کی خرابی درست کریں؛ آف لائن یا جاری اندراج ارسال و راستہ روکتا ہے۔",
+    "تازہ پڑھیں آپ کی مجاز موصول یا مقرر فہرست لاتا ہے۔ تلاش زیادہ سے زیادہ ہزار ریکارڈ میں نمبر یا نام ملاتی ہے۔ کھولیں رابطہ، تاریخ، حالت، اگلا قدم اور پہنچایا جواب دوبارہ پڑھتا ہے۔ خالی فہرست اور خرابی الگ ہیں؛ خرابی پر تازہ کریں۔ دوسرے میز کی شکایت افسر سے کھلوائیں؛ آئی ڈی کا اندازہ نہیں۔",
+    "اپیل صرف موجودہ سرور اجازت پر ہے۔ جواب اور آخری تاریخ پڑھیں، اختلاف اور ذریعہ لکھیں، جائزہ اور ایک بار محفوظ کریں۔ دیر یا غلط حالت پر تازہ ریکارڈ اور غیر ارسال الفاظ رہتے؛ تاریخ بدلنا یا شکایت کی نقل نہیں۔ فیصلہ مجاز افسر کرتا ہے۔",
+    "میز کے لیے شکایت کے حق کا نوٹس پرنٹ یا پی ڈی ایف محفوظ کریں۔ وصولی، جواب یا اپیل فیصلے کے بعد اسی ریکارڈ کا متعلقہ خط پرنٹ کریں۔ موجودہ زبان سرور کے انگریزی یا دائیں سے بائیں اردو پیراگراف لیتی، متن نہیں بدلتی۔ ناکامی پر شکایت یا اپیل نہ دہرائیں؛ وہی کاغذ پھر پرنٹ، کاغذ چیک اور پرنٹر نقشے کو آئی ٹی سے کہیں۔ محفوظ منسوخ سے کچھ نہیں بدلتا۔",
+    "ایف ون یا مدد خانے یا فارم سے یہی ہدایات، غیر ارسال کام اور فوکس رکھتی ہے۔ انگریزی، اردو اور دونوں تھیم کا کی بورڈ و ترتیبات زوم سو تا ڈھائی سو، ری سیٹ سو ہے۔ مسودہ منسوخ صرف غیر ارسال متن چھوڑتا، محفوظ شکایت نہیں۔ نامزد انسان کا نئے ڈیٹا، اردو اور آلات کا جائزہ لازم ہے۔"
+  ],
+  faq: [
+    [
+      "What does each desk do?",
+      "Reception receives any complaint; Admissions and the ward may select a permitted current stay; ER receives a complaint without delaying urgent care. Each gives the same tracking number immediately and hands acknowledgement/investigation to the complaints officer. Never promise the result."
+    ],
+    [
+      "What if they are anonymous or cannot identify a patient?",
+      "Anonymous and suggestion-box complaints do not require a contact; otherwise obtain a phone or written address. Patient and stay links are optional and permission-based. Preserve their words rather than fabricating a patient or guessing an id."
+    ],
+    [
+      "Who adds a missing directory record?",
+      "Reception registers patients; IT adds departments, wards and logins. HR adds staff. These complaint desks select active named records only. If your permission hides a list, describe the patient or location in the text and ask the complaints officer, not another login."
+    ],
+    [
+      "Can any desk take an appeal?",
+      "Yes, when it can open the authorised complaint and can_appeal is true. Confirm the outcome/window, record the actual words and means once. COMPLAINT_APPEAL_LATE or COMPLAINT_STATE_INVALID requires rereading and referral to the complaints officer; do not backdate or duplicate."
+    ],
+    [
+      "What if saving or printing fails?",
+      "A lost write answer needs the original request/key or a readback, never a replacement action. Printing and PDF saving are separate reads of the same server document; failure/cancellation does not undo the complaint and must not cause another create. Ask IT about mappings and Quality about unclear outcomes."
+    ]
+  ],
+  faqUr: [
+    [
+      "ہر میز کیا کرتا ہے؟",
+      "استقبالیہ ہر شکایت لیتا؛ داخلہ اور وارڈ مجاز موجودہ داخلہ چنتے؛ ایمرجنسی فوری علاج روکے بغیر شکایت لیتی ہے۔ ہر میز فوراً نمبر اور افسر کو اگلا کام دیتا ہے؛ نتیجے کا وعدہ نہیں۔"
+    ],
+    [
+      "گمنام ہوں یا مریض نہ جانیں تو؟",
+      "گمنام یا ڈبے کی شکایت میں رابطہ لازم نہیں؛ ورنہ فون یا پتہ لیں۔ مریض اور داخلے کے ربط اختیاری اور مجاز ہیں۔ الفاظ رکھیں، مریض یا آئی ڈی نہ گھڑیں۔"
+    ],
+    [
+      "غائب فہرست ریکارڈ کون درج کرتا ہے؟",
+      "مریض استقبالیہ، شعبے، وارڈ اور لاگ ان آئی ٹی، عملہ ایچ آر درج کرتا ہے۔ یہاں فعال نام والے ریکارڈ چنیں۔ اجازت نہ ہو تو مریض یا جگہ متن میں لکھ کر شکایات افسر سے کہیں، دوسرے کا لاگ ان نہیں۔"
+    ],
+    [
+      "کیا ہر میز اپیل لیتا ہے؟",
+      "ہاں، مجاز شکایت کھلے اور سرور اجازت دے تو۔ جواب، مدت، اصل الفاظ اور ذریعہ ایک بار درج کریں۔ دیر یا غلط حالت پر تازہ پڑھ کر افسر کو دیں؛ پچھلی تاریخ یا نقل نہیں۔"
+    ],
+    [
+      "محفوظ یا پرنٹ ناکام ہو تو؟",
+      "غائب اندراج جواب کو اصل درخواست و کلید یا تازہ نتیجہ چاہیے، نیا متبادل نہیں۔ پرنٹ اور پی ڈی ایف اسی سرور کاغذ کے الگ اعمال ہیں؛ ناکامی یا منسوخی شکایت نہیں مٹاتی، دوبارہ تخلیق نہیں۔ نقشے کے لیے آئی ٹی اور غیر واضح نتیجے کو کوالٹی سے کہیں۔"
+    ]
+  ]
+},
+  record_complaint_er: {
+  title: "Record a complaint",
+  titleUr: "شکایت درج کریں",
+  purpose: "At Reception, Admissions, ER or the ward, listen to a verbal or written complaint, record the person’s words and give the tracking number immediately. The complaints officer acknowledges within the day, names a contact and arranges investigation and a response. Do not promise an outcome or record a second complaint to obtain a letter.",
+  purposeUr: "استقبالیہ، داخلہ، ایمرجنسی یا وارڈ پر زبانی یا تحریری شکایت سنیں، ان کے الفاظ درج کریں اور فوراً نمبر دیں۔ شکایات افسر اسی دن وصولی کا جواب، رابطہ کار، تحقیق اور جواب کا بندوبست کرتا ہے۔ نتیجے کا وعدہ یا خط لینے کو دوسری شکایت نہ کریں۔",
+  steps: [
+    "At Reception, Admissions, ER or the ward, listen to a verbal or written complaint, record the person’s words and give the tracking number immediately. The complaints officer acknowledges within the day, names a contact and arranges investigation and a response. Do not promise an outcome or record a second complaint to obtain a letter.",
+    "New complaint opens an unsent draft. Choose how it came, the relationship, category and preferred contact method; write the complainant’s name, phone or written address. A phone or address is required unless anonymous or from the suggestion box. Anonymous sends the documented Anonymous name; do not invent patient details.",
+    "Pick the patient by name or MRN from patient search; confirm name, MRN and age/date of birth. Reception registers a missing patient first. Where permitted, choose a current Admitted stay by patient and admission number; the patient follows from the stay. Never type a record id. If you cannot list stays, name the patient in the complaint text.",
+    "Choose the optional department from active departments; IT adds a missing department. The optional ward uses the wards list without beds, only with the server’s directory permissions. IT adds a ward. No permission hides the picker; do not borrow a login or ask for an id.",
+    "Write at least10characters of the complaint in their words and optionally what they ask for. Check the contact and selected records with them, tick the review and Record complaint once. The returned CMP tracking number confirms the record. The complaint is kept as recorded; this desk offers no edit or delete.",
+    "If an answer is lost, keep the window open. Retry original request uses the same frozen body and key within retention; never New complaint for that retry. Read current result can reconcile your list. If still uncertain, ask IT/Quality before replacing anything. Validation stays visible and may be corrected; offline and pending writes lock submission/navigation.",
+    "Refresh complaints rereads your authorised received/assigned list. Find matches a tracking number or name in up to1000loaded rows. Open complaint rereads its contact, due date, status, next step and conveyed outcome. No matches is distinct from a read error; refresh after a read error. Ask the complaints officer about a record another desk received; do not guess an id.",
+    "Record appeal appears only while the current server record permits it. Read the outcome and appeal-until date, enter why the complainant disagrees and how the appeal came, review and Save appeal once. A late or invalid-state refusal rereads the record and keeps the unsent words; do not change dates or record a duplicate complaint. The appeal decision belongs to the authorised officer.",
+    "Print the right-to-complain notice for the desk, or save its PDF. After acknowledgement, outcome or appeal decision, print/save that letter from the same record. The current app language selects the server’s English or right-to-left Urdu paragraphs, without rewriting them. A print/save failure never repeats a complaint or appeal; retry the same document, check the paper, and ask IT about printer mapping. PDF save cancellation changes nothing.",
+    "F1 or Help opens this screen’s instructions from a field or form, retains unsent work and restores focus. English/Urdu and both themes share keyboard/Settings zoom100–250%, reset100%. Cancel unsent draft discards only input, never a saved complaint. Named human fresh-data/Urdu/device review remains required."
+  ],
+  stepsUr: [
+    "استقبالیہ، داخلہ، ایمرجنسی یا وارڈ پر زبانی یا تحریری شکایت سنیں، ان کے الفاظ درج کریں اور فوراً نمبر دیں۔ شکایات افسر اسی دن وصولی کا جواب، رابطہ کار، تحقیق اور جواب کا بندوبست کرتا ہے۔ نتیجے کا وعدہ یا خط لینے کو دوسری شکایت نہ کریں۔",
+    "نئی شکایت غیر ارسال مسودہ کھولتی ہے۔ ذریعہ، رشتہ، زمرہ اور رابطے کا طریقہ چنیں، نام، فون یا پتہ لکھیں۔ گمنام یا تجویز کے ڈبے کے علاوہ فون یا پتہ لازم ہے۔ گمنام کے لیے طے شدہ نام جاتا ہے؛ مریض کی معلومات نہ گھڑیں۔",
+    "مریض نام یا ایم آر این سے تلاش کریں، نام، نمبر اور عمر یا پیدائش ملائیں۔ غائب مریض پہلے استقبالیہ درج کرتا ہے۔ اجازت ہو تو موجودہ داخلہ مریض اور داخلہ نمبر سے چنیں؛ مریض داخلے سے آتا ہے۔ ریکارڈ آئی ڈی نہ لکھیں۔ داخلے کی اجازت نہ ہو تو شکایت کے متن میں مریض کا نام دیں۔",
+    "اختیاری شعبہ فعال فہرست سے چنیں؛ غائب شعبہ آئی ٹی درج کرتا ہے۔ اختیاری وارڈ بغیر بستروں کی فہرست سے، سرور کی اجازت کے ساتھ ہے۔ وارڈ آئی ٹی درج کرتا ہے۔ اجازت نہ ہو تو خانہ نہیں؛ لاگ ان ادھار یا آئی ڈی نہ مانگیں۔",
+    "ان کے الفاظ میں کم از کم دس حروف شکایت اور اختیاری درخواست لکھیں۔ رابطہ اور منتخب ریکارڈ ان سے ملائیں، جائزہ چنیں اور ایک بار درج کریں۔ لوٹا شکایت نمبر اندراج کی تصدیق ہے۔ اصل شکایت محفوظ رہتی؛ اس میز پر بدلنا یا حذف نہیں۔",
+    "جواب غائب ہو تو ونڈو رکھیں۔ اصل درخواست کی دوبارہ کوشش وہی متن و کلید مقرر مدت میں بھیجتی ہے؛ نئی شکایت نہیں۔ موجودہ نتیجہ آپ کی فہرست پڑھتا ہے۔ غیر یقینی میں آئی ٹی یا کوالٹی سے چیک کرائیں۔ توثیق کی خرابی درست کریں؛ آف لائن یا جاری اندراج ارسال و راستہ روکتا ہے۔",
+    "تازہ پڑھیں آپ کی مجاز موصول یا مقرر فہرست لاتا ہے۔ تلاش زیادہ سے زیادہ ہزار ریکارڈ میں نمبر یا نام ملاتی ہے۔ کھولیں رابطہ، تاریخ، حالت، اگلا قدم اور پہنچایا جواب دوبارہ پڑھتا ہے۔ خالی فہرست اور خرابی الگ ہیں؛ خرابی پر تازہ کریں۔ دوسرے میز کی شکایت افسر سے کھلوائیں؛ آئی ڈی کا اندازہ نہیں۔",
+    "اپیل صرف موجودہ سرور اجازت پر ہے۔ جواب اور آخری تاریخ پڑھیں، اختلاف اور ذریعہ لکھیں، جائزہ اور ایک بار محفوظ کریں۔ دیر یا غلط حالت پر تازہ ریکارڈ اور غیر ارسال الفاظ رہتے؛ تاریخ بدلنا یا شکایت کی نقل نہیں۔ فیصلہ مجاز افسر کرتا ہے۔",
+    "میز کے لیے شکایت کے حق کا نوٹس پرنٹ یا پی ڈی ایف محفوظ کریں۔ وصولی، جواب یا اپیل فیصلے کے بعد اسی ریکارڈ کا متعلقہ خط پرنٹ کریں۔ موجودہ زبان سرور کے انگریزی یا دائیں سے بائیں اردو پیراگراف لیتی، متن نہیں بدلتی۔ ناکامی پر شکایت یا اپیل نہ دہرائیں؛ وہی کاغذ پھر پرنٹ، کاغذ چیک اور پرنٹر نقشے کو آئی ٹی سے کہیں۔ محفوظ منسوخ سے کچھ نہیں بدلتا۔",
+    "ایف ون یا مدد خانے یا فارم سے یہی ہدایات، غیر ارسال کام اور فوکس رکھتی ہے۔ انگریزی، اردو اور دونوں تھیم کا کی بورڈ و ترتیبات زوم سو تا ڈھائی سو، ری سیٹ سو ہے۔ مسودہ منسوخ صرف غیر ارسال متن چھوڑتا، محفوظ شکایت نہیں۔ نامزد انسان کا نئے ڈیٹا، اردو اور آلات کا جائزہ لازم ہے۔"
+  ],
+  faq: [
+    [
+      "What does each desk do?",
+      "Reception receives any complaint; Admissions and the ward may select a permitted current stay; ER receives a complaint without delaying urgent care. Each gives the same tracking number immediately and hands acknowledgement/investigation to the complaints officer. Never promise the result."
+    ],
+    [
+      "What if they are anonymous or cannot identify a patient?",
+      "Anonymous and suggestion-box complaints do not require a contact; otherwise obtain a phone or written address. Patient and stay links are optional and permission-based. Preserve their words rather than fabricating a patient or guessing an id."
+    ],
+    [
+      "Who adds a missing directory record?",
+      "Reception registers patients; IT adds departments, wards and logins. HR adds staff. These complaint desks select active named records only. If your permission hides a list, describe the patient or location in the text and ask the complaints officer, not another login."
+    ],
+    [
+      "Can any desk take an appeal?",
+      "Yes, when it can open the authorised complaint and can_appeal is true. Confirm the outcome/window, record the actual words and means once. COMPLAINT_APPEAL_LATE or COMPLAINT_STATE_INVALID requires rereading and referral to the complaints officer; do not backdate or duplicate."
+    ],
+    [
+      "What if saving or printing fails?",
+      "A lost write answer needs the original request/key or a readback, never a replacement action. Printing and PDF saving are separate reads of the same server document; failure/cancellation does not undo the complaint and must not cause another create. Ask IT about mappings and Quality about unclear outcomes."
+    ]
+  ],
+  faqUr: [
+    [
+      "ہر میز کیا کرتا ہے؟",
+      "استقبالیہ ہر شکایت لیتا؛ داخلہ اور وارڈ مجاز موجودہ داخلہ چنتے؛ ایمرجنسی فوری علاج روکے بغیر شکایت لیتی ہے۔ ہر میز فوراً نمبر اور افسر کو اگلا کام دیتا ہے؛ نتیجے کا وعدہ نہیں۔"
+    ],
+    [
+      "گمنام ہوں یا مریض نہ جانیں تو؟",
+      "گمنام یا ڈبے کی شکایت میں رابطہ لازم نہیں؛ ورنہ فون یا پتہ لیں۔ مریض اور داخلے کے ربط اختیاری اور مجاز ہیں۔ الفاظ رکھیں، مریض یا آئی ڈی نہ گھڑیں۔"
+    ],
+    [
+      "غائب فہرست ریکارڈ کون درج کرتا ہے؟",
+      "مریض استقبالیہ، شعبے، وارڈ اور لاگ ان آئی ٹی، عملہ ایچ آر درج کرتا ہے۔ یہاں فعال نام والے ریکارڈ چنیں۔ اجازت نہ ہو تو مریض یا جگہ متن میں لکھ کر شکایات افسر سے کہیں، دوسرے کا لاگ ان نہیں۔"
+    ],
+    [
+      "کیا ہر میز اپیل لیتا ہے؟",
+      "ہاں، مجاز شکایت کھلے اور سرور اجازت دے تو۔ جواب، مدت، اصل الفاظ اور ذریعہ ایک بار درج کریں۔ دیر یا غلط حالت پر تازہ پڑھ کر افسر کو دیں؛ پچھلی تاریخ یا نقل نہیں۔"
+    ],
+    [
+      "محفوظ یا پرنٹ ناکام ہو تو؟",
+      "غائب اندراج جواب کو اصل درخواست و کلید یا تازہ نتیجہ چاہیے، نیا متبادل نہیں۔ پرنٹ اور پی ڈی ایف اسی سرور کاغذ کے الگ اعمال ہیں؛ ناکامی یا منسوخی شکایت نہیں مٹاتی، دوبارہ تخلیق نہیں۔ نقشے کے لیے آئی ٹی اور غیر واضح نتیجے کو کوالٹی سے کہیں۔"
+    ]
+  ]
+},
+  record_complaint_ward: {
+  title: "Record a complaint",
+  titleUr: "شکایت درج کریں",
+  purpose: "At Reception, Admissions, ER or the ward, listen to a verbal or written complaint, record the person’s words and give the tracking number immediately. The complaints officer acknowledges within the day, names a contact and arranges investigation and a response. Do not promise an outcome or record a second complaint to obtain a letter.",
+  purposeUr: "استقبالیہ، داخلہ، ایمرجنسی یا وارڈ پر زبانی یا تحریری شکایت سنیں، ان کے الفاظ درج کریں اور فوراً نمبر دیں۔ شکایات افسر اسی دن وصولی کا جواب، رابطہ کار، تحقیق اور جواب کا بندوبست کرتا ہے۔ نتیجے کا وعدہ یا خط لینے کو دوسری شکایت نہ کریں۔",
+  steps: [
+    "At Reception, Admissions, ER or the ward, listen to a verbal or written complaint, record the person’s words and give the tracking number immediately. The complaints officer acknowledges within the day, names a contact and arranges investigation and a response. Do not promise an outcome or record a second complaint to obtain a letter.",
+    "New complaint opens an unsent draft. Choose how it came, the relationship, category and preferred contact method; write the complainant’s name, phone or written address. A phone or address is required unless anonymous or from the suggestion box. Anonymous sends the documented Anonymous name; do not invent patient details.",
+    "Pick the patient by name or MRN from patient search; confirm name, MRN and age/date of birth. Reception registers a missing patient first. Where permitted, choose a current Admitted stay by patient and admission number; the patient follows from the stay. Never type a record id. If you cannot list stays, name the patient in the complaint text.",
+    "Choose the optional department from active departments; IT adds a missing department. The optional ward uses the wards list without beds, only with the server’s directory permissions. IT adds a ward. No permission hides the picker; do not borrow a login or ask for an id.",
+    "Write at least10characters of the complaint in their words and optionally what they ask for. Check the contact and selected records with them, tick the review and Record complaint once. The returned CMP tracking number confirms the record. The complaint is kept as recorded; this desk offers no edit or delete.",
+    "If an answer is lost, keep the window open. Retry original request uses the same frozen body and key within retention; never New complaint for that retry. Read current result can reconcile your list. If still uncertain, ask IT/Quality before replacing anything. Validation stays visible and may be corrected; offline and pending writes lock submission/navigation.",
+    "Refresh complaints rereads your authorised received/assigned list. Find matches a tracking number or name in up to1000loaded rows. Open complaint rereads its contact, due date, status, next step and conveyed outcome. No matches is distinct from a read error; refresh after a read error. Ask the complaints officer about a record another desk received; do not guess an id.",
+    "Record appeal appears only while the current server record permits it. Read the outcome and appeal-until date, enter why the complainant disagrees and how the appeal came, review and Save appeal once. A late or invalid-state refusal rereads the record and keeps the unsent words; do not change dates or record a duplicate complaint. The appeal decision belongs to the authorised officer.",
+    "Print the right-to-complain notice for the desk, or save its PDF. After acknowledgement, outcome or appeal decision, print/save that letter from the same record. The current app language selects the server’s English or right-to-left Urdu paragraphs, without rewriting them. A print/save failure never repeats a complaint or appeal; retry the same document, check the paper, and ask IT about printer mapping. PDF save cancellation changes nothing.",
+    "F1 or Help opens this screen’s instructions from a field or form, retains unsent work and restores focus. English/Urdu and both themes share keyboard/Settings zoom100–250%, reset100%. Cancel unsent draft discards only input, never a saved complaint. Named human fresh-data/Urdu/device review remains required."
+  ],
+  stepsUr: [
+    "استقبالیہ، داخلہ، ایمرجنسی یا وارڈ پر زبانی یا تحریری شکایت سنیں، ان کے الفاظ درج کریں اور فوراً نمبر دیں۔ شکایات افسر اسی دن وصولی کا جواب، رابطہ کار، تحقیق اور جواب کا بندوبست کرتا ہے۔ نتیجے کا وعدہ یا خط لینے کو دوسری شکایت نہ کریں۔",
+    "نئی شکایت غیر ارسال مسودہ کھولتی ہے۔ ذریعہ، رشتہ، زمرہ اور رابطے کا طریقہ چنیں، نام، فون یا پتہ لکھیں۔ گمنام یا تجویز کے ڈبے کے علاوہ فون یا پتہ لازم ہے۔ گمنام کے لیے طے شدہ نام جاتا ہے؛ مریض کی معلومات نہ گھڑیں۔",
+    "مریض نام یا ایم آر این سے تلاش کریں، نام، نمبر اور عمر یا پیدائش ملائیں۔ غائب مریض پہلے استقبالیہ درج کرتا ہے۔ اجازت ہو تو موجودہ داخلہ مریض اور داخلہ نمبر سے چنیں؛ مریض داخلے سے آتا ہے۔ ریکارڈ آئی ڈی نہ لکھیں۔ داخلے کی اجازت نہ ہو تو شکایت کے متن میں مریض کا نام دیں۔",
+    "اختیاری شعبہ فعال فہرست سے چنیں؛ غائب شعبہ آئی ٹی درج کرتا ہے۔ اختیاری وارڈ بغیر بستروں کی فہرست سے، سرور کی اجازت کے ساتھ ہے۔ وارڈ آئی ٹی درج کرتا ہے۔ اجازت نہ ہو تو خانہ نہیں؛ لاگ ان ادھار یا آئی ڈی نہ مانگیں۔",
+    "ان کے الفاظ میں کم از کم دس حروف شکایت اور اختیاری درخواست لکھیں۔ رابطہ اور منتخب ریکارڈ ان سے ملائیں، جائزہ چنیں اور ایک بار درج کریں۔ لوٹا شکایت نمبر اندراج کی تصدیق ہے۔ اصل شکایت محفوظ رہتی؛ اس میز پر بدلنا یا حذف نہیں۔",
+    "جواب غائب ہو تو ونڈو رکھیں۔ اصل درخواست کی دوبارہ کوشش وہی متن و کلید مقرر مدت میں بھیجتی ہے؛ نئی شکایت نہیں۔ موجودہ نتیجہ آپ کی فہرست پڑھتا ہے۔ غیر یقینی میں آئی ٹی یا کوالٹی سے چیک کرائیں۔ توثیق کی خرابی درست کریں؛ آف لائن یا جاری اندراج ارسال و راستہ روکتا ہے۔",
+    "تازہ پڑھیں آپ کی مجاز موصول یا مقرر فہرست لاتا ہے۔ تلاش زیادہ سے زیادہ ہزار ریکارڈ میں نمبر یا نام ملاتی ہے۔ کھولیں رابطہ، تاریخ، حالت، اگلا قدم اور پہنچایا جواب دوبارہ پڑھتا ہے۔ خالی فہرست اور خرابی الگ ہیں؛ خرابی پر تازہ کریں۔ دوسرے میز کی شکایت افسر سے کھلوائیں؛ آئی ڈی کا اندازہ نہیں۔",
+    "اپیل صرف موجودہ سرور اجازت پر ہے۔ جواب اور آخری تاریخ پڑھیں، اختلاف اور ذریعہ لکھیں، جائزہ اور ایک بار محفوظ کریں۔ دیر یا غلط حالت پر تازہ ریکارڈ اور غیر ارسال الفاظ رہتے؛ تاریخ بدلنا یا شکایت کی نقل نہیں۔ فیصلہ مجاز افسر کرتا ہے۔",
+    "میز کے لیے شکایت کے حق کا نوٹس پرنٹ یا پی ڈی ایف محفوظ کریں۔ وصولی، جواب یا اپیل فیصلے کے بعد اسی ریکارڈ کا متعلقہ خط پرنٹ کریں۔ موجودہ زبان سرور کے انگریزی یا دائیں سے بائیں اردو پیراگراف لیتی، متن نہیں بدلتی۔ ناکامی پر شکایت یا اپیل نہ دہرائیں؛ وہی کاغذ پھر پرنٹ، کاغذ چیک اور پرنٹر نقشے کو آئی ٹی سے کہیں۔ محفوظ منسوخ سے کچھ نہیں بدلتا۔",
+    "ایف ون یا مدد خانے یا فارم سے یہی ہدایات، غیر ارسال کام اور فوکس رکھتی ہے۔ انگریزی، اردو اور دونوں تھیم کا کی بورڈ و ترتیبات زوم سو تا ڈھائی سو، ری سیٹ سو ہے۔ مسودہ منسوخ صرف غیر ارسال متن چھوڑتا، محفوظ شکایت نہیں۔ نامزد انسان کا نئے ڈیٹا، اردو اور آلات کا جائزہ لازم ہے۔"
+  ],
+  faq: [
+    [
+      "What does each desk do?",
+      "Reception receives any complaint; Admissions and the ward may select a permitted current stay; ER receives a complaint without delaying urgent care. Each gives the same tracking number immediately and hands acknowledgement/investigation to the complaints officer. Never promise the result."
+    ],
+    [
+      "What if they are anonymous or cannot identify a patient?",
+      "Anonymous and suggestion-box complaints do not require a contact; otherwise obtain a phone or written address. Patient and stay links are optional and permission-based. Preserve their words rather than fabricating a patient or guessing an id."
+    ],
+    [
+      "Who adds a missing directory record?",
+      "Reception registers patients; IT adds departments, wards and logins. HR adds staff. These complaint desks select active named records only. If your permission hides a list, describe the patient or location in the text and ask the complaints officer, not another login."
+    ],
+    [
+      "Can any desk take an appeal?",
+      "Yes, when it can open the authorised complaint and can_appeal is true. Confirm the outcome/window, record the actual words and means once. COMPLAINT_APPEAL_LATE or COMPLAINT_STATE_INVALID requires rereading and referral to the complaints officer; do not backdate or duplicate."
+    ],
+    [
+      "What if saving or printing fails?",
+      "A lost write answer needs the original request/key or a readback, never a replacement action. Printing and PDF saving are separate reads of the same server document; failure/cancellation does not undo the complaint and must not cause another create. Ask IT about mappings and Quality about unclear outcomes."
+    ]
+  ],
+  faqUr: [
+    [
+      "ہر میز کیا کرتا ہے؟",
+      "استقبالیہ ہر شکایت لیتا؛ داخلہ اور وارڈ مجاز موجودہ داخلہ چنتے؛ ایمرجنسی فوری علاج روکے بغیر شکایت لیتی ہے۔ ہر میز فوراً نمبر اور افسر کو اگلا کام دیتا ہے؛ نتیجے کا وعدہ نہیں۔"
+    ],
+    [
+      "گمنام ہوں یا مریض نہ جانیں تو؟",
+      "گمنام یا ڈبے کی شکایت میں رابطہ لازم نہیں؛ ورنہ فون یا پتہ لیں۔ مریض اور داخلے کے ربط اختیاری اور مجاز ہیں۔ الفاظ رکھیں، مریض یا آئی ڈی نہ گھڑیں۔"
+    ],
+    [
+      "غائب فہرست ریکارڈ کون درج کرتا ہے؟",
+      "مریض استقبالیہ، شعبے، وارڈ اور لاگ ان آئی ٹی، عملہ ایچ آر درج کرتا ہے۔ یہاں فعال نام والے ریکارڈ چنیں۔ اجازت نہ ہو تو مریض یا جگہ متن میں لکھ کر شکایات افسر سے کہیں، دوسرے کا لاگ ان نہیں۔"
+    ],
+    [
+      "کیا ہر میز اپیل لیتا ہے؟",
+      "ہاں، مجاز شکایت کھلے اور سرور اجازت دے تو۔ جواب، مدت، اصل الفاظ اور ذریعہ ایک بار درج کریں۔ دیر یا غلط حالت پر تازہ پڑھ کر افسر کو دیں؛ پچھلی تاریخ یا نقل نہیں۔"
+    ],
+    [
+      "محفوظ یا پرنٹ ناکام ہو تو؟",
+      "غائب اندراج جواب کو اصل درخواست و کلید یا تازہ نتیجہ چاہیے، نیا متبادل نہیں۔ پرنٹ اور پی ڈی ایف اسی سرور کاغذ کے الگ اعمال ہیں؛ ناکامی یا منسوخی شکایت نہیں مٹاتی، دوبارہ تخلیق نہیں۔ نقشے کے لیے آئی ٹی اور غیر واضح نتیجے کو کوالٹی سے کہیں۔"
+    ]
+  ]
+},
+
   my_actions: {
   title: "My actions",
   titleUr: "میرے اقدامات",
