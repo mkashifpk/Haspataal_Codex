@@ -34,6 +34,7 @@
           "retryable": false,
           "ui_action": "Explain and hide the action (check x-permissions).",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [],
@@ -74,6 +75,7 @@
           "retryable": false,
           "ui_action": "Explain and hide the action (check x-permissions).",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [
@@ -110,6 +112,18 @@
             "retry_after_seconds"
           ],
           "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [],
@@ -3194,6 +3208,7 @@
       "description": "The vendor to contact about the license (only the channels the vendor gave are present)."
     },
     "WorkspaceOut": {
+      "title": "WorkspaceOut",
       "properties": {
         "code": {
           "type": "string",
@@ -3217,7 +3232,12 @@
           },
           "type": "array",
           "title": "Roles",
-          "description": "The user's roles that open this workspace"
+          "description": "The user's roles that open this workspace (empty for My Workspace when no role lands there: every employee has it)"
+        },
+        "every_employee": {
+          "type": "boolean",
+          "title": "Every Employee",
+          "description": "True for My Workspace (self_service): every user with an employee record has it, whatever their roles. Open it like any workspace (its window sends X-Active-Workspace: self_service), but do not count it for the launcher: a user with one role workspace opens that one directly and reaches My Workspace from the user's menu"
         }
       },
       "type": "object",
@@ -3226,9 +3246,9 @@
         "label",
         "label_ur",
         "description",
-        "roles"
-      ],
-      "title": "WorkspaceOut"
+        "roles",
+        "every_employee"
+      ]
     },
     "Envelope_HospitalSettingsOut_": {
       "properties": {
@@ -3594,6 +3614,7 @@
       "title": "RefreshIn"
     },
     "WorkspaceInfoOut": {
+      "title": "WorkspaceInfoOut",
       "properties": {
         "code": {
           "type": "string",
@@ -3626,6 +3647,18 @@
           "type": "array",
           "title": "Also Uses",
           "description": "Screen ids of other workspaces its roles work in (the cashier: my_cash_shift, cash_back_prompts)"
+        },
+        "every_employee": {
+          "type": "boolean",
+          "title": "Every Employee",
+          "description": "True for My Workspace (self_service): every user with an employee record has it, whatever their roles (GET /auth/workspaces lists it for them)",
+          "default": false
+        },
+        "guest": {
+          "type": "boolean",
+          "title": "Guest",
+          "description": "True for the PHC inspector's workspace: its logins are guests without an employee record, so they have no My Workspace",
+          "default": false
         }
       },
       "type": "object",
@@ -3636,8 +3669,7 @@
         "description",
         "screens",
         "also_uses"
-      ],
-      "title": "WorkspaceInfoOut"
+      ]
     },
     "Envelope_NotificationReadOut_": {
       "properties": {

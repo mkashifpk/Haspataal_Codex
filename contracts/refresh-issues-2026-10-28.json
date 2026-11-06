@@ -654,66 +654,402 @@
       "open": false
     },
     {
-      "id": 13,
-      "developer_id": 1,
-      "implementation_id": 1,
-      "request_id": "codex-issue12-postfix-retest-20261023-v1",
-      "source": "mcp",
-      "kind": "MissingWorkflow",
-      "severity": "Medium",
-      "title": "Post-fix retest of #12: demo.reception login restoration still pending on deployed DEV",
-      "actual": "After issue12 was marked Fixed and overview.server_build equals fixed_in2026-10-23T01:28:16.037092+00:00, one sandbox_call as demo.reception GET /staff/lookup?q=DEMO still refuses authentication with INVALID_CREDENTIALS. The new diagnostic explicitly says the password was changed and asks the backend team to run hms seed-dev. The deployed protection/diagnostic change is visible, but documented reception credentials have not yet been restored.",
-      "expected": "Complete the backend-owned restoration step described in issue12's response, or keep that restoration explicitly pending. The advertised demo.reception sandbox login should work with the documented DEV credentials. Frontend agents must not reset shared passwords or reseed this shared server.",
-      "steps": "Read overview and my_backend_issues(implementation_id=1): #12 Fixed, server_build>=fixed_in. Call sandbox_call(as_user='demo.reception', method='GET', path='/staff/lookup', query={q:'DEMO'}) once. Stop on INVALID_CREDENTIALS; no reset/deactivation/reseed performed.",
-      "evidence": "Verified2026-10-23 around03:05UTC; serverbuild2026-10-23T01:28:16.037092+00:00, contract57d137222f1ca637655d. Exact refusal: login as demo.reception failed (INVALID_CREDENTIALS: Username or password is incorrect.). demo.reception's password is no longer the demo password: it was changed on this server (a DEV server refuses that since2026-10-23, an older one does not). Ask the backend team to run hms seed-dev. Sandbox auth refusal carries no HTTP request_id. demo.it authentication succeeded for a socket-scoped licence probe on the same deployed server. This follows up #12's uncompleted restoration; no staff endpoint defect or frontend workaround alleged.",
       "endpoint": "POST /auth/login",
-      "screen_id": "registration",
-      "workflow": "",
-      "build": "baseline467f416+cash-shift checkpoint; backend-fix audit2026-10-23",
-      "backend_version": "1.0.0",
-      "reported_by": "Codex",
-      "status": "Fixed",
-      "response": "Confirmed: your retest was right, and the gap was ours. The fix of #12 restored a demo login only when the backend team ran hms seed-dev by hand in an elevated prompt after installing the build, and the DEV setup ran seed-dev only on a fresh install, never on an upgrade; nobody ran it, so demo.reception kept the changed password on the build you tested (the protection against new changes was working, as you saw). Every DEV upgrade now restores the demo logins by itself: after the migrations the setup runs hms seed-dev --restore-logins, which gives every demo account that stopped working its documented login back (the demo password, no forced change, active, not locked) and changes nothing else. It never loads or reseeds the demo data, and it does nothing on a DEV server installed without it. Each restoration is recorded in the server's audit trail (seed_dev.demo_login_restore). This report is marked Fixed only once the DEV server runs this build, so demo.reception works again from fixed_in on: compare overview's server_build with fixed_in, then retry your one sandbox_call as demo.reception (GET /staff/lookup?q=DEMO). If a demo login fails again later, the sandbox's refusal now says the next DEV upgrade restores it and asks you to report it with report_backend_issue; the backend team runs the same command at once. As you did, never reset a demo account or reseed the shared server yourself; meanwhile use another demo account whose role may make the call. Read frontend guide 09, 'Demo logins'.",
-      "triaged_by": "Faqeer Hussain",
-      "duplicate_of": null,
-      "fixed_in": "2026-10-23T05:05:34.846311+00:00",
-      "created_at": "2026-10-23T03:06:01+00:00",
-      "updated_at": "2026-10-23T05:19:09+00:00",
-      "username": "mkashif",
-      "developer_name": "Muhammad Kashif",
-      "implementation_name": "Codex",
-      "open": false
+      "summary": "Log in (returns tokens, profile, roles, workspaces)",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "ACCOUNT_DISABLED",
+          "http_status": 403,
+          "message": "This account is disabled.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "ACCOUNT_EXPIRED",
+          "http_status": 403,
+          "message": "This guest account has expired (the PHC inspector's access ended).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/msds/profile"
+        },
+        {
+          "code": "ACCOUNT_LOCKED",
+          "http_status": 423,
+          "message": "Too many failed attempts; the account is temporarily locked.",
+          "retryable": true,
+          "ui_action": "Show a countdown from retry_after_seconds.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "retry_after_seconds"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "INVALID_CREDENTIALS",
+          "http_status": 401,
+          "message": "Username or password is incorrect.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "LICENSE_INVALID",
+          "http_status": 403,
+          "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "grace_until",
+            "reason",
+            "state",
+            "vendor"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "PASSWORD_CHANGE_REQUIRED",
+          "http_status": 403,
+          "message": "You must change your temporary password first.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/auth/workspaces"
+        },
+        {
+          "code": "RATE_LIMITED",
+          "http_status": 429,
+          "message": "Too many requests; slow down.",
+          "retryable": true,
+          "ui_action": "Back off per Retry-After.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "retry_after_seconds"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LoginIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LoginOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "LoginIn",
+        "fields": [
+          {
+            "pointer": "/username",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 64
+          },
+          {
+            "pointer": "/password",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 1,
+            "max_length": 256,
+            "sensitive": "never log, store or keep it after the call"
+          },
+          {
+            "pointer": "/terminal_label",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 100,
+            "description": "Optional terminal name shown in session lists"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: opens another session; the unused one expires. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
     },
     {
-      "id": 12,
-      "developer_id": 1,
-      "implementation_id": 1,
-      "request_id": "codex-demo-reception-sandbox-login-20261022",
-      "source": "mcp",
-      "kind": "MissingWorkflow",
-      "severity": "Medium",
-      "title": "Advertised demo.reception cannot authenticate through MCP sandbox_call",
-      "actual": "A single sandbox_call(as_user='demo.reception', GET /staff/lookup?q=DEMO) was refused before the requested read: login as demo.reception failed (INVALID_CREDENTIALS: Username or password is incorrect.). demo_accounts() still advertises demo.reception and its reception workspace. Admin read confirms exact user5 active, failed_login_count1, locked_until=null. Other demo accounts can use the same read endpoint successfully.",
-      "expected": "The documented DEV demo account should work through sandbox_call, or MCP should provide a current supported account/access workflow for reception regression checks. Please reconcile the sandbox credentials/documentation or provide a separate safe fixture. Do not require developers to reset shared passwords or reseed the entire shared database.",
-      "steps": "Read demo_accounts(); make sandbox_call as demo.reception, method GET, path /staff/lookup, query {q:'DEMO'}. One failure observed; no repeated sign-in attempt, password reset or reseed. As demo.it read GET /admin/users?q=demo.reception then GET /admin/users/5.",
-      "evidence": "Server2026-10-22T03:00:52.677157+00:00, contract61186bb3306515cae1c9. Sandbox auth refusal has no HTTP request_id; admin details200 requestd8523d920d7b45069431692afbc9fcee confirms active/unlocked user5. Same staff endpoint as demo.zakat200 request47fcd1f0dea44ad49dcf48657fd117cb; approvals as demo.owner200 request758f07b6315746e9ad7e39055394532f. This is a DEV fixture/sandbox availability gap, not evidence staff lookup is broken. No password/token or patient information included.",
       "endpoint": "POST /auth/login",
-      "screen_id": "registration",
-      "workflow": "",
-      "build": "index-D52G21Ye.js / baseline467f416",
-      "backend_version": "1.0.0",
-      "reported_by": "Codex",
-      "status": "Fixed",
-      "response": "Confirmed, and the sandbox was not at fault: the server's audit trail shows demo.reception's own password changed twice on 2026-10-21 between 12:19 and 12:20 UTC, from 192.168.10.5 on the office LAN (a change-password screen being tested on the shared account), so the documented password stopped working for everyone; staff lookup was never broken. A DEV server now keeps every demo account's password, roles and active state as seeded: POST /auth/change-password and POST /settings/me/change-password as a demo account, IT's POST /admin/users/{user_id}/reset-password, deactivating one (POST /admin/users/{user_id}/active with active false; reactivating is allowed), PUT /admin/users/{user_id}/roles and a UserRoles change request answer 403 DEMO_ACCOUNT_PROTECTED with details.username and details.change. A hospital's server has no demo accounts and no such rule. Test those screens with a user of your own (provision one as demo.it): your own users are not protected. hms seed-dev, run again on a server that has the demo data, now restores every demo login that stopped working (the demo password, no forced change, active, not locked) and changes nothing else; the backend team runs it once after installing this build, so demo.reception works again. When a sandbox login fails, the refusal now says why (the password was changed, the account deactivated or locked) and what to do, instead of asking whether the demo data is loaded. Read frontend guide 09, 'Demo logins'. It is on the DEV server from this build on (compare overview's server_build with fixed_in).",
-      "triaged_by": "Faqeer Hussain",
-      "duplicate_of": null,
-      "fixed_in": "2026-10-23T01:28:16.037092+00:00",
-      "created_at": "2026-10-22T18:26:08+00:00",
-      "updated_at": "2026-10-23T01:49:48+00:00",
-      "username": "mkashif",
-      "developer_name": "Muhammad Kashif",
-      "implementation_name": "Codex",
-      "open": false
+      "summary": "Log in (returns tokens, profile, roles, workspaces)",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "ACCOUNT_DISABLED",
+          "http_status": 403,
+          "message": "This account is disabled.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "ACCOUNT_EXPIRED",
+          "http_status": 403,
+          "message": "This guest account has expired (the PHC inspector's access ended).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/msds/profile"
+        },
+        {
+          "code": "ACCOUNT_LOCKED",
+          "http_status": 423,
+          "message": "Too many failed attempts; the account is temporarily locked.",
+          "retryable": true,
+          "ui_action": "Show a countdown from retry_after_seconds.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "retry_after_seconds"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "INVALID_CREDENTIALS",
+          "http_status": 401,
+          "message": "Username or password is incorrect.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "LICENSE_INVALID",
+          "http_status": 403,
+          "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "grace_until",
+            "reason",
+            "state",
+            "vendor"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "PASSWORD_CHANGE_REQUIRED",
+          "http_status": 403,
+          "message": "You must change your temporary password first.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/auth/workspaces"
+        },
+        {
+          "code": "RATE_LIMITED",
+          "http_status": 429,
+          "message": "Too many requests; slow down.",
+          "retryable": true,
+          "ui_action": "Back off per Retry-After.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "retry_after_seconds"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LoginIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LoginOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "LoginIn",
+        "fields": [
+          {
+            "pointer": "/username",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 64
+          },
+          {
+            "pointer": "/password",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 1,
+            "max_length": 256,
+            "sensitive": "never log, store or keep it after the call"
+          },
+          {
+            "pointer": "/terminal_label",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 100,
+            "description": "Optional terminal name shown in session lists"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: opens another session; the unused one expires. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
     },
     {
       "id": 11,

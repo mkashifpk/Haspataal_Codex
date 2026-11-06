@@ -2597,17 +2597,17 @@ faqUr: [
       "6. Save Draft Certificate: Click 'Save Draft' to persist current entries via versioned PUT /deaths/{death_id}. Draft certificates remain editable across clinical shifts while pending laboratory, histology, or senior review.",
       "7. Certify Cause of Death: Verify that all mandatory fields are complete. Click 'Certify Cause of Death' to transmit POST /deaths/{death_id}/certify. Certification permanently locks the certificate against direct modifications and stamps the certifier's PMDC credentials.",
       "8. Append Correction or Print A4 Certificate: For post-certification amendments, click 'Add Correction' to append factual additions with required clinical justification (POST /deaths/{death_id}/corrections). Click 'Print Certificate (A4)' to fetch the official print payload (GET /deaths/{death_id}/print-payload) formatted for the family and Union Council registration.",
-"Report Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."],
+"Autopsy report: the head of hospital authorizes the existing request first. Upload this patient’s AutopsyReport scan separately, then attach its confirmed document. Enter actual performed time in the hospital timezone and choose the actual correlation; neither starts prefilled. Submit once. A lost final-report reply requires Read current result and status reconciliation, with no report retry. Only the separate scan upload retries its original key. Upload/print failure never repeats death registration."],
     stepsUr: [
       "1. ڈیتھ رجسٹر کھولیں: ڈاکٹر ورک اسپیس یا کلینیکل مینو سے 'ڈیتھ ریکارڈ اور سرٹیفکیٹ' اسکرین پر جائیں۔ رجسٹر میں تمام اموات کی فہرست، ڈرافٹ اور تصدیق شدہ سرٹیفکیٹس کی حالت دیکھیں۔",
-      "2. وفات کا ابتدائی اعلان درج کریں: 'وفات درج کریں' بٹن پر کلک کریں۔ مریض کا شناختی نمبر، وقتِ وفات، وفات کا شعبہ (ان ڈور، ایمرجنسی، او پی ڈی، مردہ لایا گیا)، متوقع/غیر متوقع کی تفصیل درج کر کے بیک اینڈ پر محفوظ کریں۔",
+      "2. وفات کا ابتدائی اعلان درج کریں: 'وفات درج کریں' بٹن پر کلک کریں۔ مریض نام سے چنیں، وقتِ وفات، وفات کا شعبہ (ان ڈور، ایمرجنسی، او پی ڈی، مردہ لایا گیا)، متوقع/غیر متوقع کی تفصیل درج کر کے بیک اینڈ پر محفوظ کریں۔",
       "3. ڈبلیو ایچ او حصہ اول کے اسباب درج کریں: سرٹیفکیٹ ایڈیٹر میں سطر (الف) پر موت کا فوری سبب اور دورانیہ درج کریں۔ اگر پس پردہ دیگر بیماریاں ہوں تو سطر (ب)، (ج) اور (د) میں درج کریں۔ سب سے نچلی پر کی گئی سطر کو خودکار طور پر اصل بنیادی سبب قرار دیا جائے گا۔",
       "4. آئی سی ڈی کوڈز اور تجویز کردہ تشخیصی چپس: ہر سطر پر 'آئی سی ڈی کوڈ منتخب کریں' سے کوڈ براؤز کریں۔ مریض کے حالیہ کلینیکل چارٹ سے موصول شدہ تشخیصی چپس پر کلک کر کے متعلقہ سطر میں منتقل کریں۔",
       "5. حصہ دوم اور اضافی کوائف درج کریں: حصہ دوم میں دیگر معاون امراض لکھیں۔ طریقۂ وفات منتخب کریں۔ غیر قدرتی اموات میں خارجی اسباب، مقام اور تاریخ درج کریں۔ گزشتہ 4 ہفتوں کی سرجری، خواتین میں حالتِ حمل اور بچوں کے پیدائشی کوائف مکمل کریں۔",
       "6. سرٹیفکیٹ ڈرافٹ محفوظ کریں: 'ڈرافٹ محفوظ کریں' پر کلک کر کے اب تک کا کام محفوظ کریں تاکہ اگلی شفٹ کا ڈاکٹر یا ٹیسٹ نتائج آنے پر مزید اندراج کیا جا سکے۔",
       "7. وفات کے اسباب کی حتمی تصدیق کریں: تمام ضروری خانے چیک کرنے کے بعد 'سرٹیفکیٹ کی حتمی تصدیق' پر کلک کریں۔ اس سے سرٹیفکیٹ مستقل لاک ہو جائے گا اور ڈاکٹر کی پی ایم ڈی سی رجسٹریشن ثبت ہو جائے گی۔",
       "8. تصحیح کا اندراج یا اے 4 پرنٹ: تصدیق کے بعد کسی بھی ترمیم کے لیے 'تصحیح درج کریں' سے ٹھوس وجہ کے ساتھ نیا اندراج کریں۔ یونین کونسل کے باضابطہ اندراج اور لواحقین کے لیے 'سرٹیفکیٹ پرنٹ کریں' پر کلک کر کے اے 4 سرکاری دستاویز پرنٹ کریں۔",
-"Report Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"],
+"معائنے کی رپورٹ: پہلے سربراہ موجودہ درخواست منظور کرتا ہے۔ اسی مریض کی آٹوپسی رپورٹ اسکین الگ اپ لوڈ کرکے تصدیق شدہ دستاویز منسلک کریں۔ اصل وقت ہسپتال کے ٹائم زون میں اور اصل تقابل خود چنیں؛ دونوں ابتدا میں خالی ہیں۔ رپورٹ ایک بار بھیجیں۔ جواب کھو جائے تو موجودہ نتیجہ پڑھ کر حالت ملائیں، رپورٹ دوبارہ نہ بھیجیں۔ صرف الگ اسکین اپ لوڈ اصل کلید سے دوبارہ ہوتا ہے۔ اپ لوڈ یا پرنٹ ناکامی وفات کا اندراج نہیں دہراتی۔"],
     faq: [
       [
         "The Death record screen says \"Only a doctor registered with the PMDC can record or certify a death.\" (DEATH_CERTIFIER_NOT_DOCTOR). Why, and what do I do?",
@@ -2655,7 +2655,7 @@ faqUr: [
       ],
       [
         "The Death record screen says \"The autopsy cannot move to that status.\" (AUTOPSY_TRANSITION_INVALID). Why, and what do I do?",
-        "Autopsy workflow follows a strict state progression: Requested -> Completed (with report) or Cancelled. You cannot cancel an autopsy that has already been completed, nor report findings on a cancelled requisition. Check the current autopsy status and refresh data before proceeding."
+        "The clinical autopsy proceeds Requested → Authorized → Reported, or is Cancelled when permitted. The head of hospital authorizes first. A Reported or Cancelled autopsy cannot receive another report. Reread actual state after a lost reply; this final report has no idempotent replay."
       ],
       [
         "How does the WHO cause of death underlying cause rule work on this screen?",
@@ -2666,7 +2666,7 @@ faqUr: [
         "Under rule 9e98e4c3ec, the system surfaces active conditions from recent inpatient or emergency encounters as clickable suggestion chips. To maintain doctor clinical ownership, lines are never silently auto-populated. The physician reviews the chips and clicks on a suggestion to assign it to line a, b, c, d, or Part II, then verifies the duration and ICD code."
       ]
     ,
-["How do I find a record, and who adds it if missing?","Report Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."]],
+["How do I find a record, and who adds it if missing?","Autopsy report: the head of hospital authorizes the existing request first. Upload this patient’s AutopsyReport scan separately, then attach its confirmed document. Enter actual performed time in the hospital timezone and choose the actual correlation; neither starts prefilled. Submit once. A lost final-report reply requires Read current result and status reconciliation, with no report retry. Only the separate scan upload retries its original key. Upload/print failure never repeats death registration."]],
     faqUr: [
       [
         "اسکرین کہتی ہے کہ 'صرف پی ایم ڈی سی رجسٹرڈ ڈاکٹر ہی وفات کا اندراج یا تصدیق کر سکتا ہے' (DEATH_CERTIFIER_NOT_DOCTOR)۔ کیا کریں؟",
@@ -2714,7 +2714,7 @@ faqUr: [
       ],
       [
         "اسکرین کہتی ہے کہ 'پوسٹ مارٹم کو اس کیفیت میں منتقل نہیں کیا جا سکتا' (AUTOPSY_TRANSITION_INVALID)۔ کیا کریں؟",
-        "پوسٹ مارٹم کی درخواست صرف 'مکمل' یا 'منسوخ' ہو سکتی ہے۔ جو پوسٹ مارٹم پہلے مکمل ہو چکا ہو اسے منسوخ نہیں کیا جا سکتا۔ ڈیٹا ریفریش کر کے دوبارہ دیکھیں۔"
+        "معائنے کی درخواست پہلے سربراہ سے منظور، پھر رپورٹ ہوتی ہے، یا مجاز حالت میں منسوخ۔ رپورٹ شدہ یا منسوخ درخواست پر نئی رپورٹ نہیں۔ جواب کھو جائے تو اصل حالت دوبارہ پڑھیں؛ حتمی رپورٹ کی محفوظ دوبارہ کوشش نہیں۔"
       ],
       [
         "ڈبلیو ایچ او کے مطابق اصل بنیادی سببِ وفات کا تعین کیسے ہوتا ہے؟",
@@ -2725,7 +2725,7 @@ faqUr: [
         "رول 9e98e4c3ec کے تحت سسٹم مریض کے پچھلے داخلوں کی تشخیصات کو چپس کی صورت میں ظاہر کرتا ہے۔ ڈاکٹر کی کلینیکل توثیق یقینی بنانے کے لیے سسٹم خودکار طور پر کوئی سطر پر نہیں کرتا۔ معالج متعلقہ چپ پر کلک کر کے اسے سطر الف، ب، ج، د یا حصہ دوم میں شامل کرتا ہے۔"
       ]
     ,
-["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Report Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"]]
+["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","معائنے کی رپورٹ: پہلے سربراہ موجودہ درخواست منظور کرتا ہے۔ اسی مریض کی آٹوپسی رپورٹ اسکین الگ اپ لوڈ کرکے تصدیق شدہ دستاویز منسلک کریں۔ اصل وقت ہسپتال کے ٹائم زون میں اور اصل تقابل خود چنیں؛ دونوں ابتدا میں خالی ہیں۔ رپورٹ ایک بار بھیجیں۔ جواب کھو جائے تو موجودہ نتیجہ پڑھ کر حالت ملائیں، رپورٹ دوبارہ نہ بھیجیں۔ صرف الگ اسکین اپ لوڈ اصل کلید سے دوبارہ ہوتا ہے۔ اپ لوڈ یا پرنٹ ناکامی وفات کا اندراج نہیں دہراتی۔"]]
   },
   mlc_cases_doctor: {
     title: "Medico-legal cases",
@@ -6398,7 +6398,7 @@ consents_doctor: {
   "Enter dose with units, route, frequency and quantity. OPD/ER also needs whole days except a single STAT dose. Inpatient medication requires hospital-time start; Other frequency needs interval hours. Self-administration is only explicitly allowed inpatient oral/inhaled/topical non-high-alert medicine. Confirm each safety warning; the server independently checks prescribing privileges.",
   "Create prescription once. If PRESCRIPTION_INCOMPLETE, retain and correct the marked line fields. A lost reply freezes edits/navigation for the identical original-key retry within24hours. Read-only reconciliation handles non-idempotent cancellation; never replace a potentially saved prescription. Changing patient or discarding asks before losing draft text.",
   "Read the saved prescription, stamp, pharmacist queries, dispensed amounts and handover history. Print prescription or Save prescription PDF separately using the actual issued payload; printing does not record handover. A failed/cancelled print leaves the prescription saved and can be retried without prescribing again.",
-  "Only after actually giving the slip, Record handover to Patient or a named Attendant and choose Electronic/Carbon copy/Scan. Scan selects the patient's uploaded Prescription document. A prescriber may Cancel eligible open lines with a reason; saved clinical content is never edited/deleted. F1 preserves draft/focus, and Settings/keyboard share100–250%zoom.",
+  "Only after actually giving the slip, Record handover to Patient or a named Attendant and choose Electronic/Carbon copy/Scan. Scan uploads the signed paper here first (a separate original-key write), then selects the returned patient Prescription document; confirm the handover separately. A prescriber may Cancel eligible open lines with a reason; saved clinical content is never edited/deleted. F1 preserves draft/focus, and Settings/keyboard share100–250%zoom.",
   "An inpatient ExternalMarket line offers self-administration only for a drug chosen from the hospital list. A typed medicine name has unknown high-alert status and cannot be self-administered. The route must be Oral, SL, Topical, Inhaled, Ophthalmic, Otic or Nasal and the drug must not be high-alert. SELF_ADMINISTRATION_INVALID remains the server’s refusal."
 ,
 "Document: Upload the patient scan first, then attach that confirmed document. Upload or print failure never repeats the main record."],
@@ -6409,7 +6409,7 @@ consents_doctor: {
   "اکائی سمیت خوراک، راستہ، وقفہ اور مقدار لکھیں۔ بیرونی مریض کو فوری ایک خوراک کے سوا پورے دن لازم۔ داخل مریض کا آغاز ہسپتال کے وقت میں، دیگر وقفے کو گھنٹے لازم۔ خود لینا صرف مجاز غیر خطرناک منہ، سانس یا جلد کی دوائی ہے۔ خطرات تصدیق کریں؛ سرور اجازت بھی چیک کرتا ہے۔",
   "ایک بار نسخہ بنائیں۔ نامکمل دوائی پر مسودہ رکھ کر نمایاں خانے درست کریں۔ جواب گم ہو تو24گھنٹے میں اصل درخواست اسی نمبر سے چیک؛ ترمیم اور جگہ بدلنا بند۔ منسوخی صرف پڑھ کر چیک ہے۔ ممکنہ محفوظ نسخے کا بدل نہ بنائیں۔ مریض بدلنا یا مسودہ چھوڑنا پہلے پوچھتا ہے۔",
   "محفوظ نسخہ، مہر، فارماسسٹ کے سوال، فراہم مقدار اور حوالگی پڑھیں۔ اصل معلومات سے پرنٹ یا پی ڈی ایف الگ کریں؛ پرنٹ حوالگی نہیں۔ پرنٹ ناکام یا منسوخ ہو تو نسخہ محفوظ اور صرف پرنٹ دوبارہ ہے۔",
-  "اصل دینے کے بعد مریض یا نام زد تیماردار اور برقی، کاربن یا اسکین نقل کی حوالگی درج کریں۔ اسکین اسی مریض کی اپ لوڈ نسخہ دستاویز ہو۔ معالج وجہ سے کھلی دوائی منسوخ کر سکتا ہے؛ محفوظ مواد بدلنا یا حذف نہیں۔ ایف۱مسودہ و فوکس اور ترتیب و کلید100تا250فیصد ایک زوم رکھتی ہیں۔",
+  "اصل دینے کے بعد مریض یا نام زد تیماردار اور برقی، کاربن یا اسکین نقل کی حوالگی درج کریں۔ اسکین یہیں الگ اصل کلید سے پہلے اپ لوڈ اور واپس آئی اسی مریض کی نسخہ دستاویز چنیں؛ حوالگی الگ تصدیق کریں۔ معالج وجہ سے کھلی دوائی منسوخ کر سکتا ہے؛ محفوظ مواد بدلنا یا حذف نہیں۔ ایف۱مسودہ و فوکس اور ترتیب و کلید100تا250فیصد ایک زوم رکھتی ہیں۔",
   "داخل مریض کی بیرونی دوا میں خود لینے کی اجازت صرف ہسپتال کی فہرست سے منتخب دوا پر ہے۔ ٹائپ نام کا خطرہ نامعلوم؛ خود لینے کی اجازت نہیں۔ منہ، زیر زبان، جلد، سانس، آنکھ، کان یا ناک کا راستہ اور غیر خطرناک دوا لازم۔ سرور کا انکار اصل فیصلہ ہے۔"
 ,
 "Document: پہلے مریض کا اسکین اپ لوڈ، پھر تصدیق شدہ دستاویز منسلک کریں۔ اپ لوڈ یا پرنٹ ناکامی اصل اندراج نہیں دہراتی۔"],
@@ -7045,14 +7045,14 @@ consents_doctor: {
       "متعدد ذمہ داریوں والے عملے کے لیے: کام شروع کرنے سے پہلے درست جگہ کھولیں۔",
     steps: [
       "Reopening your current workspace keeps its permitted menu while the server refreshes its guidance. Wait for the workspace to open before choosing a task.",
-      "Choose a workspace card. With one workspace the terminal opens it directly.",
+      "Choose a workspace card. One role workspace opens directly; My Workspace does not add another duty to that count. Every employee can open My Workspace from the account menu; with several role workspaces it also appears among the cards. Guests without an employee record have no My Workspace.",
       "Select Open in new window to keep another duty open alongside this window. Both windows use your session, but each keeps its own workspace context.",
       "A Records badge means history access. Open work means a retiring service can finish existing work but cannot start new work.",
       "The facility controls available workspaces. Changes appear when the server notifies the terminal.",
     ],
     stepsUr: [
       "موجودہ کام کی جگہ دوبارہ کھولنے پر مجاز فہرست برقرار رہتی ہے اور سرور سے رہنمائی تازہ ہوتی ہے۔ کام چننے سے پہلے جگہ کھلنے کا انتظار کریں۔",
-      "کام کی جگہ کا کارڈ منتخب کریں۔ صرف ایک جگہ ہو تو وہ خود کھلتی ہے۔",
+      "کام کی جگہ کا کارڈ چنیں۔ کردار کی ایک جگہ خود کھلتی ہے؛ میری کام کی جگہ اس گنتی میں شامل نہیں۔ ہر ملازم اسے اکاؤنٹ مینو سے کھول سکتا ہے؛ متعدد ذمہ داریوں میں اس کا کارڈ بھی آتا ہے۔ ملازم ریکارڈ کے بغیر مہمان کو یہ جگہ نہیں ملتی۔",
       "دوسری ذمہ داری کے لیے نئی ونڈو کھولیں۔ دونوں میں ایک سیشن مگر الگ کام کا سیاق ہوتا ہے۔",
       "ریکارڈز کا مطلب سابقہ معلومات تک رسائی ہے۔ جاری کام کا مطلب موجودہ کام مکمل کرنا ہے، نیا کام شروع کرنا نہیں۔",
       "دستیاب جگہیں ہسپتال کی ترتیبات سے طے ہوتی ہیں۔ سرور کی اطلاع پر تبدیلی ظاہر ہوتی ہے۔",
@@ -7079,7 +7079,7 @@ consents_doctor: {
       "ڈیوٹی کے دوران عملے کے لیے: شناخت، کام کی جگہ، رابطہ اور مشترکہ سہولیات واضح رکھیں۔",
     steps: [
       "After sign-in, Preparing your workspace loads your permitted tasks, settings and workspace handbook. The complete menu appears together; reference lists and the notification badge load in the background. Retry loading reference lists retries only those reads, without signing in or submitting a business action. If a read fails, Retry loading workspace re-reads it without signing in again or creating a patient, payment or visit.",
-      "Check your name and current workspace in the header before working. Use Workspaces to switch duties.",
+      "Check your name and current workspace in the header before working. Use Workspaces to switch duties. Open your account menu for My Workspace: leave, attendance and an asset issue use your employee record. Ask HR about a missing employee record and IT about access; guests have no employee workspace.",
       "Use the side navigation for notifications, approvals, incident reporting and settings. Facility configuration is a separate administrator entry.",
       "Live means the event stream has caught up. Reconnecting means displayed information may be stale. An unreachable-server banner blocks writes while keeping your input.",
       "F1 or Help opens the current screen’s handbook without clearing your form. Close Help to return to the same control.",
@@ -7087,7 +7087,7 @@ consents_doctor: {
     ],
     stepsUr: [
       "سائن اِن کے بعد آپ کی کام کی جگہ تیار ہو رہی ہے اجازت، ترتیبات اور رہنمائی حاصل کرتا ہے۔ مکمل فہرست ایک ساتھ دکھتی ہے؛ حوالہ جاتی فہرستیں اور اطلاعات کا عدد پس منظر میں آتے ہیں۔ ان کی خرابی پر حوالہ جاتی فہرستیں دوبارہ حاصل کریں صرف ان کی کوشش دہراتا ہے۔ خرابی پر کام کی جگہ دوبارہ حاصل کریں دبائیں؛ دوبارہ سائن اِن یا مریض، ادائیگی یا وزٹ نہیں بنتی۔",
-      "کام سے پہلے اوپر اپنا نام اور موجودہ کام کی جگہ دیکھیں۔ ذمہ داری بدلنے کے لیے کام کی جگہیں کھولیں۔",
+      "کام سے پہلے اوپر اپنا نام اور موجودہ جگہ دیکھیں۔ ذمہ داری بدلنے کو کام کی جگہیں کھولیں۔ اکاؤنٹ مینو سے میری کام کی جگہ کھولیں؛ چھٹی، حاضری اور اثاثے کی خرابی آپ کے ملازم ریکارڈ سے ہیں۔ غائب ملازم ریکارڈ کے لیے ایچ آر اور رسائی کے لیے آئی ٹی سے کہیں۔ مہمان کا ملازم صفحہ نہیں۔",
       "اطلاعات، منظوریوں، واقعہ رپورٹ اور ترتیبات کے لیے سائیڈ مینو استعمال کریں۔ ہسپتال کی ترتیب منتظم کا الگ حصہ ہے۔",
       "لائیو کا مطلب تازہ اطلاعات مکمل ہیں۔ دوبارہ رابطے کے دوران معلومات پرانی ہو سکتی ہیں۔ رابطہ نہ ہو تو اندراج محفوظ نہیں ہوتا مگر فارم برقرار رہتا ہے۔",
       "F1 یا مدد سے موجودہ صفحے کی رہنمائی کھولیں۔ مدد بند کرنے پر اسی کنٹرول پر واپس آئیں۔",

@@ -94,6 +94,11 @@ test('role and permission gating strictly enforces clinical certifiers per PMDC 
     permissions: ['death.record'],
   };
   assert.equal(canRecordDeath(surgeonUser), true);
+  const noPermission={...mockDoctorUser,permissions:[]};
+  assert.equal(canRecordDeath(noPermission),false);
+  assert.equal(canViewDeathRegister(noPermission),false);
+  assert.equal(canManageAutopsy(noPermission),false);
+  assert.equal(canViewDeathRegister({permissions:['death.autopsy.authorize']}),true);
 });
 
 test('validateRecordDeath verifies patient ID, death timestamp and brought dead requirements', () => {

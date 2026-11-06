@@ -1,8 +1,9 @@
 import {ConsentScanUpload} from "./ConsentScanUpload";
 import {DirectoryPicker} from "../DirectoryPicker";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo,useRef } from "react";
 import {
   Empty,
+  Modal,
   ErrorBox,
   LoadState,
   useLoad,
@@ -50,7 +51,7 @@ import {
   explainDeathError,
 } from "../death-record-policy";
 import { ClinicalWriteFeedback, useClinicalWrite } from "../clinical-write";
-import { formatHospitalTime } from "../hospital-time";
+import { formatHospitalTime,hospitalTimeToUtc,hospitalTimeZoneError } from "../hospital-time";
 import { ICDPicker } from "./ICDPicker";
 
 export interface DeathRecordProps {
@@ -130,11 +131,12 @@ export function DeathRecord({
     request_reasons: "",
   });
   const [autopsyRepForm, setAutopsyRepForm] = useState<Partial<AutopsyReportIn>>({
-    performed_at: new Date().toISOString().slice(0, 16),
+    performed_at: "",
     findings: "",
-    correlation: "Confirmed",
+    correlation: undefined,
     correlation_note: "",
   });
+  useEffect(()=>{setAutopsyDocument(undefined);setAutopsyRepForm({performed_at:'',findings:'',correlation:undefined,correlation_note:''});setAutopsyRepModalOpen(false);},[selectedDeathId]);
 
   // Print Payload State
   const [printPayload, setPrintPayload] = useState<PrintOut_DeathPrintFieldsOut_ | null>(null);
@@ -153,12 +155,17 @@ export function DeathRecord({
   const [detailData, setDetailData] = useState<DeathViewOut | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<unknown>(null);
+  const detailGeneration=useRef(0),selectedDeathRef=useRef(selectedDeathId);
+  selectedDeathRef.current=selectedDeathId;
 
   const reloadDetail = async (id: number) => {
+    if(id!==selectedDeathRef.current)return;
+    const generation=++detailGeneration.current;
     setDetailLoading(true);
     setDetailError(null);
     try {
       const res = await getDeath(id);
+      if(generation!==detailGeneration.current||selectedDeathRef.current!==id)return;
       setDetailData(res);
       // Initialize draft from record
       setDraftState({
@@ -201,16 +208,18 @@ export function DeathRecord({
       });
       setCertIncompleteErrors([]);
     } catch (e) {
-      setDetailError(e);
+      if(generation===detailGeneration.current&&selectedDeathRef.current===id)setDetailError(e);
     } finally {
-      setDetailLoading(false);
+      if(generation===detailGeneration.current&&selectedDeathRef.current===id)setDetailLoading(false);
     }
   };
 
   useEffect(() => {
     if (selectedDeathId) {
+      setDetailData(null);
       reloadDetail(selectedDeathId);
     }
+    return()=>{detailGeneration.current++;};
   }, [selectedDeathId]);
 
   // Realtime subscription for death.recorded (rule:8c2341a2ff)
@@ -378,19 +387,22 @@ export function DeathRecord({
 
   // Handle Autopsy Report
   const handleAutopsyReportSubmit = () => {
-    if (!detailData||scanPending||write.blocked) return;
+    if (!detailData||detailLoading||detailError||detailData.death.death_id!==selectedDeathId||scanPending||write.blocked||detailData.autopsy?.status!=='Authorized'||!view.canRequestAutopsy||!connected) return;
     const errs = validateAutopsyReport(autopsyRepForm);
     if (Object.keys(errs).length > 0) {
       setValidationErrors(errs);
       return;
     }
+    let performedAt:string;
+    try{const problem=hospitalTimeZoneError(timeZone);if(problem)throw problem;performedAt=hospitalTimeToUtc(autopsyRepForm.performed_at!,timeZone!);}catch(e){setValidationErrors({performed_at:e instanceof Error?e.message:String(e)});return;}
     setValidationErrors({});
     write.start({
       path: `/deaths/${detailData.death.death_id}/autopsy/report`,
       method: "POST",
-      body: {...autopsyRepForm,report_document_id:autopsyDocument?.patient_id===detailData.death.patient_id?autopsyDocument.document_id:undefined},
-      permission: "death.record",
-      protection: "idempotent",
+      body: {...autopsyRepForm,performed_at:performedAt,report_document_id:autopsyDocument?.patient_id===detailData.death.patient_id?autopsyDocument.document_id:undefined},
+      permission: user.permissions.includes('death.record')?'death.record':'death.autopsy.authorize',
+      protection: "reconcile",
+      reconcilePath:`/deaths/${detailData.death.death_id}`,
       label: `Record autopsy report for ${detailData.death.death_number}`,
     });
   };
@@ -411,7 +423,7 @@ export function DeathRecord({
   };
 
   return (
-    <div data-write-pending={write.blocked||scanPending} className="container-fluid p-3" data-screen-id={screenId} style={{ minHeight: "100vh" }}>
+    <div data-write-pending={write.blocked||scanPending} data-unsaved={autopsyRepModalOpen} className="container-fluid p-3" data-screen-id={screenId} style={{ minHeight: "100vh" }}>
       {/* Retiring / Service View Banner (rule:81b46f9cf6) */}
       {view.banner && (
         <div className="alert alert-warning d-flex align-items-center mb-3" role="alert">
@@ -661,7 +673,7 @@ export function DeathRecord({
       </div>
 
       {/* Clinical Write Feedback */}
-      <ClinicalWriteFeedback write={write} />
+      {!autopsyRepModalOpen&&<ClinicalWriteFeedback write={write} />}
 
       {/* Detail & Certificate Modal */}
       {detailModalOpen && detailData && (
@@ -1421,9 +1433,12 @@ export function DeathRecord({
                                 <span className="badge bg-success mb-1">{detailData.autopsy.correlation}</span>
                                 <div className="small"><strong>{t("Findings", "نتائج")}:</strong> {detailData.autopsy.findings}</div>
                                 <div className="small text-muted">{detailData.autopsy.correlation_note}</div>
+                                {detailData.autopsy.performed_at&&<p>{t('Performed','معائنہ ہوا')}: {formatHospitalTime(detailData.autopsy.performed_at,tz)}</p>}
+                                {detailData.autopsy.reported_by_name&&<p>{t('Report recorded by','رپورٹ درج کرنے والا')}: {detailData.autopsy.reported_by_name}{detailData.autopsy.reported_at&&<> · {formatHospitalTime(detailData.autopsy.reported_at,tz)}</>}</p>}
+                                {detailData.autopsy.report_document_id!=null&&<p>{t('Signed report scan attached.','دستخط شدہ رپورٹ کی اسکین منسلک ہے۔')}</p>}
                               </div>
                             ) : (
-                              canAutopsy && (
+                              canAutopsy && ['Requested','Authorized'].includes(detailData.autopsy.status) && (
                                 <div className="d-flex gap-2">
                                   <button
                                     type="button"
@@ -1433,6 +1448,7 @@ export function DeathRecord({
                                       setAutopsyRepModalOpen(true);
                                     }}
                                     data-help="death_record.btn_open_autopsy_rep"
+                                    disabled={detailLoading||!!detailError||detailData.death.death_id!==selectedDeathId||write.blocked||!connected||!view.canRequestAutopsy||detailData.autopsy.status!=='Authorized'}
                                   >
                                     📝 {t("Record Autopsy Report", "آٹوپسی رپورٹ درج کریں")}
                                   </button>
@@ -1775,28 +1791,12 @@ export function DeathRecord({
 
       {/* Autopsy Report Modal */}
       {autopsyRepModalOpen && (
-        <div
-          className="modal fade show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-          tabIndex={-1}
-          role="dialog"
-        >
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header bg-success text-white">
-                <h5 className="modal-title fw-bold">
-                  {t("Record Autopsy Report", "آٹوپسی رپورٹ کا اندراج")}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close btn-close-white"
-                  onClick={() => {if(!scanPending&&!write.blocked)setAutopsyRepModalOpen(false);}}
-                  data-help="death_record.btn_close_autopsy_rep"
-                />
-              </div>
+        <Modal title={t("Record Autopsy Report","آٹوپسی رپورٹ کا اندراج")} closable={!scanPending&&!write.blocked} onClose={()=>{if(!scanPending&&!write.blocked)setAutopsyRepModalOpen(false);}}>
               <div className="modal-body p-3">
+                <ClinicalWriteFeedback write={write} onReviewed={()=>{setAutopsyRepModalOpen(false);if(selectedDeathId)void reloadDetail(selectedDeathId);void reloadRegister();}}/>
       {detailData&&user.permissions.includes('patient.document.upload')&&<ConsentScanUpload key={detailData.death.patient_id} patientId={detailData.death.patient_id} consentNumber={detailData.death.death_number} docType="AutopsyReport" disabled={write.blocked} onPending={setScanPending} onUploaded={v=>setAutopsyDocument({patient_id:v.patient_id,document_id:v.document_id})}/>}
       {autopsyDocument?.patient_id===detailData?.death.patient_id&&<p>{t('This patient’s scan is uploaded and will be attached when you confirm the report.','اس مریض کی اسکین اپ لوڈ ہے؛ رپورٹ کی تصدیق پر منسلک ہو گی۔')}</p>}
+                <fieldset disabled={write.blocked||scanPending} style={{border:0,padding:0}}>
                 {validationErrors.performed_at && <div className="text-danger small mb-2">{validationErrors.performed_at}</div>}
                 {validationErrors.findings && <div className="text-danger small mb-2">{validationErrors.findings}</div>}
                 {validationErrors.correlation && <div className="text-danger small mb-2">{validationErrors.correlation}</div>}
@@ -1817,10 +1817,11 @@ export function DeathRecord({
                   <label className="form-label small fw-bold mb-1">{t("Correlation Outcome", "نتائج کا تقابل")}</label>
                   <select
                     className="form-select form-select-sm"
-                    value={autopsyRepForm.correlation || "Confirmed"}
+                    value={autopsyRepForm.correlation || ""}
                     onChange={(e) => setAutopsyRepForm({ ...autopsyRepForm, correlation: e.target.value as any })}
                     data-help="death_record.select_autopsy_correlation"
                   >
+                    <option value="">{t('Choose the actual correlation','اصل تقابل چنیں')}</option>
                     <option value="Confirmed">{t("Confirmed (Clinical diagnosis verified)", "تصدیق شدہ (طبی تشخیص درست تھی)")}</option>
                     <option value="MinorDiscrepancy">{t("Minor Discrepancy", "معمولی فرق")}</option>
                     <option value="MajorDiscrepancy">{t("Major Discrepancy", "نمایاں / بڑا فرق")}</option>
@@ -1836,6 +1837,7 @@ export function DeathRecord({
                     value={autopsyRepForm.findings || ""}
                     onChange={(e) => setAutopsyRepForm({ ...autopsyRepForm, findings: e.target.value })}
                     data-help="death_record.input_autopsy_findings"
+                    maxLength={20000}
                   />
                 </div>
 
@@ -1848,8 +1850,10 @@ export function DeathRecord({
                     value={autopsyRepForm.correlation_note || ""}
                     onChange={(e) => setAutopsyRepForm({ ...autopsyRepForm, correlation_note: e.target.value })}
                     data-help="death_record.input_autopsy_correlation_note"
+                    maxLength={4000}
                   />
                 </div>
+                </fieldset>
               </div>
               <div className="modal-footer">
                 <button
@@ -1857,6 +1861,7 @@ export function DeathRecord({
                   className="btn btn-secondary btn-sm"
                   onClick={() => {if(!scanPending&&!write.blocked)setAutopsyRepModalOpen(false);}}
                   data-help="death_record.btn_cancel_autopsy_rep"
+                  disabled={write.blocked||scanPending}
                 >
                   {t("Cancel", "منسوخ")}
                 </button>
@@ -1870,9 +1875,7 @@ export function DeathRecord({
                   {t("Submit Autopsy Report", "رپورٹ جمع کریں")}
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {/* ICD Picker Modal */}

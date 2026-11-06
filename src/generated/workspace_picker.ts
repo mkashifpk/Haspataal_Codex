@@ -7,8 +7,10 @@ export interface WorkspaceOut {
   label: string;
   label_ur: string;
   description: string;
-  /** The user's roles that open this workspace */
+  /** The user's roles that open this workspace (empty for My Workspace when no role lands there: every employee has it) */
   roles: string[];
+  /** True for My Workspace (self_service): every user with an employee record has it, whatever their roles. Open it like any workspace (its window sends X-Active-Workspace: self_service), but do not count it for the launcher: a user with one role workspace opens that one directly and reaches My Workspace from the user's menu */
+  every_employee: boolean;
 }
 
 export interface MeOut {

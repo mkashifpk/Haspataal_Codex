@@ -6,7 +6,7 @@ import { resetDevDataset } from './dev-dataset';
 if(__BUILD_IS_DEV__)resetDevDataset(localStorage);
 import { MockDrills } from './screens/MockDrills';
 import { ComplianceRegister } from './screens/ComplianceRegister';
-import { screenNavigation, handbookPermits } from "./screen-navigation";
+import { screenNavigation, handbookPermits, directWorkspace } from "./screen-navigation";
 import { deliveredHelpScreens } from "./foundation-help";
 import { help as handbookHelp } from "./help";
 import { MedicationAdministration } from './screens/MedicationAdministration';
@@ -540,15 +540,16 @@ export function App() {
             liveState.current.screen,
           )
         ) {
-          if (available.length === 1) {
-            await call("workspace", { code: available[0].code });
+          const direct = directWorkspace(available);
+          if (direct) {
+            await call("workspace", { code: direct.code });
             if (!isCurrent()) return;
             loaded.current = true;
-            bootstrapSeed.offer(`${epoch}:${userId}:${available[0].code}`, snapshot);
+            bootstrapSeed.offer(`${epoch}:${userId}:${direct.code}`, snapshot);
             setOutline(undefined);
             setHelpOpen(false);
             setHelpPage(undefined);
-            setWorkspace(available[0].code);
+            setWorkspace(direct.code);
             setScreen(currentScreen => ["login", "workspace_picker", "app_shell"].includes(currentScreen) ? "app_shell" : currentScreen);
             return; // Scoped handbook must arrive before publishing its menu.
           } else {
@@ -924,7 +925,7 @@ export function App() {
       setNotice(
         "Finish or retry the pending action before changing workspace.",
       );
-      return;
+      return false;
     }
     try {
       if (
@@ -932,7 +933,7 @@ export function App() {
         dirty() &&
         !window.confirm("Discard unsaved input and switch workspace?")
       )
-        return;
+        return false;
       await call("workspace", { code, newWindow });
       if (!newWindow) {
         // Reopening the same workspace does not retrigger the workspace effect.
@@ -944,8 +945,10 @@ export function App() {
           setScreen("app_shell");
         }
       }
+      return true;
     } catch (e) {
       setError(e);
+      return false;
     }
   }
   function route(url: string) {
@@ -1568,7 +1571,7 @@ export function App() {
               {screen === 'holiday_calendar' && <HolidayCalendar key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} />}
               {screen === 'holiday_calendar_admin' && <HolidayCalendarAdmin key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === 'leave_approvals' && <LeaveApprovals key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
-              {screen === 'self_service' && <SelfService key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
+              {screen === 'self_service' && <SelfService key={user.user_id} lang={prefs.language} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === 'payroll' && <Payroll key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === 'ops_console' && <OpsConsole key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === "waste_log_ops" && <WasteLog key={user.user_id} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
@@ -1796,6 +1799,12 @@ export function App() {
             {logoutBusy && (
               <p role="status">{t("Signing out…", "سائن آؤٹ جاری ہے…")}</p>
             )}
+            {visible.filter(w => w.every_employee).map(w => (
+              <button key={w.code} data-help="workspace.open" disabled={logoutBusy}
+                onClick={async () => { if (await selectWorkspace(w.code)) setLogoutOpen(false); }}>
+                {t(w.label, w.label_ur)}
+              </button>
+            ))}
             <button
               data-help="shell.help"
               disabled={logoutBusy}

@@ -3,6 +3,11 @@ type Handbook = {
   workspaces: Array<{ screens: Array<{ id: string }> }>;
 };
 type Views = { views: { screens: Array<{ screen_id: string; view: string }> } };
+// The server's every_employee flag describes My Workspace independently of roles.
+export function directWorkspace<T extends { every_employee: boolean }>(available: T[]): T | undefined {
+  const primary = available.filter(w => !w.every_employee);
+  return primary.length === 1 ? primary[0] : primary.length === 0 && available.length === 1 ? available[0] : undefined;
+}
 export function handbookPermits(
   handbook: Handbook | undefined,
   id: string,

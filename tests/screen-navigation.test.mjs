@@ -1,6 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { screenNavigation, handbookPermits } from "../src/screen-navigation.ts";
+import { screenNavigation, handbookPermits, directWorkspace } from "../src/screen-navigation.ts";
+test("employee workspace does not turn a single duty into a launcher; guest and multiple-duty boundaries remain server-owned", () => {
+  const reception={code:"reception",every_employee:false},self={code:"self_service",every_employee:true},lab={code:"lab",every_employee:false};
+  assert.equal(directWorkspace([reception,self]),reception);
+  assert.equal(directWorkspace([reception,lab,self]),undefined);
+  assert.equal(directWorkspace([reception]),reception);
+  assert.equal(directWorkspace([self]),self);
+  assert.equal(directWorkspace([]),undefined);
+});
 test("navigation restores delivered routes omitted from a legacy list, only within the server permission/view boundary", () => {
   const outline = {
     shared_screens: [{ id: "settings" }],

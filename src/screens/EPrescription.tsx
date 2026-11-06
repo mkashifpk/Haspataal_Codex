@@ -1421,15 +1421,15 @@ function PrescriptionEditor({
                             ?.filter((d) => d.doc_type === "Prescription")
                             .map((d) => (
                               <option key={d.document_id} value={d.document_id}>
-                                {d.document_id} · {d.document_date} · {d.title}
+                                {[d.title??t('Prescription scan','نسخے کی اسکین'),d.document_date,d.uploaded_at].filter(Boolean).join(' · ')}
                               </option>
                             ))}
                         </select>
                       </Field>
                       <p>
                         {t(
-                          "Upload the signed copy separately in Patient document vault; never repeat prescribing to attach it.",
-                          "دستخط شدہ نقل دستاویزات میں الگ اپ لوڈ کریں؛ منسلک کرنے کو نسخہ دوبارہ نہ بنائیں۔",
+                          "Upload the signed copy above, then choose its confirmed Prescription document. Never repeat prescribing to attach a scan.",
+                          "دستخط شدہ نقل اوپر الگ اپ لوڈ کرکے تصدیق شدہ نسخہ دستاویز چنیں۔ اسکین منسلک کرنے کو نسخہ دوبارہ نہ بنائیں۔",
                         )}
                       </p>
                     </>

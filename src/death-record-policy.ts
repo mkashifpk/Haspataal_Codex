@@ -99,65 +99,13 @@ export function evaluateDeathRecordView(
  * Role permissions check for recording / certifying death
  */
 export function canRecordDeath(user?: ClinicalUser | null): boolean {
-  if (!user) return false;
-  if (user.permissions?.includes("death.record")) return true;
-  const roles = [user.role, ...(user.roles || [])].filter(Boolean) as string[];
-  const allowed = ["doctor", "clinical_specialist", "surgeon", "anaesthetist"];
-  return roles.some((r) => allowed.includes(r));
+  return !!user?.permissions?.includes('death.record');
 }
-
-/**
- * Role permissions check for viewing the death register
- */
 export function canViewDeathRegister(user?: ClinicalUser | null): boolean {
-  if (!user) return false;
-  if (
-    user.permissions?.some(
-      (p) => p === "death.record" || p === "death.register.view" || p === "death.body.release"
-    )
-  ) {
-    return true;
-  }
-  const roles = [user.role, ...(user.roles || [])].filter(Boolean) as string[];
-  const allowed = [
-    "doctor",
-    "clinical_specialist",
-    "surgeon",
-    "anaesthetist",
-    "owner",
-    "hospital_admin",
-    "hospital_director",
-    "clinic_director",
-    "triage_nurse",
-    "ward_nurse",
-    "head_nurse",
-    "quality_officer",
-  ];
-  return roles.some((r) => allowed.includes(r));
+  return !!user?.permissions?.some(p=>['death.record','death.register.view','death.body.release','death.autopsy.authorize'].includes(p));
 }
-
-/**
- * Role permissions check for authorizing / reporting autopsy
- */
 export function canManageAutopsy(user?: ClinicalUser | null): boolean {
-  if (!user) return false;
-  if (
-    user.permissions?.some(
-      (p) => p === "death.record" || p === "death.autopsy.authorize"
-    )
-  ) {
-    return true;
-  }
-  const roles = [user.role, ...(user.roles || [])].filter(Boolean) as string[];
-  const allowed = [
-    "doctor",
-    "clinical_specialist",
-    "surgeon",
-    "anaesthetist",
-    "hospital_director",
-    "clinic_director",
-  ];
-  return roles.some((r) => allowed.includes(r));
+  return !!user?.permissions?.some(p=>['death.record','death.autopsy.authorize'].includes(p));
 }
 
 /**
@@ -426,8 +374,8 @@ export function validateAutopsyReport(input: Partial<AutopsyReportIn>): Record<s
   }
 
   const note = input.correlation_note?.trim() ?? "";
-  if (note.length < 3) {
-    errors.correlation_note = "Correlation note must be at least 3 characters.";
+  if (note.length < 5) {
+    errors.correlation_note = "Correlation note must be at least 5 characters.";
   }
 
   return errors;

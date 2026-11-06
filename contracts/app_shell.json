@@ -1,7 +1,7 @@
 {
   "screen_id": "app_shell",
-  "contract_fingerprint": "a48efc9c8254ac5137e2",
-  "knowledge_revision": "5d997abd8847f89d",
+  "contract_fingerprint": "a4772c79e2249316e1a9",
+  "knowledge_revision": "930b217cd2e48604",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "721dd86027802160",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "*",
       "purpose": "What every terminal does around its screens: keep the session alive, load the catalogues, log out.",
@@ -230,6 +230,7 @@
       }
     ],
     "related_workflows": [
+      "clinical-and-prescriptions",
       "finance-and-owner",
       "refunds-waivers-credit"
     ]
@@ -301,7 +302,7 @@
         "id": "ev:system.maintenance",
         "label": "system.maintenance",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:system.license",
@@ -331,13 +332,13 @@
         "id": "rule:71c59cc220",
         "label": "system.maintenance: show the message as a full-screen banner; non-admins get MAINTENANCE until it ends.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:9e384556b6",
         "label": "The maintenance screen shows the server's text word for word: IT writes it in the Control Center (e.g. 'Back at 02:30') and the IT manual promises every terminal shows it. Take it from the MAINTENANCE error's message, the system.maintenance event's message or GET /health maintenance_message; never replace it with a text of your own.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
@@ -349,7 +350,7 @@
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
@@ -422,12 +423,25 @@
       "idempotency_key": false,
       "errors": [
         {
+          "code": "ACCOUNT_DISABLED",
+          "http_status": 403,
+          "message": "This account is disabled.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
           "code": "LICENSE_INVALID",
           "http_status": 403,
           "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
           "retryable": false,
           "ui_action": "Explain and hide the action (check x-permissions).",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [
@@ -452,16 +466,53 @@
           "details_from": "POST /api/v1/auth/refresh"
         },
         {
+          "code": "TOKEN_EXPIRED",
+          "http_status": 401,
+          "message": "The session has expired; refresh or log in again.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
           "code": "TOKEN_REVOKED",
           "http_status": 401,
           "message": "The session was revoked; log in again.",
           "retryable": false,
           "ui_action": "Refresh the token once; if that fails return to login.",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [],
           "details_from": "GET /api/v1/auth/workspaces"
+        },
+        {
+          "code": "UNAUTHENTICATED",
+          "http_status": 401,
+          "message": "Authentication is required.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/settings/sections"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [],
@@ -534,7 +585,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [],
       "request_body": {
         "content": {
@@ -862,9 +926,13 @@
   "copy": {
     "workspace": null,
     "error_messages": {
+      "ACCOUNT_DISABLED": "This account is disabled.",
       "LICENSE_INVALID": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
       "REFRESH_TOKEN_REUSED": "Refresh token reuse detected; all sessions of this login were revoked.",
-      "TOKEN_REVOKED": "The session was revoked; log in again."
+      "TOKEN_EXPIRED": "The session has expired; refresh or log in again.",
+      "TOKEN_REVOKED": "The session was revoked; log in again.",
+      "UNAUTHENTICATED": "Authentication is required.",
+      "VALIDATION_ERROR": "The request is invalid."
     },
     "wording_quoted_in_rules": [
       ") and the IT manual promises every terminal shows it. Take it from the MAINTENANCE error",
@@ -876,7 +944,44 @@
   "roles": {
     "full": [],
     "partial": [],
-    "note": "Its endpoints need no permission: see each endpoint's x-access."
+    "page_for": [
+      "super_admin",
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "billing_admin",
+      "accountant",
+      "cashier",
+      "receptionist",
+      "admissions_officer",
+      "triage_nurse",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "ot_admin",
+      "anaesthetist",
+      "ot_nurse",
+      "ward_nurse",
+      "head_nurse",
+      "pharmacist",
+      "pharmacy_admin",
+      "lab_technician",
+      "lab_verifier",
+      "lab_admin",
+      "radiographer",
+      "radiologist",
+      "hr_admin",
+      "maintenance_admin",
+      "ops_admin",
+      "zakat_officer",
+      "quality_officer",
+      "ipc_nurse",
+      "cssd_technician",
+      "phc_inspector",
+      "employee_self"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role and an employee record, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook. Its endpoints need no permission: see each endpoint's x-access."
   },
   "test_plan": {
     "screen": "app_shell",
@@ -891,9 +996,13 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
+          "ACCOUNT_DISABLED",
           "LICENSE_INVALID",
           "REFRESH_TOKEN_REUSED",
-          "TOKEN_REVOKED"
+          "TOKEN_EXPIRED",
+          "TOKEN_REVOKED",
+          "UNAUTHENTICATED",
+          "VALIDATION_ERROR"
         ],
         "as_one_of": [
           "any logged-in user"
@@ -907,7 +1016,9 @@
           "as_one_of": [],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "any logged-in user"
         ]
@@ -1134,6 +1245,11 @@
     ],
     "errors_the_user_can_meet": [
       {
+        "code": "ACCOUNT_DISABLED",
+        "message": "This account is disabled.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
         "code": "LICENSE_INVALID",
         "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
         "ui_action": "Explain and hide the action (check x-permissions)."
@@ -1144,9 +1260,24 @@
         "ui_action": "Refresh the token once; if that fails return to login."
       },
       {
+        "code": "TOKEN_EXPIRED",
+        "message": "The session has expired; refresh or log in again.",
+        "ui_action": "Refresh the token once; if that fails return to login."
+      },
+      {
         "code": "TOKEN_REVOKED",
         "message": "The session was revoked; log in again.",
         "ui_action": "Refresh the token once; if that fails return to login."
+      },
+      {
+        "code": "UNAUTHENTICATED",
+        "message": "Authentication is required.",
+        "ui_action": "Refresh the token once; if that fails return to login."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "message": "The request is invalid.",
+        "ui_action": "Show field errors from details.fields / the message."
       }
     ],
     "sections": [
@@ -1208,6 +1339,11 @@
     "workspace_guide": "get_handbook_outline('*')"
   },
   "workflows": [
+    {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
     {
       "slug": "finance-and-owner",
       "title": "Cash shifts, payables, receivables, owner dashboards & risk",
@@ -2095,6 +2231,7 @@
       "title": "ValidationError"
     },
     "WorkspaceInfoOut": {
+      "title": "WorkspaceInfoOut",
       "properties": {
         "code": {
           "type": "string",
@@ -2127,6 +2264,18 @@
           "type": "array",
           "title": "Also Uses",
           "description": "Screen ids of other workspaces its roles work in (the cashier: my_cash_shift, cash_back_prompts)"
+        },
+        "every_employee": {
+          "type": "boolean",
+          "title": "Every Employee",
+          "description": "True for My Workspace (self_service): every user with an employee record has it, whatever their roles (GET /auth/workspaces lists it for them)",
+          "default": false
+        },
+        "guest": {
+          "type": "boolean",
+          "title": "Guest",
+          "description": "True for the PHC inspector's workspace: its logins are guests without an employee record, so they have no My Workspace",
+          "default": false
         }
       },
       "type": "object",
@@ -2137,8 +2286,7 @@
         "description",
         "screens",
         "also_uses"
-      ],
-      "title": "WorkspaceInfoOut"
+      ]
     }
   },
   "unknowns": [

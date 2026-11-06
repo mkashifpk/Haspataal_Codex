@@ -53,6 +53,10 @@ export interface WorkspaceInfoOut {
   screens: string[];
   /** Screen ids of other workspaces its roles work in (the cashier: my_cash_shift, cash_back_prompts) */
   also_uses: string[];
+  /** True for My Workspace (self_service): every user with an employee record has it, whatever their roles (GET /auth/workspaces lists it for them) */
+  every_employee?: boolean;
+  /** True for the PHC inspector's workspace: its logins are guests without an employee record, so they have no My Workspace */
+  guest?: boolean;
 }
 
 export interface ErrorCodeOut {

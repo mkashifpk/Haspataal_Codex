@@ -23,7 +23,8 @@ export function DirectoryPicker({path,idField,list,search=false,userId=false,emp
   try{let d:any=await api('GET',path+(search?(path.includes('?')?'&':'?')+'q='+encodeURIComponent(q.trim()):''));
    if(list)for(const part of list.split('.'))d=d?.[part];
    if(!Array.isArray(d))throw Error(t('The directory response is not a list. Contact IT.','فہرست کا جواب درست نہیں۔ آئی ٹی سے رابطہ کریں۔'));
-   const found=d.filter(r=>r[idField]!=null&&r.is_active!==false&&(!userId||r.user_id!=null));
+   const activeOnly=/^\/(?:admin\/departments|finance\/vendors)(?:\?|$)/.test(path);
+   const found=d.filter(r=>r[idField]!=null&&(!activeOnly||r.is_active===true)&&(!userId||r.user_id!=null));
    if(n===generation.current){setRows(found);if(value&&!found.some(r=>String(r[idField])===String(value)))change('');}
   }catch(e){if(n===generation.current)setError(e);}finally{if(n===generation.current)setBusy(false);}
  }
@@ -35,7 +36,7 @@ export function DirectoryPicker({path,idField,list,search=false,userId=false,emp
   <ErrorBox error={error}/>
   <select aria-label={accessibleLabel} data-help={help} data-field={rest['data-field' as keyof typeof rest]} id={rest.id} name={rest.name} className={rest.className} required={required} disabled={disabled||busy||!rows} value={rows?String(value??selected):''} onChange={e=>change(e.target.value)}>
    <option value="">{t('Choose from the directory','فہرست سے چنیں')}</option>
-   {rows?.map(r=><option key={r[idField]} value={r[idField]}>{[r.full_name??r.display_name??r.name??r.patient_name??r.batch_no??r.title??r.description??r.procedure_name??r.ward_name??r.label??r.booking_number??r.invoice_number??r.admission_number??r.work_order_number??r.emp_number??r.code, r.mrn,r.bed_label,r.expiry_date,r.qty_available!=null?`${r.qty_available} ${r.unit??''}`:null,r.is_expired?t('Expired','میعاد ختم'):null].filter(v=>v!=null&&v!=='').join(' · ')}</option>)}
+   {rows?.map(r=><option key={r[idField]} value={r[idField]}>{[r.full_name??r.display_name??r.name??r.patient_name??r.batch_no??r.title??r.description??r.procedure_name??r.ward_name??r.label??r.booking_number??r.invoice_number??r.admission_number??r.work_order_number??r.emp_number??r.code, r.mrn,r.emp_number,r.designation,r.department_name,r.registration,r.asset_tag??r.tag,r.vendor_name,r.booking_number,r.procedure_name,r.location,r.code,r.bed_label,r.expiry_date,r.qty_available!=null?`${r.qty_available} ${r.unit??''}`:null,r.is_expired?t('Expired','میعاد ختم'):null].filter(v=>v!=null&&v!=='').join(' · ')}</option>)}
   </select>
   {rows?.length===0&&<small role="status">{empty??directoryEmpty(path,userId)}</small>}
  </span>;

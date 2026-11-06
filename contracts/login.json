@@ -1,7 +1,7 @@
 {
   "screen_id": "login",
-  "contract_fingerprint": "a48efc9c8254ac5137e2",
-  "knowledge_revision": "5d997abd8847f89d",
+  "contract_fingerprint": "a4772c79e2249316e1a9",
+  "knowledge_revision": "930b217cd2e48604",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "721dd86027802160",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "*",
       "purpose": "First screen on every terminal: username/password, LAN diagnostics, terminal identity overlay.",
@@ -244,7 +244,10 @@
         "cites": []
       }
     ],
-    "related_workflows": []
+    "related_workflows": [
+      "clinical-and-prescriptions",
+      "finance-and-owner"
+    ]
   },
   "rules_in_force": null,
   "build_order": {
@@ -263,6 +266,13 @@
     "needed_by": [
       {
         "from": "my_beds",
+        "to": "login",
+        "kind": "error_prerequisite",
+        "evidence": "GET /ipd/my-beds answers PASSWORD_CHANGE_REQUIRED (seen in the tests); resolved on login",
+        "ordering": true
+      },
+      {
+        "from": "sterile_packs_ward",
         "to": "login",
         "kind": "error_prerequisite",
         "evidence": "GET /ipd/my-beds answers PASSWORD_CHANGE_REQUIRED (seen in the tests); resolved on login",
@@ -334,7 +344,7 @@
         "id": "rule:d975393728",
         "label": "In maintenance (GET /health maintenance_mode) show maintenance_message word for word: it is the text IT wrote in the Control Center (e.g. 'Back at 02:30'), never replace it with one of your own; keep polling until maintenance_mode is false.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:66a4630670",
@@ -474,6 +484,7 @@
           "retryable": false,
           "ui_action": "Explain and hide the action (check x-permissions).",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [],
@@ -514,6 +525,7 @@
           "retryable": false,
           "ui_action": "Explain and hide the action (check x-permissions).",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [
@@ -550,6 +562,18 @@
             "retry_after_seconds"
           ],
           "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [],
@@ -721,6 +745,7 @@
           "retryable": false,
           "ui_action": "Show field errors from details.fields / the message.",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [],
@@ -1135,7 +1160,44 @@
   "roles": {
     "full": [],
     "partial": [],
-    "note": "Its endpoints need no permission: see each endpoint's x-access."
+    "page_for": [
+      "super_admin",
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "billing_admin",
+      "accountant",
+      "cashier",
+      "receptionist",
+      "admissions_officer",
+      "triage_nurse",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "ot_admin",
+      "anaesthetist",
+      "ot_nurse",
+      "ward_nurse",
+      "head_nurse",
+      "pharmacist",
+      "pharmacy_admin",
+      "lab_technician",
+      "lab_verifier",
+      "lab_admin",
+      "radiographer",
+      "radiologist",
+      "hr_admin",
+      "maintenance_admin",
+      "ops_admin",
+      "zakat_officer",
+      "quality_officer",
+      "ipc_nurse",
+      "cssd_technician",
+      "phc_inspector",
+      "employee_self"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role and an employee record, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook. Its endpoints need no permission: see each endpoint's x-access."
   },
   "test_plan": {
     "screen": "login",
@@ -1156,7 +1218,8 @@
           "INVALID_CREDENTIALS",
           "LICENSE_INVALID",
           "PASSWORD_CHANGE_REQUIRED",
-          "RATE_LIMITED"
+          "RATE_LIMITED",
+          "VALIDATION_ERROR"
         ],
         "as_one_of": [
           "any logged-in user"
@@ -1491,7 +1554,18 @@
     ],
     "workspace_guide": "get_handbook_outline('*')"
   },
-  "workflows": [],
+  "workflows": [
+    {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    }
+  ],
   "scenarios": [],
   "decisions": [
     {
@@ -1669,7 +1743,7 @@
       "request": {
         "path": "/api/v1/auth/login",
         "body": {
-          "username": "u9a03234303",
+          "username": "u71195ebe7c",
           "password": "<secret>"
         }
       },
@@ -1684,29 +1758,38 @@
             "refresh_expires_in": 604800,
             "user": {
               "user_id": 1,
-              "username": "u9a03234303",
-              "display_name": "u9a03234303",
+              "username": "u71195ebe7c",
+              "display_name": "Dr Ahmed",
               "employee_id": 1,
               "emp_number": "EMP-2026-0001",
-              "designation": "Officer",
+              "designation": "Doctor",
               "department": null,
               "roles": [
-                "super_admin"
+                "doctor"
               ],
               "permissions": [
-                "admin.audit.view",
-                "admin.badge_station.manage",
-                "admin.department.manage"
+                "blood.request",
+                "blood.transfuse",
+                "blood.view"
               ],
               "workspaces": [
                 {
-                  "code": "super_admin",
-                  "label": "Super Admin (IT)",
-                  "label_ur": "سپر ایڈمن",
-                  "description": "Provisioning queue | role matrix | terminal & printer mapping | server health | kill switch.",
+                  "code": "doctor",
+                  "label": "Clinical OPD / IPD",
+                  "label_ur": "ڈاکٹر",
+                  "description": "Live queue, EMR notes, e-prescriptions with live stock, lab/imaging orders, admissions, re-route.",
                   "roles": [
-                    "super_admin"
-                  ]
+                    "doctor"
+                  ],
+                  "every_employee": false
+                },
+                {
+                  "code": "self_service",
+                  "label": "My Workspace",
+                  "label_ur": "میرا صفحہ",
+                  "description": "Own leave requests, balances, duties, attendance, issue reporting.",
+                  "roles": [],
+                  "every_employee": true
                 }
               ],
               "must_change_password": false,
@@ -1735,9 +1818,9 @@
             }
           },
           "meta": {
-            "server_time": "2026-10-16T09:26:43.358214+00:00"
+            "server_time": "2026-11-05T18:21:25.545604+00:00"
           },
-          "request_id": "142aa917b16b4b39a634f8f083a80310"
+          "request_id": "37e8be5ade644f449915d383fc884826"
         }
       }
     },
@@ -2969,6 +3052,7 @@
       "description": "The vendor to contact about the license (only the channels the vendor gave are present)."
     },
     "WorkspaceOut": {
+      "title": "WorkspaceOut",
       "properties": {
         "code": {
           "type": "string",
@@ -2992,7 +3076,12 @@
           },
           "type": "array",
           "title": "Roles",
-          "description": "The user's roles that open this workspace"
+          "description": "The user's roles that open this workspace (empty for My Workspace when no role lands there: every employee has it)"
+        },
+        "every_employee": {
+          "type": "boolean",
+          "title": "Every Employee",
+          "description": "True for My Workspace (self_service): every user with an employee record has it, whatever their roles. Open it like any workspace (its window sends X-Active-Workspace: self_service), but do not count it for the launcher: a user with one role workspace opens that one directly and reaches My Workspace from the user's menu"
         }
       },
       "type": "object",
@@ -3001,9 +3090,9 @@
         "label",
         "label_ur",
         "description",
-        "roles"
-      ],
-      "title": "WorkspaceOut"
+        "roles",
+        "every_employee"
+      ]
     }
   },
   "unknowns": [
