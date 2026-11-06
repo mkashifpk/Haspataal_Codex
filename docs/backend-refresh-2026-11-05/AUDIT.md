@@ -118,3 +118,5 @@ Final checks: 863/863unit tests passed, followed by14/14HR/self-service policy c
 Reset follow-up: archived153additional old snapshot/journal consumers (203total), preserving exact source/hashes as historical Markdown. Required package entrypoints and helpers remain. registration-review now rejects pre-reset evidence; registration-check stamps the current dataset in new output. These two registration scripts were syntax-checked; no new registration/payment was run for this harness-only change.
 
 November6 follow-up: #54/#55 Fixed and retested; every_employee launcher/user-menu rule and current workspace types refreshed. 74/74 affected built-screen reads now covered.864/864 unit tests and the real DEV foundation regression passed; exact limitations retained in ../backend-followup-2026-11-06/REVIEW.md.
+
+Follow-up source/evidence committed a7f67d2; proposals343–348 saved and verified (342–348 awaiting human review on /docs -> My progress). Original refresh324–341 accepted. Final current renderer/checks: ../backend-followup-2026-11-06/final-verification.json.

@@ -2,7 +2,7 @@
 Updated2026-11-06 by Codex/functions + Haspataal MCP.
 
 ## Task/baseline
-Full backend7429acf refresh (#52/#53, directories across every built affected screen), fresh synthetic tests/help/examples, commit/propose, then checkpoint next screen. Baseline main6cd3b4d matched checkpoint; inherited22modified/71untracked preserved. Original checkpoint docs/handoff-before-backend-7429acf.md. Commits f302364(refresh/inherited158–162),3c959bf(receipts),5a56d2a(stale harnesses/no-key),db216b6(Screen163 MyInvestigations). HEADdb216b6. Intentional uncommitted attachment/waste/workspace follow-up/evidence remains. User asked complete: answered not fully and resumed final work.
+Full backend7429acf refresh (#52/#53, directories across every built affected screen), fresh synthetic tests/help/examples, commit/propose, then checkpoint next screen. Baseline main6cd3b4d matched checkpoint; inherited22modified/71untracked preserved. Original checkpoint docs/handoff-before-backend-7429acf.md. Commits f302364(refresh/inherited158–162),3c959bf(receipts),5a56d2a(stale harnesses/no-key),db216b6(Screen163 MyInvestigations). Source/evidence follow-up committed a7f67d2. Final receipt/handoff documentation commit follows; all implementation changes are committed. User asked complete: answered not fully and resumed final work.
 
 ## Backend
 Startup progress/proposals/issues/overview/guide/roadmap/what_changed read. #52/#53 Fixed at2026-11-05T08:16:10.122689+00:00, retested. Current build2026-11-06T02:06:23.441687+00:00; contract a4772c79e2249316e1a9, rubric da7ddfe1584d. #54/#55 Fixed at current build, retested. No open issue; earlier issue4 rejected as frontend scope. November6 is IN-PLACE, no reset/migration: retain7429acf epoch IDs/keys/cursors.
@@ -19,12 +19,12 @@ Screen163 MyInvestigations db216b6 implemented/tested: assigned menu/versioned d
 Direct8a–g fresh synthetic tests passed. Directory API78HTTP200+6permission/context skips.74/74affected-screen read/F1/focus/ENUR/250bounds (self-service Nov6). Targeted cases, NOT full historical CRUD/screen_test_plan acceptance.
 864/864unit passed artifacts/nov6-final-tests-rerun.log. First run one test read JSON mid-refresh (UnexpectedEOF); stable rerun passed unchanged checker.
 Real DEV test:foundation passed Nov6, portable foundation-check.json. Zoom/preferences/multiwindow/Facility draft/recovery/handbook/F1/timezone/account boundaries passed; empty approval queue means confirmation case not run. Preferences restored; no business writes.
-Pending session53883: npm.cmd run build:release > artifacts/nov6-release.log 2>&1; if successful npm.cmd run build > artifacts/nov6-dev-build.log 2>&1. Inspect exit/logs for final release DEV exclusion/restored DEV build before claiming. No other commands or uncertain business writes.
+Session53883 completed0: final release build passed DEV Review code/all3header exclusion and DEV build restored index-Ck6TXGLW.js. No running command or uncertain business write.
 Named human fresh-data journeys/native Urdu/editor/physical device/full historical CRUD remain pending. No Reviewcode entered or human review signed. No installer signed/deployed. Large bundle warning remains.
 
 ## Progress
 324–341 refresh proposals ACCEPTED per latest server;342 Screen163 pending, awaiting human review on /docs -> My progress. Exact payloads/receipts docs/backend-refresh-2026-11-05/ and docs/screen163-2026-11-05/. Latest states docs/backend-followup-2026-11-06/proposals-verified.json. Doctor/shared human reviews in progress; never enter/sign them.
-Remaining changed/tested candidates: eprescription new POST patient documents; death_record same plus corrected report recovery; self_service new GETopsassets; workspace_picker new rule; app_shell new account menu guidance/access; waste older-date/recovery behavior if submitting materially changed evidence. Check current accepted/pending before submit; no unchanged duplicate. Save exact payload/request_id BEFORE call, current rubric/tested commit, verify receipt. No empty/human claims.
+Changed/tested follow-up proposals343eprescription,344death_record,345self_service,346workspace_picker,347app_shell,348waste_log_ops saved and verified against exact payload/build/evidence.342–348 awaiting human review on /docs -> My progress. Payloads/receipts/final-proposals-verified.json in docs/backend-followup-2026-11-06/. No unchanged accepted work re-proposed.
 
 ## Fresh record/write safety
 NO uncertain writes. Never recreate/replay with replacement keys:
@@ -36,13 +36,8 @@ NO uncertain writes. Never recreate/replay with replacement keys:
 - Nov6 ownasset3 synthetic work_order1 WO-2026-00001, key7b6d9973-a6aa-4309-92ef-d40d79a66c3c,201confirmed; docs/backend-followup-2026-11-06/workspace-issue-{intent,result}.json. workspace-nov6-check.mjs refuses rerun; do not bypass guard.
 - Screen163incident1 finalanalysis/actionconfirmed; incident2UnderReview external synthetic eventactionconfirmed. docs/screen163-2026-11-05/.
 
-## Exact next actions
-1 Inspect session53883, release/dev logs. Save portable verification summary.
-2 Review diff/check (no secrets), commit source/help/screenshots/evidence. Current patches not yet committed.
-3 Save/submit only materially changed tested proposals above with current fingerprint/commit; verify IDs, record pending ones awaiting human review on /docs -> My progress.
-4 Commit receipts/handoff, ensure clean tree; concise final outcome with AUDIT/manual checks and honest human/full-plan limits. Next-step163 already done;164 is future work.
+## Current status / next action
+No implementation or test command is in progress; no uncertain writes. Source a7f67d2 and verified proposal receipts complete the implemented refresh and checkpoint Screen163. Final documentation commit records this state. Full historical CRUD/screen_test_plan branch coverage and named human/editor/native Urdu/device acceptance are still unverified, so do not describe the entire app or full request as unconditionally accepted/completed. The next validation is the remaining cases in saved per-screen plans with fresh synthetic fixtures; the human must conduct/sign their own fresh-data workspace reviews. Manual checks are listed in AUDIT.md. Screen164 is future roadmap work, not started.
 
 ## Environment
 WindowsPowerShell Node24/npm.cmd. Ignored .dev-terminal.json/.codex/config.toml/.agents/mcp_config.json supply authorized configuration; never print/stage secrets. No real patient/waste/vendor purchase/money. Current artifacts/profiles ignored; portable sanitized evidence in docs. Never execute pre-reset historical harnesses.
-
-Final session53883 completed0: release exclusion passed and DEV restored ./assets/index-Ck6TXGLW.js. No running command.864unit/foundation/build/release allpass; next sourcecommit and exact changed-item proposals.
