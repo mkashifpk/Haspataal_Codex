@@ -32,6 +32,9 @@ export function MyComplaintInvestigations({
   readOnly,
   timeZone,
   onOpenHelp,
+  recordId,
+  onEditingChange,
+  onChanged,
 }: {
   user: ClinicalUser;
   revision: number;
@@ -39,6 +42,9 @@ export function MyComplaintInvestigations({
   readOnly: boolean;
   timeZone?: string;
   onOpenHelp: () => void;
+  recordId?: number;
+  onEditingChange?: (editing: boolean) => void;
+  onChanged?: () => void;
 }) {
   const [rows, setRows] = useState<api.ComplaintOut[]>([]),
     [detail, setDetail] = useState<api.ComplaintDetailOut>(),
@@ -52,18 +58,20 @@ export function MyComplaintInvestigations({
     [reportOpen, setReportOpen] = useState(false),
     [reported, setReported] = useState<IncidentDetailOut>();
   const [incidentPending, setIncidentPending] = useState(false);
-  const selected = useRef<number | undefined>(undefined),
+  const selected = useRef<number | undefined>(recordId),
     generation = useRef(0);
   const refresh = useCallback(async () => {
     const n = ++generation.current;
     setLoading(true);
     setError(undefined);
     try {
-      const list = await api.listComplaints({
-        mine: true,
-        status: "Acknowledged",
-        limit: 1000,
-      });
+      const list = recordId
+        ? []
+        : await api.listComplaints({
+            mine: true,
+            status: "Acknowledged",
+            limit: 1000,
+          });
       const current = selected.current
         ? await api.getComplaint(selected.current)
         : undefined;
@@ -82,7 +90,7 @@ export function MyComplaintInvestigations({
     } finally {
       if (n === generation.current) setLoading(false);
     }
-  }, [user.user_id]);
+  }, [user.user_id, recordId]);
   useEffect(() => {
     void refresh();
     return () => {
@@ -95,12 +103,13 @@ export function MyComplaintInvestigations({
   }, [detail]);
   const write = useClinicalWrite(
     user,
-    "my_complaint_investigations",
+    recordId ? "complaints_register" : "my_complaint_investigations",
     async () => {
       setMode(undefined);
       setReviewed(false);
       setReported(undefined);
       await refresh();
+      onChanged?.();
     },
   );
   useEffect(() => {
@@ -110,6 +119,9 @@ export function MyComplaintInvestigations({
     )
       void refresh();
   }, [write.error, refresh]);
+  useEffect(() => {
+    onEditingChange?.(!!mode || reportOpen || write.blocked);
+  }, [mode, reportOpen, write.blocked, onEditingChange]);
   const blocked = write.blocked || reportOpen,
     editable = connected && !readOnly && !loading && !error;
   const can = (which: Mode) =>
@@ -234,14 +246,21 @@ export function MyComplaintInvestigations({
       : t("Hospital time zone unavailable", "ہسپتال کا وقت دستیاب نہیں");
   return (
     <section
-      data-screen="my_complaint_investigations"
+      data-screen={
+        recordId ? "complaints_register" : "my_complaint_investigations"
+      }
       data-unsaved={!!mode}
       data-write-pending={write.blocked || incidentPending}
     >
       <div className="section-heading">
         <div>
           <h1>
-            {t("Complaints I investigate", "جن شکایات کی میں تحقیق کرتا ہوں")}
+            {recordId
+              ? t("Investigation and follow-up", "تحقیق اور اگلا کام")
+              : t(
+                  "Complaints I investigate",
+                  "جن شکایات کی میں تحقیق کرتا ہوں",
+                )}
           </h1>
           <p>
             {t(
@@ -252,13 +271,16 @@ export function MyComplaintInvestigations({
         </div>
         <div className="actions">
           <button
-            data-help="mci.refresh"
+            data-help={recordId ? "crw.refresh" : "mci.refresh"}
             disabled={blocked || loading}
             onClick={() => void refresh()}
           >
             {t("Refresh investigations", "تحقیقات تازہ کریں")}
           </button>
-          <button data-help="mci.help" onClick={onOpenHelp}>
+          <button
+            data-help={recordId ? "crw.help" : "mci.help"}
+            onClick={onOpenHelp}
+          >
             F1 · {t("Help", "مدد")}
           </button>
         </div>
@@ -280,7 +302,13 @@ export function MyComplaintInvestigations({
         </p>
       )}
       <ErrorBox error={error} />
-      <ClinicalWriteFeedback write={write} onReviewed={() => void refresh()} />
+      <ClinicalWriteFeedback
+        write={write}
+        onReviewed={() => {
+          void refresh();
+          onChanged?.();
+        }}
+      />
       {loading && (
         <p role="status">
           {t(
@@ -289,7 +317,7 @@ export function MyComplaintInvestigations({
           )}
         </p>
       )}
-      {!loading && !error && !rows.length && (
+      {!recordId && !loading && !error && !rows.length && (
         <p>
           {t(
             "No acknowledged complaint is currently assigned to you. The complaints officer names the investigator; a notification brings the assignment here.",
@@ -297,7 +325,7 @@ export function MyComplaintInvestigations({
           )}
         </p>
       )}
-      {rows.length === 1000 && (
+      {!recordId && rows.length === 1000 && (
         <p role="alert">
           {t(
             "The list reached its limit. Ask the complaints officer to reconcile outstanding assignments.",
@@ -305,7 +333,7 @@ export function MyComplaintInvestigations({
           )}
         </p>
       )}
-      {!loading && !error && rows.length > 0 && (
+      {!recordId && !loading && !error && rows.length > 0 && (
         <div className="table-wrap">
           <table>
             <thead>
@@ -339,7 +367,7 @@ export function MyComplaintInvestigations({
                   </td>
                   <td>
                     <button
-                      data-help="mci.open"
+                      data-help={recordId ? "crw.open" : "mci.open"}
                       disabled={blocked}
                       onClick={() => void open(r)}
                     >
@@ -439,10 +467,16 @@ export function MyComplaintInvestigations({
                     key={which}
                     data-help={
                       which === "findings"
-                        ? "mci.findings"
+                        ? recordId
+                          ? "crw.findings"
+                          : "mci.findings"
                         : which === "update"
-                          ? "mci.update"
-                          : "mci.action"
+                          ? recordId
+                            ? "crw.update"
+                            : "mci.update"
+                          : recordId
+                            ? "crw.action"
+                            : "mci.action"
                     }
                     disabled={blocked || !!mode}
                     onClick={() => begin(which)}
@@ -580,7 +614,9 @@ export function MyComplaintInvestigations({
                   )}
                 >
                   <textarea
-                    data-help="mci.findings-text"
+                    data-help={
+                      recordId ? "crw.findings-text" : "mci.findings-text"
+                    }
                     required
                     minLength={10}
                     maxLength={8000}
@@ -614,7 +650,7 @@ export function MyComplaintInvestigations({
                   user.permissions.includes("incident.report") && (
                     <button
                       type="button"
-                      data-help="mci.report"
+                      data-help={recordId ? "crw.report" : "mci.report"}
                       onClick={() => setReportOpen(true)}
                     >
                       {t(
@@ -630,7 +666,7 @@ export function MyComplaintInvestigations({
                 <div className="fields">
                   <Field label={t("Contact stage", "رابطے کا مرحلہ")}>
                     <select
-                      data-help="mci.stage"
+                      data-help={recordId ? "crw.stage" : "mci.stage"}
                       value={update.stage}
                       onChange={(e) => {
                         setUpdate({
@@ -656,7 +692,7 @@ export function MyComplaintInvestigations({
                     label={t("Actual means of contact", "اصل ذریعہ رابطہ")}
                   >
                     <select
-                      data-help="mci.means"
+                      data-help={recordId ? "crw.means" : "mci.means"}
                       value={update.means}
                       onChange={(e) => {
                         setUpdate({
@@ -685,7 +721,9 @@ export function MyComplaintInvestigations({
                   label={t("What was actually told", "حقیقت میں کیا بتایا گیا")}
                 >
                   <textarea
-                    data-help="mci.contact-note"
+                    data-help={
+                      recordId ? "crw.contact-note" : "mci.contact-note"
+                    }
                     required
                     minLength={5}
                     maxLength={2000}
@@ -707,7 +745,9 @@ export function MyComplaintInvestigations({
                     >
                       <input
                         type="date"
-                        data-help="mci.extension-date"
+                        data-help={
+                          recordId ? "crw.extension-date" : "mci.extension-date"
+                        }
                         required
                         value={update.extended_until}
                         onChange={(e) => {
@@ -726,7 +766,11 @@ export function MyComplaintInvestigations({
                       )}
                     >
                       <textarea
-                        data-help="mci.extension-reason"
+                        data-help={
+                          recordId
+                            ? "crw.extension-reason"
+                            : "mci.extension-reason"
+                        }
                         required
                         maxLength={1000}
                         value={update.extension_reason}
@@ -748,7 +792,9 @@ export function MyComplaintInvestigations({
                 <div className="fields">
                   <Field label={t("Action type", "عمل کی قسم")}>
                     <select
-                      data-help="mci.action-type"
+                      data-help={
+                        recordId ? "crw.action-type" : "mci.action-type"
+                      }
                       value={action.action_type}
                       onChange={(e) => {
                         setAction({
@@ -774,7 +820,7 @@ export function MyComplaintInvestigations({
                     )}
                   >
                     <DirectoryPicker
-                      data-help="mci.owner"
+                      data-help={recordId ? "crw.owner" : "mci.owner"}
                       path="/staff/lookup"
                       idField="user_id"
                       search
@@ -789,7 +835,7 @@ export function MyComplaintInvestigations({
                   </Field>
                   <Field label={t("Department (optional)", "شعبہ (اختیاری)")}>
                     <DirectoryPicker
-                      data-help="mci.department"
+                      data-help={recordId ? "crw.department" : "mci.department"}
                       path="/admin/departments"
                       idField="department_id"
                       value={action.department_id}
@@ -801,7 +847,7 @@ export function MyComplaintInvestigations({
                   </Field>
                   <Field label={t("Due date", "آخری تاریخ")}>
                     <input
-                      data-help="mci.due"
+                      data-help={recordId ? "crw.due" : "mci.due"}
                       type="date"
                       required
                       value={action.due_date}
@@ -814,7 +860,11 @@ export function MyComplaintInvestigations({
                 </div>
                 <Field label={t("What needs to be done", "کیا کام کرنا ہے")}>
                   <textarea
-                    data-help="mci.action-description"
+                    data-help={
+                      recordId
+                        ? "crw.action-description"
+                        : "mci.action-description"
+                    }
                     required
                     minLength={5}
                     maxLength={1000}
@@ -831,7 +881,7 @@ export function MyComplaintInvestigations({
             <label className="check">
               <input
                 type="checkbox"
-                data-help="mci.confirm"
+                data-help={recordId ? "crw.confirm" : "mci.confirm"}
                 checked={reviewed}
                 onChange={(e) => setReviewed(e.target.checked)}
               />
@@ -841,12 +891,16 @@ export function MyComplaintInvestigations({
               )}
             </label>
             <div className="actions">
-              <button type="button" data-help="mci.cancel" onClick={clearDraft}>
+              <button
+                type="button"
+                data-help={recordId ? "crw.cancel" : "mci.cancel"}
+                onClick={clearDraft}
+              >
                 {t("Cancel unsent draft", "غیر ارسال مسودہ منسوخ کریں")}
               </button>
               <button
                 type="submit"
-                data-help="mci.submit"
+                data-help={recordId ? "crw.submit" : "mci.submit"}
                 className="primary"
                 disabled={!reviewed || !can(mode)}
               >
@@ -886,7 +940,7 @@ export function MyComplaintInvestigations({
           </div>
           {reported && (
             <button
-              data-help="mci.use-incident"
+              data-help={recordId ? "crw.use-incident" : "mci.use-incident"}
               disabled={incidentPending}
               onClick={() => setReportOpen(false)}
             >

@@ -1,0 +1,134 @@
+{
+  "method": "GET",
+  "path": "/api/v1/complaints/{complaint_id}/letter/pdf",
+  "summary": "A letter to the complainant (PDF, English)",
+  "tags": [
+    "Complaints"
+  ],
+  "permissions": [],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "access": {
+    "authentication": "user",
+    "permissions": [],
+    "permissions_mode": "all",
+    "who": "complaint.view or complaint.manage, the person who received the complaint and its investigator"
+  },
+  "description": "`COMPLAINT_STATE_INVALID`: the complaint has not reached this letter's step (e.g. the\nacknowledgement before it is acknowledged).",
+  "roles_allowed": [],
+  "parameters": [
+    {
+      "name": "complaint_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Complaint Id"
+      }
+    },
+    {
+      "name": "letter",
+      "in": "query",
+      "required": true,
+      "description": "",
+      "schema": {
+        "enum": [
+          "Acknowledgement",
+          "Outcome",
+          "AppealOutcome"
+        ],
+        "type": "string",
+        "title": "Letter"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": "not JSON (a file download): see the description",
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/complaints/1/letter/pdf",
+      "query": {
+        "letter": "Acknowledgement"
+      }
+    },
+    "response": {
+      "status": 200,
+      "content_type": "application/pdf",
+      "bytes": 2424
+    }
+  },
+  "errors": [
+    {
+      "code": "COMPLAINT_STATE_INVALID",
+      "http_status": 409,
+      "message": "The complaint cannot change that way: what was complained of, the acknowledgement, the outcome and the appeal are recorded once.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "complaints_register",
+    "complaint_appeals"
+  ],
+  "used_by_workflows": [],
+  "typescript_example": "// A letter to the complainant (PDF, English)  (permissions: any logged-in user)\nexport const letterPdf = (complaint_id) =>\n  api(\"GET\", `/complaints/${complaint_id}/letter/pdf`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "file",
+    "paging": [],
+    "search": [],
+    "filters": [
+      {
+        "name": "letter",
+        "required": true,
+        "type": "string",
+        "enum": [
+          "Acknowledgement",
+          "Outcome",
+          "AppealOutcome"
+        ]
+      }
+    ],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "COMPLAINT_STATE_INVALID",
+      "http_status": 409,
+      "message": "The complaint cannot change that way: what was complained of, the acknowledgement, the outcome and the appeal are recorded once.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "GET /api/v1/complaints/{complaint_id}/letter/print-payload"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

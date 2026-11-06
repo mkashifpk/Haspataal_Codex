@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-p9a170-complaint-assignee-directory-20261106",
+  "kind": "ContractMismatch",
+  "severity": "Medium",
+  "title": "Complaint acknowledgement's named people directory omits permitted staff investigators",
+  "endpoint": "GET /quality/record-review/people",
+  "screen_id": "complaints_register",
+  "workflow": "complaints; rule:04731dfcb9",
+  "build": "4e1df5c + uncommitted Screen170, tested DEV index-CnNX1cAh.js",
+  "agent": "Codex",
+  "actual": "The Screen170 acknowledgement rule names GET /quality/record-review/people for contact and investigator. As demo.quality it returns9 rows (doctors, Head Nurse, directors/owner, IPC and Quality), but neither Nurse Hina user18 nor Ops Admin user27. GET /staff/lookup?q=Hina returns Hina with user_id18. Fresh synthetic complaint2 is currently assigned to Ops27 and detail200 confirms that assignment. The actual UI lists every returned people row without filtering can_review; Hina is missing from the server list, not hidden locally. The documented picker therefore cannot select some staff whom the assignment workflow/API supports.",
+  "expected": "The complaints workflow explicitly permits any named member of staff whatever their role, and rule04731dfcb9 directs acknowledgement contact/investigator to this people list. Please either document GET /staff/lookup -> user_id for these acknowledgement fields (it is already among Screen170's endpoints), or provide the complete eligible assignee directory. No assignment API defect or staff-lookup defect is alleged; I have not added typed ids, broadened permissions, or guessed a fallback policy.",
+  "steps": "1. Read get_screen_bundle('complaints_register') rule04731dfcb9 and the complaints workflow's Investigators paragraph. 2. As demo.quality GET /quality/record-review/people and inspect all9 rows: Hina18/Ops27 absent. 3. GET /staff/lookup?q=Hina: Hina user18 exists. 4. GET /complaints/2: fresh current-run synthetic fixture names Ops27 as investigator. 5. In the real acknowledgement UI, show all returned people choices; Hina cannot be selected.",
+  "evidence": "People directory200 request32c766eea5da493c9929ff5737786678; Hina lookup200 request2e8c0fb69f414f95b6ed00b19e8e99f3; fresh synthetic complaint2 detail200/investigator_user_id27 request54ac14f293f0481aba5b039e94f5c499. Saved170-directory-*-result.json. Real read-only Quality UI preflight stopped at missing Hina option, with0businesswrites/preferences restored/signedout; earlier real server letter PDF save/preview and intake modal/F1/cancel passed. This is separate from56 (listing an already assigned investigator's own complaints), and57 (cross-desk tracking lookup)."
+}

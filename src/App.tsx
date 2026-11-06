@@ -1,3 +1,4 @@
+import {ComplaintRegister} from './screens/ComplaintRegister';
 import {ComplaintIntake,type ComplaintDesk} from './screens/ComplaintIntake';
 import {MyActions} from './screens/MyActions';
 import {listActions as ownedQualityActions} from './generated/my_actions';
@@ -990,7 +991,7 @@ export function App() {
       approvals: "approval_queue",
       notifications: "notifications",
       actions: 'my_actions',
-      complaints: complaintInvestigations.data?.length ? 'my_complaint_investigations' : 'notifications',
+      complaints: handbookPermits(outline,'complaints_register') ? 'complaints_register' : complaintInvestigations.data?.length ? 'my_complaint_investigations' : ['record_complaint_reception','record_complaint_admissions','record_complaint_er','record_complaint_ward'].find(id=>handbookPermits(outline,id)) ?? 'notifications',
       incidents: investigations.data?.length ? "my_investigations" : "report_incident",
       settings: "settings",
       establishment: "facility_profile",
@@ -1607,6 +1608,7 @@ export function App() {
               {screen === 'payroll' && <Payroll key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === 'ops_console' && <OpsConsole key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === "waste_log_ops" && <WasteLog key={user.user_id} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen==='complaints_register'&&<ComplaintRegister key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {['record_complaint_reception','record_complaint_admissions','record_complaint_er','record_complaint_ward'].includes(screen)&&<ComplaintIntake key={user.user_id+screen} screenId={screen as ComplaintDesk} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'my_actions'&&<MyActions key={user.user_id} initialAction={actionEntry} onChanged={()=>void ownedActions.reload()} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id==='my_actions')?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'my_complaint_investigations'&&<MyComplaintInvestigations key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id==='my_complaint_investigations')?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}

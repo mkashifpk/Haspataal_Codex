@@ -10,6 +10,93 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  complaints_register: {
+  title: "Complaints register",
+  titleUr: "شکایات کا رجسٹر",
+  purpose: "The complaints officer opens the register to acknowledge, investigate, keep the complainant informed and convey a documented outcome with the right to appeal. Act on immediate clinical risk first; a complaint record does not summon clinical help. Original words and decisions remain in the history.",
+  purposeUr: "شکایات افسر وصولی کا جواب، تحقیق، رابطہ اور اپیل کے حق سمیت اصل نتیجے کے لیے رجسٹر کھولتا ہے۔ فوری طبی خطرے پر پہلے عمل کریں؛ شکایت کا اندراج طبی مدد نہیں بلاتا۔ اصل الفاظ اور فیصلے تاریخ میں رہتے ہیں۔",
+  steps: [
+    "The complaints officer opens the register to acknowledge, investigate, keep the complainant informed and convey a documented outcome with the right to appeal. Act on immediate clinical risk first; a complaint record does not summon clinical help. Original words and decisions remain in the history.",
+    "The inbox puts Received first, then Acknowledged by answer due, then Appealed. Red text names an overdue acknowledgement or answer. Filter by received dates, category and status; Apply filters rereads the server. At1000rows narrow the period/category. Empty and read error are different; Refresh register recovers a failed read and updates current flags.",
+    "Open complaint rereads the original words/request, complainant/contact, patient/MRN, location, contact person, investigator, deadline and next step. Only current server can_* flags offer actions. An appeal is decided independently on Complaint appeals, never by the original outcome officer. Do not replace a complaint to hide its history.",
+    "Acknowledge within the hospital deadline: choose priority, the named contact and optional investigator from the people directory, explain the course of action and record how the complainant was told. A blank investigator uses the chosen contact; a blank response date uses server policy. IT provides missing logins and HR adds staff. If an existing colleague is missing, stop and ask IT/Quality to check the directory; do not create duplicate staff or substitute another person. Not maintainable requires the actual reason; it is not a way to dismiss an inconvenient complaint.",
+    "Urgent means a risk now; arrange immediate clinical help. After acknowledgement, open Write findings and Report a new safety incident in Investigation and follow-up, record it separately, then deliberately use the returned incident and save the findings. Never type an incident id, invent a record or assume that acknowledging dispatched help.",
+    "Review the current record and actual communication before Record this action once. A new complaint or each acknowledgement/contact/finding/action/outcome/closure/withdrawal is a separate idempotent write. If the answer is lost, keep the draft/window: Retry original request sends the same frozen body/key within retention. Never change a key or create another record to recover a lost answer. Read current result reconciles the exact record; ask IT/Quality if unclear.",
+    "Record every actual contact in the timeline: Progress, Other or Extension. An extension records the new answer date and real reason, plus how/what the complainant was told. It does not resolve the complaint. Future fresh reads retain unsent input and clear the review; check the current deadline again.",
+    "Write the findings as established facts. A safety incident is reported through its separate form first and linked only from that returned record. The report form owns its permission-scoped patient/stay/medicine/ward lists; missing patient is registered by Reception, medicine by Pharmacy, ward by IT. Do not turn an unreported suspicion into a fabricated incident number.",
+    "Add accountable corrective/preventive actions by named owner, active department and due date. Staff search needs at least2characters, uses staff lookup user_id and offers only rows with a login; IT provides a login, HR adds staff, IT adds departments. The assigned owner receives a notification and closes the action with evidence; that does not close this complaint.",
+    "Convey outcome requires findings: record upheld/partly/not, the decision actually told, the means and reported satisfaction. It is recorded once and starts the server’s appeal window. Print the acknowledgement for written complaints and the outcome/right-to-appeal letter. Print uses current-language server paragraphs; Preview/Save server PDF downloads the backend’s supplied document. Device/save failure or cancellation never repeats a decision; retry the same document and ask IT about printer mapping.",
+    "Close early only when the complainant actually waived appeal; the waiver box is never automatic. The server refuses an open window without waiver and closes remaining records when the window ends. Withdrawal records what the complainant requested before the outcome, preserving history. Final-state refusal rereads the current record without overwriting the draft. Notifications and reconnect resync refresh data; read errors hide stale records, preserve unsent input and offer Refresh.",
+    "Record a new complaint opens a separate form with the same named patient/department/ward directories and contact rules as the desks. Reception registers a missing patient and IT adds departments/wards; the modal offers no unlisted stay lookup. F1 works inside decision, incident and intake forms, retains input and restores focus. English/Urdu and both themes share keyboard/Settings zoom100–250%, reset100%. Human fresh-data, editor, Urdu and device review remains pending."
+  ],
+  stepsUr: [
+    "شکایات افسر وصولی کا جواب، تحقیق، رابطہ اور اپیل کے حق سمیت اصل نتیجے کے لیے رجسٹر کھولتا ہے۔ فوری طبی خطرے پر پہلے عمل کریں؛ شکایت کا اندراج طبی مدد نہیں بلاتا۔ اصل الفاظ اور فیصلے تاریخ میں رہتے ہیں۔",
+    "فہرست میں پہلے موصول، پھر جواب کی تاریخ کے مطابق تسلیم شدہ، پھر اپیل ہے۔ سرخ عبارت جواب کی تاخیر بتاتی ہے۔ موصول تاریخ، زمرہ اور حالت کے فلٹر سرور تازہ پڑھتے ہیں۔ ہزار ریکارڈ پر مدت یا زمرہ محدود کریں۔ خالی اور خرابی الگ؛ تازہ رجسٹر ناکام پڑھائی اور اجازتیں تازہ کرتا ہے۔",
+    "شکایت کھول کر اصل الفاظ، درخواست، رابطہ، مریض و نمبر، جگہ، ذمہ دار، تحقیق کار، تاریخ اور اگلا قدم پڑھیں۔ عمل صرف موجودہ سرور اجازتوں پر ہے۔ اپیل الگ مجاز افسر فیصلے کے صفحے پر کرتا ہے، اصل جواب دینے والا نہیں۔ تاریخ چھپانے کو نئی شکایت نہ کریں۔",
+    "ہسپتال کی مدت میں وصولی کا جواب: ترجیح، افراد کی فہرست سے رابطہ کار و اختیاری تحقیق کار، بتایا طریقہ عمل اور ذریعہ درج کریں۔ خالی تحقیق کار رابطہ کار اور خالی تاریخ سرور پالیسی لیتی ہے۔ لاگ ان آئی ٹی اور عملہ ایچ آر درج کرتا ہے۔ ناقابل کارروائی کی اصل وجہ لازم؛ ناپسند شکایت رد کرنے کا راستہ نہیں۔",
+    "فوری سے ابھی خطرہ؛ فوری طبی مدد دیں۔ وصولی کے جواب کے بعد تحقیق و اگلے کام میں نتائج اور نیا حفاظتی واقعہ کھولیں، واقعہ الگ درج، پھر واپس آیا واقعہ چن کر نتائج محفوظ کریں۔ آئی ڈی نہ لکھیں، ریکارڈ نہ گھڑیں اور وصولی کو طبی مدد بلانا نہ سمجھیں۔",
+    "ایک بار درج کرنے سے پہلے موجودہ ریکارڈ اور اصل رابطہ چیک کریں۔ نئی شکایت اور ہر جواب، رابطہ، نتیجہ، عمل، بندش یا واپسی الگ محفوظ عمل ہیں۔ جواب غائب ہو تو مسودہ و ونڈو رکھیں؛ اصل درخواست وہی متن و کلید مقرر مدت میں بھیجتی ہے۔ کلید بدل کر یا نیا ریکارڈ بنا کر بحالی نہیں۔ موجودہ نتیجہ عین ریکارڈ ملاتا ہے؛ غیر یقینی میں آئی ٹی یا کوالٹی سے کہیں۔",
+    "ہر اصل رابطہ تاریخ میں درج کریں: پیش رفت، دیگر یا مزید وقت۔ مزید وقت میں نئی تاریخ، اصل وجہ اور کیسے و کیا بتایا، درج ہوتا ہے۔ شکایت حل نہیں ہوتی۔ تازہ پڑھائی غیر ارسال متن رکھ کر جائزہ ہٹاتی؛ موجودہ تاریخ دوبارہ چیک کریں۔",
+    "نتائج ثابت حقائق کے طور پر لکھیں۔ حفاظتی واقعہ پہلے الگ فارم سے درج اور صرف واپس آئے ریکارڈ سے ملتا ہے۔ اس فارم کی مجاز مریض، داخلہ، دوا و وارڈ فہرستیں ہیں؛ مریض استقبالیہ، دوا فارمیسی، وارڈ آئی ٹی درج کرتا ہے۔ غیر رپورٹ شک کو فرضی واقعہ نمبر نہ دیں۔",
+    "اصلاحی یا احتیاطی عمل نام والے ذمہ دار، فعال شعبے اور تاریخ سے دیں۔ عملے کی تلاش کم از کم دو حروف، لاگ ان والی صف اور اس کا صارف نمبر لیتی ہے؛ لاگ ان آئی ٹی، عملہ ایچ آر، شعبہ آئی ٹی درج کرتا ہے۔ ذمہ دار کو اطلاع اور ثبوت سے عمل بند ہوتا؛ شکایت خود بند نہیں ہوتی۔",
+    "نتیجہ پہنچانے سے پہلے تحقیق لازم: درست، جزوی یا نہیں، اصل بتایا فیصلہ، ذریعہ اور اطمینان درج کریں۔ ایک بار درج اور سرور کی اپیل مدت شروع ہوتی ہے۔ تحریری شکایت کا وصولی اور نتیجہ و اپیل کا خط پرنٹ کریں۔ پرنٹ موجودہ زبان کے سرور پیراگراف، سرور پی ڈی ایف اس کا دیا کاغذ ہے۔ آلہ، محفوظ یا منسوخی پر فیصلہ نہ دہرائیں؛ وہی کاغذ پھرلیں اور پرنٹر کو آئی ٹی سے کہیں۔",
+    "جلد بندش صرف اصل اپیل دستبرداری پر؛ خانہ خود نہیں چنتا۔ سرور مدت کھلی اور دستبرداری نہ ہو تو انکار، باقی ریکارڈ مدت بعد خود بند کرتا ہے۔ نتیجے سے پہلے اصل واپسی درخواست تاریخ رکھتی ہے۔ حتمی انکار مسودہ بدلے بغیر تازہ ریکارڈ لاتا ہے۔ اطلاع و دوبارہ رابطہ تازہ کرتے؛ خرابی پر پرانے ریکارڈ چھپتے، مسودہ رہتا اور تازہ پڑھیں دستیاب ہے۔",
+    "نئی شکایت الگ فارم میں میزوں جیسی نام والی مریض، شعبہ، وارڈ فہرست اور رابطے کی شرط لاتی ہے۔ مریض استقبالیہ، شعبہ و وارڈ آئی ٹی درج کرتا؛ غیر درج داخلہ فہرست نہیں۔ ایف ون فیصلہ، واقعہ اور نئی شکایت کے فارم میں متن و فوکس رکھتی ہے۔ انگریزی، اردو اور دونوں تھیم کا زوم سو تا ڈھائی سو، ری سیٹ سو ہے۔ انسانی نئے ڈیٹا، ادارت، اردو اور آلات کا جائزہ باقی ہے۔"
+  ],
+  faq: [
+    [
+      "What must the complaints officer acknowledge?",
+      "The complaint number, real contact person/investigator, proposed investigation and when/how the complainant will hear back. Record actual communication, not a future promise as completed. Priority Urgent also needs immediate clinical help and a separately reported safety incident."
+    ],
+    [
+      "Who is available as an investigator or action owner?",
+      "Choose a named login from the people directory for acknowledgement; action owners use staff lookup with at least2characters and only non-null user_id. HR adds staff and IT supplies logins. Never copy an employee_id into a user_id field."
+    ],
+    [
+      "Can findings, actions and the outcome be combined into one save?",
+      "No. Each has its own recorded meaning and idempotent request. A failed action or print must not repeat the complaint, incident or outcome. Keep each confirmed record and recover an unknown result with its original request or a readback."
+    ],
+    [
+      "May I decide the appeal to my own outcome?",
+      "No. The independent authorised officer uses Complaint appeals; server can_decide_appeal and COMPLAINT_APPEAL_INDEPENDENT own the restriction. The cross-desk tracking lookup is not available yet: ask the complaints officer/original desk to locate an authorised record, without borrowing access or guessing ids."
+    ],
+    [
+      "Can I close early or erase a withdrawn complaint?",
+      "Early closure needs the complainant’s actual waiver and a note. An unchecked waiver may be refused while the window is open; do not tick it to bypass refusal. Withdrawal is an append-only recorded request before outcome, not deletion."
+    ],
+    [
+      "What should be checked on paper and in Urdu?",
+      "Compare current server paragraphs, tracking number, dates, recipient and actual author stamp; check RTL shaping and all page breaks on the mapped printer/PDF. Failure or cancellation is separate from the decision. A named human and native speaker still review fresh journeys and wording; an agent cannot sign that review."
+    ]
+  ],
+  faqUr: [
+    [
+      "شکایات افسر کس بات کا جواب دے؟",
+      "شکایت نمبر، اصل رابطہ کار و تحقیق کار، تحقیق اور جواب کا وقت و ذریعہ۔ اصل رابطہ درج، آئندہ وعدہ مکمل نہ کہیں۔ فوری ترجیح پر فوری طبی مدد اور الگ حفاظتی واقعہ بھی چاہیے۔"
+    ],
+    [
+      "تحقیق کار یا عمل کا ذمہ دار کون؟",
+      "وصولی کے لیے افراد کی فہرست سے نام والا لاگ ان؛ عمل کے لیے کم از کم دو حروف سے لاگ ان والا عملہ۔ ایچ آر عملہ اور آئی ٹی لاگ ان دیتا ہے۔ ملازم نمبر کو صارف نمبر میں نہ ڈالیں۔"
+    ],
+    [
+      "نتائج، عمل اور فیصلہ ایک محفوظ میں؟",
+      "نہیں۔ ہر ایک کا الگ مطلب و محفوظ درخواست ہے۔ عمل یا پرنٹ ناکامی شکایت، واقعہ یا فیصلہ نہ دہرائے۔ تصدیق شدہ ریکارڈ رکھیں؛ نامعلوم نتیجے کو اصل درخواست یا تازہ نتیجے سے ملائیں۔"
+    ],
+    [
+      "اپنے نتیجے کی اپیل خود؟",
+      "نہیں۔ آزاد مجاز افسر اپیل فیصلے کا صفحہ، سرور اجازت و آزاد فیصلے کا اصول لیتا ہے۔ دوسرے میز کا نمبر تلاش ابھی دستیاب نہیں؛ مجاز ریکارڈ کو شکایات افسر یا اصل میز سے کہیں، لاگ ان ادھار یا آئی ڈی اندازہ نہیں۔"
+    ],
+    [
+      "جلد بند یا واپس لی شکایت مٹا سکتے ہیں؟",
+      "جلد بندش کو اصل دستبرداری اور نوٹ۔ مدت کھلی تو خالی خانہ انکار دے سکتا؛ بچنے کو نہ چنیں۔ واپسی نتیجے سے پہلے اصل درخواست کا اندراج ہے، حذف نہیں۔"
+    ],
+    [
+      "کاغذ اور اردو میں کیا چیک؟",
+      "موجودہ سرور عبارت، نمبر، تاریخ، وصول کنندہ و اصل مہر؛ مقرر پرنٹر یا پی ڈی ایف میں اردو اور صفحے چیک کریں۔ ناکامی و منسوخی فیصلے سے الگ ہیں۔ نامزد انسان و اہل زبان نئے سفر و عبارت دیکھتے؛ ایجنٹ دستخط نہیں کرتا۔"
+    ]
+  ]
+},
+
   record_complaint_reception: {
   title: "Record a complaint",
   titleUr: "شکایت درج کریں",

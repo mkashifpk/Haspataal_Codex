@@ -19,7 +19,8 @@ export type ComplaintDesk =
   | "record_complaint_reception"
   | "record_complaint_admissions"
   | "record_complaint_er"
-  | "record_complaint_ward";
+  | "record_complaint_ward"
+  | "complaints_register";
 type Letter = "Notice" | "Acknowledgement" | "Outcome" | "AppealOutcome";
 const label = (v: string) =>
   t(
@@ -76,6 +77,10 @@ export function ComplaintIntake({
   noNewWork,
   timeZone,
   onOpenHelp,
+  intakeOnly=false,
+  onRecorded,
+  onPendingChange,
+  onCancel,
 }: {
   screenId: ComplaintDesk;
   user: ClinicalUser;
@@ -85,12 +90,16 @@ export function ComplaintIntake({
   noNewWork: boolean;
   timeZone?: string;
   onOpenHelp: () => void;
+  intakeOnly?: boolean;
+  onRecorded?: (record:complaints.ComplaintDetailOut)=>void;
+  onPendingChange?: (pending:boolean)=>void;
+  onCancel?: ()=>void;
 }) {
   const [rows, setRows] = useState<complaints.ComplaintOut[]>([]),
     [detail, setDetail] = useState<complaints.ComplaintDetailOut>(),
     [loading, setLoading] = useState(false),
     [error, setError] = useState<unknown>(),
-    [mode, setMode] = useState<"new" | "appeal">(),
+    [mode, setMode] = useState<"new" | "appeal"|undefined>(intakeOnly?"new":undefined),
     [dirty, setDirty] = useState(false),
     [reviewed, setReviewed] = useState(false),
     [find, setFind] = useState(""),
@@ -111,7 +120,7 @@ export function ComplaintIntake({
     setLoading(true);
     setError(undefined);
     try {
-      const list = await complaints.listComplaints({ mine: true, limit: 1000 });
+      const list = intakeOnly ? [] : await complaints.listComplaints({ mine: true, limit: 1000 });
       const d = selected.current
         ? await complaints.getComplaint(selected.current)
         : undefined;
@@ -124,7 +133,7 @@ export function ComplaintIntake({
     } finally {
       if (n === generation.current) setLoading(false);
     }
-  }, []);
+  }, [intakeOnly]);
   useEffect(() => {
     void load();
     return () => {
@@ -140,7 +149,9 @@ export function ComplaintIntake({
     setIds({});
     setAppealText("");
     await load();
+    onRecorded?.(value);
   });
+  useEffect(()=>{onPendingChange?.(write.blocked)},[write.blocked,onPendingChange]);
   useEffect(() => {
     setReviewed(false);
   }, [detail]);
@@ -389,7 +400,7 @@ export function ComplaintIntake({
       data-unsaved={dirty || !!mode}
       data-write-pending={write.blocked}
     >
-      <div className="section-heading">
+      {!intakeOnly && <div className="section-heading">
         <div>
           <h1>{t("Record a complaint", "شکایت درج کریں")}</h1>
           <p>
@@ -411,9 +422,9 @@ export function ComplaintIntake({
             {t("Help / F1", "مدد / ایف ون")}
           </button>
         </div>
-      </div>
+      </div>}
       <div className="toolbar">
-        {user.permissions.includes("complaint.register") && (
+        {!intakeOnly && user.permissions.includes("complaint.register") && (
           <button
             data-help="ci.new"
             disabled={!writable || noNewWork}
@@ -573,7 +584,7 @@ export function ComplaintIntake({
                   )}
                 </Field>
               )}
-              {screenId !== "record_complaint_reception" &&
+              {["record_complaint_admissions","record_complaint_er","record_complaint_ward"].includes(screenId) &&
                 allowed("/admissions") && (
                   <Field
                     label={t(
@@ -700,6 +711,7 @@ export function ComplaintIntake({
                 setMode(undefined);
                 setDirty(false);
                 setIds({});
+                onCancel?.();
               }}
             >
               {t("Cancel unsent draft", "غیر ارسال مسودہ منسوخ")}
@@ -707,7 +719,7 @@ export function ComplaintIntake({
           </div>
         </form>
       )}
-      {!loading && !error && (
+      {!intakeOnly && !loading && !error && (
         <>
           <Field
             label={t(
@@ -979,3 +991,5 @@ export function ComplaintIntake({
     </section>
   );
 }
+
+export const complaintChoiceLabel=label;

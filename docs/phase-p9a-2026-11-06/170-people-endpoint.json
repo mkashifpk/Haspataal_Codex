@@ -1,0 +1,301 @@
+{
+  "method": "GET",
+  "path": "/api/v1/quality/record-review/people",
+  "summary": "Who can review records or own an action",
+  "tags": [
+    "Quality: Medical Record Review"
+  ],
+  "permissions": [
+    "quality.review.manage",
+    "committee.manage",
+    "infection.control.manage"
+  ],
+  "permissions_mode": "any",
+  "idempotency_key": false,
+  "description": "The picker for the panel (`can_review`) and for action owners (everyone listed): a committee's members and\nthe owner of an infection control audit's action too (backend issue #41).\n\n**Required permission:** `quality.review.manage OR committee.manage OR infection.control.manage`\n\n**Required permission:** `quality.review.manage OR committee.manage OR infection.control.manage`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "ipc_nurse",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[list[PersonOut]]",
+    "properties": {
+      "data": {
+        "items": {
+          "title": "PersonOut",
+          "properties": {
+            "user_id": {
+              "type": "integer",
+              "title": "User Id"
+            },
+            "display_name": {
+              "type": "string",
+              "title": "Display Name"
+            },
+            "designation": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Designation"
+            },
+            "department_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department Name"
+            },
+            "staff_category": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "Clinical",
+                    "Nursing",
+                    "Administrative",
+                    "Technical",
+                    "SupportZeroInterface",
+                    "Visiting"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Staff Category"
+            },
+            "can_review": {
+              "type": "boolean",
+              "title": "Can Review"
+            },
+            "default_discipline": {
+              "type": "string",
+              "enum": [
+                "Medical",
+                "Nursing",
+                "Pharmacy",
+                "Laboratory",
+                "Other"
+              ],
+              "title": "Default Discipline"
+            }
+          },
+          "type": "object",
+          "required": [
+            "user_id",
+            "display_name",
+            "designation",
+            "department_name",
+            "staff_category",
+            "can_review",
+            "default_discipline"
+          ],
+          "description": "Someone who can review records (can_review) or own an action."
+        },
+        "type": "array",
+        "title": "Data"
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/quality/record-review/people"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "user_id": 1,
+            "display_name": "Dr Ahmed",
+            "designation": "Doctor",
+            "department_name": "General Medicine",
+            "staff_category": "Clinical",
+            "can_review": true,
+            "default_discipline": "Medical"
+          },
+          {
+            "user_id": 7,
+            "display_name": "Dr Reviewer",
+            "designation": "Doctor",
+            "department_name": null,
+            "staff_category": "Clinical",
+            "can_review": true,
+            "default_discipline": "Medical"
+          },
+          {
+            "user_id": 2,
+            "display_name": "Dr Sara",
+            "designation": "Doctor",
+            "department_name": "General Medicine",
+            "staff_category": "Clinical",
+            "can_review": true,
+            "default_discipline": "Medical"
+          }
+        ],
+        "meta": {
+          "server_time": "2026-09-28T16:29:14.861565+00:00"
+        },
+        "request_id": "270dcbd5bcba4d3781b715ca8c500550"
+      }
+    },
+    "errors_seen": [
+      "FORBIDDEN"
+    ]
+  },
+  "errors": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "FORBIDDEN"
+  ],
+  "used_by_screens": [
+    "my_investigations",
+    "record_review_overview",
+    "record_review_cycles",
+    "record_review_report",
+    "incident_register",
+    "incident_register_owner",
+    "complaints_register",
+    "ipc_audits",
+    "committees_quality",
+    "committees_owner",
+    "committees_ipc",
+    "qa_rounds",
+    "qa_rounds_owner",
+    "patient_feedback"
+  ],
+  "used_by_workflows": [
+    "incidents-and-sentinel-events",
+    "medical-record-review"
+  ],
+  "typescript_example": "// Who can review records or own an action  (permissions: quality.review.manage, committee.manage, infection.control.manage)\nexport const people = () =>\n  api(\"GET\", `/quality/record-review/people`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "quality.review.manage",
+      "committee.manage",
+      "infection.control.manage"
+    ],
+    "permissions_mode": "any",
+    "who": "holders of quality.review.manage or committee.manage or infection.control.manage",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "ipc_nurse",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "list",
+    "paging": [],
+    "search": [],
+    "filters": [],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "any_of",
+        "required"
+      ],
+      "details_from": "POST /api/v1/admin/departments"
+    }
+  ]
+}
