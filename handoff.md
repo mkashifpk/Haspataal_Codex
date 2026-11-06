@@ -4,7 +4,7 @@ Updated 2026-11-06 by Codex / functions + Haspataal MCP.
 ## Current task / checkpoint
 User requested d4c475d in-place #54/#55 closure: fresh handover omission/status evidence, server-owned employee workspace entry, own-window/header/F1 checks, fresh demo issue, current types/examples/help, screen-plan verification, commit and only changed/tested unapproved proposals. Baseline395fe05 was clean and matched the checkpoint. No prior data, keys, cursors or preferences were reset. Only MCP recent-call history may restart; existing records remain authoritative.
 
-Current implementation/evidence is ready for source commit; final proposal/receipt documentation follows. No command or uncertain business write is running.
+Implementation/evidence committed da4b0db; final receipt/handoff documentation commit follows. No command or uncertain business write is running.
 
 ## Backend / contracts
 Startup overview/what_changed/my_progress/progress_proposals/my_backend_issues/guide/roadmap read. Build2026-11-06T02:06:23.441687+00:00 equals #54/#55 fixed_in; both Fixed/open:false. No new backend issue found/reported. Current contract a4772c79e2249316e1a9/rubric da7ddfe1584d is unchanged since395fe05 (previous session already consumed it).
@@ -30,8 +30,8 @@ Previous confirmed synthetic records/keys remain valid and final as recorded in3
 
 ## Progress / next actions
 Accepted refresh324–341 unchanged.342–348 still pending at latest check;346 is the unapproved new launcher rule, oldbuild a7f67d2. No signed human reviews entered; doctor/shared human reviews may be in progress.
-Next: commit current tested source/evidence, submit only materially updated unapproved rule:dcd34ea9d1 with NEW request_id/current commit/current evidence (346pending predates own-window proof). Do not re-propose approved self-service/other items. No empty proposals: self-service corrections are evidence, its already-approved endpoint/event claims stay excluded per user. Save exact payload before submit, verify server proposal/receipt, then commit final docs and clean-tree handoff. Pending proposals await human review on /docs -> My progress.
-Checkpoint continuation advanced the remaining workspace_picker/self_service plan cases. Other historical screen plans and roadmap164 remain future work;163 was already committed db216b6. No blanket full-app completion claim.
+Proposal349 saved and verified for updated unapproved rule:dcd34ea9d1, source da4b0db/current own-window/header proof. Original346 remains pending;349 is a materially updated build/evidence, not approved work repeated. Exact payload/receipt/verified docs/backend-d4c475d-2026-11-06/proposal-*.json. No approved self-service/event/other items re-proposed, no empty claims.349 awaiting human review on /docs -> My progress.
+No implementation/test command is in progress and no uncertain write remains. The #54/#55 requested engineering changes and fresh verification are complete within the recorded plan exclusions. Checkpoint continuation advanced the remaining workspace_picker/self_service plan cases. Next independent validation is the other historical refreshed-screen plans, beginning with the remaining waste/equipment cases using fresh synthetic fixtures and their saved plans; roadmap164 remains future work.163 was already committed db216b6. No blanket full-app completion claim.
 
 ## Limits / human checks
 Payslip happy path not run (demo profile has none; no-money scope); invalid-ID422 verified. No shared-account disable/password forcing/token revocation, live duty-start expiry or every conflict combination induced. Employee-only entry unit-tested; demo_accounts has no employee_self-only login. Named human fresh-data/native Urdu/editor/physical-device acceptance remains pending. No Review code entered or human acceptance signed. Manual checks: docs/backend-d4c475d-2026-11-06/MANUAL_CHECKS.md.
