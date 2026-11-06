@@ -10,6 +10,67 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  incident_types: {
+  title: "What to report: incident types and sentinel events",
+  titleUr: "کیا رپورٹ کریں: واقعات کی اقسام اور سنگین واقعات",
+  purpose: "The Quality Officer maintains what staff must report before circulating the current sentinel-event list to wards, ER and theatres. Done means a deliberate classification, a confirmed versioned change or retirement, and the current list prepared for posting. Immediate safety response comes first; this directory does not summon help or report an incident.",
+  purposeUr: "کوالٹی افسر وارڈ، ایمرجنسی و تھیٹر میں موجودہ سنگین واقعات کی فہرست دینے سے پہلے رپورٹ کی اقسام رکھتا ہے۔ تکمیل سوچ کر درجہ بندی، تصدیق شدہ نسخہ وار تبدیلی یا سبک دوشی اور موجودہ فہرست آویزاں کرنے کی تیاری۔ فوری حفاظت پہلے؛ یہ فہرست مدد بلاتی یا واقعہ رپورٹ نہیں کرتی۔",
+  steps: [
+    "The Quality Officer maintains what staff must report before circulating the current sentinel-event list to wards, ER and theatres. Done means a deliberate classification, a confirmed versioned change or retirement, and the current list prepared for posting. Immediate safety response comes first; this directory does not summon help or report an incident.",
+    "Types are grouped by reporting area and ordered by display order/name. Always a sentinel event is shown in red and text; the other classification becomes sentinel with severe harm or death. Filter an area or uncheck Active types only to include retired entries. A missing result is not a read failure; Refresh incident types recovers an error and hides stale rows until it succeeds.",
+    "Add incident type requires an authorised incident manager. Choose a stable reporting code (3–40uppercase letters/digits/underscore, starting with a letter), name and area; code and area cannot be edited later. This is a new catalogue code, not an existing record id. Deliberately choose the sentinel classification, describe what belongs under it and set0–10000display order. Review the effect on new reports and Add this type once.",
+    "Change or retire opens the exact named row and its loaded version. Change name, classification, description or order; uncheck Active for new reports to retire, never delete. Past incidents keep the type. Review and Save this versioned change sends the loaded row_version as expected_version. A changed version keeps the draft for comparison; cancel it and reopen the current row rather than silently rebasing or overwriting.",
+    "A lost create answer can be retried only with the original frozen body/key within retention. A versioned PATCH has no idempotent replay guarantee: if its answer disappears, never retry automatically; Read current result, find the same code/name/version and compare what changed. After reviewing, cancel the old unsent draft and reopen the current row if another distinct change is needed. Ask IT/Quality if uncertain; never create a replacement code or assume a failed response means nothing saved.",
+    "After every confirmed change obtain Preview/Save current sentinel PDF. It is the server’s current list, not just the filtered rows, and includes what to report/how and the review timelines. Print it from the PDF viewer, check all pages and replace ward/ER/theatre copies after the hospital’s approval. Download cancellation or print failure never repeats a create/change. Retry only the document; IT handles printer mapping.",
+    "F1/Help opens this page from a field without losing text and returns focus. Offline writes are unavailable; unsent drafts remain in memory. Refresh/reconnect clears the review so current data is checked again. English/Urdu and native keyboard/Settings share100–250%zoom. Named human fresh journeys, native Urdu/editor and physical printed posting review remain pending; an agent cannot sign them."
+  ],
+  stepsUr: [
+    "کوالٹی افسر وارڈ، ایمرجنسی و تھیٹر میں موجودہ سنگین واقعات کی فہرست دینے سے پہلے رپورٹ کی اقسام رکھتا ہے۔ تکمیل سوچ کر درجہ بندی، تصدیق شدہ نسخہ وار تبدیلی یا سبک دوشی اور موجودہ فہرست آویزاں کرنے کی تیاری۔ فوری حفاظت پہلے؛ یہ فہرست مدد بلاتی یا واقعہ رپورٹ نہیں کرتی۔",
+    "اقسام شعبے اور ترتیب و نام سے۔ ہمیشہ سنگین واقعہ سرخ و عبارت سے؛ دوسری قسم شدید نقصان یا موت پر سنگین۔ شعبہ چنیں یا صرف فعال ہٹا کر سبک دوش دیکھیں۔ خالی فہرست خرابی نہیں؛ تازہ اقسام ناکام پڑھائی بحال اور کامیابی تک پرانی صف چھپاتی ہیں۔",
+    "واقعے کی قسم مجاز افسر شامل کرتا ہے۔ مستقل رپورٹ کوڈ تین تا چالیس بڑے انگریزی حروف، عدد یا زیر لکیر، پہلا حرف؛ نام و شعبہ چنیں۔ کوڈ و شعبہ بعد میں نہیں بدلتے۔ یہ نئی فہرست کا کوڈ ہے، موجودہ ریکارڈ آئی ڈی نہیں۔ سنگین درجہ بندی سوچ کر، متعلقہ رپورٹ کی تفصیل اور صفر تا دس ہزار ترتیب دیں۔ نئی رپورٹ پر اثر پڑھ کر ایک بار شامل کریں۔",
+    "بدلیں یا سبک دوش عین نام والی صف و پڑھے نسخے کو کھولتا ہے۔ نام، درجہ بندی، تفصیل یا ترتیب بدلیں؛ نئی رپورٹ کے لیے فعال ہٹا کر سبک دوش، حذف نہیں۔ پچھلے واقعات میں قسم رہتی ہے۔ جائزے کے بعد پڑھا نسخہ بھیجیں۔ نسخہ بدلے تو موازنے کو مسودہ رکھ، منسوخ اور تازہ صف کھولیں؛ خاموش بنیاد یا پرانا متن نہیں تھوپتے۔",
+    "نئی قسم کا جواب غائب ہو تو صرف اصل منجمد متن و کلید مقرر مدت میں۔ نسخہ وار تبدیلی کو دوبارہ بھیجنے کی ضمانت نہیں: جواب غائب ہو تو خود نہ دہرائیں؛ موجودہ نتیجے میں وہی کوڈ، نام، نسخہ و تبدیلی ملائیں۔ جائزے کے بعد پرانا مسودہ منسوخ، الگ ضروری تبدیلی کو تازہ صف کھولیں۔ غیر یقینی آئی ٹی یا کوالٹی؛ بدل کوڈ یا ناکامی کو عدم اندراج نہ سمجھیں۔",
+    "ہر تصدیق شدہ تبدیلی کے بعد موجودہ سنگین فہرست پی ڈی ایف لیں۔ یہ سرور کی پوری موجودہ فہرست، صرف فلٹر نہیں، کیا و کیسے رپورٹ اور جائزے کی مدت بھی۔ پی ڈی ایف سے پرنٹ، تمام صفحات چیک اور ہسپتال منظوری کے بعد وارڈ، ایمرجنسی و تھیٹر نقول بدلیں۔ ڈاؤن لوڈ منسوخی یا پرنٹ خرابی قسم یا تبدیلی نہیں دہراتی۔ صرف کاغذ پھرلیں؛ پرنٹر آئی ٹی۔",
+    "ایف ون یا مدد خانے سے یہی صفحہ، متن برقرار و فوکس واپس۔ آف لائن اندراج نہیں؛ مسودہ عارضی یادداشت میں۔ تازہ پڑھائی یا رابطہ جائزہ ہٹاتا تاکہ تازہ ریکارڈ چیک ہو۔ دونوں زبان، کی بورڈ و سیٹنگ ایک سو تا دو سو پچاس زوم۔ انسانی نئے سفر، اردو، ادارت اور آویزاں کاغذ کا جائزہ باقی؛ ایجنٹ دستخط نہیں کر سکتا۔"
+  ],
+  faq: [
+    [
+      "How do I remove an obsolete type?",
+      "Open its current row and retire it by clearing Active for new reports. Do not delete it or rename it to hide history; past incidents keep their type."
+    ],
+    [
+      "What does Always mean?",
+      "It is a sentinel event whenever it happens. IfSevereHarm applies only with severe harm or death. Classification is a deliberate clinical/quality decision, never an automatic default."
+    ],
+    [
+      "Can I retry an unanswered edit?",
+      "No automatic PATCH replay. Read the current list and compare the same code/version and fields, then explicitly review. Reopen current data for a distinct further change."
+    ],
+    [
+      "Does filtering limit the sentinel PDF?",
+      "No. It is the full current server list and instructions. After changes print/check/post the new list in every care area; failure never repeats the change. Human approval and device checks remain pending."
+    ]
+  ],
+  faqUr: [
+    [
+      "پرانی قسم کیسے ہٹائیں؟",
+      "موجودہ صف میں نئی رپورٹ کے لیے فعال ہٹا کر سبک دوش۔ حذف یا تاریخ چھپانے کو نام نہیں؛ پرانے واقعات میں رہتی ہے۔"
+    ],
+    [
+      "ہمیشہ کا مطلب؟",
+      "جب بھی ہو سنگین واقعہ۔ دوسری درجہ بندی صرف شدید نقصان یا موت پر۔ یہ سوچا طبی و کوالٹی فیصلہ، خودکار انتخاب نہیں۔"
+    ],
+    [
+      "بے جواب ترمیم دہرائیں؟",
+      "خودکار تبدیلی دوبارہ نہیں۔ موجودہ فہرست میں وہی کوڈ، نسخہ و متن ملائیں اور جائزہ۔ الگ اگلی تبدیلی کو تازہ صف۔"
+    ],
+    [
+      "فلٹر پی ڈی ایف محدود کرتا؟",
+      "نہیں۔ پوری موجودہ سرور فہرست و ہدایات۔ تبدیلی کے بعد نیا کاغذ ہر جگہ چیک و آویزاں؛ ناکامی تبدیلی نہیں دہراتی۔ انسانی منظوری و آلہ چیک باقی۔"
+    ]
+  ]
+},
+
   complaint_statistics_owner: {
   title: "Complaint statistics, register and procedure",
   titleUr: "شکایات کے اعداد، رجسٹر اور طریقہ",
