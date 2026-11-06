@@ -10,6 +10,79 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  my_actions: {
+  title: "My actions",
+  titleUr: "میرے اقدامات",
+  purpose: "The person who owns an action opens My actions during the shift to carry out agreed corrective or preventive work and record the actual evidence. Done means the action has a final outcome, not that its source complaint, incident or review has been closed.",
+  purposeUr: "جس کے ذمے عمل ہے وہ شفٹ میں میرے اقدامات کھول کر طے شدہ اصلاحی یا احتیاطی کام اور اصل ثبوت درج کرتا ہے۔ مکمل سے عمل کا حتمی نتیجہ مراد ہے، اس کی شکایت، واقعہ یا جائزہ بند ہونا نہیں۔",
+  steps: [
+    "The person who owns an action opens My actions during the shift to carry out agreed corrective or preventive work and record the actual evidence. Done means the action has a final outcome, not that its source complaint, incident or review has been closed.",
+    "The menu and badge show your open actions only, soonest due first. Overdue is labelled in text and red. A new notification refreshes the list; reconnect resync rereads it. No actions is a real empty state, while a failed read stays an error. At the1000-row limit ask Quality to reconcile further work.",
+    "Open action rereads its number, source number/type, work, owner, department, due date and assigning person/time. Verify the source before acting; another person’s ownership is not transferred by knowing a record number. An action notification can open that exact owned record. Missing details remain not recorded.",
+    "Do the actual work first. Review completion / cancellation opens an unsent draft. Choose Done and explain what was done and its evidence, or Cancelled and explain why the action was dropped. At least three characters; no automatic successful outcome is filled.",
+    "Check the current record and final evidence/reason, tick the review checkbox, then Close this action finally once. Your loaded version is sent. Done and Cancelled are final; no edit, reopening or deletion is offered. The confirmed record shows the actual result, author and time.",
+    "A changed version keeps your note. Refresh and compare the current state. Only if it remains Open, Use current version; retain my note deliberately selects the latest version for another reviewed submission. If it is final, read the saved outcome instead. Never overwrite another person’s completion.",
+    "A lost completion answer has no safe replay. Keep the window and frozen request. Read current result, compare the exact action/version/state, then Result reviewed; return to draft rereads the record. Never press a new completion just because the first answer vanished. Final-state refusal also rereads. Outside a clear result ask Quality or IT.",
+    "Cancel unsent draft discards only your unsent note. Pending or unknown requests lock navigation; offline writes are disabled. Notifications refresh data without replacing the draft. The review checkbox clears after a fresh detail read, so recheck before sending.",
+    "F1 or Help works from fields, retains the draft and restores focus. English/Urdu and both themes use one keyboard/Settings zoom100–250%, reset100%. The named human must review new-data journeys, Urdu wording and devices; no agent enters or signs that review."
+  ],
+  stepsUr: [
+    "جس کے ذمے عمل ہے وہ شفٹ میں میرے اقدامات کھول کر طے شدہ اصلاحی یا احتیاطی کام اور اصل ثبوت درج کرتا ہے۔ مکمل سے عمل کا حتمی نتیجہ مراد ہے، اس کی شکایت، واقعہ یا جائزہ بند ہونا نہیں۔",
+    "مینو اور عدد صرف آپ کے کھلے عمل، قریب تاریخ پہلے دکھاتے ہیں۔ تاخیر تحریر اور سرخ میں ہے۔ نئی اطلاع اور دوبارہ رابطہ فہرست تازہ کرتے ہیں۔ کوئی عمل نہ ہونا درست خالی حالت ہے؛ ناکام پڑھائی خرابی رہتی ہے۔ ہزار کی حد پر مزید کام کوالٹی سے چیک کرائیں۔",
+    "عمل کھولیں سے نمبر، ماخذ و قسم، کام، ذمہ دار، شعبہ، تاریخ اور دینے والا و وقت تازہ پڑھیں۔ کام سے پہلے ماخذ دیکھیں؛ نمبر معلوم ہونا دوسرے کی ذمہ داری نہیں بدلتا۔ اطلاع عین اپنا ریکارڈ کھول سکتی ہے۔ غائب معلومات درج نہیں رہتیں۔",
+    "پہلے اصل کام کریں۔ تکمیل یا منسوخی جائزہ غیر ارسال مسودہ کھولتا ہے۔ مکمل میں کام اور ثبوت، منسوخ میں چھوڑنے کی وجہ دیں۔ کم از کم تین حروف؛ کامیاب نتیجہ خود نہیں بھرا جاتا۔",
+    "موجودہ ریکارڈ اور حتمی ثبوت یا وجہ چیک، جائزہ خانہ منتخب، پھر ایک بار عمل حتمی بند کریں۔ پڑھا ورژن بھیجا جاتا ہے۔ مکمل اور منسوخ حتمی ہیں؛ بدلنا، دوبارہ کھولنا یا حذف نہیں۔ تصدیق میں اصل نتیجہ، مصنف اور وقت ہیں۔",
+    "بدلا ورژن آپ کا نوٹ رکھتا ہے۔ تازہ پڑھ کر حالت ملائیں۔ صرف کھلا ہو تو موجودہ ورژن لیں، نوٹ رکھیں سے نئے جائزہ کے لیے تازہ ورژن جان بوجھ کر چنیں۔ حتمی ہو تو محفوظ نتیجہ پڑھیں۔ دوسرے کی تکمیل نہ بدلیں۔",
+    "تکمیل جواب کھونے پر محفوظ دوبارہ ارسال نہیں۔ ونڈو اور اصل درخواست رکھیں۔ موجودہ نتیجہ پڑھ کر عین عمل، ورژن اور حالت ملائیں؛ چیک کرکے مسودے پر واپسی ریکارڈ دوبارہ پڑھتی ہے۔ جواب غائب ہونے سے نئی تکمیل نہ بھیجیں۔ حتمی انکار بھی تازہ پڑھتا ہے۔ نتیجہ واضح نہ ہو تو کوالٹی یا آئی ٹی سے کہیں۔",
+    "غیر ارسال مسودہ منسوخ صرف غیر بھیجا نوٹ چھوڑتا ہے۔ جاری یا نامعلوم درخواست جگہ بدلنا روکتی؛ آف لائن اندراج بند ہے۔ اطلاع مسودہ بدلے بغیر تازہ معلومات لاتی ہے۔ نئی تفصیل پر جائزہ ختم، ارسال سے پہلے دوبارہ چیک کریں۔",
+    "ایف ون یا مدد خانے سے مسودہ رکھ کر فوکس لوٹاتی ہے۔ انگریزی، اردو اور دونوں تھیم میں مشترک کی بورڈ و ترتیبات زوم سو تا ڈھائی سو اور سو ری سیٹ ہے۔ نامزد انسان نئے ریکارڈ سفر، اردو و آلات دیکھے؛ ایجنٹ جائزہ داخل یا دستخط نہیں کرتا۔"
+  ],
+  faq: [
+    [
+      "Who sees My actions and its badge?",
+      "Anyone with an assigned open action, regardless of job role. The server scopes the list to the logged-in owner. If an expected assignment is missing, ask the person who assigned it or Quality; do not use another person’s login or a guessed record number."
+    ],
+    [
+      "What must clinical, nursing, office and support owners record?",
+      "The actual corrective/preventive work and evidence specific to the source. Done is not a promise to do it later. If the work was dropped, choose Cancelled and say why; your role name does not change the need for evidence."
+    ],
+    [
+      "Can I reopen or delete a closed action?",
+      "No. Done or Cancelled is final and QUALITY_ACTION_CLOSED refuses another completion. Read the saved author/time/outcome; ask Quality about a separately authorised follow-up, never a replacement to hide the history."
+    ],
+    [
+      "What if someone completes it while I am writing?",
+      "Keep your note and reread. The expected version prevents silently replacing current work; a final state cannot be rebased. Only an Open record allows you to deliberately select its current version and review again."
+    ],
+    [
+      "May I retry after a lost answer?",
+      "Use Read current result and reconcile the exact record. Completion is version/state protected, not an idempotent create; there is no Retry original request button. No automatic resend occurs. Keep the window until the result is clear and ask Quality/IT if uncertain."
+    ]
+  ],
+  faqUr: [
+    [
+      "میرے اقدامات اور عدد کس کو آتے ہیں؟",
+      "کھلے مقرر عمل والے کسی بھی کردار کو۔ سرور فہرست لاگ ان ذمہ دار تک رکھتا ہے۔ متوقع ذمہ داری غائب ہو تو دینے والے یا کوالٹی سے پوچھیں؛ دوسرے کا لاگ ان یا اندازے کا نمبر نہ لیں۔"
+    ],
+    [
+      "طبی، نرس، دفتر اور معاون ذمہ دار کیا درج کریں؟",
+      "ماخذ کے مطابق اصل اصلاحی یا احتیاطی کام اور ثبوت۔ مکمل آئندہ کرنے کا وعدہ نہیں۔ کام چھوڑا تو منسوخ اور وجہ دیں؛ کردار کا نام ثبوت کی شرط نہیں بدلتا۔"
+    ],
+    [
+      "بند عمل دوبارہ کھول یا مٹا سکتے ہیں؟",
+      "نہیں۔ مکمل یا منسوخ حتمی؛ دوبارہ تکمیل پر انکار ہے۔ محفوظ مصنف، وقت و نتیجہ پڑھیں؛ الگ مجاز اگلے کام کے لیے کوالٹی سے کہیں، تاریخ چھپانے کو متبادل نہیں۔"
+    ],
+    [
+      "لکھتے وقت کسی نے مکمل کر دیا تو؟",
+      "نوٹ رکھ کر تازہ پڑھیں۔ بھیجا ورژن خاموش تبدیلی روکتا؛ حتمی حالت نیا ورژن لے کر بدل نہیں سکتی۔ صرف کھلے ریکارڈ کا موجودہ ورژن جان بوجھ کر لے کر دوبارہ جائزہ ہو سکتا ہے۔"
+    ],
+    [
+      "غائب جواب کے بعد دوبارہ کوشش کر سکتے ہیں؟",
+      "موجودہ نتیجہ پڑھ کر عین ریکارڈ ملائیں۔ تکمیل ورژن و حالت سے محفوظ ہے، تکرار والی تخلیق نہیں؛ اصل درخواست کی دوبارہ کوشش کا بٹن نہیں۔ خودکار ارسال نہیں۔ وضاحت تک ونڈو رکھیں اور غیر یقینی میں کوالٹی یا آئی ٹی سے کہیں۔"
+    ]
+  ]
+},
+
   my_complaint_investigations: {
   title: "Complaints I investigate",
   titleUr: "جن شکایات کی میں تحقیق کرتا ہوں",
@@ -44,7 +117,7 @@ export const help: Record<string, HelpPage> = {
   faq: [
     [
       "Why is my assignment missing?",
-      "The officer must acknowledge and name you as investigator. The list filters your acknowledged assignments, not merely complaints you received. Ask the officer to verify the assignment/access. Backend issue56 records that some assigned non-register roles cannot currently list their work; the app does not grant a role or invent a record number."
+      "The officer must acknowledge and name you as investigator. The list filters your acknowledged assignments, not merely complaints you received. Ask the officer to verify the assignment/access. If the assigned staff member is refused access to the list, ask the complaints officer and IT to resolve it; the app cannot grant access or invent a record number."
     ],
     [
       "What should clinical, nursing, office and support investigators write?",
@@ -70,7 +143,7 @@ export const help: Record<string, HelpPage> = {
   faqUr: [
     [
       "ذمہ داری کیوں غائب ہے؟",
-      "افسر شکایت تسلیم اور آپ کو تحقیق کار مقرر کرے۔ فہرست آپ کی تسلیم شدہ تحقیقات ہے، صرف وصول کردہ شکایات نہیں۔ ذمہ داری و رسائی افسر چیک کرے۔ مسئلہ چھپن میں بعض مقرر عملے کی فہرست نہیں کھلتی؛ ایپ کردار یا نمبر نہیں گھڑتی۔"
+      "افسر شکایت تسلیم اور آپ کو تحقیق کار مقرر کرے۔ فہرست آپ کی تسلیم شدہ تحقیقات ہے، صرف وصول کردہ شکایات نہیں۔ ذمہ داری و رسائی افسر چیک کرے۔ مقرر عملے کی فہرست پر اجازت انکار ہو تو افسر اور آئی ٹی سے رسائی درست کرائیں؛ ایپ اجازت یا نمبر نہیں گھڑتی۔"
     ],
     [
       "طبی، نرس، دفتر یا معاون تحقیق کار کیا لکھیں؟",
@@ -7170,6 +7243,7 @@ consents_doctor: {
       "ڈیوٹی کے دوران عملے کے لیے: شناخت، کام کی جگہ، رابطہ اور مشترکہ سہولیات واضح رکھیں۔",
     steps: [
       "After sign-in, Preparing your workspace loads your permitted tasks, settings and workspace handbook. The complete menu appears together; reference lists and the notification badge load in the background. Retry loading reference lists retries only those reads, without signing in or submitting a business action. If a read fails, Retry loading workspace re-reads it without signing in again or creating a patient, payment or visit.",
+      "Retry assigned work reloads only your incident/complaint assignments and action count after a read error; it never submits a business record.",
       "Check your name and current workspace in the header before working. Use Workspaces to switch duties. Open your account menu for My Workspace in its own window: leave, attendance and an asset issue use your employee record. Ask HR about a missing employee record and IT about access; guests have no employee workspace.",
       "Use the side navigation for notifications, approvals, incident reporting and settings. Facility configuration is a separate administrator entry.",
       "Live means the event stream has caught up. Reconnecting means displayed information may be stale. An unreachable-server banner blocks writes while keeping your input.",
@@ -7178,6 +7252,7 @@ consents_doctor: {
     ],
     stepsUr: [
       "سائن اِن کے بعد آپ کی کام کی جگہ تیار ہو رہی ہے اجازت، ترتیبات اور رہنمائی حاصل کرتا ہے۔ مکمل فہرست ایک ساتھ دکھتی ہے؛ حوالہ جاتی فہرستیں اور اطلاعات کا عدد پس منظر میں آتے ہیں۔ ان کی خرابی پر حوالہ جاتی فہرستیں دوبارہ حاصل کریں صرف ان کی کوشش دہراتا ہے۔ خرابی پر کام کی جگہ دوبارہ حاصل کریں دبائیں؛ دوبارہ سائن اِن یا مریض، ادائیگی یا وزٹ نہیں بنتی۔",
+      "مقرر کام دوبارہ پڑھیں سے خرابی کے بعد اپنی واقعہ و شکایت ذمہ داریاں اور عمل کی تعداد تازہ ہوتی ہیں؛ کاروباری اندراج نہیں جاتا۔",
       "کام سے پہلے اوپر اپنا نام اور موجودہ جگہ دیکھیں۔ ذمہ داری بدلنے کو کام کی جگہیں کھولیں۔ اکاؤنٹ مینو سے میری کام کی جگہ کھولیں؛ چھٹی، حاضری اور اثاثے کی خرابی آپ کے ملازم ریکارڈ سے ہیں۔ غائب ملازم ریکارڈ کے لیے ایچ آر اور رسائی کے لیے آئی ٹی سے کہیں۔ مہمان کا ملازم صفحہ نہیں۔",
       "اطلاعات، منظوریوں، واقعہ رپورٹ اور ترتیبات کے لیے سائیڈ مینو استعمال کریں۔ ہسپتال کی ترتیب منتظم کا الگ حصہ ہے۔",
       "لائیو کا مطلب تازہ اطلاعات مکمل ہیں۔ دوبارہ رابطے کے دوران معلومات پرانی ہو سکتی ہیں۔ رابطہ نہ ہو تو اندراج محفوظ نہیں ہوتا مگر فارم برقرار رہتا ہے۔",

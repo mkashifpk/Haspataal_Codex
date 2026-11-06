@@ -1,3 +1,5 @@
+import {MyActions} from './screens/MyActions';
+import {listActions as ownedQualityActions} from './generated/my_actions';
 import {MyComplaintInvestigations} from './screens/MyComplaintInvestigations';
 import {listComplaints as assignedComplaints} from './generated/my_complaint_investigations';
 import { WasteLog } from './screens/WasteLog';
@@ -397,6 +399,7 @@ const frontDeskScreens = new Set([
   "receivables",
 ]);
 export function App() {
+  const [actionEntry,setActionEntry]=useState<number>();
   const [charitySelection,setCharitySelection]=useState<{userId:number;prescriptionId:number}>();
   const [querySelection,setQuerySelection]=useState<{userId:number;prescriptionId:number;itemId?:number|null}>();
   const [pharmacySelection,setPharmacySelection]=useState<{userId:number;prescriptionId:number;assistance?:CharityHandoff}>();
@@ -928,6 +931,7 @@ export function App() {
     )
       return false;
     setImagingSetupEntry(next === "imaging_quality_setup" && fromFacility);
+    if(next==='my_actions')setActionEntry(undefined);
     setScreen(next);
     setError(undefined);
     setNotice("");
@@ -965,6 +969,9 @@ export function App() {
     }
   }
   function route(url: string) {
+    const actionLink=url.match(/^\/?quality\/actions\/([1-9]\d*)(?:$|[/?])/);
+    if (actionLink) { if(navigate('my_actions'))setActionEntry(Number(actionLink[1])); return; }
+    if (/^\/?quality\/actions(?:$|[/?])/.test(url)) { if(navigate('my_actions'))setActionEntry(undefined); return; }
     const normalized = url
       .replace(/^\//, "")
       .replaceAll("-", "_")
@@ -981,6 +988,7 @@ export function App() {
       charity_override: "charity_override",
       approvals: "approval_queue",
       notifications: "notifications",
+      actions: 'my_actions',
       complaints: complaintInvestigations.data?.length ? 'my_complaint_investigations' : 'notifications',
       incidents: investigations.data?.length ? "my_investigations" : "report_incident",
       settings: "settings",
@@ -1006,8 +1014,10 @@ export function App() {
         est?.views.workspaces.find((v) => v.workspace === w.code)?.view !==
         "hidden",
     ) || [];
+  useEffect(()=>{setActionEntry(undefined);},[user?.user_id]);
   const workspaceReady = !!user && !!outline && !!est && !!meta && readyContext?.userId === user.user_id && readyContext.workspace === workspace && readyContext.epoch === metadataEpoch.current;
   const investigations=useLoad(()=>workspaceReady&&user?.permissions.some(p=>['incident.view','incident.report','ot.clinical_statistics.view'].includes(p))?assignedIncidents({mine:true,status:'UnderReview',limit:500}).then(rows=>rows.filter(r=>r.investigator_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,revision]);
+  const ownedActions=useLoad(()=>workspaceReady?ownedQualityActions({mine:true,status:'Open',limit:1000}).then(rows=>rows.filter(r=>r.owner_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,revision]);
   const complaintInvestigations=useLoad(()=>workspaceReady&&user?.permissions.some(p=>['complaint.view','complaint.manage','complaint.register'].includes(p))?assignedComplaints({mine:true,status:'Acknowledged',limit:1000}).then(rows=>rows.filter(r=>r.investigator_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,revision]);
   const legacyNav = (workspaceReady ? [
     "app_shell",
@@ -1176,7 +1186,7 @@ export function App() {
       (id !== "ot_settlement" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er","patient_programmes_triage","transfusion_bedside_er"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
-  const nav = screenNavigation(legacyNav, outline, est, deliveredHelpScreens, workspaceReady).filter(id=>(id!=='my_investigations'||!!investigations.data?.length||screen==='my_investigations')&&(id!=='my_complaint_investigations'||!!complaintInvestigations.data?.length||screen==='my_complaint_investigations'));
+  const nav = screenNavigation(legacyNav, outline, est, deliveredHelpScreens, workspaceReady).filter(id=>(id!=='my_investigations'||!!investigations.data?.length||screen==='my_investigations')&&(id!=='my_complaint_investigations'||!!complaintInvestigations.data?.length||screen==='my_complaint_investigations')&&(id!=='my_actions'||!!ownedActions.data?.length||screen==='my_actions'));
   const navigationLabel = (id: string, index: 0 | 1 | 2) => labels[id]?.[index] ?? (index === 2 ? "•" : index === 1 ? handbookHelp[id]?.titleUr ?? id : handbookHelp[id]?.title ?? id);
 
   const view = est?.views.workspaces.find(
@@ -1314,6 +1324,7 @@ export function App() {
                 >
                   <span aria-hidden="true">{navigationLabel(id, 2)}</span>
                   {navigationLabel(id, ur ? 1 : 0)}
+                  {id === "my_actions" && ownedActions.data && <b>{ownedActions.data.length===1000?"1000+":ownedActions.data.length}</b>}
                   {id === "notifications" && unread !== undefined && (
                     <b>{unread}</b>
                   )}
@@ -1332,6 +1343,11 @@ export function App() {
         )}
         <DirectoryPermissions.Provider value={user?.permissions ?? []}><main id="content">
           <ErrorBox error={error} />
+          {user && !!(ownedActions.error || investigations.error || complaintInvestigations.error) && <section className="notice" role="alert">
+            <p>{t('Assigned work could not be refreshed. Counts and menu entries may be stale.','مقرر کام تازہ نہیں ہو سکا۔ تعداد یا مینو پرانا ہو سکتا ہے۔')}</p>
+            <ErrorBox error={ownedActions.error || investigations.error || complaintInvestigations.error}/>
+            <button data-help="shell.navigation" onClick={()=>void Promise.all([ownedActions.reload(),investigations.reload(),complaintInvestigations.reload()])}>{t('Retry assigned work','مقرر کام دوبارہ پڑھیں')}</button>
+          </section>}
           {!!referenceError && user && <section className="notice" data-help="shell.navigation">
             <p>{t("Some reference lists could not be loaded. Retry to refresh them.", "بعض حوالہ جاتی فہرستیں حاصل نہیں ہو سکیں۔ تازہ کرنے کے لیے دوبارہ کوشش کریں۔")}</p>
             <ErrorBox error={referenceError} />
@@ -1590,6 +1606,7 @@ export function App() {
               {screen === 'payroll' && <Payroll key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === 'ops_console' && <OpsConsole key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === "waste_log_ops" && <WasteLog key={user.user_id} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === 'my_actions'&&<MyActions key={user.user_id} initialAction={actionEntry} onChanged={()=>void ownedActions.reload()} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id==='my_actions')?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'my_complaint_investigations'&&<MyComplaintInvestigations key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id==='my_complaint_investigations')?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'my_investigations'&&<MyInvestigations key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id==='my_investigations')?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === "mock_drills_ops" && <MockDrills key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}

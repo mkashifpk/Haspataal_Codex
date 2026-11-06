@@ -14,7 +14,7 @@ export type ClinicalCommand = {
   method: "POST" | "PATCH" | "PUT" | "DELETE";
   path: string;
   body?: unknown;
-  permission: string | { recordPath: string; capability: string };
+  permission: string | { recordPath: string; capability: string } | {recordPath: string; ownerField: 'owner_user_id'};
   protection: "idempotent" | "reconcile";
   reconcilePath?: string;
   label: string;
@@ -71,10 +71,11 @@ export function useClinicalWrite(
           ),
         );
       if (typeof a.body.permission !== 'string' && !retrying) {
-        const {recordPath, capability} = a.body.permission;
-        if (!a.body.path.startsWith(recordPath + '/') || !/^can_[a-z_]+$/.test(capability)) throw new Error('The record authority does not match this action.');
+        const authority = a.body.permission, {recordPath} = authority;
+        if (!a.body.path.startsWith(recordPath + '/') || ('capability' in authority && !/^can_[a-z_]+$/.test(authority.capability))) throw new Error('The record authority does not match this action.');
         const record = await api<Record<string, unknown>>('GET', recordPath);
-        if (record[capability] !== true) throw new Error(t('The current server record does not allow this action. Refresh and review it.', 'سرور کا موجودہ ریکارڈ اس عمل کی اجازت نہیں دیتا۔ تازہ پڑھ کر جائزہ لیں۔'));
+        const allowed = 'capability' in authority ? record[authority.capability] === true : record[authority.ownerField] === current.user.user_id;
+        if (!allowed) throw new Error(t('The current server record does not allow this action. Refresh and review it.', 'سرور کا موجودہ ریکارڈ اس عمل کی اجازت نہیں دیتا۔ تازہ پڑھ کر جائزہ لیں۔'));
       }
       if (prepare) await prepare();
       if (

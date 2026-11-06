@@ -1,12 +1,12 @@
 # Phase P9A implementation
 
-User request: build the remaining Phase P9A screens and report reproduced backend gaps. Work proceeds in roadmap order, with a tested commit and progress proposal per screen; human acceptance is separate. Clarification was offered for all164–193 versus only164; absent a narrower reply, the working scope is all remaining screens.
+User request: build the remaining Phase P9A screens and report reproduced backend gaps. Work proceeds in roadmap order, with a tested commit and progress proposal per screen; human acceptance is separate. User confirmed all remaining screens164–193.
 
 | Position | Screen | Current status |
 |---|---|---|
 |163|my_investigations|Previously implemented db216b6; proposal342 pending human review|
-|164|my_complaint_investigations|Implemented; fresh UI/API/event/lost-reply tests passed; final current-read/commit/proposal in progress. Non-register investigator list blocked by backend56|
-|165|my_actions|Requirements/types/quality/design/plan read; next implementation|
+|164|my_complaint_investigations|Implemented/tested3ce23ae; proposal350 verified/pending human review. Non-register investigator list blocked by backend56|
+|165|my_actions|Implementation in progress; requirements/types/quality/design/plan read|
 |166|record_complaint_reception|Not started|
 |167|record_complaint_admissions|Not started|
 |168|record_complaint_er|Not started|
