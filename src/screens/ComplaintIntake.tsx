@@ -14,14 +14,13 @@ import { useClinicalWrite, ClinicalWriteFeedback } from "../clinical-write";
 import type { ClinicalUser } from "../clinical-context";
 import { bilingual as t } from "../i18n";
 import { formatHospitalTime } from "../hospital-time";
-import contract from "../../contracts/record_complaint_reception.json";
+import enums from "../complaint-intake-values.json";
 export type ComplaintDesk =
   | "record_complaint_reception"
   | "record_complaint_admissions"
   | "record_complaint_er"
   | "record_complaint_ward";
 type Letter = "Notice" | "Acknowledgement" | "Outcome" | "AppealOutcome";
-const enums = contract.schemas.ComplaintIn.properties;
 const label = (v: string) =>
   t(
     v.replace(/([a-z])([A-Z])/g, "$1 $2"),
