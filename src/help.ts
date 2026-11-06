@@ -10,6 +10,91 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  my_complaint_investigations: {
+  title: "Complaints I investigate",
+  titleUr: "جن شکایات کی میں تحقیق کرتا ہوں",
+  purpose: "The named investigator opens Complaints I investigate during the shift to establish facts, keep the complainant informed before the promised date and assign accountable improvements. The complaints officer conveys the final outcome and appeal rights.",
+  purposeUr: "مقرر تحقیق کار اپنی شفٹ میں حقائق، وعدہ کردہ تاریخ سے پہلے اطلاع اور بہتری کی ذمہ داری کے لیے شکایت تحقیق کھولتا ہے۔ حتمی جواب اور اپیل کا حق شکایات افسر پہنچاتا ہے۔",
+  steps: [
+    "The named investigator opens Complaints I investigate during the shift to establish facts, keep the complainant informed before the promised date and assign accountable improvements. The complaints officer conveys the final outcome and appeal rights.",
+    "The menu appears only for a current acknowledged assignment. The complaints officer names the investigator; complaint notifications refresh the list. It contains only your actual assignments, sorted by answer date, overdue in red and text. A failed read is not an empty queue. At the list limit ask the officer to reconcile outstanding work.",
+    "Open investigation rereads the tracking number, original complaint, requested outcome, complainant and preferred contact, available patient/location, receiving staff, named contact/investigator, deadline and next step. Check these before an entry. Absent details stay not recorded. Your investigation does not change the original complaint.",
+    "Write findings: record the facts, people spoken to, records read and the explanation, without blame. At least ten characters; do not prefill an outcome. Read any existing findings and author/time above, review the actual entry, then Record this entry once. The server decides whether findings are still permitted.",
+    "A newly discovered safety incident is a separate report. Report a newly found safety incident opens the existing incident form with its own F1 guidance. Complete its real fields, retain its original retry key after a lost answer, then Use this confirmed incident. Only that confirmed number is carried to the findings; no typed internal number or guessed link. A report failure never submits findings, and a findings failure never repeats the report.",
+    "Record contact / extension only after actually informing the complainant. Choose Progress, Extension or Other and the actual means; write exactly what was told. Extension also needs the new answer date and reason. Tell them before the promised answer date; a stored entry does not itself send a phone call, SMS, email or letter. The confirmed timeline shows who and when.",
+    "Add corrective / preventive action: choose its type, describe the actual work, search staff by at least two name characters, choose a returned login, optionally choose an active department and select the due date. The responsible person is notified and later records completion evidence. HR adds missing staff; IT supplies a missing login or department. No internal number is requested.",
+    "Check the current record and review checkbox before each separate submission. Current server permissions and record flags control actions; there is no role-name shortcut. Refresh/events preserve an unsent draft and reset its review checkbox if the record changed. Recheck before sending. Cancellation discards only unsent input. Pending requests hold navigation and cannot be replaced.",
+    "Findings, contacts and actions each keep their own original body/key. A lost answer locks that request; Retry original request within its retention replays exactly it, never a replacement or another action. Read current result helps reconcile. Outside retention ask IT before a new request; a missing list row alone proves nothing.",
+    "COMPLAINT_STATE_INVALID refreshes the current complaint; keep the draft and follow the next step. FORBIDDEN means the officer must check the assignment/access. Validation stays visible for correction. This screen offers no complaint edit, outcome letter, appeal decision, closure or deletion; those belong to the complaints officer and independent appeal workflow.",
+    "F1 and visible Help work from fields and the incident dialog, retaining the draft and focus. English/Urdu, both themes and shared keyboard/Settings zoom100–250%, reset100%, remain available. Native Urdu/editor, complete fresh-data human journeys and devices require the named human portal review; the agent does not enter or sign it."
+  ],
+  stepsUr: [
+    "مقرر تحقیق کار اپنی شفٹ میں حقائق، وعدہ کردہ تاریخ سے پہلے اطلاع اور بہتری کی ذمہ داری کے لیے شکایت تحقیق کھولتا ہے۔ حتمی جواب اور اپیل کا حق شکایات افسر پہنچاتا ہے۔",
+    "مینو موجودہ تسلیم شدہ ذمہ داری پر آتا ہے۔ افسر تحقیق کار مقرر کرتا؛ شکایت کی اطلاع فہرست تازہ کرتی ہے۔ صرف آپ کی ذمہ داریاں، جواب تاریخ کی ترتیب اور تاخیر سرخ و تحریر میں ہے۔ ناکام پڑھائی خالی قطار نہیں۔ حد پر افسر سے باقی کام چیک کرائیں۔",
+    "تحقیق کھولیں سے اصل نمبر، شکایت، درخواست کردہ نتیجہ، شکایت کنندہ و رابطہ، دستیاب مریض یا مقام، وصول کنندہ، ذمہ دار و تحقیق کار، تاریخ اور اگلا قدم تازہ پڑھیں۔ اندراج سے پہلے چیک کریں۔ غائب بات درج نہیں رہتی؛ تحقیق اصل شکایت نہیں بدلتی۔",
+    "نتائج لکھیں میں حقائق، جن سے بات ہوئی، پڑھے ریکارڈ اور وضاحت الزام کے بغیر لکھیں؛ کم از کم دس حروف۔ نتیجہ پہلے سے نہ بھریں۔ موجودہ نتائج اور مصنف و وقت دیکھ کر اصل اندراج چیک اور ایک بار درج کریں۔ اجازت سرور طے کرتا ہے۔",
+    "نیا حفاظتی واقعہ الگ رپورٹ ہے۔ متعلقہ بٹن اصل واقعہ فارم اور اپنی ایف ون مدد کھولتا ہے۔ حقیقی خانے مکمل، غائب جواب میں اصل کلید رکھیں، پھر تصدیق شدہ واقعہ استعمال کریں۔ صرف تصدیق شدہ نمبر نتائج میں جاتا؛ اندرونی نمبر لکھنا یا اندازہ نہیں۔ رپورٹ کی خرابی نتائج نہیں بھیجتی، نتائج کی خرابی رپورٹ نہیں دہراتی۔",
+    "رابطہ یا مزید وقت حقیقت میں اطلاع دینے کے بعد درج کریں۔ پیش رفت، مزید وقت یا دیگر اور اصل ذریعہ چن کر بتایا متن لکھیں۔ مزید وقت میں نئی جواب تاریخ اور وجہ بھی دیں۔ وعدے کی تاریخ سے پہلے بتائیں؛ اندراج خود کال، پیغام، ای میل یا خط نہیں بھیجتا۔ تصدیق شدہ تاریخ میں مصنف اور وقت ہیں۔",
+    "اصلاحی یا احتیاطی عمل میں قسم، اصل کام، کم از کم دو حروف سے عملہ تلاش اور واپس آیا لاگ ان چنیں، اختیاری فعال شعبہ اور آخری تاریخ دیں۔ ذمہ دار کو اطلاع اور بعد میں تکمیل کا ثبوت دینا ہے۔ ایچ آر عملہ، آئی ٹی لاگ ان یا شعبہ درست کرے؛ اندرونی نمبر نہیں مانگا جاتا۔",
+    "ہر الگ ارسال سے پہلے موجودہ ریکارڈ اور جائزہ خانہ چیک کریں۔ اصل اجازت اور ریکارڈ کے جھنڈے عمل طے کرتے؛ کردار کا مختصر راستہ نہیں۔ تازہ پڑھائی مسودہ رکھتی اور ریکارڈ بدلے تو جائزہ ختم کرتی ہے۔ دوبارہ چیک کریں۔ منسوخی صرف غیر ارسال متن چھوڑتی؛ جاری درخواست جگہ بدلنے اور متبادل کو روکتی ہے۔",
+    "نتائج، رابطہ اور عمل ہر ایک اپنا اصل متن و کلید رکھتے ہیں۔ غائب جواب اسے مقفل کرتا؛ مدت کے اندر عین اصل درخواست کی کوشش کریں، متبادل یا دوسرا عمل نہیں۔ موجودہ نتیجہ پڑھ کر ملائیں۔ مدت بعد آئی ٹی سے پہلے پوچھیں؛ فہرست سے غائب ہونا ناکامی کا ثبوت نہیں۔",
+    "حالت کا انکار تازہ شکایت پڑھتا؛ مسودہ رکھ کر اگلا قدم لیں۔ اجازت انکار پر افسر ذمہ داری و رسائی چیک کرے۔ غلط اندراج کی خرابی درست کرنے کو واضح رہتی ہے۔ یہاں اصل شکایت بدلنا، جواب خط، اپیل فیصلہ، بند یا حذف کرنا نہیں؛ یہ افسر اور آزاد اپیل کے کام ہیں۔",
+    "ایف ون اور مدد خانے و واقعہ مکالمے سے مسودہ اور فوکس رکھتی ہیں۔ انگریزی، اردو، دونوں تھیم اور مشترک کی بورڈ و ترتیبات زوم سو تا ڈھائی سو، سو ری سیٹ ہے۔ اصل اردو، ادارت، مکمل انسانی نئے ریکارڈ سفر اور آلات کا نامزد پورٹل جائزہ باقی؛ ایجنٹ اسے داخل یا دستخط نہیں کرتا۔"
+  ],
+  faq: [
+    [
+      "Why is my assignment missing?",
+      "The officer must acknowledge and name you as investigator. The list filters your acknowledged assignments, not merely complaints you received. Ask the officer to verify the assignment/access. Backend issue56 records that some assigned non-register roles cannot currently list their work; the app does not grant a role or invent a record number."
+    ],
+    [
+      "What should clinical, nursing, office and support investigators write?",
+      "Write the factual sequence, whose account was checked, which records were read and what they show. Distinguish evidence from an unverified account. The complaints officer conveys the outcome; findings or an action do not close the complaint."
+    ],
+    [
+      "Does Record contact send a message?",
+      "No. Make the actual contact first, using the preferred means when possible, then record what was told. Extension records the new date/reason before the answer is due. Ask the officer if contact is impossible or overdue; do not invent a successful conversation."
+    ],
+    [
+      "How do I link a safety incident without an internal number?",
+      "Use Report a newly found safety incident, finish the existing reporting form, then Use this confirmed incident. Its confirmed number is retained for the findings. If you cannot report, ask an authorised reporter and the complaints officer; never type an invented ID."
+    ],
+    [
+      "Who can own an action?",
+      "Choose a real staff member with a returned login from name search. A staff field and a login are different: this action uses the login. HR adds staff; IT provides the login/department. The notified owner completes it with evidence in their action workflow."
+    ],
+    [
+      "What if a reply vanishes or the record changes?",
+      "Keep the window. Each write retries only its exact original body/key within retention, and holds other writes/navigation. Refresh compares current state and preserves unsent input. A refused state or permission never authorises an automatic replacement; ask the officer or IT as the message directs."
+    ]
+  ],
+  faqUr: [
+    [
+      "ذمہ داری کیوں غائب ہے؟",
+      "افسر شکایت تسلیم اور آپ کو تحقیق کار مقرر کرے۔ فہرست آپ کی تسلیم شدہ تحقیقات ہے، صرف وصول کردہ شکایات نہیں۔ ذمہ داری و رسائی افسر چیک کرے۔ مسئلہ چھپن میں بعض مقرر عملے کی فہرست نہیں کھلتی؛ ایپ کردار یا نمبر نہیں گھڑتی۔"
+    ],
+    [
+      "طبی، نرس، دفتر یا معاون تحقیق کار کیا لکھیں؟",
+      "حقائق کی ترتیب، کس کی بات چیک کی، کون سا ریکارڈ پڑھا اور کیا ملا لکھیں۔ ثبوت اور غیر مصدقہ بات الگ کریں۔ افسر حتمی جواب دیتا؛ نتائج یا عمل شکایت بند نہیں کرتے۔"
+    ],
+    [
+      "کیا رابطہ درج کریں سے پیغام جاتا ہے؟",
+      "نہیں۔ ممکن ہو تو پسندیدہ ذریعے سے اصل رابطہ پہلے، پھر بتایا متن درج کریں۔ مزید وقت میں آخری تاریخ سے پہلے نئی تاریخ اور وجہ بتائیں۔ رابطہ ناممکن یا دیر ہو تو افسر سے کہیں؛ کامیاب گفتگو نہ گھڑیں۔"
+    ],
+    [
+      "اندرونی نمبر کے بغیر حفاظتی واقعہ کیسے جوڑیں؟",
+      "نیا واقعہ رپورٹ کریں سے اصل فارم مکمل، پھر تصدیق شدہ واقعہ استعمال کریں۔ اس کا نمبر نتائج کے لیے محفوظ ہے۔ اجازت نہ ہو تو مجاز رپورٹ کنندہ اور افسر سے کہیں؛ فرضی نمبر نہ لکھیں۔"
+    ],
+    [
+      "عمل کس کے ذمے ہو سکتا ہے؟",
+      "نام تلاش سے حقیقی عملہ اور واپس آیا لاگ ان چنیں۔ ملازم اور لاگ ان الگ ہیں؛ اس عمل میں لاگ ان جاتا ہے۔ ایچ آر عملہ، آئی ٹی لاگ ان و شعبہ دے۔ اطلاع والا ذمہ دار اپنے عمل میں ثبوت کے ساتھ مکمل کرے۔"
+    ],
+    [
+      "جواب غائب یا ریکارڈ بدل جائے تو؟",
+      "ونڈو رکھیں۔ ہر عمل مدت میں صرف اصل متن و کلید دہرائے اور باقی عمل و جگہ بدلنا روکے۔ تازہ پڑھائی حالت ملاتی اور غیر ارسال متن رکھتی ہے۔ حالت یا اجازت انکار خودکار متبادل کی اجازت نہیں؛ پیغام کے مطابق افسر یا آئی ٹی سے کہیں۔"
+    ]
+  ]
+},
+
   my_investigations: {
   title: "Incidents I investigate",
   titleUr: "جن واقعات کی میں تحقیق کرتا ہوں",

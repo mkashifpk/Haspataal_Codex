@@ -140,10 +140,14 @@ export function Incidents({
   user,
   revision,
   timeZone,
+  onRecorded,
+  onPendingChange,
 }: {
   user: any;
   revision: number;
   timeZone?: string;
+  onRecorded?: (record: incidents.IncidentDetailOut) => void;
+  onPendingChange?: (pending: boolean) => void;
 }) {
   const r = useLoad(
     async () => ({
@@ -167,6 +171,7 @@ export function Incidents({
   const formRef = useRef<HTMLFormElement>(null);
   const [pendingReport, setPendingReport] =
     useState<WriteAttempt<incidents.IncidentIn>>();
+  useEffect(() => { onPendingChange?.(busy || !!pendingReport); }, [busy, pendingReport, onPendingChange]);
   async function sendReport(attempt: WriteAttempt<incidents.IncidentIn>) {
     if (submitting.current || !canRetryWrite(attempt)) return;
     submitting.current = true;
@@ -181,6 +186,7 @@ export function Incidents({
         { key: attempt.key },
       );
       setSaved(result);
+      onRecorded?.(result);
       setPendingReport(undefined);
       formRef.current?.reset();
       setType("");

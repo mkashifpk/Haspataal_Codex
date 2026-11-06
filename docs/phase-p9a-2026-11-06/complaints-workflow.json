@@ -1,0 +1,199 @@
+{
+  "slug": "complaints",
+  "title": "Complaints (MSDS)",
+  "summary": "The patients' and families' complaints - received in any way and given a tracking number, acknowledged within the hours the procedure sets with a contact person and a course of action, investigated with progress and extensions told, answered with the right to appeal, the appeal decided by someone independent, the actions that follow, the notice of the right to complain in English and Urdu, the written procedure, the monthly return and the statistics.",
+  "order": 99,
+  "workflow": "MSDS PRE 80-83",
+  "workspaces": [
+    "*",
+    "reception",
+    "admissions",
+    "quality",
+    "owner_dashboard"
+  ],
+  "file": "complaints.md",
+  "markdown": "# Complaints (MSDS)\n\nThe MSDS asks the hospital to tell patients how to complain and to accept complaints in any form (PRE 80), to have a\nwritten procedure for collecting, prioritising, investigating and resolving them (81), to acknowledge, keep the\ncomplainant informed and answer within set times, with an appeal (82), and to use the results to improve (83).\n\n| MSDS | What is checked | Haspataal |\n|---|---|---|\n| PRE 80 | Patients know how to complain; complaints accepted verbally and in writing | The **notice** in English and Urdu (`GET /complaints/notice/print-payload`); every channel recorded; the tracking number |\n| PRE 81 | A written procedure | `GET /complaints/policy/pdf`, built from the settings |\n| PRE 82 | Acknowledged, informed, answered on time, an appeal; a monthly report, nil included | `complaint_acknowledge_hours`, `complaint_response_days`, extensions recorded, the outcome letter with `complaint_appeal_days`; the **monthly return** |\n| PRE 83 | Complaints lead to improvement | The incident a complaint revealed, the **actions** in the hospital's register, the statistics |\n\nWho does what:\n\n* **Front desks** (`complaint.register`: reception, admissions, the wards): record a complaint as it is made and give\n  the tracking number; they read the complaints they received.\n* **Quality Officer** (`complaint.view`, `complaint.manage`): acknowledge, name the contact person and the investigator,\n  convey the outcome, close, the register, the statistics, the monthly return.\n* **Investigators** (any member of staff named, whatever their role: the shared screen *Complaints I investigate*):\n  record progress, write the findings, record actions; anyone else but a manager gets `FORBIDDEN`.\n* **Owner** (`complaint.appeal.decide`): decides appeals, never their own decision (`COMPLAINT_APPEAL_INDEPENDENT`).\n\n## 1. Receiving (any desk)\n\n1. `POST /complaints` with an `Idempotency-Key`:\n   ```json\n   { \"channel\": \"InPerson\", \"complainant_name\": \"Mr Tariq Mehmood\", \"complainant_relation\": \"Relative\",\n     \"complainant_phone\": \"0300-1234567\", \"preferred_means\": \"Telephone\", \"admission_id\": 812, \"ward_id\": 4,\n     \"category\": \"NursingCare\", \"description\": \"My father's call bell was not answered for 40 minutes last night\",\n     \"desired_outcome\": \"An explanation and that it does not happen again\" }\n   ```\n   A telephone number or an address is required except for anonymous and suggestion-box complaints. Give the\n   `complaint_number` at once: it is the tracking number. The managers get `complaint.received`.\n   The pickers (decision 62): the ward from `GET /beds/matrix?include_beds=false`, the department from\n   `GET /admin/departments`, the patient from `GET /patients/search` and, at a desk that may view admissions, the\n   admission from `GET /admissions` (the reception names the patient only).\n2. The notice of the right to complain for the walls and the waiting room screens:\n   `GET /complaints/notice/print-payload` (`fields.urdu` right to left).\n\n## 2. Acknowledging (Quality Officer)\n\n1. The register: `GET /complaints?open_only=true` (`acknowledgement_overdue` after `complaint_acknowledge_hours`).\n2. `POST /complaints/{complaint_id}/acknowledge`\n   ```json\n   { \"priority\": \"High\", \"contact_user_id\": 17, \"investigator_user_id\": 23,\n     \"course_of_action\": \"The head nurse will check the call bell log and speak to the night staff\",\n     \"means\": \"Telephone\", \"note\": \"Told Mr Mehmood the outcome is due within 7 days\" }\n   ```\n   Or `{\"maintainable\": false, \"not_maintainable_reason\": \"...\", \"means\": \"Letter\"}`. Print the acknowledgement:\n   `GET /complaints/{complaint_id}/letter/print-payload?letter=Acknowledgement` (or `.../letter/pdf`).\n\n## 3. Investigating (the investigator)\n\n1. \"Complaints I investigate\": `GET /complaints?mine=true`; one: `GET /complaints/{complaint_id}` (`updates`,\n   `next_step`, `can_*`).\n2. Keep the complainant informed: `POST /complaints/{complaint_id}/updates {\"stage\": \"Progress\", \"means\", \"note\"}`; more\n   time: `{\"stage\": \"Extension\", \"extended_until\", \"extension_reason\", ...}`.\n3. The findings: `POST /complaints/{complaint_id}/findings {\"findings\", \"incident_id\"?}` (report the patient safety\n   incident first with `POST /incidents`, see [incidents](incidents-and-sentinel-events.md)).\n4. Actions: `POST /complaints/{complaint_id}/actions` (the hospital's action register).\n   The owner from `GET /staff/lookup` (their `user_id`), the department from `GET /admin/departments`.\n\n## 4. The outcome, the appeal, the closure\n\n1. `POST /complaints/{complaint_id}/outcome {\"upheld\": \"PartlyUpheld\", \"outcome\", \"means\", \"satisfaction\"?}`: needs the\n   findings (`COMPLAINT_FINDINGS_REQUIRED`); the appeal window opens. Print `?letter=Outcome`.\n2. An appeal within the window: `POST /complaints/{complaint_id}/appeal {\"appeal_text\", \"means\"}`\n   (`COMPLAINT_APPEAL_LATE` after it). The owner decides: `POST /complaints/{complaint_id}/appeal-decision\n   {\"appeal_upheld\", \"appeal_decision\", \"means\"}`; print `?letter=AppealDecision`.\n3. Closing early only when the complainant waives the appeal: `POST /complaints/{complaint_id}/close {\"note\",\n   \"appeal_waived\": true}`; otherwise the worker closes it when the window ends (job complaints.alerts). Withdrawn by the\n   complainant: `POST /complaints/{complaint_id}/withdraw {\"reason\", \"means\"}`.\n\n## 5. The return, the statistics, the procedure\n\n* The monthly return, nil included: `GET /quality/monthly-returns?kind=Complaints`, then\n  `POST /quality/monthly-returns {\"kind\": \"Complaints\", \"month\"}`.\n* `GET /complaints/statistics?date_from=&date_to=`: by channel, category, priority, department, month; on time;\n  upheld; appeals; satisfaction; incidents and actions. `GET /complaints/register/pdf?date_from=&date_to=`.\n* The written procedure: `GET /complaints/policy/pdf`.\n\nEvents: `complaint.received`, `complaint.updated`.",
+  "steps": [
+    {
+      "heading": "",
+      "anchor": "",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/complaints/notice/print-payload",
+          "summary": "The notice of the right to complain (English and Urdu)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/complaints/policy/pdf",
+          "summary": "The written complaints procedure (PDF)"
+        }
+      ]
+    },
+    {
+      "heading": "1. Receiving (any desk)",
+      "anchor": "1-receiving-any-desk",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/complaints",
+          "summary": "Record a complaint"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "summary": "Live bed matrix (counts per ward + optional bed list)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions",
+          "summary": "Admissions (default: all live ones; admissions desk queue)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/complaints/notice/print-payload",
+          "summary": "The notice of the right to complain (English and Urdu)"
+        }
+      ]
+    },
+    {
+      "heading": "2. Acknowledging (Quality Officer)",
+      "anchor": "2-acknowledging-quality-officer",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/complaints",
+          "summary": "The complaints register"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/complaints/{complaint_id}/acknowledge",
+          "summary": "Acknowledge: the tracking number, the contact person, the course of action"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/complaints/{complaint_id}/letter/print-payload",
+          "summary": "A letter to the complainant (print payload)"
+        }
+      ]
+    },
+    {
+      "heading": "3. Investigating (the investigator)",
+      "anchor": "3-investigating-the-investigator",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/complaints",
+          "summary": "The complaints register"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/complaints/{complaint_id}",
+          "summary": "One complaint"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/complaints/{complaint_id}/updates",
+          "summary": "Record a contact with the complainant (progress, more time)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/complaints/{complaint_id}/findings",
+          "summary": "Write the findings of the investigation"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/incidents",
+          "summary": "Report an incident, an adverse event or a near miss"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/complaints/{complaint_id}/actions",
+          "summary": "Record a corrective or preventive action"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/staff/lookup",
+          "summary": "Find a staff member for a form (badge facts only)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/departments",
+          "summary": "Departments"
+        }
+      ]
+    },
+    {
+      "heading": "4. The outcome, the appeal, the closure",
+      "anchor": "4-the-outcome-the-appeal-the-closure",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/complaints/{complaint_id}/outcome",
+          "summary": "Convey the outcome, with the right to appeal"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/complaints/{complaint_id}/appeal",
+          "summary": "Record an appeal"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/complaints/{complaint_id}/appeal-decision",
+          "summary": "Decide an appeal (closes the complaint)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/complaints/{complaint_id}/close",
+          "summary": "Close a resolved complaint before its appeal window ends"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/complaints/{complaint_id}/withdraw",
+          "summary": "The complainant withdrew the complaint"
+        }
+      ]
+    },
+    {
+      "heading": "5. The return, the statistics, the procedure",
+      "anchor": "5-the-return-the-statistics-the-procedure",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/quality/monthly-returns",
+          "summary": "The monthly returns of a register, nil returns included"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/quality/monthly-returns",
+          "summary": "Confirm a month's return (none is an answer too)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/complaints/statistics",
+          "summary": "Complaint statistics"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/complaints/register/pdf",
+          "summary": "The complaints register for a period (PDF)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/complaints/policy/pdf",
+          "summary": "The written complaints procedure (PDF)"
+        }
+      ]
+    }
+  ]
+}

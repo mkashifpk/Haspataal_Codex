@@ -1,0 +1,42 @@
+// Operates only the current session's fresh synthetic complaint. Never rerun writes after an interruption.
+import fs from 'node:fs';import assert from 'node:assert/strict';
+import {session,expect,capture,help} from './clinical-test-kit.mjs';
+const dir='docs/phase-p9a-2026-11-06/',fixture=JSON.parse(fs.readFileSync(dir+'164-ack-a-result.json')).body.data;
+const file='artifacts/p9a164-journey.json';assert(!fs.existsSync(file),'Reconcile original journey and key before any rerun.');
+const j={complaint_id:fixture.complaint_id,started:new Date().toISOString(),pending:null,checks:[]};
+const save=()=>fs.writeFileSync(file,JSON.stringify(j,null,2));save();
+let s;try{
+ s=await session('p9a164-nurse','demo.nurse');s.p.on('dialog',d=>d.accept());j.renderer=s.j.renderer;save();
+ await s.p.getByRole('navigation').locator('[data-screen-target="my_complaint_investigations"]').click();
+ const root=s.p.locator('[data-screen="my_complaint_investigations"]'),c=(id,tag='')=>root.locator(`${tag}[data-help="mci.${id}"]`),submit=async label=>{j.pending=label;save();await c('confirm','input').check();await c('submit','button').click();},done=async()=>{await expect(c('submit','button')).toHaveCount(0);j.pending=null;save();};
+ await root.getByRole('row').filter({hasText:fixture.complaint_number}).getByRole('button',{name:'Open investigation',exact:true}).click();
+ await expect(root).toContainText(fixture.description);await expect(root).toContainText('Nurse Hina');
+ await c('update','button').click();await c('contact-note','textarea').fill('SYNTHETIC ONLY: simulated progress conversation for the test, no actual complainant contacted.');
+ await help(s,c('contact-note','textarea'),'Complaints I investigate');
+ const updatePath=`/complaints/${fixture.complaint_id}/updates`;
+ await s.fault({failPath:updatePath,failMethod:'POST',once:true});await submit('Progress POST committed reply lost; retry original request');
+ await expect(root.getByRole('button',{name:'Retry original request',exact:true})).toBeEnabled();await expect(c('stage','select')).toBeDisabled();await s.p.keyboard.press('Control+,');await expect(root).toBeVisible();
+ await root.getByRole('button',{name:'Retry original request',exact:true}).click();await done();
+ await c('update','button').click();await c('stage','select').selectOption('Extension');await c('contact-note','textarea').fill('SYNTHETIC ONLY: a simulated new answer date was explained. No actual contact.');await c('extension-date','input').fill('2026-11-05');await c('extension-reason','textarea').fill('SYNTHETIC negative date validation, no actual delay.');await submit('Expected invalid extension refusal');
+ await expect(root).toContainText('VALIDATION_ERROR');j.pending=null;save();await c('extension-date','input').fill('2026-11-20');await c('extension-reason','textarea').fill('SYNTHETIC ONLY: timetable verification, no actual delay.');await submit('Valid separate extension');await done();
+ await expect(root).toContainText('2026-11-20');
+ await c('findings','button').click();await c('findings-text','textarea').fill('SYNTHETIC ONLY: reviewed this test record and a simulated staff account; no actual failure, complaint or harm. Findings demonstrate the workflow without blame.');
+ await c('report','button').click();const modal=s.p.getByRole('dialog').filter({has:s.p.getByRole('heading',{name:'Report the safety incident first',exact:true})});
+ const types=await s.native('api',{method:'GET',path:'/incident-types',});const type=types.find(x=>x.area==='Facility'&&x.sentinel!=='Always');assert(type);
+ await modal.locator('select[data-field="type_code"]').selectOption(type.type_code);await modal.locator('select[name="kind"]').selectOption('NearMiss');await modal.locator('select[name="harm"]').selectOption('NoHarm');await modal.locator('select[name="affected"]').selectOption('None');
+ await modal.locator('input[name="location"]').fill('SYNTHETIC TEST AREA - NO ACTUAL EVENT');await modal.locator('textarea[name="description"]').fill('SCN164 SYNTHETIC ONLY: fictitious tabletop near miss found while testing complaint handoff; no actual event or patient.');await modal.locator('textarea[name="immediate_action"]').fill('SYNTHETIC ONLY: test preparation, no actual intervention.');
+ await help(s,modal.locator('textarea[name="description"]'),'Report an incident');
+ await s.fault({failPath:'/incidents',failMethod:'POST',once:true});j.pending='Separate synthetic incident POST reply lost';save();await modal.getByRole('button',{name:'Submit incident report',exact:true}).click();
+ await expect(modal.getByRole('button',{name:'Retry original report',exact:true})).toBeEnabled();
+ await modal.getByRole('button',{name:'Close',exact:true}).click();await expect(modal).toBeVisible();
+ await modal.getByRole('button',{name:'Retry original report',exact:true}).click();await expect(c('use-incident','button')).toBeEnabled();await c('use-incident','button').click();
+ const incidentWrites=(await s.trace()).requests.filter(r=>r.method==='POST'&&r.path.endsWith('/incidents'));assert.equal(incidentWrites.length,2);assert.equal(incidentWrites[0].key,incidentWrites[1].key);assert.deepEqual(incidentWrites[0].body,incidentWrites[1].body);assert.equal(incidentWrites[0].result.data.incident_id,incidentWrites[1].result.data.incident_id);j.incident_id=incidentWrites[0].result.data.incident_id;j.incident_number=incidentWrites[0].result.data.incident_number;save();
+ await expect(root).toContainText(j.incident_number);await s.fault({failPath:`/complaints/${fixture.complaint_id}/findings`,failMethod:'POST',once:true});await submit('Findings POST committed reply lost');await expect(root.getByRole('button',{name:'Retry original request',exact:true})).toBeEnabled();await root.getByRole('button',{name:'Retry original request',exact:true}).click();await done();await expect(root).toContainText(j.incident_number);
+ await c('action','button').click();await c('action-description','textarea').fill('SYNTHETIC ONLY: verify this test workflow; no actual operational task or expenditure.');
+ const owner=root.locator('.directory-picker').filter({has:s.p.locator('input[data-help="mci.owner"]')});await owner.locator('input').fill('Hina');await owner.getByRole('button',{name:'Find by name',exact:true}).click();const choice=owner.locator('option').filter({hasText:'Nurse Hina'});await expect(choice).toHaveCount(1);const ownerId=await choice.getAttribute('value');const me=await s.native('api',{method:'GET',path:'/auth/me'});assert.equal(Number(ownerId),me.user_id);assert.notEqual(Number(ownerId),me.employee_id);await owner.locator('select').selectOption(ownerId);
+ const dept=c('department','select');await expect(dept.locator('option')).not.toHaveCount(1);await dept.selectOption(await dept.locator('option:not([value=""])').first().getAttribute('value'));await c('due','input').fill('2026-11-21');await help(s,c('action-description','textarea'),'Complaints I investigate');
+ await s.fault({failPath:`/complaints/${fixture.complaint_id}/actions`,failMethod:'POST',once:true});await submit('Action POST committed reply lost');await expect(root.getByRole('button',{name:'Retry original request',exact:true})).toBeEnabled();await root.getByRole('button',{name:'Retry original request',exact:true}).click();await done();
+ const current=await s.native('api',{method:'GET',path:`/complaints/${fixture.complaint_id}`});assert.equal(current.actions.length,1);assert.equal(current.actions[0].owner_user_id,me.user_id);assert.equal(current.incident_id,j.incident_id);assert.equal(current.extended_until,'2026-11-20');assert.equal(current.updates.filter(x=>x.stage==='Progress').length,1);assert.equal(current.updates.filter(x=>x.stage==='Extension').length,1);
+ for(const suffix of ['findings','actions']){const requests=(await s.trace()).requests.filter(r=>r.method==='POST'&&r.path.endsWith(`/complaints/${fixture.complaint_id}/${suffix}`));assert.equal(requests.length,2);assert.equal(requests[0].key,requests[1].key);assert.deepEqual(requests[0].body,requests[1].body);}
+ j.current=current;await capture(s,'my_complaint_investigations');j.passed=true;j.checks.push('Assigned list/detail; Progress and Extension validation/contact attribution; separate incident callback/link without raw ID; all lost replies replay original keys with one effect; action employee-vs-user lookup/active department; navigation/pending locks; F1/focus, ENUR/themes250bounds.');save();s.j.passed=true;s.pass(j.checks[0]);
+}catch(e){j.error=e.stack;save();throw e;}finally{if(s)await s.close();}

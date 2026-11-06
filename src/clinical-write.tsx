@@ -14,7 +14,7 @@ export type ClinicalCommand = {
   method: "POST" | "PATCH" | "PUT" | "DELETE";
   path: string;
   body?: unknown;
-  permission: string;
+  permission: string | { recordPath: string; capability: string };
   protection: "idempotent" | "reconcile";
   reconcilePath?: string;
   label: string;
@@ -62,7 +62,7 @@ export function useClinicalWrite(
       if (
         current.user.user_id !== a.body.actor ||
         current.scope !== a.body.scope ||
-        !current.user.permissions.includes(a.body.permission)
+        (typeof a.body.permission === 'string' && !current.user.permissions.includes(a.body.permission))
       )
         throw new Error(
           t(
@@ -70,11 +70,17 @@ export function useClinicalWrite(
             "اصل صارف، پرچی یا اجازت بدل گئی۔ نیا عمل کرنے سے پہلے آئی ٹی سے نتیجہ چیک کرائیں۔",
           ),
         );
+      if (typeof a.body.permission !== 'string' && !retrying) {
+        const {recordPath, capability} = a.body.permission;
+        if (!a.body.path.startsWith(recordPath + '/') || !/^can_[a-z_]+$/.test(capability)) throw new Error('The record authority does not match this action.');
+        const record = await api<Record<string, unknown>>('GET', recordPath);
+        if (record[capability] !== true) throw new Error(t('The current server record does not allow this action. Refresh and review it.', 'سرور کا موجودہ ریکارڈ اس عمل کی اجازت نہیں دیتا۔ تازہ پڑھ کر جائزہ لیں۔'));
+      }
       if (prepare) await prepare();
       if (
         live.current.user.user_id !== a.body.actor ||
         live.current.scope !== a.body.scope ||
-        !live.current.user.permissions.includes(a.body.permission)
+        (typeof a.body.permission === 'string' && !live.current.user.permissions.includes(a.body.permission))
       )
         throw new Error(
           t(

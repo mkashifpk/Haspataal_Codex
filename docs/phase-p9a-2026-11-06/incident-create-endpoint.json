@@ -1,0 +1,1446 @@
+{
+  "method": "POST",
+  "path": "/api/v1/incidents",
+  "summary": "Report an incident, an adverse event or a near miss",
+  "tags": [
+    "Incidents and sentinel events"
+  ],
+  "permissions": [
+    "incident.report"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": true,
+  "description": "Anyone reports, the same day, without blame: the type (`GET /incident-types`), incident or near miss, the harm,\nwhen and where, who was affected, what happened and what was done at once. A theatre adverse event gives the\noperation and the phase (`INCIDENT_DETAILS_REQUIRED` otherwise, MSDS COP 40); a medication error the stage and the\nmedicine (CQI 102). The database classes it a sentinel event from the list and the harm; the managers are told at once\n(`incident.reported`, critical for a sentinel event). Reporting what the screening list found: send its\n`screening_key` (`INCIDENT_SCREENING_DECIDED` when it was reported or dismissed already).\nAn id in the request body that does not exist: `REFERENCE_NOT_FOUND` (details.field).\n`INCIDENT_TYPE_INACTIVE`: this incident type is no longer on the hospital's list.\n\n**Required permission:** `incident.report`\n\n**Required permission:** `incident.report`",
+  "roles_allowed": [
+    "accountant",
+    "admissions_officer",
+    "anaesthetist",
+    "billing_admin",
+    "cashier",
+    "clinic_director",
+    "clinical_specialist",
+    "cssd_technician",
+    "doctor",
+    "employee_self",
+    "head_nurse",
+    "hospital_admin",
+    "hospital_director",
+    "hr_admin",
+    "ipc_nurse",
+    "lab_admin",
+    "lab_technician",
+    "lab_verifier",
+    "maintenance_admin",
+    "ops_admin",
+    "ot_admin",
+    "ot_nurse",
+    "owner",
+    "pharmacist",
+    "pharmacy_admin",
+    "quality_officer",
+    "radiographer",
+    "radiologist",
+    "receptionist",
+    "super_admin",
+    "surgeon",
+    "triage_nurse",
+    "ward_nurse",
+    "zakat_officer"
+  ],
+  "parameters": [
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "IncidentIn",
+    "properties": {
+      "type_code": {
+        "type": "string",
+        "title": "Type Code",
+        "description": "From GET /incident-types"
+      },
+      "kind": {
+        "type": "string",
+        "enum": [
+          "Incident",
+          "NearMiss"
+        ],
+        "title": "Kind",
+        "description": "NearMiss: caught before it reached anyone",
+        "default": "Incident"
+      },
+      "harm": {
+        "type": "string",
+        "enum": [
+          "NoHarm",
+          "Mild",
+          "Moderate",
+          "Severe",
+          "Death"
+        ],
+        "title": "Harm",
+        "default": "NoHarm"
+      },
+      "occurred_at": {
+        "type": "string",
+        "format": "date-time",
+        "title": "Occurred At"
+      },
+      "affected": {
+        "type": "string",
+        "enum": [
+          "Patient",
+          "Staff",
+          "Visitor",
+          "None"
+        ],
+        "title": "Affected"
+      },
+      "patient_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Patient Id",
+        "description": "The patient (GET /patients/search)"
+      },
+      "admission_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Admission Id",
+        "description": "The admission it happened in (the patient follows from it) (GET /admissions)"
+      },
+      "employee_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Employee Id",
+        "description": "The staff member harmed (affected Staff)"
+      },
+      "booking_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Booking Id",
+        "description": "A theatre adverse event: the operation (with ot_phase) (GET /ot/bookings)"
+      },
+      "ot_phase": {
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "BeforeInduction",
+              "Induction",
+              "Maintenance",
+              "Emergence",
+              "Recovery",
+              "AfterRecovery"
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Ot Phase"
+      },
+      "drug_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Drug Id",
+        "description": "A medication error or an adverse drug reaction: the medicine (GET /drugs/search)"
+      },
+      "medication_stage": {
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "Prescribing",
+              "Transcribing",
+              "Dispensing",
+              "Administration",
+              "Monitoring"
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Medication Stage"
+      },
+      "death_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Death Id",
+        "description": "An unexpected death: the death record (GET /deaths?patient_id=)"
+      },
+      "department_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Department Id",
+        "description": "The department (GET /admin/departments)"
+      },
+      "ward_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Ward Id",
+        "description": "The ward (GET /beds/matrix?include_beds=false)"
+      },
+      "location": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 300
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Location",
+        "examples": [
+          "Bed 12, near the nursing station"
+        ]
+      },
+      "description": {
+        "type": "string",
+        "maxLength": 8000,
+        "minLength": 10,
+        "title": "Description",
+        "description": "What happened: facts, not opinions or blame"
+      },
+      "immediate_action": {
+        "type": "string",
+        "maxLength": 4000,
+        "minLength": 3,
+        "title": "Immediate Action",
+        "description": "What was done at once for the person and to make the place safe"
+      },
+      "screening_key": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Screening Key",
+        "description": "Reporting what the screening list found (GET /incident-screening)"
+      },
+      "reporter_confidential": {
+        "type": "boolean",
+        "title": "Reporter Confidential",
+        "description": "Only the incident managers see who reported it",
+        "default": false
+      }
+    },
+    "type": "object",
+    "required": [
+      "type_code",
+      "occurred_at",
+      "affected",
+      "description",
+      "immediate_action"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[IncidentDetailOut]",
+    "properties": {
+      "data": {
+        "title": "IncidentDetailOut",
+        "properties": {
+          "incident_id": {
+            "type": "integer",
+            "title": "Incident Id"
+          },
+          "incident_number": {
+            "type": "string",
+            "title": "Incident Number"
+          },
+          "type_code": {
+            "type": "string",
+            "title": "Type Code"
+          },
+          "type_name": {
+            "type": "string",
+            "title": "Type Name"
+          },
+          "area": {
+            "type": "string",
+            "enum": [
+              "Clinical",
+              "Medication",
+              "Anaesthesia",
+              "Surgery",
+              "Diagnostics",
+              "Transfusion",
+              "Infection",
+              "MotherAndBaby",
+              "Behaviour",
+              "Facility",
+              "Occupational"
+            ],
+            "title": "Area"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "Incident",
+              "NearMiss"
+            ],
+            "title": "Kind"
+          },
+          "harm": {
+            "type": "string",
+            "enum": [
+              "NoHarm",
+              "Mild",
+              "Moderate",
+              "Severe",
+              "Death"
+            ],
+            "title": "Harm"
+          },
+          "is_sentinel": {
+            "type": "boolean",
+            "title": "Is Sentinel"
+          },
+          "sentinel_override": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sentinel Override",
+            "description": "Why the Quality Officer classed it otherwise than the list"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "department_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          },
+          "department_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Name"
+          },
+          "ward_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ward Id"
+          },
+          "ward_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ward Name"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "affected": {
+            "type": "string",
+            "enum": [
+              "Patient",
+              "Staff",
+              "Visitor",
+              "None"
+            ],
+            "title": "Affected"
+          },
+          "patient_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Id"
+          },
+          "mrn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mrn"
+          },
+          "patient_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Name"
+          },
+          "admission_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admission Id"
+          },
+          "admission_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admission Number"
+          },
+          "employee_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Id"
+          },
+          "employee_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Name"
+          },
+          "booking_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking Id"
+          },
+          "booking_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking Number"
+          },
+          "procedure_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Procedure Name"
+          },
+          "ot_phase": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "BeforeInduction",
+                  "Induction",
+                  "Maintenance",
+                  "Emergence",
+                  "Recovery",
+                  "AfterRecovery"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ot Phase"
+          },
+          "drug_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drug Id"
+          },
+          "drug_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drug Name"
+          },
+          "medication_stage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Prescribing",
+                  "Transcribing",
+                  "Dispensing",
+                  "Administration",
+                  "Monitoring"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Medication Stage"
+          },
+          "high_alert": {
+            "type": "boolean",
+            "title": "High Alert",
+            "description": "The medicine is on the high-alert list (MSDS CQI 102 iv)"
+          },
+          "death_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Death Id"
+          },
+          "death_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Death Number"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "immediate_action": {
+            "type": "string",
+            "title": "Immediate Action"
+          },
+          "screening_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Screening Key"
+          },
+          "reporter_confidential": {
+            "type": "boolean",
+            "title": "Reporter Confidential"
+          },
+          "reported_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported By",
+            "description": "Null when the reporter asked for confidentiality (shown to the managers only)"
+          },
+          "reported_by_name": {
+            "type": "string",
+            "title": "Reported By Name"
+          },
+          "reported_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Reported At"
+          },
+          "report_stamp": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthorStampOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Reported",
+              "UnderReview",
+              "Analysed",
+              "Closed",
+              "Withdrawn"
+            ],
+            "title": "Status"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "reviewed_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed By Name"
+          },
+          "review_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Note"
+          },
+          "investigator_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Investigator User Id"
+          },
+          "investigator_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Investigator Name"
+          },
+          "analysis_due": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Due"
+          },
+          "withdraw_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdraw Reason"
+          },
+          "analysis_method": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Review",
+                  "RootCauseAnalysis"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Method"
+          },
+          "chronology": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chronology"
+          },
+          "root_causes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Root Causes"
+          },
+          "contributing_factors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Contributing Factors"
+          },
+          "lessons": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lessons"
+          },
+          "disclosure": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Disclosed",
+                  "NotYet",
+                  "NotApplicable"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disclosure"
+          },
+          "disclosure_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disclosure Note"
+          },
+          "external_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Reference"
+          },
+          "analysed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysed At"
+          },
+          "analysis_stamp": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthorStampOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "closure_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closure Note"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "closure_stamp": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthorStampOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          },
+          "review_overdue": {
+            "type": "boolean",
+            "title": "Review Overdue",
+            "description": "Reported and still not reviewed after incident_review_hours"
+          },
+          "analysis_overdue": {
+            "type": "boolean",
+            "title": "Analysis Overdue"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/QualityActionOut"
+            },
+            "type": "array",
+            "title": "Actions"
+          },
+          "next_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Step",
+            "description": "What happens next; null when closed or withdrawn"
+          },
+          "can_review": {
+            "type": "boolean",
+            "title": "Can Review"
+          },
+          "can_withdraw": {
+            "type": "boolean",
+            "title": "Can Withdraw"
+          },
+          "can_analyse": {
+            "type": "boolean",
+            "title": "Can Analyse",
+            "description": "The caller may save and sign the analysis (the investigator or a manager)"
+          },
+          "can_add_action": {
+            "type": "boolean",
+            "title": "Can Add Action"
+          },
+          "can_close": {
+            "type": "boolean",
+            "title": "Can Close"
+          }
+        },
+        "type": "object",
+        "required": [
+          "incident_id",
+          "incident_number",
+          "type_code",
+          "type_name",
+          "area",
+          "kind",
+          "harm",
+          "is_sentinel",
+          "sentinel_override",
+          "occurred_at",
+          "department_id",
+          "department_name",
+          "ward_id",
+          "ward_name",
+          "location",
+          "affected",
+          "patient_id",
+          "mrn",
+          "patient_name",
+          "admission_id",
+          "admission_number",
+          "employee_id",
+          "employee_name",
+          "booking_id",
+          "booking_number",
+          "procedure_name",
+          "ot_phase",
+          "drug_id",
+          "drug_name",
+          "medication_stage",
+          "high_alert",
+          "death_id",
+          "death_number",
+          "description",
+          "immediate_action",
+          "screening_key",
+          "reporter_confidential",
+          "reported_by",
+          "reported_by_name",
+          "reported_at",
+          "report_stamp",
+          "status",
+          "reviewed_at",
+          "reviewed_by_name",
+          "review_note",
+          "investigator_user_id",
+          "investigator_name",
+          "analysis_due",
+          "withdraw_reason",
+          "analysis_method",
+          "chronology",
+          "root_causes",
+          "contributing_factors",
+          "lessons",
+          "disclosure",
+          "disclosure_note",
+          "external_reference",
+          "analysed_at",
+          "analysis_stamp",
+          "closure_note",
+          "closed_at",
+          "closure_stamp",
+          "row_version",
+          "review_overdue",
+          "analysis_overdue",
+          "actions",
+          "next_step",
+          "can_review",
+          "can_withdraw",
+          "can_analyse",
+          "can_add_action",
+          "can_close"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/incidents",
+      "body": {
+        "type_code": "DELAY_IN_CARE",
+        "occurred_at": "2026-10-01T07:11:25.324724+00:00",
+        "affected": "Patient",
+        "patient_id": 1,
+        "description": "OPD queue held for a VIP for two hours; a waiting patient's review was delayed",
+        "immediate_action": "Queue order restored"
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "data": {
+          "incident_id": 1,
+          "incident_number": "INC-2026-00001",
+          "type_code": "DELAY_IN_CARE",
+          "type_name": "Delay or failure in treatment or monitoring",
+          "area": "Clinical",
+          "kind": "Incident",
+          "harm": "NoHarm",
+          "is_sentinel": false,
+          "sentinel_override": null,
+          "occurred_at": "2026-10-01T07:11:25.324724+00:00",
+          "department_id": null,
+          "department_name": null,
+          "ward_id": null,
+          "ward_name": null,
+          "location": null,
+          "affected": "Patient",
+          "patient_id": 1,
+          "mrn": "MRN-2026-000001",
+          "patient_name": "Ali Khan",
+          "admission_id": null,
+          "admission_number": null,
+          "employee_id": null,
+          "employee_name": null,
+          "booking_id": null,
+          "booking_number": null,
+          "procedure_name": null,
+          "ot_phase": null,
+          "drug_id": null,
+          "drug_name": null,
+          "medication_stage": null,
+          "high_alert": false,
+          "death_id": null,
+          "death_number": null,
+          "description": "OPD queue held for a VIP for two hours; a waiting patient's review was delayed",
+          "immediate_action": "Queue order restored",
+          "screening_key": null,
+          "reporter_confidential": false,
+          "reported_by": 6,
+          "reported_by_name": "Complaints Officer",
+          "reported_at": "2026-10-01T07:11:25.566626+00:00",
+          "report_stamp": {
+            "at": "2026-10-01T07:11:25.566626+00:00",
+            "name": "Complaints Officer",
+            "text": "Complaints Officer, Officer, 01-Oct-2026 12:11",
+            "user_id": 6,
+            "designation": "Officer",
+            "employee_id": 6,
+            "registration": null
+          },
+          "status": "Reported",
+          "reviewed_at": null,
+          "reviewed_by_name": null,
+          "review_note": null,
+          "investigator_user_id": null,
+          "investigator_name": null,
+          "analysis_due": null,
+          "withdraw_reason": null,
+          "analysis_method": null,
+          "chronology": null,
+          "root_causes": null,
+          "contributing_factors": [],
+          "lessons": null,
+          "disclosure": null,
+          "disclosure_note": null,
+          "external_reference": null,
+          "analysed_at": null,
+          "analysis_stamp": null,
+          "closure_note": null,
+          "closed_at": null,
+          "closure_stamp": null,
+          "row_version": 1,
+          "review_overdue": false,
+          "analysis_overdue": false,
+          "actions": [],
+          "next_step": "Review: confirm the type, the harm and the class, and name the investigator",
+          "can_review": true,
+          "can_withdraw": true,
+          "can_analyse": false,
+          "can_add_action": false,
+          "can_close": false
+        },
+        "meta": {
+          "server_time": "2026-10-01T07:11:25.595836+00:00"
+        },
+        "request_id": "00598659a52f4a5b96ffa9937617dae5"
+      }
+    },
+    "errors_seen": [
+      "INCIDENT_DETAILS_REQUIRED",
+      "INCIDENT_TYPE_INACTIVE",
+      "VALIDATION_ERROR"
+    ],
+    "events_emitted": [
+      "incident.reported",
+      "notification.created"
+    ]
+  },
+  "errors": [
+    {
+      "code": "INCIDENT_DETAILS_REQUIRED",
+      "http_status": 422,
+      "message": "The incident type needs more detail: a theatre adverse event its operation and phase, a medication error its stage.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "INCIDENT_SCREENING_DECIDED",
+      "http_status": 409,
+      "message": "This screening item is not on the list: it was reported or dismissed already, or is outside the screening window.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "INCIDENT_TYPE_INACTIVE",
+      "http_status": 409,
+      "message": "This incident type is no longer on the hospital's list.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "INCIDENT_DETAILS_REQUIRED",
+    "INCIDENT_TYPE_INACTIVE",
+    "VALIDATION_ERROR"
+  ],
+  "used_by_screens": [
+    "report_incident",
+    "safety_checklist",
+    "safety_checklist_admin",
+    "safety_checklist_anaesthesia",
+    "recovery_board",
+    "recovery_board_admin",
+    "recovery_board_anaesthesia",
+    "anaesthesia_record",
+    "surgical_record_surgeon",
+    "complaints_register",
+    "incident_screening"
+  ],
+  "used_by_workflows": [
+    "complaints",
+    "incidents-and-sentinel-events",
+    "surgical-care"
+  ],
+  "typescript_example": "// Report an incident, an adverse event or a near miss  (permissions: incident.report)\nexport const reportIncidents = (body) =>\n  api(\"POST\", `/incidents`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "incident.report"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of incident.report",
+    "roles_allowed": [
+      "accountant",
+      "admissions_officer",
+      "anaesthetist",
+      "billing_admin",
+      "cashier",
+      "clinic_director",
+      "clinical_specialist",
+      "cssd_technician",
+      "doctor",
+      "employee_self",
+      "head_nurse",
+      "hospital_admin",
+      "hospital_director",
+      "hr_admin",
+      "ipc_nurse",
+      "lab_admin",
+      "lab_technician",
+      "lab_verifier",
+      "maintenance_admin",
+      "ops_admin",
+      "ot_admin",
+      "ot_nurse",
+      "owner",
+      "pharmacist",
+      "pharmacy_admin",
+      "quality_officer",
+      "radiographer",
+      "radiologist",
+      "receptionist",
+      "super_admin",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse",
+      "zakat_officer"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /incidents",
+    "emits_events": [
+      "incident.reported",
+      "notification.created"
+    ],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [
+    "incident.reported",
+    "notification.created"
+  ],
+  "list": null,
+  "cross_field_rules": {
+    "IncidentIn": [
+      "A near miss reached nobody: harm is NoHarm",
+      "A theatre adverse event gives the operation (booking_id) and the phase (ot_phase)",
+      "Say which staff member was harmed (employee_id)",
+      "An incident that concerns a patient is reported with affected Patient"
+    ]
+  },
+  "errors_detail": [
+    {
+      "code": "INCIDENT_DETAILS_REQUIRED",
+      "http_status": 422,
+      "message": "The incident type needs more detail: a theatre adverse event its operation and phase, a medication error its stage.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "POST /api/v1/incidents"
+    },
+    {
+      "code": "INCIDENT_SCREENING_DECIDED",
+      "http_status": 409,
+      "message": "This screening item is not on the list: it was reported or dismissed already, or is outside the screening window.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "screening_key"
+      ],
+      "details_from": "POST /api/v1/incident-screening/dismiss"
+    },
+    {
+      "code": "INCIDENT_TYPE_INACTIVE",
+      "http_status": 409,
+      "message": "This incident type is no longer on the hospital's list.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "POST /api/v1/incidents"
+    },
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "ward_id"
+      ],
+      "details_from": "POST /api/v1/pharmacy/storage-checks"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}
