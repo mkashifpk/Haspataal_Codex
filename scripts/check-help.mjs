@@ -316,6 +316,7 @@ export function checkHelp({
       "IncidentTypes",
       "IncidentRegister",
       "IncidentScreening",
+      "IncidentStatistics",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

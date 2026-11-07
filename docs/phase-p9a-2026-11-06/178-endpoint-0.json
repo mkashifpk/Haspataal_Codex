@@ -1,0 +1,436 @@
+{
+  "method": "GET",
+  "path": "/api/v1/incidents/statistics",
+  "summary": "Incident statistics",
+  "tags": [
+    "Incidents and sentinel events"
+  ],
+  "permissions": [
+    "incident.view"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "description": "For the incidents that occurred in the period (default: this month to today): by area, harm, type, department and\nmonth; medication errors by stage and adverse drug reactions, in patients on high-alert medicines (MSDS CQI 102);\nanaesthesia events (103); transfusion reactions (104, AAC 25); every sentinel event with its analysis and actions\n(107); the contributing factors found; review and analysis timeliness; reports per 1,000 inpatient days.\n\n**Required permission:** `incident.view`\n\n**Required permission:** `incident.view`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [
+    {
+      "name": "date_from",
+      "in": "query",
+      "required": false,
+      "description": "",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Date From"
+      }
+    },
+    {
+      "name": "date_to",
+      "in": "query",
+      "required": false,
+      "description": "",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Date To"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[IncidentStatisticsOut]",
+    "properties": {
+      "data": {
+        "title": "IncidentStatisticsOut",
+        "properties": {
+          "date_from": {
+            "type": "string",
+            "format": "date",
+            "title": "Date From"
+          },
+          "date_to": {
+            "type": "string",
+            "format": "date",
+            "title": "Date To"
+          },
+          "reported": {
+            "type": "integer",
+            "title": "Reported",
+            "description": "Reports of the period (withdrawn ones left out)"
+          },
+          "incidents": {
+            "type": "integer",
+            "title": "Incidents"
+          },
+          "near_misses": {
+            "type": "integer",
+            "title": "Near Misses"
+          },
+          "sentinel_events": {
+            "type": "integer",
+            "title": "Sentinel Events"
+          },
+          "patient_days": {
+            "type": "number",
+            "title": "Patient Days",
+            "description": "Inpatient days in the period"
+          },
+          "reports_per_1000_patient_days": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reports Per 1000 Patient Days"
+          },
+          "by_area": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentCountOut"
+            },
+            "type": "array",
+            "title": "By Area"
+          },
+          "by_harm": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentCountOut"
+            },
+            "type": "array",
+            "title": "By Harm"
+          },
+          "by_type": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentCountOut"
+            },
+            "type": "array",
+            "title": "By Type"
+          },
+          "by_department": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentCountOut"
+            },
+            "type": "array",
+            "title": "By Department"
+          },
+          "by_month": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentMonthOut"
+            },
+            "type": "array",
+            "title": "By Month"
+          },
+          "contributing_factors": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentCountOut"
+            },
+            "type": "array",
+            "title": "Contributing Factors",
+            "description": "Counted over the signed analyses"
+          },
+          "medication": {
+            "$ref": "#/components/schemas/MedicationIncidentsOut"
+          },
+          "anaesthesia_events": {
+            "type": "integer",
+            "title": "Anaesthesia Events",
+            "description": "MSDS CQI 103 c, COP 40"
+          },
+          "surgical_events": {
+            "type": "integer",
+            "title": "Surgical Events"
+          },
+          "transfusion_reactions": {
+            "type": "integer",
+            "title": "Transfusion Reactions",
+            "description": "MSDS CQI 104 a, AAC 25"
+          },
+          "timeliness": {
+            "$ref": "#/components/schemas/TimelinessOut"
+          },
+          "sentinel_list": {
+            "items": {
+              "$ref": "#/components/schemas/SentinelRowOut"
+            },
+            "type": "array",
+            "title": "Sentinel List"
+          },
+          "open_now": {
+            "$ref": "#/components/schemas/OpenNowOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date_from",
+          "date_to",
+          "reported",
+          "incidents",
+          "near_misses",
+          "sentinel_events",
+          "patient_days",
+          "reports_per_1000_patient_days",
+          "by_area",
+          "by_harm",
+          "by_type",
+          "by_department",
+          "by_month",
+          "contributing_factors",
+          "medication",
+          "anaesthesia_events",
+          "surgical_events",
+          "transfusion_reactions",
+          "timeliness",
+          "sentinel_list",
+          "open_now"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/incidents/statistics"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "date_from": "2026-10-01",
+          "date_to": "2026-10-01",
+          "reported": 1,
+          "incidents": 1,
+          "near_misses": 0,
+          "sentinel_events": 0,
+          "patient_days": 0,
+          "reports_per_1000_patient_days": null,
+          "by_area": [
+            {
+              "key": "Medication",
+              "count": 1
+            }
+          ],
+          "by_harm": [
+            {
+              "key": "Mild",
+              "count": 1
+            }
+          ],
+          "by_type": [
+            {
+              "key": "Medication error",
+              "count": 1
+            }
+          ],
+          "by_department": [
+            {
+              "key": "Not given",
+              "count": 1
+            }
+          ],
+          "by_month": [
+            {
+              "month": "2026-10-01",
+              "incidents": 1,
+              "near_misses": 0,
+              "sentinel": 0
+            }
+          ],
+          "contributing_factors": [
+            {
+              "key": "Individual",
+              "count": 1
+            },
+            {
+              "key": "Task",
+              "count": 1
+            }
+          ],
+          "medication": {
+            "errors": 1,
+            "by_stage": [
+              {
+                "key": "Administration",
+                "count": 1
+              }
+            ],
+            "adverse_drug_reactions": 0,
+            "adverse_drug_reactions_high_alert": 0,
+            "errors_high_alert": 0
+          },
+          "anaesthesia_events": 0,
+          "surgical_events": 0,
+          "transfusion_reactions": 0,
+          "timeliness": {
+            "review_target_hours": 24,
+            "reviewed": 1,
+            "reviewed_in_time": 1,
+            "reviewed_in_time_pct": 100,
+            "analysed": 1,
+            "analysed_by_due_date": 1
+          },
+          "sentinel_list": [],
+          "open_now": {
+            "reported": 0,
+            "under_review": 0,
+            "analysed": 0,
+            "sentinel": 0
+          }
+        },
+        "meta": {
+          "server_time": "2026-10-01T07:19:50.811573+00:00"
+        },
+        "request_id": "88d5d36b48fd4696b7aaeae63540916d"
+      }
+    }
+  },
+  "errors": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "incident_statistics",
+    "incident_statistics_owner"
+  ],
+  "used_by_workflows": [
+    "incidents-and-sentinel-events"
+  ],
+  "typescript_example": "// Incident statistics  (permissions: incident.view)\nexport const incidentStatistics = () =>\n  api(\"GET\", `/incidents/statistics`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "incident.view"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of incident.view",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "object",
+    "paging": [],
+    "search": [],
+    "filters": [
+      {
+        "name": "date_from",
+        "required": false,
+        "type": "string"
+      },
+      {
+        "name": "date_to",
+        "required": false,
+        "type": "string"
+      }
+    ],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}
