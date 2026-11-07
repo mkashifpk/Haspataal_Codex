@@ -15,8 +15,8 @@ User request: build the remaining Phase P9A screens and report reproduced backen
 |171|complaint_appeals|Implemented/tested3377da0; proposal361 verified pending human review|
 |172|complaint_statistics|Implemented/tested625fb79 (baseedb73e4); proposal362 verified pending human review|
 |173|complaint_statistics_owner|Implemented/tested07ed430; proposal363 verified pending human review|
-|174|incident_types|Implemented/tested; final release/commit/proposal in progress; human gates pending|
-|175|incident_register|Not started|
+|174|incident_types|Implemented/testedc2a6d7b; proposal364 verified pending human review|
+|175|incident_register|Implementation in progress; review4/withdraw3 verified; analysis correction/follow-up under test|
 |176|incident_register_owner|Not started|
 |177|incident_screening|Not started|
 |178|incident_statistics|Not started|

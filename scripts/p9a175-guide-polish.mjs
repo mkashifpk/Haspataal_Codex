@@ -1,0 +1,1 @@
+import fs from'node:fs';for(const p of ['scripts/p9a175-help.mjs','src/help.ts','src/foundation-help.ts']){let s=fs.readFileSync(p,'utf8').replaceAll(' It is a synthetic demo business signature in automated tests, never a human portal review signature.','').replaceAll(' خودکار آزمائش صرف فرضی کاروباری دستخط، انسانی پورٹل جائزے کے نہیں۔','');fs.writeFileSync(p,s);}

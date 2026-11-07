@@ -65,6 +65,10 @@ export function MyInvestigations({
   readOnly,
   timeZone,
   onOpenHelp,
+  recordId,
+  parentScreen = "incident_register",
+  onEditingChange,
+  onChanged,
 }: {
   user: ClinicalUser;
   revision: number;
@@ -72,6 +76,10 @@ export function MyInvestigations({
   readOnly: boolean;
   timeZone?: string;
   onOpenHelp: () => void;
+  recordId?: number;
+  parentScreen?: "incident_register" | "incident_register_owner";
+  onEditingChange?: (editing: boolean) => void;
+  onChanged?: () => void;
 }) {
   const [rows, setRows] = useState<api.IncidentOut[]>([]),
     [detail, setDetail] = useState<api.IncidentDetailOut>(),
@@ -84,7 +92,7 @@ export function MyInvestigations({
     [pdfBusy, setPdfBusy] = useState(false),
     [pdfError, setPdfError] = useState<unknown>(),
     [pdfNotice, setPdfNotice] = useState("");
-  const selected = useRef<number | undefined>(undefined),
+  const selected = useRef<number | undefined>(recordId),
     request = useRef(0);
   const permission = user.permissions.find((p) =>
     ["incident.report", "incident.manage"].includes(p),
@@ -94,11 +102,13 @@ export function MyInvestigations({
     setLoading(true);
     setError(undefined);
     try {
-      const list = await api.listIncidents({
-        mine: true,
-        status: "UnderReview",
-        limit: 500,
-      });
+      const list = recordId
+        ? []
+        : await api.listIncidents({
+            mine: true,
+            status: "UnderReview",
+            limit: 500,
+          });
       const id = selected.current;
       const current = id ? await api.getIncident(id) : undefined;
       if (generation === request.current) {
@@ -110,25 +120,36 @@ export function MyInvestigations({
     } finally {
       if (generation === request.current) setLoading(false);
     }
-  }, [user.user_id]);
+  }, [user.user_id, recordId]);
   useEffect(() => {
     void refresh();
     return () => {
       request.current++;
     };
   }, [refresh, revision]);
-  const write = useClinicalWrite(user, "my_investigations", async () => {
-    setMode(undefined);
-    setDraft(undefined);
-    setReviewed(false);
-    setAction(actionBlank());
-    await refresh();
-  });
+  const write = useClinicalWrite(
+    user,
+    recordId ? parentScreen : "my_investigations",
+    async () => {
+      setMode(undefined);
+      setDraft(undefined);
+      setReviewed(false);
+      setAction(actionBlank());
+      await refresh();
+      onChanged?.();
+    },
+  );
   const blocked = write.blocked || pdfBusy,
     editable = !!permission && !readOnly && connected && !loading && !error;
   useEffect(() => {
+    onEditingChange?.(!!mode || blocked);
+    return () => onEditingChange?.(false);
+  }, [mode, blocked, onEditingChange]);
+  useEffect(() => {
     setReviewed(false);
   }, [detail?.row_version]);
+  // Embedded manager work needs a new review after action-only refreshes too.
+  useEffect(() => { if (recordId) setReviewed(false); }, [detail, recordId]);
   const changed =
     draft && detail && draft.expected_version !== detail.row_version;
   async function open(r: api.IncidentOut) {
@@ -227,7 +248,12 @@ export function MyInvestigations({
             ? "/analysis/sign"
             : "/actions"),
       body,
-      permission,
+      permission: recordId
+        ? {
+            recordPath: path,
+            capability: kind === "action" ? "can_add_action" : "can_analyse",
+          }
+        : permission,
       protection: kind === "action" ? "idempotent" : "reconcile",
       reconcilePath: path,
       label:
@@ -255,17 +281,21 @@ export function MyInvestigations({
       300,
     ],
   ];
+  const Heading=recordId?'h3':'h1';
   return (
     <section
-      data-screen="my_investigations"
+      data-screen={recordId ? undefined : "my_investigations"}
+      data-help-screen={recordId ? parentScreen : undefined}
       data-write-pending={blocked}
       data-unsaved={!!mode}
     >
       <div className="section-heading">
         <div>
-          <h1>
-            {t("Incidents I investigate", "جن واقعات کی میں تحقیق کرتا ہوں")}
-          </h1>
+          <Heading>
+            {recordId
+              ? t("Investigation and actions", "تحقیق اور اعمال")
+              : t("Incidents I investigate", "جن واقعات کی میں تحقیق کرتا ہوں")}
+          </Heading>
           <p>
             {t(
               "Explain what happened without blame, identify causes in the system, then assign corrective and preventive work.",
@@ -275,13 +305,16 @@ export function MyInvestigations({
         </div>
         <div className="actions">
           <button
-            data-help="mi.refresh"
+            data-help={recordId ? "irw.refresh" : "mi.refresh"}
             disabled={blocked || loading}
             onClick={() => void refresh()}
           >
             {t("Refresh investigations", "تحقیقات تازہ کریں")}
           </button>
-          <button data-help="mi.help" onClick={onOpenHelp}>
+          <button
+            data-help={recordId ? "irw.help" : "mi.help"}
+            onClick={onOpenHelp}
+          >
             F1 · {t("Help", "مدد")}
           </button>
         </div>
@@ -303,7 +336,13 @@ export function MyInvestigations({
         </p>
       )}
       <ErrorBox error={error} />
-      <ClinicalWriteFeedback write={write} onReviewed={() => void refresh()} />
+      <ClinicalWriteFeedback
+        write={write}
+        onReviewed={() => {
+          void refresh();
+          if (recordId) onChanged?.();
+        }}
+      />
       {loading && (
         <p role="status">
           {t(
@@ -312,7 +351,7 @@ export function MyInvestigations({
           )}
         </p>
       )}
-      {!loading && !error && !rows.length && (
+      {!recordId && !loading && !error && !rows.length && (
         <p>
           {t(
             "No incidents are currently assigned to you for analysis. Quality names the investigator; a notification brings new work here.",
@@ -371,7 +410,7 @@ export function MyInvestigations({
                   </td>
                   <td>
                     <button
-                      data-help="mi.open"
+                      data-help={recordId ? "irw.open" : "mi.open"}
                       disabled={blocked}
                       onClick={() => void open(r)}
                     >
@@ -385,7 +424,10 @@ export function MyInvestigations({
         </div>
       )}
       {detail && (
-        <article className="panel investigation-detail">
+        <article
+          className="panel investigation-detail"
+          hidden={!!recordId && (loading || !!error)}
+        >
           <h2>
             <bdi>{detail.incident_number}</bdi> · {detail.type_name}
           </h2>
@@ -437,21 +479,21 @@ export function MyInvestigations({
           {detail.analysis_stamp && <p>{detail.analysis_stamp.text}</p>}
           <div className="actions">
             <button
-              data-help="mi.analysis"
+              data-help={recordId ? "irw.analysis" : "mi.analysis"}
               disabled={blocked || !editable || !detail.can_analyse || !!mode}
               onClick={() => begin("analysis")}
             >
               {t("Edit analysis draft", "تجزیہ مسودہ بدلیں")}
             </button>
             <button
-              data-help="mi.sign"
+              data-help={recordId ? "irw.sign" : "mi.sign"}
               disabled={blocked || !editable || !detail.can_analyse || !!mode}
               onClick={() => begin("sign")}
             >
               {t("Review and sign analysis", "تجزیہ دیکھیں اور دستخط کریں")}
             </button>
             <button
-              data-help="mi.action"
+              data-help={recordId ? "irw.action" : "mi.action"}
               disabled={
                 blocked || !editable || !detail.can_add_action || !!mode
               }
@@ -463,14 +505,14 @@ export function MyInvestigations({
               )}
             </button>
             <button
-              data-help="mi.pdf"
+              data-help={recordId ? "irw.pdf" : "mi.pdf"}
               disabled={blocked || !connected}
               onClick={() => void pdf(true)}
             >
               {t("View / print report", "رپورٹ دیکھیں / پرنٹ کریں")}
             </button>
             <button
-              data-help="mi.pdf"
+              data-help={recordId ? "irw.pdf" : "mi.pdf"}
               disabled={blocked || !connected}
               onClick={() => void pdf(false)}
             >
@@ -521,7 +563,7 @@ export function MyInvestigations({
                   <>
                     <Field label={t("Analysis method", "تجزیے کا طریقہ")}>
                       <select
-                        data-help="mi.method"
+                        data-help={recordId ? "irw.method" : "mi.method"}
                         value={draft.analysis_method ?? ""}
                         onChange={(e) => {
                           setReviewed(false);
@@ -544,7 +586,9 @@ export function MyInvestigations({
                     {fields.map(([key, en, ur, max]) => (
                       <Field key={key} label={t(en, ur)}>
                         <textarea
-                          data-help="mi.narrative"
+                          data-help={
+                            recordId ? "irw.narrative" : "mi.narrative"
+                          }
                           name={key}
                           maxLength={max}
                           value={String(draft[key] ?? "")}
@@ -562,10 +606,11 @@ export function MyInvestigations({
                       <legend>
                         {t("Contributing factors", "معاون اسباب")}
                       </legend>
+                      {recordId && detail.is_sentinel && <p>{t('A sentinel analysis needs at least one factor of the system, not only a person or the patient.','سنگین واقعے کے تجزیے میں نظام کا کم از کم ایک عامل لازم ہے، صرف فرد یا مریض کافی نہیں۔')}</p>}
                       {factors.map((f, i) => (
                         <label key={f}>
                           <input
-                            data-help="mi.factors"
+                            data-help={recordId ? "irw.factors" : "mi.factors"}
                             type="checkbox"
                             checked={
                               draft.contributing_factors?.includes(f) ?? false
@@ -593,7 +638,9 @@ export function MyInvestigations({
                       )}
                     >
                       <select
-                        data-help="mi.disclosure"
+                        data-help={
+                          recordId ? "irw.disclosure" : "mi.disclosure"
+                        }
                         value={draft.disclosure ?? ""}
                         onChange={(e) => {
                           setReviewed(false);
@@ -626,7 +673,7 @@ export function MyInvestigations({
                         )}
                         <button
                           type="button"
-                          data-help="mi.compare"
+                          data-help={recordId ? "irw.compare" : "mi.compare"}
                           onClick={() => {
                             if (
                               window.confirm(
@@ -665,7 +712,9 @@ export function MyInvestigations({
                   <>
                     <Field label={t("Action type", "عمل کی قسم")}>
                       <select
-                        data-help="mi.action-type"
+                        data-help={
+                          recordId ? "irw.action-type" : "mi.action-type"
+                        }
                         value={action.action_type}
                         onChange={(e) => {
                           setReviewed(false);
@@ -686,7 +735,11 @@ export function MyInvestigations({
                     </Field>
                     <Field label={t("Action description", "عمل کی تفصیل")}>
                       <textarea
-                        data-help="mi.action-description"
+                        data-help={
+                          recordId
+                            ? "irw.action-description"
+                            : "mi.action-description"
+                        }
                         required
                         minLength={5}
                         maxLength={1000}
@@ -718,7 +771,7 @@ export function MyInvestigations({
                               owner_user_id: e.target.value,
                             });
                           }}
-                          data-help="mi.owner"
+                          data-help={recordId ? "irw.owner" : "mi.owner"}
                         />
                       ) : (
                         <DirectoryPicker
@@ -734,7 +787,7 @@ export function MyInvestigations({
                               owner_user_id: e.target.value,
                             });
                           }}
-                          data-help="mi.owner"
+                          data-help={recordId ? "irw.owner" : "mi.owner"}
                         />
                       )}
                     </Field>
@@ -750,12 +803,14 @@ export function MyInvestigations({
                             department_id: e.target.value,
                           });
                         }}
-                        data-help="mi.department"
+                        data-help={
+                          recordId ? "irw.department" : "mi.department"
+                        }
                       />
                     </Field>
                     <Field label={t("Due date", "آخری تاریخ")}>
                       <input
-                        data-help="mi.due"
+                        data-help={recordId ? "irw.due" : "mi.due"}
                         required
                         type="date"
                         value={action.due_date}
@@ -769,7 +824,7 @@ export function MyInvestigations({
                 )}
                 <label>
                   <input
-                    data-help="mi.confirm"
+                    data-help={recordId ? "irw.confirm" : "mi.confirm"}
                     type="checkbox"
                     checked={reviewed}
                     onChange={(e) => setReviewed(e.target.checked)}
@@ -782,7 +837,7 @@ export function MyInvestigations({
                 <div className="actions">
                   <button
                     type="button"
-                    data-help="mi.cancel"
+                    data-help={recordId ? "irw.cancel" : "mi.cancel"}
                     onClick={() => {
                       if (
                         window.confirm(
@@ -800,7 +855,7 @@ export function MyInvestigations({
                     {t("Cancel unsent draft", "غیر ارسال مسودہ منسوخ")}
                   </button>
                   <button
-                    data-help="mi.submit"
+                    data-help={recordId ? "irw.submit" : "mi.submit"}
                     disabled={
                       !reviewed ||
                       !!changed ||

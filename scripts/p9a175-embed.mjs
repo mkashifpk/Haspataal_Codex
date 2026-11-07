@@ -1,0 +1,1 @@
+import fs from'node:fs';const p='src/screens/MyInvestigations.tsx';let s=fs.readFileSync(p,'utf8');s=s.replace(/data-help="mi\.([a-z_-]+)"/g,(_,k)=>`data-help={recordId ? "irw.${k}" : "mi.${k}"}`);fs.writeFileSync(p,s);

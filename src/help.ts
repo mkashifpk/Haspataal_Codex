@@ -10,6 +10,77 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  incident_register: {
+  title: "Incident register",
+  titleUr: "واقعات کا رجسٹر",
+  purpose: "The Quality Officer opens the incident register during review to assign an independent investigator, follow a blame-free analysis and accountable actions, then record what changed at closure. Immediate clinical safety comes first; this register does not dispatch emergency help.",
+  purposeUr: "کوالٹی افسر جائزے میں آزاد تحقیق کار، بے الزام تجزیہ و ذمہ دار اعمال اور بندش پر اصل تبدیلی دیکھتا ہے۔ فوری طبی حفاظت پہلے؛ یہ رجسٹر ہنگامی مدد نہیں بھیجتا۔",
+  steps: [
+    "The Quality Officer opens the incident register during review to assign an independent investigator, follow a blame-free analysis and accountable actions, then record what changed at closure. Immediate clinical safety comes first; this register does not dispatch emergency help.",
+    "The inbox ranks Reported first, then Under review, then signed analyses with visible open actions. Review/analysis overdue is red plus text; a sentinel is explicitly named. Apply status, sentinel and occurrence-date filters; at1000 narrow the period/status. Open incident rereads its exact server record. Confidential reporter names follow server redaction; missing fields are not invented.",
+    "Review and assign uses current can_review. Choose an active type by name from the hospital reporting list, confirm kind/harm and check the class calculated from that type and harm. Follow the list unless a deliberate different sentinel class is justified with the actual reason. Choose the independent investigator by name from the people directory, never a person involved. Blank due date uses server policy. Existing colleague missing: ask IT/Quality to check the directory; do not substitute someone or create duplicate staff.",
+    "Withdraw report records an actual reason before signed analysis, such as a duplicate or no incident; it stays in the register and is never deleted. Review, withdrawal and closure send the currently loaded expected_version and have no idempotent replay guarantee. After a lost answer keep the draft, Read current result and compare this exact report/version; do not repeat the write. Explicitly review, then cancel the old unsent draft and reopen the current record for a distinct next step.",
+    "Investigation and actions shows report, review, patient/location, authors and next step. Save analysis draft records method, chronology, system/root causes, contributing factors, lessons, disclosure and external reference with its loaded version. A sentinel requires Root cause analysis and at least one factor of the system, not only a person or patient. Compare current record preserves an old unsent draft; deliberately choose whether to keep or discard after a conflict. Sign final analysis is a separate once-only versioned write.",
+    "Add corrective/preventive action chooses a named responsible person with a login, active department and due date. The people directory is used when authorised; otherwise the documented staff search uses at least2characters and sends user_id, never employee_id. IT supplies missing login/department; HR supplies staff, but an existing missing colleague must be checked by IT/Quality. Each action is a separate idempotent write; an unanswered action retries only the original frozen key/body. The owner completes it with evidence in My actions.",
+    "Close incident asks what changed in follow-up after signed analysis. Open actions must first be done/cancelled; a sentinel also needs at least one action Done, not merely cancelled. Refusals keep the note and reread authority; do not weaken classification or fabricate completion. Final closure preserves the record/author stamp. Preview/Save report PDF uses the actual server report/analysis/actions; document failure or cancellation never repeats a business write. IT handles the printer and Quality checks the report.",
+    "Only current server can_review/can_withdraw/can_analyse/can_add_action/can_close offer actions. Service records-only or disconnected views disable new work. Actual incident events/resync refresh reads; failed reads hide stale records, retain disabled unsent text and offer Refresh. F1/Help from decisions or analysis keeps text and restores focus. English/Urdu and Settings/native keyboard share100–250%zoom. Named human fresh journeys, Urdu/editor/physical output and every-role review remain pending."
+  ],
+  stepsUr: [
+    "کوالٹی افسر جائزے میں آزاد تحقیق کار، بے الزام تجزیہ و ذمہ دار اعمال اور بندش پر اصل تبدیلی دیکھتا ہے۔ فوری طبی حفاظت پہلے؛ یہ رجسٹر ہنگامی مدد نہیں بھیجتا۔",
+    "پہلے رپورٹ شدہ، پھر زیر تحقیق، پھر کھلے اعمال والے دستخط شدہ تجزیے۔ تاخیر سرخ و عبارت، سنگین واضح۔ حالت، سنگین و وقوع کی مدت فلٹر لگائیں؛ ہزار پر محدود کریں۔ واقعہ کھولنا عین تازہ سرور ریکارڈ۔ خفیہ نام سرور کے مطابق چھپتے؛ غائب قدر نہیں گھڑتے۔",
+    "جائزہ موجودہ اجازت پر۔ ہسپتال کی فعال قسم نام سے، نوعیت و نقصان اور ان سے بنا درجہ چیک۔ فہرست کے مطابق، الگ سنگین درجہ صرف اصل وجہ سے۔ افراد کی فہرست سے آزاد تحقیق کار، ملوث شخص نہیں۔ خالی تاریخ سرور پالیسی۔ موجودہ ساتھی غائب تو آئی ٹی یا کوالٹی سے فہرست چیک؛ بدل شخص یا نقل عملہ نہیں۔",
+    "واپسی دستخط سے پہلے اصل وجہ، مثلاً نقل یا واقعہ نہیں؛ رجسٹر سے حذف نہیں۔ جائزہ، واپسی و بندش پڑھے نسخے سے، دوبارہ ارسال کی ضمانت نہیں۔ جواب غائب تو مسودہ، موجودہ نتیجہ اور عین رپورٹ و نسخہ ملائیں؛ عمل نہ دہرائیں۔ جائزے کے بعد پرانا مسودہ منسوخ، الگ اگلے قدم کو تازہ ریکارڈ کھولیں۔",
+    "تحقیق و اعمال میں رپورٹ، جائزہ، مریض و جگہ، مصنف و اگلا قدم۔ مسودہ طریقہ، وقت وار واقعات، بنیادی نظامی اسباب، عوامل، سبق، بتانا اور بیرونی حوالہ پڑھے نسخے سے۔ سنگین کو بنیادی اسباب کا تجزیہ اور نظام کا کم از کم ایک عامل، صرف فرد یا مریض کافی نہیں۔ تازہ ریکارڈ موازنے میں پرانا مسودہ رہتا؛ ٹکراؤ پر خود رکھیں یا چھوڑیں۔ حتمی تجزیہ الگ ایک بار نسخہ وار دستخط۔",
+    "اصلاحی یا احتیاطی عمل میں لاگ ان والا نام، فعال شعبہ و تاریخ۔ مجاز افراد کی فہرست، ورنہ مقرر عملہ تلاش دو حروف و صارف نمبر، ملازم نمبر نہیں۔ لاگ ان و شعبہ آئی ٹی، عملہ ایچ آر؛ موجودہ غائب ساتھی آئی ٹی یا کوالٹی چیک۔ ہر عمل الگ محفوظ اندراج؛ بے جواب پر وہی کلید و متن۔ ذمہ دار میرے اعمال میں ثبوت سے مکمل کرتا ہے۔",
+    "بندش دستخط شدہ تجزیے کے بعد اصل اگلا اثر۔ کھلے اعمال پہلے مکمل یا منسوخ؛ سنگین کو کم از کم ایک مکمل، صرف منسوخ نہیں۔ انکار نوٹ رکھ کر اجازت تازہ؛ درجہ کم یا فرضی تکمیل نہیں۔ بندش ریکارڈ و مہر محفوظ۔ سرور رپورٹ پی ڈی ایف اصل تجزیہ و اعمال؛ کاغذ کی ناکامی اندراج نہیں دہراتی۔ پرنٹر آئی ٹی، رپورٹ کوالٹی۔",
+    "عمل صرف سرور کی موجودہ قابلیت سے۔ صرف ریکارڈ یا رابطہ نہ ہونے میں نیا کام معطل۔ اصل اطلاع یا دوبارہ رابطہ پڑھائی تازہ؛ ناکامی پر پرانا چھپا، غیر ارسال متن معطل محفوظ و تازہ بٹن۔ فیصلہ یا تجزیے سے ایف ون متن رکھتا و فوکس واپس۔ دونوں زبان، سیٹنگ و کی بورڈ ایک سو تا دو سو پچاس زوم۔ انسانی نئے سفر، اردو، ادارت، کاغذ اور تمام کردار جائزہ باقی۔"
+  ],
+  faq: [
+    [
+      "Who may investigate?",
+      "A named independent person from the server directory who was not involved; current server flags govern manager/investigator work. If an eligible colleague is missing, stop and ask IT/Quality; never guess ids."
+    ],
+    [
+      "What happens after a lost review or analysis answer?",
+      "These versioned writes are not automatically replayed. Read the exact current record/version, compare the effect, explicitly review and cancel the old unsent draft before a distinct new action. Only action creation has original-key retry."
+    ],
+    [
+      "Can I close while work is open?",
+      "No. Complete/cancel each action with evidence. A sentinel needs at least one Done action. Do not create fake evidence or cancel everything to bypass that rule."
+    ],
+    [
+      "Can a wrong report be erased?",
+      "No. An authorised manager records a withdrawal reason before analysis is signed; original words/history remain. Signed analysis and final closure are not edited."
+    ],
+    [
+      "What is still reviewed by a human?",
+      "Fresh clinical/quality journeys, confidential visibility, native Urdu, author stamps, every role, printed reports and service transitions. An agent does not sign or approve a portal review."
+    ]
+  ],
+  faqUr: [
+    [
+      "تحقیق کون؟",
+      "سرور فہرست کا نامزد آزاد غیر ملوث شخص؛ مینیجر و تحقیق کار کا عمل سرور اجازت۔ اہل ساتھی غائب تو رک کر آئی ٹی یا کوالٹی، نمبر اندازہ نہیں۔"
+    ],
+    [
+      "جائزے یا تجزیے کا جواب غائب؟",
+      "نسخہ وار عمل خود نہیں دہراتے۔ عین موجودہ نسخہ و اثر ملائیں، جائزہ اور الگ نئے قدم سے پہلے پرانا مسودہ منسوخ۔ صرف نیا عمل اصل کلید سے دوبارہ۔"
+    ],
+    [
+      "کھلے کام میں بندش؟",
+      "نہیں۔ ہر عمل ثبوت سے مکمل یا منسوخ؛ سنگین میں ایک مکمل لازم۔ فرضی ثبوت یا بچنے کو سب منسوخ نہیں۔"
+    ],
+    [
+      "غلط رپورٹ مٹا سکتے؟",
+      "نہیں۔ مجاز افسر دستخط سے پہلے اصل واپسی وجہ؛ الفاظ و تاریخ برقرار۔ دستخط شدہ تجزیہ و بندش نہیں بدلتے۔"
+    ],
+    [
+      "انسان کیا چیک؟",
+      "نئے طبی و کوالٹی سفر، خفیہ رسائی، اردو، مہر، تمام کردار، کاغذ اور خدمت تبدیلی۔ ایجنٹ پورٹل جائزہ منظور یا دستخط نہیں کرتا۔"
+    ]
+  ]
+},
+
   incident_types: {
   title: "What to report: incident types and sentinel events",
   titleUr: "کیا رپورٹ کریں: واقعات کی اقسام اور سنگین واقعات",

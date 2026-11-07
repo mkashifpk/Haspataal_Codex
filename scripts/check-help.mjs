@@ -314,6 +314,7 @@ export function checkHelp({
       "ComplaintAppeals",
       "ComplaintStatistics",
       "IncidentTypes",
+      "IncidentRegister",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
