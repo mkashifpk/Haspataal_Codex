@@ -1,0 +1,720 @@
+{
+  "method": "POST",
+  "path": "/api/v1/qa/rounds/{round_id}/actions",
+  "summary": "Raise a corrective or preventive action from a round",
+  "tags": [
+    "Quality assurance rounds"
+  ],
+  "permissions": [
+    "qa.round.conduct"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": true,
+  "description": "A row of the hospital's action register (`GET /quality/actions`): the improvement made from the observations\n(indicator 18). The owner is notified. `NOT_FOUND`; `VALIDATION_ERROR` for an inactive owner or a past due date.\n\n**Required permission:** `qa.round.conduct`\n\n**Required permission:** `qa.round.conduct`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [
+    {
+      "name": "round_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Round Id"
+      }
+    },
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "QualityActionIn",
+    "properties": {
+      "action_type": {
+        "type": "string",
+        "enum": [
+          "Corrective",
+          "Preventive"
+        ],
+        "title": "Action Type"
+      },
+      "description": {
+        "type": "string",
+        "maxLength": 1000,
+        "minLength": 5,
+        "title": "Description",
+        "examples": [
+          "Teach OPD doctors to finalize notes the same day"
+        ]
+      },
+      "owner_user_id": {
+        "type": "integer",
+        "title": "Owner User Id",
+        "description": "Who carries it out; they are notified and close it with the evidence (GET /staff/lookup → user_id; GET /quality/record-review/people, GET /facility/staff)"
+      },
+      "due_date": {
+        "type": "string",
+        "format": "date",
+        "title": "Due Date"
+      },
+      "department_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Department Id",
+        "description": "The department (GET /admin/departments)"
+      }
+    },
+    "type": "object",
+    "required": [
+      "action_type",
+      "description",
+      "owner_user_id",
+      "due_date"
+    ],
+    "description": "A corrective or preventive action for its source (a record review, an incident)."
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[QualityActionOut]",
+    "properties": {
+      "data": {
+        "title": "QualityActionOut",
+        "properties": {
+          "action_id": {
+            "type": "integer",
+            "title": "Action Id"
+          },
+          "action_number": {
+            "type": "string",
+            "title": "Action Number"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "RecordReview",
+              "Incident",
+              "Complaint",
+              "InfectionAudit",
+              "Meeting",
+              "Drill",
+              "MockInterview",
+              "QaRound",
+              "PatientFeedback"
+            ],
+            "title": "Source",
+            "description": "What found the need: a medical record review, an incident, a complaint, an infection control audit, a committee meeting, a mock drill, a mock PHC interview, a QA round, a patient's feedback"
+          },
+          "cycle_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cycle Id"
+          },
+          "cycle_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cycle Number"
+          },
+          "incident_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incident Id"
+          },
+          "incident_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incident Number"
+          },
+          "complaint_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Complaint Id"
+          },
+          "complaint_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Complaint Number"
+          },
+          "ipc_audit_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ipc Audit Id"
+          },
+          "audit_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Number"
+          },
+          "meeting_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meeting Id"
+          },
+          "meeting_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meeting Number"
+          },
+          "drill_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drill Id"
+          },
+          "drill_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drill Number"
+          },
+          "mock_interview_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mock Interview Id"
+          },
+          "interview_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interview Number",
+            "description": "The mock PHC interview that found the gap (MIV-...)"
+          },
+          "qa_round_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qa Round Id"
+          },
+          "qa_round_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qa Round Number",
+            "description": "The in-charge's QA round whose finding it addresses (QAR-...)"
+          },
+          "feedback_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback Id"
+          },
+          "feedback_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback Number",
+            "description": "The patient feedback it answers (FB-...)"
+          },
+          "source_number": {
+            "type": "string",
+            "title": "Source Number",
+            "description": "The number of the review cycle, the incident, the complaint, the audit or the meeting"
+          },
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "Corrective",
+              "Preventive"
+            ],
+            "title": "Action Type"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "criterion_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Criterion Code",
+            "description": "A record review: the checklist item whose deficiencies it addresses"
+          },
+          "department_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          },
+          "department_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Name"
+          },
+          "owner_user_id": {
+            "type": "integer",
+            "title": "Owner User Id"
+          },
+          "owner_name": {
+            "type": "string",
+            "title": "Owner Name"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Due Date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Open",
+              "Done",
+              "Cancelled"
+            ],
+            "title": "Status"
+          },
+          "outcome_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Note",
+            "description": "Done: what was done (the evidence); Cancelled: why it was dropped"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "completed_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed By Name"
+          },
+          "created_by": {
+            "type": "integer",
+            "title": "Created By"
+          },
+          "created_by_name": {
+            "type": "string",
+            "title": "Created By Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          },
+          "is_overdue": {
+            "type": "boolean",
+            "title": "Is Overdue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action_id",
+          "action_number",
+          "source",
+          "cycle_id",
+          "cycle_number",
+          "incident_id",
+          "incident_number",
+          "complaint_id",
+          "complaint_number",
+          "ipc_audit_id",
+          "audit_number",
+          "meeting_id",
+          "meeting_number",
+          "drill_id",
+          "drill_number",
+          "mock_interview_id",
+          "interview_number",
+          "qa_round_id",
+          "qa_round_number",
+          "feedback_id",
+          "feedback_number",
+          "source_number",
+          "action_type",
+          "description",
+          "criterion_code",
+          "department_id",
+          "department_name",
+          "owner_user_id",
+          "owner_name",
+          "due_date",
+          "status",
+          "outcome_note",
+          "completed_at",
+          "completed_by_name",
+          "created_by",
+          "created_by_name",
+          "created_at",
+          "row_version",
+          "is_overdue"
+        ],
+        "description": "A corrective or preventive action of the hospital's register (MSDS IMS 162, CQI 83, 107)."
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/qa/rounds/1/actions",
+      "body": {
+        "action_type": "Corrective",
+        "description": "Refill the oxygen cylinder every Monday",
+        "owner_user_id": 1,
+        "due_date": "2026-10-21"
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "data": {
+          "action_id": 1,
+          "action_number": "CAPA-2026-0001",
+          "source": "QaRound",
+          "cycle_id": null,
+          "cycle_number": null,
+          "incident_id": null,
+          "incident_number": null,
+          "complaint_id": null,
+          "complaint_number": null,
+          "ipc_audit_id": null,
+          "audit_number": null,
+          "meeting_id": null,
+          "meeting_number": null,
+          "drill_id": null,
+          "drill_number": null,
+          "mock_interview_id": null,
+          "interview_number": null,
+          "qa_round_id": 1,
+          "qa_round_number": "QAR-2026-00001",
+          "feedback_id": null,
+          "feedback_number": null,
+          "source_number": "QAR-2026-00001",
+          "action_type": "Corrective",
+          "description": "Refill the oxygen cylinder every Monday",
+          "criterion_code": null,
+          "department_id": null,
+          "department_name": null,
+          "owner_user_id": 1,
+          "owner_name": "Quality Officer",
+          "due_date": "2026-10-21",
+          "status": "Open",
+          "outcome_note": null,
+          "completed_at": null,
+          "completed_by_name": null,
+          "created_by": 1,
+          "created_by_name": "Quality Officer",
+          "created_at": "2026-10-14T11:26:21.678535+00:00",
+          "row_version": 1,
+          "is_overdue": false
+        },
+        "meta": {
+          "server_time": "2026-10-14T11:26:21.699465+00:00"
+        },
+        "request_id": "0c0792b2f154414f9ef7ad5ebdd835a6"
+      }
+    },
+    "events_emitted": [
+      "notification.created"
+    ]
+  },
+  "errors": [
+    {
+      "code": "NOT_FOUND",
+      "http_status": 404,
+      "message": "The requested resource was not found.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Say 'not found'; refresh the list."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "qa_rounds",
+    "qa_rounds_owner"
+  ],
+  "used_by_workflows": [
+    "clinic-quality-and-education"
+  ],
+  "typescript_example": "// Raise a corrective or preventive action from a round  (permissions: qa.round.conduct)\nexport const addActionQaRoundsActions = (round_id, body) =>\n  api(\"POST\", `/qa/rounds/${round_id}/actions`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "qa.round.conduct"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of qa.round.conduct",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /qa/rounds/{round_id}",
+    "emits_events": [
+      "notification.created"
+    ],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [
+    "notification.created"
+  ],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "NOT_FOUND",
+      "http_status": 404,
+      "message": "The requested resource was not found.",
+      "retryable": false,
+      "ui_action": "Say 'not found'; refresh the list.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "resource"
+      ],
+      "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

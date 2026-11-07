@@ -1,0 +1,390 @@
+{
+  "method": "GET",
+  "path": "/api/v1/qa/rounds",
+  "summary": "The rounds conducted",
+  "tags": [
+    "Quality assurance rounds"
+  ],
+  "permissions": [
+    "qa.round.conduct",
+    "qa.checklist.manage",
+    "msds.view"
+  ],
+  "permissions_mode": "any",
+  "idempotency_key": false,
+  "description": "Latest recorded first, with the number of findings. Continue with the last round_id as `before_id`, keeping the\nsame filters, until an empty page. Reversed dates give `VALIDATION_ERROR`.\n\n**Required permission:** `qa.round.conduct OR qa.checklist.manage OR msds.view`\n\n**Required permission:** `qa.round.conduct OR qa.checklist.manage OR msds.view`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [
+    {
+      "name": "frequency",
+      "in": "query",
+      "required": false,
+      "description": "",
+      "schema": {
+        "anyOf": [
+          {
+            "enum": [
+              "DailyWeekly",
+              "MonthlyQuarterly",
+              "StorageQuarterly"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Frequency"
+      }
+    },
+    {
+      "name": "date_from",
+      "in": "query",
+      "required": false,
+      "description": "",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Date From"
+      }
+    },
+    {
+      "name": "date_to",
+      "in": "query",
+      "required": false,
+      "description": "",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Date To"
+      }
+    },
+    {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "maximum": 1000,
+        "minimum": 1,
+        "default": 200,
+        "title": "Limit"
+      }
+    },
+    {
+      "name": "before_id",
+      "in": "query",
+      "required": false,
+      "description": "",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Before Id"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[list[RoundOut]]",
+    "properties": {
+      "data": {
+        "items": {
+          "title": "RoundOut",
+          "properties": {
+            "round_id": {
+              "type": "integer",
+              "title": "Round Id"
+            },
+            "round_number": {
+              "type": "string",
+              "title": "Round Number"
+            },
+            "frequency": {
+              "type": "string",
+              "enum": [
+                "DailyWeekly",
+                "MonthlyQuarterly",
+                "StorageQuarterly"
+              ],
+              "title": "Frequency"
+            },
+            "conducted_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Conducted At"
+            },
+            "general_remarks": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "General Remarks"
+            },
+            "conducted_by": {
+              "type": "integer",
+              "title": "Conducted By"
+            },
+            "conducted_by_name": {
+              "type": "string",
+              "title": "Conducted By Name"
+            },
+            "signed_stamp": {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "findings": {
+              "type": "integer",
+              "title": "Findings",
+              "description": "Items marked NeedsAttention"
+            }
+          },
+          "type": "object",
+          "required": [
+            "round_id",
+            "round_number",
+            "frequency",
+            "conducted_at",
+            "general_remarks",
+            "conducted_by",
+            "conducted_by_name",
+            "signed_stamp",
+            "created_at",
+            "findings"
+          ]
+        },
+        "type": "array",
+        "title": "Data"
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/qa/rounds",
+      "query": {
+        "frequency": "DailyWeekly"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "round_id": 1,
+            "round_number": "QAR-2026-00001",
+            "frequency": "DailyWeekly",
+            "conducted_at": "2026-10-14T11:26:21.453601+00:00",
+            "general_remarks": "Clean; oxygen low",
+            "conducted_by": 1,
+            "conducted_by_name": "Quality Officer",
+            "signed_stamp": {
+              "at": "2026-10-14T11:26:21.533298+00:00",
+              "name": "Quality Officer",
+              "text": "Quality Officer, Officer, 14-Oct-2026 16:26",
+              "user_id": 1,
+              "designation": "Officer",
+              "employee_id": 1,
+              "registration": null
+            },
+            "created_at": "2026-10-14T11:26:21.533298+00:00",
+            "findings": 1
+          }
+        ],
+        "meta": {
+          "server_time": "2026-10-14T11:26:21.741417+00:00"
+        },
+        "request_id": "4d59f7d2ee7a43689cdbd7db2ace4f52"
+      }
+    }
+  },
+  "errors": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "qa_rounds",
+    "qa_rounds_owner"
+  ],
+  "used_by_workflows": [],
+  "typescript_example": "// The rounds conducted  (permissions: qa.round.conduct, qa.checklist.manage, msds.view)\nexport const listRounds = () =>\n  api(\"GET\", `/qa/rounds`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "qa.round.conduct",
+      "qa.checklist.manage",
+      "msds.view"
+    ],
+    "permissions_mode": "any",
+    "who": "holders of qa.round.conduct or qa.checklist.manage or msds.view",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "list",
+    "paging": [
+      {
+        "name": "limit",
+        "required": false,
+        "type": "integer",
+        "default": 200,
+        "minimum": 1,
+        "maximum": 1000
+      }
+    ],
+    "search": [],
+    "filters": [
+      {
+        "name": "frequency",
+        "required": false,
+        "type": "string",
+        "enum": [
+          "DailyWeekly",
+          "MonthlyQuarterly",
+          "StorageQuarterly"
+        ]
+      },
+      {
+        "name": "date_from",
+        "required": false,
+        "type": "string"
+      },
+      {
+        "name": "date_to",
+        "required": false,
+        "type": "string"
+      },
+      {
+        "name": "before_id",
+        "required": false,
+        "type": "integer",
+        "minimum": 1
+      }
+    ],
+    "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

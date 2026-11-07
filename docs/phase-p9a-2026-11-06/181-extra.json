@@ -1,0 +1,4142 @@
+{
+  "screen_id": "qa_rounds",
+  "contract_fingerprint": "a4772c79e2249316e1a9",
+  "knowledge_revision": "930b217cd2e48604",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /qa/rounds/status",
+      "summary": "Which checklist is due",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "qa.round.conduct",
+          "qa.checklist.manage",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of qa.round.conduct or qa.checklist.manage or msds.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_RoundStatusOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /qa/checklist-items",
+      "summary": "The checklist's items",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "qa.round.conduct",
+          "qa.checklist.manage",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of qa.round.conduct or qa.checklist.manage or msds.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "frequency",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "DailyWeekly",
+                  "MonthlyQuarterly",
+                  "StorageQuarterly"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frequency"
+          }
+        },
+        {
+          "name": "include_inactive",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Include Inactive"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_QaChecklistItemOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "frequency",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "DailyWeekly",
+              "MonthlyQuarterly",
+              "StorageQuarterly"
+            ]
+          },
+          {
+            "name": "include_inactive",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /qa/checklist-items",
+      "summary": "Add the establishment's own checklist item",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "qa.checklist.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of qa.checklist.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "QA_CHECKLIST_ITEM_EXISTS",
+          "http_status": 409,
+          "message": "A checklist item with this code exists.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "constraint"
+          ],
+          "details_from": "POST /api/v1/qa/checklist-items"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/QaChecklistItemIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_QaChecklistItemOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "QaChecklistItemIn",
+        "fields": [
+          {
+            "pointer": "/code",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "pattern": "^[A-Z0-9_]{2,40}$"
+          },
+          {
+            "pointer": "/frequency",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "DailyWeekly",
+              "MonthlyQuarterly",
+              "StorageQuarterly"
+            ]
+          },
+          {
+            "pointer": "/position",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "minimum": 1,
+            "maximum": 999,
+            "description": "Its place in the checklist (the seeded items use 1-28)"
+          },
+          {
+            "pointer": "/text",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 300
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /qa/checklist-items",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "PATCH /qa/checklist-items/{item_id}",
+      "summary": "Reword, move or retire a checklist item",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "qa.checklist.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of qa.checklist.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        },
+        {
+          "code": "VERSION_CONFLICT",
+          "http_status": 409,
+          "message": "The record was changed by someone else; reload and try again.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "current_version",
+            "expected_version"
+          ],
+          "details_from": "PATCH /api/v1/finance/service-catalog/{service_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "item_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Item Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/QaChecklistItemUpdateIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_QaChecklistItemOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "QaChecklistItemUpdateIn",
+        "fields": [
+          {
+            "pointer": "/text",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "min_length": 3,
+            "max_length": 300
+          },
+          {
+            "pointer": "/position",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 999
+          },
+          {
+            "pointer": "/is_active",
+            "type": "boolean",
+            "required": false,
+            "nullable": true,
+            "description": "False retires the item from the next rounds"
+          },
+          {
+            "pointer": "/expected_version",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "Optimistic concurrency: the row_version you loaded"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "version_check",
+        "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+        "reconcile_with": "GET /qa/checklist-items",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /qa/rounds",
+      "summary": "Conduct and sign a round",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "qa.round.conduct"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of qa.round.conduct",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RoundIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RoundDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "RoundIn",
+        "fields": [
+          {
+            "pointer": "/frequency",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "DailyWeekly",
+              "MonthlyQuarterly",
+              "StorageQuarterly"
+            ]
+          },
+          {
+            "pointer": "/conducted_at",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date-time",
+            "description": "The date and time of the inspection, with timezone (not in the future)"
+          },
+          {
+            "pointer": "/items",
+            "type": "array",
+            "required": true,
+            "nullable": false,
+            "description": "Every active item of the frequency, once (GET /qa/checklist-items)",
+            "items": "RoundAnswerIn"
+          },
+          {
+            "pointer": "/general_remarks",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 4000
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /qa/rounds",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /qa/rounds",
+      "summary": "The rounds conducted",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "qa.round.conduct",
+          "qa.checklist.manage",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of qa.round.conduct or qa.checklist.manage or msds.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "frequency",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "DailyWeekly",
+                  "MonthlyQuarterly",
+                  "StorageQuarterly"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frequency"
+          }
+        },
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "default": 200,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "before_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_RoundOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 200,
+            "minimum": 1,
+            "maximum": 1000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "frequency",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "DailyWeekly",
+              "MonthlyQuarterly",
+              "StorageQuarterly"
+            ]
+          },
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "before_id",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "GET /qa/rounds/{round_id}",
+      "summary": "One round",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "qa.round.conduct",
+          "qa.checklist.manage",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of qa.round.conduct or qa.checklist.manage or msds.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "round_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Round Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RoundDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /qa/rounds/{round_id}/pdf",
+      "summary": "The signed round (PDF)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "qa.round.conduct",
+          "qa.checklist.manage",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of qa.round.conduct or qa.checklist.manage or msds.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "round_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Round Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "The stored file, with its own Content-Type (e.g. application/pdf) and its file name in Content-Disposition.",
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "file",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "prints": {
+        "kind": "file",
+        "media": [
+          "application/octet-stream"
+        ]
+      }
+    },
+    {
+      "endpoint": "POST /qa/rounds/{round_id}/actions",
+      "summary": "Raise a corrective or preventive action from a round",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "qa.round.conduct"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of qa.round.conduct",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "round_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Round Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/QualityActionIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_QualityActionOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "QualityActionIn",
+        "fields": [
+          {
+            "pointer": "/action_type",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Corrective",
+              "Preventive"
+            ]
+          },
+          {
+            "pointer": "/description",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 5,
+            "max_length": 1000
+          },
+          {
+            "pointer": "/owner_user_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "Who carries it out; they are notified and close it with the evidence (GET /staff/lookup → user_id; GET /quality/record-review/people, GET /facility/staff)"
+          },
+          {
+            "pointer": "/due_date",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "The department (GET /admin/departments)"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /qa/rounds/{round_id}",
+        "emits_events": [
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /quality/record-review/people",
+      "summary": "Who can review records or own an action",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "committee.manage",
+          "infection.control.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or committee.manage or infection.control.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        }
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_PersonOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/departments",
+      "summary": "Departments",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DepartmentOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    }
+  ],
+  "test_plan": {
+    "screen": "qa_rounds",
+    "title": "Quality assurance rounds (the in-charge's checklist)",
+    "cases": [
+      {
+        "id": "case:GET /qa/rounds/status",
+        "call": "GET /api/v1/qa/rounds/status",
+        "summary": "Which checklist is due",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:GET /qa/checklist-items",
+        "call": "GET /api/v1/qa/checklist-items",
+        "summary": "The checklist's items",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:POST /qa/checklist-items",
+        "call": "POST /api/v1/qa/checklist-items",
+        "summary": "Add the establishment's own checklist item",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "QA_CHECKLIST_ITEM_EXISTS",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:PATCH /qa/checklist-items/{item_id}",
+        "call": "PATCH /api/v1/qa/checklist-items/{item_id}",
+        "summary": "Reword, move or retire a checklist item",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR",
+          "VERSION_CONFLICT"
+        ],
+        "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry",
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:POST /qa/rounds",
+        "call": "POST /api/v1/qa/rounds",
+        "summary": "Conduct and sign a round",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:GET /qa/rounds",
+        "call": "GET /api/v1/qa/rounds",
+        "summary": "The rounds conducted",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:GET /qa/rounds/{round_id}",
+        "call": "GET /api/v1/qa/rounds/{round_id}",
+        "summary": "One round",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:GET /qa/rounds/{round_id}/pdf",
+        "call": "GET /api/v1/qa/rounds/{round_id}/pdf",
+        "summary": "The signed round (PDF)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:POST /qa/rounds/{round_id}/actions",
+        "call": "POST /api/v1/qa/rounds/{round_id}/actions",
+        "summary": "Raise a corrective or preventive action from a round",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:GET /quality/record-review/people",
+        "call": "GET /api/v1/quality/record-review/people",
+        "summary": "Who can review records or own an action",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      {
+        "id": "case:GET /admin/departments",
+        "call": "GET /api/v1/admin/departments",
+        "summary": "Departments",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      }
+    ],
+    "service_cases": [],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100,
+        "max_pct": 250,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/qa_rounds",
+    "workspace_guide": "get_handbook_outline('quality')",
+    "realtime": [
+      {
+        "event": "notification.created",
+        "check": "the screen refreshes without polling"
+      }
+    ],
+    "acceptance_rules": [
+      "Open on the status: one card per checklist with the last round and 'Due' in amber when is_due (never done, or the establishment's interval has passed: settings qa_round_daily_weekly_days, qa_round_monthly_quarterly_days, qa_round_storage_days).",
+      "The third card, StorageQuarterly, is the quarterly inspection of the medicine storage areas by the technical in-charge (the clinic manual, indicator 36): its twelve safe storage practices; it prints as 'Drug storage site inspection'.",
+      "A round lists every active item of its frequency (GET /qa/checklist-items?frequency=), in position order, each with Satisfactory / Needs attention / Not applicable, an observation (required for Needs attention) and a recommendation; then the general remarks. The date and time default to now and may be earlier (a paper round entered later), never later.",
+      "Signing is the POST: the in-charge's stamp is applied and the round is kept as signed. Say so on the confirm dialog: a mistake is corrected by the next round, never edited.",
+      "From a signed round, each finding offers 'Raise action' (POST /qa/rounds/{id}/actions: owner from GET /quality/record-review/people, due date, corrective or preventive); the actions then live in the action register.",
+      "Print = GET /qa/rounds/{id}/pdf, the manual's form filled in, kept in record as the evidence.",
+      "Checklist items (qa.checklist.manage): the manual's items are seeded with their source; add the establishment's own, reword, reorder or retire (is_active false; past rounds keep them). Send expected_version."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  },
+  "handbook": {
+    "page": "screens/qa_rounds",
+    "screen_id": "qa_rounds",
+    "title": "Quality assurance rounds (the in-charge's checklist)",
+    "purpose": "The in-charge's recurring checklist (the manual's 'HCE performance measuring checklist for incharge'): conduct and sign a daily/weekly or monthly/quarterly round, see which is due, print it for the record and raise corrective actions from its findings.",
+    "tasks": [
+      {
+        "id": "qa_rounds::GET /qa/rounds/status",
+        "task": "Which checklist is due",
+        "call": "GET /qa/rounds/status",
+        "is_action": false,
+        "permissions": [
+          "qa.round.conduct",
+          "qa.checklist.manage",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "qa_rounds::GET /qa/checklist-items",
+        "task": "The checklist's items",
+        "call": "GET /qa/checklist-items",
+        "is_action": false,
+        "permissions": [
+          "qa.round.conduct",
+          "qa.checklist.manage",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "qa_rounds::POST /qa/checklist-items",
+        "task": "Add the establishment's own checklist item",
+        "call": "POST /qa/checklist-items",
+        "is_action": true,
+        "permissions": [
+          "qa.checklist.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "qa_rounds::PATCH /qa/checklist-items/{item_id}",
+        "task": "Reword, move or retire a checklist item",
+        "call": "PATCH /qa/checklist-items/{item_id}",
+        "is_action": true,
+        "permissions": [
+          "qa.checklist.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "qa_rounds::POST /qa/rounds",
+        "task": "Conduct and sign a round",
+        "call": "POST /qa/rounds",
+        "is_action": true,
+        "permissions": [
+          "qa.round.conduct"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "qa_rounds::GET /qa/rounds",
+        "task": "The rounds conducted",
+        "call": "GET /qa/rounds",
+        "is_action": false,
+        "permissions": [
+          "qa.round.conduct",
+          "qa.checklist.manage",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "qa_rounds::GET /qa/rounds/{round_id}",
+        "task": "One round",
+        "call": "GET /qa/rounds/{round_id}",
+        "is_action": false,
+        "permissions": [
+          "qa.round.conduct",
+          "qa.checklist.manage",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "qa_rounds::GET /qa/rounds/{round_id}/pdf",
+        "task": "The signed round (PDF)",
+        "call": "GET /qa/rounds/{round_id}/pdf",
+        "is_action": false,
+        "permissions": [
+          "qa.round.conduct",
+          "qa.checklist.manage",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "qa_rounds::POST /qa/rounds/{round_id}/actions",
+        "task": "Raise a corrective or preventive action from a round",
+        "call": "POST /qa/rounds/{round_id}/actions",
+        "is_action": true,
+        "permissions": [
+          "qa.round.conduct"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "qa_rounds::GET /quality/record-review/people",
+        "task": "Who can review records or own an action",
+        "call": "GET /quality/record-review/people",
+        "is_action": false,
+        "permissions": [
+          "quality.review.manage",
+          "committee.manage",
+          "infection.control.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "qa_rounds::GET /admin/departments",
+        "task": "Departments",
+        "call": "GET /admin/departments",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      }
+    ],
+    "rules_to_explain": [
+      "Open on the status: one card per checklist with the last round and 'Due' in amber when is_due (never done, or the establishment's interval has passed: settings qa_round_daily_weekly_days, qa_round_monthly_quarterly_days, qa_round_storage_days).",
+      "The third card, StorageQuarterly, is the quarterly inspection of the medicine storage areas by the technical in-charge (the clinic manual, indicator 36): its twelve safe storage practices; it prints as 'Drug storage site inspection'.",
+      "A round lists every active item of its frequency (GET /qa/checklist-items?frequency=), in position order, each with Satisfactory / Needs attention / Not applicable, an observation (required for Needs attention) and a recommendation; then the general remarks. The date and time default to now and may be earlier (a paper round entered later), never later.",
+      "Signing is the POST: the in-charge's stamp is applied and the round is kept as signed. Say so on the confirm dialog: a mistake is corrected by the next round, never edited.",
+      "From a signed round, each finding offers 'Raise action' (POST /qa/rounds/{id}/actions: owner from GET /quality/record-review/people, due date, corrective or preventive); the actions then live in the action register.",
+      "Print = GET /qa/rounds/{id}/pdf, the manual's form filled in, kept in record as the evidence.",
+      "Checklist items (qa.checklist.manage): the manual's items are seeded with their source; add the establishment's own, reword, reorder or retire (is_active false; past rounds keep them). Send expected_version."
+    ],
+    "updates_by_itself_on": [
+      "notification.created"
+    ],
+    "errors_the_user_can_meet": [
+      {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "QA_CHECKLIST_ITEM_EXISTS",
+        "message": "A checklist item with this code exists.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "message": "The request is invalid.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VERSION_CONFLICT",
+        "message": "The record was changed by someone else; reload and try again.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      }
+    ],
+    "sections": [
+      "Purpose and audience",
+      "Step by step (one per task, where to click)",
+      "Every control and its effects",
+      "States and feedback",
+      "Messages, mistakes and recovery",
+      "Language and visual examples",
+      "Related help and delivery"
+    ],
+    "requirement_ids": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "delivery": "F1 and contextual screen Help",
+    "requirements": [
+      {
+        "id": "S1",
+        "title": "Purpose and audience",
+        "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+      },
+      {
+        "id": "S2",
+        "title": "Step by step (one per task, where to click)",
+        "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+      },
+      {
+        "id": "S3",
+        "title": "Every control and its effects",
+        "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+      },
+      {
+        "id": "S4",
+        "title": "States and feedback",
+        "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+      },
+      {
+        "id": "S5",
+        "title": "Messages, mistakes and recovery",
+        "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+      },
+      {
+        "id": "S6",
+        "title": "Language and visual examples",
+        "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+      },
+      {
+        "id": "S7",
+        "title": "Related help and delivery",
+        "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+      }
+    ],
+    "workspace_guide": "get_handbook_outline('quality')"
+  },
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "examples": {
+    "GET /qa/rounds/status": {
+      "request": {
+        "path": "/api/v1/qa/rounds/status"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "frequency": "DailyWeekly",
+              "interval_days": 7,
+              "active_items": 15,
+              "last_round_id": null,
+              "last_round_number": null,
+              "last_conducted_at": null,
+              "days_since": null,
+              "is_due": true
+            },
+            {
+              "frequency": "MonthlyQuarterly",
+              "interval_days": 92,
+              "active_items": 13,
+              "last_round_id": null,
+              "last_round_number": null,
+              "last_conducted_at": null,
+              "days_since": null,
+              "is_due": true
+            },
+            {
+              "frequency": "StorageQuarterly",
+              "interval_days": 92,
+              "active_items": 12,
+              "last_round_id": null,
+              "last_round_number": null,
+              "last_conducted_at": null,
+              "days_since": null,
+              "is_due": true
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-14T11:26:21.452097+00:00"
+          },
+          "request_id": "22d8b97e86994306aab4b6631eb15ecc"
+        }
+      }
+    },
+    "GET /qa/checklist-items": {
+      "request": {
+        "path": "/api/v1/qa/checklist-items",
+        "query": {
+          "frequency": "DailyWeekly"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "item_id": 1,
+              "code": "DW_CLEANLINESS",
+              "frequency": "DailyWeekly",
+              "position": 1,
+              "text": "General cleanliness",
+              "source": "Clinic manual p49, daily/weekly item 4",
+              "is_active": true,
+              "row_version": 1
+            },
+            {
+              "item_id": 2,
+              "code": "DW_WASHROOM",
+              "frequency": "DailyWeekly",
+              "position": 2,
+              "text": "Washroom cleaned/functional",
+              "source": "Clinic manual p49, daily/weekly item 5",
+              "is_active": true,
+              "row_version": 1
+            },
+            {
+              "item_id": 3,
+              "code": "DW_DRINKING_WATER",
+              "frequency": "DailyWeekly",
+              "position": 3,
+              "text": "Drinking water available",
+              "source": "Clinic manual p49, daily/weekly item 6",
+              "is_active": true,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-14T11:26:21.429146+00:00"
+          },
+          "request_id": "97ad5f169d80413f93560d5c0f769c3a"
+        }
+      }
+    },
+    "POST /qa/checklist-items": {
+      "request": {
+        "path": "/api/v1/qa/checklist-items",
+        "body": {
+          "code": "OWN_FIRST_AID_KIT",
+          "frequency": "DailyWeekly",
+          "position": 16,
+          "text": "First aid kit complete"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "item_id": 45,
+            "code": "OWN_FIRST_AID_KIT",
+            "frequency": "DailyWeekly",
+            "position": 16,
+            "text": "First aid kit complete",
+            "source": null,
+            "is_active": true,
+            "row_version": 1
+          },
+          "meta": {
+            "server_time": "2026-10-14T11:26:21.808795+00:00"
+          },
+          "request_id": "a2cccb92d82f4036b93bcfbb40aa2720"
+        }
+      }
+    },
+    "PATCH /qa/checklist-items/{item_id}": {
+      "request": {
+        "path": "/api/v1/qa/checklist-items/45",
+        "body": {
+          "is_active": false,
+          "expected_version": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "item_id": 45,
+            "code": "OWN_FIRST_AID_KIT",
+            "frequency": "DailyWeekly",
+            "position": 16,
+            "text": "First aid kit complete",
+            "source": null,
+            "is_active": false,
+            "row_version": 2
+          },
+          "meta": {
+            "server_time": "2026-10-14T11:26:21.889019+00:00"
+          },
+          "request_id": "8965bf6682ec4823a31be258667e5486"
+        }
+      }
+    },
+    "POST /qa/rounds": {
+      "request": {
+        "path": "/api/v1/qa/rounds",
+        "body": {
+          "frequency": "DailyWeekly",
+          "conducted_at": "2026-10-14T11:26:21.453601+00:00",
+          "items": [
+            {
+              "item_id": 1,
+              "result": "Satisfactory"
+            },
+            {
+              "item_id": 2,
+              "result": "Satisfactory"
+            },
+            {
+              "item_id": 3,
+              "result": "Satisfactory"
+            }
+          ],
+          "general_remarks": "Clean; oxygen low"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "round_id": 1,
+            "round_number": "QAR-2026-00001",
+            "frequency": "DailyWeekly",
+            "conducted_at": "2026-10-14T11:26:21.453601+00:00",
+            "general_remarks": "Clean; oxygen low",
+            "conducted_by": 1,
+            "conducted_by_name": "Quality Officer",
+            "signed_stamp": {
+              "at": "2026-10-14T11:26:21.533298+00:00",
+              "name": "Quality Officer",
+              "text": "Quality Officer, Officer, 14-Oct-2026 16:26",
+              "user_id": 1,
+              "designation": "Officer",
+              "employee_id": 1,
+              "registration": null
+            },
+            "created_at": "2026-10-14T11:26:21.533298+00:00",
+            "findings": 1,
+            "items": [
+              {
+                "item_id": 1,
+                "code": "DW_CLEANLINESS",
+                "position": 1,
+                "text": "General cleanliness",
+                "result": "Satisfactory",
+                "observation": null,
+                "recommendation": null
+              },
+              {
+                "item_id": 2,
+                "code": "DW_WASHROOM",
+                "position": 2,
+                "text": "Washroom cleaned/functional",
+                "result": "Satisfactory",
+                "observation": null,
+                "recommendation": null
+              },
+              {
+                "item_id": 3,
+                "code": "DW_DRINKING_WATER",
+                "position": 3,
+                "text": "Drinking water available",
+                "result": "Satisfactory",
+                "observation": null,
+                "recommendation": null
+              }
+            ],
+            "actions": []
+          },
+          "meta": {
+            "server_time": "2026-10-14T11:26:21.633861+00:00"
+          },
+          "request_id": "b0382347a88f4ec1840f9cf98ec605ad"
+        }
+      }
+    },
+    "GET /qa/rounds": {
+      "request": {
+        "path": "/api/v1/qa/rounds",
+        "query": {
+          "frequency": "DailyWeekly"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "round_id": 1,
+              "round_number": "QAR-2026-00001",
+              "frequency": "DailyWeekly",
+              "conducted_at": "2026-10-14T11:26:21.453601+00:00",
+              "general_remarks": "Clean; oxygen low",
+              "conducted_by": 1,
+              "conducted_by_name": "Quality Officer",
+              "signed_stamp": {
+                "at": "2026-10-14T11:26:21.533298+00:00",
+                "name": "Quality Officer",
+                "text": "Quality Officer, Officer, 14-Oct-2026 16:26",
+                "user_id": 1,
+                "designation": "Officer",
+                "employee_id": 1,
+                "registration": null
+              },
+              "created_at": "2026-10-14T11:26:21.533298+00:00",
+              "findings": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-14T11:26:21.741417+00:00"
+          },
+          "request_id": "4d59f7d2ee7a43689cdbd7db2ace4f52"
+        }
+      }
+    },
+    "GET /qa/rounds/{round_id}": {
+      "request": {
+        "path": "/api/v1/qa/rounds/1"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"round_id\": 1, \"round_number\": \"QAR-2026-00001\", \"frequency\": \"DailyWeekly\", \"conducted_at\": \"2026-10-14T11:26:21.453601+00:00\", \"general_remarks\": \"Clean; oxygen low\", \"conducted_by\": 1, \"conducted_by_name\": \"Quality Officer\", \"signed_stamp\": {\"at\": \"2026-10-14T11:26:21.533298+00:00\", \"name\": \"Quality Officer\", \"text\": \"Quality Officer, Officer, 14-Oct-2026 16:26\", \"user_id\": 1, \"designation\": \"Officer\", \"employee_id\": 1, \"registration\": null}, \"created_at\": \"2026-10-14T11:26:21.533298+00:00\", \"findings\": 1, \"items\": [{\"item_id\": 1, \"code\": \"DW_CLEANLINESS\", \"position\": 1, \"text\": \"General cleanliness\", \"result\": \"Satisfactory\", \"observation\": null, \"recommendation\": null}, {\"item_id\": 2, \"code\": \"DW_WASHROOM\", \"position\": 2, \"text\": \"Washroom cleaned/functional\", \"result\": \"Satisfactory\", \"observation\": null, \"recommendation\": null}, {\"item_id\": 3, \"code\": \"DW_DRINKING_WATER\", \"position\": 3, \"text\": \"Drinking water available\", \"result\": \"Satisfactory\", \"observation\": null, \"recommendation\": null}], \"actions\": [{\"action_id\": 1, \"action_number\": \"CAPA-2026-0001\", \"source\": \"QaRound\", \"cycle_id\": null, \"cycle_number\": null, \"incident_id\": null, \"incident_number\": null, \"complaint_id\": null, \"complaint_number\": null, \"ipc_audit_id\": null, \"audit_number\": null, \"meeting_id\": null, \"meeting_number\": null, \"drill_id\": null, \"drill_number\": null, \"mock_interview_id\": null, \"interview_number\": null, \"qa_round_id\": 1, \"qa_round_number\": \"QAR-2026-000…"
+      }
+    },
+    "GET /qa/rounds/{round_id}/pdf": {
+      "request": {
+        "path": "/api/v1/qa/rounds/1/pdf"
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/pdf",
+        "bytes": 3893
+      }
+    },
+    "POST /qa/rounds/{round_id}/actions": {
+      "request": {
+        "path": "/api/v1/qa/rounds/1/actions",
+        "body": {
+          "action_type": "Corrective",
+          "description": "Refill the oxygen cylinder every Monday",
+          "owner_user_id": 1,
+          "due_date": "2026-10-21"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "action_id": 1,
+            "action_number": "CAPA-2026-0001",
+            "source": "QaRound",
+            "cycle_id": null,
+            "cycle_number": null,
+            "incident_id": null,
+            "incident_number": null,
+            "complaint_id": null,
+            "complaint_number": null,
+            "ipc_audit_id": null,
+            "audit_number": null,
+            "meeting_id": null,
+            "meeting_number": null,
+            "drill_id": null,
+            "drill_number": null,
+            "mock_interview_id": null,
+            "interview_number": null,
+            "qa_round_id": 1,
+            "qa_round_number": "QAR-2026-00001",
+            "feedback_id": null,
+            "feedback_number": null,
+            "source_number": "QAR-2026-00001",
+            "action_type": "Corrective",
+            "description": "Refill the oxygen cylinder every Monday",
+            "criterion_code": null,
+            "department_id": null,
+            "department_name": null,
+            "owner_user_id": 1,
+            "owner_name": "Quality Officer",
+            "due_date": "2026-10-21",
+            "status": "Open",
+            "outcome_note": null,
+            "completed_at": null,
+            "completed_by_name": null,
+            "created_by": 1,
+            "created_by_name": "Quality Officer",
+            "created_at": "2026-10-14T11:26:21.678535+00:00",
+            "row_version": 1,
+            "is_overdue": false
+          },
+          "meta": {
+            "server_time": "2026-10-14T11:26:21.699465+00:00"
+          },
+          "request_id": "0c0792b2f154414f9ef7ad5ebdd835a6"
+        }
+      }
+    },
+    "GET /quality/record-review/people": {
+      "request": {
+        "path": "/api/v1/quality/record-review/people"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "user_id": 1,
+              "display_name": "Dr Ahmed",
+              "designation": "Doctor",
+              "department_name": "General Medicine",
+              "staff_category": "Clinical",
+              "can_review": true,
+              "default_discipline": "Medical"
+            },
+            {
+              "user_id": 7,
+              "display_name": "Dr Reviewer",
+              "designation": "Doctor",
+              "department_name": null,
+              "staff_category": "Clinical",
+              "can_review": true,
+              "default_discipline": "Medical"
+            },
+            {
+              "user_id": 2,
+              "display_name": "Dr Sara",
+              "designation": "Doctor",
+              "department_name": "General Medicine",
+              "staff_category": "Clinical",
+              "can_review": true,
+              "default_discipline": "Medical"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-28T16:29:14.861565+00:00"
+          },
+          "request_id": "270dcbd5bcba4d3781b715ca8c500550"
+        }
+      }
+    },
+    "GET /admin/departments": {
+      "request": {
+        "path": "/api/v1/admin/departments"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "department_id": 1,
+              "code": "CARD",
+              "name": "Cardiology & Vascular",
+              "is_clinical": true,
+              "is_active": true,
+              "row_version": 2
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:34:24.417658+00:00"
+          },
+          "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+        }
+      }
+    }
+  },
+  "schemas": {
+    "AuthorStampOut": {
+      "properties": {
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation",
+          "description": "Designation and specialty, e.g. \"Medical Officer, General Medicine\""
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "Council registration, e.g. \"PMDC 12345-P\" or \"PNC 67890\""
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At",
+          "description": "When the entry was signed, reported or verified"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "The printed line: name, designation, registration, date and time"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "user_id",
+        "name",
+        "designation",
+        "registration",
+        "at",
+        "text"
+      ],
+      "title": "AuthorStampOut",
+      "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
+    },
+    "DepartmentOut": {
+      "properties": {
+        "department_id": {
+          "type": "integer",
+          "title": "Department Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "is_clinical": {
+          "type": "boolean",
+          "title": "Is Clinical"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "department_id",
+        "code",
+        "name",
+        "is_clinical",
+        "is_active",
+        "row_version"
+      ],
+      "title": "DepartmentOut"
+    },
+    "Envelope_QaChecklistItemOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/QaChecklistItemOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[QaChecklistItemOut]"
+    },
+    "Envelope_QualityActionOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/QualityActionOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[QualityActionOut]"
+    },
+    "Envelope_RoundDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/RoundDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[RoundDetailOut]"
+    },
+    "Envelope_list_DepartmentOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/DepartmentOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[DepartmentOut]]"
+    },
+    "Envelope_list_PersonOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PersonOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PersonOut]]"
+    },
+    "Envelope_list_QaChecklistItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/QaChecklistItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[QaChecklistItemOut]]"
+    },
+    "Envelope_list_RoundOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/RoundOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[RoundOut]]"
+    },
+    "Envelope_list_RoundStatusOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/RoundStatusOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[RoundStatusOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "PersonOut": {
+      "properties": {
+        "user_id": {
+          "type": "integer",
+          "title": "User Id"
+        },
+        "display_name": {
+          "type": "string",
+          "title": "Display Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "staff_category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Clinical",
+                "Nursing",
+                "Administrative",
+                "Technical",
+                "SupportZeroInterface",
+                "Visiting"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Staff Category"
+        },
+        "can_review": {
+          "type": "boolean",
+          "title": "Can Review"
+        },
+        "default_discipline": {
+          "type": "string",
+          "enum": [
+            "Medical",
+            "Nursing",
+            "Pharmacy",
+            "Laboratory",
+            "Other"
+          ],
+          "title": "Default Discipline"
+        }
+      },
+      "type": "object",
+      "required": [
+        "user_id",
+        "display_name",
+        "designation",
+        "department_name",
+        "staff_category",
+        "can_review",
+        "default_discipline"
+      ],
+      "title": "PersonOut",
+      "description": "Someone who can review records (can_review) or own an action."
+    },
+    "QaChecklistItemIn": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]{2,40}$",
+          "title": "Code",
+          "examples": [
+            "OWN_FIRST_AID_KIT"
+          ]
+        },
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "DailyWeekly",
+            "MonthlyQuarterly",
+            "StorageQuarterly"
+          ],
+          "title": "Frequency"
+        },
+        "position": {
+          "type": "integer",
+          "maximum": 999,
+          "minimum": 1,
+          "title": "Position",
+          "description": "Its place in the checklist (the seeded items use 1-28)"
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 3,
+          "title": "Text",
+          "examples": [
+            "First aid kit complete and in date"
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "frequency",
+        "position",
+        "text"
+      ],
+      "title": "QaChecklistItemIn"
+    },
+    "QaChecklistItemOut": {
+      "properties": {
+        "item_id": {
+          "type": "integer",
+          "title": "Item Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "DailyWeekly",
+            "MonthlyQuarterly",
+            "StorageQuarterly"
+          ],
+          "title": "Frequency"
+        },
+        "position": {
+          "type": "integer",
+          "title": "Position"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source",
+          "description": "The manual's form and item it comes from; null for the establishment's own"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "item_id",
+        "code",
+        "frequency",
+        "position",
+        "text",
+        "source",
+        "is_active",
+        "row_version"
+      ],
+      "title": "QaChecklistItemOut"
+    },
+    "QaChecklistItemUpdateIn": {
+      "properties": {
+        "text": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300,
+              "minLength": 3
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Text"
+        },
+        "position": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 999,
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Position"
+        },
+        "is_active": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Is Active",
+          "description": "False retires the item from the next rounds"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Version",
+          "description": "Optimistic concurrency: the row_version you loaded"
+        }
+      },
+      "type": "object",
+      "title": "QaChecklistItemUpdateIn"
+    },
+    "QualityActionIn": {
+      "properties": {
+        "action_type": {
+          "type": "string",
+          "enum": [
+            "Corrective",
+            "Preventive"
+          ],
+          "title": "Action Type"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 5,
+          "title": "Description",
+          "examples": [
+            "Teach OPD doctors to finalize notes the same day"
+          ]
+        },
+        "owner_user_id": {
+          "type": "integer",
+          "title": "Owner User Id",
+          "description": "Who carries it out; they are notified and close it with the evidence (GET /staff/lookup → user_id; GET /quality/record-review/people, GET /facility/staff)"
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Due Date"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id",
+          "description": "The department (GET /admin/departments)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "action_type",
+        "description",
+        "owner_user_id",
+        "due_date"
+      ],
+      "title": "QualityActionIn",
+      "description": "A corrective or preventive action for its source (a record review, an incident)."
+    },
+    "QualityActionOut": {
+      "properties": {
+        "action_id": {
+          "type": "integer",
+          "title": "Action Id"
+        },
+        "action_number": {
+          "type": "string",
+          "title": "Action Number"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "RecordReview",
+            "Incident",
+            "Complaint",
+            "InfectionAudit",
+            "Meeting",
+            "Drill",
+            "MockInterview",
+            "QaRound",
+            "PatientFeedback"
+          ],
+          "title": "Source",
+          "description": "What found the need: a medical record review, an incident, a complaint, an infection control audit, a committee meeting, a mock drill, a mock PHC interview, a QA round, a patient's feedback"
+        },
+        "cycle_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cycle Id"
+        },
+        "cycle_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cycle Number"
+        },
+        "incident_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Incident Id"
+        },
+        "incident_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Incident Number"
+        },
+        "complaint_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Complaint Id"
+        },
+        "complaint_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Complaint Number"
+        },
+        "ipc_audit_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ipc Audit Id"
+        },
+        "audit_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Audit Number"
+        },
+        "meeting_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Meeting Id"
+        },
+        "meeting_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Meeting Number"
+        },
+        "drill_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drill Id"
+        },
+        "drill_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drill Number"
+        },
+        "mock_interview_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mock Interview Id"
+        },
+        "interview_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Interview Number",
+          "description": "The mock PHC interview that found the gap (MIV-...)"
+        },
+        "qa_round_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Qa Round Id"
+        },
+        "qa_round_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Qa Round Number",
+          "description": "The in-charge's QA round whose finding it addresses (QAR-...)"
+        },
+        "feedback_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Feedback Id"
+        },
+        "feedback_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Feedback Number",
+          "description": "The patient feedback it answers (FB-...)"
+        },
+        "source_number": {
+          "type": "string",
+          "title": "Source Number",
+          "description": "The number of the review cycle, the incident, the complaint, the audit or the meeting"
+        },
+        "action_type": {
+          "type": "string",
+          "enum": [
+            "Corrective",
+            "Preventive"
+          ],
+          "title": "Action Type"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "criterion_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Criterion Code",
+          "description": "A record review: the checklist item whose deficiencies it addresses"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "owner_user_id": {
+          "type": "integer",
+          "title": "Owner User Id"
+        },
+        "owner_name": {
+          "type": "string",
+          "title": "Owner Name"
+        },
+        "due_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Due Date"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Open",
+            "Done",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "outcome_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Outcome Note",
+          "description": "Done: what was done (the evidence); Cancelled: why it was dropped"
+        },
+        "completed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed At"
+        },
+        "completed_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed By Name"
+        },
+        "created_by": {
+          "type": "integer",
+          "title": "Created By"
+        },
+        "created_by_name": {
+          "type": "string",
+          "title": "Created By Name"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "is_overdue": {
+          "type": "boolean",
+          "title": "Is Overdue"
+        }
+      },
+      "type": "object",
+      "required": [
+        "action_id",
+        "action_number",
+        "source",
+        "cycle_id",
+        "cycle_number",
+        "incident_id",
+        "incident_number",
+        "complaint_id",
+        "complaint_number",
+        "ipc_audit_id",
+        "audit_number",
+        "meeting_id",
+        "meeting_number",
+        "drill_id",
+        "drill_number",
+        "mock_interview_id",
+        "interview_number",
+        "qa_round_id",
+        "qa_round_number",
+        "feedback_id",
+        "feedback_number",
+        "source_number",
+        "action_type",
+        "description",
+        "criterion_code",
+        "department_id",
+        "department_name",
+        "owner_user_id",
+        "owner_name",
+        "due_date",
+        "status",
+        "outcome_note",
+        "completed_at",
+        "completed_by_name",
+        "created_by",
+        "created_by_name",
+        "created_at",
+        "row_version",
+        "is_overdue"
+      ],
+      "title": "QualityActionOut",
+      "description": "A corrective or preventive action of the hospital's register (MSDS IMS 162, CQI 83, 107)."
+    },
+    "RoundAnswerIn": {
+      "properties": {
+        "item_id": {
+          "type": "integer",
+          "title": "Item Id"
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "Satisfactory",
+            "NeedsAttention",
+            "NotApplicable"
+          ],
+          "title": "Result"
+        },
+        "observation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observation",
+          "description": "Required when the result is NeedsAttention"
+        },
+        "recommendation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Recommendation"
+        }
+      },
+      "type": "object",
+      "required": [
+        "item_id",
+        "result"
+      ],
+      "title": "RoundAnswerIn"
+    },
+    "RoundDetailOut": {
+      "properties": {
+        "round_id": {
+          "type": "integer",
+          "title": "Round Id"
+        },
+        "round_number": {
+          "type": "string",
+          "title": "Round Number"
+        },
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "DailyWeekly",
+            "MonthlyQuarterly",
+            "StorageQuarterly"
+          ],
+          "title": "Frequency"
+        },
+        "conducted_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Conducted At"
+        },
+        "general_remarks": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "General Remarks"
+        },
+        "conducted_by": {
+          "type": "integer",
+          "title": "Conducted By"
+        },
+        "conducted_by_name": {
+          "type": "string",
+          "title": "Conducted By Name"
+        },
+        "signed_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "findings": {
+          "type": "integer",
+          "title": "Findings",
+          "description": "Items marked NeedsAttention"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/components/schemas/RoundItemOut"
+          },
+          "type": "array",
+          "title": "Items"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/components/schemas/QualityActionOut"
+          },
+          "type": "array",
+          "title": "Actions"
+        }
+      },
+      "type": "object",
+      "required": [
+        "round_id",
+        "round_number",
+        "frequency",
+        "conducted_at",
+        "general_remarks",
+        "conducted_by",
+        "conducted_by_name",
+        "signed_stamp",
+        "created_at",
+        "findings",
+        "items",
+        "actions"
+      ],
+      "title": "RoundDetailOut"
+    },
+    "RoundIn": {
+      "properties": {
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "DailyWeekly",
+            "MonthlyQuarterly",
+            "StorageQuarterly"
+          ],
+          "title": "Frequency"
+        },
+        "conducted_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Conducted At",
+          "description": "The date and time of the inspection, with timezone (not in the future)"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/components/schemas/RoundAnswerIn"
+          },
+          "type": "array",
+          "maxItems": 200,
+          "minItems": 1,
+          "title": "Items",
+          "description": "Every active item of the frequency, once (GET /qa/checklist-items)"
+        },
+        "general_remarks": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "General Remarks"
+        }
+      },
+      "type": "object",
+      "required": [
+        "frequency",
+        "conducted_at",
+        "items"
+      ],
+      "title": "RoundIn"
+    },
+    "RoundItemOut": {
+      "properties": {
+        "item_id": {
+          "type": "integer",
+          "title": "Item Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "position": {
+          "type": "integer",
+          "title": "Position"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text"
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "Satisfactory",
+            "NeedsAttention",
+            "NotApplicable"
+          ],
+          "title": "Result"
+        },
+        "observation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observation"
+        },
+        "recommendation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Recommendation"
+        }
+      },
+      "type": "object",
+      "required": [
+        "item_id",
+        "code",
+        "position",
+        "text",
+        "result",
+        "observation",
+        "recommendation"
+      ],
+      "title": "RoundItemOut"
+    },
+    "RoundOut": {
+      "properties": {
+        "round_id": {
+          "type": "integer",
+          "title": "Round Id"
+        },
+        "round_number": {
+          "type": "string",
+          "title": "Round Number"
+        },
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "DailyWeekly",
+            "MonthlyQuarterly",
+            "StorageQuarterly"
+          ],
+          "title": "Frequency"
+        },
+        "conducted_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Conducted At"
+        },
+        "general_remarks": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "General Remarks"
+        },
+        "conducted_by": {
+          "type": "integer",
+          "title": "Conducted By"
+        },
+        "conducted_by_name": {
+          "type": "string",
+          "title": "Conducted By Name"
+        },
+        "signed_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "findings": {
+          "type": "integer",
+          "title": "Findings",
+          "description": "Items marked NeedsAttention"
+        }
+      },
+      "type": "object",
+      "required": [
+        "round_id",
+        "round_number",
+        "frequency",
+        "conducted_at",
+        "general_remarks",
+        "conducted_by",
+        "conducted_by_name",
+        "signed_stamp",
+        "created_at",
+        "findings"
+      ],
+      "title": "RoundOut"
+    },
+    "RoundStatusOut": {
+      "properties": {
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "DailyWeekly",
+            "MonthlyQuarterly",
+            "StorageQuarterly"
+          ],
+          "title": "Frequency"
+        },
+        "interval_days": {
+          "type": "integer",
+          "title": "Interval Days",
+          "description": "The establishment's interval (settings qa_round_daily_weekly_days, qa_round_monthly_quarterly_days)"
+        },
+        "active_items": {
+          "type": "integer",
+          "title": "Active Items"
+        },
+        "last_round_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Round Id"
+        },
+        "last_round_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Round Number"
+        },
+        "last_conducted_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Conducted At"
+        },
+        "days_since": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Days Since"
+        },
+        "is_due": {
+          "type": "boolean",
+          "title": "Is Due",
+          "description": "Never done, or the interval has passed since the last round"
+        }
+      },
+      "type": "object",
+      "required": [
+        "frequency",
+        "interval_days",
+        "active_items",
+        "last_round_id",
+        "last_round_number",
+        "last_conducted_at",
+        "days_since",
+        "is_due"
+      ],
+      "title": "RoundStatusOut"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
+}

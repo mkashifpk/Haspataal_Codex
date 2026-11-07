@@ -1,0 +1,462 @@
+{
+  "method": "POST",
+  "path": "/api/v1/qa/rounds",
+  "summary": "Conduct and sign a round",
+  "tags": [
+    "Quality assurance rounds"
+  ],
+  "permissions": [
+    "qa.round.conduct"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": true,
+  "description": "The in-charge answers every active item of the frequency: Satisfactory, NeedsAttention (with the observation) or\nNotApplicable, with recommendations and the general remarks. The round is signed with the in-charge's stamp and kept\nas signed: correct a mistake in the next round. `VALIDATION_ERROR` for a missing, unknown or repeated item, a\nNeedsAttention without an observation, or a time in the future.\n\n**Required permission:** `qa.round.conduct`\n\n**Required permission:** `qa.round.conduct`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "RoundIn",
+    "properties": {
+      "frequency": {
+        "type": "string",
+        "enum": [
+          "DailyWeekly",
+          "MonthlyQuarterly",
+          "StorageQuarterly"
+        ],
+        "title": "Frequency"
+      },
+      "conducted_at": {
+        "type": "string",
+        "format": "date-time",
+        "title": "Conducted At",
+        "description": "The date and time of the inspection, with timezone (not in the future)"
+      },
+      "items": {
+        "items": {
+          "title": "RoundAnswerIn",
+          "properties": {
+            "item_id": {
+              "type": "integer",
+              "title": "Item Id"
+            },
+            "result": {
+              "type": "string",
+              "enum": [
+                "Satisfactory",
+                "NeedsAttention",
+                "NotApplicable"
+              ],
+              "title": "Result"
+            },
+            "observation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Observation",
+              "description": "Required when the result is NeedsAttention"
+            },
+            "recommendation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Recommendation"
+            }
+          },
+          "type": "object",
+          "required": [
+            "item_id",
+            "result"
+          ]
+        },
+        "type": "array",
+        "maxItems": 200,
+        "minItems": 1,
+        "title": "Items",
+        "description": "Every active item of the frequency, once (GET /qa/checklist-items)"
+      },
+      "general_remarks": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 4000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "General Remarks"
+      }
+    },
+    "type": "object",
+    "required": [
+      "frequency",
+      "conducted_at",
+      "items"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[RoundDetailOut]",
+    "properties": {
+      "data": {
+        "title": "RoundDetailOut",
+        "properties": {
+          "round_id": {
+            "type": "integer",
+            "title": "Round Id"
+          },
+          "round_number": {
+            "type": "string",
+            "title": "Round Number"
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "DailyWeekly",
+              "MonthlyQuarterly",
+              "StorageQuarterly"
+            ],
+            "title": "Frequency"
+          },
+          "conducted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Conducted At"
+          },
+          "general_remarks": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "General Remarks"
+          },
+          "conducted_by": {
+            "type": "integer",
+            "title": "Conducted By"
+          },
+          "conducted_by_name": {
+            "type": "string",
+            "title": "Conducted By Name"
+          },
+          "signed_stamp": {
+            "$ref": "#/components/schemas/AuthorStampOut"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "findings": {
+            "type": "integer",
+            "title": "Findings",
+            "description": "Items marked NeedsAttention"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RoundItemOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/QualityActionOut"
+            },
+            "type": "array",
+            "title": "Actions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "round_id",
+          "round_number",
+          "frequency",
+          "conducted_at",
+          "general_remarks",
+          "conducted_by",
+          "conducted_by_name",
+          "signed_stamp",
+          "created_at",
+          "findings",
+          "items",
+          "actions"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/qa/rounds",
+      "body": {
+        "frequency": "DailyWeekly",
+        "conducted_at": "2026-10-14T11:26:21.453601+00:00",
+        "items": [
+          {
+            "item_id": 1,
+            "result": "Satisfactory"
+          },
+          {
+            "item_id": 2,
+            "result": "Satisfactory"
+          },
+          {
+            "item_id": 3,
+            "result": "Satisfactory"
+          }
+        ],
+        "general_remarks": "Clean; oxygen low"
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "data": {
+          "round_id": 1,
+          "round_number": "QAR-2026-00001",
+          "frequency": "DailyWeekly",
+          "conducted_at": "2026-10-14T11:26:21.453601+00:00",
+          "general_remarks": "Clean; oxygen low",
+          "conducted_by": 1,
+          "conducted_by_name": "Quality Officer",
+          "signed_stamp": {
+            "at": "2026-10-14T11:26:21.533298+00:00",
+            "name": "Quality Officer",
+            "text": "Quality Officer, Officer, 14-Oct-2026 16:26",
+            "user_id": 1,
+            "designation": "Officer",
+            "employee_id": 1,
+            "registration": null
+          },
+          "created_at": "2026-10-14T11:26:21.533298+00:00",
+          "findings": 1,
+          "items": [
+            {
+              "item_id": 1,
+              "code": "DW_CLEANLINESS",
+              "position": 1,
+              "text": "General cleanliness",
+              "result": "Satisfactory",
+              "observation": null,
+              "recommendation": null
+            },
+            {
+              "item_id": 2,
+              "code": "DW_WASHROOM",
+              "position": 2,
+              "text": "Washroom cleaned/functional",
+              "result": "Satisfactory",
+              "observation": null,
+              "recommendation": null
+            },
+            {
+              "item_id": 3,
+              "code": "DW_DRINKING_WATER",
+              "position": 3,
+              "text": "Drinking water available",
+              "result": "Satisfactory",
+              "observation": null,
+              "recommendation": null
+            }
+          ],
+          "actions": []
+        },
+        "meta": {
+          "server_time": "2026-10-14T11:26:21.633861+00:00"
+        },
+        "request_id": "b0382347a88f4ec1840f9cf98ec605ad"
+      }
+    },
+    "errors_seen": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "events_emitted": []
+  },
+  "errors": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "FORBIDDEN",
+    "VALIDATION_ERROR"
+  ],
+  "used_by_screens": [
+    "qa_rounds",
+    "qa_rounds_owner"
+  ],
+  "used_by_workflows": [
+    "clinic-quality-and-education"
+  ],
+  "typescript_example": "// Conduct and sign a round  (permissions: qa.round.conduct)\nexport const conduct = (body) =>\n  api(\"POST\", `/qa/rounds`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "qa.round.conduct"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of qa.round.conduct",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /qa/rounds",
+    "emits_events": [],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "any_of",
+        "required"
+      ],
+      "details_from": "POST /api/v1/admin/departments"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

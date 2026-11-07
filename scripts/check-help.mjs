@@ -319,6 +319,7 @@ export function checkHelp({
       "IncidentStatistics",
       "ActionRegister",
       "ActionSourcePreview",
+      "QaRounds",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

@@ -1,0 +1,263 @@
+{
+  "method": "GET",
+  "path": "/api/v1/qa/rounds/status",
+  "summary": "Which checklist is due",
+  "tags": [
+    "Quality assurance rounds"
+  ],
+  "permissions": [
+    "qa.round.conduct",
+    "qa.checklist.manage",
+    "msds.view"
+  ],
+  "permissions_mode": "any",
+  "idempotency_key": false,
+  "description": "For each frequency: the last round, the interval the establishment set and whether the next round is due.\n\n**Required permission:** `qa.round.conduct OR qa.checklist.manage OR msds.view`\n\n**Required permission:** `qa.round.conduct OR qa.checklist.manage OR msds.view`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[list[RoundStatusOut]]",
+    "properties": {
+      "data": {
+        "items": {
+          "title": "RoundStatusOut",
+          "properties": {
+            "frequency": {
+              "type": "string",
+              "enum": [
+                "DailyWeekly",
+                "MonthlyQuarterly",
+                "StorageQuarterly"
+              ],
+              "title": "Frequency"
+            },
+            "interval_days": {
+              "type": "integer",
+              "title": "Interval Days",
+              "description": "The establishment's interval (settings qa_round_daily_weekly_days, qa_round_monthly_quarterly_days)"
+            },
+            "active_items": {
+              "type": "integer",
+              "title": "Active Items"
+            },
+            "last_round_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last Round Id"
+            },
+            "last_round_number": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last Round Number"
+            },
+            "last_conducted_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last Conducted At"
+            },
+            "days_since": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Days Since"
+            },
+            "is_due": {
+              "type": "boolean",
+              "title": "Is Due",
+              "description": "Never done, or the interval has passed since the last round"
+            }
+          },
+          "type": "object",
+          "required": [
+            "frequency",
+            "interval_days",
+            "active_items",
+            "last_round_id",
+            "last_round_number",
+            "last_conducted_at",
+            "days_since",
+            "is_due"
+          ]
+        },
+        "type": "array",
+        "title": "Data"
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/qa/rounds/status"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "frequency": "DailyWeekly",
+            "interval_days": 7,
+            "active_items": 15,
+            "last_round_id": null,
+            "last_round_number": null,
+            "last_conducted_at": null,
+            "days_since": null,
+            "is_due": true
+          },
+          {
+            "frequency": "MonthlyQuarterly",
+            "interval_days": 92,
+            "active_items": 13,
+            "last_round_id": null,
+            "last_round_number": null,
+            "last_conducted_at": null,
+            "days_since": null,
+            "is_due": true
+          },
+          {
+            "frequency": "StorageQuarterly",
+            "interval_days": 92,
+            "active_items": 12,
+            "last_round_id": null,
+            "last_round_number": null,
+            "last_conducted_at": null,
+            "days_since": null,
+            "is_due": true
+          }
+        ],
+        "meta": {
+          "server_time": "2026-10-14T11:26:21.452097+00:00"
+        },
+        "request_id": "22d8b97e86994306aab4b6631eb15ecc"
+      }
+    }
+  },
+  "errors": [],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "qa_rounds",
+    "qa_rounds_owner"
+  ],
+  "used_by_workflows": [
+    "clinic-quality-and-education"
+  ],
+  "typescript_example": "// Which checklist is due  (permissions: qa.round.conduct, qa.checklist.manage, msds.view)\nexport const status = () =>\n  api(\"GET\", `/qa/rounds/status`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "qa.round.conduct",
+      "qa.checklist.manage",
+      "msds.view"
+    ],
+    "permissions_mode": "any",
+    "who": "holders of qa.round.conduct or qa.checklist.manage or msds.view",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "list",
+    "paging": [],
+    "search": [],
+    "filters": [],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": []
+}

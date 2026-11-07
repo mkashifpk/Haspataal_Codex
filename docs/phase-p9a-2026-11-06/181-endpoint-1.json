@@ -1,0 +1,316 @@
+{
+  "method": "GET",
+  "path": "/api/v1/qa/checklist-items",
+  "summary": "The checklist's items",
+  "tags": [
+    "Quality assurance rounds"
+  ],
+  "permissions": [
+    "qa.round.conduct",
+    "qa.checklist.manage",
+    "msds.view"
+  ],
+  "permissions_mode": "any",
+  "idempotency_key": false,
+  "description": "The manual's 'HCE performance measuring checklist for incharge' (PDF p49-50) as seeded, and the establishment's\nown items, by frequency and position. A round answers every active item of its frequency.\n\n**Required permission:** `qa.round.conduct OR qa.checklist.manage OR msds.view`\n\n**Required permission:** `qa.round.conduct OR qa.checklist.manage OR msds.view`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [
+    {
+      "name": "frequency",
+      "in": "query",
+      "required": false,
+      "description": "",
+      "schema": {
+        "anyOf": [
+          {
+            "enum": [
+              "DailyWeekly",
+              "MonthlyQuarterly",
+              "StorageQuarterly"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Frequency"
+      }
+    },
+    {
+      "name": "include_inactive",
+      "in": "query",
+      "required": false,
+      "description": "",
+      "schema": {
+        "type": "boolean",
+        "default": false,
+        "title": "Include Inactive"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[list[QaChecklistItemOut]]",
+    "properties": {
+      "data": {
+        "items": {
+          "title": "QaChecklistItemOut",
+          "properties": {
+            "item_id": {
+              "type": "integer",
+              "title": "Item Id"
+            },
+            "code": {
+              "type": "string",
+              "title": "Code"
+            },
+            "frequency": {
+              "type": "string",
+              "enum": [
+                "DailyWeekly",
+                "MonthlyQuarterly",
+                "StorageQuarterly"
+              ],
+              "title": "Frequency"
+            },
+            "position": {
+              "type": "integer",
+              "title": "Position"
+            },
+            "text": {
+              "type": "string",
+              "title": "Text"
+            },
+            "source": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source",
+              "description": "The manual's form and item it comes from; null for the establishment's own"
+            },
+            "is_active": {
+              "type": "boolean",
+              "title": "Is Active"
+            },
+            "row_version": {
+              "type": "integer",
+              "title": "Row Version"
+            }
+          },
+          "type": "object",
+          "required": [
+            "item_id",
+            "code",
+            "frequency",
+            "position",
+            "text",
+            "source",
+            "is_active",
+            "row_version"
+          ]
+        },
+        "type": "array",
+        "title": "Data"
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/qa/checklist-items",
+      "query": {
+        "frequency": "DailyWeekly"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "item_id": 1,
+            "code": "DW_CLEANLINESS",
+            "frequency": "DailyWeekly",
+            "position": 1,
+            "text": "General cleanliness",
+            "source": "Clinic manual p49, daily/weekly item 4",
+            "is_active": true,
+            "row_version": 1
+          },
+          {
+            "item_id": 2,
+            "code": "DW_WASHROOM",
+            "frequency": "DailyWeekly",
+            "position": 2,
+            "text": "Washroom cleaned/functional",
+            "source": "Clinic manual p49, daily/weekly item 5",
+            "is_active": true,
+            "row_version": 1
+          },
+          {
+            "item_id": 3,
+            "code": "DW_DRINKING_WATER",
+            "frequency": "DailyWeekly",
+            "position": 3,
+            "text": "Drinking water available",
+            "source": "Clinic manual p49, daily/weekly item 6",
+            "is_active": true,
+            "row_version": 1
+          }
+        ],
+        "meta": {
+          "server_time": "2026-10-14T11:26:21.429146+00:00"
+        },
+        "request_id": "97ad5f169d80413f93560d5c0f769c3a"
+      }
+    }
+  },
+  "errors": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "qa_rounds",
+    "qa_rounds_owner"
+  ],
+  "used_by_workflows": [
+    "clinic-quality-and-education"
+  ],
+  "typescript_example": "// The checklist's items  (permissions: qa.round.conduct, qa.checklist.manage, msds.view)\nexport const listItems = () =>\n  api(\"GET\", `/qa/checklist-items`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "qa.round.conduct",
+      "qa.checklist.manage",
+      "msds.view"
+    ],
+    "permissions_mode": "any",
+    "who": "holders of qa.round.conduct or qa.checklist.manage or msds.view",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "list",
+    "paging": [],
+    "search": [],
+    "filters": [
+      {
+        "name": "frequency",
+        "required": false,
+        "type": "string",
+        "enum": [
+          "DailyWeekly",
+          "MonthlyQuarterly",
+          "StorageQuarterly"
+        ]
+      },
+      {
+        "name": "include_inactive",
+        "required": false,
+        "type": "boolean",
+        "default": false
+      }
+    ],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+{
+  "method": "GET",
+  "path": "/api/v1/qa/rounds/{round_id}",
+  "summary": "One round",
+  "tags": [
+    "Quality assurance rounds"
+  ],
+  "permissions": [
+    "qa.round.conduct",
+    "qa.checklist.manage",
+    "msds.view"
+  ],
+  "permissions_mode": "any",
+  "idempotency_key": false,
+  "description": "Its answers and the actions raised from it. `NOT_FOUND`.\n\n**Required permission:** `qa.round.conduct OR qa.checklist.manage OR msds.view`\n\n**Required permission:** `qa.round.conduct OR qa.checklist.manage OR msds.view`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [
+    {
+      "name": "round_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Round Id"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[RoundDetailOut]",
+    "properties": {
+      "data": {
+        "title": "RoundDetailOut",
+        "properties": {
+          "round_id": {
+            "type": "integer",
+            "title": "Round Id"
+          },
+          "round_number": {
+            "type": "string",
+            "title": "Round Number"
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "DailyWeekly",
+              "MonthlyQuarterly",
+              "StorageQuarterly"
+            ],
+            "title": "Frequency"
+          },
+          "conducted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Conducted At"
+          },
+          "general_remarks": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "General Remarks"
+          },
+          "conducted_by": {
+            "type": "integer",
+            "title": "Conducted By"
+          },
+          "conducted_by_name": {
+            "type": "string",
+            "title": "Conducted By Name"
+          },
+          "signed_stamp": {
+            "$ref": "#/components/schemas/AuthorStampOut"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "findings": {
+            "type": "integer",
+            "title": "Findings",
+            "description": "Items marked NeedsAttention"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RoundItemOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/QualityActionOut"
+            },
+            "type": "array",
+            "title": "Actions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "round_id",
+          "round_number",
+          "frequency",
+          "conducted_at",
+          "general_remarks",
+          "conducted_by",
+          "conducted_by_name",
+          "signed_stamp",
+          "created_at",
+          "findings",
+          "items",
+          "actions"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/qa/rounds/1"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "round_id": 1,
+          "round_number": "QAR-2026-00001",
+          "frequency": "DailyWeekly",
+          "conducted_at": "2026-10-14T11:26:21.453601+00:00",
+          "general_remarks": "Clean; oxygen low",
+          "conducted_by": 1,
+          "conducted_by_name": "Quality Officer",
+          "signed_stamp": {
+            "at": "2026-10-14T11:26:21.533298+00:00",
+            "name": "Quality Officer",
+            "text": "Quality Officer, Officer, 14-Oct-2026 16:26",
+            "user_id": 1,
+            "designation": "Officer",
+            "employee_id": 1,
+            "registration": null
+          },
+          "created_at": "2026-10-14T11:26:21.533298+00:00",
+          "findings": 1,
+          "items": [
+            {
+              "item_id": 1,
+              "code": "DW_CLEANLINESS",
+              "position": 1,
+              "text": "General cleanliness",
+              "result": "Satisfactory",
+              "observation": null,
+              "recommendation": null
+            },
+            {
+              "item_id": 2,
+              "code": "DW_WASHROOM",
+              "position": 2,
+              "text": "Washroom cleaned/functional",
+              "result": "Satisfactory",
+              "observation": null,
+              "recommendation": null
+            },
+            {
+              "item_id": 3,
+              "code": "DW_DRINKING_WATER",
+              "position": 3,
+              "text": "Drinking water available",
+              "result": "Satisfactory",
+              "observation": null,
+              "recommendation": null
+            }
+          ],
+          "actions": [
+            {
+              "action_id": 1,
+              "action_number": "CAPA-2026-0001",
+              "source": "QaRound",
+              "cycle_id": null,
+              "cycle_number": null,
+              "incident_id": null,
+              "incident_number": null,
+              "complaint_id": null,
+              "complaint_number": null,
+              "ipc_audit_id": null,
+              "audit_number": null,
+              "meeting_id": null,
+              "meeting_number": null,
+              "drill_id": null,
+              "drill_number": null,
+              "mock_interview_id": null,
+              "interview_number": null,
+              "qa_round_id": 1,
+              "qa_round_number": "QAR-2026-00001",
+              "feedback_id": null,
+              "feedback_number": null,
+              "source_number": "QAR-2026-00001",
+              "action_type": "Corrective",
+              "description": "Refill the oxygen cylinder every Monday",
+              "criterion_code": null,
+              "department_id": null,
+              "department_name": null,
+              "owner_user_id": 1,
+              "owner_name": "Quality Officer",
+              "due_date": "2026-10-21",
+              "status": "Open",
+              "outcome_note": null,
+              "completed_at": null,
+              "completed_by_name": null,
+              "created_by": 1,
+              "created_by_name": "Quality Officer",
+              "created_at": "2026-10-14T11:26:21.678535+00:00",
+              "row_version": 1,
+              "is_overdue": false
+            }
+          ]
+        },
+        "meta": {
+          "server_time": "2026-10-14T11:26:21.723890+00:00"
+        },
+        "request_id": "f267e92debc54ca7ade8883d9bc57975"
+      }
+    }
+  },
+  "errors": [
+    {
+      "code": "NOT_FOUND",
+      "http_status": 404,
+      "message": "The requested resource was not found.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Say 'not found'; refresh the list."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "qa_rounds",
+    "qa_rounds_owner"
+  ],
+  "used_by_workflows": [],
+  "typescript_example": "// One round  (permissions: qa.round.conduct, qa.checklist.manage, msds.view)\nexport const getRound = (round_id) =>\n  api(\"GET\", `/qa/rounds/${round_id}`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "qa.round.conduct",
+      "qa.checklist.manage",
+      "msds.view"
+    ],
+    "permissions_mode": "any",
+    "who": "holders of qa.round.conduct or qa.checklist.manage or msds.view",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "object",
+    "paging": [],
+    "search": [],
+    "filters": [],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "NOT_FOUND",
+      "http_status": 404,
+      "message": "The requested resource was not found.",
+      "retryable": false,
+      "ui_action": "Say 'not found'; refresh the list.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "resource"
+      ],
+      "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

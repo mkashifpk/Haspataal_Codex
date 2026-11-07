@@ -1,0 +1,355 @@
+{
+  "method": "PATCH",
+  "path": "/api/v1/qa/checklist-items/{item_id}",
+  "summary": "Reword, move or retire a checklist item",
+  "tags": [
+    "Quality assurance rounds"
+  ],
+  "permissions": [
+    "qa.checklist.manage"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "description": "`is_active` false retires it from the next rounds; past rounds keep it. `VERSION_CONFLICT` with a stale\n`expected_version`; `NOT_FOUND`.\n\n**Required permission:** `qa.checklist.manage`\n\n**Required permission:** `qa.checklist.manage`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [
+    {
+      "name": "item_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Item Id"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "QaChecklistItemUpdateIn",
+    "properties": {
+      "text": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 3
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Text"
+      },
+      "position": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "maximum": 999,
+            "minimum": 1
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Position"
+      },
+      "is_active": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Is Active",
+        "description": "False retires the item from the next rounds"
+      },
+      "expected_version": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Expected Version",
+        "description": "Optimistic concurrency: the row_version you loaded"
+      }
+    },
+    "type": "object"
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[QaChecklistItemOut]",
+    "properties": {
+      "data": {
+        "title": "QaChecklistItemOut",
+        "properties": {
+          "item_id": {
+            "type": "integer",
+            "title": "Item Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "DailyWeekly",
+              "MonthlyQuarterly",
+              "StorageQuarterly"
+            ],
+            "title": "Frequency"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source",
+            "description": "The manual's form and item it comes from; null for the establishment's own"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_id",
+          "code",
+          "frequency",
+          "position",
+          "text",
+          "source",
+          "is_active",
+          "row_version"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/qa/checklist-items/45",
+      "body": {
+        "is_active": false,
+        "expected_version": 1
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "item_id": 45,
+          "code": "OWN_FIRST_AID_KIT",
+          "frequency": "DailyWeekly",
+          "position": 16,
+          "text": "First aid kit complete",
+          "source": null,
+          "is_active": false,
+          "row_version": 2
+        },
+        "meta": {
+          "server_time": "2026-10-14T11:26:21.889019+00:00"
+        },
+        "request_id": "8965bf6682ec4823a31be258667e5486"
+      }
+    },
+    "errors_seen": [
+      "VERSION_CONFLICT"
+    ],
+    "events_emitted": []
+  },
+  "errors": [
+    {
+      "code": "NOT_FOUND",
+      "http_status": 404,
+      "message": "The requested resource was not found.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Say 'not found'; refresh the list."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "VERSION_CONFLICT",
+      "http_status": 409,
+      "message": "The record was changed by someone else; reload and try again.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "VERSION_CONFLICT"
+  ],
+  "used_by_screens": [
+    "qa_rounds",
+    "qa_rounds_owner"
+  ],
+  "used_by_workflows": [
+    "clinic-quality-and-education"
+  ],
+  "typescript_example": "// Reword, move or retire a checklist item  (permissions: qa.checklist.manage)\nexport const updateItem = (item_id, body) =>\n  api(\"PATCH\", `/qa/checklist-items/${item_id}`, body);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "qa.checklist.manage"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of qa.checklist.manage",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": {
+    "protection": "version_check",
+    "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+    "reconcile_with": "GET /qa/checklist-items",
+    "emits_events": [],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "NOT_FOUND",
+      "http_status": 404,
+      "message": "The requested resource was not found.",
+      "retryable": false,
+      "ui_action": "Say 'not found'; refresh the list.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "resource"
+      ],
+      "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    },
+    {
+      "code": "VERSION_CONFLICT",
+      "http_status": 409,
+      "message": "The record was changed by someone else; reload and try again.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "current_version",
+        "expected_version"
+      ],
+      "details_from": "PATCH /api/v1/finance/service-catalog/{service_id}"
+    }
+  ]
+}

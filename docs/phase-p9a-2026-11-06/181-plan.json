@@ -1,0 +1,909 @@
+{
+  "screen": "qa_rounds",
+  "title": "Quality assurance rounds (the in-charge's checklist)",
+  "cases": [
+    {
+      "id": "case:GET /qa/rounds/status",
+      "call": "GET /api/v1/qa/rounds/status",
+      "summary": "Which checklist is due",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/qa/rounds/status"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "frequency": "DailyWeekly",
+                  "interval_days": 7,
+                  "active_items": 15,
+                  "last_round_id": null,
+                  "last_round_number": null,
+                  "last_conducted_at": null,
+                  "days_since": null,
+                  "is_due": true
+                },
+                {
+                  "frequency": "MonthlyQuarterly",
+                  "interval_days": 92,
+                  "active_items": 13,
+                  "last_round_id": null,
+                  "last_round_number": null,
+                  "last_conducted_at": null,
+                  "days_since": null,
+                  "is_due": true
+                },
+                {
+                  "frequency": "StorageQuarterly",
+                  "interval_days": 92,
+                  "active_items": 12,
+                  "last_round_id": null,
+                  "last_round_number": null,
+                  "last_conducted_at": null,
+                  "days_since": null,
+                  "is_due": true
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T11:26:21.452097+00:00"
+              },
+              "request_id": "22d8b97e86994306aab4b6631eb15ecc"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /qa/checklist-items",
+      "call": "GET /api/v1/qa/checklist-items",
+      "summary": "The checklist's items",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/qa/checklist-items",
+            "query": {
+              "frequency": "DailyWeekly"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "item_id": 1,
+                  "code": "DW_CLEANLINESS",
+                  "frequency": "DailyWeekly",
+                  "position": 1,
+                  "text": "General cleanliness",
+                  "source": "Clinic manual p49, daily/weekly item 4",
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "item_id": 2,
+                  "code": "DW_WASHROOM",
+                  "frequency": "DailyWeekly",
+                  "position": 2,
+                  "text": "Washroom cleaned/functional",
+                  "source": "Clinic manual p49, daily/weekly item 5",
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "item_id": 3,
+                  "code": "DW_DRINKING_WATER",
+                  "frequency": "DailyWeekly",
+                  "position": 3,
+                  "text": "Drinking water available",
+                  "source": "Clinic manual p49, daily/weekly item 6",
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T11:26:21.429146+00:00"
+              },
+              "request_id": "97ad5f169d80413f93560d5c0f769c3a"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /qa/checklist-items",
+      "call": "POST /api/v1/qa/checklist-items",
+      "summary": "Add the establishment's own checklist item",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/qa/checklist-items",
+            "body": {
+              "code": "OWN_FIRST_AID_KIT",
+              "frequency": "DailyWeekly",
+              "position": 16,
+              "text": "First aid kit complete"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "item_id": 45,
+                "code": "OWN_FIRST_AID_KIT",
+                "frequency": "DailyWeekly",
+                "position": 16,
+                "text": "First aid kit complete",
+                "source": null,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:26:21.808795+00:00"
+              },
+              "request_id": "a2cccb92d82f4036b93bcfbb40aa2720"
+            }
+          },
+          "errors_seen": [
+            "QA_CHECKLIST_ITEM_EXISTS"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "QA_CHECKLIST_ITEM_EXISTS",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:PATCH /qa/checklist-items/{item_id}",
+      "call": "PATCH /api/v1/qa/checklist-items/{item_id}",
+      "summary": "Reword, move or retire a checklist item",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/qa/checklist-items/45",
+            "body": {
+              "is_active": false,
+              "expected_version": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "item_id": 45,
+                "code": "OWN_FIRST_AID_KIT",
+                "frequency": "DailyWeekly",
+                "position": 16,
+                "text": "First aid kit complete",
+                "source": null,
+                "is_active": false,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:26:21.889019+00:00"
+              },
+              "request_id": "8965bf6682ec4823a31be258667e5486"
+            }
+          },
+          "errors_seen": [
+            "VERSION_CONFLICT"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR",
+        "VERSION_CONFLICT"
+      ],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    },
+    {
+      "id": "case:POST /qa/rounds",
+      "call": "POST /api/v1/qa/rounds",
+      "summary": "Conduct and sign a round",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/qa/rounds",
+            "body": {
+              "frequency": "DailyWeekly",
+              "conducted_at": "2026-10-14T11:26:21.453601+00:00",
+              "items": [
+                {
+                  "item_id": 1,
+                  "result": "Satisfactory"
+                },
+                {
+                  "item_id": 2,
+                  "result": "Satisfactory"
+                },
+                {
+                  "item_id": 3,
+                  "result": "Satisfactory"
+                }
+              ],
+              "general_remarks": "Clean; oxygen low"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "round_id": 1,
+                "round_number": "QAR-2026-00001",
+                "frequency": "DailyWeekly",
+                "conducted_at": "2026-10-14T11:26:21.453601+00:00",
+                "general_remarks": "Clean; oxygen low",
+                "conducted_by": 1,
+                "conducted_by_name": "Quality Officer",
+                "signed_stamp": {
+                  "at": "2026-10-14T11:26:21.533298+00:00",
+                  "name": "Quality Officer",
+                  "text": "Quality Officer, Officer, 14-Oct-2026 16:26",
+                  "user_id": 1,
+                  "designation": "Officer",
+                  "employee_id": 1,
+                  "registration": null
+                },
+                "created_at": "2026-10-14T11:26:21.533298+00:00",
+                "findings": 1,
+                "items": [
+                  {
+                    "item_id": 1,
+                    "code": "DW_CLEANLINESS",
+                    "position": 1,
+                    "text": "General cleanliness",
+                    "result": "Satisfactory",
+                    "observation": null,
+                    "recommendation": null
+                  },
+                  {
+                    "item_id": 2,
+                    "code": "DW_WASHROOM",
+                    "position": 2,
+                    "text": "Washroom cleaned/functional",
+                    "result": "Satisfactory",
+                    "observation": null,
+                    "recommendation": null
+                  },
+                  {
+                    "item_id": 3,
+                    "code": "DW_DRINKING_WATER",
+                    "position": 3,
+                    "text": "Drinking water available",
+                    "result": "Satisfactory",
+                    "observation": null,
+                    "recommendation": null
+                  }
+                ],
+                "actions": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:26:21.633861+00:00"
+              },
+              "request_id": "b0382347a88f4ec1840f9cf98ec605ad"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /qa/rounds",
+      "call": "GET /api/v1/qa/rounds",
+      "summary": "The rounds conducted",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/qa/rounds",
+            "query": {
+              "frequency": "DailyWeekly"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "round_id": 1,
+                  "round_number": "QAR-2026-00001",
+                  "frequency": "DailyWeekly",
+                  "conducted_at": "2026-10-14T11:26:21.453601+00:00",
+                  "general_remarks": "Clean; oxygen low",
+                  "conducted_by": 1,
+                  "conducted_by_name": "Quality Officer",
+                  "signed_stamp": {
+                    "at": "2026-10-14T11:26:21.533298+00:00",
+                    "name": "Quality Officer",
+                    "text": "Quality Officer, Officer, 14-Oct-2026 16:26",
+                    "user_id": 1,
+                    "designation": "Officer",
+                    "employee_id": 1,
+                    "registration": null
+                  },
+                  "created_at": "2026-10-14T11:26:21.533298+00:00",
+                  "findings": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T11:26:21.741417+00:00"
+              },
+              "request_id": "4d59f7d2ee7a43689cdbd7db2ace4f52"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /qa/rounds/{round_id}",
+      "call": "GET /api/v1/qa/rounds/{round_id}",
+      "summary": "One round",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/qa/rounds/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "round_id": 1,
+                "round_number": "QAR-2026-00001",
+                "frequency": "DailyWeekly",
+                "conducted_at": "2026-10-14T11:26:21.453601+00:00",
+                "general_remarks": "Clean; oxygen low",
+                "conducted_by": 1,
+                "conducted_by_name": "Quality Officer",
+                "signed_stamp": {
+                  "at": "2026-10-14T11:26:21.533298+00:00",
+                  "name": "Quality Officer",
+                  "text": "Quality Officer, Officer, 14-Oct-2026 16:26",
+                  "user_id": 1,
+                  "designation": "Officer",
+                  "employee_id": 1,
+                  "registration": null
+                },
+                "created_at": "2026-10-14T11:26:21.533298+00:00",
+                "findings": 1,
+                "items": [
+                  {
+                    "item_id": 1,
+                    "code": "DW_CLEANLINESS",
+                    "position": 1,
+                    "text": "General cleanliness",
+                    "result": "Satisfactory",
+                    "observation": null,
+                    "recommendation": null
+                  },
+                  {
+                    "item_id": 2,
+                    "code": "DW_WASHROOM",
+                    "position": 2,
+                    "text": "Washroom cleaned/functional",
+                    "result": "Satisfactory",
+                    "observation": null,
+                    "recommendation": null
+                  },
+                  {
+                    "item_id": 3,
+                    "code": "DW_DRINKING_WATER",
+                    "position": 3,
+                    "text": "Drinking water available",
+                    "result": "Satisfactory",
+                    "observation": null,
+                    "recommendation": null
+                  }
+                ],
+                "actions": [
+                  {
+                    "action_id": 1,
+                    "action_number": "CAPA-2026-0001",
+                    "source": "QaRound",
+                    "cycle_id": null,
+                    "cycle_number": null,
+                    "incident_id": null,
+                    "incident_number": null,
+                    "complaint_id": null,
+                    "complaint_number": null,
+                    "ipc_audit_id": null,
+                    "audit_number": null,
+                    "meeting_id": null,
+                    "meeting_number": null,
+                    "drill_id": null,
+                    "drill_number": null,
+                    "mock_interview_id": null,
+                    "interview_number": null,
+                    "qa_round_id": 1,
+                    "qa_round_number": "QAR-2026-00001",
+                    "feedback_id": null,
+                    "feedback_number": null,
+                    "source_number": "QAR-2026-00001",
+                    "action_type": "Corrective",
+                    "description": "Refill the oxygen cylinder every Monday",
+                    "criterion_code": null,
+                    "department_id": null,
+                    "department_name": null,
+                    "owner_user_id": 1,
+                    "owner_name": "Quality Officer",
+                    "due_date": "2026-10-21",
+                    "status": "Open",
+                    "outcome_note": null,
+                    "completed_at": null,
+                    "completed_by_name": null,
+                    "created_by": 1,
+                    "created_by_name": "Quality Officer",
+                    "created_at": "2026-10-14T11:26:21.678535+00:00",
+                    "row_version": 1,
+                    "is_overdue": false
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:26:21.723890+00:00"
+              },
+              "request_id": "f267e92debc54ca7ade8883d9bc57975"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /qa/rounds/{round_id}/pdf",
+      "call": "GET /api/v1/qa/rounds/{round_id}/pdf",
+      "summary": "The signed round (PDF)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/qa/rounds/1/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 3893
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /qa/rounds/{round_id}/actions",
+      "call": "POST /api/v1/qa/rounds/{round_id}/actions",
+      "summary": "Raise a corrective or preventive action from a round",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/qa/rounds/1/actions",
+            "body": {
+              "action_type": "Corrective",
+              "description": "Refill the oxygen cylinder every Monday",
+              "owner_user_id": 1,
+              "due_date": "2026-10-21"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "action_id": 1,
+                "action_number": "CAPA-2026-0001",
+                "source": "QaRound",
+                "cycle_id": null,
+                "cycle_number": null,
+                "incident_id": null,
+                "incident_number": null,
+                "complaint_id": null,
+                "complaint_number": null,
+                "ipc_audit_id": null,
+                "audit_number": null,
+                "meeting_id": null,
+                "meeting_number": null,
+                "drill_id": null,
+                "drill_number": null,
+                "mock_interview_id": null,
+                "interview_number": null,
+                "qa_round_id": 1,
+                "qa_round_number": "QAR-2026-00001",
+                "feedback_id": null,
+                "feedback_number": null,
+                "source_number": "QAR-2026-00001",
+                "action_type": "Corrective",
+                "description": "Refill the oxygen cylinder every Monday",
+                "criterion_code": null,
+                "department_id": null,
+                "department_name": null,
+                "owner_user_id": 1,
+                "owner_name": "Quality Officer",
+                "due_date": "2026-10-21",
+                "status": "Open",
+                "outcome_note": null,
+                "completed_at": null,
+                "completed_by_name": null,
+                "created_by": 1,
+                "created_by_name": "Quality Officer",
+                "created_at": "2026-10-14T11:26:21.678535+00:00",
+                "row_version": 1,
+                "is_overdue": false
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:26:21.699465+00:00"
+              },
+              "request_id": "0c0792b2f154414f9ef7ad5ebdd835a6"
+            }
+          },
+          "events_emitted": [
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /quality/record-review/people",
+      "call": "GET /api/v1/quality/record-review/people",
+      "summary": "Who can review records or own an action",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-review/people"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "user_id": 1,
+                  "display_name": "Dr Ahmed",
+                  "designation": "Doctor",
+                  "department_name": "General Medicine",
+                  "staff_category": "Clinical",
+                  "can_review": true,
+                  "default_discipline": "Medical"
+                },
+                {
+                  "user_id": 7,
+                  "display_name": "Dr Reviewer",
+                  "designation": "Doctor",
+                  "department_name": null,
+                  "staff_category": "Clinical",
+                  "can_review": true,
+                  "default_discipline": "Medical"
+                },
+                {
+                  "user_id": 2,
+                  "display_name": "Dr Sara",
+                  "designation": "Doctor",
+                  "department_name": "General Medicine",
+                  "staff_category": "Clinical",
+                  "can_review": true,
+                  "default_discipline": "Medical"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-28T16:29:14.861565+00:00"
+              },
+              "request_id": "270dcbd5bcba4d3781b715ca8c500550"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN"
+      ]
+    },
+    {
+      "id": "case:GET /admin/departments",
+      "call": "GET /api/v1/admin/departments",
+      "summary": "Departments",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/departments"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "department_id": 1,
+                  "code": "CARD",
+                  "name": "Cardiology & Vascular",
+                  "is_clinical": true,
+                  "is_active": true,
+                  "row_version": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.417658+00:00"
+              },
+              "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/qa_rounds",
+  "workspace_guide": "get_handbook_outline('quality')",
+  "realtime": [
+    {
+      "event": "notification.created",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Open on the status: one card per checklist with the last round and 'Due' in amber when is_due (never done, or the establishment's interval has passed: settings qa_round_daily_weekly_days, qa_round_monthly_quarterly_days, qa_round_storage_days).",
+    "The third card, StorageQuarterly, is the quarterly inspection of the medicine storage areas by the technical in-charge (the clinic manual, indicator 36): its twelve safe storage practices; it prints as 'Drug storage site inspection'.",
+    "A round lists every active item of its frequency (GET /qa/checklist-items?frequency=), in position order, each with Satisfactory / Needs attention / Not applicable, an observation (required for Needs attention) and a recommendation; then the general remarks. The date and time default to now and may be earlier (a paper round entered later), never later.",
+    "Signing is the POST: the in-charge's stamp is applied and the round is kept as signed. Say so on the confirm dialog: a mistake is corrected by the next round, never edited.",
+    "From a signed round, each finding offers 'Raise action' (POST /qa/rounds/{id}/actions: owner from GET /quality/record-review/people, due date, corrective or preventive); the actions then live in the action register.",
+    "Print = GET /qa/rounds/{id}/pdf, the manual's form filled in, kept in record as the evidence.",
+    "Checklist items (qa.checklist.manage): the manual's items are seeded with their source; add the establishment's own, reword, reorder or retire (is_active false; past rounds keep them). Send expected_version."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

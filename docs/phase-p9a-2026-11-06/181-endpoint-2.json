@@ -1,0 +1,331 @@
+{
+  "method": "POST",
+  "path": "/api/v1/qa/checklist-items",
+  "summary": "Add the establishment's own checklist item",
+  "tags": [
+    "Quality assurance rounds"
+  ],
+  "permissions": [
+    "qa.checklist.manage"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": true,
+  "description": "It joins the next rounds of its frequency. `QA_CHECKLIST_ITEM_EXISTS` for a code in use.\n\n**Required permission:** `qa.checklist.manage`\n\n**Required permission:** `qa.checklist.manage`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "QaChecklistItemIn",
+    "properties": {
+      "code": {
+        "type": "string",
+        "pattern": "^[A-Z0-9_]{2,40}$",
+        "title": "Code",
+        "examples": [
+          "OWN_FIRST_AID_KIT"
+        ]
+      },
+      "frequency": {
+        "type": "string",
+        "enum": [
+          "DailyWeekly",
+          "MonthlyQuarterly",
+          "StorageQuarterly"
+        ],
+        "title": "Frequency"
+      },
+      "position": {
+        "type": "integer",
+        "maximum": 999,
+        "minimum": 1,
+        "title": "Position",
+        "description": "Its place in the checklist (the seeded items use 1-28)"
+      },
+      "text": {
+        "type": "string",
+        "maxLength": 300,
+        "minLength": 3,
+        "title": "Text",
+        "examples": [
+          "First aid kit complete and in date"
+        ]
+      }
+    },
+    "type": "object",
+    "required": [
+      "code",
+      "frequency",
+      "position",
+      "text"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[QaChecklistItemOut]",
+    "properties": {
+      "data": {
+        "title": "QaChecklistItemOut",
+        "properties": {
+          "item_id": {
+            "type": "integer",
+            "title": "Item Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "DailyWeekly",
+              "MonthlyQuarterly",
+              "StorageQuarterly"
+            ],
+            "title": "Frequency"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source",
+            "description": "The manual's form and item it comes from; null for the establishment's own"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_id",
+          "code",
+          "frequency",
+          "position",
+          "text",
+          "source",
+          "is_active",
+          "row_version"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/qa/checklist-items",
+      "body": {
+        "code": "OWN_FIRST_AID_KIT",
+        "frequency": "DailyWeekly",
+        "position": 16,
+        "text": "First aid kit complete"
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "data": {
+          "item_id": 45,
+          "code": "OWN_FIRST_AID_KIT",
+          "frequency": "DailyWeekly",
+          "position": 16,
+          "text": "First aid kit complete",
+          "source": null,
+          "is_active": true,
+          "row_version": 1
+        },
+        "meta": {
+          "server_time": "2026-10-14T11:26:21.808795+00:00"
+        },
+        "request_id": "a2cccb92d82f4036b93bcfbb40aa2720"
+      }
+    },
+    "errors_seen": [
+      "QA_CHECKLIST_ITEM_EXISTS"
+    ],
+    "events_emitted": []
+  },
+  "errors": [
+    {
+      "code": "QA_CHECKLIST_ITEM_EXISTS",
+      "http_status": 409,
+      "message": "A checklist item with this code exists.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "QA_CHECKLIST_ITEM_EXISTS"
+  ],
+  "used_by_screens": [
+    "qa_rounds",
+    "qa_rounds_owner"
+  ],
+  "used_by_workflows": [
+    "clinic-quality-and-education"
+  ],
+  "typescript_example": "// Add the establishment's own checklist item  (permissions: qa.checklist.manage)\nexport const addItem = (body) =>\n  api(\"POST\", `/qa/checklist-items`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "qa.checklist.manage"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of qa.checklist.manage",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /qa/checklist-items",
+    "emits_events": [],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "QA_CHECKLIST_ITEM_EXISTS",
+      "http_status": 409,
+      "message": "A checklist item with this code exists.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "constraint"
+      ],
+      "details_from": "POST /api/v1/qa/checklist-items"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

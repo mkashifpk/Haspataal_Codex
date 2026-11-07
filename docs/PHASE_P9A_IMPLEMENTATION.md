@@ -21,8 +21,8 @@ User request: build the remaining Phase P9A screens and report reproduced backen
 |177|incident_screening|Implemented/testedbcae14e; proposal367 verified pending; issue60New; remaining role/source/human gates pending|
 |178|incident_statistics|Implemented/testeda7bcdfd; proposal368 verified pending; human/full breadth gates pending|
 |179|incident_statistics_owner|Implemented/testedc8f08ad; proposal369 verified pending; human/full breadth gates pending|
-|180|action_register|Implemented/tested selected journeys; final checks/commit/proposal next; issue61New; human/full breadth gates pending|
-|181|qa_rounds|Not started|
+|180|action_register|Implemented/tested4bbed64; proposal370 verified pending; issue61New; human/full breadth gates pending|
+|181|qa_rounds|Implemented/tested selected journeys; final checks/commit/proposal next; human/full breadth gates pending|
 |182|qa_rounds_owner|Not started|
 |183|record_feedback_reception|Not started|
 |184|patient_feedback|Not started|
