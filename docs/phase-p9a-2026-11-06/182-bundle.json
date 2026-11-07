@@ -1,0 +1,440 @@
+{
+  "screen_id": "qa_rounds_owner",
+  "contract_fingerprint": "a4772c79e2249316e1a9",
+  "knowledge_revision": "930b217cd2e48604",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "screen": {
+    "id": "qa_rounds_owner",
+    "workspace": "owner_dashboard",
+    "title": "Quality assurance rounds (the in-charge's checklist)",
+    "purpose": "The in-charge's recurring checklist (the manual's 'HCE performance measuring checklist for incharge'): conduct and sign a daily/weekly or monthly/quarterly round, see which is due, print it for the record and raise corrective actions from its findings.",
+    "workflow": "The clinic manual, indicators 17-18 (decisions 24)",
+    "rule_objects": [
+      {
+        "id": "rule:06d84be817",
+        "text": "Open on the status: one card per checklist with the last round and 'Due' in amber when is_due (never done, or the establishment's interval has passed: settings qa_round_daily_weekly_days, qa_round_monthly_quarterly_days, qa_round_storage_days).",
+        "cites": []
+      },
+      {
+        "id": "rule:50f67dbc1e",
+        "text": "The third card, StorageQuarterly, is the quarterly inspection of the medicine storage areas by the technical in-charge (the clinic manual, indicator 36): its twelve safe storage practices; it prints as 'Drug storage site inspection'.",
+        "cites": []
+      },
+      {
+        "id": "rule:3d1ab1f1a2",
+        "text": "A round lists every active item of its frequency (GET /qa/checklist-items?frequency=), in position order, each with Satisfactory / Needs attention / Not applicable, an observation (required for Needs attention) and a recommendation; then the general remarks. The date and time default to now and may be earlier (a paper round entered later), never later.",
+        "cites": []
+      },
+      {
+        "id": "rule:d93e439017",
+        "text": "Signing is the POST: the in-charge's stamp is applied and the round is kept as signed. Say so on the confirm dialog: a mistake is corrected by the next round, never edited.",
+        "cites": []
+      },
+      {
+        "id": "rule:e81b05f7fb",
+        "text": "From a signed round, each finding offers 'Raise action' (POST /qa/rounds/{id}/actions: owner from GET /quality/record-review/people, due date, corrective or preventive); the actions then live in the action register.",
+        "cites": []
+      },
+      {
+        "id": "rule:10b8f88708",
+        "text": "Print = GET /qa/rounds/{id}/pdf, the manual's form filled in, kept in record as the evidence.",
+        "cites": []
+      },
+      {
+        "id": "rule:cdf3dbc4c8",
+        "text": "Checklist items (qa.checklist.manage): the manual's items are seeded with their source; add the establishment's own, reword, reorder or retire (is_active false; past rounds keep them). Send expected_version.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "clinic-quality-and-education",
+      "complaints",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "finance-and-owner",
+      "hr-and-payroll",
+      "incidents-and-sentinel-events",
+      "infection-control",
+      "medical-record-review",
+      "personnel-records",
+      "phc-interview-prep",
+      "quality-indicators-and-committees"
+    ]
+  },
+  "rules_in_force": null,
+  "build_order": {
+    "screen": "qa_rounds_owner",
+    "title": "Quality assurance rounds (the in-charge's checklist)",
+    "workspace": "owner_dashboard",
+    "phase": "P9A",
+    "position": 182,
+    "points": 78,
+    "capabilities": [
+      "realtime",
+      "idempotent_writes",
+      "versioned_edits",
+      "file_downloads",
+      "f1_help",
+      "zoom"
+    ],
+    "depends_on": [
+      {
+        "from": "qa_rounds_owner",
+        "to": "it_console",
+        "kind": "data_candidate",
+        "evidence": "it reads admin/departments, which POST /admin/departments on it_console creates",
+        "ordering": false,
+        "forward": false
+      }
+    ],
+    "needed_by": [],
+    "go_live_setup": false,
+    "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
+  },
+  "definition_of_done": {
+    "points": 78,
+    "items": [
+      {
+        "id": "ep:GET /qa/rounds/status",
+        "label": "GET /qa/rounds/status",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /qa/checklist-items",
+        "label": "GET /qa/checklist-items",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /qa/checklist-items",
+        "label": "POST /qa/checklist-items",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:PATCH /qa/checklist-items/{item_id}",
+        "label": "PATCH /qa/checklist-items/{item_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /qa/rounds",
+        "label": "POST /qa/rounds",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /qa/rounds",
+        "label": "GET /qa/rounds",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /qa/rounds/{round_id}",
+        "label": "GET /qa/rounds/{round_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /qa/rounds/{round_id}/pdf",
+        "label": "GET /qa/rounds/{round_id}/pdf",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /qa/rounds/{round_id}/actions",
+        "label": "POST /qa/rounds/{round_id}/actions",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/record-review/people",
+        "label": "GET /quality/record-review/people",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /admin/departments",
+        "label": "GET /admin/departments",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ev:notification.created",
+        "label": "notification.created",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:06d84be817",
+        "label": "Open on the status: one card per checklist with the last round and 'Due' in amber when is_due (never done, or the establishment's interval has passed: settings qa_round_daily_weekly_days, qa_round_monthly_quarterly_days, qa_round_storage_days).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:50f67dbc1e",
+        "label": "The third card, StorageQuarterly, is the quarterly inspection of the medicine storage areas by the technical in-charge (the clinic manual, indicator 36): its twelve safe storage practices; it prints as 'Drug storage site inspection'.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:3d1ab1f1a2",
+        "label": "A round lists every active item of its frequency (GET /qa/checklist-items?frequency=), in position order, each with Satisfactory / Needs attention / Not applicable, an observation (required for Needs attention) and a recommendation; then the general remarks. The date and time default to now and may be earlier (a paper round entered later), never later.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:d93e439017",
+        "label": "Signing is the POST: the in-charge's stamp is applied and the round is kept as signed. Say so on the confirm dialog: a mistake is corrected by the next round, never edited.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:e81b05f7fb",
+        "label": "From a signed round, each finding offers 'Raise action' (POST /qa/rounds/{id}/actions: owner from GET /quality/record-review/people, due date, corrective or preventive); the actions then live in the action register.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:10b8f88708",
+        "label": "Print = GET /qa/rounds/{id}/pdf, the manual's form filled in, kept in record as the evidence.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:cdf3dbc4c8",
+        "label": "Checklist items (qa.checklist.manage): the manual's items are seeded with their source; add the establishment's own, reword, reorder or retire (is_active false; past rounds keep them). Send expected_version.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "realtime": {
+    "topics": [
+      "notification.created",
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [
+      {
+        "event": "notification.created",
+        "priority": "normal",
+        "presentation": null,
+        "emitted_by_operations": [
+          "PATCH /rosters/{roster_id}",
+          "POST /admin/change-requests",
+          "POST /admissions/{admission_id}/transfer",
+          "POST /admissions/{admission_id}/treating-doctor",
+          "POST /approvals/{request_id}/approve",
+          "POST /approvals/{request_id}/cancel",
+          "POST /approvals/{request_id}/reject",
+          "POST /committee-meetings/{meeting_id}/actions",
+          "POST /complaints",
+          "POST /complaints/{complaint_id}/acknowledge",
+          "POST /complaints/{complaint_id}/actions",
+          "POST /complaints/{complaint_id}/appeal",
+          "POST /cssd/cycles/{cycle_id}/recall",
+          "POST /cssd/cycles/{cycle_id}/results",
+          "POST /deaths/{death_id}/autopsy",
+          "POST /deaths/{death_id}/autopsy/authorize",
+          "POST /deaths/{death_id}/certify",
+          "POST /drug-recalls",
+          "POST /facility/drills/{drill_id}/actions",
+          "POST /finance/cash-shifts/{shift_id}/cash-drop",
+          "POST /hr/employees/{employee_id}/status",
+          "POST /hr/employees/{employee_id}/submit",
+          "POST /hr/leave-requests/{leave_request_id}/decision",
+          "POST /imaging/orders/{order_id}/report",
+          "POST /incidents",
+          "POST /incidents/{incident_id}/actions",
+          "POST /incidents/{incident_id}/analysis/sign",
+          "POST /incidents/{incident_id}/review",
+          "POST /infection-cases",
+          "POST /infection/audits/{audit_id}/actions",
+          "POST /lab/results/{result_id}/verify",
+          "POST /lab/samples/{sample_id}/reject",
+          "POST /msds/interview-prep/mock-interviews",
+          "POST /opd-tickets/{ticket_id}/credit-request",
+          "POST /opd-tickets/{ticket_id}/refund-request",
+          "POST /opd-tickets/{ticket_id}/vip-waiver-post-consult",
+          "POST /opd-tickets/{ticket_id}/vip-waiver-request",
+          "POST /ot/bookings/{booking_id}/ssi-checks",
+          "POST /patient-feedback",
+          "POST /patient-feedback/{feedback_id}/actions",
+          "POST /personnel/qualifications/{qualification_id}/verify",
+          "POST /pharmacy/charity-override-request",
+          "POST /prescription-queries/{query_id}/answer",
+          "POST /prescriptions/{prescription_id}/queries",
+          "POST /qa/rounds/{round_id}/actions",
+          "POST /quality/record-review-items/{item_id}/assign",
+          "POST /quality/record-review-items/{item_id}/review",
+          "POST /quality/record-reviews/{cycle_id}/actions",
+          "POST /quality/record-reviews/{cycle_id}/start",
+          "POST /rosters",
+          "POST /rosters/copy",
+          "POST /rosters/swaps/{swap_id}/approve",
+          "POST /rosters/swaps/{swap_id}/reject",
+          "POST /rosters/{roster_id}/cancel",
+          "POST /self/leave-requests",
+          "POST /self/leave-requests/{leave_request_id}/cancel",
+          "POST /self/roster/swaps",
+          "POST /self/roster/swaps/{swap_id}/accept",
+          "POST /self/roster/swaps/{swap_id}/cancel",
+          "POST /self/roster/swaps/{swap_id}/decline",
+          "POST /wards/{ward_id}/indents"
+        ],
+        "refresh": [
+          "GET /qa/rounds/status",
+          "GET /qa/checklist-items",
+          "GET /qa/rounds",
+          "GET /quality/record-review/people",
+          "GET /admin/departments"
+        ]
+      }
+    ],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "patient_context": null,
+  "scanner": [],
+  "same_component_as": [
+    "qa_rounds"
+  ],
+  "scenarios": [],
+  "unknowns": [],
+  "omitted_sections": [
+    "ui_quality",
+    "endpoints",
+    "handoffs",
+    "value_lists",
+    "states",
+    "copy",
+    "roles",
+    "test_plan",
+    "handbook",
+    "workflows",
+    "decisions",
+    "examples",
+    "schemas"
+  ],
+  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type."
+}

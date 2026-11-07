@@ -10,6 +10,74 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  qa_rounds_owner: {
+  title: "QA rounds: inspect, sign and follow the findings",
+  titleUr: "معیار دورے: معائنہ، دستخط اور مشاہدات کی پیروی",
+  purpose: "The authorised hospital leader/in-charge reviews recurring inspections, signs the checked practices and assigns findings to named owners. Done means every current question was actually checked, the deliberate answers were signed as a permanent record, the PDF kept and any needed work given a named owner. This is an inspection record, not a draft to edit after signing.",
+  purposeUr: "مجاز ہسپتال سربراہ یا انچارج باقاعدہ معائنے دیکھتا، چیک شدہ طریقے دستخط اور مشاہدات نام سے ذمہ داروں کو دیتا ہے۔ تکمیل ہر موجودہ سوال اصل چیک، سوچے جواب دستخط سے مستقل، پی ڈی ایف محفوظ اور ضروری کام نام سے ذمہ دار۔ یہ معائنہ ریکارڈ ہے، دستخط کے بعد ترمیمی مسودہ نہیں۔",
+  steps: [
+    "The authorised hospital leader/in-charge reviews recurring inspections, signs the checked practices and assigns findings to named owners. Done means every current question was actually checked, the deliberate answers were signed as a permanent record, the PDF kept and any needed work given a named owner. This is an inspection record, not a draft to edit after signing.",
+    "Start with the three server status cards: Daily/weekly, Monthly/quarterly and Drug storage site inspection. Due has amber and text when never conducted or the establishment’s interval passed. Read the actual last round/time, active-question count and interval; never infer a missing date as today. Storage has the manual’s twelve seeded safe-storage practices, plus any active local questions. IT/authorised facility settings own the intervals; do not branch on a facility category or assume a checklist is due every login.",
+    "Conduct this round opens every active question of that frequency, ordered by position. Choose Satisfactory, Needs attention or Not applicable deliberately for EACH question; no answer is assumed. Needs attention requires an observation; add a recommendation and general remarks. When conducted starts at the current hospital time, may be earlier for a paper inspection and cannot be future. If the checklist or timezone changes, keep the old answers for comparison, cancel and reopen the current form; no silent merge.",
+    "Review and sign round opens the final dialog. Signing IS the submission: the in-charge’s actual server stamp is applied and the record kept as signed; a mistake is corrected in the next round, never edited/deleted here. Review the question/finding count, time and remarks and confirm every answer before Conduct and sign once. A lost create/sign answer may be retried only with its original frozen body/key within retention. Keep the window open; never submit a replacement inspection or new key. Read current result and compare the original signed history if uncertain. Closing a reviewed hold discards the unsent create form; it does not assert success or submit a replacement.",
+    "Open signed round shows its actual items, observations/recommendations, general remarks and in-charge stamp. Each Needs attention finding offers Raise action from this finding. Choose Corrective/Preventive, describe the work, choose the owner by name from the eligible people list (their login/user reference), optionally choose an active department and a due date today or later. HR adds staff, IT provides logins/departments; ask Quality/IT when an existing colleague is missing. Never type an id. Submit one reviewed action; it appears in the round and the hospital action register. A lost action answer retries only the original body/key, never a substitute action.",
+    "Checklist questions is a separate manager task. Choose the frequency and Include retired questions if needed. Add checklist question takes a NEW stable2–40uppercase-letter/digit/underscore catalogue code, question text and position1–999; this is a new code, not a record id. Change or retire question edits the loaded version’s wording/order or clears Active in future rounds, never deletes. Past signed rounds retain their recorded wording. Review the effect, then save once. A lost create retries its original body/key; a PATCH edit has GET-only reconciliation, never automatic replay. If its version changed, compare, cancel the old edit and reopen the current row.",
+    "Signed-round history filters frequency/From/To; Older rounds uses the last real server cursor when a100-row page fills. Empty history is not a read error. Refresh rounds and checklists hides stale data and retains disabled unsent text until recovery, clearing review. Preview/Save signed round PDF obtains that exact signed server form; storage prints as Drug storage site inspection. Print/check every page in the viewer and keep it in the record. Download cancellation/print failure never signs again; retry only the PDF. F1 from a question, editor, action or sign dialog preserves text/focus. English/Urdu and native keyboard/Settings share100–250%zoom. Named human fresh journeys, Urdu/editor, physical-device/full-role reviews remain pending."
+  ],
+  stepsUr: [
+    "مجاز ہسپتال سربراہ یا انچارج باقاعدہ معائنے دیکھتا، چیک شدہ طریقے دستخط اور مشاہدات نام سے ذمہ داروں کو دیتا ہے۔ تکمیل ہر موجودہ سوال اصل چیک، سوچے جواب دستخط سے مستقل، پی ڈی ایف محفوظ اور ضروری کام نام سے ذمہ دار۔ یہ معائنہ ریکارڈ ہے، دستخط کے بعد ترمیمی مسودہ نہیں۔",
+    "تین سرور کارڈ: روزانہ/ہفتہ وار، ماہانہ/سہ ماہی، ادویات ذخیرہ معائنہ۔ کبھی نہ ہونے یا ادارے کا وقفہ گزرنے پر مقررہ معائنہ باقی عنبری و عبارت۔ اصل پچھلا دورہ، وقت، فعال سوال و وقفہ پڑھیں؛ غائب تاریخ آج نہیں۔ ذخیرے کے بارہ اصل محفوظ طریقے اور فعال مقامی سوال۔ وقفے مجاز سہولت سیٹنگ؛ ادارے زمرے سے فیصلہ یا ہر لاگ ان پر مقرر نہ سمجھیں۔",
+    "دورہ کریں اسی وقفے کے ہر فعال سوال ترتیب سے۔ ہر سوال پر تسلی بخش، توجہ درکار یا لاگو نہیں سوچ کر؛ خودکار جواب نہیں۔ توجہ میں مشاہدہ ضروری؛ سفارش و عمومی نوٹ۔ معائنہ کا وقت موجودہ ہسپتال، کاغذی معائنہ کا پرانا ہو سکتا، مستقبل نہیں۔ فہرست یا وقت بدلنے پر پرانے جواب موازنے کو، منسوخ اور تازہ فارم؛ خاموش ملاپ نہیں۔",
+    "جائزہ و دستخط حتمی مکالمہ۔ دستخط ہی ارسال: انچارج کی اصل سرور مہر اور ریکارڈ محفوظ؛ غلطی اگلے دورے میں، یہاں ترمیم یا حذف نہیں۔ سوال و مشاہدہ تعداد، وقت اور نوٹ، ہر جواب چیک، پھر ایک بار۔ غائب جواب صرف اصل منجمد متن و کلید مقرر مدت میں۔ کھڑکی رکھیں؛ متبادل معائنہ یا نئی کلید نہیں۔ غیر یقینی موجودہ نتیجہ و اصل تاریخ ملائیں۔ جائزہ روک بند کرنے سے غیر ارسال فارم ختم، کامیابی کا دعویٰ یا متبادل ارسال نہیں۔",
+    "دستخط دورہ اصل سوال، مشاہدہ، سفارش، نوٹ و مہر۔ ہر توجہ والے مشاہدے سے عمل۔ اصلاحی یا احتیاطی، کام کی وضاحت، اہل افراد فہرست سے نام و لاگ ان، اختیاری فعال شعبہ، آج یا بعد کی تاریخ۔ عملہ ایچ آر، لاگ ان و شعبہ آئی ٹی؛ موجودہ ساتھی غائب تو کوالٹی یا آئی ٹی۔ آئی ڈی نہ لکھیں۔ ایک جائزہ عمل دورے و مرکزی رجسٹر میں۔ غائب جواب اصل متن و کلید، متبادل عمل نہیں۔",
+    "سوال فہرست الگ منتظم کام۔ وقفہ اور ضرورت پر سبک دوش بھی۔ نئے سوال کا نیا مستقل دو تا چالیس بڑے حرف، عدد یا زیر لکیر کوڈ، عبارت و ترتیب ایک تا نو سو ننانوے؛ نیا کوڈ، ریکارڈ آئی ڈی نہیں۔ پڑھے نسخے کی عبارت، ترتیب یا اگلے دوروں کی فعالی بدلیں، حذف نہیں۔ پچھلے دستخط اپنی عبارت رکھتے۔ اثر دیکھ، ایک بار محفوظ۔ نئی تخلیق غائب تو اصل متن و کلید؛ نسخہ ترمیم صرف نتیجہ پڑھ کر، خودکار ارسال نہیں۔ نسخہ بدلے تو موازنہ، منسوخ اور موجودہ صف دوبارہ۔",
+    "تاریخ میں وقفہ، سے و تک؛ سو صف بھرنے پر پرانے دورے اصل آخری سرور حوالہ سے۔ خالی تاریخ ناکامی نہیں۔ تازہ پڑھائی پر پرانا چھپتا، ناکامی تک معطل مسودہ محفوظ و جائزہ دوبارہ۔ عین دستخط فارم کی پی ڈی ایف؛ ذخیرہ عنوان ادویات ذخیرہ معائنہ۔ ویور سے ہر صفحہ پرنٹ، چیک و ریکارڈ میں۔ منسوخی یا پرنٹ خرابی پھر دستخط نہیں؛ صرف پی ڈی ایف۔ سوال، ترمیم، عمل یا دستخط مکالمے سے ایف ون متن و فوکس رکھتا۔ دونوں زبان، کی بورڈ و سیٹنگ ایک سو تا دو سو پچاس زوم۔ انسانی نئے سفر، اردو، ادارت، آلہ و تمام کردار جائزہ باقی۔"
+  ],
+  faq: [
+    [
+      "Can I change a signed round?",
+      "No. It is kept with the in-charge’s stamp. Conduct a new round to correct a mistake; do not resubmit an unanswered original with a new key."
+    ],
+    [
+      "Why are there three cards?",
+      "The daily/weekly and monthly/quarterly inspections have their own question sets and intervals; the third is medicine storage, with twelve seeded practices and active local additions. Due is answered by the server."
+    ],
+    [
+      "What must I write for Needs attention?",
+      "Record the actual observation, then a useful recommendation if appropriate. Every active question needs a deliberate answer before signing."
+    ],
+    [
+      "How does a finding become work?",
+      "Raise an action from that signed finding, choose a named eligible owner and active department, set a due date today or later, describe the work and review once. It is tracked in the action register; the signed inspection does not change."
+    ],
+    [
+      "Does retiring a question alter old rounds?",
+      "No. Retire only for future rounds. Past signed rounds keep their original question wording and answers. A lost versioned edit must be read/reconciled, never replayed automatically."
+    ]
+  ],
+  faqUr: [
+    [
+      "دستخط دورہ بدلیں؟",
+      "نہیں۔ انچارج مہر سے محفوظ۔ غلطی اگلے نئے دورے میں، بے جواب اصل نئی کلید سے نہیں۔"
+    ],
+    [
+      "تین کارڈ کیوں؟",
+      "روزانہ/ہفتہ وار اور ماہانہ/سہ ماہی کے الگ سوال و وقفہ؛ تیسرا ذخیرہ، بارہ اصل طریقے و مقامی فعال اضافے۔ مقرر ہونے کا سرور جواب۔"
+    ],
+    [
+      "توجہ درکار میں کیا لکھیں؟",
+      "اصل مشاہدہ، مناسب مفید سفارش۔ ہر فعال سوال کا سوچا جواب، پھر دستخط۔"
+    ],
+    [
+      "مشاہدہ کام کیسے؟",
+      "دستخط مشاہدے سے عمل، نام سے ذمہ دار و فعال شعبہ، آج یا بعد کی تاریخ، کام و ایک جائزہ۔ عمل رجسٹر میں، دستخط معائنہ برقرار۔"
+    ],
+    [
+      "سوال سبک دوش کرنے سے پرانے دورے؟",
+      "نہیں۔ اگلے دوروں کے لیے سبک دوش۔ پرانے دستخط اپنی عبارت و جواب۔ بے جواب نسخہ ترمیم پڑھ کر، خودکار پھر نہیں۔"
+    ]
+  ]
+},
   qa_rounds: {
   title: "QA rounds: inspect, sign and follow the findings",
   titleUr: "معیار دورے: معائنہ، دستخط اور مشاہدات کی پیروی",

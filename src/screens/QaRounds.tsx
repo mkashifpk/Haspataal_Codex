@@ -56,6 +56,7 @@ type Draft = {
   remarks: string;
 };
 export function QaRounds({
+  screenId = "qa_rounds",
   user,
   revision,
   connected,
@@ -64,6 +65,7 @@ export function QaRounds({
   timeZone,
   onOpenHelp,
 }: {
+  screenId?: "qa_rounds" | "qa_rounds_owner";
   user: ClinicalUser;
   revision: number;
   connected: boolean;
@@ -72,7 +74,6 @@ export function QaRounds({
   timeZone?: string;
   onOpenHelp: () => void;
 }) {
-  const screenId = "qa_rounds";
   const [statuses, setStatuses] = useState<api.RoundStatusOut[]>([]),
     [rounds, setRounds] = useState<api.RoundOut[]>([]),
     [allItems, setAllItems] = useState<api.QaChecklistItemOut[]>([]),
