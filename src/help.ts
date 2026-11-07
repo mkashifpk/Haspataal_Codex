@@ -10,6 +10,64 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  incident_statistics_owner: {
+  title: "Patient safety statistics and sentinel event returns",
+  titleUr: "مریض حفاظت کے اعداد اور سنگین واقعات کی رپورٹیں",
+  purpose: "The authorised hospital leader reviews patient safety reporting, the committee’s analysis and action follow-through, and the documented monthly sentinel return. Done means the period is understood, source records checked and only an intentionally reviewed month confirmed. A low reporting rate is a warning about under-reporting, never a success badge.",
+  purposeUr: "مجاز ہسپتال سربراہ مریض حفاظت کی رپورٹنگ، کمیٹی کے تجزیے، اعمال پر عمل اور سنگین واقعات کی ماہانہ رپورٹ دیکھتا ہے۔ تکمیل مدت سمجھنا، ماخذ چیک اور صرف سوچ کر ماہ تصدیق۔ کم رپورٹ شرح کم رپورٹنگ کی تنبیہ، کامیابی نہیں۔",
+  steps: [
+    "The authorised hospital leader reviews patient safety reporting, the committee’s analysis and action follow-through, and the documented monthly sentinel return. Done means the period is understood, source records checked and only an intentionally reviewed month confirmed. A low reporting rate is a warning about under-reporting, never a success badge.",
+    "From/To and Apply safety period use occurrence dates, initially the server’s current month-to-today. The displayed Applied period and PDF use the last successful query, not unsent date edits. A reversed range cannot submit. Refresh safety report recovers failed reads; stale tables hide until success. The headline excludes withdrawn reports while Reports behind this period includes them and says so; at1000rows narrow the period.",
+    "Tiles show reports, incidents, near misses, sentinel events, inpatient days and reports per1000patient-days. A missing denominator shows Not available, never zero. Read server charts and their accessible count tables by month/area/harm/type/department and factors in signed analyses; inspect medication error stages, high-alert medicine events, ADRs, anaesthesia/surgical events and transfusion reactions. Timeliness shows its target and denominators. Open now is across all periods, distinct from the selected period.",
+    "The sentinel table shows each event’s number/type/harm/occurrence/status, analysis method and signature time, and actions done/total. Missing analysis is Not signed, not a fabricated date. Preview/Save safety register PDF obtains the server’s exact applied-period register. Preview opens the PDF; save chooses a local file; print/check all pages in the viewer. Cancel/failure never confirms a month or repeats a business write. Retry only the PDF; IT handles the printer.",
+    "Monthly sentinel event returns are separate from date filtering: choose3–36ended months. A confirmed zero is a documented nil return. Review month for confirmation shows the live counted numbers; compare ward/theatre/death/screening sources with the clinical team and explain the checks in the note. Review the freeze, then Confirm this month once. The server freezes the count and stamps the confirmer; late numbers remain amber/text separately. Current month is never offered. Cancel discards only the unsent note. An already-confirmed month has its stamp and no confirm button.",
+    "If a confirmation answer disappears, keep the modal/window and retry only its identical frozen body/original key within retention. Read current result shows the actual server stamp/count; never create a replacement confirmation. QUALITY_RETURN_CONFIRMED means another answer already exists: refresh and review it, not an undo. If entries changed during review, cancel and reopen the current month instead of silently freezing a stale count. Offline/records-only cannot confirm. F1 from the note preserves text/focus; English/Urdu and native keyboard/Settings share100–250%zoom. Named human fresh-data, Urdu/editor, complete-role and device reviews remain pending."
+  ],
+  stepsUr: [
+    "مجاز ہسپتال سربراہ مریض حفاظت کی رپورٹنگ، کمیٹی کے تجزیے، اعمال پر عمل اور سنگین واقعات کی ماہانہ رپورٹ دیکھتا ہے۔ تکمیل مدت سمجھنا، ماخذ چیک اور صرف سوچ کر ماہ تصدیق۔ کم رپورٹ شرح کم رپورٹنگ کی تنبیہ، کامیابی نہیں۔",
+    "سے، تک اور مدت وقوع کی تاریخوں سے؛ پہلے سرور کا موجودہ ماہ تا آج۔ لاگو مدت و پی ڈی ایف آخری کامیاب سوال کی، غیر ارسال تاریخ نہیں۔ الٹی مدت ارسال نہیں۔ تازہ رپورٹ ناکام پڑھائی بحال، کامیابی تک پرانا چھپتا۔ اوپر گنتی واپس رپورٹ خارج، اصل فہرست شامل و واضح؛ ہزار صف پر مدت کم کریں۔",
+    "رپورٹ، واقعات، بال بال بچاؤ، سنگین واقعات، داخل مریض دن اور فی ہزار شرح۔ مخرج نہ ہو تو دستیاب نہیں، صفر نہیں۔ سرور چارٹ و قابل مطالعہ جدول ماہ، شعبہ، نقصان، قسم، محکمہ اور دستخط عوامل؛ دوا مرحلہ، زیادہ خطرہ، ردعمل، بے ہوشی، جراحی و خون۔ بروقت اعداد کا ہدف و مخرج۔ اب کھلے تمام مدتوں کے، منتخب مدت سے الگ۔",
+    "سنگین جدول نمبر، قسم، نقصان، وقوع، حالت، تجزیہ و دستخط وقت، اعمال مکمل و کل۔ تجزیہ غائب تو دستخط نہیں، فرض تاریخ نہیں۔ پی ڈی ایف سرور کا عین لاگو مدت رجسٹر۔ دیکھیں کھولتا، محفوظ مقامی فائل؛ ویور سے پرنٹ و تمام صفحات چیک۔ منسوخی یا ناکامی ماہ تصدیق یا عمل نہیں دہراتی۔ صرف پی ڈی ایف پھر لیں؛ پرنٹر آئی ٹی۔",
+    "ماہانہ سنگین رپورٹیں مدت فلٹر سے الگ: تین تا چھتیس گزرے ماہ۔ تصدیق صفر خالی رپورٹ کا ثبوت۔ ماہ کا جائزہ زندہ نمبر؛ طبی ٹیم سے وارڈ، تھیٹر، وفات، چھان بین ماخذ ملا اور نوٹ میں چیک۔ حتمی ہونے کا جائزہ پھر ایک بار تصدیق۔ سرور گنتی حتمی و مہر؛ بعد کے نمبر الگ عنبری و عبارت۔ موجودہ ماہ پیش نہیں۔ منسوخی صرف غیر ارسال نوٹ۔ تصدیق ماہ کی مہر، دوبارہ بٹن نہیں۔",
+    "جواب غائب تو کھڑکی رکھ اور مقرر مدت میں عین منجمد متن و اصل کلید۔ موجودہ نتیجہ سرور مہر و گنتی، متبادل تصدیق نہیں۔ پہلے تصدیق پیغام پر تازہ اور نتیجہ چیک، واپسی نہیں۔ جائزے میں اندراج بدلیں تو منسوخ و تازہ ماہ، پرانی گنتی خاموش حتمی نہیں۔ آف لائن یا صرف ریکارڈ میں تصدیق نہیں۔ نوٹ سے ایف ون متن و فوکس رکھتا؛ دونوں زبان، کی بورڈ و سیٹنگ ایک سو تا دو سو پچاس زوم۔ انسانی نئے سفر، اردو، ادارت، تمام کردار و آلہ جائزہ باقی۔"
+  ],
+  faq: [
+    [
+      "Is a low reporting rate good?",
+      "No. It can mean under-reporting. Check the original ward/theatre/death/screening sources and encourage factual reporting without blame. A zero denominator is unavailable, not a zero rate."
+    ],
+    [
+      "Does the date filter change the monthly return?",
+      "No. A return covers the entire ended month. The period charts use occurrence dates; Open now covers all periods. Read the applied period before saving the PDF."
+    ],
+    [
+      "How do I record a nil sentinel return?",
+      "Only after the month ended and all sources were checked, review its zero live count, explain the checks and confirm once. The server freezes/stamps it; later entries remain separately visible."
+    ],
+    [
+      "Can a lost confirmation be submitted again?",
+      "Only as the original frozen body/key retry. Do not make a second logical confirmation or treat PDF failure as a reason to repeat it. Read its stamp and ask Quality/IT if uncertain."
+    ]
+  ],
+  faqUr: [
+    [
+      "کم رپورٹ شرح اچھی؟",
+      "نہیں۔ کم رپورٹنگ ہو سکتی۔ وارڈ، تھیٹر، وفات و چھان بین ماخذ چیک اور الزام کے بغیر رپورٹ۔ صفر مخرج میں شرح دستیاب نہیں۔"
+    ],
+    [
+      "تاریخ فلٹر ماہ رپورٹ بدلتا؟",
+      "نہیں۔ رپورٹ پورے گزرے ماہ کی۔ چارٹ وقوع، اب کھلے تمام مدت۔ پی ڈی ایف سے پہلے لاگو مدت پڑھیں۔"
+    ],
+    [
+      "خالی سنگین رپورٹ کیسے؟",
+      "ماہ گزرنے اور تمام ماخذ چیک کے بعد صفر کا جائزہ، چیک لکھ کر ایک بار تصدیق۔ سرور حتمی و مہر؛ بعد کے الگ۔"
+    ],
+    [
+      "غائب تصدیق دوبارہ؟",
+      "صرف اصل منجمد متن و کلید کی کوشش۔ دوسری منطقی تصدیق یا پی ڈی ایف ناکامی پر تکرار نہیں۔ مہر پڑھیں؛ غیر یقینی کوالٹی یا آئی ٹی۔"
+    ]
+  ]
+},
   incident_statistics: {
   title: "Patient safety statistics and sentinel event returns",
   titleUr: "مریض حفاظت کے اعداد اور سنگین واقعات کی رپورٹیں",

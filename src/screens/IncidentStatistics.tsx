@@ -13,6 +13,7 @@ import type { ClinicalUser } from "../clinical-context";
 import { bilingual as t } from "../i18n";
 import { formatHospitalTime } from "../hospital-time";
 export function IncidentStatistics({
+  screenId = "incident_statistics",
   user,
   revision,
   connected,
@@ -20,6 +21,7 @@ export function IncidentStatistics({
   timeZone,
   onOpenHelp,
 }: {
+  screenId?: "incident_statistics"|"incident_statistics_owner";
   user: ClinicalUser;
   revision: number;
   connected: boolean;
@@ -27,7 +29,6 @@ export function IncidentStatistics({
   timeZone?: string;
   onOpenHelp: () => void;
 }) {
-  const screenId = "incident_statistics";
   const [data, setData] = useState<api.IncidentStatisticsOut>(),
     [reports, setReports] = useState<api.IncidentOut[]>([]),
     [returns, setReturns] = useState<api.MonthlyReturnOut[]>([]),
