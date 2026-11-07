@@ -1,0 +1,487 @@
+{
+  "method": "GET",
+  "path": "/api/v1/quality/record-reviews/{cycle_id}",
+  "summary": "A cycle with its panel, sampled records, deficiency counts and actions",
+  "tags": [
+    "Quality: Medical Record Review"
+  ],
+  "permissions": [
+    "quality.review.manage",
+    "quality.review.view"
+  ],
+  "permissions_mode": "any",
+  "idempotency_key": false,
+  "description": "Keep it live with `record_review.updated`.\n\n**Required permission:** `quality.review.manage OR quality.review.view`\n\n**Required permission:** `quality.review.manage OR quality.review.view`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer"
+  ],
+  "parameters": [
+    {
+      "name": "cycle_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Cycle Id"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[CycleOut]",
+    "properties": {
+      "data": {
+        "title": "CycleOut",
+        "properties": {
+          "cycle_id": {
+            "type": "integer",
+            "title": "Cycle Id"
+          },
+          "cycle_number": {
+            "type": "string",
+            "title": "Cycle Number"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date",
+            "title": "Period End"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Due Date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Planned",
+              "InReview",
+              "Closed",
+              "Cancelled"
+            ],
+            "title": "Status"
+          },
+          "include_opd": {
+            "type": "boolean",
+            "title": "Include Opd"
+          },
+          "confidence_level": {
+            "type": "integer",
+            "title": "Confidence Level"
+          },
+          "margin_pct": {
+            "type": "integer",
+            "title": "Margin Pct"
+          },
+          "min_per_stratum": {
+            "type": "integer",
+            "title": "Min Per Stratum"
+          },
+          "sample_seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sample Seed"
+          },
+          "sample_plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sampled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sampled At"
+          },
+          "sampled_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sampled By Name"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary",
+            "description": "The closing minutes"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "closed_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed By Name"
+          },
+          "cancel_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancel Reason"
+          },
+          "created_by": {
+            "type": "integer",
+            "title": "Created By"
+          },
+          "created_by_name": {
+            "type": "string",
+            "title": "Created By Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          },
+          "is_overdue": {
+            "type": "boolean",
+            "title": "Is Overdue"
+          },
+          "reviewers": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewerOut"
+            },
+            "type": "array",
+            "title": "Reviewers"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ItemListOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "deficiencies": {
+            "$ref": "#/components/schemas/DeficiencyCountsOut"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/QualityActionOut"
+            },
+            "type": "array",
+            "title": "Actions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cycle_id",
+          "cycle_number",
+          "title",
+          "period_start",
+          "period_end",
+          "due_date",
+          "status",
+          "include_opd",
+          "confidence_level",
+          "margin_pct",
+          "min_per_stratum",
+          "sample_seed",
+          "sample_plan",
+          "sampled_at",
+          "sampled_by_name",
+          "summary",
+          "closed_at",
+          "closed_by_name",
+          "cancel_reason",
+          "created_by",
+          "created_by_name",
+          "created_at",
+          "row_version",
+          "is_overdue",
+          "reviewers",
+          "items",
+          "deficiencies",
+          "actions"
+        ],
+        "description": "A review cycle with its panel, its sampled records, the deficiency counts and the actions."
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/quality/record-reviews/2"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "cycle_id": 2,
+          "cycle_number": "MRR-2026-001",
+          "title": "Medical record review Q1 2020",
+          "period_start": "2020-01-01",
+          "period_end": "2020-03-31",
+          "due_date": "2026-10-12",
+          "status": "InReview",
+          "include_opd": true,
+          "confidence_level": 95,
+          "margin_pct": 10,
+          "min_per_stratum": 2,
+          "sample_seed": 3798655846473618000,
+          "sample_plan": {
+            "z": 1.96,
+            "method": "Stratified random sample (department x record state); Cochran sample size for a proportion (p = 0.5) with finite-population correction; proportional allocation with a minimum per stratum",
+            "strata": [
+              {
+                "sample": 1,
+                "stratum": "1:Active",
+                "population": 1,
+                "record_state": "Active",
+                "department_id": 1,
+                "department_name": "General Medicine"
+              }
+            ],
+            "margin_pct": 10,
+            "population": 1,
+            "unassigned": 0,
+            "drawn_records": 1,
+            "planned_sample": 1,
+            "min_per_stratum": 2,
+            "required_sample": 1,
+            "confidence_level": 95,
+            "includes_open_records": true,
+            "includes_closed_records": false
+          },
+          "sampled_at": "2026-09-28T16:29:34.385526+00:00",
+          "sampled_by_name": "Quality Officer",
+          "summary": null,
+          "closed_at": null,
+          "closed_by_name": null,
+          "cancel_reason": null,
+          "created_by": 6,
+          "created_by_name": "Quality Officer",
+          "created_at": "2026-09-28T16:29:34.347228+00:00",
+          "row_version": 2,
+          "is_overdue": false,
+          "reviewers": [
+            {
+              "user_id": 7,
+              "display_name": "Dr Reviewer",
+              "discipline": "Medical",
+              "is_active": true,
+              "assigned": 1,
+              "reviewed": 0
+            }
+          ],
+          "items": [
+            {
+              "item_id": 1,
+              "cycle_id": 2,
+              "cycle_number": "MRR-2026-001",
+              "due_date": "2026-10-12",
+              "record_type": "Admission",
+              "admission_id": 1,
+              "ticket_id": null,
+              "record_number": "ADM-2026-00001",
+              "mrn": "MRN-2026-000003",
+              "department_id": 1,
+              "department_name": "General Medicine",
+              "record_state": "Active",
+              "reviewer_user_id": 7,
+              "reviewer_name": "Dr Reviewer",
+              "status": "Pending",
+              "score_pct": null,
+              "reviewed_at": null
+            }
+          ],
+          "deficiencies": {
+            "total": 0,
+            "open": 0,
+            "corrected": 0,
+            "acknowledged": 0,
+            "withdrawn": 0
+          },
+          "actions": []
+        },
+        "meta": {
+          "server_time": "2026-09-28T16:29:34.478872+00:00"
+        },
+        "request_id": "b402c2b7358e4e778c3d4540d16973c3"
+      }
+    }
+  },
+  "errors": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "record_review_overview",
+    "record_review_cycles"
+  ],
+  "used_by_workflows": [
+    "medical-record-review"
+  ],
+  "typescript_example": "// A cycle with its panel, sampled records, deficiency counts and actions  (permissions: quality.review.manage, quality.review.view)\nexport const getCycleQualityRecordReviews = (cycle_id) =>\n  api(\"GET\", `/quality/record-reviews/${cycle_id}`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "quality.review.manage",
+      "quality.review.view"
+    ],
+    "permissions_mode": "any",
+    "who": "holders of quality.review.manage or quality.review.view",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer"
+    ]
+  },
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "object",
+    "paging": [],
+    "search": [],
+    "filters": [],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

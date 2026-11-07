@@ -10,6 +10,65 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  action_register: {
+  title: "Corrective and preventive actions: follow-up and final evidence",
+  titleUr: "اصلاحی اور احتیاطی اعمال: پیروی اور حتمی ثبوت",
+  purpose: "The Quality Officer opens the action register to follow every corrective/preventive commitment across the hospital, not only their own tasks. Done means a named owner’s work has actual evidence, or a justified cancellation has been deliberately recorded and the committee can read the current register. Completing an action does not close its source incident or review cycle.",
+  purposeUr: "کوالٹی افسر ہسپتال کے تمام اصلاحی و احتیاطی وعدوں کی پیروی کرتا، صرف اپنے کام نہیں۔ تکمیل ذمہ دار کے کام کا اصل ثبوت، یا سوچ کر وجہ والی منسوخی اور کمیٹی کے لیے موجودہ رجسٹر۔ عمل مکمل کرنے سے اصل واقعہ یا جائزہ دور بند نہیں۔",
+  steps: [
+    "The Quality Officer opens the action register to follow every corrective/preventive commitment across the hospital, not only their own tasks. Done means a named owner’s work has actual evidence, or a justified cancellation has been deliberately recorded and the committee can read the current register. Completing an action does not close its source incident or review cycle.",
+    "Choose Source, Status, Overdue only and a Department, then Apply action filters. Departments are picked by active name from IT’s directory; clear the choice for all departments. IT adds a missing department. The server orders open actions first by due date, with Overdue text/red. At1000rows narrow the filters. No matching actions is different from a read error. Refresh action register hides stale rows while reading; a failed read retains a disabled unsent decision until recovery.",
+    "Open action reads its exact current record: source number, original work, owner, department, due date and final evidence/name/time if already closed. The source number for an Incident or Record review opens a read-only source record, using its stored reference; no id is typed. Review the report, analysis/lessons or review-cycle summary and sampled MRNs, refresh that source if needed, then close the preview. This is source context, not the full source editing workspace; other sources keep their real number visible.",
+    "Complete or cancel this action requires its owner or quality.action.manage; the Quality manager can close another owner’s work. Choose Done with evidence or Cancelled with reason deliberately, write3–2000characters, check the source/work and final effect, then Save this final decision once. Editing the note resets the review. The loaded row_version is sent as expected_version. A final action has its actual evidence/name/time and no edit/reopen/undo control. Cancel unsent decision discards only the draft.",
+    "A completion is version-protected, not idempotently replayable. If its answer disappears, keep the window/draft locked and Read current result; never retry the POST automatically. Compare the exact action’s status, evidence and loaded version, then explicitly review the result. VERSION_CONFLICT or QUALITY_ACTION_CLOSED refreshes current data: preserve the old note for comparison, cancel it and reopen only if a distinct action is still needed. An absent/failed read is never confirmation. Ask Quality/IT if uncertain; do not create a replacement action.",
+    "Choose the PDF From/To dates before Preview/Save action register PDF. It contains actions recorded in that period AND every still-open action, for the applied source. Status, overdue and department table filters do not restrict the PDF. Preview opens the server PDF; Save chooses a local file; print/check every page in the viewer. Cancel/print failure never completes an action; retry only the PDF. F1 from filters, source or evidence preserves text/focus. English/Urdu and native keyboard/Settings share100–250%zoom. Human fresh-data, Urdu/editor, physical-device and full-role reviews remain pending."
+  ],
+  stepsUr: [
+    "کوالٹی افسر ہسپتال کے تمام اصلاحی و احتیاطی وعدوں کی پیروی کرتا، صرف اپنے کام نہیں۔ تکمیل ذمہ دار کے کام کا اصل ثبوت، یا سوچ کر وجہ والی منسوخی اور کمیٹی کے لیے موجودہ رجسٹر۔ عمل مکمل کرنے سے اصل واقعہ یا جائزہ دور بند نہیں۔",
+    "ماخذ، حالت، صرف تاخیر اور شعبہ چن، فلٹر لگائیں۔ شعبہ آئی ٹی فعال فہرست سے نام، خالی انتخاب تمام شعبے۔ غائب شعبہ آئی ٹی۔ سرور کھلے اعمال پہلے آخری تاریخ سے؛ تاخیر سرخ و عبارت۔ ہزار صف پر فلٹر محدود۔ خالی اور ناکامی الگ۔ تازہ پڑھائی میں پرانا چھپتا؛ ناکامی پر غیر ارسال فیصلہ معطل محفوظ۔",
+    "عمل کھولیں عین تازہ ریکارڈ: ماخذ نمبر، اصل کام، ذمہ دار، شعبہ، تاریخ اور بند ہونے پر حتمی ثبوت، نام و وقت۔ واقعہ یا ریکارڈ جائزے کا نمبر محفوظ حوالے سے صرف مطالعہ ماخذ کھولتا؛ آئی ڈی نہیں۔ رپورٹ، تجزیہ و اسباق یا دور کا خلاصہ اور منتخب ایم آر این پڑھ، ضرورت پر ماخذ تازہ، پھر پیش منظر بند۔ یہ ماخذ سیاق ہے، پورا ترمیم شعبہ نہیں؛ دوسرے ماخذ کا اصل نمبر نظر آتا۔",
+    "عمل مکمل یا منسوخ ذمہ دار یا مجاز کوالٹی منتظم؛ منتظم دوسرے ذمہ دار کا کام بھی بند کر سکتا۔ ثبوت سے مکمل یا وجہ سے منسوخ سوچ کر، تین تا دو ہزار حروف، ماخذ، کام و حتمی اثر چیک، پھر ایک بار محفوظ۔ نوٹ بدلنے پر جائزہ دوبارہ۔ پڑھا نسخہ بھیجا جاتا۔ حتمی عمل کا اصل ثبوت، نام و وقت، ترمیم، کھولنا یا واپسی نہیں۔ منسوخ صرف غیر ارسال مسودہ۔",
+    "تکمیل نسخہ محفوظ، دوبارہ بھیجنے کی ضمانت نہیں۔ جواب غائب تو کھڑکی و مسودہ مقفل اور موجودہ نتیجہ پڑھیں؛ خودکار پوسٹ دوبارہ نہیں۔ عین عمل کی حالت، ثبوت و نسخہ ملائیں، پھر واضح جائزہ۔ نسخہ اختلاف یا پہلے بند پیغام تازہ معلومات؛ پرانا نوٹ موازنے کو، منسوخ اور صرف الگ ضروری عمل کو دوبارہ کھولیں۔ غائب یا ناکام پڑھائی تصدیق نہیں۔ غیر یقینی کوالٹی یا آئی ٹی؛ متبادل عمل نہ بنائیں۔",
+    "پی ڈی ایف کی سے و تک تاریخیں چن کر دیکھیں یا محفوظ۔ اس مدت میں درج اور ہر اب کھلا عمل، لاگو ماخذ کے لیے۔ حالت، تاخیر و شعبہ جدول فلٹر پی ڈی ایف محدود نہیں کرتے۔ دیکھیں سرور پی ڈی ایف، محفوظ مقامی فائل؛ ویور سے پرنٹ و ہر صفحہ چیک۔ منسوخی یا پرنٹ ناکامی عمل نہیں مکمل؛ صرف پی ڈی ایف پھرلیں۔ فلٹر، ماخذ یا ثبوت سے ایف ون متن و فوکس رکھتا۔ دونوں زبان، کی بورڈ و سیٹنگ ایک سو تا دو سو پچاس زوم۔ انسانی نئے سفر، اردو، ادارت، آلہ و تمام کردار جائزہ باقی۔"
+  ],
+  faq: [
+    [
+      "Can Quality close someone else’s action?",
+      "With quality.action.manage, yes. Read the current source/work and evidence, then make one final reviewed decision. Otherwise only the action’s owner may complete it."
+    ],
+    [
+      "Does completion close the incident?",
+      "No. The action and source have separate lifecycles. A source can already be closed while its follow-up evidence is still recorded."
+    ],
+    [
+      "Can I retry a missing completion answer?",
+      "No automatic replay. Read the exact current action and compare evidence/status/version, then review. Ask Quality/IT if uncertain; never create a duplicate action."
+    ],
+    [
+      "Why does the PDF show open actions outside my dates?",
+      "The committee register intentionally includes every still-open action plus actions recorded in the period, for the applied source. Table status/department/overdue filters do not limit it."
+    ]
+  ],
+  faqUr: [
+    [
+      "کوالٹی دوسرے کا عمل بند کر سکتا؟",
+      "اجازت کے ساتھ ہاں۔ موجودہ ماخذ، کام و ثبوت پڑھ کر ایک حتمی جائزہ۔ ورنہ صرف ذمہ دار تکمیل کر سکتا۔"
+    ],
+    [
+      "تکمیل واقعہ بند کرتی؟",
+      "نہیں۔ عمل و ماخذ کے الگ مراحل۔ ماخذ بند ہو سکتا اور پیروی کا ثبوت پھر بھی درج۔"
+    ],
+    [
+      "غائب تکمیل دہرائیں؟",
+      "خودکار نہیں۔ عین تازہ عمل کا ثبوت، حالت و نسخہ ملا کر جائزہ۔ غیر یقینی کوالٹی یا آئی ٹی؛ نقل عمل نہیں۔"
+    ],
+    [
+      "پی ڈی ایف میں مدت باہر کھلے اعمال کیوں؟",
+      "کمیٹی رجسٹر میں ہر اب کھلا اور مدت میں درج عمل، لاگو ماخذ کے لیے۔ جدول کے حالت، شعبہ و تاخیر فلٹر اسے محدود نہیں کرتے۔"
+    ]
+  ]
+},
+
   incident_statistics_owner: {
   title: "Patient safety statistics and sentinel event returns",
   titleUr: "مریض حفاظت کے اعداد اور سنگین واقعات کی رپورٹیں",

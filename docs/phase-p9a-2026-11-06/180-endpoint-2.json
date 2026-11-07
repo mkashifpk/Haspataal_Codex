@@ -1,0 +1,717 @@
+{
+  "method": "POST",
+  "path": "/api/v1/quality/actions/{action_id}/complete",
+  "summary": "Close an action: done with the evidence, or cancelled",
+  "tags": [
+    "Quality improvement"
+  ],
+  "permissions": [],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "access": {
+    "authentication": "user",
+    "permissions": [],
+    "permissions_mode": "all",
+    "who": "the action's owner or quality.action.manage"
+  },
+  "description": "By its owner or the Quality Officer (`quality.action.manage`); final (`QUALITY_ACTION_CLOSED`). An action may be\nclosed after its review cycle or incident has closed: the follow-up is part of the evidence.\n\n`VERSION_CONFLICT`: the action changed since you read it (`details.current_version`): reload it, then try again.",
+  "roles_allowed": [],
+  "parameters": [
+    {
+      "name": "action_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Action Id"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "ActionDoneIn",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": [
+          "Done",
+          "Cancelled"
+        ],
+        "title": "Status"
+      },
+      "note": {
+        "type": "string",
+        "maxLength": 2000,
+        "minLength": 3,
+        "title": "Note",
+        "description": "Done: what was done (the evidence); Cancelled: why it was dropped"
+      },
+      "expected_version": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Expected Version",
+        "description": "Optimistic concurrency: the row_version you loaded"
+      }
+    },
+    "type": "object",
+    "required": [
+      "status",
+      "note"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[QualityActionOut]",
+    "properties": {
+      "data": {
+        "title": "QualityActionOut",
+        "properties": {
+          "action_id": {
+            "type": "integer",
+            "title": "Action Id"
+          },
+          "action_number": {
+            "type": "string",
+            "title": "Action Number"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "RecordReview",
+              "Incident",
+              "Complaint",
+              "InfectionAudit",
+              "Meeting",
+              "Drill",
+              "MockInterview",
+              "QaRound",
+              "PatientFeedback"
+            ],
+            "title": "Source",
+            "description": "What found the need: a medical record review, an incident, a complaint, an infection control audit, a committee meeting, a mock drill, a mock PHC interview, a QA round, a patient's feedback"
+          },
+          "cycle_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cycle Id"
+          },
+          "cycle_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cycle Number"
+          },
+          "incident_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incident Id"
+          },
+          "incident_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incident Number"
+          },
+          "complaint_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Complaint Id"
+          },
+          "complaint_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Complaint Number"
+          },
+          "ipc_audit_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ipc Audit Id"
+          },
+          "audit_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Number"
+          },
+          "meeting_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meeting Id"
+          },
+          "meeting_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meeting Number"
+          },
+          "drill_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drill Id"
+          },
+          "drill_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drill Number"
+          },
+          "mock_interview_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mock Interview Id"
+          },
+          "interview_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interview Number",
+            "description": "The mock PHC interview that found the gap (MIV-...)"
+          },
+          "qa_round_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qa Round Id"
+          },
+          "qa_round_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qa Round Number",
+            "description": "The in-charge's QA round whose finding it addresses (QAR-...)"
+          },
+          "feedback_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback Id"
+          },
+          "feedback_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback Number",
+            "description": "The patient feedback it answers (FB-...)"
+          },
+          "source_number": {
+            "type": "string",
+            "title": "Source Number",
+            "description": "The number of the review cycle, the incident, the complaint, the audit or the meeting"
+          },
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "Corrective",
+              "Preventive"
+            ],
+            "title": "Action Type"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "criterion_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Criterion Code",
+            "description": "A record review: the checklist item whose deficiencies it addresses"
+          },
+          "department_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          },
+          "department_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Name"
+          },
+          "owner_user_id": {
+            "type": "integer",
+            "title": "Owner User Id"
+          },
+          "owner_name": {
+            "type": "string",
+            "title": "Owner Name"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Due Date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Open",
+              "Done",
+              "Cancelled"
+            ],
+            "title": "Status"
+          },
+          "outcome_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Note",
+            "description": "Done: what was done (the evidence); Cancelled: why it was dropped"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "completed_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed By Name"
+          },
+          "created_by": {
+            "type": "integer",
+            "title": "Created By"
+          },
+          "created_by_name": {
+            "type": "string",
+            "title": "Created By Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          },
+          "is_overdue": {
+            "type": "boolean",
+            "title": "Is Overdue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action_id",
+          "action_number",
+          "source",
+          "cycle_id",
+          "cycle_number",
+          "incident_id",
+          "incident_number",
+          "complaint_id",
+          "complaint_number",
+          "ipc_audit_id",
+          "audit_number",
+          "meeting_id",
+          "meeting_number",
+          "drill_id",
+          "drill_number",
+          "mock_interview_id",
+          "interview_number",
+          "qa_round_id",
+          "qa_round_number",
+          "feedback_id",
+          "feedback_number",
+          "source_number",
+          "action_type",
+          "description",
+          "criterion_code",
+          "department_id",
+          "department_name",
+          "owner_user_id",
+          "owner_name",
+          "due_date",
+          "status",
+          "outcome_note",
+          "completed_at",
+          "completed_by_name",
+          "created_by",
+          "created_by_name",
+          "created_at",
+          "row_version",
+          "is_overdue"
+        ],
+        "description": "A corrective or preventive action of the hospital's register (MSDS IMS 162, CQI 83, 107)."
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/quality/actions/1/complete",
+      "body": {
+        "status": "Done",
+        "note": "Two scanners bought and installed; staff shown how to use them"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "action_id": 1,
+          "action_number": "CAPA-2026-0001",
+          "source": "Incident",
+          "cycle_id": null,
+          "cycle_number": null,
+          "incident_id": 2,
+          "incident_number": "INC-2026-00001",
+          "complaint_id": null,
+          "complaint_number": null,
+          "ipc_audit_id": null,
+          "audit_number": null,
+          "meeting_id": null,
+          "meeting_number": null,
+          "drill_id": null,
+          "drill_number": null,
+          "mock_interview_id": null,
+          "interview_number": null,
+          "qa_round_id": null,
+          "qa_round_number": null,
+          "feedback_id": null,
+          "feedback_number": null,
+          "source_number": "INC-2026-00001",
+          "action_type": "Preventive",
+          "description": "Wristband scanners on every medicine trolley",
+          "criterion_code": null,
+          "department_id": null,
+          "department_name": null,
+          "owner_user_id": 6,
+          "owner_name": "Nurse Rubina",
+          "due_date": "2026-11-13",
+          "status": "Done",
+          "outcome_note": "Two scanners bought and installed; staff shown how to use them",
+          "completed_at": "2026-10-14T10:54:28.497734+00:00",
+          "completed_by_name": "Nurse Rubina",
+          "created_by": 1,
+          "created_by_name": "Dr Ahmed",
+          "created_at": "2026-10-14T10:54:28.448864+00:00",
+          "row_version": 2,
+          "is_overdue": false
+        },
+        "meta": {
+          "server_time": "2026-10-14T10:54:28.504388+00:00"
+        },
+        "request_id": "c603d6a43a2b49009e4650715b7a6a8d"
+      }
+    },
+    "errors_seen": [
+      "FORBIDDEN",
+      "QUALITY_ACTION_CLOSED"
+    ],
+    "events_emitted": []
+  },
+  "errors": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "QUALITY_ACTION_CLOSED",
+      "http_status": 409,
+      "message": "This action is already done or cancelled.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "VERSION_CONFLICT",
+      "http_status": 409,
+      "message": "The record was changed by someone else; reload and try again.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "FORBIDDEN",
+    "QUALITY_ACTION_CLOSED"
+  ],
+  "used_by_screens": [
+    "my_actions",
+    "record_review_overview",
+    "record_review_report",
+    "action_register"
+  ],
+  "used_by_workflows": [
+    "incidents-and-sentinel-events",
+    "medical-record-review"
+  ],
+  "typescript_example": "// Close an action: done with the evidence, or cancelled  (permissions: any logged-in user)\nexport const completeAction = (action_id, body) =>\n  api(\"POST\", `/quality/actions/${action_id}/complete`, body);   // api(): see get_guide('envelope-and-errors')",
+  "write_semantics": {
+    "protection": "version_check",
+    "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+    "reconcile_with": "GET /quality/actions/{action_id}",
+    "emits_events": [],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "any_of",
+        "required"
+      ],
+      "details_from": "POST /api/v1/admin/departments"
+    },
+    {
+      "code": "QUALITY_ACTION_CLOSED",
+      "http_status": 409,
+      "message": "This action is already done or cancelled.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "POST /api/v1/quality/actions/{action_id}/complete"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    },
+    {
+      "code": "VERSION_CONFLICT",
+      "http_status": 409,
+      "message": "The record was changed by someone else; reload and try again.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "current_version",
+        "expected_version"
+      ],
+      "details_from": "PATCH /api/v1/finance/service-catalog/{service_id}"
+    }
+  ]
+}
