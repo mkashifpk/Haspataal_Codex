@@ -23,6 +23,7 @@ const statusText = (s: string) =>
     Withdrawn: t("Withdrawn", "واپس لیا"),
   })[s] ?? s;
 export function IncidentRegister({
+  screenId = 'incident_register',
   user,
   revision,
   connected,
@@ -30,6 +31,7 @@ export function IncidentRegister({
   timeZone,
   onOpenHelp,
 }: {
+  screenId?: 'incident_register'|'incident_register_owner';
   user: ClinicalUser;
   revision: number;
   connected: boolean;
@@ -113,7 +115,7 @@ export function IncidentRegister({
     void load();
     setLocalRevision((v) => v + 1);
   }, [load]);
-  const write = useClinicalWrite(user, "incident_register", async () => {
+  const write = useClinicalWrite(user, screenId, async () => {
       setMode(undefined);
       setReviewed(false);
       changed();
@@ -200,7 +202,7 @@ export function IncidentRegister({
   }
   return (
     <section
-      data-screen="incident_register"
+      data-screen={screenId}
       data-unsaved={!!mode || followupBusy}
       data-write-pending={write.blocked}
     >
@@ -700,7 +702,7 @@ export function IncidentRegister({
               readOnly={readOnly}
               timeZone={timeZone}
               recordId={detail.incident_id}
-              parentScreen="incident_register"
+              parentScreen={screenId}
               onEditingChange={setFollowupBusy}
               onChanged={changed}
               onOpenHelp={onOpenHelp}

@@ -5,19 +5,19 @@ User request: build the remaining Phase P9A screens and report reproduced backen
 | Position | Screen | Current status |
 |---|---|---|
 |163|my_investigations|Previously implemented db216b6; proposal342 pending human review|
-|164|my_complaint_investigations|Implemented/tested3ce23ae; proposal350 verified/pending human review. Non-register investigator list blocked by backend56|
-|165|my_actions|Implemented/tested d209b79; proposal351 verified/pending human review. Full human/editor/translation acceptance pending|
-|166|record_complaint_reception|Implemented/tested4e1df5c (base62d0ee1); proposal352 verified/pending human review. Cross-desk appeal lookup blocked by57; human gates pending|
-|167|record_complaint_admissions|Implemented/tested4e1df5c (base62d0ee1); proposal353 verified/pending human review. Cross-desk appeal lookup blocked by57; human gates pending|
-|168|record_complaint_er|Implemented/tested4e1df5c (base62d0ee1); proposal354 verified/pending human review. Cross-desk appeal lookup blocked by57; human gates pending|
-|169|record_complaint_ward|Implemented/tested4e1df5c (base62d0ee1); proposal355 verified/pending human review. Cross-desk appeal lookup blocked by57; human gates pending|
-|170|complaints_register|Implemented/tested f3b0ba4; proposal356 verified pending. Backend58/59 and human gates pending|
-|171|complaint_appeals|Implemented/tested3377da0; proposal361 verified pending human review|
-|172|complaint_statistics|Implemented/tested625fb79 (baseedb73e4); proposal362 verified pending human review|
-|173|complaint_statistics_owner|Implemented/tested07ed430; proposal363 verified pending human review|
-|174|incident_types|Implemented/testedc2a6d7b; proposal364 verified pending human review|
-|175|incident_register|Implementation in progress; review4/withdraw3 verified; analysis correction/follow-up under test|
-|176|incident_register_owner|Not started|
+|164|my_complaint_investigations|Implemented/tested3ce23ae; proposal350 selected claims accepted7Nov. Non-register investigator list blocked by backend56|
+|165|my_actions|Implemented/tested d209b79; proposal351 selected claims accepted7Nov. Full human/editor/translation acceptance pending|
+|166|record_complaint_reception|Implemented/tested4e1df5c (base62d0ee1); proposal352 selected claims accepted7Nov. Cross-desk appeal lookup blocked by57; human gates pending|
+|167|record_complaint_admissions|Implemented/tested4e1df5c (base62d0ee1); proposal353 selected claims accepted7Nov. Cross-desk appeal lookup blocked by57; human gates pending|
+|168|record_complaint_er|Implemented/tested4e1df5c (base62d0ee1); proposal354 selected claims accepted7Nov. Cross-desk appeal lookup blocked by57; human gates pending|
+|169|record_complaint_ward|Implemented/tested4e1df5c (base62d0ee1); proposal355 selected claims accepted7Nov. Cross-desk appeal lookup blocked by57; human gates pending|
+|170|complaints_register|Implemented/tested f3b0ba4; proposal356 selected claims accepted7Nov. Backend58/59 and human gates pending|
+|171|complaint_appeals|Implemented/tested3377da0; proposal361 selected claims accepted7Nov|
+|172|complaint_statistics|Implemented/tested625fb79 (baseedb73e4); proposal362 selected claims accepted7Nov|
+|173|complaint_statistics_owner|Implemented/tested07ed430; proposal363 selected claims accepted7Nov|
+|174|incident_types|Implemented/testedc2a6d7b; proposal364 selected claims accepted7Nov|
+|175|incident_register|Implemented/testedfeae856; proposal365 verified pending human review|
+|176|incident_register_owner|Implemented/tested; final checks/commit/proposal pending; human gates pending|
 |177|incident_screening|Not started|
 |178|incident_statistics|Not started|
 |179|incident_statistics_owner|Not started|
