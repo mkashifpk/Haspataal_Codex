@@ -10,6 +10,67 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  incident_screening: {
+  title: "Possible sentinel events: screening and reasoned decisions",
+  titleUr: "ممکنہ سنگین واقعات: چھان بین اور وجہ کے ساتھ فیصلہ",
+  purpose: "Quality uses Possible sentinel events to check source records that may not have been reported. A row is a possible event, not a confirmed sentinel classification. Make the place safe first, check the source with the clinical team, then report the facts or dismiss with an honest reason.",
+  purposeUr: "کوالٹی ممکنہ سنگین واقعات میں غیر رپورٹ شدہ ماخذ چیک کرتا ہے۔ صف ممکنہ واقعہ، تصدیق شدہ سنگین درجہ نہیں۔ پہلے حفاظت، طبی ٹیم کے ساتھ ماخذ چیک، پھر حقائق رپورٹ یا درست وجہ سے خارج۔",
+  steps: [
+    "Quality uses Possible sentinel events to check source records that may not have been reported. A row is a possible event, not a confirmed sentinel classification. Make the place safe first, check the source with the clinical team, then report the facts or dismiss with an honest reason.",
+    "Refresh screening reads the current server window, excluding reported or dismissed items. Each row shows return to theatre, readmission or death, the patient name/MRN, found time, source detail and suggested type. Find in screening and Source kind filter only the loaded rows. An empty server window differs from no filter matches or a read error. A failed read hides stale rows and disables the retained draft until Refresh succeeds.",
+    "Report this item opens the chosen source’s patient, stay/operation/death and screening reference, with the suggested incident type. No record identity is typed again. Check the occurrence time in the hospital timezone, choose harm deliberately and verify the suggested type from the active incident list. Return to theatre requires the actual phase; never assume the first phase. Record facts without blame, immediate safety action and any confidential-reporter request. Confirm the source/decision, then Submit screening report once.",
+    "Department comes by name from active departments; IT adds a missing department. Ward comes by name from the bed matrix without patient details; IT adds wards. Optional medicine comes from the formulary after at least two letters; pharmacy adds a missing medicine. Select its medication stage when relevant. The patient and linked clinical records already come from the screening row; a missing or incorrect source belongs with Quality and the clinical team, never a guessed identifier.",
+    "Dismiss with reason requires incident management permission. Explain why this source is not an incident, for example a documented planned second-look operation or an expected death. A reason is 5–1000 characters. Review and Confirm dismissal once; the server keeps the reason. Cancellation discards only the unsent draft and never reverses a confirmed decision. Only a confirmed response is shown as Dismissal confirmed.",
+    "A lost incident-create answer can be retried with its identical frozen body and original key, never a new report. A dismissal has no idempotent replay: Read current result instead. A missing item means it is no longer pending, not that your dismissal is proven: another person may have decided it or its window ended. Compare the source with Quality before releasing a hold. INCIDENT_SCREENING_DECIDED refreshes the list; do not replace or repeat the decision. A retained stale draft cannot be submitted.",
+    "New possible events also reach Incident notifications. The live shell refreshes screening after incident reports and reconnect/resync; use Refresh after reading an upstream notification. Offline and records-only views do not permit new decisions. F1/Help works in the report and dismissal without losing text and returns focus. English/Urdu and native keyboard/Settings share100–250%zoom. Named human fresh journeys, Urdu translation/editor and full-role reviews remain pending."
+  ],
+  stepsUr: [
+    "کوالٹی ممکنہ سنگین واقعات میں غیر رپورٹ شدہ ماخذ چیک کرتا ہے۔ صف ممکنہ واقعہ، تصدیق شدہ سنگین درجہ نہیں۔ پہلے حفاظت، طبی ٹیم کے ساتھ ماخذ چیک، پھر حقائق رپورٹ یا درست وجہ سے خارج۔",
+    "تازہ چھان بین سرور کی موجودہ مدت، رپورٹ یا خارج معاملات نکال کر۔ ہر صف میں تھیٹر واپسی، دوبارہ داخلہ یا وفات، نام و ایم آر این، ملنے کا وقت، ماخذ اور تجویز قسم۔ نام و قسم فلٹر صرف پڑھی صفوں پر۔ خالی مدت، فلٹر خالی اور خرابی الگ۔ ناکامی پر پرانا چھپا، محفوظ مسودہ تازہ کامیابی تک معطل۔",
+    "رپورٹ منتخب ماخذ کا مریض، قیام، آپریشن یا وفات، حوالہ اور تجویز قسم لاتی ہے۔ ریکارڈ شناخت دوبارہ نہیں۔ ہسپتال وقت میں وقوع چیک، نقصان سوچ کر، فعال قسم فہرست سے تجویز چیک۔ تھیٹر واپسی کا اصل مرحلہ ضروری، پہلا فرض نہیں۔ الزام کے بغیر حقائق، فوری حفاظت اور نام خفیہ درخواست لکھیں۔ ماخذ و فیصلہ چیک اور ایک بار ارسال۔",
+    "شعبہ فعال فہرست سے نام، غائب شعبہ آئی ٹی۔ وارڈ مریض تفصیل کے بغیر بستر فہرست سے، غائب وارڈ آئی ٹی۔ متعلقہ دوا کم از کم دو حروف سے فارمولری، غائب دوا فارمیسی۔ متعلقہ مرحلہ چنیں۔ مریض و طبی ریکارڈ پہلے ماخذ صف سے؛ غلط یا غائب ماخذ کوالٹی و طبی ٹیم، فرض شناخت نہیں۔",
+    "وجہ سے اخراج واقعہ انتظام کی اجازت سے۔ ماخذ واقعہ نہ ہونے کی وجہ، مثلاً دستاویزی منصوبہ بند دوسرا آپریشن یا متوقع وفات۔ پانچ تا ہزار حروف۔ جائزہ اور ایک بار تصدیق؛ سرور وجہ رکھتا۔ منسوخی صرف غیر ارسال مسودہ، تصدیق شدہ فیصلہ واپس نہیں۔ صرف تصدیق شدہ جواب پر اخراج کی تصدیق۔",
+    "واقعہ بنانے کا جواب غائب تو عین منجمد متن و اصل کلید سے، نئی رپورٹ نہیں۔ اخراج دوبارہ بھیجنے کی ضمانت نہیں: موجودہ نتیجہ پڑھیں۔ غائب معاملہ اب زیر انتظار نہیں، آپ کا اخراج ثابت نہیں؛ دوسرا فیصلہ یا مدت ختم۔ کوالٹی سے ماخذ ملائیں پھر روک ختم۔ پہلے فیصلہ کا پیغام فہرست تازہ، متبادل یا تکرار نہیں۔ پرانا محفوظ مسودہ ارسال نہیں۔",
+    "نئے ممکنہ واقعات واقعہ اطلاعات میں بھی۔ رواں شیل رپورٹ اور دوبارہ رابطہ پر چھان بین تازہ؛ ماخذ اطلاع کے بعد تازہ کریں۔ آف لائن و صرف ریکارڈ میں نیا فیصلہ نہیں۔ رپورٹ و اخراج سے ایف ون متن رکھ اور فوکس واپس۔ دونوں زبان، کی بورڈ و سیٹنگ ایک سو تا دو سو پچاس زوم۔ انسانی نئے سفر، اردو ترجمہ، ادارت و تمام کردار جائزہ باقی۔"
+  ],
+  faq: [
+    [
+      "Does a screening row mean a sentinel event happened?",
+      "No. Check the original record with the clinical team. Report facts for review or explain the evidence for dismissal; never dismiss merely to clear the list."
+    ],
+    [
+      "Where do patient and operation identities come from?",
+      "The selected screening row supplies its patient and linked stay, operation or death. Choose the actual operation phase; do not type ids or choose an unrelated patient."
+    ],
+    [
+      "Can I repeat an unanswered dismissal?",
+      "Never automatically. Read the pending list and reconcile with Quality. Disappearance does not prove who decided it or which reason was saved. Only repeat a distinct still-needed decision after reconciliation."
+    ],
+    [
+      "What if another colleague already decided it?",
+      "The server returns INCIDENT_SCREENING_DECIDED and the list refreshes. Keep unsent text for comparison, cancel it and review the source; do not create a replacement incident."
+    ]
+  ],
+  faqUr: [
+    [
+      "کیا صف سنگین واقعے کی تصدیق ہے؟",
+      "نہیں۔ طبی ٹیم سے اصل ماخذ چیک۔ حقائق رپورٹ یا اخراج کے شواہد، صرف فہرست خالی کرنے کو نہیں۔"
+    ],
+    [
+      "مریض و آپریشن شناخت کہاں سے؟",
+      "منتخب ماخذ صف سے مریض و متعلقہ قیام، آپریشن یا وفات۔ اصل مرحلہ چنیں؛ آئی ڈی نہ لکھیں یا غیر متعلق مریض نہ چنیں۔"
+    ],
+    [
+      "بے جواب اخراج دہرائیں؟",
+      "خودکار کبھی نہیں۔ زیر انتظار فہرست و کوالٹی سے نتیجہ۔ غائب ہونا فیصلہ کنندہ یا وجہ نہیں بتاتا۔ صرف جائزے کے بعد اب بھی ضروری الگ فیصلہ۔"
+    ],
+    [
+      "دوسرے نے پہلے فیصلہ کیا؟",
+      "سرور پہلے فیصلہ پیغام اور فہرست تازہ۔ موازنے کو متن، منسوخ اور ماخذ چیک؛ متبادل واقعہ نہیں۔"
+    ]
+  ]
+},
+
   incident_register_owner: {
   title: "Incident register",
   titleUr: "واقعات کا رجسٹر",

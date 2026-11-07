@@ -1,0 +1,456 @@
+{
+  "method": "POST",
+  "path": "/api/v1/deaths/{death_id}/certify",
+  "summary": "Certify the cause of death (final)",
+  "tags": [
+    "Deaths"
+  ],
+  "permissions": [
+    "death.record"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "description": "Needs Part I (a), the manner, whether the death was expected, surgery in the last four weeks (and its date), the\nexternal cause for an injury, the pregnancy question for a woman of 10-54: otherwise `DEATH_CERTIFICATE_INCOMPLETE`\nwith `details.missing`. Only a doctor registered with the PMDC certifies; the name, designation and PMDC number are\nstamped on it. An unexpected or a maternal death notifies the Quality Officer as a sentinel event.\n`DEATH_CERTIFIER_NOT_DOCTOR`: only a doctor registered with the PMDC can record or certify a death.\n\n`DEATH_RECORD_FINAL`: the death is already certified: append a correction instead.\n\n**Required permission:** `death.record`\n\n**Required permission:** `death.record`",
+  "roles_allowed": [
+    "anaesthetist",
+    "clinical_specialist",
+    "doctor",
+    "surgeon"
+  ],
+  "parameters": [
+    {
+      "name": "death_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Death Id"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "CertifyIn",
+    "properties": {
+      "expected_version": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Expected Version",
+        "description": "row_version of the draft you read"
+      }
+    },
+    "type": "object"
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[DeathViewOut]",
+    "properties": {
+      "data": {
+        "title": "DeathViewOut",
+        "properties": {
+          "death": {
+            "$ref": "#/components/schemas/DeathRecordOut"
+          },
+          "patient": {
+            "$ref": "#/components/schemas/PatientAtDeathOut"
+          },
+          "corrections": {
+            "items": {
+              "$ref": "#/components/schemas/DeathCorrectionOut"
+            },
+            "type": "array",
+            "title": "Corrections"
+          },
+          "autopsy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AutopsyOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The latest clinical autopsy request, if any"
+          },
+          "suggested": {
+            "$ref": "#/components/schemas/DeathSuggestionsOut"
+          },
+          "missing": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "cause_a",
+                "manner",
+                "expected_death",
+                "surgery_within_4_weeks",
+                "surgery_date",
+                "external_cause",
+                "pregnancy_status"
+              ]
+            },
+            "type": "array",
+            "title": "Missing",
+            "description": "What certification still needs (empty once certified)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "death",
+          "patient",
+          "corrections",
+          "autopsy",
+          "suggested",
+          "missing"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/deaths/2/certify",
+      "body": {}
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "death": {
+            "death_id": 2,
+            "death_number": "DTH-2026-00001",
+            "patient_id": 1,
+            "setting": "Inpatient",
+            "admission_id": 1,
+            "ticket_id": null,
+            "mlc_id": null,
+            "arrived_at": null,
+            "death_at": "2026-09-29T03:33:52.931281+00:00",
+            "death_at_estimated": false,
+            "pronounced_by": 1,
+            "pronounced_at": "2026-09-29T03:43:52.933807+00:00",
+            "terminal_event": "Cardiac arrest; CPR 30 min",
+            "resuscitation_attempted": true,
+            "expected_death": true,
+            "cause_a": "Septic shock",
+            "cause_a_interval": "2 days",
+            "cause_a_icd": "1G41",
+            "cause_b": "Right lower lobe pneumonia",
+            "cause_b_interval": "6 days",
+            "cause_b_icd": "CA40.Z",
+            "cause_c": null,
+            "cause_c_interval": null,
+            "cause_c_icd": null,
+            "cause_d": null,
+            "cause_d_interval": null,
+            "cause_d_icd": null,
+            "other_conditions": "Type 2 diabetes mellitus",
+            "other_conditions_icd": [
+              "5A11"
+            ],
+            "manner": "Disease",
+            "external_cause_date": null,
+            "external_cause": null,
+            "external_cause_place": null,
+            "surgery_within_4_weeks": false,
+            "surgery_date": null,
+            "surgery_reason": null,
+            "pregnancy_status": null,
+            "pregnancy_contributed": null,
+            "multiple_pregnancy": null,
+            "hours_survived": null,
+            "birth_weight_grams": null,
+            "gestation_weeks": null,
+            "mother_age_years": null,
+            "maternal_conditions": null,
+            "status": "Certified",
+            "certified_by": 1,
+            "certified_at": "2026-09-29T03:43:53.113388+00:00",
+            "certifier_name": "Dr Ahmed",
+            "certifier_designation": "Doctor",
+            "certifier_license": "PMDC PMDC-16770",
+            "body_released_at": null,
+            "body_released_by": null,
+            "body_released_to": null,
+            "receiver_name": null,
+            "receiver_relationship": null,
+            "receiver_id_number": null,
+            "receiver_phone": null,
+            "police_reference": null,
+            "release_note": null,
+            "recorded_by": 1,
+            "created_at": "2026-09-29T03:43:52.933807+00:00",
+            "row_version": 3,
+            "admission_number": "ADM-2026-00001",
+            "ward_name": "General Ward",
+            "bed_label": "GW-1",
+            "ticket_number": null,
+            "mlc_number": null,
+            "mlc_status": null,
+            "pronounced_by_name": "Dr Ahmed",
+            "body_released_by_name": null,
+            "icd_terms": [
+              {
+                "uri": "http://id.who.int/icd/release/11/mms/1683090852",
+                "code": "1G41",
+                "title": "Sepsis with septic shock",
+                "system": "ICD-11"
+              },
+              {
+                "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                "code": "CA40.Z",
+                "title": "Pneumonia, organism unspecified",
+                "system": "ICD-11"
+              },
+              {
+                "uri": "http://id.who.int/icd/release/11/mms/119724091",
+                "code": "5A11",
+                "title": "Type 2 diabetes mellitus",
+                "system": "ICD-11"
+              }
+            ],
+            "underlying_cause": "Right lower lobe pneumonia",
+            "underlying_icd": "CA40.Z",
+            "underlying_term": {
+              "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+              "code": "CA40.Z",
+              "title": "Pneumonia, organism unspecified",
+              "system": "ICD-11"
+            }
+          },
+          "patient": {
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "full_name": "Ali Khan",
+            "father_or_husband_name": null,
+            "gender": "male",
+            "dob": null,
+            "cnic": null,
+            "address": null,
+            "age_at_death_years": 40,
+            "age_at_death_days": null,
+            "pregnancy_applies": false,
+            "infant_applies": false
+          },
+          "corrections": [],
+          "autopsy": null,
+          "suggested": {
+            "conditions": [
+              {
+                "text": "Community-acquired pneumonia",
+                "icd_codes": [],
+                "icd_terms": []
+              }
+            ],
+            "surgery": null
+          },
+          "missing": []
+        },
+        "meta": {
+          "server_time": "2026-09-29T03:43:53.125054+00:00"
+        },
+        "request_id": "30c506c9fb084620a37fcf6a6337a761"
+      }
+    },
+    "errors_seen": [
+      "DEATH_CERTIFICATE_INCOMPLETE",
+      "DEATH_CERTIFIER_NOT_DOCTOR"
+    ],
+    "events_emitted": [
+      "notification.created"
+    ]
+  },
+  "errors": [
+    {
+      "code": "DEATH_CERTIFICATE_INCOMPLETE",
+      "http_status": 422,
+      "message": "The death certificate is missing required parts.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "DEATH_CERTIFIER_NOT_DOCTOR",
+      "http_status": 403,
+      "message": "Only a doctor registered with the PMDC can record or certify a death.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "DEATH_RECORD_FINAL",
+      "http_status": 409,
+      "message": "A certified death record cannot change; append a correction.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "DEATH_CERTIFICATE_INCOMPLETE",
+    "DEATH_CERTIFIER_NOT_DOCTOR"
+  ],
+  "used_by_screens": [
+    "death_record"
+  ],
+  "used_by_workflows": [
+    "deaths-and-medico-legal-cases",
+    "inpatient-and-discharge"
+  ],
+  "typescript_example": "// Certify the cause of death (final)  (permissions: death.record)\nexport const certifyDeath = (death_id, body) =>\n  api(\"POST\", `/deaths/${death_id}/certify`, body);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "death.record"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of death.record",
+    "roles_allowed": [
+      "anaesthetist",
+      "clinical_specialist",
+      "doctor",
+      "surgeon"
+    ]
+  },
+  "write_semantics": {
+    "protection": "version_check",
+    "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+    "reconcile_with": "GET /deaths/{death_id}",
+    "emits_events": [
+      "notification.created"
+    ],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [
+    "notification.created"
+  ],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "DEATH_CERTIFICATE_INCOMPLETE",
+      "http_status": 422,
+      "message": "The death certificate is missing required parts.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "missing"
+      ],
+      "details_from": "POST /api/v1/deaths/{death_id}/certify"
+    },
+    {
+      "code": "DEATH_CERTIFIER_NOT_DOCTOR",
+      "http_status": 403,
+      "message": "Only a doctor registered with the PMDC can record or certify a death.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "POST /api/v1/deaths/{death_id}/certify"
+    },
+    {
+      "code": "DEATH_RECORD_FINAL",
+      "http_status": 409,
+      "message": "A certified death record cannot change; append a correction.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/deaths/{death_id}"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}
