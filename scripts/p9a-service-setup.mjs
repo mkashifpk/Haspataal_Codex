@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+let p='src/App.tsx',s=fs.readFileSync(p,'utf8');
+const before=s.slice(s.indexOf('  const [imagingSetupEntry'),s.indexOf('  function navigate('));
+const after=`  const setupPermissions: Record<string,string> = {imaging_quality_setup:'diagnostics.setup.manage',preventive_programmes_setup:'programme.manage',labour_register_columns:'maternity.policy.manage'};
+  const [facilitySetupEntry, setFacilitySetupEntry] = useState<string>();
+  const setupPermission = user?.permissions.includes('establishment.manage') ? Object.values(setupPermissions).find(p=>user.permissions.includes(p)) : undefined;
+  const facilitySetupScope = !!setupPermission && (screen === 'facility_profile' || screen === facilitySetupEntry);
+  const facilitySetupHandbook = useLoad(() => facilitySetupScope && user ? call<HandbookOut>('service-setup-handbook').then(data=>({userId:user.user_id,data})) : Promise.resolve(undefined), [facilitySetupScope,user?.user_id,revision]);
+  const availableSetupPages = !facilitySetupHandbook.loading && !facilitySetupHandbook.error && facilitySetupHandbook.data?.userId === user?.user_id ? [...(facilitySetupHandbook.data?.data.shared_screens||[]),...(facilitySetupHandbook.data?.data.workspaces.flatMap(w=>w.screens)||[])].filter(p=>setupPermissions[p.id] && user?.permissions.includes(setupPermissions[p.id])) : [];
+  const facilitySetupOutline = outline && {...outline, shared_screens:[...outline.shared_screens.filter(p=>!availableSetupPages.some(s=>s.id===p.id)),...availableSetupPages]};
+  const imagingSetupEntry = facilitySetupEntry === 'imaging_quality_setup';
+
+`;
+if(!before.includes('facilitySetupPage'))throw Error('setup markers');s=s.replace(before,after);
+s=s.replace('if(next === "imaging_quality_setup" && est?.views.screens.find(s=>s.screen_id===next)?.view === "setup" && !(fromFacility && screen === "facility_profile" && user?.permissions.includes("establishment.manage"))) return false;','const viaSetup = fromFacility && screen === "facility_profile" && availableSetupPages.some(p=>p.id===next);\n    if(est?.views.screens.find(s=>s.screen_id===next)?.view === "setup" && !viaSetup) return false;');
+s=s.replace('next === "imaging_quality_setup" && fromFacility && facilitySetupPage ? facilitySetupOutline : outline','viaSetup ? facilitySetupOutline : outline').replace('setImagingSetupEntry(next === "imaging_quality_setup" && fromFacility);','setFacilitySetupEntry(viaSetup ? next : undefined);').replace('screen === "imaging_quality_setup" && imagingSetupEntry ? facilitySetupOutline : outline','screen === facilitySetupEntry ? facilitySetupOutline : outline');
+const prop=s.split('\n').find(l=>l.includes('onImagingSetup={'));if(!prop)throw Error('Facility link missing');s=s.replace(prop,'                  serviceSetups={availableSetupPages.filter(p=>est?.views.screens.some(v=>v.screen_id===p.id&&v.view!=="hidden")).map(p=>({id:p.id,title:p.title,open:()=>navigate(p.id,true)}))}');fs.writeFileSync(p,s);
+p='electron/main.cjs';s=fs.readFileSync(p,'utf8').replace('!["establishment.manage", "diagnostics.setup.manage"].every(p => auth.user.permissions.includes(p))','!auth.user.permissions.includes("establishment.manage") || !["diagnostics.setup.manage", "programme.manage", "maternity.policy.manage"].some(p => auth.user.permissions.includes(p))');fs.writeFileSync(p,s);
+p='src/screens/Facility.tsx';s=fs.readFileSync(p,'utf8').replaceAll('onImagingSetup,','serviceSetups,').replace('onImagingSetup?: () => void;','serviceSetups?: {id:string; title:string; open:()=>void}[];');const link=s.split('\n').find(l=>l.includes('{onImagingSetup &&'));if(!link)throw Error('Facility control marker');s=s.replace(link,'          {serviceSetups?.map(setup => <button key={setup.id} data-help="facility.imaging-setup" disabled={!!pending || busy} onClick={setup.open}>{setup.id === "imaging_quality_setup" ? tr("Imaging turnaround, critical findings and policy") : setup.title}</button>)}');fs.writeFileSync(p,s);
+p='src/screen-navigation.ts';s=fs.readFileSync(p,'utf8').replace('return id !== "imaging_quality_setup" || view !== "setup";','return view !== "setup";');fs.writeFileSync(p,s);

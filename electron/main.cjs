@@ -1215,14 +1215,14 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return{ok:true,data:{opened:true}};
     }
     if (action === "service-setup-handbook") {
-      if (!auth || !["establishment.manage", "diagnostics.setup.manage"].every(p => auth.user.permissions.includes(p)))
+      if (!auth || !auth.user.permissions.includes("establishment.manage") || !["diagnostics.setup.manage", "programme.manage", "maternity.policy.manage"].some(p => auth.user.permissions.includes(p)))
         throw new Error("Your current permissions do not allow this action. Refresh your workspace or contact the administrator.");
       // Facility setup spans workspaces: omit X-Active-Workspace only for this
       // authorised metadata read. Normal api calls keep their window's scope.
       return await api("GET", "/meta/handbook", undefined, undefined);
     }
     if (action === "clinical-pdf") {
-      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/(?:consents|cost-estimates|incidents)\/[1-9]\d*\/pdf|\/admissions\/[1-9]\d*\/discharge-summary\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/incidents\/sentinel-list\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf|\/facility\/equipment\/plan\/pdf|\/facility\/compliance-documents\/register\/pdf|\/facility\/drills\/[1-9]\d*\/pdf)$/.test(args.path) && !/^\/complaints\/[1-9]\d*\/letter\/pdf\?letter=(?:Acknowledgement|Outcome|AppealOutcome)$/.test(args.path)) if(!require("./complaint-report-path.cjs").isComplaintReportPath(args.path) && !require("./incident-report-path.cjs").isIncidentReportPath(args.path) && !require("./action-register-path.cjs").isActionRegisterPdfPath(args.path) && !require("./qa-round-path.cjs").isQaRoundPdfPath(args.path) && !require("./feedback-form-path.cjs").isFeedbackFormPdfPath(args.path)) throw new Error("Clinical download not permitted");
+      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/(?:consents|cost-estimates|incidents)\/[1-9]\d*\/pdf|\/admissions\/[1-9]\d*\/discharge-summary\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/incidents\/sentinel-list\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf|\/facility\/equipment\/plan\/pdf|\/facility\/compliance-documents\/register\/pdf|\/facility\/drills\/[1-9]\d*\/pdf)$/.test(args.path) && !/^\/complaints\/[1-9]\d*\/letter\/pdf\?letter=(?:Acknowledgement|Outcome|AppealOutcome)$/.test(args.path)) if(!require("./complaint-report-path.cjs").isComplaintReportPath(args.path) && !require("./incident-report-path.cjs").isIncidentReportPath(args.path) && !require("./action-register-path.cjs").isActionRegisterPdfPath(args.path) && !require("./qa-round-path.cjs").isQaRoundPdfPath(args.path) && !require("./feedback-form-path.cjs").isFeedbackFormPdfPath(args.path) && !require("./p9-quality-pdf-path.cjs").isQualityRegisterPdfPath(args.path)) throw new Error("Clinical download not permitted");
       const op=matchOperation("GET",args.path);
       if(!op || !auth || !permissionAllows(op,auth.user)) throw new Error("You do not have permission to download this document");
       if(Date.now()>auth.expires-60000)await refresh();

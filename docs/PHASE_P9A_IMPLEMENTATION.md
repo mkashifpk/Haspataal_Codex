@@ -24,17 +24,17 @@ User request: build the remaining Phase P9A screens and report reproduced backen
 |180|action_register|Implemented/tested4bbed64; proposal370 verified pending; issue61New; human/full breadth gates pending|
 |181|qa_rounds|Implemented/tested676a9ab; proposal371 verified pending; human/full breadth gates pending|
 |182|qa_rounds_owner|Implemented and tested in 3b70b76. Proposal 372 verified pending human review.|
-|183|record_feedback_reception|Implemented and tested. Two fresh responses, independent PDF, bilingual help. Proposal receipt tracked in the handoff.|
-|184|patient_feedback|Not started|
-|185|education_materials|Not started|
-|186|home_visit_policy|Not started|
-|187|home_visit_register|Not started|
-|188|preventive_programmes_setup|Not started|
-|189|adr_report|Not started|
-|190|blood_registers|Not started|
-|191|blood_center_registers|Not started|
-|192|obstetric_register|Not started|
-|193|labour_register_columns|Not started|
+|183|record_feedback_reception|037b90e, proposal 373 verified pending.|
+|184|patient_feedback|76389bf, proposal 374 verified pending.|
+|185|education_materials|cb1e4fc, proposal 375 verified pending.|
+|186|home_visit_policy|f98a6e0, proposal 376 verified pending. Shared policy write untested.|
+|187|home_visit_register|Implemented. DEV view hidden and verified. Interactive register and proposal pending.|
+|188|preventive_programmes_setup|Implemented. Facility setup create and stop-offering tested. Human review pending.|
+|189|adr_report|Implemented. ADR prefill, stock picker, save and sending lock tested. Backend report 62.|
+|190|blood_registers|Implemented. DEV statistics, empty trace source and PDFs tested. Backend report 63.|
+|191|blood_center_registers|Implemented. DEV return, empty donation source and PDF tested. Backend report 64.|
+|192|obstetric_register|Implemented. DEV period reads, Draft filter and PDFs tested.|
+|193|labour_register_columns|Implemented. Synthetic column create, append choice and retire tested.|
 
 Backend56 (New, 6 November2026): Ops is named investigator of fresh complaint2; detail200 with all write flags, own-assignment list403. Nurse's list200 works. No local role, guessed-ID or list-permission bypass. Exact requests and report receipt: phase-p9a-2026-11-06/.
 

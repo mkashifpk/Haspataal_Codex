@@ -1,4 +1,4 @@
-import { tr } from "../i18n";
+import { tr, bilingual as t } from "../i18n";
 import { useRef, useState } from "react";
 import * as facility from "../generated/facility_profile";
 import contract from "../generated/facility_profile-form.json";
@@ -17,12 +17,12 @@ export function Facility({
   revision,
   onChanged,
   storageScope,
-  onImagingSetup,
+  serviceSetups,
 }: {
   revision: number;
   onChanged: () => void;
   storageScope: string;
-  onImagingSetup?: () => void;
+  serviceSetups?: {id:string; title:string; open:()=>void}[];
 }) {
   const storageKey = `haspataal.facility-apply:${storageScope}`;
   const [loadedAttempt] = useState(() => {
@@ -314,7 +314,11 @@ export function Facility({
       )}
       {r.data && (
         <>
-          {onImagingSetup && <button data-help="facility.imaging-setup" disabled={!!pending || busy} onClick={onImagingSetup}>{tr("Imaging turnaround, critical findings and policy")}</button>}
+          {serviceSetups?.map(setup => (
+            <button key={setup.id} data-help={setup.id === "imaging_quality_setup" ? "facility.imaging-setup" : "facility.service-setup"} disabled={!!pending || busy} onClick={setup.open}>
+              {setup.id === "imaging_quality_setup" ? tr("Imaging turnaround, critical findings and policy") : setup.id === "preventive_programmes_setup" ? t(setup.title, "پیش کردہ احتیاطی پروگرام") : t(setup.title, "زچگی رجسٹر: کالم")}
+            </button>
+          ))}
           {tab === "Staff & duties" &&
             r.data.staff.map((s) => (
               <article

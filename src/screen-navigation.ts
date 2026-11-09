@@ -48,6 +48,6 @@ export function screenNavigation(
     )?.view;
     if (view === "hidden") return false;
     // Facility-profile configuration owns this setup-only entry.
-    return id !== "imaging_quality_setup" || view !== "setup";
+    return view !== "setup" || !["imaging_quality_setup", "preventive_programmes_setup", "labour_register_columns"].includes(id);
   });
 }

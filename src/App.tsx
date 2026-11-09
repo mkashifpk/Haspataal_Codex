@@ -1,3 +1,10 @@
+import { LabourRegisterColumns } from "./screens/LabourRegisterColumns";
+import { ObstetricRegister } from "./screens/ObstetricRegister";
+import { BloodCenterRegisters } from "./screens/BloodCenterRegisters";
+import { BloodRegisters } from "./screens/BloodRegisters";
+import { AdrReport } from "./screens/AdrReport";
+import { PreventiveProgrammes } from "./screens/PreventiveProgrammes";
+import { HomeVisitRegister } from "./screens/HomeVisitRegister";
 import { HomeVisitPolicy } from "./screens/HomeVisitPolicy";
 import { EducationMaterials } from "./screens/EducationMaterials";
 import { PatientFeedback } from "./screens/PatientFeedback";
@@ -878,17 +885,21 @@ export function App() {
   const [estimateAdmissionEntry,setEstimateAdmissionEntry]=useState<{userId:number;admissionId:number}>();
   const [wardAdmissionEntry,setWardAdmissionEntry]=useState<{userId:number;admissionId:number}>();
   const [bedAdmissionEntry,setBedAdmissionEntry]=useState<{userId:number;admissionId:number}>();
-  const [imagingSetupEntry, setImagingSetupEntry] = useState(false);
-  const facilitySetupScope = !!user && user.permissions.includes('establishment.manage') && user.permissions.includes('diagnostics.setup.manage') && (screen === 'facility_profile' || (screen === 'imaging_quality_setup' && imagingSetupEntry));
-  const facilitySetupHandbook = useLoad(() => facilitySetupScope && user ? call<HandbookOut>('service-setup-handbook').then(data=>({userId:user.user_id, data})) : Promise.resolve(undefined), [facilitySetupScope,user?.user_id,revision]);
-  const facilitySetupPage = !facilitySetupHandbook.loading && !facilitySetupHandbook.error && facilitySetupHandbook.data?.userId === user?.user_id ? [...(facilitySetupHandbook.data?.data.shared_screens||[]),...(facilitySetupHandbook.data?.data.workspaces.flatMap(w=>w.screens)||[])].find(s=>s.id==='imaging_quality_setup') : undefined;
-  const facilitySetupOutline = outline && facilitySetupPage ? {...outline, shared_screens:[...outline.shared_screens.filter(s=>s.id!=='imaging_quality_setup'),facilitySetupPage]} : outline;
+  const setupPermissions: Record<string,string> = {imaging_quality_setup:'diagnostics.setup.manage',preventive_programmes_setup:'programme.manage',labour_register_columns:'maternity.policy.manage'};
+  const [facilitySetupEntry, setFacilitySetupEntry] = useState<string>();
+  const setupPermission = user?.permissions.includes('establishment.manage') ? Object.values(setupPermissions).find(p=>user.permissions.includes(p)) : undefined;
+  const facilitySetupScope = !!setupPermission && (screen === 'facility_profile' || screen === facilitySetupEntry);
+  const facilitySetupHandbook = useLoad(() => facilitySetupScope && user ? call<HandbookOut>('service-setup-handbook').then(data=>({userId:user.user_id,data})) : Promise.resolve(undefined), [facilitySetupScope,user?.user_id,revision]);
+  const availableSetupPages = !facilitySetupHandbook.loading && !facilitySetupHandbook.error && facilitySetupHandbook.data?.userId === user?.user_id ? [...(facilitySetupHandbook.data?.data.shared_screens||[]),...(facilitySetupHandbook.data?.data.workspaces.flatMap(w=>w.screens)||[])].filter(p=>setupPermissions[p.id] && user?.permissions.includes(setupPermissions[p.id])) : [];
+  const facilitySetupOutline = outline && {...outline, shared_screens:[...outline.shared_screens.filter(p=>!availableSetupPages.some(s=>s.id===p.id)),...availableSetupPages]};
+  const imagingSetupEntry = facilitySetupEntry === 'imaging_quality_setup';
 
   function navigate(next: string, fromFacility = false) {
     if (sessionRecovery) return false;
-    if(next === "imaging_quality_setup" && est?.views.screens.find(s=>s.screen_id===next)?.view === "setup" && !(fromFacility && screen === "facility_profile" && user?.permissions.includes("establishment.manage"))) return false;
+    const viaSetup = fromFacility && screen === "facility_profile" && availableSetupPages.some(p=>p.id===next);
+    if(setupPermissions[next] && est?.views.screens.find(s=>s.screen_id===next)?.view === "setup" && !viaSetup) return false;
     if (frontDeskScreens.has(next) && !workspace) return false;
-    const routeOutline = next === "imaging_quality_setup" && fromFacility && facilitySetupPage ? facilitySetupOutline : outline;
+    const routeOutline = viaSetup ? facilitySetupOutline : outline;
     if (user && !["login", "connect_server", "settings", "help_center"].includes(next) && !handbookPermits(routeOutline, next)) return false;
     const required: Record<string, string[]> = {
       radiology_worklist: ["imaging.order.update", "imaging.order.view"],
@@ -944,7 +955,7 @@ export function App() {
       !window.confirm("Leave this screen and discard unsaved input?")
     )
       return false;
-    setImagingSetupEntry(next === "imaging_quality_setup" && fromFacility);
+    setFacilitySetupEntry(viaSetup ? next : undefined);
     if(next==='my_actions')setActionEntry(undefined);
     setScreen(next);
     setError(undefined);
@@ -1030,9 +1041,9 @@ export function App() {
     ) || [];
   useEffect(()=>{setActionEntry(undefined);},[user?.user_id]);
   const workspaceReady = !!user && !!outline && !!est && !!meta && readyContext?.userId === user.user_id && readyContext.workspace === workspace && readyContext.epoch === metadataEpoch.current;
-  const investigations=useLoad(()=>workspaceReady&&user?.permissions.some(p=>['incident.view','incident.report','ot.clinical_statistics.view'].includes(p))?assignedIncidents({mine:true,status:'UnderReview',limit:500}).then(rows=>rows.filter(r=>r.investigator_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,revision]);
+  const investigations=useLoad(()=>workspaceReady&&user?.permissions.some(p=>['incident.view','incident.report','ot.clinical_statistics.view'].includes(p))?assignedIncidents({mine:true,status:'UnderReview',limit:500}).then(rows=>rows.filter(r=>r.investigator_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,outline,revision]);
   const ownedActions=useLoad(()=>workspaceReady?ownedQualityActions({mine:true,status:'Open',limit:1000}).then(rows=>rows.filter(r=>r.owner_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,revision]);
-  const complaintInvestigations=useLoad(()=>workspaceReady&&user?.permissions.some(p=>['complaint.view','complaint.manage','complaint.register'].includes(p))?assignedComplaints({mine:true,status:'Acknowledged',limit:1000}).then(rows=>rows.filter(r=>r.investigator_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,revision]);
+  const complaintInvestigations=useLoad(()=>workspaceReady&&user&&handbookPermits(outline,'my_complaint_investigations')?assignedComplaints({mine:true,status:'Acknowledged',limit:1000}).then(rows=>rows.filter(r=>r.investigator_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,outline,revision]);
   const legacyNav = (workspaceReady ? [
     "app_shell",
     "workspace_picker",
@@ -1631,6 +1642,13 @@ export function App() {
               {screen==='qa_rounds_owner'&&<QaRounds screenId="qa_rounds_owner" noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen==='record_feedback_reception'&&<RecordFeedback noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen==='patient_feedback'&&<PatientFeedback revision={revision} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen==='labour_register_columns'&&<LabourRegisterColumns view={est?.views.screens.find(s=>s.screen_id===screen)?.view} fromSetup={facilitySetupEntry===screen} revision={revision} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen==='obstetric_register'&&<ObstetricRegister view={est?.views.screens.find(s=>s.screen_id===screen)?.view} revision={revision} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen==='blood_center_registers'&&<BloodCenterRegisters view={est?.views.screens.find(s=>s.screen_id===screen)?.view} revision={revision} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen==='blood_registers'&&<BloodRegisters view={est?.views.screens.find(s=>s.screen_id===screen)?.view} revision={revision} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen==='adr_report'&&<AdrReport revision={revision} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen==='preventive_programmes_setup'&&<PreventiveProgrammes view={est?.views.screens.find(s=>s.screen_id===screen)?.view} fromSetup={facilitySetupEntry===screen} openFacility={()=>navigate('facility_profile')} revision={revision} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen==='home_visit_register'&&<HomeVisitRegister view={est?.views.screens.find(s=>s.screen_id===screen)?.view} revision={revision} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen==='home_visit_policy'&&<HomeVisitPolicy openFacility={()=>navigate('facility_profile')} revision={revision} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen==='education_materials'&&<EducationMaterials revision={revision} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen==='incident_register_owner'&&<IncidentRegister screenId="incident_register_owner" key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
@@ -1802,7 +1820,7 @@ export function App() {
               {screen === "facility_profile" && (
                 <Facility
                   revision={revision}
-                  onImagingSetup={user.permissions.includes("diagnostics.setup.manage") && ["setup","full","open_work","records"].includes(est?.views.screens.find(s=>s.screen_id==="imaging_quality_setup")?.view||"") && !!facilitySetupPage ? ()=>{navigate("imaging_quality_setup",true)} : undefined}
+                  serviceSetups={availableSetupPages.filter(p=>est?.views.screens.some(v=>v.screen_id===p.id&&v.view!=="hidden")).map(p=>({id:p.id,title:p.title,open:()=>navigate(p.id,true)}))}
                   onChanged={refreshData}
                   storageScope={`${server.fingerprint}:${user.user_id}`}
                 />
@@ -1822,7 +1840,7 @@ export function App() {
         <Help
           screen={screen}
           initialPage={helpPage}
-          outline={screen === "imaging_quality_setup" && imagingSetupEntry ? facilitySetupOutline : outline}
+          outline={screen === facilitySetupEntry ? facilitySetupOutline : outline}
           language={prefs.language}
           onClose={() => {
             setHelpOpen(false);
