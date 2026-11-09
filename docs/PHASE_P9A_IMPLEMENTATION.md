@@ -29,13 +29,13 @@ User request: build the remaining Phase P9A screens and report reproduced backen
 |185|education_materials|cb1e4fc, proposal 375 verified pending.|
 |186|home_visit_policy|f98a6e0, proposal 376 verified pending. Shared policy write untested.|
 |187|home_visit_register|Implemented. DEV view hidden and verified. Interactive register and proposal pending.|
-|188|preventive_programmes_setup|Implemented. Facility setup create and stop-offering tested. Human review pending.|
-|189|adr_report|Implemented. ADR prefill, stock picker, save and sending lock tested. Backend report 62.|
-|190|blood_registers|Implemented. DEV statistics, empty trace source and PDFs tested. Backend report 63.|
-|191|blood_center_registers|Implemented. DEV return, empty donation source and PDF tested. Backend report 64.|
-|192|obstetric_register|Implemented. DEV period reads, Draft filter and PDFs tested.|
-|193|labour_register_columns|Implemented. Synthetic column create, append choice and retire tested.|
+|188|preventive_programmes_setup|Implemented. Facility setup create and stop-offering tested. Proposal 377 verified pending human review.|
+|189|adr_report|Implemented. ADR prefill, stock picker, save and sending lock tested. Backend report 62. Proposal 378 verified pending human review.|
+|190|blood_registers|Implemented. DEV statistics, empty trace source and PDFs tested. Backend report 63. Proposal 379 verified pending human review.|
+|191|blood_center_registers|Implemented. DEV return, empty donation source and PDF tested. Backend report 64. Proposal 380 verified pending human review.|
+|192|obstetric_register|Implemented. DEV period reads, Draft filter and PDFs tested. Proposal 381 verified pending human review.|
+|193|labour_register_columns|Implemented. Synthetic column create, append choice and retire tested. Proposal 382 verified pending human review.|
 
-Backend56 (New, 6 November2026): Ops is named investigator of fresh complaint2; detail200 with all write flags, own-assignment list403. Nurse's list200 works. No local role, guessed-ID or list-permission bypass. Exact requests and report receipt: phase-p9a-2026-11-06/.
+The 7 November DEV build fixed reports #56–#61. The 9 November follow-up verified Ops assignment access, four-desk tracking and a fresh cross-desk appeal, expanded staff directory and acknowledgement, withdrawal letter refusal, screening wording and the named department filter. Reports #62–#64 describe missing selector sources in the ADR, transfusion and blood-center bundles. The existing permission-checked source calls returned 200. See [the follow-up evidence](phase-p9a-2026-11-06/nov9-tracking-verification.md).
 
 All tests use clearly synthetic DEV records with fresh request identities. No human Review code/signature is entered. Translation/editor/device and complete named human journeys stay pending; the progress portal's authenticated human owns acceptance.

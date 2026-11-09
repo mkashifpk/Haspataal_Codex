@@ -1,6 +1,6 @@
 {
   "screen_id": "record_complaint_er",
-  "contract_fingerprint": "a4772c79e2249316e1a9",
+  "contract_fingerprint": "2bf245cdfd753209ff51",
   "knowledge_revision": "930b217cd2e48604",
   "delivery_gate": {
     "required": true,
@@ -235,6 +235,11 @@
       {
         "id": "rule:193690f561",
         "text": "Exists for the service emergency_department (work): show it as GET /establishment views.screens says for screen_id record_complaint_er (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "cites": []
+      },
+      {
+        "id": "rule:f714cbc2ba",
+        "text": "A complaint another desk received (decision 63): 'Track a complaint' asks for the tracking number and calls GET /complaints/by-number/{complaint_number} (exact; NOT_FOUND: no such number). The card says how it stands, never what it says: confirm complainant_name with the person at the desk, then give the status, the contact person and answer_due, or the last day to appeal (appeal_until). 'Record appeal' while can_appeal; afterwards this desk opens the complaint (can_open).",
         "cites": []
       }
     ],
@@ -485,6 +490,18 @@
       {
         "id": "q:editor",
         "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /complaints/by-number/{complaint_number}",
+        "label": "GET /complaints/by-number/{complaint_number}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:f714cbc2ba",
+        "label": "A complaint another desk received (decision 63): 'Track a complaint' asks for the tracking number and calls GET /complaints/by-number/{complaint_number} (exact; NOT_FOUND: no such number). The card says how it stands, never what it says: confirm complainant_name with the person at the desk, then give the status, the contact person and answer_due, or the last day to appeal (appeal_until). 'Record appeal' while can_appeal; afterwards this desk opens the complaint (can_open).",
         "points": 2,
         "claimed": false
       }
@@ -2066,6 +2083,128 @@
             "type": "integer"
           }
         ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /complaints/by-number/{complaint_number}",
+      "summary": "The tracking card of a complaint, by its number (any complaint desk)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "complaint.register",
+          "complaint.view",
+          "complaint.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of complaint.register or complaint.view or complaint.manage",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "complaint_number",
+          "in": "path",
+          "required": true,
+          "description": "The tracking number as the complainant gives it, e.g. CMP-2026-00004 (exact; case and spaces ignored)",
+          "schema": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "The tracking number as the complainant gives it, e.g. CMP-2026-00004 (exact; case and spaces ignored)",
+            "title": "Complaint Number"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ComplaintCardOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
         "note": null
       }
     }
@@ -8123,6 +8262,140 @@
       ],
       "title": "WardOccupancyOut",
       "description": "A ward's bed counts (view v_bed_matrix)."
+    },
+    "ComplaintCardOut": {
+      "properties": {
+        "complaint_id": {
+          "type": "integer",
+          "title": "Complaint Id"
+        },
+        "complaint_number": {
+          "type": "string",
+          "title": "Complaint Number",
+          "description": "The tracking number"
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Received At"
+        },
+        "complainant_name": {
+          "type": "string",
+          "title": "Complainant Name",
+          "description": "Confirm it with the person at the desk before telling them anything"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Received",
+            "Acknowledged",
+            "Resolved",
+            "Appealed",
+            "Closed",
+            "Withdrawn",
+            "NotMaintainable"
+          ],
+          "title": "Status"
+        },
+        "contact_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Contact Name",
+          "description": "The contact person named at the acknowledgement; null before it"
+        },
+        "answer_due": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Answer Due",
+          "description": "The date the complainant was given for the outcome, with any extension; null before the acknowledgement"
+        },
+        "outcome_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Outcome At",
+          "description": "When the outcome was conveyed"
+        },
+        "appeal_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Appeal Until",
+          "description": "The last day to appeal, once the outcome is conveyed"
+        },
+        "can_appeal": {
+          "type": "boolean",
+          "title": "Can Appeal",
+          "description": "Take the appeal now (POST /complaints/{complaint_id}/appeal): Resolved, within the window, and the caller takes complaints"
+        },
+        "can_open": {
+          "type": "boolean",
+          "title": "Can Open",
+          "description": "GET /complaints/{complaint_id} opens it for the caller: a complaint reader or manager, the person who received it, its investigator or the desk that took its appeal"
+        }
+      },
+      "type": "object",
+      "required": [
+        "complaint_id",
+        "complaint_number",
+        "received_at",
+        "complainant_name",
+        "status",
+        "contact_name",
+        "answer_due",
+        "outcome_at",
+        "appeal_until",
+        "can_appeal",
+        "can_open"
+      ],
+      "title": "ComplaintCardOut",
+      "description": "What any complaint desk reads by the exact tracking number the complainant brings (decision 63): how the complaint\nstands and whether it can be appealed now; never what it says, the patient, the findings or the outcome."
+    },
+    "Envelope_ComplaintCardOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/ComplaintCardOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[ComplaintCardOut]"
     }
   },
   "unknowns": [

@@ -15,6 +15,7 @@ import type { ClinicalUser } from "../clinical-context";
 import { bilingual as t } from "../i18n";
 import { formatHospitalTime } from "../hospital-time";
 import enums from "../complaint-intake-values.json";
+import { ComplaintTracking } from "./ComplaintTracking";
 export type ComplaintDesk =
   | "record_complaint_reception"
   | "record_complaint_admissions"
@@ -112,6 +113,7 @@ export function ComplaintIntake({
     [printBusy, setPrintBusy] = useState(false),
     [printError, setPrintError] = useState<unknown>(),
     [printNotice, setPrintNotice] = useState("");
+  const [trackingPending, setTrackingPending] = useState(false);
   const selected = useRef<number | undefined>(undefined),
     generation = useRef(0),
     form = useRef<HTMLFormElement>(null);
@@ -179,10 +181,12 @@ export function ComplaintIntake({
     !loading &&
     !error &&
     !write.blocked &&
+    !trackingPending &&
     !printBusy;
   const choose = async (id: number) => {
     if (
       write.blocked ||
+      trackingPending ||
       printBusy ||
       ((mode || dirty) &&
         !window.confirm(
@@ -202,6 +206,7 @@ export function ComplaintIntake({
   const startNew = () => {
     if (
       write.blocked ||
+      trackingPending ||
       printBusy ||
       ((mode || dirty) &&
         !window.confirm(
@@ -448,6 +453,7 @@ export function ComplaintIntake({
           {t("Save notice PDF", "نوٹس پی ڈی ایف محفوظ کریں")}
         </button>
       </div>
+      {!intakeOnly && screenId !== "complaints_register" && <ComplaintTracking user={user} screenId={screenId} disabled={!connected || !!mode || write.blocked || printBusy} canWrite={connected && !readOnly && !mode && !write.blocked && !printBusy} onOpen={id => void choose(id)} onPendingChange={setTrackingPending}/>}
       {loading && (
         <p role="status">{t("Loading complaints…", "شکایات کھل رہی ہیں…")}</p>
       )}

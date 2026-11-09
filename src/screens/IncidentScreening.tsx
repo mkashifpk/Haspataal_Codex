@@ -228,8 +228,10 @@ export function IncidentScreening({
         <div className="actions">
           <button
             data-help="isc.refresh"
-            disabled={blocked || loading}
-            onClick={() => void load()}
+            aria-disabled={blocked || loading}
+            onClick={() => {
+              if (!blocked && !loading) void load();
+            }}
           >
             {t("Refresh screening", "چھان بین تازہ کریں")}
           </button>
@@ -315,8 +317,8 @@ export function IncidentScreening({
                 "متعلقہ معاملہ نہیں۔ نام یا قسم کا فلٹر ہٹائیں۔",
               )
             : t(
-                "No pending items in the server screening window. New items also arrive in Incident notifications; refresh after reviewing a notification.",
-                "سرور کی مدت میں کوئی زیر انتظار معاملہ نہیں۔ نئے معاملات واقعہ اطلاعات میں بھی آتے ہیں؛ اطلاع دیکھ کر تازہ کریں۔",
+                "No pending items in the server screening window. Deaths appear after certification, readmissions after the previous discharge, and returns to theatre after both operation times are recorded. New items also arrive in Incident notifications.",
+                "سرور کی مدت میں کوئی زیر انتظار معاملہ نہیں۔ وفات تصدیق کے بعد، دوبارہ داخلہ پچھلی رخصتی کے بعد، اور تھیٹر واپسی دونوں وقت درج ہونے پر دکھتی ہے۔ نئے معاملات واقعہ اطلاع میں بھی آتے ہیں۔",
               )}
         </p>
       )}

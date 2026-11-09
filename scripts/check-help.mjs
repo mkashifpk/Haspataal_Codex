@@ -310,6 +310,7 @@ export function checkHelp({
       "MyComplaintInvestigations",
       "MyActions",
       "ComplaintIntake",
+      "ComplaintTracking",
       "ComplaintRegister",
       "ComplaintAppeals",
       "ComplaintStatistics",
