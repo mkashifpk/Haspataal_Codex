@@ -1,0 +1,1738 @@
+{
+  "screen": "record_review_cycles",
+  "title": "Record review cycles",
+  "cases": [
+    {
+      "id": "case:GET /quality/record-review/status",
+      "call": "GET /api/v1/quality/record-review/status",
+      "summary": "Review schedule at a glance (what is due, what is open, MSDS 156)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-review/status"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "frequency_months": 3,
+                "today": "2026-09-28",
+                "next_due": {
+                  "period_start": "2026-04-01",
+                  "period_end": "2026-06-30",
+                  "label": "Q2 2026",
+                  "due_by": "2026-07-30",
+                  "is_overdue": true
+                },
+                "open_cycles": [],
+                "last_closed": {
+                  "cycle_id": 1,
+                  "cycle_number": "MRR-2026-001",
+                  "period_start": "2026-08-29",
+                  "period_end": "2026-09-28",
+                  "closed_at": "2026-09-28T16:29:15.441521+00:00"
+                },
+                "open_deficiencies": 0,
+                "overdue_actions": 0,
+                "indicator_156": {
+                  "indicator": 156,
+                  "title": "The medical records are reviewed periodically",
+                  "status": "NotMet",
+                  "evidence": "1 review(s) closed in the last 12 months; the policy asks for one every 3 month(s) (4 a year)"
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-28T16:29:15.508892+00:00"
+              },
+              "request_id": "748e43f775ea40d6bcf44aef45b517ed"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /quality/record-reviews",
+      "call": "GET /api/v1/quality/record-reviews",
+      "summary": "Review cycles (newest period first)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-reviews"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "cycle_id": 1,
+                  "cycle_number": "MRR-2026-001",
+                  "title": "Medical record review 2026-08-29 to 2026-09-28",
+                  "period_start": "2026-08-29",
+                  "period_end": "2026-09-28",
+                  "due_date": "2026-10-28",
+                  "status": "InReview",
+                  "created_at": "2026-09-28T16:29:14.873160+00:00",
+                  "closed_at": null,
+                  "is_overdue": false,
+                  "items_total": 4,
+                  "items_reviewed": 0,
+                  "open_deficiencies": 0
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-28T16:29:15.063434+00:00"
+              },
+              "request_id": "44d38b90c8a7451da242e20fa986cbf8"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /quality/record-reviews",
+      "call": "POST /api/v1/quality/record-reviews",
+      "summary": "Plan a review cycle",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-reviews",
+            "body": {
+              "period_start": "2026-08-29",
+              "period_end": "2026-09-28",
+              "reviewers": [
+                {
+                  "user_id": 7
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "cycle_id": 1,
+                "cycle_number": "MRR-2026-001",
+                "title": "Medical record review 2026-08-29 to 2026-09-28",
+                "period_start": "2026-08-29",
+                "period_end": "2026-09-28",
+                "due_date": "2026-10-28",
+                "status": "Planned",
+                "include_opd": true,
+                "confidence_level": 95,
+                "margin_pct": 10,
+                "min_per_stratum": 2,
+                "sample_seed": null,
+                "sample_plan": null,
+                "sampled_at": null,
+                "sampled_by_name": null,
+                "summary": null,
+                "closed_at": null,
+                "closed_by_name": null,
+                "cancel_reason": null,
+                "created_by": 6,
+                "created_by_name": "Quality Officer",
+                "created_at": "2026-09-28T16:29:14.873160+00:00",
+                "row_version": 1,
+                "is_overdue": false,
+                "reviewers": [
+                  {
+                    "user_id": 7,
+                    "display_name": "Dr Reviewer",
+                    "discipline": "Medical",
+                    "is_active": true,
+                    "assigned": 0,
+                    "reviewed": 0
+                  }
+                ],
+                "items": [],
+                "deficiencies": {
+                  "total": 0,
+                  "open": 0,
+                  "corrected": 0,
+                  "acknowledged": 0,
+                  "withdrawn": 0
+                },
+                "actions": []
+              },
+              "meta": {
+                "server_time": "2026-09-28T16:29:14.932286+00:00"
+              },
+              "request_id": "a20bcbec19ab41599d2cc76fe8fc4b09"
+            }
+          },
+          "errors_seen": [
+            "RECORD_REVIEWER_NOT_ELIGIBLE",
+            "RECORD_REVIEW_PERIOD_OVERLAP"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "RECORD_REVIEWER_NOT_ELIGIBLE",
+        "RECORD_REVIEW_PERIOD_OVERLAP",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /quality/record-reviews/{cycle_id}",
+      "call": "GET /api/v1/quality/record-reviews/{cycle_id}",
+      "summary": "A cycle with its panel, sampled records, deficiency counts and actions",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-reviews/2"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "cycle_id": 2,
+                "cycle_number": "MRR-2026-001",
+                "title": "Medical record review Q1 2020",
+                "period_start": "2020-01-01",
+                "period_end": "2020-03-31",
+                "due_date": "2026-10-12",
+                "status": "InReview",
+                "include_opd": true,
+                "confidence_level": 95,
+                "margin_pct": 10,
+                "min_per_stratum": 2,
+                "sample_seed": 3798655846473618000,
+                "sample_plan": {
+                  "z": 1.96,
+                  "method": "Stratified random sample (department x record state); Cochran sample size for a proportion (p = 0.5) with finite-population correction; proportional allocation with a minimum per stratum",
+                  "strata": [
+                    {
+                      "sample": 1,
+                      "stratum": "1:Active",
+                      "population": 1,
+                      "record_state": "Active",
+                      "department_id": 1,
+                      "department_name": "General Medicine"
+                    }
+                  ],
+                  "margin_pct": 10,
+                  "population": 1,
+                  "unassigned": 0,
+                  "drawn_records": 1,
+                  "planned_sample": 1,
+                  "min_per_stratum": 2,
+                  "required_sample": 1,
+                  "confidence_level": 95,
+                  "includes_open_records": true,
+                  "includes_closed_records": false
+                },
+                "sampled_at": "2026-09-28T16:29:34.385526+00:00",
+                "sampled_by_name": "Quality Officer",
+                "summary": null,
+                "closed_at": null,
+                "closed_by_name": null,
+                "cancel_reason": null,
+                "created_by": 6,
+                "created_by_name": "Quality Officer",
+                "created_at": "2026-09-28T16:29:34.347228+00:00",
+                "row_version": 2,
+                "is_overdue": false,
+                "reviewers": [
+                  {
+                    "user_id": 7,
+                    "display_name": "Dr Reviewer",
+                    "discipline": "Medical",
+                    "is_active": true,
+                    "assigned": 1,
+                    "reviewed": 0
+                  }
+                ],
+                "items": [
+                  {
+                    "item_id": 1,
+                    "cycle_id": 2,
+                    "cycle_number": "MRR-2026-001",
+                    "due_date": "2026-10-12",
+                    "record_type": "Admission",
+                    "admission_id": 1,
+                    "ticket_id": null,
+                    "record_number": "ADM-2026-00001",
+                    "mrn": "MRN-2026-000003",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Active",
+                    "reviewer_user_id": 7,
+                    "reviewer_name": "Dr Reviewer",
+                    "status": "Pending",
+                    "score_pct": null,
+                    "reviewed_at": null
+                  }
+                ],
+                "deficiencies": {
+                  "total": 0,
+                  "open": 0,
+                  "corrected": 0,
+                  "acknowledged": 0,
+                  "withdrawn": 0
+                },
+                "actions": []
+              },
+              "meta": {
+                "server_time": "2026-09-28T16:29:34.478872+00:00"
+              },
+              "request_id": "b402c2b7358e4e778c3d4540d16973c3"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /quality/record-review/people",
+      "call": "GET /api/v1/quality/record-review/people",
+      "summary": "Every member of staff a quality record may name (and who can review records)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-review/people"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "user_id": 1,
+                  "display_name": "Dr Ahmed",
+                  "designation": "Doctor",
+                  "department_name": "General Medicine",
+                  "staff_category": "Clinical",
+                  "can_review": true,
+                  "default_discipline": "Medical"
+                },
+                {
+                  "user_id": 7,
+                  "display_name": "Dr Reviewer",
+                  "designation": "Doctor",
+                  "department_name": null,
+                  "staff_category": "Clinical",
+                  "can_review": true,
+                  "default_discipline": "Medical"
+                },
+                {
+                  "user_id": 2,
+                  "display_name": "Dr Sara",
+                  "designation": "Doctor",
+                  "department_name": "General Medicine",
+                  "staff_category": "Clinical",
+                  "can_review": true,
+                  "default_discipline": "Medical"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-28T16:29:14.861565+00:00"
+              },
+              "request_id": "270dcbd5bcba4d3781b715ca8c500550"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /quality/record-reviews/{cycle_id}/reviewers",
+      "call": "PUT /api/v1/quality/record-reviews/{cycle_id}/reviewers",
+      "summary": "Replace the review panel",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-reviews/1/reviewers",
+            "body": {
+              "reviewers": [
+                {
+                  "user_id": 7
+                },
+                {
+                  "user_id": 8
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "cycle_id": 1,
+                "cycle_number": "MRR-2026-001",
+                "title": "Medical record review 2026-08-29 to 2026-09-28",
+                "period_start": "2026-08-29",
+                "period_end": "2026-09-28",
+                "due_date": "2026-10-28",
+                "status": "Planned",
+                "include_opd": true,
+                "confidence_level": 95,
+                "margin_pct": 10,
+                "min_per_stratum": 2,
+                "sample_seed": null,
+                "sample_plan": null,
+                "sampled_at": null,
+                "sampled_by_name": null,
+                "summary": null,
+                "closed_at": null,
+                "closed_by_name": null,
+                "cancel_reason": null,
+                "created_by": 6,
+                "created_by_name": "Quality Officer",
+                "created_at": "2026-09-28T16:29:14.873160+00:00",
+                "row_version": 1,
+                "is_overdue": false,
+                "reviewers": [
+                  {
+                    "user_id": 7,
+                    "display_name": "Dr Reviewer",
+                    "discipline": "Medical",
+                    "is_active": true,
+                    "assigned": 0,
+                    "reviewed": 0
+                  },
+                  {
+                    "user_id": 8,
+                    "display_name": "Head Nurse Reviewer",
+                    "discipline": "Nursing",
+                    "is_active": true,
+                    "assigned": 0,
+                    "reviewed": 0
+                  }
+                ],
+                "items": [],
+                "deficiencies": {
+                  "total": 0,
+                  "open": 0,
+                  "corrected": 0,
+                  "acknowledged": 0,
+                  "withdrawn": 0
+                },
+                "actions": []
+              },
+              "meta": {
+                "server_time": "2026-09-28T16:29:14.953570+00:00"
+              },
+              "request_id": "6e28a3050bd14ccfaff65440903b17be"
+            }
+          },
+          "errors_seen": [
+            "RECORD_REVIEWER_HAS_ITEMS"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "RECORD_REVIEWER_HAS_ITEMS",
+        "RECORD_REVIEWER_NOT_ELIGIBLE",
+        "RECORD_REVIEW_NOT_OPEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /quality/record-reviews/{cycle_id}/sample-plan",
+      "call": "GET /api/v1/quality/record-reviews/{cycle_id}/sample-plan",
+      "summary": "The sampling plan (a preview before the start; nothing is drawn)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-reviews/1/sample-plan"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "method": "Stratified random sample (department x record state); Cochran sample size for a proportion (p = 0.5) with finite-population correction; proportional allocation with a minimum per stratum",
+                "confidence_level": 95,
+                "z": 1.96,
+                "margin_pct": 10,
+                "min_per_stratum": 2,
+                "population": 4,
+                "required_sample": 4,
+                "planned_sample": 4,
+                "includes_open_records": true,
+                "includes_closed_records": true,
+                "strata": [
+                  {
+                    "stratum": "1:Discharged",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Discharged",
+                    "population": 1,
+                    "sample": 1
+                  },
+                  {
+                    "stratum": "1:Active",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Active",
+                    "population": 1,
+                    "sample": 1
+                  },
+                  {
+                    "stratum": "1:Visit",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Visit",
+                    "population": 2,
+                    "sample": 2
+                  }
+                ],
+                "seed": null,
+                "is_drawn": false
+              },
+              "meta": {
+                "server_time": "2026-09-28T16:29:14.967573+00:00"
+              },
+              "request_id": "3a53e2ca450340cc9f9425a7781dbd39"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /quality/record-reviews/{cycle_id}/start",
+      "call": "POST /api/v1/quality/record-reviews/{cycle_id}/start",
+      "summary": "Draw the sample and start the review",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-reviews/1/start"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "cycle_id": 1,
+                "cycle_number": "MRR-2026-001",
+                "title": "Medical record review 2026-08-29 to 2026-09-28",
+                "period_start": "2026-08-29",
+                "period_end": "2026-09-28",
+                "due_date": "2026-10-28",
+                "status": "InReview",
+                "include_opd": true,
+                "confidence_level": 95,
+                "margin_pct": 10,
+                "min_per_stratum": 2,
+                "sample_seed": 2336315891933234700,
+                "sample_plan": {
+                  "z": 1.96,
+                  "method": "Stratified random sample (department x record state); Cochran sample size for a proportion (p = 0.5) with finite-population correction; proportional allocation with a minimum per stratum",
+                  "strata": [
+                    {
+                      "sample": 1,
+                      "stratum": "1:Discharged",
+                      "population": 1,
+                      "record_state": "Discharged",
+                      "department_id": 1,
+                      "department_name": "General Medicine"
+                    },
+                    {
+                      "sample": 1,
+                      "stratum": "1:Active",
+                      "population": 1,
+                      "record_state": "Active",
+                      "department_id": 1,
+                      "department_name": "General Medicine"
+                    },
+                    {
+                      "sample": 2,
+                      "stratum": "1:Visit",
+                      "population": 2,
+                      "record_state": "Visit",
+                      "department_id": 1,
+                      "department_name": "General Medicine"
+                    }
+                  ],
+                  "margin_pct": 10,
+                  "population": 4,
+                  "unassigned": 0,
+                  "drawn_records": 4,
+                  "planned_sample": 4,
+                  "min_per_stratum": 2,
+                  "required_sample": 4,
+                  "confidence_level": 95,
+                  "includes_open_records": true,
+                  "includes_closed_records": true
+                },
+                "sampled_at": "2026-09-28T16:29:14.972548+00:00",
+                "sampled_by_name": "Quality Officer",
+                "summary": null,
+                "closed_at": null,
+                "closed_by_name": null,
+                "cancel_reason": null,
+                "created_by": 6,
+                "created_by_name": "Quality Officer",
+                "created_at": "2026-09-28T16:29:14.873160+00:00",
+                "row_version": 2,
+                "is_overdue": false,
+                "reviewers": [
+                  {
+                    "user_id": 7,
+                    "display_name": "Dr Reviewer",
+                    "discipline": "Medical",
+                    "is_active": true,
+                    "assigned": 2,
+                    "reviewed": 0
+                  },
+                  {
+                    "user_id": 8,
+                    "display_name": "Head Nurse Reviewer",
+                    "discipline": "Nursing",
+                    "is_active": true,
+                    "assigned": 2,
+                    "reviewed": 0
+                  }
+                ],
+                "items": [
+                  {
+                    "item_id": 1,
+                    "cycle_id": 1,
+                    "cycle_number": "MRR-2026-001",
+                    "due_date": "2026-10-28",
+                    "record_type": "Admission",
+                    "admission_id": 1,
+                    "ticket_id": null,
+                    "record_number": "ADM-2026-00001",
+                    "mrn": "MRN-2026-000003",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Active",
+                    "reviewer_user_id": 7,
+                    "reviewer_name": "Dr Reviewer",
+                    "status": "Pending",
+                    "score_pct": null,
+                    "reviewed_at": null
+                  },
+                  {
+                    "item_id": 2,
+                    "cycle_id": 1,
+                    "cycle_number": "MRR-2026-001",
+                    "due_date": "2026-10-28",
+                    "record_type": "Admission",
+                    "admission_id": 2,
+                    "ticket_id": null,
+                    "record_number": "ADM-2026-00002",
+                    "mrn": "MRN-2026-000004",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Discharged",
+                    "reviewer_user_id": 8,
+                    "reviewer_name": "Head Nurse Reviewer",
+                    "status": "Pending",
+                    "score_pct": null,
+                    "reviewed_at": null
+                  },
+                  {
+                    "item_id": 3,
+                    "cycle_id": 1,
+                    "cycle_number": "MRR-2026-001",
+                    "due_date": "2026-10-28",
+                    "record_type": "OpdVisit",
+                    "admission_id": null,
+                    "ticket_id": 2,
+                    "record_number": "OPD-2026-000002",
+                    "mrn": "MRN-2026-000002",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Visit",
+                    "reviewer_user_id": 7,
+                    "reviewer_name": "Dr Reviewer",
+                    "status": "Pending",
+                    "score_pct": null,
+                    "reviewed_at": null
+                  }
+                ],
+                "deficiencies": {
+                  "total": 0,
+                  "open": 0,
+                  "corrected": 0,
+                  "acknowledged": 0,
+                  "withdrawn": 0
+                },
+                "actions": []
+              },
+              "meta": {
+                "server_time": "2026-09-28T16:29:15.048334+00:00"
+              },
+              "request_id": "42d021f728934f5484322d5297fd7b76"
+            }
+          },
+          "errors_seen": [
+            "RECORD_REVIEW_EMPTY_POPULATION",
+            "RECORD_REVIEW_NO_REVIEWERS"
+          ],
+          "events_emitted": [
+            "notification.created",
+            "record_review.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "RECORD_REVIEW_EMPTY_POPULATION",
+        "RECORD_REVIEW_NO_REVIEWERS",
+        "RECORD_REVIEW_TRANSITION_INVALID",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /quality/record-review-items/{item_id}/assign",
+      "call": "POST /api/v1/quality/record-review-items/{item_id}/assign",
+      "summary": "Hand a pending record to another panel member",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-review-items/1/assign",
+            "body": {
+              "reviewer_user_id": 14
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "item_id": 1,
+                "cycle_id": 1,
+                "cycle_number": "MRR-2026-001",
+                "due_date": "2026-10-28",
+                "record_type": "Admission",
+                "admission_id": 1,
+                "ticket_id": null,
+                "record_number": "ADM-2026-00001",
+                "mrn": "MRN-2026-000003",
+                "department_id": 1,
+                "department_name": "General Medicine",
+                "record_state": "Active",
+                "reviewer_user_id": 14,
+                "reviewer_name": "Dr Other",
+                "status": "Pending",
+                "score_pct": null,
+                "reviewed_at": null
+              },
+              "meta": {
+                "server_time": "2026-09-28T16:29:25.992362+00:00"
+              },
+              "request_id": "27bf2cde9a8c4b84a7417956319ce876"
+            }
+          },
+          "errors_seen": [
+            "RECORD_REVIEWER_IS_AUTHOR"
+          ],
+          "events_emitted": [
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "RECORD_REVIEWER_IS_AUTHOR",
+        "RECORD_REVIEWER_NOT_ELIGIBLE",
+        "RECORD_REVIEW_FROZEN",
+        "RECORD_REVIEW_NOT_OPEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /quality/record-review-items/{item_id}",
+      "call": "GET /api/v1/quality/record-review-items/{item_id}",
+      "summary": "A sampled record with its checklist and the system's answers",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-review-items/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "item_id": 1,
+                "cycle_id": 1,
+                "cycle_number": "MRR-2026-001",
+                "due_date": "2026-10-31",
+                "record_type": "Admission",
+                "admission_id": 1,
+                "ticket_id": null,
+                "record_number": "ADM-2026-00001",
+                "mrn": "MRN-2026-000003",
+                "department_id": 1,
+                "department_name": "General Medicine",
+                "record_state": "Active",
+                "reviewer_user_id": 7,
+                "reviewer_name": "Dr Reviewer",
+                "status": "Pending",
+                "score_pct": null,
+                "reviewed_at": null,
+                "snapshot": {
+                  "record_type": "Admission",
+                  "admission": {
+                    "admission_id": 1,
+                    "admission_number": "ADM-2026-00001",
+                    "status": "Admitted",
+                    "admission_type": "Standard",
+                    "patient_id": 3,
+                    "mrn": "MRN-2026-000003",
+                    "patient_name": "Ali Khan",
+                    "primary_doctor_id": 1,
+                    "primary_doctor_name": "Dr Ahmed",
+                    "ward_name": "Medical Ward",
+                    "department_name": "General Medicine",
+                    "requested_at": "2026-09-30T20:22:29.965573+00:00",
+                    "admitted_at": "2026-09-30T20:22:30.031109+00:00",
+                    "discharged_at": null,
+                    "admission_reason": "Fever and breathlessness",
+                    "provisional_diagnosis": "Community-acquired pneumonia",
+                    "initial_care_plan": null,
+                    "details_stamp": {
+                      "at": "2026-09-30T20:22:29.965573+00:00",
+                      "name": "Dr Ahmed",
+                      "text": "Dr Ahmed, Doctor, PMDC PMDC-64348, 01-Oct-2026 01:22",
+                      "user_id": 1,
+                      "designation": "Doctor",
+                      "employee_id": 1,
+                      "registration": "PMDC PMDC-64348"
+                    },
+                    "vitals_interval_minutes": 240,
+                    "encounters": [
+                      {
+                        "encounter_id": 3,
+                        "encounter_type": "IPD",
+                        "status": "Final",
+                        "doctor_id": 1,
+                        "doctor_name": "Dr Ahmed",
+                        "created_at": "2026-09-30T20:22:30.284026+00:00",
+                        "finalized_at": "2026-09-30T20:22:30.288739+00:00",
+                        "chief_complaint": null,
+                        "history": null,
+                        "diagnosis": "Pneumonia",
+                        "icd_codes": [
+                          "CA40.Z"
+                        ],
+                        "icd_terms": [
+                          {
+                            "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                            "code": "CA40.Z",
+                            "title": "Pneumonia, organism unspecified",
+                            "system": "ICD-11"
+                          }
+                        ],
+                        "plan": "IV ceftriaxone, oxygen",
+                        "clinical_note": null,
+                        "corrections": 0
+                      }
+                    ],
+                    "death": null,
+                    "mlc_numbers": [],
+                    "discharge_summary": null,
+                    "vitals": {
+                      "count": 1,
+                      "first_at": "2026-09-30T20:22:30.300786+00:00",
+                      "last_at": "2026-09-30T20:22:30.300786+00:00",
+                      "longest_gap_minutes": 0
+                    },
+                    "nursing_notes": {
+                      "count": 0,
+                      "first_at": null,
+                      "last_at": null
+                    },
+                    "doses": {
+                      "scheduled": 0,
+                      "administered": 0,
+                      "not_given": 0,
+                      "uncharted": 0
+                    },
+                    "operations": [],
+                    "consents": [
+                      {
+                        "consent_number": "CN-2026-000001",
+                        "category": "General",
+                        "form_title": "داخلے اور علاج کے لیے عمومی رضامندی",
+                        "status": "Given",
+                        "mode": "Signed",
+                        "decided_at": "2026-09-30T20:22:30.173293+00:00",
+                        "booking_number": null,
+                        "signer": "Patient",
+                        "signer_relationship": null,
+                        "obtained_by_name": "Dr Ahmed",
+                        "scanned": true
+                      }
+                    ],
+                    "verbal_orders": [],
+                    "wristbands": [
+                      {
+                        "reason": "Admission",
+                        "replacement_reason": null,
+                        "issued_at": "2026-09-30T20:22:30.249271+00:00",
+                        "replaced_at": null
+                      }
+                    ],
+                    "own_medicines": [],
+                    "documents": [
+                      {
+                        "doc_type": "Consent",
+                        "title": "CN-2026-000001",
+                        "uploaded_at": "2026-09-30T20:22:30.206908+00:00"
+                      }
+                    ],
+                    "prescriptions": 0,
+                    "lab_requisitions": 0,
+                    "lab_results_published": 0,
+                    "imaging_orders": 0,
+                    "imaging_reported": 0,
+                    "critical_results": [],
+                    "results_measured": 0,
+                    "routine_results_measured": 0,
+                    "late_results": []
+                  },
+                  "visit": null
+                },
+                "criteria": [
+                  {
+                    "criterion_id": 1,
+                    "code": "ADM_REASON",
+                    "category": "Completeness",
+                    "applies_to": "Admission",
+                    "responsible": "Doctor",
+                    "title": "Reason for admission documented",
+                    "guidance": "The admission request or the first inpatient note says why the patient was admitted [MSDS 149].",
+                    "auto_check": "admission_reason",
+                    "sort_order": 10,
+                    "is_active": true,
+                    "row_version": 1
+                  },
+                  {
+                    "criterion_id": 2,
+                    "code": "ADM_DIAGNOSIS",
+                    "category": "Completeness",
+                    "applies_to": "Admission",
+                    "responsible": "Doctor",
+                    "title": "Provisional or final diagnosis documented",
+                    "guidance": "A diagnosis on the admission or in a finalized inpatient note [MSDS 149].",
+                    "auto_check": "provisional_diagnosis",
+                    "sort_order": 20,
+                    "is_active": true,
+                    "row_version": 1
+                  },
+                  {
+                    "criterion_id": 3,
+                    "code": "ADM_CARE_PLAN",
+                    "category": "Completeness",
+                    "applies_to": "Admission",
+                    "responsible": "Doctor",
+                    "title": "Plan of care documented",
+                    "guidance": "The admission's initial care plan or a finalized inpatient note states the plan [MSDS 149].",
+                    "auto_check": "care_plan",
+                    "sort_order": 30,
+                    "is_active": true,
+                    "row_version": 1
+                  }
+                ],
+                "auto_results": {
+                  "ADM_REASON": {
+                    "result": "Pass",
+                    "detail": "Reason given on the admission",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_DIAGNOSIS": {
+                    "result": "Pass",
+                    "detail": "Provisional diagnosis on the admission",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_CARE_PLAN": {
+                    "result": "Pass",
+                    "detail": "Plan in a finalized note",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_OPERATIVE_NOTE": {
+                    "result": "NA",
+                    "detail": "No completed operation",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_ANAESTHESIA": {
+                    "result": "NA",
+                    "detail": "No completed operation with an anaesthetist",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_SAFETY_CHECKLIST": {
+                    "result": "NA",
+                    "detail": "No completed operation",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_GENERAL_CONSENT": {
+                    "result": "Pass",
+                    "detail": "CN-2026-000001: signed by the patient, the form scanned",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_CONSENT": {
+                    "result": "NA",
+                    "detail": "No operation and no transfusion",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_DISCHARGE_SUMMARY": {
+                    "result": "NA",
+                    "detail": "The patient is still admitted",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_TRANSFER_RECORD": {
+                    "result": "NA",
+                    "detail": "Not transferred to another hospital",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_VITALS": {
+                    "result": "Pass",
+                    "detail": "1 entries; longest gap 0.0 h (ordered every 4.0 h)",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_WRISTBAND": {
+                    "result": "Pass",
+                    "detail": "Wristband printed 01-Oct-2026 01:22",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_MAR": {
+                    "result": "NA",
+                    "detail": "No scheduled doses",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_VERBAL_ORDERS": {
+                    "result": "NA",
+                    "detail": "No verbal or telephone order",
+                    "responsible_employee_id": null
+                  },
+                  "ADM_OWN_MEDICINES": {
+                    "result": "NA",
+                    "detail": "The patient brought no medicines in",
+                    "responsible_employee_id": null
+                  },
+                  "ICD_CODED": {
+                    "result": "Pass",
+                    "detail": "CA40.Z",
+                    "responsible_employee_id": null
+                  },
+                  "NOTES_SIGNED": {
+                    "result": "Pass",
+                    "detail": "All 1 note(s) finalized",
+                    "responsible_employee_id": null
+                  },
+                  "NOTES_TIMELY": {
+                    "result": "Pass",
+                    "detail": "Every note finalized within 24 h",
+                    "responsible_employee_id": null
+                  },
+                  "DEATH_CERTIFICATE": {
+                    "result": "NA",
+                    "detail": "The patient did not die in this record",
+                    "responsible_employee_id": null
+                  },
+                  "AUTOPSY_REPORT": {
+                    "result": "NA",
+                    "detail": "No clinical autopsy",
+                    "responsible_employee_id": null
+                  },
+                  "CRITICAL_RESULTS": {
+                    "result": "NA",
+                    "detail": "No critical result",
+                    "responsible_employee_id": null
+                  },
+                  "DIAGNOSTIC_TURNAROUND": {
+                    "result": "NA",
+                    "detail": "No lab result or imaging report was due",
+                    "responsible_employee_id": null
+                  }
+                },
+                "answers": null,
+                "reviewer_note": null,
+                "deficiencies": []
+              },
+              "meta": {
+                "server_time": "2026-09-30T20:22:31.488961+00:00"
+              },
+              "request_id": "1f27558b6eb446d7a6d1d65e204e6541"
+            }
+          },
+          "errors_seen": [
+            "RECORD_REVIEW_NOT_ASSIGNED"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "RECORD_REVIEW_NOT_ASSIGNED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /quality/record-reviews/{cycle_id}/close",
+      "call": "POST /api/v1/quality/record-reviews/{cycle_id}/close",
+      "summary": "Close the cycle with the minutes",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-reviews/1/close",
+            "body": {
+              "summary": "4 records reviewed by a doctor and a head nurse; 2 deficiencies; teaching session planned"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "cycle_id": 1,
+                "cycle_number": "MRR-2026-001",
+                "title": "Medical record review 2026-09-14 to 2026-10-14",
+                "period_start": "2026-09-14",
+                "period_end": "2026-10-14",
+                "due_date": "2026-11-13",
+                "status": "Closed",
+                "include_opd": true,
+                "confidence_level": 95,
+                "margin_pct": 10,
+                "min_per_stratum": 2,
+                "sample_seed": 1284696102606740000,
+                "sample_plan": {
+                  "z": 1.96,
+                  "method": "Stratified random sample (department x record state); Cochran sample size for a proportion (p = 0.5) with finite-population correction; proportional allocation with a minimum per stratum",
+                  "strata": [
+                    {
+                      "sample": 1,
+                      "stratum": "1:Discharged",
+                      "population": 1,
+                      "record_state": "Discharged",
+                      "department_id": 1,
+                      "department_name": "General Medicine"
+                    },
+                    {
+                      "sample": 1,
+                      "stratum": "1:Active",
+                      "population": 1,
+                      "record_state": "Active",
+                      "department_id": 1,
+                      "department_name": "General Medicine"
+                    },
+                    {
+                      "sample": 2,
+                      "stratum": "1:Visit",
+                      "population": 2,
+                      "record_state": "Visit",
+                      "department_id": 1,
+                      "department_name": "General Medicine"
+                    }
+                  ],
+                  "margin_pct": 10,
+                  "population": 4,
+                  "unassigned": 0,
+                  "drawn_records": 4,
+                  "planned_sample": 4,
+                  "min_per_stratum": 2,
+                  "required_sample": 4,
+                  "confidence_level": 95,
+                  "includes_open_records": true,
+                  "includes_closed_records": true
+                },
+                "sampled_at": "2026-10-14T11:26:59.580763+00:00",
+                "sampled_by_name": "Quality Officer",
+                "summary": "4 records reviewed by a doctor and a head nurse; 2 deficiencies; teaching session planned",
+                "closed_at": "2026-10-14T11:27:00.139707+00:00",
+                "closed_by_name": "Quality Officer",
+                "cancel_reason": null,
+                "created_by": 6,
+                "created_by_name": "Quality Officer",
+                "created_at": "2026-10-14T11:26:59.510407+00:00",
+                "row_version": 3,
+                "is_overdue": false,
+                "reviewers": [
+                  {
+                    "user_id": 7,
+                    "display_name": "Dr Reviewer",
+                    "discipline": "Medical",
+                    "is_active": true,
+                    "assigned": 2,
+                    "reviewed": 2
+                  },
+                  {
+                    "user_id": 8,
+                    "display_name": "Head Nurse Reviewer",
+                    "discipline": "Nursing",
+                    "is_active": true,
+                    "assigned": 2,
+                    "reviewed": 2
+                  }
+                ],
+                "items": [
+                  {
+                    "item_id": 1,
+                    "cycle_id": 1,
+                    "cycle_number": "MRR-2026-001",
+                    "due_date": "2026-11-13",
+                    "record_type": "Admission",
+                    "admission_id": 1,
+                    "ticket_id": null,
+                    "record_number": "ADM-2026-00001",
+                    "mrn": "MRN-2026-000003",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Active",
+                    "reviewer_user_id": 7,
+                    "reviewer_name": "Dr Reviewer",
+                    "status": "Reviewed",
+                    "score_pct": 100,
+                    "reviewed_at": "2026-10-14T11:26:59.739837+00:00"
+                  },
+                  {
+                    "item_id": 2,
+                    "cycle_id": 1,
+                    "cycle_number": "MRR-2026-001",
+                    "due_date": "2026-11-13",
+                    "record_type": "Admission",
+                    "admission_id": 2,
+                    "ticket_id": null,
+                    "record_number": "ADM-2026-00002",
+                    "mrn": "MRN-2026-000004",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Discharged",
+                    "reviewer_user_id": 8,
+                    "reviewer_name": "Head Nurse Reviewer",
+                    "status": "Reviewed",
+                    "score_pct": 100,
+                    "reviewed_at": "2026-10-14T11:26:59.888692+00:00"
+                  },
+                  {
+                    "item_id": 3,
+                    "cycle_id": 1,
+                    "cycle_number": "MRR-2026-001",
+                    "due_date": "2026-11-13",
+                    "record_type": "OpdVisit",
+                    "admission_id": null,
+                    "ticket_id": 2,
+                    "record_number": "OPD-2026-000002",
+                    "mrn": "MRN-2026-000002",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Visit",
+                    "reviewer_user_id": 7,
+                    "reviewer_name": "Dr Reviewer",
+                    "status": "Reviewed",
+                    "score_pct": 71.4,
+                    "reviewed_at": "2026-10-14T11:26:59.785694+00:00"
+                  }
+                ],
+                "deficiencies": {
+                  "total": 2,
+                  "open": 0,
+                  "corrected": 1,
+                  "acknowledged": 1,
+                  "withdrawn": 0
+                },
+                "actions": [
+                  {
+                    "action_id": 1,
+                    "action_number": "CAPA-2026-0001",
+                    "source": "RecordReview",
+                    "cycle_id": 1,
+                    "cycle_number": "MRR-2026-001",
+                    "incident_id": null,
+                    "incident_number": null,
+                    "complaint_id": null,
+                    "complaint_number": null,
+                    "ipc_audit_id": null,
+                    "audit_number": null,
+                    "meeting_id": null,
+                    "meeting_number": null,
+                    "drill_id": null,
+                    "drill_number": null,
+                    "mock_interview_id": null,
+                    "interview_number": null,
+                    "qa_round_id": null,
+                    "qa_round_number": null,
+                    "feedback_id": null,
+                    "feedback_number": null,
+                    "source_number": "MRR-2026-001",
+                    "action_type": "Preventive",
+                    "description": "Teach OPD doctors to code the diagnosis and write the plan",
+                    "criterion_code": "OPD_PLAN",
+                    "department_id": null,
+                    "department_name": null,
+                    "owner_user_id": 7,
+                    "owner_name": "Dr Reviewer",
+                    "due_date": "2026-11-13",
+                    "status": "Open",
+                    "outcome_note": null,
+                    "completed_at": null,
+                    "completed_by_name": null,
+                    "created_by": 6,
+                    "created_by_name": "Quality Officer",
+                    "created_at": "2026-10-14T11:27:00.043932+00:00",
+                    "row_version": 1,
+                    "is_overdue": false
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:27:00.153061+00:00"
+              },
+              "request_id": "87ef6e25392549c1899a45ee62ec5c27"
+            }
+          },
+          "errors_seen": [
+            "RECORD_REVIEW_ACTION_REQUIRED",
+            "RECORD_REVIEW_OPEN_DEFICIENCIES"
+          ],
+          "events_emitted": [
+            "record_review.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "RECORD_REVIEW_ACTION_REQUIRED",
+        "RECORD_REVIEW_FROZEN",
+        "RECORD_REVIEW_OPEN_DEFICIENCIES",
+        "RECORD_REVIEW_OPEN_ITEMS",
+        "RECORD_REVIEW_TRANSITION_INVALID",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /quality/record-reviews/{cycle_id}/cancel",
+      "call": "POST /api/v1/quality/record-reviews/{cycle_id}/cancel",
+      "summary": "Cancel a cycle",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-reviews/1/cancel",
+            "body": {
+              "reason": "Wrong panel"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "cycle_id": 1,
+                "cycle_number": "MRR-2026-001",
+                "title": "Medical record review 2026-08-29 to 2026-09-28",
+                "period_start": "2026-08-29",
+                "period_end": "2026-09-28",
+                "due_date": "2026-10-28",
+                "status": "Cancelled",
+                "include_opd": false,
+                "confidence_level": 95,
+                "margin_pct": 10,
+                "min_per_stratum": 2,
+                "sample_seed": 4323497820549769000,
+                "sample_plan": {
+                  "z": 1.96,
+                  "method": "Stratified random sample (department x record state); Cochran sample size for a proportion (p = 0.5) with finite-population correction; proportional allocation with a minimum per stratum",
+                  "strata": [
+                    {
+                      "sample": 1,
+                      "stratum": "1:Discharged",
+                      "population": 1,
+                      "record_state": "Discharged",
+                      "department_id": 1,
+                      "department_name": "General Medicine"
+                    },
+                    {
+                      "sample": 1,
+                      "stratum": "1:Active",
+                      "population": 1,
+                      "record_state": "Active",
+                      "department_id": 1,
+                      "department_name": "General Medicine"
+                    }
+                  ],
+                  "margin_pct": 10,
+                  "population": 2,
+                  "unassigned": 0,
+                  "drawn_records": 2,
+                  "planned_sample": 2,
+                  "min_per_stratum": 2,
+                  "required_sample": 2,
+                  "confidence_level": 95,
+                  "includes_open_records": true,
+                  "includes_closed_records": true
+                },
+                "sampled_at": "2026-09-28T16:29:25.776594+00:00",
+                "sampled_by_name": "Quality Officer",
+                "summary": null,
+                "closed_at": null,
+                "closed_by_name": null,
+                "cancel_reason": "Wrong panel",
+                "created_by": 6,
+                "created_by_name": "Quality Officer",
+                "created_at": "2026-09-28T16:29:25.735193+00:00",
+                "row_version": 3,
+                "is_overdue": false,
+                "reviewers": [
+                  {
+                    "user_id": 14,
+                    "display_name": "Dr Other",
+                    "discipline": "Medical",
+                    "is_active": true,
+                    "assigned": 1,
+                    "reviewed": 1
+                  },
+                  {
+                    "user_id": 7,
+                    "display_name": "Dr Reviewer",
+                    "discipline": "Medical",
+                    "is_active": true,
+                    "assigned": 1,
+                    "reviewed": 0
+                  },
+                  {
+                    "user_id": 1,
+                    "display_name": "Dr Ahmed",
+                    "discipline": "Medical",
+                    "is_active": false,
+                    "assigned": 0,
+                    "reviewed": 0
+                  }
+                ],
+                "items": [
+                  {
+                    "item_id": 2,
+                    "cycle_id": 1,
+                    "cycle_number": "MRR-2026-001",
+                    "due_date": "2026-10-28",
+                    "record_type": "Admission",
+                    "admission_id": 2,
+                    "ticket_id": null,
+                    "record_number": "ADM-2026-00002",
+                    "mrn": "MRN-2026-000004",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Discharged",
+                    "reviewer_user_id": 7,
+                    "reviewer_name": "Dr Reviewer",
+                    "status": "Pending",
+                    "score_pct": null,
+                    "reviewed_at": null
+                  },
+                  {
+                    "item_id": 1,
+                    "cycle_id": 1,
+                    "cycle_number": "MRR-2026-001",
+                    "due_date": "2026-10-28",
+                    "record_type": "Admission",
+                    "admission_id": 1,
+                    "ticket_id": null,
+                    "record_number": "ADM-2026-00001",
+                    "mrn": "MRN-2026-000003",
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "record_state": "Active",
+                    "reviewer_user_id": 14,
+                    "reviewer_name": "Dr Other",
+                    "status": "Reviewed",
+                    "score_pct": 87.5,
+                    "reviewed_at": "2026-09-28T16:29:26.093761+00:00"
+                  }
+                ],
+                "deficiencies": {
+                  "total": 1,
+                  "open": 0,
+                  "corrected": 0,
+                  "acknowledged": 0,
+                  "withdrawn": 1
+                },
+                "actions": []
+              },
+              "meta": {
+                "server_time": "2026-09-28T16:29:26.197242+00:00"
+              },
+              "request_id": "a678f6744bbb49f19c9504f59c2bb510"
+            }
+          },
+          "errors_seen": [
+            "RECORD_REVIEW_FROZEN"
+          ],
+          "events_emitted": [
+            "record_review.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "RECORD_REVIEW_FROZEN",
+        "RECORD_REVIEW_TRANSITION_INVALID",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/record_review_cycles",
+  "workspace_guide": "get_handbook_outline('quality')",
+  "realtime": [
+    {
+      "event": "record_review.updated",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Start from GET /quality/record-review/status: `next_due` names the period to review (a quarter by default); 'Plan review' pre-fills it (POST /quality/record-reviews with no period).",
+    "Panel picker = GET /quality/record-review/people (can_review). Show each reviewer's discipline: MSDS 158 wants doctors AND nurses, never only the records staff.",
+    "Before 'Start', show GET .../sample-plan as a table (department x state: population, sample) with the formula line; after the start the sample and period are frozen (say so on the button's confirmation).",
+    "Progress bar per reviewer (reviewers[].assigned / reviewed), live with record_review.updated. Records with no reviewer (everyone on the panel wrote in them) need 'Assign' to a new panel member.",
+    "'Close' asks for the minutes. Show the three refusals as a checklist before enabling it: all reviewed, no open deficiency, an action recorded when deficiencies were found."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

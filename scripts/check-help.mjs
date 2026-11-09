@@ -323,6 +323,12 @@ export function checkHelp({
       "QaRounds",
       "RecordFeedback",
       "PatientFeedback",
+
+      "RecordReviewWorklist",
+      "RecordReviewCycles",
+
+      "ConsentRegister",
+      "ConsentPolicySetup",
       "LabourRegisterColumns",
       "ObstetricRegister",
       "BloodCenterRegisters",

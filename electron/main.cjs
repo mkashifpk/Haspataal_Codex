@@ -1072,9 +1072,13 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
     if (action === "print-consent") {
       if(!Number.isSafeInteger(args.consentId)||args.consentId<1||!Number.isSafeInteger(args.expectedVersion))throw Error('Invalid consent reference');
       const actor=auth?.user.user_id,workspace=windows.get(win.id);
+      const sourceScreen=args.sourceScreen??'consents_admissions';
+      const registerWorkspace=sourceScreen==='consent_register'?'quality':sourceScreen==='consent_register_owner'?'owner_dashboard':undefined;
+      if(sourceScreen!=='consents_admissions'&&(!registerWorkspace||workspace!==registerWorkspace||!auth?.user.permissions.includes('consent.view')))throw Error('The consent register is unavailable');
       const [record,payload,est]=await Promise.all([api('GET','/consents/'+args.consentId,undefined,workspace),api('GET','/consents/'+args.consentId+'/print-payload',undefined,workspace),api('GET','/establishment',undefined,workspace)]);
       if(!record.ok)return record;if(!payload.ok)return payload;if(!est.ok)return est;
-      if(!['full','open_work','records'].includes(est.data.views.screens.find(s=>s.screen_id==='consents_admissions')?.view))throw Error('The consent records view is unavailable');
+      const consentView=est.data.views.screens.find(s=>s.screen_id===sourceScreen)?.view;
+      if(!['full','open_work','records'].includes(consentView??(registerWorkspace?'full':'')))throw Error('The consent records view is unavailable');
       const f=require('./consent-print.cjs').assertConsent(payload.data,args.consentId);
       if(record.data.row_version!==args.expectedVersion||f.consent.row_version!==args.expectedVersion||record.data.patient_id!==f.consent.patient_id||record.data.mrn!==f.consent.mrn)throw Error('The consent changed. Read it before printing; do not use the old form.');
       const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;

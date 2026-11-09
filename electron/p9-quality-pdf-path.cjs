@@ -7,6 +7,7 @@ const periodDocuments = new Set([
 
 exports.isQualityRegisterPdfPath = value => {
   if (typeof value !== 'string' || value !== value.trim()) return false;
+  if (value === '/consent-policy/pdf') return true;
   if (/^\/(?:incidents\/[1-9]\d*\/adr-report|blood\/reactions\/[1-9]\d*)\/pdf$/.test(value)) return true;
   const match = /^(\/[^?]+)\?date_from=\d{4}-\d{2}-\d{2}&date_to=\d{4}-\d{2}-\d{2}$/.exec(value);
   return !!match && periodDocuments.has(match[1]);

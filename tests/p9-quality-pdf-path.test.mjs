@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 const {isQualityRegisterPdfPath: allowed}=createRequire(import.meta.url)('../electron/p9-quality-pdf-path.cjs');
 test('Quality PDFs admit only documented paths and canonical date queries',()=>{
+  assert(allowed('/consent-policy/pdf'));
+  assert(!allowed('/consent-policy/pdf?scope=all'));
   assert(allowed('/incidents/8/adr-report/pdf'));
   assert(allowed('/blood/reactions/17/pdf'));
   assert(allowed('/maternity/labour-register/pdf?date_from=2026-11-01&date_to=2026-11-09'));
