@@ -1043,7 +1043,7 @@ export function App() {
   const workspaceReady = !!user && !!outline && !!est && !!meta && readyContext?.userId === user.user_id && readyContext.workspace === workspace && readyContext.epoch === metadataEpoch.current;
   const investigations=useLoad(()=>workspaceReady&&user?.permissions.some(p=>['incident.view','incident.report','ot.clinical_statistics.view'].includes(p))?assignedIncidents({mine:true,status:'UnderReview',limit:500}).then(rows=>rows.filter(r=>r.investigator_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,outline,revision]);
   const ownedActions=useLoad(()=>workspaceReady?ownedQualityActions({mine:true,status:'Open',limit:1000}).then(rows=>rows.filter(r=>r.owner_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,revision]);
-  const complaintInvestigations=useLoad(()=>workspaceReady&&user&&handbookPermits(outline,'my_complaint_investigations')?assignedComplaints({mine:true,status:'Acknowledged',limit:1000}).then(rows=>rows.filter(r=>r.investigator_user_id===user?.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,outline,revision]);
+  const complaintInvestigations=useLoad(()=>workspaceReady&&user?assignedComplaints({mine:true,status:'Acknowledged',limit:1000}).then(rows=>rows.filter(r=>r.investigator_user_id===user.user_id)):Promise.resolve([]),[workspaceReady,user?.user_id,revision]);
   const legacyNav = (workspaceReady ? [
     "app_shell",
     "workspace_picker",

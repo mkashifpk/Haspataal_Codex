@@ -97,6 +97,8 @@ export interface ComplaintDetailOut {
   close_note: string | null;
   withdraw_reason: string | null;
   row_version: number;
+  /** The user who took the appeal at a complaint desk: they read the complaint from then on, like the person who received it */
+  appeal_received_by: number | null;
   acknowledgement_overdue: boolean;
   answer_overdue: boolean;
   updates: ComplaintUpdateOut[];
@@ -252,8 +254,33 @@ export interface ComplaintOut {
   close_note: string | null;
   withdraw_reason: string | null;
   row_version: number;
+  /** The user who took the appeal at a complaint desk: they read the complaint from then on, like the person who received it */
+  appeal_received_by: number | null;
   acknowledgement_overdue: boolean;
   answer_overdue: boolean;
+}
+
+/** What any complaint desk reads by the exact tracking number the complainant brings (decision 63): how the complaint stands and whether it can be appealed now; never what it says, the patient, the findings or the outcome. */
+export interface ComplaintCardOut {
+  complaint_id: number;
+  /** The tracking number */
+  complaint_number: string;
+  received_at: string;
+  /** Confirm it with the person at the desk before telling them anything */
+  complainant_name: string;
+  status: "Received" | "Acknowledged" | "Resolved" | "Appealed" | "Closed" | "Withdrawn" | "NotMaintainable";
+  /** The contact person named at the acknowledgement; null before it */
+  contact_name: string | null;
+  /** The date the complainant was given for the outcome, with any extension; null before the acknowledgement */
+  answer_due: string | null;
+  /** When the outcome was conveyed */
+  outcome_at: string | null;
+  /** The last day to appeal, once the outcome is conveyed */
+  appeal_until: string | null;
+  /** Take the appeal now (POST /complaints/{complaint_id}/appeal): Resolved, within the window, and the caller takes complaints */
+  can_appeal: boolean;
+  /** GET /complaints/{complaint_id} opens it for the caller: a complaint reader or manager, the person who received it, its investigator or the desk that took its appeal */
+  can_open: boolean;
 }
 
 export interface AppealIn {
@@ -443,14 +470,19 @@ export function registerComplaints(body: ComplaintIn): Promise<ComplaintDetailOu
   return api<ComplaintDetailOut>("POST", `/complaints`, body, { idempotent: true });
 }
 
-/** The complaints register — GET /api/v1/complaints (who may call: holders of complaint.view or complaint.manage or complaint.register). */
+/** The complaints register — GET /api/v1/complaints (who may call: any logged-in user: the whole register with complaint.view or complaint.manage; anyone else the complaints they received, investigate or took the appeal of (mine is implied)). */
 export function listComplaints(query?: { status?: "Received" | "Acknowledged" | "Resolved" | "Appealed" | "Closed" | "Withdrawn" | "NotMaintainable" | null; category?: "ClinicalCare" | "NursingCare" | "StaffAttitude" | "Communication" | "WaitingTime" | "Billing" | "Cleanliness" | "Food" | "Facilities" | "Privacy" | "Safety" | "Medication" | "Diagnostics" | "Other" | null; channel?: "InPerson" | "Telephone" | "Letter" | "Email" | "SuggestionBox" | "HealthCommission" | "SocialMedia" | "Other" | null; priority?: "Urgent" | "High" | "Normal" | "Low" | null; department_id?: number | null; patient_id?: number | null; date_from?: string | null; date_to?: string | null; mine?: boolean; open_only?: boolean; overdue_only?: boolean; limit?: number }): Promise<ComplaintOut[]> {
   return api<ComplaintOut[]>("GET", withQuery(`/complaints`, query), undefined);
 }
 
-/** One complaint — GET /api/v1/complaints/{complaint_id} (who may call: complaint.view or complaint.manage, the person who received the complaint and its investigator). */
+/** One complaint — GET /api/v1/complaints/{complaint_id} (who may call: complaint.view or complaint.manage, the person who received the complaint, its investigator and the person who took its appeal). */
 export function getComplaint(complaint_id: number): Promise<ComplaintDetailOut> {
   return api<ComplaintDetailOut>("GET", `/complaints/${complaint_id}`, undefined);
+}
+
+/** The tracking card of a complaint, by its number (any complaint desk) — GET /api/v1/complaints/by-number/{complaint_number} (who may call: holders of complaint.register or complaint.view or complaint.manage). */
+export function byNumberComplaints(complaint_number: string): Promise<ComplaintCardOut> {
+  return api<ComplaintCardOut>("GET", `/complaints/by-number/${complaint_number}`, undefined);
 }
 
 /** Record an appeal — POST /api/v1/complaints/{complaint_id}/appeal (who may call: holders of complaint.register or complaint.manage). */
@@ -463,7 +495,7 @@ export function noticeComplaintsPrintPayload(): Promise<PrintOut_ComplaintsNotic
   return api<PrintOut_ComplaintsNoticeFieldsOut_>("GET", `/complaints/notice/print-payload`, undefined);
 }
 
-/** A letter to the complainant (print payload) — GET /api/v1/complaints/{complaint_id}/letter/print-payload (who may call: complaint.view or complaint.manage, the person who received the complaint and its investigator). */
+/** A letter to the complainant (print payload) — GET /api/v1/complaints/{complaint_id}/letter/print-payload (who may call: complaint.view or complaint.manage, the person who received the complaint, its investigator and the person who took its appeal). */
 export function letterPayload(complaint_id: number, query: { letter: "Acknowledgement" | "Outcome" | "AppealOutcome" }): Promise<PrintOut_ComplaintLetterFieldsOut_> {
   return api<PrintOut_ComplaintLetterFieldsOut_>("GET", withQuery(`/complaints/${complaint_id}/letter/print-payload`, query), undefined);
 }

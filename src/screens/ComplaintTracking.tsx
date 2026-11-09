@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { byNumberComplaints } from "../generated/complaint_tracking";
+import { byNumberComplaints } from "../generated/complaint_intake";
+import { ApiError } from "../bridge";
 import { Field, LoadState, useLoad } from "../components";
 import { ClinicalWriteFeedback, useClinicalWrite } from "../clinical-write";
 import type { ClinicalUser } from "../clinical-context";
@@ -52,6 +53,10 @@ export function ComplaintTracking({
         : Promise.resolve(undefined),
     [number, permitted],
   );
+  const notFound =
+    lookup.error instanceof ApiError && lookup.error.response.error?.code === "NOT_FOUND"
+      ? lookup.error.response
+      : undefined;
   const card =
     !lookup.loading &&
     !lookup.error &&
@@ -172,7 +177,12 @@ export function ComplaintTracking({
           </button>
         </fieldset>
       </form>
-      {number && <LoadState {...lookup} retry={() => void lookup.reload()} />}
+      {number && (notFound ? (
+        <p className="error" role="alert">
+          {t("No complaint has that tracking number.", "اس ٹریکنگ نمبر کی کوئی شکایت نہیں ملی۔")}
+          <small>NOT_FOUND{notFound.request_id && ` · ${notFound.request_id}`}</small>
+        </p>
+      ) : <LoadState {...lookup} retry={() => void lookup.reload()} />)}
       <ClinicalWriteFeedback
         write={write}
         onReviewed={() => {

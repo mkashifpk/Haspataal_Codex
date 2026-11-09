@@ -72,6 +72,8 @@ export interface ComplaintOut {
   close_note: string | null;
   withdraw_reason: string | null;
   row_version: number;
+  /** The user who took the appeal at a complaint desk: they read the complaint from then on, like the person who received it */
+  appeal_received_by: number | null;
   acknowledgement_overdue: boolean;
   answer_overdue: boolean;
 }
@@ -155,6 +157,8 @@ export interface ComplaintDetailOut {
   close_note: string | null;
   withdraw_reason: string | null;
   row_version: number;
+  /** The user who took the appeal at a complaint desk: they read the complaint from then on, like the person who received it */
+  appeal_received_by: number | null;
   acknowledgement_overdue: boolean;
   answer_overdue: boolean;
   updates: ComplaintUpdateOut[];
@@ -237,9 +241,9 @@ export interface ComplaintAcknowledgeIn {
   not_maintainable_reason?: string | null;
   /** Urgent: a risk to a patient now; High: harm or a serious failure of care */
   priority?: "Urgent" | "High" | "Normal" | "Low" | null;
-  /** The contact person named to the complainant */
+  /** The contact person named to the complainant: any active member of staff with a login (GET /quality/record-review/people, or GET /staff/lookup → user_id) */
   contact_user_id?: number | null;
-  /** Who investigates (default: the contact person) */
+  /** Who investigates (default: the contact person): any active member of staff with a login, whatever their role (GET /quality/record-review/people, or GET /staff/lookup → user_id) */
   investigator_user_id?: number | null;
   course_of_action?: string | null;
   /** Default: received + complaint_response_days */
@@ -336,13 +340,14 @@ export interface HospitalHeaderOut {
   issue_line: string;
 }
 
-/** Someone who can review records (can_review) or own an action. */
+/** An active member of staff a quality record may name (an action's owner, an investigator, a contact person, a committee's member); `can_review`: also on the record review panel. */
 export interface PersonOut {
   user_id: number;
   display_name: string;
   designation: string | null;
   department_name: string | null;
   staff_category: "Clinical" | "Nursing" | "Administrative" | "Technical" | "SupportZeroInterface" | "Visiting" | null;
+  /** Holds quality.review.perform: may sit on the record review panel */
   can_review: boolean;
   default_discipline: "Medical" | "Nursing" | "Pharmacy" | "Laboratory" | "Other";
 }
@@ -683,12 +688,12 @@ export interface DrugStockOut {
   stock_status: "InStock" | "Low" | "OutOfStock";
 }
 
-/** The complaints register — GET /api/v1/complaints (who may call: holders of complaint.view or complaint.manage or complaint.register). */
+/** The complaints register — GET /api/v1/complaints (who may call: any logged-in user: the whole register with complaint.view or complaint.manage; anyone else the complaints they received, investigate or took the appeal of (mine is implied)). */
 export function listComplaints(query?: { status?: "Received" | "Acknowledged" | "Resolved" | "Appealed" | "Closed" | "Withdrawn" | "NotMaintainable" | null; category?: "ClinicalCare" | "NursingCare" | "StaffAttitude" | "Communication" | "WaitingTime" | "Billing" | "Cleanliness" | "Food" | "Facilities" | "Privacy" | "Safety" | "Medication" | "Diagnostics" | "Other" | null; channel?: "InPerson" | "Telephone" | "Letter" | "Email" | "SuggestionBox" | "HealthCommission" | "SocialMedia" | "Other" | null; priority?: "Urgent" | "High" | "Normal" | "Low" | null; department_id?: number | null; patient_id?: number | null; date_from?: string | null; date_to?: string | null; mine?: boolean; open_only?: boolean; overdue_only?: boolean; limit?: number }): Promise<ComplaintOut[]> {
   return api<ComplaintOut[]>("GET", withQuery(`/complaints`, query), undefined);
 }
 
-/** One complaint — GET /api/v1/complaints/{complaint_id} (who may call: complaint.view or complaint.manage, the person who received the complaint and its investigator). */
+/** One complaint — GET /api/v1/complaints/{complaint_id} (who may call: complaint.view or complaint.manage, the person who received the complaint, its investigator and the person who took its appeal). */
 export function getComplaint(complaint_id: number): Promise<ComplaintDetailOut> {
   return api<ComplaintDetailOut>("GET", `/complaints/${complaint_id}`, undefined);
 }
@@ -728,17 +733,17 @@ export function addActionComplaintsActions(complaint_id: number, body: QualityAc
   return api<QualityActionOut>("POST", `/complaints/${complaint_id}/actions`, body, { idempotent: true });
 }
 
-/** A letter to the complainant (print payload) — GET /api/v1/complaints/{complaint_id}/letter/print-payload (who may call: complaint.view or complaint.manage, the person who received the complaint and its investigator). */
+/** A letter to the complainant (print payload) — GET /api/v1/complaints/{complaint_id}/letter/print-payload (who may call: complaint.view or complaint.manage, the person who received the complaint, its investigator and the person who took its appeal). */
 export function letterPayload(complaint_id: number, query: { letter: "Acknowledgement" | "Outcome" | "AppealOutcome" }): Promise<PrintOut_ComplaintLetterFieldsOut_> {
   return api<PrintOut_ComplaintLetterFieldsOut_>("GET", withQuery(`/complaints/${complaint_id}/letter/print-payload`, query), undefined);
 }
 
-/** A letter to the complainant (PDF, English) — GET /api/v1/complaints/{complaint_id}/letter/pdf (who may call: complaint.view or complaint.manage, the person who received the complaint and its investigator). */
+/** A letter to the complainant (PDF, English) — GET /api/v1/complaints/{complaint_id}/letter/pdf (who may call: complaint.view or complaint.manage, the person who received the complaint, its investigator and the person who took its appeal). */
 export function letterPdf(complaint_id: number, query: { letter: "Acknowledgement" | "Outcome" | "AppealOutcome" }): Promise<unknown> {
   return api<unknown>("GET", withQuery(`/complaints/${complaint_id}/letter/pdf`, query), undefined);
 }
 
-/** Who can review records or own an action — GET /api/v1/quality/record-review/people (who may call: holders of quality.review.manage or committee.manage or infection.control.manage). */
+/** Every member of staff a quality record may name (and who can review records) — GET /api/v1/quality/record-review/people (who may call: any logged-in user). */
 export function people(): Promise<PersonOut[]> {
   return api<PersonOut[]>("GET", `/quality/record-review/people`, undefined);
 }

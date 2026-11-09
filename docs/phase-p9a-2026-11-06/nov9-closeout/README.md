@@ -1,0 +1,25 @@
+# November backend issue closeout
+
+The working tree started clean at `6f2c963`, with the earlier tracking implementation at `b46a2e0`. MCP reported DEV build `2026-11-07T10:03:18.175586+00:00`, equal to `fixed_in` on each of #56–#61. All six reports are already Fixed and closed on the backend. Contract `2bf245cdfd753209ff51` adds one operation and the associated card/envelope. No operation was removed. [Contract comparison and issue statuses](backend-contract-recheck.json)
+
+## Retest results
+
+| Report | Evidence |
+| --- | --- |
+| #56, #58 | A fresh anonymous suggestion-box complaint, CMP-2026-00012, was acknowledged by Quality with Nurse Hina as contact and Ops Admin as investigator. Both names came from the staff directory with `can_review: false`. The inspector was absent. Ops listed the complaint with and without `mine` and opened it with `can_write_findings: true`. Maintenance got an empty list and a 403 on detail. |
+| #57 | Admissions created CMP-2026-00013. Quality acknowledged it, Ops recorded findings and Quality conveyed the synthetic outcome. Reception could read the restricted card by exact and lowercase number, with 403 on detail. The card was 403 for Lab Admin and an unknown number returned 404. The appeal committed once with a new key and the actual Reception actor. The card changed to `can_appeal: false`, `can_open: true`; detail and the Reception list then included the complaint. The earlier native [four-desk journey](../nov9-tracking-journey.json) exercised the appeal and a deliberate original-key replay on the separate CMP-2026-00011. |
+| #59 | For complaint 9, all three letter kinds returned 409 `COMPLAINT_STATE_INVALID` on print payload and PDF. CMP-2026-00012, withdrawn after acknowledgement, returned its acknowledgement with Nurse Hina and the original issue date. |
+| #60 | Existing deaths 4 and 5 were already certified. The fresh synthetic Death:6 was absent while Draft and present after the doctor completed and certified it. The previous native run verified the empty-list explanation and F1, including focus return. |
+| #61 | Quality got the active department directory. Filtering by its General Medicine ID returned seven actions, each in that department. [Directory and server view evidence](directory-and-home-view.json) |
+
+The six current `screen_test_plan` responses supplied the [case inventory](screen-plan-cases.json). This run exercised the affected acceptance paths above. Other branches retain their prior 164, 167, 170, 177 and 180 evidence. An exhaustive rerun of every role, service state and historic error case, fresh readmission and theatre source journeys, and physical printing are outside this run.
+
+## Frontend and progress
+
+Regenerated complaint clients now contain the two `appeal_received_by` fields and the exact tracking card and operation. The remaining generated changes are comments for the affected access rules and people fields. Full endpoint descriptions also specify the appeal and acknowledgement semantics, letter step refusals and screening prerequisites. Saved live contract examples were refreshed. Historical DEV journals remain dated evidence.
+
+The terminal queries assignments for every signed-in staff user after workspace bootstrap. It filters the results to the named investigator and keeps the server's navigation gates. Tracking now explains a missing number in English and Urdu. The desk FAQs describe the restricted lookup and appeal at any desk. Quality guidance describes the staff directory and letter availability. The current repository has no implemented record-review panel. Its future picker must filter the full directory to `can_review: true`; named complaint and action pickers use the full eligible directory.
+
+The 873-test suite passed before the final workspace-guide wording update. The final DEV build passed handbook coverage for 192 screens and TypeScript. The four generated complaint clients matched the MCP output byte for byte. The [terminal readback](native-read.json) passed on the final DEV bundle `index-C6zt6w9r.js` (SHA-256 `aee45d073328c09fc54ae431dd36ced0184776acd61e49df16004bb7441bf2d3`). Reception verified missing-number copy, confirmation before disclosure, post-appeal opening and F1. Quality verified both withdrawal states, acknowledgement PDF preview, screening F1, the department filter and the home-visit menu gate. The first test run timed out when selecting a department by an exact label that omitted its code. The corrected harness uses the actual directory option value and verifies the filtered request. Both profiles restored preferences and signed out. Terminal rechecks issued only business reads.
+
+Proposals 383–388 were confirmed accepted. No duplicate submission was sent. Backend reports #62–#64 remain New. The continuation check found Home visits register still hidden in Quality's live server view. The published DEV scenarios do not expose a home-visit fixture. Period, detail and notice checks remain pending an authorised service or retained-history fixture. Named workspace and Urdu reviews remain human work.

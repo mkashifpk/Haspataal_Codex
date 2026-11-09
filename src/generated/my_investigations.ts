@@ -261,13 +261,14 @@ export interface QualityActionIn {
   department_id?: number | null;
 }
 
-/** Someone who can review records (can_review) or own an action. */
+/** An active member of staff a quality record may name (an action's owner, an investigator, a contact person, a committee's member); `can_review`: also on the record review panel. */
 export interface PersonOut {
   user_id: number;
   display_name: string;
   designation: string | null;
   department_name: string | null;
   staff_category: "Clinical" | "Nursing" | "Administrative" | "Technical" | "SupportZeroInterface" | "Visiting" | null;
+  /** Holds quality.review.perform: may sit on the record review panel */
   can_review: boolean;
   default_discipline: "Medical" | "Nursing" | "Pharmacy" | "Laboratory" | "Other";
 }
@@ -322,7 +323,7 @@ export function addActionIncidentsActions(incident_id: number, body: QualityActi
   return api<QualityActionOut>("POST", `/incidents/${incident_id}/actions`, body, { idempotent: true });
 }
 
-/** Who can review records or own an action — GET /api/v1/quality/record-review/people (who may call: holders of quality.review.manage or committee.manage or infection.control.manage). */
+/** Every member of staff a quality record may name (and who can review records) — GET /api/v1/quality/record-review/people (who may call: any logged-in user). */
 export function people(): Promise<PersonOut[]> {
   return api<PersonOut[]>("GET", `/quality/record-review/people`, undefined);
 }

@@ -1,0 +1,288 @@
+{
+  "server_build": "2026-11-07T10:03:18.175586+00:00",
+  "contract": "2bf245cdfd753209ff51",
+  "comparison_base": "a4772c79e2249316e1a9",
+  "issues": [
+    {
+      "id": 56,
+      "title": "Named Ops complaint investigator can read detail but cannot list their own assignments",
+      "status": "Fixed",
+      "open": false,
+      "fixed_in": "2026-11-07T10:03:18.175586+00:00"
+    },
+    {
+      "id": 57,
+      "title": "Another complaint desk cannot look up a tracking number to take its appeal",
+      "status": "Fixed",
+      "open": false,
+      "fixed_in": "2026-11-07T10:03:18.175586+00:00"
+    },
+    {
+      "id": 58,
+      "title": "Complaint acknowledgement's named people directory omits permitted staff investigators",
+      "status": "Fixed",
+      "open": false,
+      "fixed_in": "2026-11-07T10:03:18.175586+00:00"
+    },
+    {
+      "id": 59,
+      "title": "Withdrawn unacknowledged complaint returns acknowledgement with None and blank deadline",
+      "status": "Fixed",
+      "open": false,
+      "fixed_in": "2026-11-07T10:03:18.175586+00:00"
+    },
+    {
+      "id": 60,
+      "title": "Screening excludes draft unexpected deaths; certification prerequisite is undocumented",
+      "status": "Fixed",
+      "open": false,
+      "fixed_in": "2026-11-07T10:03:18.175586+00:00"
+    },
+    {
+      "id": 61,
+      "title": "Action register bundle omits department directory for its documented department filter",
+      "status": "Fixed",
+      "open": false,
+      "fixed_in": "2026-11-07T10:03:18.175586+00:00"
+    },
+    {
+      "id": 62,
+      "title": "ADR report bundle omits the ADR incident selector source",
+      "status": "New",
+      "open": true,
+      "fixed_in": null
+    },
+    {
+      "id": 63,
+      "title": "Transfusion registers bundle omits the stock source for unit trace",
+      "status": "New",
+      "open": true,
+      "fixed_in": null
+    },
+    {
+      "id": 64,
+      "title": "Blood center return bundle omits the period donation directory",
+      "status": "New",
+      "open": true,
+      "fixed_in": null
+    }
+  ],
+  "operations": {
+    "added": [
+      "GET /api/v1/complaints/by-number/{complaint_number}"
+    ],
+    "removed": [],
+    "changed": [
+      {
+        "operation": "GET /api/v1/complaints",
+        "what": [
+          "permissions",
+          "permissions_mode",
+          "access"
+        ]
+      },
+      {
+        "operation": "GET /api/v1/complaints/{complaint_id}",
+        "what": [
+          "access"
+        ]
+      },
+      {
+        "operation": "GET /api/v1/complaints/{complaint_id}/letter/pdf",
+        "what": [
+          "access"
+        ]
+      },
+      {
+        "operation": "GET /api/v1/complaints/{complaint_id}/letter/print-payload",
+        "what": [
+          "access"
+        ]
+      },
+      {
+        "operation": "GET /api/v1/quality/record-review/people",
+        "what": [
+          "permissions",
+          "permissions_mode",
+          "access"
+        ]
+      }
+    ]
+  },
+  "schemas": {
+    "added": [
+      "ComplaintCardOut",
+      "Envelope_ComplaintCardOut_"
+    ],
+    "removed": [],
+    "changed": [
+      "ComplaintAcknowledgeIn",
+      "ComplaintDetailOut",
+      "ComplaintOut",
+      "PersonOut"
+    ]
+  },
+  "endpoints": [
+    {
+      "operation": "GET /complaints",
+      "description": "Newest first (the period by the day received). Without `complaint.view` or `complaint.manage`, whatever the\ncaller's role, `mine` is implied: the complaints they received, investigate or took the appeal of. So the member of\nstaff named investigator lists theirs on \"Complaints I investigate\" (`?mine=true&status=Acknowledged`) without any\ncomplaint permission, and a caller with none of these gets an empty list. `acknowledgement_overdue` and\n`answer_overdue` in red. A complaint another desk received is found by its tracking number\n(`GET /complaints/by-number/{complaint_number}`), never by browsing.",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user: the whole register with complaint.view or complaint.manage; anyone else the complaints they received, investigate or took the appeal of (mine is implied)"
+      }
+    },
+    {
+      "operation": "GET /complaints/{complaint_id}",
+      "description": "For the complaint readers, the person who received it, its investigator and the desk that took its appeal: with\nevery contact with the complainant (`updates`), the actions, `next_step` and what the caller may do (`can_*`).\n`FORBIDDEN` for anyone else: another desk reads the complaint's card by its tracking number\n(`GET /complaints/by-number/{complaint_number}`). Reading one about a patient is logged as a patient-data access.",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "complaint.view or complaint.manage, the person who received the complaint, its investigator and the person who took its appeal"
+      }
+    },
+    {
+      "operation": "GET /complaints/by-number/{complaint_number}",
+      "description": "A complainant brings their tracking number to any desk, to ask how it stands or to appeal the outcome\n(decision 63, backend issue #57): the card says how it stands, never what the complaint says, the patient, the\nfindings or the outcome. Confirm `complainant_name` with the person at the desk first. Then, while `can_appeal`,\ntake the appeal (`POST /complaints/{complaint_id}/appeal`): from then on that desk opens the complaint like the desk\nthat received it (`can_open`). Exact numbers only: there is no search, so a desk never browses the register.\n`NOT_FOUND`: no complaint has that number.\n\n**Required permission:** `complaint.register OR complaint.view OR complaint.manage`\n\n**Required permission:** `complaint.register OR complaint.view OR complaint.manage`",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "complaint.register",
+          "complaint.view",
+          "complaint.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of complaint.register or complaint.view or complaint.manage",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      }
+    },
+    {
+      "operation": "POST /complaints/{complaint_id}/appeal",
+      "description": "At any complaint desk, within the window the outcome gave (`COMPLAINT_APPEAL_LATE` after it). A desk that did not\nreceive the complaint finds it by the tracking number first (`GET /complaints/by-number/{complaint_number}`,\n`can_appeal`); the answer is the whole complaint, which that desk reads from then on (decision 63). The appeal\ndeciders are notified.\n\n`COMPLAINT_STATE_INVALID`: only a Resolved complaint is appealed.\n\n**Required permission:** `complaint.register OR complaint.manage`\n\n**Required permission:** `complaint.register OR complaint.manage`",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "complaint.register",
+          "complaint.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of complaint.register or complaint.manage",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      }
+    },
+    {
+      "operation": "POST /complaints/{complaint_id}/acknowledge",
+      "description": "Within `complaint_acknowledge_hours` (MSDS PRE 82 ii a): the priority, the contact person, the investigator\n(default: the contact person; both any active member of staff with a login, whatever their role, from\n`GET /quality/record-review/people`: backend issue #58), the course of action and the date the outcome is due (default\n`complaint_response_days` after receipt); `means` says how the complainant was told (recorded as an update). Or\n`maintainable` false with the reason. Then print the letter (`GET /complaints/{id}/letter/print-payload`).\n`COMPLAINT_STATE_INVALID`: the complaint cannot change that way: what was complained of, the acknowledgement, the\noutcome and the appeal are recorded once.\n\n**Required permission:** `complaint.manage`\n\n**Required permission:** `complaint.manage`",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "complaint.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of complaint.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      }
+    },
+    {
+      "operation": "GET /complaints/{complaint_id}/letter/pdf",
+      "description": "The same letters as the print payload, when it has them. `COMPLAINT_STATE_INVALID`: the complaint has not reached\nthis letter's step (the acknowledgement before it is acknowledged, or of a complaint withdrawn before that).",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "complaint.view or complaint.manage, the person who received the complaint, its investigator and the person who took its appeal"
+      }
+    },
+    {
+      "operation": "GET /complaints/{complaint_id}/letter/print-payload",
+      "description": "The acknowledgement, the outcome with the right to appeal, or the appeal decision, in English with the Urdu\nsentences in `fields.urdu` (render right to left on the terminal). Each letter exists once its step happened,\nwhatever the status became later: `Acknowledgement` once `acknowledged_at` is set (acknowledged, or answered not\nmaintainable), `Outcome` once `outcome_at`, `AppealOutcome` once `appeal_decided_at`. A complaint withdrawn after\nits acknowledgement reprints that letter as sent; one withdrawn before it has no letter.\n`COMPLAINT_STATE_INVALID`: the complaint has not reached that letter's step (backend issue #59).",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "complaint.view or complaint.manage, the person who received the complaint, its investigator and the person who took its appeal"
+      }
+    },
+    {
+      "operation": "GET /quality/record-review/people",
+      "description": "Every active member of staff with a login, by name: the picker of every form that may name anyone, whatever\ntheir role (an action's owner, an incident's investigator, a complaint's contact person and investigator, a\ncommittee's members), and of the record review panel (only those with `can_review`: the panel refuses the\nothers). The facts of their badge only, as `GET /staff/lookup` gives them to anyone\n(its search suits a large hospital better), so every user may call it: the investigator named on an incident picks\nthe owner of an action from it on the shared screen \"Incidents I investigate\" (backend issue #58, after #41).",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      }
+    },
+    {
+      "operation": "GET /incident-screening",
+      "description": "Returns to theatre and readmissions within 24 hours, unexpected, maternal and post-operative deaths and suicides\nof the last `incident_screening_days`, not yet reported or dismissed (MSDS CQI 106): report each (`POST /incidents`\nwith `screening_key` and the suggested type) or dismiss it with the reason.\n\nEach kind appears once the records it reads are final (backend issue #60):\n* ReturnToTheatre: an operation that started within `incident_screening_hours` of the end of the patient's previous\n  operation (both with their actual times; a cancelled one never counts);\n* Readmission: an admission within `incident_screening_hours` of the patient's previous discharge;\n* Death: once the death is **certified** (`POST /deaths/{death_id}/certify`; a draft's facts may still change),\n  never one brought dead: recorded by the doctor as unexpected (`expected_death` false), a suicide (manner\n  IntentionalSelfHarm), a maternal death (pregnancy at death or within 42 days), or within four weeks of an\n  operation.\nAlready reported as an incident for the same operation, admission or death, or dismissed: not listed.\n\n**Required permission:** `incident.view`\n\n**Required permission:** `incident.view`",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "incident.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of incident.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      }
+    },
+    {
+      "operation": "GET /admin/departments",
+      "description": "The departments by name: the directory every form that names a department picks from (`department_id`,\n`target_department_id`), so nobody types an id: the incident and complaint forms, the corrective actions of every\nregister, the duty rosters, the equipment and asset registers, the compliance register, the mock drills, the waste\nlog, the training sessions, the job descriptions, the service catalogue and HR's onboarding (decision 62). Offer the\nactive ones (`is_active`); clinical departments carry `is_clinical`. The IT console adds and edits them\n(`POST /admin/departments`, `PUT /admin/departments/{department_id}`).",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      }
+    }
+  ]
+}
