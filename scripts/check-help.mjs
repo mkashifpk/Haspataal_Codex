@@ -322,6 +322,7 @@ export function checkHelp({
       "QaRounds",
       "RecordFeedback",
       "PatientFeedback",
+      "HomeVisitPolicy",
       "EducationMaterials",
       "QualityRegister",
       "QualityPaper",

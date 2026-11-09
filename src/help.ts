@@ -10,6 +10,16 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  home_visit_policy: {
+    title: "Home visits: our policy and its notice",
+    titleUr: "گھریلو دورے: پالیسی اور نوٹس",
+    purpose: "Read whether the hospital provides home visits and print its notice for patients. Either policy is valid.",
+    purposeUr: "دیکھیں ہسپتال گھریلو دورے دیتا ہے یا نہیں۔ مریضوں کے لیے نوٹس پرنٹ۔ دونوں پالیسیاں درست ہیں۔",
+    steps: ["Describe the arrangements. Open Edit arrangements if you have permission. Record hours, area, how to ask, who goes and the kit. Ask the service lead to verify the details.","Save and check the notice. Check the arrangements and save once. Print and replace the notice after each change. If a reply is lost, read the current policy before doing anything else.","Cancel unsent arrangements. Cancel closes the unsent draft. A lost result must be read before leaving the form.","Service activation and retirement. Open Facility settings to review the service and its prerequisites. Only Facility settings changes the service state. Display the current notice where patients can see it.","Open Help or press F1 from the current control. Close it to resume the task. Use Settings or keyboard shortcuts for the shared 100–250% zoom."],
+    stepsUr: ["انتظام کی تفصیل۔ اجازت ہو تو انتظام بدلیں۔ اوقات، علاقہ، درخواست، جانے والا عملہ اور کٹ۔ خدمت انچارج سے تصدیق۔","محفوظ اور نوٹس چیک۔ انتظام دیکھ کر ایک بار محفوظ۔ ہر تبدیلی پر نیا نوٹس لگائیں۔ جواب غائب تو پہلے موجودہ پالیسی پڑھیں۔","غیر ارسال انتظام منسوخ۔ غیر ارسال مسودہ بند۔ غائب نتیجہ فارم چھوڑنے سے پہلے پڑھیں۔","خدمت فعال اور سبک دوش۔ خدمت و شرائط سہولت ترتیبات میں دیکھیں۔ خدمت حالت وہیں بدلے۔ موجودہ نوٹس مریضوں کے سامنے لگائیں۔","مدد یا موجودہ خانے سے ایف ون۔ بند کر کے کام جاری۔ ترتیبات یا کی بورڈ سے مشترک سو تا ڈھائی سو فیصد زوم۔"],
+    faq: [["Describe the arrangements","Open Edit arrangements if you have permission. Record hours, area, how to ask, who goes and the kit. Ask the service lead to verify the details."],["Save and check the notice","Check the arrangements and save once. Print and replace the notice after each change. If a reply is lost, read the current policy before doing anything else."],["Cancel unsent arrangements","Cancel closes the unsent draft. A lost result must be read before leaving the form."],["Service activation and retirement","Open Facility settings to review the service and its prerequisites. Only Facility settings changes the service state. Display the current notice where patients can see it."]],
+    faqUr: [["انتظام کی تفصیل","اجازت ہو تو انتظام بدلیں۔ اوقات، علاقہ، درخواست، جانے والا عملہ اور کٹ۔ خدمت انچارج سے تصدیق۔"],["محفوظ اور نوٹس چیک","انتظام دیکھ کر ایک بار محفوظ۔ ہر تبدیلی پر نیا نوٹس لگائیں۔ جواب غائب تو پہلے موجودہ پالیسی پڑھیں۔"],["غیر ارسال انتظام منسوخ","غیر ارسال مسودہ بند۔ غائب نتیجہ فارم چھوڑنے سے پہلے پڑھیں۔"],["خدمت فعال اور سبک دوش","خدمت و شرائط سہولت ترتیبات میں دیکھیں۔ خدمت حالت وہیں بدلے۔ موجودہ نوٹس مریضوں کے سامنے لگائیں۔"]],
+  },
   education_materials: {
     title: "Health education: materials and register",
     titleUr: "صحت کی تعلیم: مواد اور رجسٹر",

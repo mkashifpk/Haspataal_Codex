@@ -88,3 +88,8 @@ Preparing185 Education materials (same Quality workspace) and remaining P9A cont
 185 bootstrap passed. Running node scripts/p9a185-ui.mjs; read guarded journal before any write continuation.
 185 guarded UI passed. One synthetic Leaflet material1 created once with original-key replay, version1->2 retired via one lost PATCH then GET only. Profile closed. Starting mandatory npm.cmd run build, log artifacts/p9a185-final-dev.log. 184 commit76389bf proposal374 verified pending human review. Next finish185 proposal before Owner186.
 185 full build passed 184 handbook screens. Native tests and signed-out verified. Commit/submit185 before Owner186.
+185 commit cb1e4fc, proposal375 verified pending, awaiting human review on /docs -> My progress. Own material1 retiredv2, no uncertain writes. Starting Owner186 policy/notice/settings handoff. DEV home_visits Available/provided=false, do not switch shared service or alter shared arrangements for a smoke check. 187 hidden per current server view. Files HomeVisitPolicy.tsx and own bilingual help/maps.
+186 Owner policy mounted. Preparing no-write real DEV policy/F1/notice/Facility navigation test. Pending bootstrap186 then profile.
+186 bootstrap passed. Running no-write native Owner UI node scripts/p9a186-ui.mjs. No service transition.
+186 actual Owner policy provided=false/Available, official PDF, unsent draft/F1 and Facility settings handoff PASSED. No PUT or service change, profile closed. Starting mandatory build 185 screen help + tsc + DEV, artifacts/p9a186-final-dev.log. 187 backend view hidden with home_visits Available; don't activate shared service for evidence.
+186 final mandatory build passed. Tested Owner read/PDF/F1/cancel/Facility handoff only. Ready commit/proposal before Quality187–193.
