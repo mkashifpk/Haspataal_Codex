@@ -39,3 +39,5 @@ User request: build the remaining Phase P9A screens and report reproduced backen
 The 7 November DEV build fixed reports #56–#61. The 9 November follow-up verified Ops assignment access, four-desk tracking and a fresh cross-desk appeal, expanded staff directory and acknowledgement, withdrawal letter refusal, screening wording and the named department filter. Reports #62–#64 describe missing selector sources in the ADR, transfusion and blood-center bundles. The existing permission-checked source calls returned 200. See [the follow-up evidence](phase-p9a-2026-11-06/nov9-tracking-verification.md).
 
 All tests use clearly synthetic DEV records with fresh request identities. No human Review code/signature is entered. Translation/editor/device and complete named human journeys stay pending; the progress portal's authenticated human owns acceptance.
+
+The 9 November follow-up is implemented in b46a2e0. Proposals 383–388 were verified pending human review for the four tracking desks, screening prerequisites and the action-register department directory.
