@@ -1,0 +1,350 @@
+{
+  "screen": "education_materials",
+  "title": "Health education: materials and register",
+  "cases": [
+    {
+      "id": "case:GET /education/materials",
+      "call": "GET /api/v1/education/materials",
+      "summary": "The education materials",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/education/materials"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "material_id": 1,
+                  "title": "Dengue: clean standing water",
+                  "topic": "Dengue prevention",
+                  "kind": "Leaflet",
+                  "language": "Urdu",
+                  "displayed_at": "Waiting area rack",
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T11:26:46.582181+00:00"
+              },
+              "request_id": "6bff3115911847a593c56ae7a9bb8feb"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /education/materials",
+      "call": "POST /api/v1/education/materials",
+      "summary": "Add a material",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/education/materials",
+            "body": {
+              "title": "Dengue: clean standing water",
+              "topic": "Dengue prevention",
+              "kind": "Leaflet",
+              "language": "Urdu",
+              "displayed_at": "Waiting area rack"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "material_id": 1,
+                "title": "Dengue: clean standing water",
+                "topic": "Dengue prevention",
+                "kind": "Leaflet",
+                "language": "Urdu",
+                "displayed_at": "Waiting area rack",
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:26:46.523614+00:00"
+              },
+              "request_id": "11d18f881b6f47fe914eaf9b44191018"
+            }
+          },
+          "errors_seen": [
+            "EDUCATION_MATERIAL_EXISTS"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "EDUCATION_MATERIAL_EXISTS",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:PATCH /education/materials/{material_id}",
+      "call": "PATCH /api/v1/education/materials/{material_id}",
+      "summary": "Change or retire a material",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/education/materials/3",
+            "body": {
+              "is_active": false,
+              "expected_version": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "material_id": 3,
+                "title": "Old polio poster",
+                "topic": "Polio",
+                "kind": "Poster",
+                "language": "Urdu",
+                "displayed_at": null,
+                "is_active": false,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:26:46.573602+00:00"
+              },
+              "request_id": "96b16aed7e2c4d2996d430181c09ecb9"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "EDUCATION_MATERIAL_EXISTS",
+        "NOT_FOUND",
+        "VALIDATION_ERROR",
+        "VERSION_CONFLICT"
+      ],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    },
+    {
+      "id": "case:GET /education/register",
+      "call": "GET /api/v1/education/register",
+      "summary": "The education register of a period",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/education/register",
+            "query": {
+              "date_from": "2026-10-14",
+              "date_to": "2026-10-14"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "education_id": 2,
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "encounter_id": null,
+                  "topic": "Plenty of fluids and paracetamol only",
+                  "method": "Verbal",
+                  "material_id": null,
+                  "material_title": null,
+                  "given_to": "Attendant",
+                  "note": null,
+                  "given_by": 1,
+                  "given_by_name": "Dr Ahmed",
+                  "given_by_stamp": {
+                    "at": "2026-10-14T11:26:46.893423+00:00",
+                    "name": "Dr Ahmed",
+                    "text": "Dr Ahmed, Doctor, PMDC PMDC-37977, 14-Oct-2026 16:26",
+                    "user_id": 1,
+                    "designation": "Doctor",
+                    "employee_id": 1,
+                    "registration": "PMDC PMDC-37977"
+                  },
+                  "given_at": "2026-10-14T11:26:46.893423+00:00"
+                },
+                {
+                  "education_id": 1,
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "encounter_id": 1,
+                  "topic": "Dengue prevention",
+                  "method": "Leaflet",
+                  "material_id": 1,
+                  "material_title": "Dengue: clean standing water",
+                  "given_to": "Both",
+                  "note": null,
+                  "given_by": 1,
+                  "given_by_name": "Dr Ahmed",
+                  "given_by_stamp": {
+                    "at": "2026-10-14T11:26:46.873269+00:00",
+                    "name": "Dr Ahmed",
+                    "text": "Dr Ahmed, Doctor, PMDC PMDC-37977, 14-Oct-2026 16:26",
+                    "user_id": 1,
+                    "designation": "Doctor",
+                    "employee_id": 1,
+                    "registration": "PMDC PMDC-37977"
+                  },
+                  "given_at": "2026-10-14T11:26:46.873269+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T11:26:46.931581+00:00"
+              },
+              "request_id": "ba5962c2567b4c3e91d4365772cd04ef"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/education_materials",
+  "workspace_guide": "get_handbook_outline('quality')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Materials: title, topic, kind, language and where it is displayed or kept; retire with is_active false (past records keep it). Send expected_version.",
+    "Register: a period (default this month), newest first: date, patient, topic, method, material, given by. Every row read is logged as access to the patient's record."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

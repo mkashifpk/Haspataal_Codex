@@ -322,6 +322,8 @@ export function checkHelp({
       "QaRounds",
       "RecordFeedback",
       "PatientFeedback",
+      "EducationMaterials",
+      "QualityRegister",
       "QualityPaper",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
