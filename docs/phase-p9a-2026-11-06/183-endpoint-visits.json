@@ -1,0 +1,212 @@
+{
+  "method": "GET",
+  "path": "/api/v1/opd-queues/reception-dashboard",
+  "summary": "All queues, deferred tickets, pending approvals, cash-back prompts",
+  "tags": [
+    "OPD"
+  ],
+  "permissions": [
+    "opd.queue.view"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "description": "**Required permission:** `opd.queue.view`\n\n**Required permission:** `opd.queue.view`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "receptionist",
+    "triage_nurse"
+  ],
+  "parameters": [],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[ReceptionDashboardOut]",
+    "properties": {
+      "data": {
+        "title": "ReceptionDashboardOut",
+        "properties": {
+          "queues": {
+            "items": {
+              "$ref": "#/components/schemas/QueueBoardOut"
+            },
+            "type": "array",
+            "title": "Queues"
+          },
+          "deferred": {
+            "items": {
+              "$ref": "#/components/schemas/OpdTicketOut"
+            },
+            "type": "array",
+            "title": "Deferred"
+          },
+          "awaiting_approval": {
+            "items": {
+              "$ref": "#/components/schemas/OpdTicketOut"
+            },
+            "type": "array",
+            "title": "Awaiting Approval",
+            "description": "Tickets locked by a pending refund, waiver or credit"
+          },
+          "cash_back_prompts": {
+            "items": {
+              "$ref": "#/components/schemas/ReceptionCashBackOut"
+            },
+            "type": "array",
+            "title": "Cash Back Prompts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "queues",
+          "deferred",
+          "awaiting_approval",
+          "cash_back_prompts"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/opd-queues/reception-dashboard"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "queues": [
+            {
+              "queue_group": "department:1",
+              "doctor_id": null,
+              "doctor_name": null,
+              "department_id": 1,
+              "department_name": "General Medicine",
+              "waiting": 1,
+              "in_consultation": 0,
+              "entries": [
+                {
+                  "queue_id": 2,
+                  "ticket_id": 2,
+                  "ticket_number": "OPD-2026-000002",
+                  "token_no": 1,
+                  "patient_name": "Ali Khan",
+                  "status": "Waiting",
+                  "priority": 0,
+                  "payment_status": "Paid",
+                  "approval_lock": "None"
+                }
+              ]
+            }
+          ],
+          "deferred": [],
+          "awaiting_approval": [],
+          "cash_back_prompts": []
+        },
+        "meta": {
+          "server_time": "2026-09-27T17:42:01.757905+00:00"
+        },
+        "request_id": "f3df6bd01d0744bcba669be6164c5704"
+      }
+    }
+  },
+  "errors": [],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "registration",
+    "queue_management",
+    "record_feedback_reception"
+  ],
+  "used_by_workflows": [
+    "clinic-quality-and-education"
+  ],
+  "typescript_example": "// All queues, deferred tickets, pending approvals, cash-back prompts  (permissions: opd.queue.view)\nexport const receptionDashboard = () =>\n  api(\"GET\", `/opd-queues/reception-dashboard`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "opd.queue.view"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of opd.queue.view",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "receptionist",
+      "triage_nurse"
+    ]
+  },
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "object",
+    "paging": [],
+    "search": [],
+    "filters": [],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": []
+}

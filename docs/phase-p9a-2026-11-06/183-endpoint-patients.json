@@ -1,0 +1,724 @@
+{
+  "method": "GET",
+  "path": "/api/v1/patients/search",
+  "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
+  "tags": [
+    "Patients"
+  ],
+  "permissions": [
+    "patient.search"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "description": "Each hit includes `outstanding` → show the red **OUTSTANDING BALANCE: RS. X** banner when\n`has_outstanding_ar` is true (workflow §1.2).\n\n`q` is an MRN or UPMRN (exact, any case: a scanned slip), a mobile number (7 digits or more: the last 10 are\ncompared), a CNIC (13 digits, dashes or not) or a part of the name. A name may contain digits (the trauma label \"Unknown\nMale 3\"): any term with a letter is also looked for in the names; a term of digits alone is only a number.\n\nMerged profiles are matched too, and each person comes back once, as their master record: the MRN on an old slip,\na trauma label or a merged duplicate's name or numbers find the master, with `matched_merged_profile` naming the\nmerged profile that matched (null when the master itself did). The best match comes first: an exact MRN, then the\nclosest name. `VALIDATION_ERROR`: fewer than 2 characters once the spaces are trimmed.\n\n**Required permission:** `patient.search`\n\n**Required permission:** `patient.search`",
+  "roles_allowed": [
+    "accountant",
+    "admissions_officer",
+    "anaesthetist",
+    "billing_admin",
+    "cashier",
+    "clinic_director",
+    "clinical_specialist",
+    "doctor",
+    "head_nurse",
+    "hospital_admin",
+    "hospital_director",
+    "ipc_nurse",
+    "lab_technician",
+    "lab_verifier",
+    "ot_admin",
+    "ot_nurse",
+    "owner",
+    "pharmacist",
+    "quality_officer",
+    "radiographer",
+    "radiologist",
+    "receptionist",
+    "surgeon",
+    "triage_nurse",
+    "ward_nurse",
+    "zakat_officer"
+  ],
+  "parameters": [
+    {
+      "name": "q",
+      "in": "query",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 100,
+        "title": "Q"
+      }
+    },
+    {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "maximum": 100,
+        "minimum": 1,
+        "default": 20,
+        "title": "Limit"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[list[PatientSearchHitOut]]",
+    "properties": {
+      "data": {
+        "items": {
+          "title": "PatientSearchHitOut",
+          "properties": {
+            "patient_id": {
+              "type": "integer",
+              "title": "Patient Id"
+            },
+            "photo_document_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Photo Document Id",
+              "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+            },
+            "mrn": {
+              "type": "string",
+              "title": "Mrn"
+            },
+            "registration_type": {
+              "type": "string",
+              "enum": [
+                "Regular",
+                "LabOnly",
+                "TraumaTemp",
+                "Merged"
+              ],
+              "title": "Registration Type"
+            },
+            "full_name": {
+              "type": "string",
+              "title": "Full Name"
+            },
+            "father_or_husband_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Father Or Husband Name"
+            },
+            "gender": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "male",
+                    "female",
+                    "other",
+                    "unknown"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Gender"
+            },
+            "dob": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dob"
+            },
+            "age_years": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Years"
+            },
+            "age_recorded_on": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Recorded On",
+              "description": "When age_years was recorded (the age grows from that date)"
+            },
+            "mobile": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Mobile"
+            },
+            "cnic": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cnic"
+            },
+            "upmrn": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Upmrn",
+              "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+            },
+            "address": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Address"
+            },
+            "emergency_contact_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emergency Contact Name"
+            },
+            "emergency_contact_phone": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emergency Contact Phone"
+            },
+            "blood_group": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "A+",
+                    "A-",
+                    "B+",
+                    "B-",
+                    "AB+",
+                    "AB-",
+                    "O+",
+                    "O-",
+                    "Unknown"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Blood Group"
+            },
+            "allergies": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allergies"
+            },
+            "billing_category": {
+              "type": "string",
+              "enum": [
+                "Cash",
+                "Panel"
+              ],
+              "title": "Billing Category"
+            },
+            "panel_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Id"
+            },
+            "panel_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Name"
+            },
+            "panel_member_no": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Member No"
+            },
+            "temp_identifier": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temp Identifier",
+              "description": "Unknown-trauma label, e.g. \"Unknown Male 3\""
+            },
+            "merged_into_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Merged Into Id"
+            },
+            "linked_employee_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Linked Employee Id"
+            },
+            "is_deceased": {
+              "type": "boolean",
+              "title": "Is Deceased"
+            },
+            "death_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Death Id",
+              "description": "The death record (GET /deaths/{death_id}) when the death is recorded"
+            },
+            "death_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Death At"
+            },
+            "mlc_numbers": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Mlc Numbers",
+              "description": "Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked)"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "row_version": {
+              "type": "integer",
+              "title": "Row Version"
+            },
+            "outstanding": {
+              "$ref": "#/components/schemas/OutstandingBannerOut"
+            },
+            "matched_merged_profile": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/MergedProfileOut"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The profile merged into this record that the search matched when this record itself did not (an old slip's MRN, a trauma label such as \"Unknown Male 3\", a duplicate's name or numbers): say \"Found by MRN-…, merged into this record\". Null when this record matched"
+            }
+          },
+          "type": "object",
+          "required": [
+            "patient_id",
+            "photo_document_id",
+            "mrn",
+            "registration_type",
+            "full_name",
+            "father_or_husband_name",
+            "gender",
+            "dob",
+            "age_years",
+            "age_recorded_on",
+            "mobile",
+            "cnic",
+            "upmrn",
+            "address",
+            "emergency_contact_name",
+            "emergency_contact_phone",
+            "blood_group",
+            "allergies",
+            "billing_category",
+            "panel_id",
+            "panel_name",
+            "panel_member_no",
+            "temp_identifier",
+            "merged_into_id",
+            "linked_employee_id",
+            "is_deceased",
+            "death_id",
+            "death_at",
+            "mlc_numbers",
+            "created_at",
+            "row_version",
+            "outstanding",
+            "matched_merged_profile"
+          ],
+          "description": "A person the search found, always as their master record (merged profiles are never hits of their own)."
+        },
+        "type": "array",
+        "title": "Data"
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/patients/search",
+      "query": {
+        "q": "MRN-2026-000001"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "registration_type": "Regular",
+            "full_name": "Ali Khan",
+            "father_or_husband_name": null,
+            "gender": "male",
+            "dob": null,
+            "age_years": 40,
+            "age_recorded_on": "2026-10-24",
+            "mobile": "03004648043",
+            "cnic": null,
+            "upmrn": null,
+            "address": null,
+            "emergency_contact_name": null,
+            "emergency_contact_phone": null,
+            "blood_group": null,
+            "allergies": null,
+            "billing_category": "Cash",
+            "panel_id": null,
+            "panel_name": null,
+            "panel_member_no": null,
+            "temp_identifier": null,
+            "merged_into_id": null,
+            "linked_employee_id": null,
+            "is_deceased": false,
+            "created_at": "2026-10-24T10:22:47.211654+00:00",
+            "row_version": 1,
+            "death_id": null,
+            "death_at": null,
+            "photo_document_id": null,
+            "mlc_numbers": [],
+            "matched_merged_profile": null,
+            "outstanding": {
+              "has_outstanding_ar": true,
+              "outstanding_ar_balance": 600,
+              "ar_block_applies": true,
+              "banner_text": "OUTSTANDING BALANCE: RS. 600.00"
+            }
+          }
+        ],
+        "meta": {
+          "server_time": "2026-10-24T10:22:47.821541+00:00"
+        },
+        "request_id": "4d98edf634a347f1a9685ccd268ae47f"
+      }
+    },
+    "errors_seen": [
+      "FORBIDDEN"
+    ]
+  },
+  "errors": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "FORBIDDEN"
+  ],
+  "used_by_screens": [
+    "report_incident",
+    "patient_search",
+    "registration",
+    "trauma_merge",
+    "er_board_doctor",
+    "er_board",
+    "ot_scheduling",
+    "complaints_register",
+    "record_complaint_reception",
+    "record_complaint_admissions",
+    "record_complaint_ward",
+    "record_complaint_er",
+    "infection_cases",
+    "cost_estimates_admissions",
+    "cost_estimates_billing",
+    "home_visit_record",
+    "donor_assessment",
+    "record_feedback_reception",
+    "msds_inspection_pack",
+    "msds_inspection_pack_owner"
+  ],
+  "used_by_workflows": [
+    "blood-center",
+    "clinic-quality-and-education",
+    "complaints",
+    "cost-estimates-and-tariff",
+    "emergency-department",
+    "incidents-and-sentinel-events",
+    "infection-control",
+    "opd-reception",
+    "operating-theater",
+    "phc-inspection",
+    "refunds-waivers-credit"
+  ],
+  "typescript_example": "// Returning-patient lookup by name / phone / CNIC / UPMRN / MRN  (permissions: patient.search)\nexport const searchPatients = () =>\n  api(\"GET\", `/patients/search`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "patient.search"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of patient.search",
+    "roles_allowed": [
+      "accountant",
+      "admissions_officer",
+      "anaesthetist",
+      "billing_admin",
+      "cashier",
+      "clinic_director",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "hospital_admin",
+      "hospital_director",
+      "ipc_nurse",
+      "lab_technician",
+      "lab_verifier",
+      "ot_admin",
+      "ot_nurse",
+      "owner",
+      "pharmacist",
+      "quality_officer",
+      "radiographer",
+      "radiologist",
+      "receptionist",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse",
+      "zakat_officer"
+    ]
+  },
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "list",
+    "paging": [
+      {
+        "name": "limit",
+        "required": false,
+        "type": "integer",
+        "default": 20,
+        "minimum": 1,
+        "maximum": 100
+      }
+    ],
+    "search": [
+      {
+        "name": "q",
+        "required": true,
+        "type": "string",
+        "min_length": 2
+      }
+    ],
+    "filters": [],
+    "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "any_of",
+        "required"
+      ],
+      "details_from": "POST /api/v1/admin/departments"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

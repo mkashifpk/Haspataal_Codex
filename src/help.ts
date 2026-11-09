@@ -10,6 +10,80 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  record_feedback_reception: {
+  title: "Patient feedback: listen, record and keep the response",
+  titleUr: "مریض رائے: سنیں، درج اور محفوظ رکھیں",
+  purpose: "Reception records the client satisfaction form as the respondent gave it, during departure or from a paper form. Anonymous is the default. Saving makes one permanent response for the person in charge to review.",
+  purposeUr: "استقبالیہ رخصتی یا کاغذ سے جواب دینے والے کی اصل رائے درج کرتا ہے۔ پہلے گمنام۔ محفوظ ایک مستقل رائے انچارج کے جائزے کے لیے۔",
+  steps: [
+    "Open Record patient feedback in Reception. New feedback response starts a fresh unsent Annex A. Anonymous is the default and no satisfaction answer is assumed. Record the respondent’s actual words; never fill answers for them.",
+    "Choose Exit interview at departure, Paper form / suggestion box when copying the form as filled, or Community key informant. Received on is the actual receipt date, today or earlier, never future.",
+    "Choose Anonymous, Patient, Relative or Community member as given. A respondent type alone never names anyone. The agreement checkbox remains clear. Anonymous sends no patient or visit reference. Switching respondent clears all named choices.",
+    "Choose Yes or No deliberately. Yes shows ten “how” reasons; No shows thirteen “why” reasons. Tick any reasons the respondent gave, more than one allowed. Changing Yes/No clears earlier reasons and Other text; no opposite-list reason is kept. Other requires their text, up to500characters; comments up to2000.",
+    "Only when the respondent agrees, select a non-anonymous respondent and tick agreement. Choose EITHER patient by name (search at least two characters; Reception registers a missing patient first) OR the agreed visit from today’s reception queues. Match the name and visit number. Never type an id. No matching visit: use the agreed patient or keep unnamed; ask Reception, do not invent a visit. Clearing agreement removes the reference. Calls appear only with the server’s directory permissions.",
+    "Check channel, respondent, answer, reasons, actual date, comments and any naming agreement. Tick review, then Record final feedback once. The returned feedback number confirms permanent recording; there is no edit or delete. A dissatisfied response notifies the person in charge for review; Reception does not mark it reviewed here. Correct a mistake with the responsible in-charge, never silently overwrite.",
+    "After an unknown answer keep the window and frozen form. Retry only the original action/body/key within its retention; do not start another response or use a new key. Server refusal shows its code/reference; retain text, correct the cause and review again. Reference not found: refresh the permitted directory and reselect by name. Never assume a lost reply means failure. A read/print problem cannot undo a confirmed response.",
+    "Cancel discards only an unsent form after confirmation when changed. Cancel and navigation stay blocked while a submitted outcome is unknown. A reviewed hold closes the unsent form without claiming success or sending a replacement.",
+    "Preview/Save blank feedback form obtains Annex A for the suggestion box. In the viewer print every page and check legibility. Cancelling save or a PDF/printer failure never records feedback. Retry only Preview/Save, not Record final feedback. No physical printer or human translation review is claimed by the automated checks.",
+    "F1 or Help opens this screen’s guidance, preserving unsent words and focus. English/Urdu and native keyboard/Settings share100–250% zoom."
+  ],
+  stepsUr: [
+    "استقبالیہ میں مریض رائے کھولیں۔ نئی رائے غیر ارسال ضمیمہ الف؛ پہلے گمنام اور اطمینان جواب خودکار نہیں۔ اصل الفاظ درج، خود جواب نہ بنائیں۔",
+    "رخصتی، اصل بھرا کاغذ یا تجویز ڈبہ، یا برادری باخبر فرد چنیں۔ موصول تاریخ اصل، آج یا پہلے، مستقبل نہیں۔",
+    "بتایا گمنام، مریض، رشتہ دار یا برادری فرد چنیں۔ قسم سے نام ظاہر نہیں۔ رضامندی نشان خالی۔ گمنام میں مریض یا پرچی نہیں۔ قسم بدلنے پر نام حوالہ ختم۔",
+    "ہاں یا نہیں خود چنیں۔ ہاں میں دس کیسے، نہیں میں تیرہ کیوں وجوہ۔ بتائی کئی وجوہ نشان کر سکتے۔ جواب بدلنے پر پرانی وجوہ و دیگر متن ختم، مخالف فہرست نہیں رہتی۔ دیگر اصل متن پانچ سو، تبصرہ دو ہزار تک۔",
+    "صرف رضامندی پر غیر گمنام فرد اور نشان۔ یا مریض نام سے (کم از کم دو حرف؛ نہ ملے استقبالیہ پہلے درج) یا آج قطار کی رضامند پرچی۔ نام و نمبر ملائیں۔ آئی ڈی نہ لکھیں۔ پرچی نہ ہو تو رضامند مریض یا گمنام، استقبالیہ؛ فرضی پرچی نہیں۔ نشان ہٹانے سے حوالہ ختم۔ فہرستیں سرور اجازت سے۔",
+    "ذریعہ، فرد، جواب، وجوہ، اصل تاریخ، تبصرہ و رضامندی چیک، جائزہ نشان پھر حتمی رائے ایک بار۔ واپس رائے نمبر مستقل تصدیق، ترمیم یا حذف نہیں۔ غیر مطمئن رائے انچارج کو اطلاع؛ استقبالیہ یہاں جائزہ مکمل نہیں کرتا۔ غلطی انچارج سے، خاموش تبدیلی نہیں۔",
+    "غائب جواب پر کھڑکی و منجمد فارم رکھیں۔ مقرر مدت میں صرف اصل عمل متن کلید دوبارہ، نئی رائے یا کلید نہیں۔ سرور انکار کوڈ حوالہ دکھاتا، متن رکھ وجہ درست و جائزہ۔ حوالہ نہ ملے مجاز فہرست تازہ اور نام سے دوبارہ۔ غائب جواب ناکامی نہ سمجھیں۔ پڑھائی یا پرنٹ تصدیق شدہ رائے واپس نہیں کرتی۔",
+    "منسوخی صرف غیر ارسال بدلے فارم کی تصدیق کے بعد۔ نامعلوم ارسال میں منسوخی و نقل بند۔ جائزہ روک بند کرنے سے غیر ارسال فارم ختم، کامیابی دعویٰ یا متبادل نہیں۔",
+    "خالی فارم دیکھیں یا محفوظ ضمیمہ الف ڈبے کے لیے۔ ویور سے ہر صفحہ پرنٹ، پڑھنا چیک۔ محفوظ منسوخی، پی ڈی ایف یا پرنٹر خرابی رائے درج نہیں کرتی۔ صرف فارم دوبارہ، حتمی درج نہیں۔ خودکار چیک انسانی ترجمہ یا اصل پرنٹر جائزہ نہیں۔",
+    "ایف ون یا مدد یہی رہنمائی، متن و فوکس محفوظ۔ دونوں زبان اور کی بورڈ و سیٹنگ ایک سو تا دو سو پچاس زوم۔"
+  ],
+  faq: [
+    [
+      "Must the patient be named?",
+      "Only when the respondent agrees, select a non-anonymous respondent and tick agreement. Choose EITHER patient by name (search at least two characters; Reception registers a missing patient first) OR the agreed visit from today’s reception queues. Match the name and visit number. Never type an id. No matching visit: use the agreed patient or keep unnamed; ask Reception, do not invent a visit. Clearing agreement removes the reference. Calls appear only with the server’s directory permissions."
+    ],
+    [
+      "What changes when I choose Yes or No?",
+      "Choose Yes or No deliberately. Yes shows ten “how” reasons; No shows thirteen “why” reasons. Tick any reasons the respondent gave, more than one allowed. Changing Yes/No clears earlier reasons and Other text; no opposite-list reason is kept. Other requires their text, up to500characters; comments up to2000."
+    ],
+    [
+      "Can Reception edit a saved response?",
+      "Check channel, respondent, answer, reasons, actual date, comments and any naming agreement. Tick review, then Record final feedback once. The returned feedback number confirms permanent recording; there is no edit or delete. A dissatisfied response notifies the person in charge for review; Reception does not mark it reviewed here. Correct a mistake with the responsible in-charge, never silently overwrite."
+    ],
+    [
+      "The answer disappeared. Do I record again?",
+      "After an unknown answer keep the window and frozen form. Retry only the original action/body/key within its retention; do not start another response or use a new key. Server refusal shows its code/reference; retain text, correct the cause and review again. Reference not found: refresh the permitted directory and reselect by name. Never assume a lost reply means failure. A read/print problem cannot undo a confirmed response."
+    ],
+    [
+      "How do I supply suggestion-box forms?",
+      "Preview/Save blank feedback form obtains Annex A for the suggestion box. In the viewer print every page and check legibility. Cancelling save or a PDF/printer failure never records feedback. Retry only Preview/Save, not Record final feedback. No physical printer or human translation review is claimed by the automated checks."
+    ]
+  ],
+  faqUr: [
+    [
+      "مریض کا نام لازمی؟",
+      "صرف رضامندی پر غیر گمنام فرد اور نشان۔ یا مریض نام سے (کم از کم دو حرف؛ نہ ملے استقبالیہ پہلے درج) یا آج قطار کی رضامند پرچی۔ نام و نمبر ملائیں۔ آئی ڈی نہ لکھیں۔ پرچی نہ ہو تو رضامند مریض یا گمنام، استقبالیہ؛ فرضی پرچی نہیں۔ نشان ہٹانے سے حوالہ ختم۔ فہرستیں سرور اجازت سے۔"
+    ],
+    [
+      "ہاں یا نہیں پر کیا بدلے؟",
+      "ہاں یا نہیں خود چنیں۔ ہاں میں دس کیسے، نہیں میں تیرہ کیوں وجوہ۔ بتائی کئی وجوہ نشان کر سکتے۔ جواب بدلنے پر پرانی وجوہ و دیگر متن ختم، مخالف فہرست نہیں رہتی۔ دیگر اصل متن پانچ سو، تبصرہ دو ہزار تک۔"
+    ],
+    [
+      "محفوظ رائے بدل سکتے؟",
+      "ذریعہ، فرد، جواب، وجوہ، اصل تاریخ، تبصرہ و رضامندی چیک، جائزہ نشان پھر حتمی رائے ایک بار۔ واپس رائے نمبر مستقل تصدیق، ترمیم یا حذف نہیں۔ غیر مطمئن رائے انچارج کو اطلاع؛ استقبالیہ یہاں جائزہ مکمل نہیں کرتا۔ غلطی انچارج سے، خاموش تبدیلی نہیں۔"
+    ],
+    [
+      "جواب غائب تو دوبارہ درج؟",
+      "غائب جواب پر کھڑکی و منجمد فارم رکھیں۔ مقرر مدت میں صرف اصل عمل متن کلید دوبارہ، نئی رائے یا کلید نہیں۔ سرور انکار کوڈ حوالہ دکھاتا، متن رکھ وجہ درست و جائزہ۔ حوالہ نہ ملے مجاز فہرست تازہ اور نام سے دوبارہ۔ غائب جواب ناکامی نہ سمجھیں۔ پڑھائی یا پرنٹ تصدیق شدہ رائے واپس نہیں کرتی۔"
+    ],
+    [
+      "ڈبے کے خالی فارم کیسے؟",
+      "خالی فارم دیکھیں یا محفوظ ضمیمہ الف ڈبے کے لیے۔ ویور سے ہر صفحہ پرنٹ، پڑھنا چیک۔ محفوظ منسوخی، پی ڈی ایف یا پرنٹر خرابی رائے درج نہیں کرتی۔ صرف فارم دوبارہ، حتمی درج نہیں۔ خودکار چیک انسانی ترجمہ یا اصل پرنٹر جائزہ نہیں۔"
+    ]
+  ]
+},
   qa_rounds_owner: {
   title: "QA rounds: inspect, sign and follow the findings",
   titleUr: "معیار دورے: معائنہ، دستخط اور مشاہدات کی پیروی",

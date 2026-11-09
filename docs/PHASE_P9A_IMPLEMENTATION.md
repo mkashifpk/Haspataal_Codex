@@ -23,8 +23,8 @@ User request: build the remaining Phase P9A screens and report reproduced backen
 |179|incident_statistics_owner|Implemented/testedc8f08ad; proposal369 verified pending; human/full breadth gates pending|
 |180|action_register|Implemented/tested4bbed64; proposal370 verified pending; issue61New; human/full breadth gates pending|
 |181|qa_rounds|Implemented/tested676a9ab; proposal371 verified pending; human/full breadth gates pending|
-|182|qa_rounds_owner|Implemented/tested Owner Storage and Quality regression; commit/proposal next; human/full breadth gates pending|
-|183|record_feedback_reception|Not started|
+|182|qa_rounds_owner|Implemented and tested in 3b70b76. Proposal 372 verified pending human review.|
+|183|record_feedback_reception|Implemented and tested. Two fresh responses, independent PDF, bilingual help. Proposal receipt tracked in the handoff.|
 |184|patient_feedback|Not started|
 |185|education_materials|Not started|
 |186|home_visit_policy|Not started|

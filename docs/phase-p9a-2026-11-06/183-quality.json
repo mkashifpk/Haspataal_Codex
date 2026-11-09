@@ -1,0 +1,473 @@
+{
+  "unknowns": [
+    {
+      "what": "H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "source": "frontend-docs/guides/16-ui-quality.md",
+  "standard_revision": "7795bdfe5246755d",
+  "context": {
+    "workspace": "reception",
+    "purpose": "The client satisfaction form: an exit interview at the end of the visit, or a paper form from the suggestion box typed in as it was filled.",
+    "roles": [
+      "receptionist"
+    ],
+    "screens": [
+      {
+        "id": "record_feedback_reception",
+        "title": "Record patient feedback"
+      }
+    ],
+    "also_uses": [],
+    "handbook": "get_handbook_outline('reception')",
+    "screen_id": "record_feedback_reception",
+    "workflow": "The clinic manual, indicator 45 and Annex A (decisions 25)",
+    "contract": "get_screen_bundle('record_feedback_reception')"
+  },
+  "requirements": [
+    {
+      "id": "Q1",
+      "title": "Establish the purpose and staff context",
+      "instruction": "Before choosing a layout, state who is doing what, what starts the task, what success looks like and what could\nconfuse them. Use the screen's purpose, workspace, playbook and demo role. Distinguish a busy reception counter,\nbedside nursing, a laboratory scanner and an office review. Record the relevant input devices, interruptions,\nlanguage and display conditions. Keep the patient, visit, money or stock context clear throughout the task.\n\nWrite down why the proposed interaction fits this work. Use actual staff-task evidence and references approved by\nthe frontend lead; do not substitute an attractive generic dashboard for the job. Do not invent software screens\nfor staff whose specified interaction is a physical badge tap."
+    },
+    {
+      "id": "Q2",
+      "title": "Reuse intent through complete patterns",
+      "instruction": "Use the frontend team's approved design system and record its version and owner. Where no shared system has been\napproved, use the team's established components within the backend constraints and record the outstanding decision.\nReuse complete patterns: patient selection and identity, search and selection, a validated write and its result,\npending approval and handover, printing and recovery, corrections to finalized records. Follow the relevant\nplaybook; a template must preserve the permissions and transitions of this particular task.\n\nDocument the reason for a variation. Explore alternatives where they make a task clearer or reduce effort, then\nreview them in the whole journey. Do not introduce arbitrary colours, motion, alerts or different meanings for the\nsame control. Read the relevant standards when building or reviewing the flow; do not rely on an old chat summary."
+    },
+    {
+      "id": "Q3",
+      "title": "Complete the interaction and its recovery",
+      "instruction": "For every task show prerequisites, editable and read-only information, validation, the pending state, the confirmed\nresult and the next step. Distinguish loading, empty, unavailable, denied, stale and failed states. Explain disabled\nactions when the user needs to know how to proceed. Include keyboard and scanner interactions, focus after actions,\nconfirmation, cancellation and navigation with unsaved work.\n\nUse each endpoint's repeat rules, version checks and reconciliation instructions after an uncertain result. Never\nshow success merely because a button was pressed, queue clinical or money writes offline, or offer an unsupported\nundo. Follow the existing guides for printing, reconnects, sessions, realtime refreshes and in-memory form recovery.\nNever persist a co-signer's credentials. Distinguish server-owned rules from frontend presentation choices."
+    },
+    {
+      "id": "Q4",
+      "title": "Make the details work in the actual environment",
+      "instruction": "Review both Light and DarkHighContrast, 100-250 percent zoom, English and Urdu, right-to-left layout, mixed-direction\nidentifiers, long names and dense tables. Bundle the required Urdu font. Keep meaning available through text and\nicons, not colour alone. Verify labels, focus order, keyboard operation and readable status messages using the\nfrontend's accessibility tests and a person using the app.\n\nKeyboard zoom shortcuts are compulsory: Ctrl++ (including Ctrl+=) increases, Ctrl+- decreases, and Ctrl+0 resets\nto 100%; use Command on macOS. Clamp the application's zoom to **100% through 250%, inclusive**. Settings, keyboard,\nmenu and any enabled wheel/pinch zoom must share that bound and one zoom state. Persist `ui_scale_pct` through\n`PUT /settings/me` and restore it on login; do not layer CSS scaling over an independent browser zoom. Touch clients\nmust expose equivalent visible controls and handle shortcuts when a hardware keyboard is attached. Test both bounds,\nreset, intermediate values, reopened windows and dense forms/tables without clipped controls or lost data.\n\nUse the actual terminal workflow and supported devices: a scanner must not type into the wrong field, a printer\nproblem must leave the task understandable, and a realtime update must not silently change the selected patient.\nReview consistency across screens and helpful details such as an explicit selected date, shift or patient. Give\nthe product character through clarity, wording and care for staff, within the approved visual system. Any new\nperformance target or clinical presentation rule needs its designated owner's decision."
+    },
+    {
+      "id": "Q5",
+      "title": "Teach the delivered UI as part of building it",
+      "instruction": "Create or revise the screen handbook and the workspace guide with its role-specific FAQ in the same change as\nthe UI. Follow `get_end_user_handbook_brief` and `get_handbook_outline(workspace)` and the\n[end-user handbook contract](12-end-user-handbook.md). Explain every user-facing control and meaningful outcome,\nincluding frontend-only filters, navigation and dialogs that have no API call. Use actual labels and demo-data\nscreenshots in English and Urdu; flag translations awaiting human review.\n\nCover every supported job task in the role's workspace FAQ, including shared screens and handovers. A help page's\nexistence does not establish completeness. Kiosks also need an operator job aid available through the authorized\nstaff help or training material; do not add a login to the kiosk to deliver it."
+    },
+    {
+      "id": "Q6",
+      "title": "Require evidence before reporting completion",
+      "instruction": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.\n\nThe frontend repository must make these checks part of its build or CI:\n\n- Maintain an inventory of implemented screens, workspaces, supported role tasks and interactive controls. Map each\n  to handbook pages and sections in both languages. Include frontend-only behaviour; catalogue tasks are a minimum.\n- Fail on missing or empty pages/sections, uncovered tasks or controls, broken help links or missing referenced\n  screenshots. Test F1, screen Help, workspace Help, offline help, deep links, search and permission filtering; changing\n  user or roles must not retain another user's navigation or search results.\n- Run the relevant API scenario and frontend interaction tests, including repeat submissions, concurrent edits,\n  uncertain outcomes and hardware failures. A non-applicable case needs a reason, not a silent omission.\n- Apply every section of the [human workspace acceptance checklist](17-workspace-review-checklist.md) to each role\n  and supported task. Create fresh synthetic records through the UI, then read, update and cancel/deactivate/delete\n  only as the API permits. Test refusal where deletion or editing is forbidden. Read-only roles inspect new records\n  created by an authorized upstream role. Record the actual new IDs and outcomes; never treat seeded records alone\n  or an agent's API calls as a human journey pass.\n- Record the standards revision, implemented scope, test results, guide paths, demo screenshots and outstanding\n  decisions in the change's review evidence. A named human reviewer must walk through a complete role journey using\n  only the handbook, check that it matches the UI and review translations. Revise misleading or incomplete details.\n\nThe frontend lead owns the component and flow patterns, the delivery checks and their maintenance. The designated\nclinical/language owners approve their wording and decisions. The backend supplies the contract and examples.\nMCP supplies requirements, not proof that a frontend file exists, that a build passed or that staff can use it.\nAn agent may critique the work and collect evidence; it cannot approve its own human review or award progress."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "human_review": {
+    "source": "frontend-docs/guides/17-workspace-review-checklist.md",
+    "required": true,
+    "checklist": [
+      {
+        "id": "R1",
+        "title": "Identify the implementation and complete scope",
+        "instruction": "- [ ] Record implementation ID/name, repository, commit/build, backend/standards revision, workspace, roles,\n  reviewer, date, device/OS, languages and peripherals tested (the review's *Start* step: the portal fills in what it\n  knows).\n- [ ] Inventory each role's screens, tasks, controls, permissions and required handovers. Every task needs a test\n  result and matching FAQ answer. A read-only role or non-applicable operation needs a specific contract-based reason."
+      },
+      {
+        "id": "R2",
+        "title": "Create fresh data through the frontend",
+        "instruction": "- [ ] With the review code in your app's DEV settings, create new records through each applicable create form:\n  patient/visit, request/order, master record, transaction or register entry. The review lists them with their IDs as\n  the server sees them; where a free-text field permits it, you may type the code there too, to find them again.\n- [ ] Try required fields missing, invalid values, duplicate identifiers and cancellation before saving. Verify\n  the visible validation, server refusal and that no partial or duplicate business record is reported as saved.\n- [ ] Complete the valid path and check the generated number, defaults, ownership, patient/visit context and next step.\n  A seeded master may be a prerequisite; the transaction being accepted must be new. Do not create destructive test\n  masters on a shared server without coordinating with its backend team."
+      },
+      {
+        "id": "R3",
+        "title": "Read and retrieve those new records",
+        "instruction": "- [ ] Find each new record by its actual ID/number and relevant search/filter/sort controls. Open list and detail\n  views, refresh, navigate away/back and sign in again. Confirm persistence and exact values, units, dates and status.\n- [ ] Check empty/no-match results and pagination where applicable. A read-only role must read a fresh record created\n  by an authorized upstream role and demonstrate that write actions are unavailable/refused."
+      },
+      {
+        "id": "R4",
+        "title": "Update, correct and exercise permitted deletion",
+        "instruction": "- [ ] Edit each supported field on the new record, save and re-read it. Check cancellation, unsaved-work navigation,\n  stale versions and simultaneous edits from a second session; one user's changes must not silently replace another's.\n- [ ] Test the actual permitted lifecycle: delete a draft where supported, or cancel, deactivate, stop, reverse or\n  append a correction with the required reason/approval. Verify list/detail/history and downstream effects afterwards.\n- [ ] Where deletion or editing is forbidden (for example finalized clinical or financial records), verify the\n  frontend offers the permitted correction and the server refuses the forbidden action. Never invent hard deletion\n  to tick a CRUD box. Record an explicit not-applicable/refused result with the supporting contract."
+      },
+      {
+        "id": "R5",
+        "title": "Permissions, handovers and end-to-end outcomes",
+        "instruction": "- [ ] Test allowed and denied actions with the appropriate accounts, including separation of requester/approver,\n  sign-off, counter-signature and multi-role switching. Check patient and workspace context after every switch.\n- [ ] Follow the new record into the next role's queue and complete the supported journey. Verify live refresh,\n  balances/stock/bed state where relevant, notifications and printable output against the new record's values.\n- [ ] Shared task coverage belongs to every role that uses it; do not mark a workspace done with an unfinished handover."
+      },
+      {
+        "id": "R6",
+        "title": "F1 help and detailed role FAQs",
+        "instruction": "- [ ] Press **F1** on each screen and with a field/dialog focused. Correct contextual help must open without losing\n  input; closing it restores focus. Test visible Help, workspace help, offline reading, search and deep links.\n- [ ] Follow each role task's FAQ using only its instructions. Check prerequisites, actual labels, steps, outcomes,\n  errors, recovery and handovers in English and Urdu. Missing/generic answers fail acceptance.\n- [ ] Change user/permissions and verify restricted pages/search results disappear. Login/locked/kiosk help must\n  reveal only permitted public/operator guidance. Hardware keyboard shortcuts and touch Help must both work where supported."
+      },
+      {
+        "id": "R7",
+        "title": "Zoom, language and usable layouts",
+        "instruction": "- [ ] Test Ctrl++/Ctrl+=, Ctrl+-, Ctrl+0 (Command equivalents on macOS), Settings and any enabled wheel/pinch/menu\n  routes. Verify **100% minimum, 250% maximum**, reset to 100%, persistence and a single shared application zoom state.\n- [ ] Repeatedly try beyond both bounds. Test at 100%, 150%, 200% and 250%, in both themes and languages, including\n  Urdu reading direction, long labels, tables, dialogs, validation messages and Help. All actions remain reachable.\n- [ ] Check tab order, focus, scanner input and visible controls on touch clients. Do not confuse OS magnification\n  with the application's saved zoom preference."
+      },
+      {
+        "id": "R8",
+        "title": "Failures, retries and devices",
+        "instruction": "- [ ] Test double submit, lost reply, disconnect/reconnect, session expiry, stale data and refused operations on\n  the new records. Confirm honest pending/error messages, correct reconciliation and no duplicate writes.\n- [ ] Test required printers/scanners/cameras, denied device permission and unavailable hardware. Verify recovery\n  preserves appropriate form context and does not display success before the server confirms it.\n- [ ] Patient workflows: register and admit a new patient **without** a photo (the form must let you skip it with no\n  reason), then take one and see it on the patient and the admission; a PDF as the photo must be refused. Upload a\n  synthetic outside report with its facility and date, re-open it under the correct patient and check it is labelled\n  as an outside report, never shown as this hospital's result."
+      },
+      {
+        "id": "R9",
+        "title": "Keep reproducible evidence",
+        "instruction": "- [ ] The review on the portal is the evidence, kept on the DEV server: what the server saw your app do (records new\n  and existing, refusals, each operation by lifecycle step and screen), your answers and a note for every Fail and N/A\n  (what failed and how to reproduce it, or why it does not apply). Keep screenshots and longer test output with your\n  app; mention where in the note.\n- [ ] *Test in the app* is a to-do list that ticks itself: an operation turns **Done on a new record** when the server\n  sees your app do it with the code, **Done on existing records only** when it changed demo data alone (the inspectors\n  see that), **Refused** when you tested a refusal. Mark only what is not seen: *Not applicable* or *Fail*, with the note.\n- [ ] *Screens*: for each screen, F1 help, the role FAQs and zoom (one click passes a whole column; then mark the\n  exceptions). The **fresh-data** column is the server's: it passes where your app made new records with that screen's\n  own write operations (any new record, for a screen that only reads); you can only reject it.\n- [ ] *Export* gives the review as one Markdown file for your repository or review system, whenever you want it.\n- [ ] Accepting or reporting **F1 help, the role FAQs, zoom or the fresh-data review** (on a proposal, on *Save this\n  screen* or in the transfer of legacy work) needs **your signed review** of that screen's workspace. The portal\n  preselects the review that passes them and refuses, saying why (`details.field` = `review_id`), an item without a\n  signed review, on a review that does not cover the screen or one that does not pass it there. The backend team's\n  inspectors see the review beside your agent's proposals.\n- [ ] **Approve all reported progress** is one human declaration for the displayed selection; untick any untested items\n  first. Each proposal retains its build, the review it was accepted with and your decision."
+      },
+      {
+        "id": "R10",
+        "title": "Decide and report honestly",
+        "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
+      }
+    ],
+    "workspace_checklist": "- [ ] **Create:** open your cash shift; register a new patient with *Register + OPD slip* (and one with the full\n  intake form), skip the optional Patient Photo on one and take it on the other; upload a synthetic outside report\n  with its facility and date; a lab-only walk-in; a complaint.\n- [ ] **Read:** find each new patient by MRN, mobile and name; the slip, the queue token, the documents (the outside\n  report labelled as outside) and the dues banner.\n- [ ] **Update / correct:** edit the new patient's demographics, and from a second session the same patient\n  (`VERSION_CONFLICT`); defer the ticket and reactivate it.\n- [ ] **Cancel / delete:** cancel or void an unpaid ticket; request the refund of a paid one, then hand the cash back\n  once approved; merge a trauma profile made in this review into the new patient. Nothing is deleted.\n- [ ] **Refused:** a discount above your ceiling (`DISCOUNT_CEILING_EXCEEDED`, then request the waiver); a PDF as the\n  photo (`UNSUPPORTED_MEDIA_TYPE`); an outside report without its facility (`VALIDATION_ERROR`).\n- [ ] **Hand over:** the ticket reaches the doctor's live queue; the refund and the waiver reach the approval queue;\n  the closed shift reaches the accountant; once the lab verifies the walk-in's result, the open screen refreshes by\n  itself (`lab.result.published`) and the desk prints the report.",
+    "operations": {
+      "create": [
+        {
+          "call": "POST /patient-feedback",
+          "summary": "Record a patient's feedback (Annex A)",
+          "screen": "record_feedback_reception"
+        }
+      ],
+      "update_or_correct": [],
+      "cancel_or_delete": [],
+      "other_actions": []
+    },
+    "operations_rule": "Exercise each operation on records you create new in this review, through the app: create, then read them back, update or correct them, and cancel, withdraw or delete them where the contract allows (and see the refusal where it does not). The other_actions are the steps of the record's life (sign, approve, dispense ...).",
+    "portal_review": "The human tester records this review on the portal (My progress → the workspace → Start the review), with its code in the app's DEV settings: the server sees the operations the app did on new records, the tester answers the rest and signs. The four compulsory items need that signed review; fresh data needs the server's evidence. You build the Review code setting (dev_build_headers), never start, fill or sign a review; progress_proposals → human_reviews lists the failures to fix.",
+    "dev_build_headers": {
+      "send": [
+        "X-Haspataal-Developer: <portal username>",
+        "X-Haspataal-Implementation: <implementation id>",
+        "X-Haspataal-Review: <the DEV settings' Review code, while the tester has one set>"
+      ],
+      "review_code_setting": "One app-wide field, Review code, in Settings → This terminal (open before login too), empty by default; the shared API client adds the header. Not on any screen or the login form.",
+      "release_build": "The field and all three headers behind the DEV build flag (compiled out, never a runtime switch): the hospital's release build has neither (guide 19, I6 and I9).",
+      "never": "Never set a review code yourself, in tests or scripts: only the tester's writes with it count."
+    }
+  },
+  "open_decisions": [
+    {
+      "id": "H02",
+      "topic": "formatting",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right.",
+      "status": "open"
+    },
+    {
+      "id": "H03",
+      "topic": "formatting",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone.",
+      "status": "open"
+    },
+    {
+      "id": "H04",
+      "topic": "formatting",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting.",
+      "status": "open"
+    },
+    {
+      "id": "H08",
+      "topic": "language",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it).",
+      "status": "open"
+    },
+    {
+      "id": "H09",
+      "topic": "design",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles).",
+      "status": "open"
+    },
+    {
+      "id": "H10",
+      "topic": "presentation",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule.",
+      "status": "open"
+    },
+    {
+      "id": "H12",
+      "topic": "platforms",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks.",
+      "status": "open"
+    },
+    {
+      "id": "H18",
+      "topic": "language",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require.",
+      "status": "open"
+    },
+    {
+      "id": "H19",
+      "topic": "clinical",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\".",
+      "status": "open"
+    },
+    {
+      "id": "H20",
+      "topic": "terminals",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password.",
+      "status": "open"
+    },
+    {
+      "id": "H22",
+      "topic": "printing",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer.",
+      "status": "open"
+    },
+    {
+      "id": "H24",
+      "topic": "approval",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes).",
+      "status": "open"
+    }
+  ],
+  "verification": {
+    "frontend_files_inspected": false,
+    "progress_recorded": false,
+    "rule": "Requirements only. Frontend CI checks coverage; a named human reviews the working journey."
+  },
+  "contract_fingerprint": "a4772c79e2249316e1a9",
+  "knowledge_revision": "930b217cd2e48604"
+}

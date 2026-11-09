@@ -320,6 +320,7 @@ export function checkHelp({
       "ActionRegister",
       "ActionSourcePreview",
       "QaRounds",
+      "RecordFeedback",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

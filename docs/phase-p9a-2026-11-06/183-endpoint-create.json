@@ -1,0 +1,634 @@
+{
+  "method": "POST",
+  "path": "/api/v1/patient-feedback",
+  "summary": "Record a patient's feedback (Annex A)",
+  "tags": [
+    "Patient feedback"
+  ],
+  "permissions": [
+    "feedback.record",
+    "feedback.review"
+  ],
+  "permissions_mode": "any",
+  "idempotency_key": true,
+  "description": "As the respondent gave it: satisfied or not, the reasons from the form's list for that answer (Other with its\ntext), comments. Anonymous unless the respondent agrees to name the visit or the patient. A dissatisfied response\nnotifies the person in charge. `VALIDATION_ERROR` for reasons of the other list, Other without its text, a future\ndate, a visit of another patient or an anonymous response that names someone; `NOT_FOUND` for an unknown visit or\npatient. An id in the request body that does not exist: `REFERENCE_NOT_FOUND` (details.field).\n\n**Required permission:** `feedback.record OR feedback.review`\n\n**Required permission:** `feedback.record OR feedback.review`",
+  "roles_allowed": [
+    "clinic_director",
+    "hospital_admin",
+    "hospital_director",
+    "owner",
+    "quality_officer",
+    "receptionist"
+  ],
+  "parameters": [
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "FeedbackIn",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "enum": [
+          "ExitInterview",
+          "Form",
+          "KeyInformant"
+        ],
+        "title": "Channel",
+        "description": "ExitInterview at the end of the visit; Form from the suggestion box or the desk; KeyInformant in the community"
+      },
+      "respondent": {
+        "type": "string",
+        "enum": [
+          "Patient",
+          "Relative",
+          "Anonymous",
+          "CommunityMember"
+        ],
+        "title": "Respondent"
+      },
+      "satisfied": {
+        "type": "boolean",
+        "title": "Satisfied",
+        "description": "Annex A question 1"
+      },
+      "reasons": {
+        "items": {
+          "type": "string",
+          "enum": [
+            "CompleteInformation",
+            "AvailableWhenNeeded",
+            "NotCostly",
+            "ConvenientToReach",
+            "CourteousStaff",
+            "RelevantStaffAvailable",
+            "PrivacyObserved",
+            "FemaleStaffAvailable",
+            "Recovered",
+            "Confidentiality",
+            "Privacy",
+            "LackOfAttention",
+            "InadequateInformation",
+            "AskedToComeAgain",
+            "Costly",
+            "LongWait",
+            "DiscourteousStaff",
+            "StaffNotCompetent",
+            "RelevantStaffNotAvailable",
+            "FemaleStaffNotAvailable",
+            "SideEffects",
+            "Other"
+          ]
+        },
+        "type": "array",
+        "maxItems": 13,
+        "title": "Reasons",
+        "description": "Satisfied: from the YES list; not satisfied: from the NO list"
+      },
+      "other_reason": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 500
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Other Reason",
+        "description": "Required with Other, and only with it"
+      },
+      "comments": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 2000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Comments"
+      },
+      "received_on": {
+        "type": "string",
+        "format": "date",
+        "title": "Received On"
+      },
+      "ticket_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Ticket Id",
+        "description": "The visit it is about, when the respondent agrees to be named (GET /opd-queues/reception-dashboard)"
+      },
+      "patient_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Patient Id",
+        "description": "The patient, when named without a visit; null when anonymous (GET /patients/search)"
+      }
+    },
+    "type": "object",
+    "required": [
+      "channel",
+      "respondent",
+      "satisfied",
+      "received_on"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[FeedbackDetailOut]",
+    "properties": {
+      "data": {
+        "title": "FeedbackDetailOut",
+        "properties": {
+          "feedback_id": {
+            "type": "integer",
+            "title": "Feedback Id"
+          },
+          "feedback_number": {
+            "type": "string",
+            "title": "Feedback Number"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "ExitInterview",
+              "Form",
+              "KeyInformant"
+            ],
+            "title": "Channel"
+          },
+          "respondent": {
+            "type": "string",
+            "enum": [
+              "Patient",
+              "Relative",
+              "Anonymous",
+              "CommunityMember"
+            ],
+            "title": "Respondent"
+          },
+          "patient_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Id"
+          },
+          "mrn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mrn"
+          },
+          "patient_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Name"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          },
+          "received_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Received On"
+          },
+          "satisfied": {
+            "type": "boolean",
+            "title": "Satisfied"
+          },
+          "reasons": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "CompleteInformation",
+                "AvailableWhenNeeded",
+                "NotCostly",
+                "ConvenientToReach",
+                "CourteousStaff",
+                "RelevantStaffAvailable",
+                "PrivacyObserved",
+                "FemaleStaffAvailable",
+                "Recovered",
+                "Confidentiality",
+                "Privacy",
+                "LackOfAttention",
+                "InadequateInformation",
+                "AskedToComeAgain",
+                "Costly",
+                "LongWait",
+                "DiscourteousStaff",
+                "StaffNotCompetent",
+                "RelevantStaffNotAvailable",
+                "FemaleStaffNotAvailable",
+                "SideEffects",
+                "Other"
+              ]
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "other_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Other Reason"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments"
+          },
+          "recorded_by": {
+            "type": "integer",
+            "title": "Recorded By"
+          },
+          "recorded_by_name": {
+            "type": "string",
+            "title": "Recorded By Name"
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Recorded At"
+          },
+          "reviewed_by": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed By"
+          },
+          "reviewed_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed By Name"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "review_action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Action"
+          },
+          "review_pending": {
+            "type": "boolean",
+            "title": "Review Pending"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/QualityActionOut"
+            },
+            "type": "array",
+            "title": "Actions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "feedback_id",
+          "feedback_number",
+          "channel",
+          "respondent",
+          "patient_id",
+          "mrn",
+          "patient_name",
+          "ticket_id",
+          "received_on",
+          "satisfied",
+          "reasons",
+          "other_reason",
+          "comments",
+          "recorded_by",
+          "recorded_by_name",
+          "recorded_at",
+          "reviewed_by",
+          "reviewed_by_name",
+          "reviewed_at",
+          "review_action",
+          "review_pending",
+          "actions"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/patient-feedback",
+      "body": {
+        "channel": "ExitInterview",
+        "respondent": "Patient",
+        "ticket_id": 1,
+        "satisfied": true,
+        "reasons": [
+          "CourteousStaff",
+          "PrivacyObserved"
+        ],
+        "received_on": "2026-10-14"
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "data": {
+          "feedback_id": 1,
+          "feedback_number": "FB-2026-00001",
+          "channel": "ExitInterview",
+          "respondent": "Patient",
+          "patient_id": 1,
+          "mrn": "MRN-2026-000001",
+          "patient_name": "Ali Khan",
+          "ticket_id": 1,
+          "received_on": "2026-10-14",
+          "satisfied": true,
+          "reasons": [
+            "CourteousStaff",
+            "PrivacyObserved"
+          ],
+          "other_reason": null,
+          "comments": null,
+          "recorded_by": 3,
+          "recorded_by_name": "Receptionist",
+          "recorded_at": "2026-10-14T11:26:35.417371+00:00",
+          "reviewed_by": null,
+          "reviewed_by_name": null,
+          "reviewed_at": null,
+          "review_action": null,
+          "review_pending": true,
+          "actions": []
+        },
+        "meta": {
+          "server_time": "2026-10-14T11:26:35.481930+00:00"
+        },
+        "request_id": "0832f2f739ef47408c5e8b952696295f"
+      }
+    },
+    "errors_seen": [
+      "VALIDATION_ERROR"
+    ],
+    "events_emitted": [
+      "notification.created"
+    ]
+  },
+  "errors": [
+    {
+      "code": "NOT_FOUND",
+      "http_status": 404,
+      "message": "The requested resource was not found.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Say 'not found'; refresh the list."
+    },
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "VALIDATION_ERROR"
+  ],
+  "used_by_screens": [
+    "record_feedback_reception"
+  ],
+  "used_by_workflows": [
+    "clinic-quality-and-education"
+  ],
+  "typescript_example": "// Record a patient's feedback (Annex A)  (permissions: feedback.record, feedback.review)\nexport const recordPatientFeedback = (body) =>\n  api(\"POST\", `/patient-feedback`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "feedback.record",
+      "feedback.review"
+    ],
+    "permissions_mode": "any",
+    "who": "holders of feedback.record or feedback.review",
+    "roles_allowed": [
+      "clinic_director",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "quality_officer",
+      "receptionist"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /patient-feedback",
+    "emits_events": [
+      "notification.created"
+    ],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [
+    "notification.created"
+  ],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "NOT_FOUND",
+      "http_status": 404,
+      "message": "The requested resource was not found.",
+      "retryable": false,
+      "ui_action": "Say 'not found'; refresh the list.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "resource"
+      ],
+      "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+    },
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "ward_id"
+      ],
+      "details_from": "POST /api/v1/pharmacy/storage-checks"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}
