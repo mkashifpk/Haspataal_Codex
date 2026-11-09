@@ -321,6 +321,8 @@ export function checkHelp({
       "ActionSourcePreview",
       "QaRounds",
       "RecordFeedback",
+      "PatientFeedback",
+      "QualityPaper",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

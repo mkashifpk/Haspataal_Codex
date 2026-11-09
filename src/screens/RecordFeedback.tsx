@@ -91,7 +91,8 @@ const wording: Record<string, [string, string]> = {
   Anonymous: ["Anonymous", "گمنام"],
   CommunityMember: ["Community member", "برادری کا فرد"],
 };
-const label = (v: string) => (wording[v] ? t(...wording[v]) : v);
+export const feedbackLabel = (v: string) => (wording[v] ? t(...wording[v]) : v);
+const label = feedbackLabel;
 export function RecordFeedback({
   user,
   connected,
