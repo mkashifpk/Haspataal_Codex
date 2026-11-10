@@ -45,3 +45,5 @@ Diagnostics 214–217 shared UI wired with authorized service views and individu
 Final P9B 218–222 contracts and plans read. Implement diagnostic correlation (append-only), medication statistics and recall read, cost-estimate statistics and policy/tariff PDFs, surgical metrics and open adverse-event lists. No clinical writes planned without exact eligible synthetic source.
 All four Diagnostics native journeys 214–217 passed, including Separate and the five-document Combined save-dialog journey. No business writes. Pending mandatory build at 216, then commit/propose. Final 218–222 source and contracts drafted but not mounted; no correlation eligible fixture at preflight.
 ER proposals 411–413 verified pending, awaiting human review on /docs -> My progress.
+Final screens 218–222 mounted with native estimate/policy PDF support. Pending TypeScript, handbook wiring, and native read-only Quality and Owner journeys.
+Diagnostics proposals 414–417 verified pending, awaiting human review on /docs -> My progress. Final five static handbook checks at 221 and TypeScript passed; native journey pending.
