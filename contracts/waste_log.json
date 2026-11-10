@@ -1,0 +1,305 @@
+{
+  "screen": {
+    "id": "waste_log",
+    "workspace": "infection_control",
+    "title": "Hospital waste log",
+    "purpose": "What each area generated, by category and weight, and its handover to the contractor.",
+    "workflow": "MSDS IPC 88",
+    "rule_objects": [
+      {
+        "id": "rule:53379bd701",
+        "text": "One row per area, day and category; when the contractor collects, the consignment note and the disposal.",
+        "cites": []
+      },
+      {
+        "id": "rule:99b228425d",
+        "text": "Totals by category and month; risk waste not handed over shows in handed_over_kg below weight_kg.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "clinic-quality-and-education",
+      "complaints",
+      "cost-estimates-and-tariff",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "finance-and-owner",
+      "hr-and-payroll",
+      "incidents-and-sentinel-events",
+      "infection-control",
+      "inpatient-and-discharge",
+      "laboratory-and-radiology",
+      "medical-record-review",
+      "medication-safety",
+      "personnel-records",
+      "phc-interview-prep",
+      "quality-indicators-and-committees"
+    ]
+  },
+  "definition_of_done": {
+    "points": 51,
+    "items": [
+      {
+        "id": "ep:POST /infection/waste",
+        "label": "POST /infection/waste",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /infection/waste",
+        "label": "GET /infection/waste",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /finance/vendors",
+        "label": "GET /finance/vendors",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /infection/waste/handover",
+        "label": "POST /infection/waste/handover",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /admin/departments",
+        "label": "GET /admin/departments",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /beds/matrix",
+        "label": "GET /beds/matrix",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:53379bd701",
+        "label": "One row per area, day and category; when the contractor collects, the consignment note and the disposal.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:99b228425d",
+        "label": "Totals by category and month; risk waste not handed over shows in handed_over_kg below weight_kg.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "POST /infection/waste",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.waste.record"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of infection.waste.record",
+        "roles_allowed": [
+          "ipc_nurse",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /infection/waste",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "summary": "Record hospital waste"
+    },
+    {
+      "endpoint": "GET /infection/waste",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.waste.record",
+          "infection.control.manage",
+          "infection.statistics.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.waste.record or infection.control.manage or infection.statistics.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "summary": "The waste log"
+    },
+    {
+      "endpoint": "GET /finance/vendors",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "summary": "Vendors"
+    },
+    {
+      "endpoint": "POST /infection/waste/handover",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.waste.record"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of infection.waste.record",
+        "roles_allowed": [
+          "ipc_nurse",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /infection/waste",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "summary": "Hand collected waste over to the contractor"
+    },
+    {
+      "endpoint": "GET /admin/departments",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "summary": "Departments"
+    },
+    {
+      "endpoint": "GET /beds/matrix",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Live bed matrix (counts per ward + optional bed list)"
+    }
+  ],
+  "id_sources": [],
+  "rules_in_force": null
+}

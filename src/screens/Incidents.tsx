@@ -137,12 +137,14 @@ function Lookup({
   );
 }
 export function Incidents({
+  initialType,
   user,
   revision,
   timeZone,
   onRecorded,
   onPendingChange,
 }: {
+  initialType?: string;
   user: any;
   revision: number;
   timeZone?: string;
@@ -163,7 +165,7 @@ export function Incidents({
     [saved, setSaved] = useState<incidents.IncidentDetailOut>(),
     [detail, setDetail] = useState<incidents.IncidentDetailOut>(),
     [affected, setAffected] = useState("None"),
-    [type, setType] = useState(""),
+    [type, setType] = useState(initialType ?? ""),
     [ids, setIds] = useState<Record<string, number>>({});
   const [draftZone, setDraftZone] = useState(timeZone);
   const submitting = useRef(false),

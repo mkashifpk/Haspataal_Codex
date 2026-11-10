@@ -77,7 +77,7 @@ export function IpcAudits({user,connected,timeZone,revision,onOpenHelp}:P9cProps
     <LoadState {...list} retry={list.reload}/>
     {audit&&<><AuditBreakdown audit={audit}/><ReportTable title={t("Audit register","آڈٹ رجسٹر")} columns={[t("Audit","آڈٹ"),t("Area","علاقہ"),t("Details and findings","تفصیل اور نتائج"),t("Actions","کارروائیاں")]} rows={audit.audits.map(x=>({key:x.audit_id,cells:[
       <>{x.audit_number} · {t(x.kind,kinds[x.kind])}<br/>{x.audited_on} · {x.author_stamp.text}</>,[x.ward_name,x.department_name,x.location].filter(Boolean).join(" · ")||"—",
-      <details><summary data-help="ipc.audit">{x.compliant}/{x.observations} · {x.compliance_pct}%</summary><ul>{x.details.map((d,i)=><li key={i}>{d.item} · {d.compliant}/{d.observed}</li>)}</ul><p>{x.findings}</p></details>,x.actions
+      <details><summary data-help="ipc.audit">{x.compliant}/{x.observations} · {x.compliance_pct}%</summary><ul>{x.details.map((d,i)=><li key={i}>{d.item} · {d.compliant}/{d.observed}</li>)}</ul><p>{x.findings}</p></details>,<>{x.actions}{canWrite&&<button type="button" data-help="ipc.audit" disabled={!canStart||!!draft} onClick={()=>{setSelected(x);setDraft("action");write.clearError();}}>{t("Assign audit action","آڈٹ کارروائی تفویض کریں")}</button>}</>
     ]}))}/></>}
     {selected&&!draft&&canWrite&&<button type="button" data-help="ipc.audit" disabled={!canStart} onClick={()=>{setDraft("action");write.clearError();}}>{t("Assign an action for","کارروائی تفویض کریں")} {selected.audit_number}</button>}
     {!draft&&<ClinicalWriteFeedback write={write}/>}

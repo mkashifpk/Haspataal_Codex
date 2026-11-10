@@ -3,6 +3,8 @@ const periodDocuments = new Set([
   '/blood/registers/reactions/pdf', '/blood/storage-checks/pdf',
   '/blood-center/registers/pdf', '/maternity/assessments/register/pdf',
   '/maternity/labour-register/pdf',
+  '/infection/report/pdf',
+  '/quality/indicators/pdf',
 ]);
 const diagnosticDocuments = new Set([
   '/diagnostics/lab-policy/pdf', '/diagnostics/imaging-policy/pdf', '/diagnostics/services/pdf',
@@ -18,6 +20,7 @@ exports.isQualityRegisterPdfPath = value => {
   if (typeof value !== 'string' || value !== value.trim()) return false;
   if (value === '/consent-policy/pdf') return true;
   if (value === '/mlc/contacts/pdf') return true;
+  if (/^\/committee-meetings\/[1-9]\d*\/pdf$/.test(value)) return true;
   if (exports.isDiagnosticPdfPath(value)) return true;
   if (exports.isEstimatePdfPath(value) || value === '/medication-safety/policy/pdf') return true;
   if (/^\/quality\/record-reviews\/[1-9]\d*\/report\/pdf$/.test(value)) return true;

@@ -1,0 +1,217 @@
+{
+  "screen": {
+    "id": "my_committees",
+    "workspace": "*",
+    "title": "My committees",
+    "purpose": "The committees you are a member of, their meetings and minutes; the chair approves the minutes.",
+    "workflow": "MSDS CQI 93-98",
+    "rule_objects": [
+      {
+        "id": "rule:d7f2f47fe7",
+        "text": "Show only when GET /committees is not empty. A chair sees 'Approve the minutes' while can_finalize.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "facility-compliance-equipment-drills",
+      "quality-indicators-and-committees"
+    ]
+  },
+  "definition_of_done": {
+    "points": 46,
+    "items": [
+      {
+        "id": "ep:GET /committees",
+        "label": "GET /committees",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /committees/{committee_id}",
+        "label": "GET /committees/{committee_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /committee-meetings/{meeting_id}",
+        "label": "GET /committee-meetings/{meeting_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /committee-meetings/{meeting_id}/finalize",
+        "label": "POST /committee-meetings/{meeting_id}/finalize",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /committee-meetings/{meeting_id}/pdf",
+        "label": "GET /committee-meetings/{meeting_id}/pdf",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:d7f2f47fe7",
+        "label": "Show only when GET /committees is not empty. A chair sees 'Approve the minutes' while can_finalize.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /committees",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user: the committees they are a member of (all with committee.view or committee.manage)"
+      },
+      "service_gates": [],
+      "summary": "The committees"
+    },
+    {
+      "endpoint": "GET /committees/{committee_id}",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "the committee's members, committee.view or committee.manage"
+      },
+      "service_gates": [],
+      "summary": "A committee and its meetings"
+    },
+    {
+      "endpoint": "GET /committee-meetings/{meeting_id}",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "the committee's members, committee.view or committee.manage"
+      },
+      "service_gates": [],
+      "summary": "A meeting and its minutes"
+    },
+    {
+      "endpoint": "POST /committee-meetings/{meeting_id}/finalize",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "the chair of the committee or committee.manage"
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with MEETING_FINAL: the minutes are final already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /committee-meetings/{meeting_id}",
+        "refused_with": "MEETING_FINAL",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "summary": "Approve the minutes (final)"
+    },
+    {
+      "endpoint": "GET /committee-meetings/{meeting_id}/pdf",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "the committee's members, committee.view or committee.manage"
+      },
+      "service_gates": [],
+      "summary": "The minutes (PDF)"
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "committee_id",
+      "source": "this_screen",
+      "call": "GET /committees",
+      "field": "committee_id",
+      "used_by": [
+        "GET /committees/{committee_id}"
+      ]
+    },
+    {
+      "id": "meeting_id",
+      "source": "this_screen",
+      "call": "GET /committees/{committee_id}",
+      "field": "meeting_id",
+      "used_by": [
+        "GET /committee-meetings/{meeting_id}",
+        "POST /committee-meetings/{meeting_id}/finalize",
+        "GET /committee-meetings/{meeting_id}/pdf"
+      ]
+    }
+  ],
+  "rules_in_force": null
+}

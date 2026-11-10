@@ -45,6 +45,7 @@ const statusName = (s: api.QualityActionOut["status"]) =>
     Cancelled: t("Cancelled", "منسوخ"),
   })[s];
 export function ActionRegister({
+  initialSource,
   user,
   revision,
   connected,
@@ -52,6 +53,7 @@ export function ActionRegister({
   timeZone,
   onOpenHelp,
 }: {
+  initialSource?: Source;
   user: ClinicalUser;
   revision: number;
   connected: boolean;
@@ -65,8 +67,9 @@ export function ActionRegister({
     [error, setError] = useState<unknown>(),
     [query, setQuery] = useState<Parameters<typeof api.listActions>[0]>({
       limit: 1000,
+      source: initialSource,
     }),
-    [source, setSource] = useState<Source | "">(""),
+    [source, setSource] = useState<Source | "">(initialSource ?? ""),
     [statusFilter, setStatusFilter] = useState<
       api.QualityActionOut["status"] | ""
     >(""),

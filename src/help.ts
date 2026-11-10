@@ -10,6 +10,350 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  waste_log: {
+    title: "Healthcare waste log",
+    titleUr: "طبی فضلہ رجسٹر",
+    purpose: "Record one measured weight for the actual date, area and category. Enter the contractor, consignment note and disposal at collection if known, or use Handover later. Compare collected and handed-over kilograms in category and month totals.",
+    purposeUr: "اصل تاریخ، جگہ اور قسم کے لیے ناپا وزن درج کریں۔ معلوم ہوں تو ٹھیکیدار، رسید اور تلفی درج کریں، یا بعد میں حوالگی کریں۔ قسم اور ماہ کے کل میں جمع اور حوالے کلو ملائیں۔",
+    steps: [
+      "Record one measured weight for the actual date, area and category. Enter the contractor, consignment note and disposal at collection if known, or use Handover later. Compare collected and handed-over kilograms in category and month totals."
+    ],
+    stepsUr: [
+      "اصل تاریخ، جگہ اور قسم کے لیے ناپا وزن درج کریں۔ معلوم ہوں تو ٹھیکیدار، رسید اور تلفی درج کریں، یا بعد میں حوالگی کریں۔ قسم اور ماہ کے کل میں جمع اور حوالے کلو ملائیں۔"
+    ],
+    faq: [
+      [
+        "Record a collection and handover",
+        "Record one measured weight for the actual date, area and category. Enter the contractor, consignment note and disposal at collection if known, or use Handover later. Compare collected and handed-over kilograms in category and month totals."
+      ]
+    ],
+    faqUr: [
+      [
+        "جمع اور حوالگی درج کریں",
+        "اصل تاریخ، جگہ اور قسم کے لیے ناپا وزن درج کریں۔ معلوم ہوں تو ٹھیکیدار، رسید اور تلفی درج کریں، یا بعد میں حوالگی کریں۔ قسم اور ماہ کے کل میں جمع اور حوالے کلو ملائیں۔"
+      ]
+    ]
+  },
+  infection_statistics_ipc: {
+    title: "Infection control statistics",
+    titleUr: "انفیکشن کنٹرول اعداد",
+    purpose: "The initial period is last month. Compare operations, infections and rates by surgeon, procedure, theatre and wound class. Coverage below 100% means follow-up is incomplete. Read the due list, audits and waste, then save the permitted PDF for the committee.",
+    purposeUr: "ابتدائی مدت گزشتہ ماہ ہے۔ سرجن، عمل، تھیٹر اور زخم قسم سے آپریشن، انفیکشن اور شرح ملائیں۔ سو فیصد سے کم کوریج میں پیروی نامکمل ہے۔ مقررہ فہرست، آڈٹ اور فضلہ پڑھیں، پھر کمیٹی کے لیے مجاز پی ڈی ایف محفوظ کریں۔",
+    steps: [
+      "The initial period is last month. Compare operations, infections and rates by surgeon, procedure, theatre and wound class. Coverage below 100% means follow-up is incomplete. Read the due list, audits and waste, then save the permitted PDF for the committee."
+    ],
+    stepsUr: [
+      "ابتدائی مدت گزشتہ ماہ ہے۔ سرجن، عمل، تھیٹر اور زخم قسم سے آپریشن، انفیکشن اور شرح ملائیں۔ سو فیصد سے کم کوریج میں پیروی نامکمل ہے۔ مقررہ فہرست، آڈٹ اور فضلہ پڑھیں، پھر کمیٹی کے لیے مجاز پی ڈی ایف محفوظ کریں۔"
+    ],
+    faq: [
+      [
+        "Read the monthly infection report",
+        "The initial period is last month. Compare operations, infections and rates by surgeon, procedure, theatre and wound class. Coverage below 100% means follow-up is incomplete. Read the due list, audits and waste, then save the permitted PDF for the committee."
+      ]
+    ],
+    faqUr: [
+      [
+        "ماہانہ انفیکشن رپورٹ پڑھیں",
+        "ابتدائی مدت گزشتہ ماہ ہے۔ سرجن، عمل، تھیٹر اور زخم قسم سے آپریشن، انفیکشن اور شرح ملائیں۔ سو فیصد سے کم کوریج میں پیروی نامکمل ہے۔ مقررہ فہرست، آڈٹ اور فضلہ پڑھیں، پھر کمیٹی کے لیے مجاز پی ڈی ایف محفوظ کریں۔"
+      ]
+    ]
+  },
+  infection_statistics: {
+    title: "Infection control statistics",
+    titleUr: "انفیکشن کنٹرول اعداد",
+    purpose: "The initial period is last month. Compare operations, infections and rates by surgeon, procedure, theatre and wound class. Coverage below 100% means follow-up is incomplete. Read the due list, audits and waste, then save the permitted PDF for the committee.",
+    purposeUr: "ابتدائی مدت گزشتہ ماہ ہے۔ سرجن، عمل، تھیٹر اور زخم قسم سے آپریشن، انفیکشن اور شرح ملائیں۔ سو فیصد سے کم کوریج میں پیروی نامکمل ہے۔ مقررہ فہرست، آڈٹ اور فضلہ پڑھیں، پھر کمیٹی کے لیے مجاز پی ڈی ایف محفوظ کریں۔",
+    steps: [
+      "The initial period is last month. Compare operations, infections and rates by surgeon, procedure, theatre and wound class. Coverage below 100% means follow-up is incomplete. Read the due list, audits and waste, then save the permitted PDF for the committee."
+    ],
+    stepsUr: [
+      "ابتدائی مدت گزشتہ ماہ ہے۔ سرجن، عمل، تھیٹر اور زخم قسم سے آپریشن، انفیکشن اور شرح ملائیں۔ سو فیصد سے کم کوریج میں پیروی نامکمل ہے۔ مقررہ فہرست، آڈٹ اور فضلہ پڑھیں، پھر کمیٹی کے لیے مجاز پی ڈی ایف محفوظ کریں۔"
+    ],
+    faq: [
+      [
+        "Read the monthly infection report",
+        "The initial period is last month. Compare operations, infections and rates by surgeon, procedure, theatre and wound class. Coverage below 100% means follow-up is incomplete. Read the due list, audits and waste, then save the permitted PDF for the committee."
+      ]
+    ],
+    faqUr: [
+      [
+        "ماہانہ انفیکشن رپورٹ پڑھیں",
+        "ابتدائی مدت گزشتہ ماہ ہے۔ سرجن، عمل، تھیٹر اور زخم قسم سے آپریشن، انفیکشن اور شرح ملائیں۔ سو فیصد سے کم کوریج میں پیروی نامکمل ہے۔ مقررہ فہرست، آڈٹ اور فضلہ پڑھیں، پھر کمیٹی کے لیے مجاز پی ڈی ایف محفوظ کریں۔"
+      ]
+    ]
+  },
+  infection_statistics_owner: {
+    title: "Infection control statistics",
+    titleUr: "انفیکشن کنٹرول اعداد",
+    purpose: "The initial period is last month. Compare operations, infections and rates by surgeon, procedure, theatre and wound class. Coverage below 100% means follow-up is incomplete. Read the due list, audits and waste, then save the permitted PDF for the committee.",
+    purposeUr: "ابتدائی مدت گزشتہ ماہ ہے۔ سرجن، عمل، تھیٹر اور زخم قسم سے آپریشن، انفیکشن اور شرح ملائیں۔ سو فیصد سے کم کوریج میں پیروی نامکمل ہے۔ مقررہ فہرست، آڈٹ اور فضلہ پڑھیں، پھر کمیٹی کے لیے مجاز پی ڈی ایف محفوظ کریں۔",
+    steps: [
+      "The initial period is last month. Compare operations, infections and rates by surgeon, procedure, theatre and wound class. Coverage below 100% means follow-up is incomplete. Read the due list, audits and waste, then save the permitted PDF for the committee."
+    ],
+    stepsUr: [
+      "ابتدائی مدت گزشتہ ماہ ہے۔ سرجن، عمل، تھیٹر اور زخم قسم سے آپریشن، انفیکشن اور شرح ملائیں۔ سو فیصد سے کم کوریج میں پیروی نامکمل ہے۔ مقررہ فہرست، آڈٹ اور فضلہ پڑھیں، پھر کمیٹی کے لیے مجاز پی ڈی ایف محفوظ کریں۔"
+    ],
+    faq: [
+      [
+        "Read the monthly infection report",
+        "The initial period is last month. Compare operations, infections and rates by surgeon, procedure, theatre and wound class. Coverage below 100% means follow-up is incomplete. Read the due list, audits and waste, then save the permitted PDF for the committee."
+      ]
+    ],
+    faqUr: [
+      [
+        "ماہانہ انفیکشن رپورٹ پڑھیں",
+        "ابتدائی مدت گزشتہ ماہ ہے۔ سرجن، عمل، تھیٹر اور زخم قسم سے آپریشن، انفیکشن اور شرح ملائیں۔ سو فیصد سے کم کوریج میں پیروی نامکمل ہے۔ مقررہ فہرست، آڈٹ اور فضلہ پڑھیں، پھر کمیٹی کے لیے مجاز پی ڈی ایف محفوظ کریں۔"
+      ]
+    ]
+  },
+  staff_training_ipc: {
+    title: "IPC staff training and health",
+    titleUr: "انفیکشن کنٹرول تربیت اور صحت",
+    purpose: "Choose the date, requirement, category and trainer. Select employees from the directory and record each assessment if there was one. Filter compliance by requirement, department or overdue state.",
+    purposeUr: "تاریخ، ضرورت، زمرہ اور ٹرینر چنیں۔ فہرست سے ملازم منتخب کریں اور ہوا ہو تو ہر جائزہ درج کریں۔ ضرورت، شعبے یا تاخیر سے تعمیل چھانٹیں۔",
+    steps: [
+      "Choose the date, requirement, category and trainer. Select employees from the directory and record each assessment if there was one. Filter compliance by requirement, department or overdue state.",
+      "Open an employee from the authorized due list. Read the missing medical, hepatitis B doses or antibody and next check. Confirm each actual dose separately. Enter a dose number and next due date where applicable."
+    ],
+    stepsUr: [
+      "تاریخ، ضرورت، زمرہ اور ٹرینر چنیں۔ فہرست سے ملازم منتخب کریں اور ہوا ہو تو ہر جائزہ درج کریں۔ ضرورت، شعبے یا تاخیر سے تعمیل چھانٹیں۔",
+      "مجاز مقررہ فہرست سے ملازم کھولیں۔ غائب معائنہ، ہیپاٹائٹس بی خوراک یا اینٹی باڈی اور اگلی جانچ پڑھیں۔ ہر اصل خوراک الگ تصدیق کریں۔ متعلقہ خوراک نمبر اور اگلی تاریخ درج کریں۔"
+    ],
+    faq: [
+      [
+        "Record training and attendance",
+        "Choose the date, requirement, category and trainer. Select employees from the directory and record each assessment if there was one. Filter compliance by requirement, department or overdue state."
+      ],
+      [
+        "Review confidential staff health",
+        "Open an employee from the authorized due list. Read the missing medical, hepatitis B doses or antibody and next check. Confirm each actual dose separately. Enter a dose number and next due date where applicable."
+      ]
+    ],
+    faqUr: [
+      [
+        "تربیت اور حاضری درج کریں",
+        "تاریخ، ضرورت، زمرہ اور ٹرینر چنیں۔ فہرست سے ملازم منتخب کریں اور ہوا ہو تو ہر جائزہ درج کریں۔ ضرورت، شعبے یا تاخیر سے تعمیل چھانٹیں۔"
+      ],
+      [
+        "خفیہ عملہ صحت دیکھیں",
+        "مجاز مقررہ فہرست سے ملازم کھولیں۔ غائب معائنہ، ہیپاٹائٹس بی خوراک یا اینٹی باڈی اور اگلی جانچ پڑھیں۔ ہر اصل خوراک الگ تصدیق کریں۔ متعلقہ خوراک نمبر اور اگلی تاریخ درج کریں۔"
+      ]
+    ]
+  },
+  quality_indicator_targets: {
+    title: "Quality indicator benchmarks",
+    titleUr: "معیار اشاریہ اہداف",
+    purpose: "Find the indicator and read its unit and better direction. Enter the value, comparison and a source such as last year's hospital result. If the benchmark changed while you entered it, reopen the latest version.",
+    purposeUr: "اشاریہ، اکائی اور بہتر سمت پڑھیں۔ قدر، موازنہ اور ماخذ مثلاً ہسپتال کا گزشتہ سال نتیجہ درج کریں۔ دوران اندراج ہدف بدل جائے تو تازہ نسخہ کھولیں۔",
+    steps: [
+      "Find the indicator and read its unit and better direction. Enter the value, comparison and a source such as last year's hospital result. If the benchmark changed while you entered it, reopen the latest version."
+    ],
+    stepsUr: [
+      "اشاریہ، اکائی اور بہتر سمت پڑھیں۔ قدر، موازنہ اور ماخذ مثلاً ہسپتال کا گزشتہ سال نتیجہ درج کریں۔ دوران اندراج ہدف بدل جائے تو تازہ نسخہ کھولیں۔"
+    ],
+    faq: [
+      [
+        "Set a quality benchmark",
+        "Find the indicator and read its unit and better direction. Enter the value, comparison and a source such as last year's hospital result. If the benchmark changed while you entered it, reopen the latest version."
+      ]
+    ],
+    faqUr: [
+      [
+        "معیار ہدف مقرر کریں",
+        "اشاریہ، اکائی اور بہتر سمت پڑھیں۔ قدر، موازنہ اور ماخذ مثلاً ہسپتال کا گزشتہ سال نتیجہ درج کریں۔ دوران اندراج ہدف بدل جائے تو تازہ نسخہ کھولیں۔"
+      ]
+    ]
+  },
+  quality_indicators: {
+    title: "Clinical quality indicators",
+    titleUr: "طبی معیار اشاریے",
+    purpose: "Choose this month so far or last month. Read the value, numerator and denominator, status and benchmark. Open a tile for frozen bars and the hatched live month. Save the report PDF for the committee.",
+    purposeUr: "یہ ماہ اب تک یا گزشتہ ماہ چنیں۔ قدر، شمار، مخرج، حالت اور ہدف پڑھیں۔ منجمد سلاخیں اور دھاری دار جاری ماہ کے لیے اشاریہ کھولیں۔ کمیٹی کے لیے رپورٹ پی ڈی ایف محفوظ کریں۔",
+    steps: [
+      "Choose this month so far or last month. Read the value, numerator and denominator, status and benchmark. Open a tile for frozen bars and the hatched live month. Save the report PDF for the committee."
+    ],
+    stepsUr: [
+      "یہ ماہ اب تک یا گزشتہ ماہ چنیں۔ قدر، شمار، مخرج، حالت اور ہدف پڑھیں۔ منجمد سلاخیں اور دھاری دار جاری ماہ کے لیے اشاریہ کھولیں۔ کمیٹی کے لیے رپورٹ پی ڈی ایف محفوظ کریں۔"
+    ],
+    faq: [
+      [
+        "Compare indicators and trends",
+        "Choose this month so far or last month. Read the value, numerator and denominator, status and benchmark. Open a tile for frozen bars and the hatched live month. Save the report PDF for the committee."
+      ]
+    ],
+    faqUr: [
+      [
+        "اشاریے اور رجحان ملائیں",
+        "یہ ماہ اب تک یا گزشتہ ماہ چنیں۔ قدر، شمار، مخرج، حالت اور ہدف پڑھیں۔ منجمد سلاخیں اور دھاری دار جاری ماہ کے لیے اشاریہ کھولیں۔ کمیٹی کے لیے رپورٹ پی ڈی ایف محفوظ کریں۔"
+      ]
+    ]
+  },
+  quality_indicators_owner: {
+    title: "Clinical quality indicators",
+    titleUr: "طبی معیار اشاریے",
+    purpose: "Choose this month so far or last month. Read the value, numerator and denominator, status and benchmark. Open a tile for frozen bars and the hatched live month. Save the report PDF for the committee.",
+    purposeUr: "یہ ماہ اب تک یا گزشتہ ماہ چنیں۔ قدر، شمار، مخرج، حالت اور ہدف پڑھیں۔ منجمد سلاخیں اور دھاری دار جاری ماہ کے لیے اشاریہ کھولیں۔ کمیٹی کے لیے رپورٹ پی ڈی ایف محفوظ کریں۔",
+    steps: [
+      "Choose this month so far or last month. Read the value, numerator and denominator, status and benchmark. Open a tile for frozen bars and the hatched live month. Save the report PDF for the committee."
+    ],
+    stepsUr: [
+      "یہ ماہ اب تک یا گزشتہ ماہ چنیں۔ قدر، شمار، مخرج، حالت اور ہدف پڑھیں۔ منجمد سلاخیں اور دھاری دار جاری ماہ کے لیے اشاریہ کھولیں۔ کمیٹی کے لیے رپورٹ پی ڈی ایف محفوظ کریں۔"
+    ],
+    faq: [
+      [
+        "Compare indicators and trends",
+        "Choose this month so far or last month. Read the value, numerator and denominator, status and benchmark. Open a tile for frozen bars and the hatched live month. Save the report PDF for the committee."
+      ]
+    ],
+    faqUr: [
+      [
+        "اشاریے اور رجحان ملائیں",
+        "یہ ماہ اب تک یا گزشتہ ماہ چنیں۔ قدر، شمار، مخرج، حالت اور ہدف پڑھیں۔ منجمد سلاخیں اور دھاری دار جاری ماہ کے لیے اشاریہ کھولیں۔ کمیٹی کے لیے رپورٹ پی ڈی ایف محفوظ کریں۔"
+      ]
+    ]
+  },
+  my_committees: {
+    title: "My committees",
+    titleUr: "میری کمیٹیاں",
+    purpose: "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
+    purposeUr: "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+    steps: [
+      "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
+      "Schedule with the agenda. After the meeting, record attendees, apologies, issues, activities reviewed and decisions. The authorized chair approves the minutes, which become final and carry the author's stamp."
+    ],
+    stepsUr: [
+      "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+      "ایجنڈے کے ساتھ اجلاس مقرر کریں۔ بعد میں شرکاء، معذرت، مسائل، سرگرمیاں اور فیصلے درج کریں۔ مجاز صدر کارروائی منظور کرتا ہے۔ کارروائی حتمی اور دستخط شدہ ہوتی ہے۔"
+    ],
+    faq: [
+      [
+        "Find a committee or meeting",
+        "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you."
+      ],
+      [
+        "Schedule, draft and approve minutes",
+        "Schedule with the agenda. After the meeting, record attendees, apologies, issues, activities reviewed and decisions. The authorized chair approves the minutes, which become final and carry the author's stamp."
+      ]
+    ],
+    faqUr: [
+      [
+        "کمیٹی یا اجلاس تلاش کریں",
+        "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔"
+      ],
+      [
+        "اجلاس، مسودہ اور منظوری",
+        "ایجنڈے کے ساتھ اجلاس مقرر کریں۔ بعد میں شرکاء، معذرت، مسائل، سرگرمیاں اور فیصلے درج کریں۔ مجاز صدر کارروائی منظور کرتا ہے۔ کارروائی حتمی اور دستخط شدہ ہوتی ہے۔"
+      ]
+    ]
+  },
+  committees_quality: {
+    title: "Committees and minutes",
+    titleUr: "کمیٹیاں اور کارروائی",
+    purpose: "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
+    purposeUr: "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+    steps: [
+      "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
+      "Choose one chair and one secretary, add the departments they represent and set the meeting frequency and terms of reference. Select real staff from the directory or enter an external member's name.",
+      "Schedule with the agenda. After the meeting, record attendees, apologies, issues, activities reviewed and decisions. The authorized chair approves the minutes, which become final and carry the author's stamp.",
+      "Choose a final meeting. Assign the corrective or preventive action to a named owner with a due date. Review meeting actions in the action register at the next meeting."
+    ],
+    stepsUr: [
+      "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+      "ایک صدر اور ایک سیکرٹری چنیں، نمائندہ شعبے شامل کریں، تعدد اور دائرہ کار درج کریں۔ فہرست سے اصل عملہ یا بیرونی رکن کا نام چنیں۔",
+      "ایجنڈے کے ساتھ اجلاس مقرر کریں۔ بعد میں شرکاء، معذرت، مسائل، سرگرمیاں اور فیصلے درج کریں۔ مجاز صدر کارروائی منظور کرتا ہے۔ کارروائی حتمی اور دستخط شدہ ہوتی ہے۔",
+      "حتمی اجلاس چنیں۔ اصلاحی یا احتیاطی عمل ذمہ دار اور تاریخ کے ساتھ تفویض کریں۔ اگلے اجلاس میں کارروائی رجسٹر سے عمل دیکھیں۔"
+    ],
+    faq: [
+      [
+        "Find a committee or meeting",
+        "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you."
+      ],
+      [
+        "Set up the committee",
+        "Choose one chair and one secretary, add the departments they represent and set the meeting frequency and terms of reference. Select real staff from the directory or enter an external member's name."
+      ],
+      [
+        "Schedule, draft and approve minutes",
+        "Schedule with the agenda. After the meeting, record attendees, apologies, issues, activities reviewed and decisions. The authorized chair approves the minutes, which become final and carry the author's stamp."
+      ],
+      [
+        "Assign an action from final minutes",
+        "Choose a final meeting. Assign the corrective or preventive action to a named owner with a due date. Review meeting actions in the action register at the next meeting."
+      ]
+    ],
+    faqUr: [
+      [
+        "کمیٹی یا اجلاس تلاش کریں",
+        "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔"
+      ],
+      [
+        "کمیٹی قائم کریں",
+        "ایک صدر اور ایک سیکرٹری چنیں، نمائندہ شعبے شامل کریں، تعدد اور دائرہ کار درج کریں۔ فہرست سے اصل عملہ یا بیرونی رکن کا نام چنیں۔"
+      ],
+      [
+        "اجلاس، مسودہ اور منظوری",
+        "ایجنڈے کے ساتھ اجلاس مقرر کریں۔ بعد میں شرکاء، معذرت، مسائل، سرگرمیاں اور فیصلے درج کریں۔ مجاز صدر کارروائی منظور کرتا ہے۔ کارروائی حتمی اور دستخط شدہ ہوتی ہے۔"
+      ],
+      [
+        "حتمی کارروائی سے عمل تفویض کریں",
+        "حتمی اجلاس چنیں۔ اصلاحی یا احتیاطی عمل ذمہ دار اور تاریخ کے ساتھ تفویض کریں۔ اگلے اجلاس میں کارروائی رجسٹر سے عمل دیکھیں۔"
+      ]
+    ]
+  },
+  committees_ipc: {
+    title: "Committees and minutes",
+    titleUr: "کمیٹیاں اور کارروائی",
+    purpose: "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
+    purposeUr: "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+    steps: [
+      "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
+      "Choose one chair and one secretary, add the departments they represent and set the meeting frequency and terms of reference. Select real staff from the directory or enter an external member's name.",
+      "Schedule with the agenda. After the meeting, record attendees, apologies, issues, activities reviewed and decisions. The authorized chair approves the minutes, which become final and carry the author's stamp.",
+      "Choose a final meeting. Assign the corrective or preventive action to a named owner with a due date. Review meeting actions in the action register at the next meeting."
+    ],
+    stepsUr: [
+      "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+      "ایک صدر اور ایک سیکرٹری چنیں، نمائندہ شعبے شامل کریں، تعدد اور دائرہ کار درج کریں۔ فہرست سے اصل عملہ یا بیرونی رکن کا نام چنیں۔",
+      "ایجنڈے کے ساتھ اجلاس مقرر کریں۔ بعد میں شرکاء، معذرت، مسائل، سرگرمیاں اور فیصلے درج کریں۔ مجاز صدر کارروائی منظور کرتا ہے۔ کارروائی حتمی اور دستخط شدہ ہوتی ہے۔",
+      "حتمی اجلاس چنیں۔ اصلاحی یا احتیاطی عمل ذمہ دار اور تاریخ کے ساتھ تفویض کریں۔ اگلے اجلاس میں کارروائی رجسٹر سے عمل دیکھیں۔"
+    ],
+    faq: [
+      [
+        "Find a committee or meeting",
+        "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you."
+      ],
+      [
+        "Set up the committee",
+        "Choose one chair and one secretary, add the departments they represent and set the meeting frequency and terms of reference. Select real staff from the directory or enter an external member's name."
+      ],
+      [
+        "Schedule, draft and approve minutes",
+        "Schedule with the agenda. After the meeting, record attendees, apologies, issues, activities reviewed and decisions. The authorized chair approves the minutes, which become final and carry the author's stamp."
+      ],
+      [
+        "Assign an action from final minutes",
+        "Choose a final meeting. Assign the corrective or preventive action to a named owner with a due date. Review meeting actions in the action register at the next meeting."
+      ]
+    ],
+    faqUr: [
+      [
+        "کمیٹی یا اجلاس تلاش کریں",
+        "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔"
+      ],
+      [
+        "کمیٹی قائم کریں",
+        "ایک صدر اور ایک سیکرٹری چنیں، نمائندہ شعبے شامل کریں، تعدد اور دائرہ کار درج کریں۔ فہرست سے اصل عملہ یا بیرونی رکن کا نام چنیں۔"
+      ],
+      [
+        "اجلاس، مسودہ اور منظوری",
+        "ایجنڈے کے ساتھ اجلاس مقرر کریں۔ بعد میں شرکاء، معذرت، مسائل، سرگرمیاں اور فیصلے درج کریں۔ مجاز صدر کارروائی منظور کرتا ہے۔ کارروائی حتمی اور دستخط شدہ ہوتی ہے۔"
+      ],
+      [
+        "حتمی کارروائی سے عمل تفویض کریں",
+        "حتمی اجلاس چنیں۔ اصلاحی یا احتیاطی عمل ذمہ دار اور تاریخ کے ساتھ تفویض کریں۔ اگلے اجلاس میں کارروائی رجسٹر سے عمل دیکھیں۔"
+      ]
+    ]
+  },
   report_infection_doctor: {
     title: "Report infection",
     titleUr: "انفیکشن رپورٹ کریں",

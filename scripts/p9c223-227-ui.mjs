@@ -6,6 +6,7 @@ fs.mkdirSync(dir,{recursive:true});
 const patient="QA P9C Synthetic Infection 20261110 A",mrn="MRN-2026-000011";
 const put=(name,obj)=>fs.writeFileSync(dir+"/"+name+".json",JSON.stringify(obj,null,2)+"\n");
 const mutate=process.argv.includes("--writes");
+const handoff=process.argv.includes("--handoff");
 const only=Number(process.argv.find(x=>/^\d+$/.test(x)));
 async function open(s,id,workspace){
   const nav=s.p.locator('[data-screen-target="'+id+'"]');
@@ -76,6 +77,11 @@ async function run(account,workspace,screens){
           }
           await filter.selectOption("");
         }
+        if(handoff){
+          await root.getByRole("button",{name:"Report outbreak incident",exact:true}).click();
+          await expect(p.locator('select[data-field="type_code"]')).toHaveValue("OUTBREAK");
+          await p.locator('[data-screen-target="infection_cases"]').click();
+        }
       }else if(n===226){
         await expect(root.getByRole("heading",{name:"Postoperative follow-up"})).toBeVisible();
         await expect(root.getByRole("heading",{name:"Surgical site infection rate"})).toBeVisible();
@@ -109,7 +115,7 @@ async function run(account,workspace,screens){
       }
       await capture(s,id,()=>expect(root).toBeVisible());
       const reqs=(await s.trace()).requests.slice(offset).filter(r=>/infection|ssi-checks|record-review\/people|beds\/matrix|departments|patients\/search|patients\/11/.test(r.path));
-      put(n+"-journey",{passed:true,renderer:s.j.renderer,requests:reqs.map(r=>({method:r.method,path:r.path,status:r.status,request_id:r.result?.request_id}))});
+      put(n+(handoff?"-handoff":"-journey"),{passed:true,renderer:s.j.renderer,requests:reqs.map(r=>({method:r.method,path:r.path,status:r.status,request_id:r.result?.request_id}))});
       s.pass(n+" native DEV and bilingual help");
     }
     s.j.passed=true;

@@ -21,9 +21,10 @@ export function wasteAccess(
   establishment?: {
     views?: { screens: { screen_id: string; view: string }[] };
   } | null,
+  screenId = "waste_log_ops",
 ) {
   const view = establishment?.views
-    ? (establishment.views.screens.find((s) => s.screen_id === "waste_log_ops")
+    ? (establishment.views.screens.find((s) => s.screen_id === screenId)
         ?.view ?? "full")
     : "hidden";
   const canView =

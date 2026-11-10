@@ -12,6 +12,11 @@ import { DiagnosticCorrelation, EstimateStatistics, MedicationStatistics, Surgic
 import { InfectionCases } from "./screens/InfectionCases";
 import { SsiSurveillance } from "./screens/SsiSurveillance";
 import { IpcAudits } from "./screens/IpcAudits";
+import { InfectionStatistics } from "./screens/InfectionStatistics";
+import { IpcStaffTraining } from "./screens/IpcStaffTraining";
+import { IndicatorTargets, QualityIndicators } from "./screens/QualityIndicators";
+import { Committees } from "./screens/Committees";
+import { listCommittees } from "./generated/my_committees";
 import { ConsentRegister } from "./screens/ConsentRegister";
 import { ConsentPolicySetup } from "./screens/ConsentPolicySetup";
 import { LabourRegisterColumns } from "./screens/LabourRegisterColumns";
@@ -978,6 +983,8 @@ export function App() {
     )
       return false;
     setFacilitySetupEntry(viaSetup ? next : undefined);
+    setMeetingActions(undefined);
+    setOutbreakReport(undefined);
     if(next==='my_actions')setActionEntry(undefined);
     setAdrEntry(undefined);
     setClinicalChartEntry(undefined);
@@ -1237,7 +1244,14 @@ export function App() {
       (id !== "ot_settlement" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er","patient_programmes_triage","transfusion_bedside_er"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
-  const nav = screenNavigation(legacyNav, outline, est, deliveredHelpScreens, workspaceReady).filter(id=>(!['record_complaint_admissions','record_complaint_er','record_complaint_ward'].includes(id)||['full','open_work','records'].includes(est?.views.screens.find(s=>s.screen_id===id)?.view??'hidden'))&&(id!=='my_investigations'||!!investigations.data?.length||screen==='my_investigations')&&(id!=='my_complaint_investigations'||!!complaintInvestigations.data?.length||screen==='my_complaint_investigations')&&(id!=='my_actions'||!!ownedActions.data?.length||screen==='my_actions'));
+  const [meetingActions, setMeetingActions] = useState<{actor:number;workspace:typeof workspace}>();
+  const [outbreakReport, setOutbreakReport] = useState<{actor:number;workspace:typeof workspace}>();
+  const readCommittees = !!user && workspaceReady && handbookPermits(outline,"my_committees");
+  const myCommittees = useLoad(async () => ({
+    actor:user?.user_id, workspace, rows:readCommittees?await listCommittees():[],
+  }), [readCommittees,user?.user_id,workspace,revision]);
+  const hasCommittees = !myCommittees.loading && !myCommittees.error && myCommittees.data?.actor===user?.user_id && myCommittees.data?.workspace===workspace && !!myCommittees.data?.rows.length;
+  const nav = screenNavigation(legacyNav, outline, est, deliveredHelpScreens, workspaceReady).filter(id=>(!['record_complaint_admissions','record_complaint_er','record_complaint_ward'].includes(id)||['full','open_work','records'].includes(est?.views.screens.find(s=>s.screen_id===id)?.view??'hidden'))&&(id!=='my_investigations'||!!investigations.data?.length||screen==='my_investigations')&&(id!=='my_complaint_investigations'||!!complaintInvestigations.data?.length||screen==='my_complaint_investigations')&&(id!=='my_actions'||!!ownedActions.data?.length||screen==='my_actions')&&(id!=='my_committees'||hasCommittees||screen==='my_committees'));
   const readDeficiencyCount = !!user && nav.some(isDeficiencyScreen) && canReadDeficiencies(user.permissions);
   const deficiencyOpen = useLoad(async () => ({
     actor: user?.user_id,
@@ -1674,7 +1688,7 @@ export function App() {
               {screen==='incident_statistics'&&<IncidentStatistics key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen==='incident_statistics_owner'&&<IncidentStatistics screenId="incident_statistics_owner" key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen==='incident_screening'&&<IncidentScreening key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
-              {screen==='action_register'&&<ActionRegister key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen==='action_register'&&<ActionRegister key={user.user_id} initialSource={meetingActions?.actor===user.user_id && meetingActions?.workspace===workspace?'Meeting':undefined} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen==='qa_rounds'&&<QaRounds noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen==='qa_rounds_owner'&&<QaRounds screenId="qa_rounds_owner" noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen==='record_feedback_reception'&&<RecordFeedback noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
@@ -1692,9 +1706,15 @@ export function App() {
               {(screen === 'er_statistics' || screen === 'er_statistics_owner') && <EmergencyStatistics key={`${user.user_id}:${screen}`} screenId={screen} user={user} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === 'lab_quality' || screen === 'radiology_quality' || screen === 'diagnostics_quality' || screen === 'owner_diagnostics') && <DiagnosticsQuality key={`${user.user_id}:${screen}`} screenId={screen} user={user} connected={connected} combined={prefs.pdf_download==="Combined"} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'diagnostic_correlation' && <DiagnosticCorrelation key={user.user_id} user={user} connected={connected} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
-              {(screen === "report_infection_doctor" || screen === "report_infection_ward" || screen === "infection_cases") && <InfectionCases key={user.user_id+":"+screen} screenId={screen} user={user} connected={connected} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}} onIncident={nav.includes("incident_register")?()=>{navigate("incident_register");}:undefined}/>}
+              {(screen === "report_infection_doctor" || screen === "report_infection_ward" || screen === "infection_cases") && <InfectionCases key={user.user_id+":"+screen} screenId={screen} user={user} connected={connected} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}} onIncident={nav.includes("report_incident")?()=>{if(navigate("report_incident"))setOutbreakReport({actor:user.user_id,workspace});}:undefined}/>}
               {screen === "ssi_surveillance" && <SsiSurveillance key={user.user_id} user={user} connected={connected} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === "ipc_audits" && <IpcAudits key={user.user_id} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "waste_log" && <WasteLog key={user.user_id+":"+screen} screenId={screen} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {(screen === "infection_statistics_ipc" || screen === "infection_statistics" || screen === "infection_statistics_owner") && <InfectionStatistics key={user.user_id+":"+screen} screenId={screen} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}} onFollowup={nav.includes("ssi_surveillance")?()=>{navigate("ssi_surveillance");}:undefined} onActions={nav.includes("action_register")?()=>{navigate("action_register");}:undefined}/>}
+              {screen === "staff_training_ipc" && <IpcStaffTraining key={user.user_id} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "quality_indicator_targets" && <IndicatorTargets key={user.user_id} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {(screen === "quality_indicators" || screen === "quality_indicators_owner") && <QualityIndicators key={user.user_id+":"+screen} screenId={screen} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {(screen === "my_committees" || screen === "committees_quality" || screen === "committees_ipc") && <Committees key={user.user_id+":"+screen} screenId={screen} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}} onActions={nav.includes("action_register")?()=>{if(navigate("action_register"))setMeetingActions({actor:user.user_id,workspace});}:undefined}/>}
               {screen === 'medication_statistics' && <MedicationStatistics key={user.user_id} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'estimate_statistics' && <EstimateStatistics key={user.user_id} user={user} connected={connected} combined={prefs.pdf_download==="Combined"} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === 'surgical_statistics' || screen === 'surgical_statistics_owner') && <SurgicalStatistics key={`${user.user_id}:${screen}`} screenId={screen} user={user} connected={connected} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
@@ -1868,6 +1888,7 @@ export function App() {
               )}
               {screen === "report_incident" && (
                 <Incidents
+                  initialType={outbreakReport?.actor===user.user_id && outbreakReport?.workspace===workspace?"OUTBREAK":undefined}
                   user={user}
                   revision={revision}
                   timeZone={meta?.hospital_timezone}

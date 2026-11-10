@@ -1,0 +1,172 @@
+{
+  "screen": {
+    "id": "quality_indicator_targets",
+    "workspace": "quality",
+    "title": "Indicator benchmarks",
+    "purpose": "Set and document the hospital's benchmark for each clinical quality indicator.",
+    "workflow": "MSDS CQI 99",
+    "rule_objects": [
+      {
+        "id": "rule:862137fd4f",
+        "text": "One row per indicator: unit, which way is better, the benchmark and where it comes from (note: a national figure, the hospital's own last year). Every change is kept.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "quality-indicators-and-committees"
+    ]
+  },
+  "definition_of_done": {
+    "points": 37,
+    "items": [
+      {
+        "id": "ep:GET /quality/indicator-targets",
+        "label": "GET /quality/indicator-targets",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:PUT /quality/indicator-targets/{code}",
+        "label": "PUT /quality/indicator-targets/{code}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:862137fd4f",
+        "label": "One row per indicator: unit, which way is better, the benchmark and where it comes from (note: a national figure, the hospital's own last year). Every change is kept.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /quality/indicator-targets",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.indicator.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of quality.indicator.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "summary": "The hospital's benchmarks for the indicators"
+    },
+    {
+      "endpoint": "PUT /quality/indicator-targets/{code}",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.indicator.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of quality.indicator.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /quality/indicator-targets",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "summary": "Set the hospital's benchmark for an indicator"
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "code",
+      "source": "this_screen",
+      "call": "GET /quality/indicator-targets",
+      "field": "code",
+      "used_by": [
+        "PUT /quality/indicator-targets/{code}"
+      ]
+    }
+  ],
+  "rules_in_force": null
+}

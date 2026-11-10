@@ -40,17 +40,19 @@ const date = (s: string) => {
   return `${d}-${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(m) - 1]}-${y}`;
 };
 export function WasteLog({
+  screenId = "waste_log_ops",
   user,
   establishment,
   connected,
   onOpenHelp,
 }: {
+  screenId?: "waste_log" | "waste_log_ops";
   user: ClinicalUser;
   establishment?: EstablishmentOut | null;
   connected: boolean;
   onOpenHelp: () => void;
 }) {
-  const access = wasteAccess(user.permissions, establishment);
+  const access = wasteAccess(user.permissions, establishment, screenId);
   const [log, setLog] = useState<api.WasteLogOut>(),
     [loading, setLoading] = useState(false),
     [error, setError] = useState<unknown>();
@@ -137,7 +139,7 @@ export function WasteLog({
   }, [lookups]);
   const write = useClinicalWrite(
     user,
-    "waste_log_ops",
+    screenId,
     async (value: api.WasteRecordOut) => {
       setSelected(value);
       setEditor(false);
@@ -187,7 +189,7 @@ export function WasteLog({
   };
   if (!access.canView)
     return (
-      <section data-screen="waste_log_ops">
+      <section data-screen={screenId}>
         <h1>{t("Hospital waste log", "ہسپتال کا فضلہ رجسٹر")}</h1>
         <p role="alert">
           {t(
@@ -199,7 +201,7 @@ export function WasteLog({
     );
   return (
     <section
-      data-screen="waste_log_ops"
+      data-screen={screenId}
       data-unsaved="false"
       data-write-pending={blocked}
       className="waste-log"

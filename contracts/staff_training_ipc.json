@@ -1,0 +1,380 @@
+{
+  "screen": {
+    "id": "staff_training_ipc",
+    "workspace": "infection_control",
+    "title": "Staff training and vaccinations",
+    "purpose": "Train the staff in infection control and keep their hepatitis B vaccination and screenings.",
+    "workflow": "MSDS HRM 139, 140; IPC",
+    "rule_objects": [
+      {
+        "id": "rule:442dbe5b23",
+        "text": "Health due: no pre-employment medical, an incomplete hepatitis B course (three doses or the antibody) for staff exposed to blood, a dose or check due. Record each dose (dose number, next_due). Confidential.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "clinic-quality-and-education",
+      "complaints",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "finance-and-owner",
+      "hr-and-payroll",
+      "incidents-and-sentinel-events",
+      "infection-control",
+      "medical-record-review",
+      "personnel-records",
+      "phc-inspection",
+      "phc-interview-prep",
+      "quality-indicators-and-committees"
+    ]
+  },
+  "definition_of_done": {
+    "points": 58,
+    "items": [
+      {
+        "id": "ep:POST /personnel/training-sessions",
+        "label": "POST /personnel/training-sessions",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /personnel/training-sessions",
+        "label": "GET /personnel/training-sessions",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /personnel/training-requirements",
+        "label": "GET /personnel/training-requirements",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /personnel/training-compliance",
+        "label": "GET /personnel/training-compliance",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /personnel/health/due",
+        "label": "GET /personnel/health/due",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /personnel/employees/{employee_id}/health",
+        "label": "GET /personnel/employees/{employee_id}/health",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /personnel/employees/{employee_id}/health",
+        "label": "POST /personnel/employees/{employee_id}/health",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /facility/staff",
+        "label": "GET /facility/staff",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /admin/departments",
+        "label": "GET /admin/departments",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:442dbe5b23",
+        "label": "Health due: no pre-employment medical, an incomplete hepatitis B course (three doses or the antibody) for staff exposed to blood, a dose or check due. Record each dose (dose number, next_due). Confidential.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "POST /personnel/training-sessions",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.training.record"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.training.record",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /personnel/training-sessions",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "summary": "Record a training session and who attended"
+    },
+    {
+      "endpoint": "GET /personnel/training-sessions",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view",
+          "personnel.manage",
+          "personnel.training.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.view or personnel.manage or personnel.training.record",
+        "roles_allowed": [
+          "clinic_director",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Training sessions"
+    },
+    {
+      "endpoint": "GET /personnel/training-requirements",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view",
+          "personnel.manage",
+          "personnel.training.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.view or personnel.manage or personnel.training.record",
+        "roles_allowed": [
+          "clinic_director",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "summary": "The mandatory training"
+    },
+    {
+      "endpoint": "GET /personnel/training-compliance",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view",
+          "personnel.manage",
+          "personnel.training.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.view or personnel.manage or personnel.training.record",
+        "roles_allowed": [
+          "clinic_director",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Who needs which mandatory training"
+    },
+    {
+      "endpoint": "GET /personnel/health/due",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.health.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.health.manage",
+        "roles_allowed": [
+          "hr_admin",
+          "ipc_nurse"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Medicals and vaccinations due"
+    },
+    {
+      "endpoint": "GET /personnel/employees/{employee_id}/health",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.health.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.health.manage",
+        "roles_allowed": [
+          "hr_admin",
+          "ipc_nurse"
+        ]
+      },
+      "service_gates": [],
+      "summary": "The staff health record (confidential)"
+    },
+    {
+      "endpoint": "POST /personnel/employees/{employee_id}/health",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.health.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.health.manage",
+        "roles_allowed": [
+          "hr_admin",
+          "ipc_nurse"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /personnel/employees/{employee_id}/health",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": "employee"
+      },
+      "summary": "Record a medical, a screening or a vaccination"
+    },
+    {
+      "endpoint": "GET /facility/staff",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.compliance.manage",
+          "facility.equipment.manage",
+          "facility.maintenance.record",
+          "facility.drill.manage",
+          "personnel.training.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.compliance.manage or facility.equipment.manage or facility.maintenance.record or facility.drill.manage or personnel.training.record",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Pick a member of staff"
+    },
+    {
+      "endpoint": "GET /admin/departments",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "summary": "Departments"
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "employee_id",
+      "source": "this_screen",
+      "call": "POST /personnel/training-sessions",
+      "field": "employee_id",
+      "used_by": [
+        "GET /personnel/employees/{employee_id}/health",
+        "POST /personnel/employees/{employee_id}/health"
+      ]
+    }
+  ],
+  "rules_in_force": null
+}
