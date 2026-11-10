@@ -1,0 +1,312 @@
+{
+  "screen": {
+    "id": "ipc_audits",
+    "workspace": "infection_control",
+    "title": "Infection control rounds and audits",
+    "purpose": "Hand hygiene and the other audits with their findings and actions.",
+    "workflow": "MSDS IPC 84, 86",
+    "rule_objects": [
+      {
+        "id": "rule:fef8ccf41b",
+        "text": "Hand hygiene: one line per WHO moment (before touching a patient, before a clean or aseptic procedure, after body fluid exposure risk, after touching a patient, after touching the surroundings): opportunities observed and actions done; other audits: one line per item checked.",
+        "cites": []
+      },
+      {
+        "id": "rule:c0e4770c5c",
+        "text": "Charts from by_kind and by_area; add the actions the findings call for (owner, due date).",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "clinic-quality-and-education",
+      "complaints",
+      "cost-estimates-and-tariff",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "finance-and-owner",
+      "hr-and-payroll",
+      "incidents-and-sentinel-events",
+      "infection-control",
+      "inpatient-and-discharge",
+      "medical-record-review",
+      "medication-safety",
+      "personnel-records",
+      "phc-interview-prep",
+      "quality-indicators-and-committees"
+    ]
+  },
+  "definition_of_done": {
+    "points": 51,
+    "items": [
+      {
+        "id": "ep:POST /infection/audits",
+        "label": "POST /infection/audits",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /infection/audits",
+        "label": "GET /infection/audits",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /infection/audits/{audit_id}/actions",
+        "label": "POST /infection/audits/{audit_id}/actions",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/record-review/people",
+        "label": "GET /quality/record-review/people",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /beds/matrix",
+        "label": "GET /beds/matrix",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /admin/departments",
+        "label": "GET /admin/departments",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:fef8ccf41b",
+        "label": "Hand hygiene: one line per WHO moment (before touching a patient, before a clean or aseptic procedure, after body fluid exposure risk, after touching a patient, after touching the surroundings): opportunities observed and actions done; other audits: one line per item checked.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:c0e4770c5c",
+        "label": "Charts from by_kind and by_area; add the actions the findings call for (owner, due date).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "POST /infection/audits",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.control.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of infection.control.manage",
+        "roles_allowed": [
+          "ipc_nurse"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /infection/audits",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "summary": "Record an infection control round or audit"
+    },
+    {
+      "endpoint": "GET /infection/audits",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.control.manage",
+          "infection.statistics.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.control.manage or infection.statistics.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Infection control audits and compliance"
+    },
+    {
+      "endpoint": "POST /infection/audits/{audit_id}/actions",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.control.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of infection.control.manage",
+        "roles_allowed": [
+          "ipc_nurse"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /infection/audits",
+        "emits_events": [
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "summary": "Record a corrective or preventive action from an audit"
+    },
+    {
+      "endpoint": "GET /quality/record-review/people",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "summary": "Every member of staff a quality record may name (and who can review records)"
+    },
+    {
+      "endpoint": "GET /beds/matrix",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Live bed matrix (counts per ward + optional bed list)"
+    },
+    {
+      "endpoint": "GET /admin/departments",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "summary": "Departments"
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "audit_id",
+      "source": "this_screen",
+      "call": "POST /infection/audits",
+      "field": "audit_id",
+      "used_by": [
+        "POST /infection/audits/{audit_id}/actions"
+      ]
+    }
+  ],
+  "rules_in_force": null
+}

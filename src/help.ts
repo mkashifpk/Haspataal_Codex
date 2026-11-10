@@ -10,6 +10,206 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  report_infection_doctor: {
+    title: "Report infection",
+    titleUr: "انفیکشن رپورٹ کریں",
+    purpose: "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
+    purposeUr: "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
+    steps: [
+      "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
+      "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review.",
+      "Choose the reporting period or filters. Correct invalid dates and retry a failed read from the message."
+    ],
+    stepsUr: [
+      "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
+      "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔",
+      "مدت یا فلٹر چنیں۔ غلط تاریخ درست کریں اور پیغام سے ناکام پڑھائی دوبارہ کریں۔"
+    ],
+    faq: [
+      [
+        "Report suspected infection",
+        "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control."
+      ],
+      [
+        "Record a wound check",
+        "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review."
+      ],
+      [
+        "Read and filter registers",
+        "Choose the reporting period or filters. Correct invalid dates and retry a failed read from the message."
+      ]
+    ],
+    faqUr: [
+      [
+        "مشتبہ انفیکشن رپورٹ کریں",
+        "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔"
+      ],
+      [
+        "زخم کی جانچ درج کریں",
+        "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔"
+      ],
+      [
+        "رجسٹر پڑھیں اور چھانٹیں",
+        "مدت یا فلٹر چنیں۔ غلط تاریخ درست کریں اور پیغام سے ناکام پڑھائی دوبارہ کریں۔"
+      ]
+    ]
+  },
+  report_infection_ward: {
+    title: "Report infection",
+    titleUr: "انفیکشن رپورٹ کریں",
+    purpose: "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
+    purposeUr: "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
+    steps: [
+      "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
+      "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review.",
+      "Choose the reporting period or filters. Correct invalid dates and retry a failed read from the message."
+    ],
+    stepsUr: [
+      "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
+      "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔",
+      "مدت یا فلٹر چنیں۔ غلط تاریخ درست کریں اور پیغام سے ناکام پڑھائی دوبارہ کریں۔"
+    ],
+    faq: [
+      [
+        "Report suspected infection",
+        "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control."
+      ],
+      [
+        "Record a wound check",
+        "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review."
+      ],
+      [
+        "Read and filter registers",
+        "Choose the reporting period or filters. Correct invalid dates and retry a failed read from the message."
+      ]
+    ],
+    faqUr: [
+      [
+        "مشتبہ انفیکشن رپورٹ کریں",
+        "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔"
+      ],
+      [
+        "زخم کی جانچ درج کریں",
+        "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔"
+      ],
+      [
+        "رجسٹر پڑھیں اور چھانٹیں",
+        "مدت یا فلٹر چنیں۔ غلط تاریخ درست کریں اور پیغام سے ناکام پڑھائی دوبارہ کریں۔"
+      ]
+    ]
+  },
+  infection_cases: {
+    title: "Infection cases",
+    titleUr: "انفیکشن کیس",
+    purpose: "Filter to Suspected, choose a case and check the patient. Confirm against criteria or exclude with a reason. Correct the organism or surgical depth where needed. The decision is final. Report a same-organism ward cluster as an OUTBREAK incident.",
+    purposeUr: "مشتبہ کیس چھانٹیں، کیس چنیں اور مریض چیک کریں۔ معیار کے مطابق تصدیق کریں یا وجہ دے کر خارج کریں۔ ضرورت پر جرثومہ یا جراحی گہرائی درست کریں۔ فیصلہ حتمی ہے۔ ایک وارڈ میں ایک جرثومے کے گروہ کو وبا کے طور پر رپورٹ کریں۔",
+    steps: [
+      "Filter to Suspected, choose a case and check the patient. Confirm against criteria or exclude with a reason. Correct the organism or surgical depth where needed. The decision is final. Report a same-organism ward cluster as an OUTBREAK incident.",
+      "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
+      "Choose the reporting period or filters. Correct invalid dates and retry a failed read from the message."
+    ],
+    stepsUr: [
+      "مشتبہ کیس چھانٹیں، کیس چنیں اور مریض چیک کریں۔ معیار کے مطابق تصدیق کریں یا وجہ دے کر خارج کریں۔ ضرورت پر جرثومہ یا جراحی گہرائی درست کریں۔ فیصلہ حتمی ہے۔ ایک وارڈ میں ایک جرثومے کے گروہ کو وبا کے طور پر رپورٹ کریں۔",
+      "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
+      "مدت یا فلٹر چنیں۔ غلط تاریخ درست کریں اور پیغام سے ناکام پڑھائی دوبارہ کریں۔"
+    ],
+    faq: [
+      [
+        "Confirm or exclude a case",
+        "Filter to Suspected, choose a case and check the patient. Confirm against criteria or exclude with a reason. Correct the organism or surgical depth where needed. The decision is final. Report a same-organism ward cluster as an OUTBREAK incident."
+      ],
+      [
+        "Report suspected infection",
+        "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control."
+      ],
+      [
+        "Read and filter registers",
+        "Choose the reporting period or filters. Correct invalid dates and retry a failed read from the message."
+      ]
+    ],
+    faqUr: [
+      [
+        "کیس کی تصدیق یا اخراج",
+        "مشتبہ کیس چھانٹیں، کیس چنیں اور مریض چیک کریں۔ معیار کے مطابق تصدیق کریں یا وجہ دے کر خارج کریں۔ ضرورت پر جرثومہ یا جراحی گہرائی درست کریں۔ فیصلہ حتمی ہے۔ ایک وارڈ میں ایک جرثومے کے گروہ کو وبا کے طور پر رپورٹ کریں۔"
+      ],
+      [
+        "مشتبہ انفیکشن رپورٹ کریں",
+        "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔"
+      ],
+      [
+        "رجسٹر پڑھیں اور چھانٹیں",
+        "مدت یا فلٹر چنیں۔ غلط تاریخ درست کریں اور پیغام سے ناکام پڑھائی دوبارہ کریں۔"
+      ]
+    ]
+  },
+  ssi_surveillance: {
+    title: "Wound surveillance",
+    titleUr: "زخم نگرانی",
+    purpose: "Review overdue then due checks. Filter by surgeon or state. Compare the rate for the hospital period and use the operation row for a new check.",
+    purposeUr: "پہلے تاخیر پھر مقررہ جانچ دیکھیں۔ سرجن یا حالت سے فلٹر کریں۔ ہسپتال مدت کی شرح دیکھیں اور نئی جانچ کے لیے آپریشن سطر منتخب کریں۔",
+    steps: [
+      "Review overdue then due checks. Filter by surgeon or state. Compare the rate for the hospital period and use the operation row for a new check.",
+      "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review."
+    ],
+    stepsUr: [
+      "پہلے تاخیر پھر مقررہ جانچ دیکھیں۔ سرجن یا حالت سے فلٹر کریں۔ ہسپتال مدت کی شرح دیکھیں اور نئی جانچ کے لیے آپریشن سطر منتخب کریں۔",
+      "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔"
+    ],
+    faq: [
+      [
+        "Review due operations",
+        "Review overdue then due checks. Filter by surgeon or state. Compare the rate for the hospital period and use the operation row for a new check."
+      ],
+      [
+        "Record a wound check",
+        "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review."
+      ]
+    ],
+    faqUr: [
+      [
+        "مقررہ آپریشن پیروی",
+        "پہلے تاخیر پھر مقررہ جانچ دیکھیں۔ سرجن یا حالت سے فلٹر کریں۔ ہسپتال مدت کی شرح دیکھیں اور نئی جانچ کے لیے آپریشن سطر منتخب کریں۔"
+      ],
+      [
+        "زخم کی جانچ درج کریں",
+        "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔"
+      ]
+    ]
+  },
+  ipc_audits: {
+    title: "Infection control audits",
+    titleUr: "انفیکشن کنٹرول آڈٹ",
+    purpose: "Choose the kind and location. For hand hygiene enter observations and completed actions for the five WHO moments. For other audits add the checked items. After recording, assign the required follow-up to a named owner with a due date.",
+    purposeUr: "قسم اور مقام چنیں۔ ہاتھوں کی صفائی میں عالمی ادارہ صحت کے پانچ مواقع کے مشاہدات اور مکمل عمل درج کریں۔ دیگر آڈٹ کے جانچے گئے آئٹم شامل کریں۔ اندراج کے بعد ذمہ دار اور تاریخ کے ساتھ پیروی تفویض کریں۔",
+    steps: [
+      "Choose the kind and location. For hand hygiene enter observations and completed actions for the five WHO moments. For other audits add the checked items. After recording, assign the required follow-up to a named owner with a due date.",
+      "Choose the dates, kind or ward. Compare compliance by kind and area, then expand an audit row to inspect findings and each count."
+    ],
+    stepsUr: [
+      "قسم اور مقام چنیں۔ ہاتھوں کی صفائی میں عالمی ادارہ صحت کے پانچ مواقع کے مشاہدات اور مکمل عمل درج کریں۔ دیگر آڈٹ کے جانچے گئے آئٹم شامل کریں۔ اندراج کے بعد ذمہ دار اور تاریخ کے ساتھ پیروی تفویض کریں۔",
+      "تاریخ، قسم یا وارڈ چنیں۔ قسم اور علاقے کی تعمیل ملائیں، پھر نتائج اور شمار کے لیے آڈٹ سطر کھولیں۔"
+    ],
+    faq: [
+      [
+        "Record an audit or assign an action",
+        "Choose the kind and location. For hand hygiene enter observations and completed actions for the five WHO moments. For other audits add the checked items. After recording, assign the required follow-up to a named owner with a due date."
+      ],
+      [
+        "Read compliance",
+        "Choose the dates, kind or ward. Compare compliance by kind and area, then expand an audit row to inspect findings and each count."
+      ]
+    ],
+    faqUr: [
+      [
+        "آڈٹ درج کریں یا کارروائی تفویض کریں",
+        "قسم اور مقام چنیں۔ ہاتھوں کی صفائی میں عالمی ادارہ صحت کے پانچ مواقع کے مشاہدات اور مکمل عمل درج کریں۔ دیگر آڈٹ کے جانچے گئے آئٹم شامل کریں۔ اندراج کے بعد ذمہ دار اور تاریخ کے ساتھ پیروی تفویض کریں۔"
+      ],
+      [
+        "تعمیل پڑھیں",
+        "تاریخ، قسم یا وارڈ چنیں۔ قسم اور علاقے کی تعمیل ملائیں، پھر نتائج اور شمار کے لیے آڈٹ سطر کھولیں۔"
+      ]
+    ]
+  },
   diagnostic_correlation: {
     title: "Diagnostic correlation review",
     titleUr: "تشخیصی مطابقت کا جائزہ",

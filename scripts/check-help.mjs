@@ -334,6 +334,9 @@ export function checkHelp({
       "EmergencyReports",
       "DiagnosticsQuality",
       "FinalClinicalReports",
+      "InfectionCases",
+      "SsiSurveillance",
+      "IpcAudits",
 
       "ConsentRegister",
       "ConsentPolicySetup",

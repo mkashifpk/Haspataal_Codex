@@ -1,0 +1,323 @@
+{
+  "screen": {
+    "id": "infection_cases",
+    "workspace": "infection_control",
+    "title": "Infection cases",
+    "purpose": "Confirm or exclude every suspected healthcare-associated infection.",
+    "workflow": "MSDS IPC 84 ii, COP 50",
+    "rule_objects": [
+      {
+        "id": "rule:d5b3cfbf41",
+        "text": "Suspected first (notification category infection). Confirm against the surveillance criteria with the note (the depth and the organism may be corrected), or exclude with the reason. Final.",
+        "cites": []
+      },
+      {
+        "id": "rule:6ce420ebbf",
+        "text": "A cluster of the same organism on one ward: report an incident of type OUTBREAK.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "blood-center",
+      "clinic-quality-and-education",
+      "complaints",
+      "cost-estimates-and-tariff",
+      "emergency-department",
+      "incidents-and-sentinel-events",
+      "infection-control",
+      "opd-reception",
+      "operating-theater",
+      "phc-inspection",
+      "refunds-waivers-credit"
+    ]
+  },
+  "definition_of_done": {
+    "points": 50,
+    "items": [
+      {
+        "id": "ep:GET /infection-cases",
+        "label": "GET /infection-cases",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /infection-cases",
+        "label": "POST /infection-cases",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /infection-cases/{case_id}/decision",
+        "label": "POST /infection-cases/{case_id}/decision",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /infection/ssi-surveillance",
+        "label": "GET /infection/ssi-surveillance",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /patients/search",
+        "label": "GET /patients/search",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ev:notification.created",
+        "label": "notification.created",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:d5b3cfbf41",
+        "label": "Suspected first (notification category infection). Confirm against the surveillance criteria with the note (the depth and the organism may be corrected), or exclude with the reason. Final.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:6ce420ebbf",
+        "label": "A cluster of the same organism on one ward: report an incident of type OUTBREAK.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /infection-cases",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.case.report",
+          "infection.control.manage",
+          "infection.statistics.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.case.report or infection.control.manage or infection.statistics.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Infection cases"
+    },
+    {
+      "endpoint": "POST /infection-cases",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.case.report",
+          "infection.control.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.case.report or infection.control.manage",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ipc_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /infection-cases",
+        "emits_events": [
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "summary": "Report a suspected healthcare-associated infection"
+    },
+    {
+      "endpoint": "POST /infection-cases/{case_id}/decision",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.control.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of infection.control.manage",
+        "roles_allowed": [
+          "ipc_nurse"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /infection-cases",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": "infection_case"
+      },
+      "summary": "Confirm or exclude a suspected infection"
+    },
+    {
+      "endpoint": "GET /infection/ssi-surveillance",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.control.manage",
+          "infection.statistics.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.control.manage or infection.statistics.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Operations under wound surveillance"
+    },
+    {
+      "endpoint": "GET /patients/search",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "patient.search"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of patient.search",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "lab_technician",
+          "lab_verifier",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN"
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "case_id",
+      "source": "this_screen",
+      "call": "GET /infection-cases",
+      "field": "case_id",
+      "used_by": [
+        "POST /infection-cases/{case_id}/decision"
+      ]
+    }
+  ],
+  "rules_in_force": null
+}

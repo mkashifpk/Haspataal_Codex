@@ -1,0 +1,244 @@
+{
+  "screen": {
+    "id": "report_infection_doctor",
+    "workspace": "doctor",
+    "title": "Suspected infection and wound checks",
+    "purpose": "Report a suspected healthcare-associated infection; record the wound checks after an operation.",
+    "workflow": "MSDS IPC 84, COP 50",
+    "rule_objects": [
+      {
+        "id": "rule:95c310ce14",
+        "text": "Report a suspected infection (POST /infection-cases): the kind (a surgical site infection gives the operation and the depth), the onset, where it was found, the organism if known, the signs and the criteria met; the infection control team confirms or excludes it.",
+        "cites": []
+      },
+      {
+        "id": "rule:23b5e00588",
+        "text": "Wound checks after an operation (POST /ot/bookings/{booking_id}/ssi-checks): on the ward round, at the OPD review or by telephone; 'Signs of infection' needs the note and the suspected depth and opens a case itself.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "infection-control"
+    ]
+  },
+  "definition_of_done": {
+    "points": 42,
+    "items": [
+      {
+        "id": "ep:POST /infection-cases",
+        "label": "POST /infection-cases",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /infection-cases",
+        "label": "GET /infection-cases",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /ot/bookings/{booking_id}/ssi-checks",
+        "label": "POST /ot/bookings/{booking_id}/ssi-checks",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:95c310ce14",
+        "label": "Report a suspected infection (POST /infection-cases): the kind (a surgical site infection gives the operation and the depth), the onset, where it was found, the organism if known, the signs and the criteria met; the infection control team confirms or excludes it.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:23b5e00588",
+        "label": "Wound checks after an operation (POST /ot/bookings/{booking_id}/ssi-checks): on the ward round, at the OPD review or by telephone; 'Signs of infection' needs the note and the suspected depth and opens a case itself.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "POST /infection-cases",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.case.report",
+          "infection.control.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.case.report or infection.control.manage",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ipc_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /infection-cases",
+        "emits_events": [
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "summary": "Report a suspected healthcare-associated infection"
+    },
+    {
+      "endpoint": "GET /infection-cases",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.case.report",
+          "infection.control.manage",
+          "infection.statistics.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.case.report or infection.control.manage or infection.statistics.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Infection cases"
+    },
+    {
+      "endpoint": "POST /ot/bookings/{booking_id}/ssi-checks",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.case.report",
+          "infection.control.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.case.report or infection.control.manage",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ipc_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /ot/bookings/{booking_id}",
+        "emits_events": [
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "summary": "Record a wound check after an operation"
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "booking_id",
+      "source": "this_screen",
+      "call": "POST /infection-cases",
+      "field": "booking_id",
+      "used_by": [
+        "POST /ot/bookings/{booking_id}/ssi-checks"
+      ]
+    }
+  ],
+  "rules_in_force": null
+}

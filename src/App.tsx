@@ -9,6 +9,9 @@ import { DiseaseStatistics, IcdCodeLists } from "./screens/IcdReports";
 import { EmergencyRegister, EmergencyStatistics } from "./screens/EmergencyReports";
 import { DiagnosticsQuality } from "./screens/DiagnosticsQuality";
 import { DiagnosticCorrelation, EstimateStatistics, MedicationStatistics, SurgicalStatistics } from "./screens/FinalClinicalReports";
+import { InfectionCases } from "./screens/InfectionCases";
+import { SsiSurveillance } from "./screens/SsiSurveillance";
+import { IpcAudits } from "./screens/IpcAudits";
 import { ConsentRegister } from "./screens/ConsentRegister";
 import { ConsentPolicySetup } from "./screens/ConsentPolicySetup";
 import { LabourRegisterColumns } from "./screens/LabourRegisterColumns";
@@ -1689,6 +1692,9 @@ export function App() {
               {(screen === 'er_statistics' || screen === 'er_statistics_owner') && <EmergencyStatistics key={`${user.user_id}:${screen}`} screenId={screen} user={user} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === 'lab_quality' || screen === 'radiology_quality' || screen === 'diagnostics_quality' || screen === 'owner_diagnostics') && <DiagnosticsQuality key={`${user.user_id}:${screen}`} screenId={screen} user={user} connected={connected} combined={prefs.pdf_download==="Combined"} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'diagnostic_correlation' && <DiagnosticCorrelation key={user.user_id} user={user} connected={connected} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {(screen === "report_infection_doctor" || screen === "report_infection_ward" || screen === "infection_cases") && <InfectionCases key={user.user_id+":"+screen} screenId={screen} user={user} connected={connected} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}} onIncident={nav.includes("incident_register")?()=>{navigate("incident_register");}:undefined}/>}
+              {screen === "ssi_surveillance" && <SsiSurveillance key={user.user_id} user={user} connected={connected} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "ipc_audits" && <IpcAudits key={user.user_id} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'medication_statistics' && <MedicationStatistics key={user.user_id} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'estimate_statistics' && <EstimateStatistics key={user.user_id} user={user} connected={connected} combined={prefs.pdf_download==="Combined"} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === 'surgical_statistics' || screen === 'surgical_statistics_owner') && <SurgicalStatistics key={`${user.user_id}:${screen}`} screenId={screen} user={user} connected={connected} view={est?.views.screens.find(s=>s.screen_id===screen)?.view} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}

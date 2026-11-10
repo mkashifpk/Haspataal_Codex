@@ -1,0 +1,245 @@
+{
+  "screen": {
+    "id": "ssi_surveillance",
+    "workspace": "infection_control",
+    "title": "Wound surveillance after operations",
+    "purpose": "Follow every operation for 30 days (90 with an implant) so the infection rate has a known denominator.",
+    "workflow": "MSDS COP 50",
+    "rule_objects": [
+      {
+        "id": "rule:2518fe806e",
+        "text": "Overdue and Due first: telephone the patient (method Telephone) or see them in the OPD; record Healed, Healing or SignsOfInfection (it opens a case). state Complete once a closing check or an infection is in.",
+        "cites": []
+      },
+      {
+        "id": "rule:b171175814",
+        "text": "Filter by surgeon for the surgeons' monthly review.",
+        "cites": []
+      },
+      {
+        "id": "rule:9ec622493b",
+        "text": "Exists for the service surgery (work): show it as GET /establishment views.screens says for screen_id ssi_surveillance (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "infection-control"
+    ],
+    "service": {
+      "services": [
+        "surgery"
+      ],
+      "role": "work",
+      "views": {
+        "full": "Show it; every action the user's permissions allow.",
+        "open_work": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting).",
+        "records": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work.",
+        "setup": "Not in the daily menus: reach it from Facility settings (a preview's prerequisites link to it) to set the service up before switching it on.",
+        "hidden": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      },
+      "how": "GET /establishment after login and on establishment.changed: views.screens gives this screen's view (one frontend build for every profile; never decide it from the profile's category)"
+    }
+  },
+  "definition_of_done": {
+    "points": 44,
+    "items": [
+      {
+        "id": "ep:GET /infection/ssi-surveillance",
+        "label": "GET /infection/ssi-surveillance",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /ot/bookings/{booking_id}/ssi-checks",
+        "label": "POST /ot/bookings/{booking_id}/ssi-checks",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /infection/ssi-rates",
+        "label": "GET /infection/ssi-rates",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:2518fe806e",
+        "label": "Overdue and Due first: telephone the patient (method Telephone) or see them in the OPD; record Healed, Healing or SignsOfInfection (it opens a case). state Complete once a closing check or an infection is in.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:b171175814",
+        "label": "Filter by surgeon for the surgeons' monthly review.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:9ec622493b",
+        "label": "Exists for the service surgery (work): show it as GET /establishment views.screens says for screen_id ssi_surveillance (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /infection/ssi-surveillance",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.control.manage",
+          "infection.statistics.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.control.manage or infection.statistics.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Operations under wound surveillance"
+    },
+    {
+      "endpoint": "POST /ot/bookings/{booking_id}/ssi-checks",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.case.report",
+          "infection.control.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.case.report or infection.control.manage",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ipc_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /ot/bookings/{booking_id}",
+        "emits_events": [
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "summary": "Record a wound check after an operation"
+    },
+    {
+      "endpoint": "GET /infection/ssi-rates",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.statistics.view",
+          "infection.control.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.statistics.view or infection.control.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "summary": "Surgical site infection rates"
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "booking_id",
+      "source": "this_screen",
+      "call": "GET /infection/ssi-surveillance",
+      "field": "booking_id",
+      "used_by": [
+        "POST /ot/bookings/{booking_id}/ssi-checks"
+      ]
+    }
+  ],
+  "rules_in_force": null
+}
