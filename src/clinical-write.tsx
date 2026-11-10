@@ -140,14 +140,15 @@ export function useClinicalWrite(
       if (a && a.body.protection === "idempotent" && canRetryWrite(a))
         void send(a, undefined, true);
     },
-    inspect: async () => {
+    inspect: async (select?: (value: unknown) => unknown) => {
       const a = attemptRef.current;
       if (!a?.body.reconcilePath || flight.current) return;
       flight.current = true;
       setBusy(true);
       setChecked(false);
       try {
-        setObserved(await api("GET", a.body.reconcilePath));
+        const result = await api("GET", a.body.reconcilePath);
+        setObserved(select ? select(result) : result);
         setChecked(true);
       } catch (e) {
         setError(e);
@@ -168,9 +169,11 @@ export function useClinicalWrite(
 export function ClinicalWriteFeedback({
   write,
   onReviewed,
+  selectResult,
 }: {
   write: ReturnType<typeof useClinicalWrite>;
   onReviewed?: () => void;
+  selectResult?: (value: unknown) => unknown;
 }) {
   return (
     <>
@@ -203,7 +206,7 @@ export function ClinicalWriteFeedback({
           {write.attempt.body.reconcilePath && (
             <button
               data-help="clinical.recovery"
-              onClick={() => void write.inspect()}
+              onClick={() => void write.inspect(selectResult)}
             >
               {t("Read current result", "موجودہ نتیجہ پڑھیں")}
             </button>

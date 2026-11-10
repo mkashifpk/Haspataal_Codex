@@ -34,7 +34,7 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 198);
+  assert.equal(result.screens, 200);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });

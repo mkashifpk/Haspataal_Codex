@@ -1,0 +1,242 @@
+{
+  "screen": "record_deficiencies_nursing",
+  "title": "Record deficiencies to fix",
+  "cases": [
+    {
+      "id": "case:GET /quality/record-review-deficiencies",
+      "call": "GET /api/v1/quality/record-review-deficiencies",
+      "summary": "Record deficiencies (mine: to fix, or raised by me)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-review-deficiencies"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "deficiency_id": 2,
+                  "cycle_id": 1,
+                  "cycle_number": "MRR-2026-001",
+                  "item_id": 3,
+                  "record_type": "OpdVisit",
+                  "record_number": "OPD-2026-000002",
+                  "mrn": "MRN-2026-000002",
+                  "criterion_code": "ICD_CODED",
+                  "criterion_title": "Diagnosis coded (ICD)",
+                  "category": "Completeness",
+                  "description": "Diagnosis coded (ICD): Confirmed with the record",
+                  "responsible_employee_id": 1,
+                  "responsible_name": "Dr Ahmed",
+                  "status": "Open",
+                  "resolution_note": null,
+                  "resolved_at": null,
+                  "resolved_by_name": null,
+                  "raised_by": 7,
+                  "raised_by_name": "Dr Reviewer",
+                  "created_at": "2026-09-28T16:29:15.163273+00:00"
+                },
+                {
+                  "deficiency_id": 1,
+                  "cycle_id": 1,
+                  "cycle_number": "MRR-2026-001",
+                  "item_id": 3,
+                  "record_type": "OpdVisit",
+                  "record_number": "OPD-2026-000002",
+                  "mrn": "MRN-2026-000002",
+                  "criterion_code": "OPD_PLAN",
+                  "criterion_title": "Plan or prescription documented",
+                  "category": "Completeness",
+                  "description": "Plan or prescription documented: Confirmed with the record",
+                  "responsible_employee_id": 1,
+                  "responsible_name": "Dr Ahmed",
+                  "status": "Open",
+                  "resolution_note": null,
+                  "resolved_at": null,
+                  "resolved_by_name": null,
+                  "raised_by": 7,
+                  "raised_by_name": "Dr Reviewer",
+                  "created_at": "2026-09-28T16:29:15.163273+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-28T16:29:15.357673+00:00"
+              },
+              "request_id": "c71ddfffa4e649bf9b0d4b7d6de0f773"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+      "call": "POST /api/v1/quality/record-review-deficiencies/{deficiency_id}/resolve",
+      "summary": "Resolve a deficiency",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/quality/record-review-deficiencies/2/resolve",
+            "body": {
+              "status": "Corrected",
+              "note": "Correction entry added with ICD code B34.9"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "deficiency_id": 2,
+                "cycle_id": 1,
+                "cycle_number": "MRR-2026-001",
+                "item_id": 3,
+                "record_type": "OpdVisit",
+                "record_number": "OPD-2026-000002",
+                "mrn": "MRN-2026-000002",
+                "criterion_code": "ICD_CODED",
+                "criterion_title": "Diagnosis coded (ICD)",
+                "category": "Completeness",
+                "description": "Diagnosis coded (ICD): Confirmed with the record",
+                "responsible_employee_id": 1,
+                "responsible_name": "Dr Ahmed",
+                "status": "Corrected",
+                "resolution_note": "Correction entry added with ICD code B34.9",
+                "resolved_at": "2026-09-28T16:29:15.378692+00:00",
+                "resolved_by_name": "Dr Ahmed",
+                "raised_by": 7,
+                "raised_by_name": "Dr Reviewer",
+                "created_at": "2026-09-28T16:29:15.163273+00:00"
+              },
+              "meta": {
+                "server_time": "2026-09-28T16:29:15.395493+00:00"
+              },
+              "request_id": "643d8ec851c84a64bed0cc026958b21a"
+            }
+          },
+          "errors_seen": [
+            "RECORD_DEFICIENCY_NOT_YOURS",
+            "RECORD_DEFICIENCY_RESOLVED"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "RECORD_DEFICIENCY_NOT_YOURS",
+        "RECORD_DEFICIENCY_RESOLVED",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/record_deficiencies_nursing",
+  "workspace_guide": "get_handbook_outline('head_nurse')",
+  "realtime": [
+    {
+      "event": "notification.created",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Fix the record the usual way (a correction entry on the note; records are never edited), then 'Mark corrected' with a note saying what was fixed.",
+    "A badge counts the Open ones (GET ...deficiencies?status=Open); notification category record_deficiency."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

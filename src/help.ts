@@ -10,6 +10,126 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  record_deficiencies_doctor: {
+    title: "Record deficiencies to fix",
+    titleUr: "ریکارڈ کی درست کرنے والی کمیاں",
+    purpose: "Review deficiencies in your clinical documentation and record completed corrections.",
+    purposeUr: "اپنی طبی دستاویز کی کمیاں دیکھیں اور مکمل اصلاح درج کریں۔",
+    steps: [
+      "Read your open worklist and history. Open is the default. The navigation badge counts the server’s Open list. Choose Corrected, Acknowledged, Withdrawn or All statuses to inspect history. Refresh rereads the permitted list. A record_deficiency notification updates the list and badge. When the server returns its 1,000-row limit, 1000+ means at least that many.",
+      "Open the exact deficiency. Match the record number, MRN, criterion, cycle and assigned author or nursing team. Read what the reviewer found. Open Mark corrected only after adding a separate correction entry to the source record. Review findings you raised may be visible even when another person must correct them.",
+      "Describe the source correction. Say what the separate entry fixed, using 3–1,000 characters. Include its reference if available. Cancel discards the unsent resolution only and asks when the note has text.",
+      "Confirm the source entry already exists. Tick this only after checking the actual appended correction in the chart. This form records the resolution and leaves the source record intact. Changing the note clears the confirmation.",
+      "Save the correction status once. Confirm correction checks the current scoped row and asks the server to mark it Corrected. The list and badge refresh from the server. If the outcome is unknown, use Read current result to read the exact original deficiency in its cycle. Never submit a replacement based on absence from Open."
+    ],
+    stepsUr: [
+      "اپنی کھلی فہرست اور تاریخ پڑھیں۔ کھلی پہلے منتخب ہے۔ نیویگیشن بیج سرور کی کھلی فہرست گنتا ہے۔ تاریخ کے لیے درست شدہ، تسلیم شدہ، واپس لی گئی یا تمام حالتیں چنیں۔ تازہ کرنا مجاز فہرست دوبارہ پڑھتا ہے۔ نئی کمی کی اطلاع فہرست اور بیج تازہ کرتی ہے۔ سرور کی 1,000 کی حد پر 1000+ کا مطلب کم از کم اتنی تعداد ہے۔",
+      "عین کمی کھولیں۔ ریکارڈ نمبر، ایم آر این، معیار، جائزے کا دور اور ذمہ دار مصنف یا نرسنگ ٹیم ملائیں۔ جائزہ لینے والے کی دریافت پڑھیں۔ اصل ریکارڈ میں الگ اصلاحی اندراج کے بعد درست شدہ قرار دیں کھولیں۔ آپ کی رپورٹ کردہ کمی دکھ سکتی ہے جسے کوئی دوسرا درست کرے گا۔",
+      "اصل اصلاح کی وضاحت کریں۔ 3 سے 1,000 حروف میں بتائیں الگ اندراج نے کیا درست کیا۔ دستیاب ہو تو اس کا حوالہ لکھیں۔ منسوخ صرف غیر ارسال شدہ حل چھوڑتا ہے اور نوٹ موجود ہو تو تصدیق مانگتا ہے۔",
+      "تصدیق کریں کہ اصل اندراج موجود ہے۔ چارٹ میں شامل حقیقی اصلاح چیک کرنے کے بعد ہی نشان لگائیں۔ یہ فارم حل درج کرتا ہے اور اصل ریکارڈ برقرار رہتا ہے۔ نوٹ بدلنے سے تصدیق ہٹ جاتی ہے۔",
+      "اصلاح کی حالت ایک بار محفوظ کریں۔ اصلاح کی تصدیق مجاز قطار کی موجودہ حالت دیکھ کر سرور سے اسے درست شدہ کرتی ہے۔ فہرست اور بیج سرور سے تازہ ہوتے ہیں۔ نتیجہ نامعلوم ہو تو موجودہ نتیجہ پڑھیں سے اصل کمی اسی دور میں پڑھیں۔ کھلی فہرست میں نہ ملنے پر متبادل نہ بھیجیں۔"
+    ],
+    faq: [
+      [
+        "How do doctors and clinical specialists correct a finding?",
+        "Open the actual patient and visit or admission using the chart workflow, match the MRN and add a signed correction to your source note. Return to the finding and record what you fixed. Another clinician’s finding you raised stays visible for follow-up."
+      ],
+      [
+        "How do surgeons or anaesthetists correct an operative or anaesthesia finding?",
+        "Check the operation and original note in the clinical record. Append the permitted correction in that record first. Mark corrected here only when the item belongs to you and the correction is already recorded."
+      ],
+      [
+        "What can managers, directors, owners and Quality do here?",
+        "Read the list permitted in the current workspace. If a finding is yours to correct, append the actual source correction first. The Quality workflow handles acknowledgement, withdrawal and cycle actions."
+      ],
+      [
+        "What if a correction is refused or its answer is lost?",
+        "Read the server message and refresh. For an unknown result use Read current result, compare its exact record, criterion and resolution, then return to the list. If the server does not return the original finding, ask IT while the request stays locked."
+      ],
+      [
+        "How do I use Help and zoom?",
+        "Press F1 on the list, a field or the correction dialog. Close Help to return to the same draft. Use Settings or Ctrl+=, Ctrl+- and Ctrl+0 for the shared 100–250% zoom. Urdu text awaits named language review."
+      ]
+    ],
+    faqUr: [
+      [
+        "ڈاکٹر اور ماہر کمی کیسے درست کریں؟",
+        "چارٹ کے طریقے سے اصل مریض اور وزٹ یا داخلہ کھولیں، ایم آر این ملائیں، اور اپنے اصل نوٹ میں دستخط شدہ اصلاح شامل کریں۔ کمی پر لوٹ کر لکھیں کیا درست ہوا۔ کسی دوسرے معالج کی آپ کی رپورٹ کردہ کمی فالو اپ کے لیے دکھتی ہے۔"
+      ],
+      [
+        "سرجن یا بے ہوشی کے ڈاکٹر آپریشن یا بے ہوشی کی کمی کیسے درست کریں؟",
+        "طبی ریکارڈ میں آپریشن اور اصل نوٹ دیکھیں۔ پہلے اسی ریکارڈ میں مجاز اصلاح شامل کریں۔ یہاں صرف اپنی کمی کو درست شدہ کہیں جب اصلاح پہلے درج ہو۔"
+      ],
+      [
+        "منیجر، ڈائریکٹر، مالک اور کوالٹی یہاں کیا کر سکتے ہیں؟",
+        "موجودہ کام کی جگہ کی مجاز فہرست پڑھیں۔ اپنی ذمہ داری کی کمی کے لیے پہلے حقیقی اصل اصلاح شامل کریں۔ تسلیم، واپسی اور دور کے اقدامات کوالٹی کے طریقے میں ہوتے ہیں۔"
+      ],
+      [
+        "اصلاح رد ہو یا جواب گم ہو تو کیا کریں؟",
+        "سرور کا پیغام پڑھیں اور تازہ کریں۔ نامعلوم نتیجے کے لیے موجودہ نتیجہ پڑھیں، عین ریکارڈ، معیار اور حل ملائیں، پھر فہرست پر واپس آئیں۔ اصل کمی واپس نہ آئے تو درخواست مقفل رکھتے ہوئے آئی ٹی سے رجوع کریں۔"
+      ],
+      [
+        "مدد اور زوم کیسے استعمال کریں؟",
+        "فہرست، خانے یا اصلاح کے مکالمے میں ایف ون دبائیں۔ مدد بند کرنے پر وہی مسودہ ملے گا۔ ترتیبات یا کنٹرول مساوی، منفی اور صفر سے مشترک سو تا ڈھائی سو فیصد زوم استعمال کریں۔ اردو متن کا نامزد لسانی جائزہ باقی ہے۔"
+      ]
+    ]
+  },
+  record_deficiencies_nursing: {
+    title: "Record deficiencies to fix",
+    titleUr: "ریکارڈ کی درست کرنے والی کمیاں",
+    purpose: "Review deficiencies in your team’s nursing documentation and record completed corrections.",
+    purposeUr: "اپنی ٹیم کی نرسنگ دستاویز کی کمیاں دیکھیں اور مکمل اصلاح درج کریں۔",
+    steps: [
+      "Read your open worklist and history. Open is the default. The navigation badge counts the server’s Open list. Choose Corrected, Acknowledged, Withdrawn or All statuses to inspect history. Refresh rereads the permitted list. A record_deficiency notification updates the list and badge. When the server returns its 1,000-row limit, 1000+ means at least that many.",
+      "Open the exact deficiency. Match the record number, MRN, criterion, cycle and assigned author or nursing team. Read what the reviewer found. Open Mark corrected only after adding a separate correction entry to the source record. Review findings you raised may be visible even when another person must correct them.",
+      "Describe the source correction. Say what the separate entry fixed, using 3–1,000 characters. Include its reference if available. Cancel discards the unsent resolution only and asks when the note has text.",
+      "Confirm the source entry already exists. Tick this only after checking the actual appended correction in the chart. This form records the resolution and leaves the source record intact. Changing the note clears the confirmation.",
+      "Save the correction status once. Confirm correction checks the current scoped row and asks the server to mark it Corrected. The list and badge refresh from the server. If the outcome is unknown, use Read current result to read the exact original deficiency in its cycle. Never submit a replacement based on absence from Open."
+    ],
+    stepsUr: [
+      "اپنی کھلی فہرست اور تاریخ پڑھیں۔ کھلی پہلے منتخب ہے۔ نیویگیشن بیج سرور کی کھلی فہرست گنتا ہے۔ تاریخ کے لیے درست شدہ، تسلیم شدہ، واپس لی گئی یا تمام حالتیں چنیں۔ تازہ کرنا مجاز فہرست دوبارہ پڑھتا ہے۔ نئی کمی کی اطلاع فہرست اور بیج تازہ کرتی ہے۔ سرور کی 1,000 کی حد پر 1000+ کا مطلب کم از کم اتنی تعداد ہے۔",
+      "عین کمی کھولیں۔ ریکارڈ نمبر، ایم آر این، معیار، جائزے کا دور اور ذمہ دار مصنف یا نرسنگ ٹیم ملائیں۔ جائزہ لینے والے کی دریافت پڑھیں۔ اصل ریکارڈ میں الگ اصلاحی اندراج کے بعد درست شدہ قرار دیں کھولیں۔ آپ کی رپورٹ کردہ کمی دکھ سکتی ہے جسے کوئی دوسرا درست کرے گا۔",
+      "اصل اصلاح کی وضاحت کریں۔ 3 سے 1,000 حروف میں بتائیں الگ اندراج نے کیا درست کیا۔ دستیاب ہو تو اس کا حوالہ لکھیں۔ منسوخ صرف غیر ارسال شدہ حل چھوڑتا ہے اور نوٹ موجود ہو تو تصدیق مانگتا ہے۔",
+      "تصدیق کریں کہ اصل اندراج موجود ہے۔ چارٹ میں شامل حقیقی اصلاح چیک کرنے کے بعد ہی نشان لگائیں۔ یہ فارم حل درج کرتا ہے اور اصل ریکارڈ برقرار رہتا ہے۔ نوٹ بدلنے سے تصدیق ہٹ جاتی ہے۔",
+      "اصلاح کی حالت ایک بار محفوظ کریں۔ اصلاح کی تصدیق مجاز قطار کی موجودہ حالت دیکھ کر سرور سے اسے درست شدہ کرتی ہے۔ فہرست اور بیج سرور سے تازہ ہوتے ہیں۔ نتیجہ نامعلوم ہو تو موجودہ نتیجہ پڑھیں سے اصل کمی اسی دور میں پڑھیں۔ کھلی فہرست میں نہ ملنے پر متبادل نہ بھیجیں۔"
+    ],
+    faq: [
+      [
+        "How does the Head Nurse correct a nursing finding?",
+        "Match the ward patient and the original nursing entry. Open the authorised ward chart and append the nursing correction or missing documentation. Review it before marking the finding corrected. If it is a medical finding, follow up with the author."
+      ],
+      [
+        "What can managers, directors, owners and Quality do here?",
+        "Read the list permitted in the current workspace. If a finding is yours to correct, append the actual source correction first. The Quality workflow handles acknowledgement, withdrawal and cycle actions."
+      ],
+      [
+        "What if a correction is refused or its answer is lost?",
+        "Read the server message and refresh. For an unknown result use Read current result, compare its exact record, criterion and resolution, then return to the list. If the server does not return the original finding, ask IT while the request stays locked."
+      ],
+      [
+        "How do I use Help and zoom?",
+        "Press F1 on the list, a field or the correction dialog. Close Help to return to the same draft. Use Settings or Ctrl+=, Ctrl+- and Ctrl+0 for the shared 100–250% zoom. Urdu text awaits named language review."
+      ]
+    ],
+    faqUr: [
+      [
+        "ہیڈ نرس نرسنگ کی کمی کیسے درست کرے؟",
+        "وارڈ کے مریض اور اصل نرسنگ اندراج ملائیں۔ مجاز وارڈ چارٹ کھولیں اور نرسنگ اصلاح یا نامکمل دستاویز شامل کریں۔ کمی درست شدہ کرنے سے پہلے اصل اندراج دیکھیں۔ طبی کمی کی صورت میں مصنف سے پیروی کریں۔"
+      ],
+      [
+        "منیجر، ڈائریکٹر، مالک اور کوالٹی یہاں کیا کر سکتے ہیں؟",
+        "موجودہ کام کی جگہ کی مجاز فہرست پڑھیں۔ اپنی ذمہ داری کی کمی کے لیے پہلے حقیقی اصل اصلاح شامل کریں۔ تسلیم، واپسی اور دور کے اقدامات کوالٹی کے طریقے میں ہوتے ہیں۔"
+      ],
+      [
+        "اصلاح رد ہو یا جواب گم ہو تو کیا کریں؟",
+        "سرور کا پیغام پڑھیں اور تازہ کریں۔ نامعلوم نتیجے کے لیے موجودہ نتیجہ پڑھیں، عین ریکارڈ، معیار اور حل ملائیں، پھر فہرست پر واپس آئیں۔ اصل کمی واپس نہ آئے تو درخواست مقفل رکھتے ہوئے آئی ٹی سے رجوع کریں۔"
+      ],
+      [
+        "مدد اور زوم کیسے استعمال کریں؟",
+        "فہرست، خانے یا اصلاح کے مکالمے میں ایف ون دبائیں۔ مدد بند کرنے پر وہی مسودہ ملے گا۔ ترتیبات یا کنٹرول مساوی، منفی اور صفر سے مشترک سو تا ڈھائی سو فیصد زوم استعمال کریں۔ اردو متن کا نامزد لسانی جائزہ باقی ہے۔"
+      ]
+    ]
+  },
   record_review_worklist_nursing: {
     title: "My record reviews",
     titleUr: "میرے ریکارڈ جائزے",

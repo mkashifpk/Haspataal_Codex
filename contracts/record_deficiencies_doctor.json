@@ -1,0 +1,664 @@
+{
+  "screen_id": "record_deficiencies_doctor",
+  "contract_fingerprint": "257cc319fed31b6ed2ac",
+  "knowledge_revision": "6ef028e8063dcc4a",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "screen": {
+    "id": "record_deficiencies_doctor",
+    "workspace": "doctor",
+    "title": "Record deficiencies to fix",
+    "purpose": "Deficiencies a review found in your records (nursing items: the ward's).",
+    "workflow": "MSDS IMS-3 (161, 162)",
+    "rule_objects": [
+      {
+        "id": "rule:6d9bfc1414",
+        "text": "Fix the record the usual way (a correction entry on the note; records are never edited), then 'Mark corrected' with a note saying what was fixed.",
+        "cites": []
+      },
+      {
+        "id": "rule:9f5d4c2aad",
+        "text": "A badge counts the Open ones (GET ...deficiencies?status=Open); notification category record_deficiency.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "medical-record-review"
+    ]
+  },
+  "rules_in_force": null,
+  "build_order": {
+    "screen": "record_deficiencies_doctor",
+    "title": "Record deficiencies to fix",
+    "workspace": "doctor",
+    "phase": "P9B",
+    "position": 200,
+    "points": 41,
+    "capabilities": [
+      "realtime",
+      "f1_help",
+      "zoom"
+    ],
+    "depends_on": [],
+    "needed_by": [],
+    "go_live_setup": false,
+    "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
+  },
+  "definition_of_done": {
+    "points": 41,
+    "items": [
+      {
+        "id": "ep:GET /quality/record-review-deficiencies",
+        "label": "GET /quality/record-review-deficiencies",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+        "label": "POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ev:notification.created",
+        "label": "notification.created",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:6d9bfc1414",
+        "label": "Fix the record the usual way (a correction entry on the note; records are never edited), then 'Mark corrected' with a note saying what was fixed.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:9f5d4c2aad",
+        "label": "A badge counts the Open ones (GET ...deficiencies?status=Open); notification category record_deficiency.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /quality/record-review-deficiencies",
+      "summary": "Record deficiencies (mine: to fix, or raised by me)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.deficiency.resolve",
+          "quality.review.perform"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.deficiency.resolve or quality.review.perform",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "cycle_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cycle Id"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Open",
+                  "Corrected",
+                  "Acknowledged",
+                  "Withdrawn"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "mine",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Mine"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "default": 200,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DeficiencyOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 200,
+            "minimum": 1,
+            "maximum": 1000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "cycle_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Open",
+              "Corrected",
+              "Acknowledged",
+              "Withdrawn"
+            ]
+          },
+          {
+            "name": "mine",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+      "summary": "Resolve a deficiency",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.deficiency.resolve",
+          "quality.review.perform"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.deficiency.resolve or quality.review.perform",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "RECORD_DEFICIENCY_NOT_YOURS",
+          "http_status": 403,
+          "message": "Only the record's author, the nursing supervisors (nursing items) or the Quality Officer can resolve this deficiency.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/quality/record-review-deficiencies/{deficiency_id}/resolve"
+        },
+        {
+          "code": "RECORD_DEFICIENCY_RESOLVED",
+          "http_status": 409,
+          "message": "This deficiency is already resolved.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/quality/record-review-deficiencies/{deficiency_id}/resolve"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "deficiency_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Deficiency Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ResolveIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DeficiencyOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ResolveIn",
+        "fields": [
+          {
+            "pointer": "/status",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Corrected",
+              "Acknowledged",
+              "Withdrawn"
+            ]
+          },
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 1000,
+            "description": "Corrected: what was fixed (e.g. the correction entry)"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with RECORD_DEFICIENCY_RESOLVED: the deficiency is resolved already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /quality/record-review-deficiencies",
+        "refused_with": "RECORD_DEFICIENCY_RESOLVED",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    }
+  ],
+  "handoffs": [],
+  "id_sources": [
+    {
+      "id": "deficiency_id",
+      "source": "this_screen",
+      "call": "GET /quality/record-review-deficiencies",
+      "field": "deficiency_id",
+      "used_by": [
+        "POST /quality/record-review-deficiencies/{deficiency_id}/resolve"
+      ]
+    }
+  ],
+  "patient_context": null,
+  "value_lists": [
+    {
+      "values": [
+        "Timeliness",
+        "Legibility",
+        "Completeness"
+      ],
+      "column": "record_review_deficiencies.category",
+      "used_at": "GET /quality/record-review-deficiencies[].category",
+      "labels": {
+        "Timeliness": "Timeliness",
+        "Legibility": "Legibility",
+        "Completeness": "Completeness"
+      }
+    },
+    {
+      "values": [
+        "Open",
+        "Corrected",
+        "Acknowledged",
+        "Withdrawn"
+      ],
+      "column": "record_review_deficiencies.status",
+      "used_at": "GET /quality/record-review-deficiencies[].status",
+      "labels": {
+        "Open": "Open",
+        "Corrected": "Corrected",
+        "Acknowledged": "Acknowledged",
+        "Withdrawn": "Withdrawn"
+      }
+    },
+    {
+      "values": [
+        "Admission",
+        "OpdVisit"
+      ],
+      "column": "record_review_items.record_type",
+      "used_at": "GET /quality/record-review-deficiencies[].record_type",
+      "labels": {
+        "Admission": "Admission",
+        "OpdVisit": "Opd visit"
+      }
+    },
+    {
+      "values": [
+        "Corrected",
+        "Acknowledged",
+        "Withdrawn"
+      ],
+      "column": null,
+      "used_at": "POST /quality/record-review-deficiencies/{deficiency_id}/resolve body.status",
+      "labels": {
+        "Corrected": "Corrected",
+        "Acknowledged": "Acknowledged",
+        "Withdrawn": "Withdrawn"
+      }
+    }
+  ],
+  "states": [
+    {
+      "state": "loading",
+      "why": "every read"
+    },
+    {
+      "state": "error",
+      "why": "every call (show error.code's message)"
+    },
+    {
+      "state": "empty",
+      "why": "a list can be empty: say why and what to do next"
+    },
+    {
+      "state": "forbidden",
+      "why": "actions hidden or disabled by permission (GET /auth/me)"
+    },
+    {
+      "state": "stale / reconnecting",
+      "why": "realtime: show Live / Reconnecting, reload after a truncated replay"
+    },
+    {
+      "state": "submitting / outcome unknown",
+      "why": "a write in flight, or its answer lost: see each write's on_lost_answer"
+    }
+  ],
+  "scanner": [],
+  "copy": {
+    "workspace": {
+      "en": "Clinical OPD / IPD",
+      "ur": "ڈاکٹر"
+    },
+    "error_messages": {
+      "RECORD_DEFICIENCY_NOT_YOURS": "Only the record's author, the nursing supervisors (nursing items) or the Quality Officer can resolve this deficiency.",
+      "RECORD_DEFICIENCY_RESOLVED": "This deficiency is already resolved.",
+      "VALIDATION_ERROR": "The request is invalid."
+    },
+    "wording_quoted_in_rules": [
+      "Mark corrected"
+    ],
+    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
+  },
+  "same_component_as": [
+    "record_deficiencies_nursing"
+  ],
+  "roles": {
+    "full": [
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "anaesthetist",
+      "head_nurse",
+      "quality_officer"
+    ],
+    "partial": [],
+    "page_for": [
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "anaesthetist",
+      "head_nurse",
+      "quality_officer"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role and an employee record, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
+  },
+  "scenarios": []
+}

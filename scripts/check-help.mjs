@@ -325,6 +325,7 @@ export function checkHelp({
       "PatientFeedback",
 
       "RecordReviewWorklist",
+      "RecordDeficiencies",
       "RecordReviewCycles",
 
       "ConsentRegister",

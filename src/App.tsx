@@ -1,4 +1,6 @@
 import { RecordReviewWorklist } from "./screens/RecordReviewWorklist";
+import { RecordDeficiencies, canReadDeficiencies, deficiencyLimit, isDeficiencyScreen } from "./screens/RecordDeficiencies";
+import { deficiencies as readDeficiencies } from "./generated/record_deficiencies";
 import { RecordReviewCycles } from "./screens/RecordReviewCycles";
 import { ConsentRegister } from "./screens/ConsentRegister";
 import { ConsentPolicySetup } from "./screens/ConsentPolicySetup";
@@ -451,6 +453,7 @@ export function App() {
     [meta, setMeta] = useState<any>(),
     [unread, setUnread] = useState<number>(),
     [revision, setRevision] = useState(0),
+    [deficiencyRevision, setDeficiencyRevision] = useState(0),
     [stream, setStream] = useState("Connecting"),
     [error, setError] = useState<unknown>(),
     [helpOpen, setHelpOpen] = useState(false),
@@ -704,11 +707,14 @@ export function App() {
         setStream(e.status);
         if (e.resync) {
           setRevision((n) => n + 1);
+          setDeficiencyRevision((n) => n + 1);
           void refreshData();
         }
       }
       if (e.type === "event") {
         setRevision((n) => n + 1);
+        if (e.event_type === "notification.created" && e.payload.category === "record_deficiency")
+          setDeficiencyRevision((n) => n + 1);
         if (e.event_type === "system.license") {
           // The documented DEV fixture belongs to this authenticated socket;
           // an ordinary REST read would erase it with the global DEV state.
@@ -1222,6 +1228,16 @@ export function App() {
       (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er","patient_programmes_triage","transfusion_bedside_er"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const nav = screenNavigation(legacyNav, outline, est, deliveredHelpScreens, workspaceReady).filter(id=>(!['record_complaint_admissions','record_complaint_er','record_complaint_ward'].includes(id)||['full','open_work','records'].includes(est?.views.screens.find(s=>s.screen_id===id)?.view??'hidden'))&&(id!=='my_investigations'||!!investigations.data?.length||screen==='my_investigations')&&(id!=='my_complaint_investigations'||!!complaintInvestigations.data?.length||screen==='my_complaint_investigations')&&(id!=='my_actions'||!!ownedActions.data?.length||screen==='my_actions'));
+  const readDeficiencyCount = !!user && nav.some(isDeficiencyScreen) && canReadDeficiencies(user.permissions);
+  const deficiencyOpen = useLoad(async () => ({
+    actor: user?.user_id,
+    workspace,
+    rows: readDeficiencyCount ? await readDeficiencies({ status: "Open", mine: true, limit: deficiencyLimit }) : [],
+  }), [readDeficiencyCount, user?.user_id, workspace, deficiencyRevision]);
+  const deficiencyRows = deficiencyOpen.data?.actor === user?.user_id && deficiencyOpen.data?.workspace === workspace
+    ? deficiencyOpen.data?.rows : undefined;
+  const deficiencyCount = readDeficiencyCount && !deficiencyOpen.loading && !deficiencyOpen.error
+    ? deficiencyRows?.length : undefined;
   const navigationLabel = (id: string, index: 0 | 1 | 2) => labels[id]?.[index] ?? (index === 2 ? "•" : index === 1 ? handbookHelp[id]?.titleUr ?? id : handbookHelp[id]?.title ?? id);
 
   const view = est?.views.workspaces.find(
@@ -1360,6 +1376,7 @@ export function App() {
                   <span aria-hidden="true">{navigationLabel(id, 2)}</span>
                   {navigationLabel(id, ur ? 1 : 0)}
                   {id === "my_actions" && ownedActions.data && <b>{ownedActions.data.length===1000?"1000+":ownedActions.data.length}</b>}
+                  {isDeficiencyScreen(id) && deficiencyCount !== undefined && <b aria-label={t("Open deficiencies", "کھلی کمیاں")}>{deficiencyCount === deficiencyLimit ? `${deficiencyLimit}+` : deficiencyCount}</b>}
                   {id === "notifications" && unread !== undefined && (
                     <b>{unread}</b>
                   )}
@@ -1653,6 +1670,7 @@ export function App() {
               {screen==='record_feedback_reception'&&<RecordFeedback noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen==='patient_feedback'&&<PatientFeedback revision={revision} noNewWork={(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')!=='full'} key={user.user_id} user={user} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === 'record_review_worklist_doctor' || screen === 'record_review_worklist_nursing') && <RecordReviewWorklist key={`${user.user_id}:${screen}`} screenId={screen} revision={revision} user={user} connected={connected} readOnly={['records','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {isDeficiencyScreen(screen) && nav.includes(screen) && <RecordDeficiencies key={`${user.user_id}:${screen}`} screenId={screen} user={user} connected={connected} stream={stream} revision={deficiencyRevision} openList={{...deficiencyOpen,data:deficiencyRows}} readOnly={['records','hidden','setup'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'record_review_cycles' && <RecordReviewCycles key={user.user_id} user={user} connected={connected} revision={revision} readOnly={['records','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === 'consent_register' || screen === 'consent_register_owner') && <ConsentRegister key={`${user.user_id}:${screen}`} screenId={screen} revision={revision} user={user} connected={connected} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'consent_policy_setup' && <ConsentPolicySetup key={user.user_id} user={user} connected={connected} revision={revision} readOnly={['records','hidden'].includes(est?.views.screens.find(s=>s.screen_id===screen)?.view??'full')} openSettings={()=>navigate('settings')} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
