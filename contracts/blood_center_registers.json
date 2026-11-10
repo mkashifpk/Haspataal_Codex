@@ -1,7 +1,7 @@
 {
   "screen_id": "blood_center_registers",
-  "contract_fingerprint": "2bf245cdfd753209ff51",
-  "knowledge_revision": "0adf198241668290",
+  "contract_fingerprint": "257cc319fed31b6ed2ac",
+  "knowledge_revision": "6ef028e8063dcc4a",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -206,6 +206,11 @@
         "cites": []
       },
       {
+        "id": "rule:93f58b5cab",
+        "text": "Open a donation from the period's list: GET /blood-center/donations?date_from=&date_to= (newest first, 100 a page: continue with the last donation_id as before_id); show the donation number, the donor's number, age_years and donor_sex and the status, never a name, then GET /blood-center/donations/{donation_id}.",
+        "cites": []
+      },
+      {
         "id": "rule:7494467e85",
         "text": "The registers name donors by number, age and sex only; opening a donation is logged as a read of the donor's record and of each patient named: say so.",
         "cites": []
@@ -262,17 +267,23 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 42,
+    "points": 47,
     "items": [
       {
         "id": "ep:GET /blood-center/return",
         "label": "GET /blood-center/return",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /blood-center/registers/pdf",
         "label": "GET /blood-center/registers/pdf",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /blood-center/donations",
+        "label": "GET /blood-center/donations",
         "points": 3,
         "claimed": false
       },
@@ -285,6 +296,12 @@
       {
         "id": "rule:4d2f057780",
         "label": "A period (default the last quarter, at most 366 days); every figure is computed, never typed.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:93f58b5cab",
+        "label": "Open a donation from the period's list: GET /blood-center/donations?date_from=&date_to= (newest first, 100 a page: continue with the last donation_id as before_id); show the donation number, the donor's number, age_years and donor_sex and the status, never a name, then GET /blood-center/donations/{donation_id}.",
         "points": 2,
         "claimed": false
       },
@@ -322,7 +339,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -594,6 +611,232 @@
         "media": [
           "application/octet-stream"
         ]
+      }
+    },
+    {
+      "endpoint": "GET /blood-center/donations",
+      "summary": "Donations and the worklists",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "blood_center.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of blood_center.view",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Accepted",
+                  "Deferred",
+                  "Collected",
+                  "Unsuccessful",
+                  "Cleared",
+                  "Reactive",
+                  "Rejected"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "donor_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Donor Id"
+          }
+        },
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 500,
+            "minimum": 1,
+            "default": 100,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "before_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DonationOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 100,
+            "minimum": 1,
+            "maximum": 500
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Accepted",
+              "Deferred",
+              "Collected",
+              "Unsuccessful",
+              "Cleared",
+              "Reactive",
+              "Rejected"
+            ]
+          },
+          {
+            "name": "donor_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "before_id",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
       }
     },
     {
@@ -3740,6 +3983,17 @@
         "blood_center_registers"
       ],
       "meanwhile": "Offer the blood center screens only while the blood_center service is Active (GET /establishment); a component leaves the center only into this hospital's blood bank: offer no distribution."
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "donation_id",
+      "source": "this_screen",
+      "call": "GET /blood-center/donations",
+      "field": "donation_id",
+      "used_by": [
+        "GET /blood-center/donations/{donation_id}"
+      ]
     }
   ]
 }

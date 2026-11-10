@@ -1,7 +1,7 @@
 {
   "screen_id": "ward_indent",
-  "contract_fingerprint": "f253171154eef6044fa2",
-  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "contract_fingerprint": "257cc319fed31b6ed2ac",
+  "knowledge_revision": "6ef028e8063dcc4a",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -213,6 +213,11 @@
     "workflow": "§2.6",
     "rule_objects": [
       {
+        "id": "rule:14607295ff",
+        "text": "The ward: pick it from GET /beds/matrix (each ward's ward_id and name). An indent sent answers its indent_id: follow it with GET /ward-indents/{indent_id}, again on approval.resolved.",
+        "cites": []
+      },
+      {
         "id": "rule:6c0ce3ff85",
         "text": "Ward stock shows is_expired and is_recalled in red: never given. Remove expired or damaged stock (POST /wards/{ward_id}/inventory/remove, reason Expiry or Damage: written off) and send unneeded good stock back (ReturnToPharmacy); a recall removes its own batches (MSDS 59, 60).",
         "cites": [
@@ -227,9 +232,16 @@
     ],
     "related_workflows": [
       "clinical-and-prescriptions",
+      "complaints",
+      "cost-estimates-and-tariff",
       "duty-rosters-and-attendance",
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "incidents-and-sentinel-events",
+      "infection-control",
       "inpatient-and-discharge",
-      "medication-safety"
+      "medication-safety",
+      "operating-theater"
     ],
     "service": {
       "services": [
@@ -314,35 +326,41 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 52,
+    "points": 57,
     "items": [
       {
         "id": "ep:POST /wards/{ward_id}/indents",
         "label": "POST /wards/{ward_id}/indents",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /ward-indents/{indent_id}",
         "label": "GET /ward-indents/{indent_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /wards/{ward_id}/inventory",
         "label": "GET /wards/{ward_id}/inventory",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /drugs/search",
         "label": "GET /drugs/search",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /wards/{ward_id}/inventory/remove",
         "label": "POST /wards/{ward_id}/inventory/remove",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /beds/matrix",
+        "label": "GET /beds/matrix",
         "points": 3,
         "claimed": false
       },
@@ -350,11 +368,17 @@
         "id": "ev:approval.resolved",
         "label": "approval.resolved",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:pharmacy.recall.updated",
         "label": "pharmacy.recall.updated",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:14607295ff",
+        "label": "The ward: pick it from GET /beds/matrix (each ward's ward_id and name). An indent sent answers its indent_id: follow it with GET /ward-indents/{indent_id}, again on approval.resolved.",
         "points": 2,
         "claimed": false
       },
@@ -362,31 +386,31 @@
         "id": "rule:6c0ce3ff85",
         "label": "Ward stock shows is_expired and is_recalled in red: never given. Remove expired or damaged stock (POST /wards/{ward_id}/inventory/remove, reason Expiry or Damage: written off) and send unneeded good stock back (ReturnToPharmacy); a recall removes its own batches (MSDS 59, 60).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:af4d84840c",
         "label": "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id ward_indent (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
@@ -398,7 +422,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -1035,6 +1059,146 @@
         "emits_events": [],
         "prints": false,
         "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /beds/matrix",
+      "summary": "Live bed matrix (counts per ward + optional bed list)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "BED_NO_LONGER_AVAILABLE",
+          "http_status": 409,
+          "message": "Bed was reserved by another terminal.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "bed_id",
+            "current_state"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/allocate-bed"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "include_beds",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "title": "Include Beds"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_BedMatrixOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "include_beds",
+            "required": false,
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        "note": null
       }
     }
   ],
@@ -2945,6 +3109,28 @@
         "every screen"
       ],
       "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "ward_id",
+      "source": "this_screen",
+      "call": "GET /beds/matrix",
+      "field": "ward_id",
+      "used_by": [
+        "POST /wards/{ward_id}/indents",
+        "GET /wards/{ward_id}/inventory",
+        "POST /wards/{ward_id}/inventory/remove"
+      ]
+    },
+    {
+      "id": "indent_id",
+      "source": "this_screen",
+      "call": "POST /wards/{ward_id}/indents",
+      "field": "indent_id",
+      "used_by": [
+        "GET /ward-indents/{indent_id}"
+      ]
     }
   ]
 }

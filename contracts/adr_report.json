@@ -1,7 +1,7 @@
 {
   "screen_id": "adr_report",
-  "contract_fingerprint": "2bf245cdfd753209ff51",
-  "knowledge_revision": "0adf198241668290",
+  "contract_fingerprint": "257cc319fed31b6ed2ac",
+  "knowledge_revision": "6ef028e8063dcc4a",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -212,6 +212,11 @@
         "cites": []
       },
       {
+        "id": "rule:7f6e6afa74",
+        "text": "Opened from the menu, the screen starts on the ADR incidents: GET /incidents?type_code=ADVERSE_DRUG_REACTION (newest first; date_from, date_to and open_only narrow it); the incident picked gives its incident_id and, for the stock batches, its drug_id. The incident register's 'ADR report' on such an incident opens the same screen on that incident_id.",
+        "cites": []
+      },
+      {
         "id": "rule:a917b687ad",
         "text": "GET first: saved false shows the draft Haspataal could fill (the medicine's name, ingredients and form, the date it was reported). The product's registration number, pack size, manufacturer and manufacture date come from the pack: type them; never invent them.",
         "cites": []
@@ -238,7 +243,9 @@
       }
     ],
     "related_workflows": [
-      "incidents-and-sentinel-events"
+      "blood-transfusion",
+      "incidents-and-sentinel-events",
+      "surgical-care"
     ]
   },
   "rules_in_force": null,
@@ -288,43 +295,49 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 61,
+    "points": 66,
     "items": [
+      {
+        "id": "ep:GET /incidents",
+        "label": "GET /incidents",
+        "points": 3,
+        "claimed": false
+      },
       {
         "id": "ep:GET /incidents/{incident_id}/adr-report",
         "label": "GET /incidents/{incident_id}/adr-report",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:PUT /incidents/{incident_id}/adr-report",
         "label": "PUT /incidents/{incident_id}/adr-report",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /incidents/{incident_id}/adr-report/submissions",
         "label": "POST /incidents/{incident_id}/adr-report/submissions",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /incidents/{incident_id}/adr-report/pdf",
         "label": "GET /incidents/{incident_id}/adr-report/pdf",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /incidents/{incident_id}",
         "label": "GET /incidents/{incident_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /drugs/{drug_id}/stock-status",
         "label": "GET /drugs/{drug_id}/stock-status",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:incident.updated",
@@ -335,6 +348,12 @@
       {
         "id": "rule:19ba6a9f20",
         "label": "Offer 'ADR report' only on an incident of the type ADVERSE_DRUG_REACTION (INCIDENT_NOT_ADR otherwise).",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:7f6e6afa74",
+        "label": "Opened from the menu, the screen starts on the ADR incidents: GET /incidents?type_code=ADVERSE_DRUG_REACTION (newest first; date_from, date_to and open_only narrow it); the incident picked gives its incident_id and, for the stock batches, its drug_id. The incident register's 'ADR report' on such an incident opens the same screen on that incident_id.",
         "points": 2,
         "claimed": false
       },
@@ -366,7 +385,7 @@
         "id": "rule:255229b733",
         "label": "Print = GET /incidents/{id}/adr-report/pdf, the manual's form filled in.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
@@ -384,7 +403,7 @@
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
@@ -396,7 +415,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -438,6 +457,432 @@
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
   },
   "endpoints": [
+    {
+      "endpoint": "GET /incidents",
+      "summary": "The incident register",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "incident.view",
+          "incident.report",
+          "ot.clinical_statistics.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of incident.view or incident.report or ot.clinical_statistics.view",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Reported",
+                  "UnderReview",
+                  "Analysed",
+                  "Closed",
+                  "Withdrawn"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "type_code",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type Code"
+          }
+        },
+        {
+          "name": "area",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Clinical",
+                  "Medication",
+                  "Anaesthesia",
+                  "Surgery",
+                  "Diagnostics",
+                  "Transfusion",
+                  "Infection",
+                  "MotherAndBaby",
+                  "Behaviour",
+                  "Facility",
+                  "Occupational"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          }
+        },
+        {
+          "name": "sentinel_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Sentinel Only"
+          }
+        },
+        {
+          "name": "harm",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "NoHarm",
+                  "Mild",
+                  "Moderate",
+                  "Severe",
+                  "Death"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Harm"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "booking_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking Id"
+          }
+        },
+        {
+          "name": "patient_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Id"
+          }
+        },
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "mine",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Mine"
+          }
+        },
+        {
+          "name": "open_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Open Only"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "default": 200,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_IncidentOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 200,
+            "minimum": 1,
+            "maximum": 1000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Reported",
+              "UnderReview",
+              "Analysed",
+              "Closed",
+              "Withdrawn"
+            ]
+          },
+          {
+            "name": "type_code",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "area",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Clinical",
+              "Medication",
+              "Anaesthesia",
+              "Surgery",
+              "Diagnostics",
+              "Transfusion",
+              "Infection",
+              "MotherAndBaby",
+              "Behaviour",
+              "Facility",
+              "Occupational"
+            ]
+          },
+          {
+            "name": "sentinel_only",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "harm",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NoHarm",
+              "Mild",
+              "Moderate",
+              "Severe",
+              "Death"
+            ]
+          },
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "booking_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "patient_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "mine",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "open_only",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
     {
       "endpoint": "GET /incidents/{incident_id}/adr-report",
       "summary": "An adverse drug reaction's report (or its pre-filled draft)",
@@ -5112,6 +5557,30 @@
         "every screen"
       ],
       "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "incident_id",
+      "source": "this_screen",
+      "call": "GET /incidents",
+      "field": "incident_id",
+      "used_by": [
+        "GET /incidents/{incident_id}/adr-report",
+        "PUT /incidents/{incident_id}/adr-report",
+        "POST /incidents/{incident_id}/adr-report/submissions",
+        "GET /incidents/{incident_id}/adr-report/pdf",
+        "GET /incidents/{incident_id}"
+      ]
+    },
+    {
+      "id": "drug_id",
+      "source": "this_screen",
+      "call": "GET /incidents",
+      "field": "drug_id",
+      "used_by": [
+        "GET /drugs/{drug_id}/stock-status"
+      ]
     }
   ]
 }

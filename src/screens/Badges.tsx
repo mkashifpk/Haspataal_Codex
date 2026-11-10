@@ -44,6 +44,7 @@ export interface BadgesProps {
   };
   establishment?: EstablishmentOut | null;
   connected?: boolean;
+  initialEmployeeId?: number;
   timeZone?: string;
   onNavigateScreen?: (screenId: string) => void;
 }
@@ -52,6 +53,7 @@ export const Badges: React.FC<BadgesProps> = ({
   user,
   establishment,
   connected = true,
+  initialEmployeeId,
   onNavigateScreen,
 }) => {
   // Capability gating
@@ -61,7 +63,7 @@ export const Badges: React.FC<BadgesProps> = ({
   );
 
   // Selected Employee State
-  const [employeeIdInput, setEmployeeIdInput] = useState<string>("1");
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(initialEmployeeId);
   const [employee, setEmployee] = useState<EmployeeDetailOut | null>(null);
   const [loadingEmployee, setLoadingEmployee] = useState<boolean>(false);
   const [employeeError, setEmployeeError] = useState<string | null>(null);
@@ -111,10 +113,8 @@ export const Badges: React.FC<BadgesProps> = ({
   }, [capability.canViewBadges]);
 
   useEffect(() => {
-    if (employeeIdInput && !isNaN(Number(employeeIdInput))) {
-      fetchEmployee(Number(employeeIdInput));
-    }
-  }, [fetchEmployee]);
+    if (selectedEmployeeId) void fetchEmployee(selectedEmployeeId);
+  }, [fetchEmployee, selectedEmployeeId]);
 
   // 2. Issue Badge Handler
   const handleOpenIssueModal = () => {
@@ -310,28 +310,15 @@ export const Badges: React.FC<BadgesProps> = ({
       <div className="card shadow-sm mb-3">
         <div className="card-body p-3">
           <div className="row g-2 align-items-end">
-            <div className="col-12 col-md-4">
-              <label htmlFor="badgeEmpIdInput" className="form-label small fw-bold mb-1">
-                Employee Identifier (Database ID)
-              </label>
-              <input
-                id="badgeEmpIdInput"
-                type="number"
-                min="1"
-                className="form-control form-control-sm"
-                placeholder="Enter employee database ID (e.g. 1)"
-                value={employeeIdInput}
-                onChange={(e) => setEmployeeIdInput(e.target.value)}
-                data-help="badges.emp_id_input"
-              />
-            </div>
-
+            <button type="button" data-help="badges.emp_id_input" onClick={() => onNavigateScreen?.("staff_directory")}>
+              Choose staff member / ملازم چنیں
+            </button>
             <div className="col-12 col-md-3 d-flex gap-2">
               <button
                 type="button"
                 className="btn btn-primary btn-sm w-100"
-                onClick={() => fetchEmployee(Number(employeeIdInput))}
-                disabled={loadingEmployee || !employeeIdInput}
+                onClick={() => { if (selectedEmployeeId) void fetchEmployee(selectedEmployeeId); }}
+                disabled={loadingEmployee || !selectedEmployeeId}
                 data-help="badges.load_employee"
               >
                 {loadingEmployee ? "Loading..." : "Load Employee"}
@@ -342,7 +329,7 @@ export const Badges: React.FC<BadgesProps> = ({
                   className="btn btn-outline-secondary btn-sm"
                   onClick={() => {
                     setEmployee(null);
-                    setEmployeeIdInput("");
+                    setSelectedEmployeeId(undefined);
                   }}
                   data-help="badges.clear_employee"
                 >

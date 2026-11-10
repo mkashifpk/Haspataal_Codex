@@ -1,3 +1,4 @@
+import { bilingual } from "../i18n";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import type { EstablishmentOut } from "../generated/facility_profile";
 import type {
@@ -14,7 +15,6 @@ import type {
 import {
   recoveryBoard as fetchRecoveryBoard,
   getRecord as getSurgicalRecord,
-  openRecovery as postOpenRecovery,
   recoveryObservation as postRecoveryObservation,
   dischargeRecovery as postDischargeRecovery,
   correct as postCorrection,
@@ -92,9 +92,6 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
   const [surgicalRecord, setSurgicalRecord] = useState<SurgicalRecordOut | null>(null);
   const [loadingDetail, setLoadingDetail] = useState<boolean>(false);
 
-  // Open Recovery Stay for Local Anaesthesia modal
-  const [showOpenModal, setShowOpenModal] = useState<boolean>(false);
-  const [openBookingIdInput, setOpenBookingIdInput] = useState<string>("");
 
   // Observation Modal
   const [showObsModal, setShowObsModal] = useState<boolean>(false);
@@ -207,32 +204,6 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
         (p.ot_name && p.ot_name.toLowerCase().includes(q)),
     );
   }, [boardData, searchQuery]);
-
-  // Open Recovery Stay for Local Anaesthesia
-  const handleOpenRecoverySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const bid = Number(openBookingIdInput);
-    if (!bid || isNaN(bid)) {
-      setErrorBanner({ en: "Please enter a valid numeric Booking ID.", ur: "براہ کرم درست بکنگ نمبر درج کریں۔" });
-      return;
-    }
-    try {
-      setSubmitting(true);
-      setErrorBanner(null);
-      await postOpenRecovery(bid);
-      setSuccessBanner(`Recovery stay opened for booking #${bid}.`);
-      setTimeout(() => setSuccessBanner(null), 3000);
-      setShowOpenModal(false);
-      setOpenBookingIdInput("");
-      await loadBoard();
-      setSelectedBookingId(bid);
-      loadRecord(bid);
-    } catch (err: any) {
-      setErrorBanner(explainRecoveryBoardError(err?.code, err?.details));
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   // Submit PACU Observation
   const handleObsSubmit = async (e: React.FormEvent) => {
@@ -490,14 +461,14 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
           )}
 
           {canOpen && (
-            <button
-              type="button"
-              onClick={() => setShowOpenModal(true)}
-              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold shadow-sm"
-              data-help="recovery_board.open_recovery_btn"
-            >
-              + Open Recovery Stay
-            </button>
+            <div>
+              <button type="button" disabled aria-describedby="local-recovery-source" data-help="recovery_board.open_recovery_btn">
+                {bilingual("Open Recovery Stay", "ریکوری قیام کھولیں")}
+              </button>
+              <p id="local-recovery-source" role="status">
+                {bilingual("Opening a local-anaesthesia recovery stay is unavailable until the server provides an eligible booking to select.", "مقامی بے ہوشی کے بعد ریکوری قیام کھولنے کے لیے سرور سے قابلِ انتخاب بکنگ درکار ہے۔")}
+              </p>
+            </div>
           )}
 
           <button
@@ -881,53 +852,6 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
           ) : null}
         </div>
       </div>
-
-      {/* MODAL: Open Recovery Stay for Local Anaesthesia */}
-      {showOpenModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-5 space-y-4">
-            <h3 className="text-base font-bold text-gray-900">
-              Open PACU Recovery Stay
-            </h3>
-            <p className="text-xs text-gray-500">
-              For local or regional anaesthesia cases where patient transitions directly to recovery post-procedure.
-            </p>
-            <form onSubmit={handleOpenRecoverySubmit} className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-gray-700">Surgical Booking ID *</label>
-                <input
-                  type="number"
-                  required
-                  placeholder="Enter Booking ID (e.g. 101)"
-                  value={openBookingIdInput}
-                  onChange={(e) => setOpenBookingIdInput(e.target.value)}
-                  className="w-full px-3 py-1.5 border rounded text-xs mt-1"
-                  data-help="recovery_board.open_recovery_booking_select"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t">
-                <button
-                  type="button"
-                  onClick={() => setShowOpenModal(false)}
-                  data-help="recovery_board.open_recovery_cancel_btn"
-                  className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold"
-                  data-help="recovery_board.open_recovery_btn"
-                >
-                  {submitting ? "Opening..." : "Confirm Arrival in Recovery"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* MODAL: Record Vitals Observation (Rule 08ba1ce134) */}
       {showObsModal && (

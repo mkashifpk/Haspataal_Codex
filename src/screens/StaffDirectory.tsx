@@ -59,6 +59,7 @@ export interface StaffDirectoryProps {
   establishment?: EstablishmentOut | null;
   connected?: boolean;
   timeZone?: string;
+  availableScreens?: string[];
   onNavigateScreen?: (screenId: string,employeeId?:number) => void;
 }
 
@@ -71,6 +72,7 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({
   establishment,
   connected = true,
   onNavigateScreen,
+  availableScreens = [],
 }) => {
   // Capability gating
   const capability: StaffDirectoryCapabilityView = useMemo(
@@ -982,6 +984,10 @@ export const StaffDirectory: React.FC<StaffDirectoryProps> = ({
                       </div>
                     </div>
 
+                    <div className="toolbar">
+                      {availableScreens.includes("badges") && <button data-help="staff_directory.identity" onClick={() => onNavigateScreen?.("badges", employeeDetail.employee_id)}>Open badges / بیجز کھولیں</button>}
+                      {availableScreens.includes("id_card") && <button data-help="staff_directory.identity" onClick={() => onNavigateScreen?.("id_card", employeeDetail.employee_id)}>Open ID card / شناختی کارڈ کھولیں</button>}
+                    </div>
                     {/* Onboarding Draft notice */}
                     {employeeDetail.employment_status === "Draft" && (
                       <div className="alert alert-warning mb-3 d-flex justify-content-between align-items-center">

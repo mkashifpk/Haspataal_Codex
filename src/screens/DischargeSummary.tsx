@@ -75,12 +75,7 @@ export function DischargeSummary({
   };
 
   // Admission context
-  const [searchAdmissionInput, setSearchAdmissionInput] = useState<string>(
-    initialAdmissionId ? String(initialAdmissionId) : ""
-  );
-  const [activeAdmissionId, setActiveAdmissionId] = useState<number | null>(
-    initialAdmissionId || null
-  );
+  const activeAdmissionId = initialAdmissionId;
   const [revision, setRevision] = useState<number>(0);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
@@ -167,18 +162,6 @@ export function DischargeSummary({
       setMissingFields(missing || []);
     }
   }, [summaryLoad.data]);
-
-  // Handle Admission Search
-  const handleLoadAdmission = (e: React.FormEvent) => {
-    e.preventDefault();
-    const id = Number(searchAdmissionInput.trim());
-    if (id > 0) {
-      setActiveAdmissionId(id);
-      setFieldErrors({});
-      setMissingFields([]);
-      setActionNotice(null);
-    }
-  };
 
   // Helper to construct current draft payload
   const buildDraftPayload = (): DischargeSummaryIn => {
@@ -424,38 +407,14 @@ export function DischargeSummary({
       {/* Write Feedback */}
       <ClinicalWriteFeedback write={write} />
 
-      {/* Admission Search Card */}
-      <div className="card mb-3 p-3 bg-light border">
-        <form onSubmit={handleLoadAdmission} className="row g-2 align-items-center">
-          <div className="col-auto">
-            <label htmlFor="admSearch" className="col-form-label fw-bold">
-              {t("Inpatient Admission ID:", "داخلہ نمبر:")}
-            </label>
-          </div>
-          <div className="col-auto">
-            <input
-              id="admSearch"
-              type="number"
-              min="1"
-              className="form-control form-control-sm"
-              placeholder="e.g. 1"
-              data-help="discharge_summary.search_admission"
-              value={searchAdmissionInput}
-              onChange={(e) => setSearchAdmissionInput(e.target.value)}
-            />
-          </div>
-          <div className="col-auto">
-            <button
-              type="submit"
-              className="btn btn-primary btn-sm"
-              data-help="discharge_summary.search_btn"
-              disabled={summaryLoad.loading || !searchAdmissionInput.trim()}
-            >
-              {summaryLoad.loading ? t("Loading...", "لوڈ ہو رہا ہے...") : t("Load Summary", "سمری کھولیں")}
-            </button>
-          </div>
-        </form>
-      </div>
+      {!activeAdmissionId && onBack && (
+        <div className="card mb-3 p-3">
+          <p>{t("Select the patient in Inpatient rounds, then open Discharge summary.", "داخل مریضوں کے راؤنڈ میں مریض چنیں، پھر ڈسچارج سمری کھولیں۔")}</p>
+          <button type="button" className="btn btn-primary" data-help="discharge_summary.search_btn" onClick={onBack}>
+            {t("Open Inpatient rounds", "داخل مریضوں کے راؤنڈ کھولیں")}
+          </button>
+        </div>
+      )}
 
       <LoadState
         loading={summaryLoad.loading}

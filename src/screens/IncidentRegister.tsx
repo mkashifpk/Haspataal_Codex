@@ -30,6 +30,7 @@ export function IncidentRegister({
   readOnly,
   timeZone,
   onOpenHelp,
+  onOpenAdr,
 }: {
   screenId?: 'incident_register'|'incident_register_owner';
   user: ClinicalUser;
@@ -38,6 +39,7 @@ export function IncidentRegister({
   readOnly: boolean;
   timeZone?: string;
   onOpenHelp: () => void;
+  onOpenAdr?: (incident: api.IncidentDetailOut) => void;
 }) {
   const [rows, setRows] = useState<api.IncidentOut[]>([]),
     [detail, setDetail] = useState<api.IncidentDetailOut>(),
@@ -437,6 +439,11 @@ export function IncidentRegister({
           )}
           {detail.closed_at && <div><h3>{t('Closure and follow-up','بندش اور اگلا اقدام')}</h3><p className="preserve-whitespace">{detail.closure_note??t('Not recorded','درج نہیں')}</p><p>{detail.closure_stamp?.text??t('No stamp recorded','مہر درج نہیں')} · {when(detail.closed_at)}</p></div>}
           <div className="toolbar">
+            {onOpenAdr && detail.type_code === "ADVERSE_DRUG_REACTION" && (
+              <button data-help="irg.adr" disabled={loading || !!error || !!mode || write.blocked} onClick={() => onOpenAdr(detail)}>
+                {t("ADR report", "مضر ردعمل رپورٹ")}
+              </button>
+            )}
             {(["review", "withdraw", "close"] as Mode[])
               .filter((m) =>
                 m === "review"

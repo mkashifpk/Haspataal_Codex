@@ -709,7 +709,7 @@ export function ERBoard({
                               type="button"
                               className="btn btn-danger btn-sm py-0 px-2"
                               data-help="er_board.btn_triage_visit"
-                              onClick={() => onNavigateScreen("er_visit", v.er_visit_id)}
+                              onClick={() => onNavigateScreen(screenId === "er_board_doctor" ? "er_visit_doctor" : "er_visit", v.er_visit_id)}
                               title={t("Open clinical triage and treatment chart", "طبی معائنہ اور ٹرائیج چارٹ کھولیں")}
                             >
                               🩺 {t("Chart", "چارٹ")}

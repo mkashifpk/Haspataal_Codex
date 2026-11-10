@@ -94,6 +94,48 @@ export interface WardStockRemoveIn {
   note: string;
 }
 
+export interface BedMatrixOut {
+  wards: WardOccupancyOut[];
+  /** Ward name -> available beds */
+  summary: Record<string, number>;
+  /** Only with include_beds=true */
+  beds?: BedMatrixBedOut[] | null;
+}
+
+/** A ward's bed counts (view v_bed_matrix). */
+export interface WardOccupancyOut {
+  ward_id: number;
+  code: string;
+  name: string;
+  ward_type: "General" | "Private" | "SemiPrivate" | "ICU" | "CCU" | "NICU" | "Surgical" | "Pediatric" | "Maternity" | "Emergency" | "Isolation" | "Other";
+  gender_restriction: "male" | "female" | "any";
+  total_beds: number;
+  available: number;
+  reserved: number;
+  occupied: number;
+  /** Beds being cleaned or waiting for discharge clearance */
+  turnover: number;
+  out_of_service: number;
+}
+
+export interface BedMatrixBedOut {
+  bed_id: number;
+  ward_id: number;
+  label: string;
+  current_state: "Available" | "Reserved" | "Occupied" | "Dirty" | "Cleaning" | "OutOfService";
+  state_changed_at: string;
+  is_overflow_allowed: boolean;
+  admission_id: number | null;
+  /** Only with with_patients=true */
+  patient_name: string | null;
+  /** Only with with_patients=true */
+  mrn: string | null;
+  admission_status: "AdmissionPending" | "Waitlisted" | "BedReserved" | "CodeRedActive" | "Admitted" | "DischargeInProgress" | "Discharged" | "Cancelled" | null;
+  is_overflow: boolean | null;
+  /** The discharge stage the patient in this bed waits for */
+  discharge_blocked_on: string | null;
+}
+
 /** Head Nurse: ward supply requisition (indent) — POST /api/v1/wards/{ward_id}/indents (who may call: holders of ward.indent.create). */
 export function createIndent(ward_id: number, body: IndentIn): Promise<WardIndentOut> {
   return api<WardIndentOut>("POST", `/wards/${ward_id}/indents`, body, { idempotent: true });
@@ -117,4 +159,9 @@ export function searchDrugs(query?: { q?: string; limit?: number }): Promise<Dru
 /** Remove stock from a ward (expired, damaged, or returned to the pharmacy) — POST /api/v1/wards/{ward_id}/inventory/remove (who may call: holders of ward.indent.create or pharmacy.stock.adjust). */
 export function removeWardStock(ward_id: number, body: WardStockRemoveIn): Promise<WardStockOut[]> {
   return api<WardStockOut[]>("POST", `/wards/${ward_id}/inventory/remove`, body, { idempotent: true });
+}
+
+/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record). */
+export function bedMatrix(query?: { include_beds?: boolean }): Promise<BedMatrixOut> {
+  return api<BedMatrixOut>("GET", withQuery(`/beds/matrix`, query), undefined);
 }

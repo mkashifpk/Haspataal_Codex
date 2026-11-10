@@ -1,6 +1,5 @@
 import { useState } from "react";
 import * as center from "../generated/blood_center_registers";
-import { listDonations } from "../generated/donor_assessment";
 import { LoadState, useLoad } from "../components";
 import type { ClinicalUser } from "../clinical-context";
 import { bilingual as t } from "../i18n";
@@ -43,7 +42,6 @@ export function BloodCenterRegisters({
   const [range, setRange] = useState<DateRange>(),
     [cursor, setCursor] = useState<number>(),
     [selected, setSelected] = useState<number>();
-  const [showDonations, setShowDonations] = useState(false);
   const period = range ?? lastQuarter(timeZone);
   const canRead =
     !!view &&
@@ -58,12 +56,11 @@ export function BloodCenterRegisters({
   );
   const donations = useLoad(
     () =>
-      canRead && showDonations && period.date_to
-        ? listDonations({ ...period, limit: 100, before_id: cursor })
+      canRead && period.date_to
+        ? center.listDonations({ ...period, limit: 100, before_id: cursor })
         : Promise.resolve([]),
     [
       canRead,
-      showDonations,
       period.date_from,
       period.date_to,
       cursor,
@@ -235,14 +232,12 @@ export function BloodCenterRegisters({
         </p>
         <button
           data-help="bcr.open"
-          onClick={() => {
-            setShowDonations(true);
-            void donations.reload();
-          }}
+          disabled={!connected || donations.loading}
+          onClick={() => void donations.reload()}
         >
           {t("Read donations for this period", "مدت کے عطیات پڑھیں")}
         </button>
-        {showDonations && (
+        {period.date_to && (
           <>
             <LoadState {...donations} retry={() => void donations.reload()} />
             {rows && (
@@ -281,6 +276,7 @@ export function BloodCenterRegisters({
                     rows.length === 100 ? rows.at(-1)?.donation_id : undefined
                   }
                   onPage={setCursor}
+                  moreLabel={t("More", "مزید")}
                 />
               </>
             )}

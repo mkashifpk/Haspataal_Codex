@@ -74,13 +74,7 @@ export function ERVisit({
   onBack,
   screenId = "er_visit",
 }: ERVisitProps) {
-  // Active visit selection state
-  const [selectedVisitId, setSelectedVisitId] = useState<number | null>(
-    initialVisitId ?? null
-  );
-  const [lookupVisitInput, setLookupVisitInput] = useState<string>(
-    initialVisitId ? String(initialVisitId) : ""
-  );
+  const selectedVisitId = initialVisitId;
 
   // Modals visibility
   const [showTriageModal, setShowTriageModal] = useState(false);
@@ -564,35 +558,12 @@ export function ERVisit({
           </h4>
         </div>
 
-        {/* Visit selector input */}
         <div className="d-flex align-items-center gap-2">
-          <label className="col-form-label-sm text-muted mb-0">
-            {t("Visit ID:", "وزٹ آئی ڈی:")}
-          </label>
-          <input
-            type="number"
-            className="form-control form-control-sm"
-            style={{ width: "120px" }}
-            data-help="er_visit.input_visit_id"
-            value={lookupVisitInput}
-            onChange={(e) => setLookupVisitInput(e.target.value)}
-            placeholder="e.g. 1"
-          />
-          <button
-            type="button"
-            className="btn btn-sm btn-primary"
-            data-help="er_visit.btn_lookup_visit"
-            onClick={() => {
-              const id = Number(lookupVisitInput);
-              if (id > 0) setSelectedVisitId(id);
-            }}
-          >
-            {t("Open", "کھولیں")}
-          </button>
           <button
             type="button"
             className="btn btn-sm btn-outline-secondary"
             data-help="er_visit.btn_refresh"
+            disabled={!selectedVisitId}
             onClick={() => visitLoad.reload()}
           >
             ↻ {t("Refresh", "تازہ کریں")}

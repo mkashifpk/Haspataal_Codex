@@ -72,6 +72,79 @@ export interface CenterPatientReactionCountOut {
   n: number;
 }
 
+export interface DonationOut {
+  donation_id: number;
+  /** On the bag, the satellite bags and the sample tubes */
+  donation_number: string;
+  donor_id: number;
+  donor_number: string;
+  donor_sex: "Male" | "Female";
+  donation_kind: "Voluntary" | "Replacement" | "Autologous";
+  for_patient_id: number | null;
+  for_patient_mrn: string | null;
+  venue: "BloodCenter" | "Camp";
+  venue_note: string | null;
+  attended_at: string;
+  /** On the day of the attendance */
+  age_years: number;
+  /** No earlier collection */
+  first_time: boolean;
+  history_completed: boolean;
+  history_note: string | null;
+  weight_kg: number;
+  hb_g_dl: number;
+  hb_method: "CopperSulphate" | "Photometer" | "Haematocrit" | "Analyser";
+  pulse: number | null;
+  bp_systolic: number | null;
+  bp_diastolic: number | null;
+  temperature_c: number | null;
+  consent_signed: boolean;
+  consent_language: string | null;
+  unpaid_declared: boolean;
+  assessed_by: number;
+  assessed_stamp: AuthorStampOut;
+  status: "Accepted" | "Deferred" | "Collected" | "Unsuccessful" | "Cleared" | "Reactive" | "Rejected";
+  bag_type: "Single" | "Double" | "Triple" | "Quadruple" | null;
+  bag_lot: string | null;
+  anticoagulant: string | null;
+  collection_started_at: string | null;
+  collection_ended_at: string | null;
+  volume_ml: number | null;
+  unsuccessful_reason: string | null;
+  donor_reaction: "None" | "Vasovagal" | "Haematoma" | "Convulsions" | "Vomiting" | "Tetany" | "LocalAllergic" | "Severe" | "Other" | null;
+  reaction_action: string | null;
+  reaction_incident_id: number | null;
+  reaction_incident_number: string | null;
+  collected_by: number | null;
+  collected_stamp: AuthorStampOut | null;
+  /** Cleared: from the agreeing determinations */
+  abo: "A" | "B" | "AB" | "O" | null;
+  rh: "Positive" | "Negative" | null;
+  cleared_by: number | null;
+  cleared_stamp: AuthorStampOut | null;
+  cleared_at: string | null;
+  clearance_note: string | null;
+  status_at: string;
+  /** Screens with a reactive result */
+  reactive_markers: ("HBsAg" | "AntiHCV" | "AntiHIV" | "Syphilis" | "Malaria" | "ABOForward" | "ABOReverse" | "RhD")[];
+  row_version: number;
+}
+
+/** The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it (SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print `text` under it on paper. */
+export interface AuthorStampOut {
+  employee_id: number | null;
+  user_id: number | null;
+  name: string;
+  /** Designation and specialty, e.g. "Medical Officer, General Medicine" */
+  designation: string | null;
+  /** Council registration, e.g. "PMDC 12345-P" or "PNC 67890" */
+  registration: string | null;
+  /** When the entry was signed, reported or verified */
+  at: string;
+  /** The printed line: name, designation, registration, date and time */
+  text: string;
+}
+
 export interface DonationDetailOut {
   donation_id: number;
   /** On the bag, the satellite bags and the sample tubes */
@@ -133,21 +206,6 @@ export interface DonationDetailOut {
   components: CenterComponentOut[];
   /** Where its components went (the patients named are logged) */
   transfusions: DonationTransfusionOut[];
-}
-
-/** The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it (SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print `text` under it on paper. */
-export interface AuthorStampOut {
-  employee_id: number | null;
-  user_id: number | null;
-  name: string;
-  /** Designation and specialty, e.g. "Medical Officer, General Medicine" */
-  designation: string | null;
-  /** Council registration, e.g. "PMDC 12345-P" or "PNC 67890" */
-  registration: string | null;
-  /** When the entry was signed, reported or verified */
-  at: string;
-  /** The printed line: name, designation, registration, date and time */
-  text: string;
 }
 
 export interface DonationTestOut {
@@ -244,6 +302,11 @@ export function centerReturn(query: { date_from: string; date_to: string }): Pro
 /** The return and the registers (PDF) — GET /api/v1/blood-center/registers/pdf (who may call: holders of blood_center.view). */
 export function registersPdf(query: { date_from: string; date_to: string }): Promise<unknown> {
   return api<unknown>("GET", withQuery(`/blood-center/registers/pdf`, query), undefined);
+}
+
+/** Donations and the worklists — GET /api/v1/blood-center/donations (who may call: holders of blood_center.view). */
+export function listDonations(query?: { status?: "Accepted" | "Deferred" | "Collected" | "Unsuccessful" | "Cleared" | "Reactive" | "Rejected" | null; donor_id?: number | null; date_from?: string | null; date_to?: string | null; limit?: number; before_id?: number | null }): Promise<DonationOut[]> {
+  return api<DonationOut[]>("GET", withQuery(`/blood-center/donations`, query), undefined);
 }
 
 /** One donation, from the donor to the patients — GET /api/v1/blood-center/donations/{donation_id} (who may call: holders of blood_center.view). */

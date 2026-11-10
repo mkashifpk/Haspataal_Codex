@@ -48,6 +48,39 @@ export interface BloodTurnaroundOut {
   longest_minutes: number;
 }
 
+export interface BloodUnitOut {
+  unit_id: number;
+  source_id: number;
+  source_name: string;
+  unit_number: string;
+  component: "WholeBlood" | "RedCells" | "FreshFrozenPlasma" | "Cryoprecipitate" | "Platelets";
+  abo: "A" | "B" | "AB" | "O";
+  rh: "Positive" | "Negative";
+  volume_ml: number | null;
+  collected_on: string | null;
+  expires_at: string;
+  /** The expiry has passed: discard it */
+  expired: boolean;
+  screened: boolean;
+  arrival_temperature_c: number | null;
+  received_at: string;
+  received_by: number;
+  status: "InStock" | "Reserved" | "Issued" | "Transfused" | "Discarded" | "ReturnedToSource";
+  /** The request it is cross-matched for (kept once issued) */
+  reserved_for: number | null;
+  reserved_for_number: string | null;
+  discard_reason: "Expired" | "BagDamaged" | "OutOfStorageTooLong" | "StorageTemperature" | "IdentityDiscrepancy" | "Other" | null;
+  status_note: string | null;
+  status_at: string;
+  status_by: number | null;
+  /** Released by the hospital's own blood center: its component */
+  center_component_id: number | null;
+  /** Its donation (GET /blood-center/donations/{donation_id}), back to the donor */
+  donation_id: number | null;
+  donation_number: string | null;
+  row_version: number;
+}
+
 export interface BloodUnitTraceOut {
   unit_id: number;
   source_id: number;
@@ -388,6 +421,11 @@ export function reactionRegister(query: { date_from: string; date_to: string }):
 /** The blood storage temperature log (PDF) — GET /api/v1/blood/storage-checks/pdf (who may call: holders of blood.view). */
 export function storagePdf(query: { date_from: string; date_to: string }): Promise<unknown> {
   return api<unknown>("GET", withQuery(`/blood/storage-checks/pdf`, query), undefined);
+}
+
+/** The blood stock — GET /api/v1/blood/units (who may call: holders of blood.view). */
+export function listUnits(query?: { status?: "InStock" | "Reserved" | "Issued" | "Transfused" | "Discarded" | "ReturnedToSource" | null; component?: "WholeBlood" | "RedCells" | "FreshFrozenPlasma" | "Cryoprecipitate" | "Platelets" | null; abo?: "A" | "B" | "AB" | "O" | null; rh?: "Positive" | "Negative" | null; limit?: number; before_id?: number | null }): Promise<BloodUnitOut[]> {
+  return api<BloodUnitOut[]>("GET", withQuery(`/blood/units`, query), undefined);
 }
 
 /** One unit and its whole chain — GET /api/v1/blood/units/{unit_id} (who may call: holders of blood.view). */

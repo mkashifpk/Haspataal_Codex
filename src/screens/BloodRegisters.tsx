@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react";
 import * as blood from "../generated/blood_registers";
-import { listUnits } from "../generated/blood_bank";
 import { LoadState, useLoad, Field, ErrorBox } from "../components";
 import { ClinicalWriteFeedback, useClinicalWrite } from "../clinical-write";
 import type { ClinicalUser } from "../clinical-context";
@@ -45,9 +44,7 @@ export function BloodRegisters({
   const [editing, setEditing] = useState(false),
     [checked, setChecked] = useState(false);
   const [status, setStatus] =
-    useState<NonNullable<Parameters<typeof listUnits>[0]>["status"]>(
-      "Transfused",
-    );
+    useState<NonNullable<Parameters<typeof blood.listUnits>[0]>["status"]>();
   const [inputError, setInputError] = useState<unknown>();
   const period = range ?? currentMonth(timeZone);
   const canRead =
@@ -64,7 +61,7 @@ export function BloodRegisters({
   const units = useLoad(
     () =>
       canRead && showUnits
-        ? listUnits({ limit: 100, before_id: cursor, status })
+        ? blood.listUnits({ limit: 100, before_id: cursor, status })
         : Promise.resolve([]),
     [canRead, showUnits, cursor, status, revision],
   );
@@ -81,7 +78,7 @@ export function BloodRegisters({
     [canRead, transfusionId, revision],
   );
   const use =
-    transfusion.data?.transfusion_id === transfusionId
+    !transfusion.loading && !transfusion.error && transfusion.data?.transfusion_id === transfusionId
       ? transfusion.data
       : undefined;
   const reaction = use?.reaction_report;
@@ -313,26 +310,25 @@ export function BloodRegisters({
         </article>
       )}
       <article className="card">
-        <h2>{t("Follow a blood unit", "خون یونٹ کی پیروی")}</h2>
+        <h2>{t("Trace a unit", "خون یونٹ کی پیروی")}</h2>
         <Field label={t("Unit status", "یونٹ حالت")}>
           <select
             data-help="br.unit"
             disabled={editing || write.blocked}
             value={status ?? ""}
             onChange={(e) => {
-              setStatus(e.target.value as typeof status);
+              setStatus((e.target.value || undefined) as typeof status);
               setCursor(undefined);
               setUnitId(undefined);
               setTransfusionId(undefined);
+              setShowIncident(false);
             }}
           >
+            <option value="">{t("In the bank or on a ward", "بلڈ بینک یا وارڈ میں")}</option>
             {Object.entries({
               Transfused: "منتقل",
               Discarded: "ضائع",
               ReturnedToSource: "ذریعہ کو واپس",
-              InStock: "اسٹاک میں",
-              Reserved: "محفوظ",
-              Issued: "جاری",
             }).map(([value, ur]) => (
               <option key={value} value={value}>
                 {t(value, ur)}
@@ -344,8 +340,8 @@ export function BloodRegisters({
           data-help="br.unit"
           disabled={editing || write.blocked}
           onClick={() => {
-            setShowUnits(true);
-            void units.reload();
+            if (showUnits) void units.reload();
+            else setShowUnits(true);
           }}
         >
           {t("Read blood units", "خون یونٹ پڑھیں")}
@@ -391,6 +387,7 @@ export function BloodRegisters({
                   next={rows.length === 100 ? rows.at(-1)?.unit_id : undefined}
                   disabled={editing || write.blocked}
                   onPage={setCursor}
+                  moreLabel={t("More", "مزید")}
                 />
               </>
             )}

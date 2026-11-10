@@ -1,0 +1,15 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-8776475-recovery-board-local-booking-source-1",
+  "agent": "Codex",
+  "build": "5fc3716",
+  "screen_id": "recovery_board",
+  "endpoint": "POST /ot/bookings/{booking_id}/recovery",
+  "kind": "Documentation",
+  "severity": "Medium",
+  "title": "Recovery board has no booking source for opening a local-anaesthesia recovery stay",
+  "expected": "The recovery_board id_sources entry for opening a stay should identify an authorized source that can return a Cleaning or Completed operation with no recovery stay yet. An eligible list or a documented handoff from a permitted screen would let staff select the exact booking.",
+  "actual": "The current bundle names only GET /ot/recovery-board -> booking_id. The GET is documented as patients in recovery now. The POST is explicitly for an operation without a recovery stay after local anaesthesia and returns OT_RECOVERY_OPEN if the stay already exists. The listed source therefore does not supply the booking for the action that starts a new stay.",
+  "steps": "Read recovery_board id_sources and both endpoint descriptions. As demo.otnurse, call GET /ot/recovery-board and inspect its patients-in-recovery result. No write or guessed booking ID is needed to reproduce the catalogue mismatch.",
+  "evidence": "DEV build 2026-11-09T17:10:47.430848+00:00. GET /ot/recovery-board returned 200 and an empty patients list for demo.otnurse, request_id 6e736e7364f9463e8fec3e66f6afb782. This confirms the read works for the role; the documented already-in-recovery scope and the POST's eligibility differ. There was no eligible synthetic operation in this read and no claim that either API handler is broken."
+}

@@ -59,10 +59,8 @@ export function LabVerification({
     [criticalAlert, setCriticalAlert] = useState<string | null>(null),
     [inspectReqId, setInspectReqId] = useState<number | null>(null),
     [showReqModal, setShowReqModal] = useState(false),
-    [inspectReqInput, setInspectReqInput] = useState(""),
     [reportReqId, setReportReqId] = useState<number | null>(null),
     [showReportModal, setShowReportModal] = useState(false),
-    [reportReqInput, setReportReqInput] = useState(""),
     [pdfSaving, setPdfSaving] = useState(false),
     [pdfNotice, setPdfNotice] = useState<string | null>(null);
   const activeItemRef = React.useRef<lab.VerificationItemOut | null>(null);
@@ -552,7 +550,6 @@ export function LabVerification({
                 data-help="verification.requisition"
                 onClick={() => {
                   setShowReqModal(true);
-                  setInspectReqInput(String(selected.requisition_id));
                   setInspectReqId(selected.requisition_id);
                 }}
               >
@@ -564,7 +561,6 @@ export function LabVerification({
                 data-help="verification.report"
                 onClick={() => {
                   setShowReportModal(true);
-                  setReportReqInput(String(selected.requisition_id));
                   setReportReqId(selected.requisition_id);
                 }}
               >
@@ -796,28 +792,6 @@ export function LabVerification({
           }}
         >
           <div className="dialog-body">
-            <Field label={t("Inspect Requisition #", "درخواست نمبر درج کریں")}>
-              <div className="input-with-button">
-                <input
-                  type="number"
-                  min={1}
-                  data-help="verification.requisition"
-                  placeholder={t("e.g. 1", "مثلاً 1")}
-                  value={inspectReqInput}
-                  onChange={(e) => setInspectReqInput(e.target.value)}
-                />
-                <button
-                  type="button"
-                  data-help="verification.requisition"
-                  onClick={() => {
-                    const id = Number(inspectReqInput);
-                    if (/^[1-9]\d*$/.test(inspectReqInput) && Number.isSafeInteger(id)) {setInspectReqId(id);reqDetail.reload();}
-                  }}
-                >
-                  {t("Load", "کھولیں")}
-                </button>
-              </div>
-            </Field>
             {inspectReqId && <LoadState {...reqDetail} retry={reqDetail.reload} />}
             {boundRequisition && (
               <div className="requisition-overview">
@@ -862,32 +836,6 @@ export function LabVerification({
           }}
         >
           <div className="dialog-body">
-            <Field label={t("Report Requisition #", "رپورٹ درخواست نمبر")}>
-              <div className="input-with-button">
-                <input
-                  type="number"
-                  min={1}
-                  data-help="verification.report"
-                  placeholder={t("e.g. 1", "مثلاً 1")}
-                  value={reportReqInput}
-                  onChange={(e) => setReportReqInput(e.target.value)}
-                />
-                <button
-                  type="button"
-                  data-help="verification.report"
-                  onClick={() => {
-                    const id = Number(reportReqInput);
-                    if (/^[1-9]\d*$/.test(reportReqInput) && Number.isSafeInteger(id)) {
-                      setReportReqId(id);
-                      setPdfNotice(null);
-                      reportPayload.reload();
-                    }
-                  }}
-                >
-                  {t("Load", "کھولیں")}
-                </button>
-              </div>
-            </Field>
             {pdfNotice && <p role="status" className="notice info">{pdfNotice}</p>}
             {reportReqId && <LoadState {...reportPayload} retry={reportPayload.reload} />}
             {signedReport && (

@@ -19,10 +19,9 @@ import type {
 } from "../generated/ward_indent";
 import {
   wardInventory,
+  bedMatrix,
   searchDrugs,
-  createIndent,
   getIndent,
-  removeWardStock,
 } from "../generated/ward_indent";
 import {
   evaluateWardIndentView,
@@ -45,10 +44,7 @@ export interface WardIndentProps {
   user: ClinicalUser;
   establishment: EstablishmentOut;
   connected?: boolean;
-  stream?: string | null;
   timeZone?: string;
-  initialWardId?: number;
-  initialIndentId?: number;
   onNavigateScreen?: (screen: string, contextId?: number) => void;
   onBack?: () => void;
 }
@@ -57,10 +53,7 @@ export function WardIndent({
   user,
   establishment: propEstablishment,
   connected = true,
-  stream = null,
   timeZone,
-  initialWardId = 1,
-  initialIndentId,
   onNavigateScreen,
   onBack,
 }: WardIndentProps) {
@@ -82,7 +75,7 @@ export function WardIndent({
   const [activeTab, setActiveTab] = useState<"cabinet" | "create" | "track">("cabinet");
 
   // Ward Selection
-  const [wardId, setWardId] = useState<number>(initialWardId);
+  const [selectedWardId, setWardId] = useState<number>();
   const [revision, setRevision] = useState<number>(0);
   const [realtimeNotice, setRealtimeNotice] = useState<string | null>(null);
 
@@ -104,20 +97,30 @@ export function WardIndent({
   const [draftFieldErrors, setDraftFieldErrors] = useState<Record<string, string>>({});
 
   // Tab 3: Track Indent
-  const [trackIndentId, setTrackIndentId] = useState<string>(initialIndentId ? String(initialIndentId) : "");
-  const [trackedIndent, setTrackedIndent] = useState<WardIndentOut | null>(null);
-  const [trackLoading, setTrackLoading] = useState<boolean>(false);
-  const [trackError, setTrackError] = useState<string | null>(null);
+  const [trackIndentId, setTrackIndentId] = useState<number>();
+  const canPickWard = permissions.canCreate || permissions.canViewInv || permissions.canRemove;
+  const wards = useLoad(() => canPickWard ? bedMatrix({include_beds: false}) : Promise.resolve(undefined), [canPickWard, revision]);
+  const wardRows = !wards.loading && !wards.error ? wards.data?.wards : undefined;
+  const wardId = wardRows?.find(row => row.ward_id === selectedWardId)?.ward_id;
+  const tracking = useLoad(() => permissions.canViewInd && trackIndentId ? getIndent(trackIndentId) : Promise.resolve(undefined),
+    [permissions.canViewInd, trackIndentId, revision, connected]);
+  const trackedIndent = !tracking.loading && !tracking.error && tracking.data?.indent_id === trackIndentId ? tracking.data : undefined;
 
   // Clinical write controller
-  const write = useClinicalWrite(user, "ward_indent", () => {
+  const write = useClinicalWrite(user, "ward_indent", (saved: WardIndentOut, command) => {
+    if (command.path.endsWith("/indents")) {
+      setTrackIndentId(saved.indent_id);
+      setActiveTab("track");
+      setIndentLines([]);
+      setIndentNote("");
+    }
     setRevision((r) => r + 1);
   });
 
   // Load Ward Inventory
   const inventoryLoad = useLoad<WardStockOut[]>(
     async () => {
-      if (!permissions.canViewInv) return [];
+      if (!permissions.canViewInv || !wardId) return [];
       return await wardInventory(wardId);
     },
     [wardId, revision, permissions.canViewInv]
@@ -125,9 +128,10 @@ export function WardIndent({
 
   // Real-time Event Subscription
   useEffect(() => {
-    const handleServerEvent = (ev: Event) => {
-      const custom = ev as CustomEvent<{ topic?: string; payload?: unknown }>;
-      const topic = custom.detail?.topic || "";
+    return window.terminal?.subscribe((event) => {
+      if (event.type === "stream" && event.resync) setRevision((r) => r + 1);
+      if (event.type !== "event") return;
+      const topic = event.event_type;
 
       if (topic === "approval.resolved") {
         setRealtimeNotice(
@@ -137,9 +141,6 @@ export function WardIndent({
           )
         );
         setRevision((r) => r + 1);
-        if (trackedIndent) {
-          loadTrackedIndent(trackedIndent.indent_id);
-        }
       } else if (topic === "pharmacy.recall.updated") {
         setRealtimeNotice(
           t(
@@ -157,13 +158,8 @@ export function WardIndent({
         );
         setRevision((r) => r + 1);
       }
-    };
-
-    window.addEventListener("haspataal:event", handleServerEvent);
-    return () => {
-      window.removeEventListener("haspataal:event", handleServerEvent);
-    };
-  }, [trackedIndent]);
+    });
+  }, []);
 
   // Drug Search Handler
   const handleSearchDrugs = async () => {
@@ -221,6 +217,7 @@ export function WardIndent({
 
   // Submit Indent Requisition
   const handleSubmitIndent = async () => {
+    if (!connected || !permissions.canCreate || !wardId || write.blocked) return;
     const validation = validateIndentDraft({
       ward_id: wardId,
       items: indentLines,
@@ -250,13 +247,11 @@ export function WardIndent({
       protection: "idempotent",
       label: t("Submit Ward Supply Indent", "وارڈ سپلائی انڈینٹ جمع کروائیں"),
     });
-    setIndentLines([]);
-    setIndentNote("");
   };
 
   // Execute Stock Removal (rule:6c0ce3ff85)
   const handleConfirmRemoval = async () => {
-    if (!removingBatch) return;
+    if (!connected || !permissions.canRemove || !wardId || write.blocked || !removingBatch) return;
 
     const validation = validateStockRemovalInput({
       batch_id: removingBatch.batch_id,
@@ -296,29 +291,6 @@ export function WardIndent({
     setRemoveReason("Expiry");
   };
 
-  // Load Tracked Indent
-  const loadTrackedIndent = async (idToLoad: number) => {
-    if (!idToLoad || !permissions.canViewInd) return;
-    setTrackLoading(true);
-    setTrackError(null);
-    try {
-      const data = await getIndent(idToLoad);
-      setTrackedIndent(data);
-    } catch (err: any) {
-      setTrackError(err?.message || "Failed to load indent details.");
-    } finally {
-      setTrackLoading(false);
-    }
-  };
-
-  const handleTrackSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const id = Number(trackIndentId);
-    if (id > 0) {
-      loadTrackedIndent(id);
-    }
-  };
-
   // Filter Inventory Batches
   const allStock = inventoryLoad.data || [];
   const expiredCount = allStock.filter((s) => s.is_expired).length;
@@ -333,7 +305,7 @@ export function WardIndent({
   });
 
   return (
-    <div className="ward-indent-screen container" data-help="ward_indent.root">
+    <div className="ward-indent-screen container" data-help="ward_indent.root" data-screen="ward_indent" data-unsaved={indentLines.length > 0 || !!indentNote || !!removingBatch} data-write-pending={write.blocked}>
       {/* Header Banner */}
       <div className="screen-header mb-4">
         <div className="d-flex justify-content-between align-items-center">
@@ -398,6 +370,7 @@ export function WardIndent({
       {/* Clinical Write Feedback */}
       <ClinicalWriteFeedback write={write} />
 
+      {canPickWard && <LoadState {...wards} retry={() => void wards.reload()} />}
       {/* Ward Selector Bar */}
       <div className="card mb-3 p-3 bg-light border">
         <div className="row g-3 align-items-center">
@@ -411,14 +384,12 @@ export function WardIndent({
               id="wardSelect"
               className="form-select form-select-sm"
               data-help="ward_indent.ward_id"
-              value={wardId}
-              onChange={(e) => setWardId(Number(e.target.value) || 1)}
+              value={wardId ?? ""}
+              disabled={write.blocked || wards.loading || !!wards.error || indentLines.length > 0 || !!removingBatch}
+              onChange={(e) => setWardId(wardRows?.find(row => String(row.ward_id) === e.target.value)?.ward_id)}
             >
-              <option value={1}>{t("Ward 1 - Medical Inpatient", "وارڈ 1 - میڈیکل داخلہ")}</option>
-              <option value={2}>{t("Ward 2 - Surgical Inpatient", "وارڈ 2 - سرجیکل داخلہ")}</option>
-              <option value={3}>{t("Ward 3 - Pediatric Ward", "وارڈ 3 - بچوں کا وارڈ")}</option>
-              <option value={4}>{t("Ward 4 - Maternity & Labour", "وارڈ 4 - زچہ و بچہ")}</option>
-              <option value={5}>{t("Ward 5 - Intensive Care Unit", "وارڈ 5 - انتہائی نگہداشت (ICU)")}</option>
+              <option value="">{t("Choose a ward", "وارڈ چنیں")}</option>
+              {wardRows?.map(row => <option key={row.ward_id} value={row.ward_id}>{row.name}</option>)}
             </select>
           </div>
           <div className="col-auto">
@@ -427,7 +398,7 @@ export function WardIndent({
               className="btn btn-outline-secondary btn-sm"
               data-help="ward_indent.refresh_inventory"
               onClick={() => inventoryLoad.reload()}
-              disabled={inventoryLoad.loading}
+              disabled={!wardId || inventoryLoad.loading}
             >
               {inventoryLoad.loading ? t("Refreshing...", "تازہ ہو رہا ہے...") : t("Refresh Stock", "اسٹاک تازہ کریں")}
             </button>
@@ -994,7 +965,7 @@ export function WardIndent({
                     className="btn btn-success fw-bold"
                     data-help="ward_indent.submit_indent"
                     onClick={handleSubmitIndent}
-                    disabled={write.busy || indentLines.length === 0}
+                    disabled={!wardId || write.blocked || indentLines.length === 0}
                   >
                     {write.busy
                       ? t("Submitting Indent...", "انڈینٹ بھیجا جا رہا ہے...")
@@ -1010,41 +981,12 @@ export function WardIndent({
       {/* TAB 3: TRACK REQUISITION */}
       {activeTab === "track" && (
         <div className="tab-pane active" data-help="ward_indent.track_pane">
-          {/* Tracker Search Form */}
-          <div className="card mb-3 p-3 bg-light border">
-            <form onSubmit={handleTrackSubmit} className="row g-2 align-items-center">
-              <div className="col-auto">
-                <label htmlFor="trackInput" className="col-form-label fw-bold">
-                  {t("Indent Requisition ID:", "انڈینٹ نمبر:")}
-                </label>
-              </div>
-              <div className="col-auto">
-                <input
-                  id="trackInput"
-                  type="number"
-                  min="1"
-                  className="form-control form-control-sm"
-                  placeholder="e.g. 1"
-                  data-help="ward_indent.track_indent_id"
-                  value={trackIndentId}
-                  onChange={(e) => setTrackIndentId(e.target.value)}
-                />
-              </div>
-              <div className="col-auto">
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-sm"
-                  data-help="ward_indent.track_button"
-                  disabled={trackLoading || !trackIndentId}
-                >
-                  {trackLoading ? t("Loading...", "لوڈ ہو رہا ہے...") : t("Track Requisition", "ٹریک کریں")}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {trackError && <div className="alert alert-danger py-2 mb-3">{trackError}</div>}
-
+          {trackIndentId && <>
+            <button type="button" data-help="ward_indent.track_button" disabled={!connected || tracking.loading} onClick={() => void tracking.reload()}>
+              {t("Refresh submitted indent", "جمع شدہ انڈینٹ تازہ پڑھیں")}
+            </button>
+            <LoadState {...tracking} retry={() => void tracking.reload()} />
+          </>}
           {/* Indent Display */}
           {trackedIndent ? (
             <div className="card p-3 shadow-sm border" data-help="ward_indent.tracked_card">
@@ -1133,8 +1075,8 @@ export function WardIndent({
           ) : (
             <Empty>
               {t(
-                "No indent loaded. Enter an indent ID above to inspect approval status and central stock.",
-                "کوئی انڈینٹ منتخب نہیں ہے۔ منظوری اور اسٹاک کی معلومات کے لیے اوپر انڈینٹ نمبر درج کریں۔"
+                "Submit a requisition to follow its approval here.",
+                "منظوری یہاں دیکھنے کے لیے درخواست جمع کریں۔"
               )}
             </Empty>
           )}

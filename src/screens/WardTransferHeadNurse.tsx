@@ -76,7 +76,7 @@ export function WardTransferHeadNurse({
     initialAdmissionId ? String(initialAdmissionId) : "",
   );
   const [activeAdmissionId, setActiveAdmissionId] = useState<number | null>(
-    initialAdmissionId || null,
+    null,
   );
 
   // Form state
@@ -105,7 +105,8 @@ export function WardTransferHeadNurse({
     return await bedMatrix({ include_beds: true });
   }, [revision]);
 
-  const matrixData = matrixLoad.data;
+  const matrixData = matrixLoad.error ? undefined : matrixLoad.data;
+  const occupiedBeds = (matrixData?.beds ?? []).filter(bed => bed.admission_id !== null);
 
   // Load Transfer History for current admission
   const transfersLoad = useLoad<AdmissionTransferOut[]>(async () => {
@@ -181,7 +182,7 @@ export function WardTransferHeadNurse({
   const handleLoadAdmission = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const id = parseInt(admissionIdInput.trim(), 10);
-    if (!isNaN(id) && id > 0) {
+    if (!matrixLoad.loading && occupiedBeds.some(bed => bed.admission_id === id)) {
       setActiveAdmissionId(id);
       setSelectedBedId(null);
       setTransferReason("");
@@ -311,18 +312,18 @@ export function WardTransferHeadNurse({
         <form onSubmit={handleLoadAdmission} className="admission-selector-form">
           <div className="form-group inline-group">
             <label htmlFor="hn-admission-id-input">
-              {t("Inpatient Admission ID / MRN:", "مریض کا داخلہ نمبر / ایم آر این:")}
+              {t("Current ward and bed", "موجودہ وارڈ اور بستر")}
             </label>
-            <input
-              id="hn-admission-id-input"
-              type="number"
-              min="1"
-              data-help="ward_transfer_head_nurse.search_admission"
-              placeholder={t("e.g. 1", "مثلاً 1")}
-              value={admissionIdInput}
-              onChange={(e) => setAdmissionIdInput(e.target.value)}
-              className="input-field"
-            />
+            <select id="hn-admission-id-input" className="input-field" data-help="ward_transfer_head_nurse.search_admission"
+              value={admissionIdInput} onChange={e => setAdmissionIdInput(e.target.value)}
+              disabled={matrixLoad.loading || Boolean(matrixLoad.error)}>
+              <option value="">{t("Choose an occupied bed", "زیر استعمال بستر چنیں")}</option>
+              {occupiedBeds.map(bed => (
+                <option key={bed.bed_id} value={bed.admission_id ?? ""}>
+                  {matrixData?.wards.find(ward => ward.ward_id === bed.ward_id)?.name} · {bed.label}
+                </option>
+              ))}
+            </select>
             <button
               type="submit"
               data-help="ward_transfer_head_nurse.search_btn"

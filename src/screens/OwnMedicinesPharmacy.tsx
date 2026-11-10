@@ -58,7 +58,6 @@ export function OwnMedicinesPharmacy({
   const [tick, setTick] = useState(0);
   const [mineOnly, setMineOnly] = useState(false);
   const [selectedAdmissionId, setSelectedAdmissionId] = useState<number | null>(null);
-  const [manualAdmissionInput, setManualAdmissionInput] = useState("");
   const [activePatientLabel, setActivePatientLabel] = useState<string | null>(null);
 
   // Identification modal states
@@ -153,25 +152,15 @@ export function OwnMedicinesPharmacy({
   const handleSelectWorklistItem = (item: MedicationWorklistItemOut) => {
     if (item.admission_id) {
       setSelectedAdmissionId(item.admission_id);
-      setManualAdmissionInput(String(item.admission_id));
       setActivePatientLabel(
         `${item.patient_name || "Patient"} (${item.mrn || "No MRN"}) - Ward: ${item.ward_name || "N/A"} Bed: ${item.bed_label || "N/A"}`,
       );
     }
   };
 
-  const handleManualLoadAdmission = (e: React.FormEvent) => {
-    e.preventDefault();
-    const id = parseInt(manualAdmissionInput.trim(), 10);
-    if (!isNaN(id) && id > 0) {
-      setSelectedAdmissionId(id);
-      setActivePatientLabel(`Admission #${id}`);
-    }
-  };
-
   const openIdentifyModal = (med: OwnMedicineOut) => {
     const check = canIdentifyMedicine(med);
-    if (!check.allowed) {
+    if (!check.allowed || worklistState.loading || worklistState.error || !worklistItems.some(item => item.own_medicine_id === med.own_medicine_id && item.admission_id === selectedAdmissionId)) {
       return;
     }
     setIdentifyingMedicine(med);
@@ -333,7 +322,7 @@ export function OwnMedicinesPharmacy({
             </Empty>
           )}
 
-          {worklistItems.length > 0 && (
+          {!worklistState.error && worklistItems.length > 0 && (
             <ul className="worklist-items-list" style={{ listStyle: "none", padding: 0, margin: 0 }}>
               {worklistItems.map((item, idx) => {
                 const isSelected = item.admission_id === selectedAdmissionId;
@@ -400,22 +389,7 @@ export function OwnMedicinesPharmacy({
                 </div>
               )}
             </div>
-            <form onSubmit={handleManualLoadAdmission} style={{ display: "flex", gap: "0.5rem" }}>
-              <input
-                type="number"
-                placeholder={t("Admission ID", "داخلہ نمبر")}
-                data-help="ownmeds_pharma.manual_admission_id"
-                value={manualAdmissionInput}
-                onChange={(e) => setManualAdmissionInput(e.target.value)}
-                style={{ width: "120px", padding: "4px 8px" }}
-              />
-              <button
-                type="submit"
-                className="btn btn-secondary btn-sm"
-                data-help="ownmeds_pharma.load_admission"
-              >
-                {t("Load", "لوڈ")}
-              </button>
+            <div>
               {selectedAdmissionId && (
                 <button
                   type="button"
@@ -427,15 +401,15 @@ export function OwnMedicinesPharmacy({
                   {t("Refresh", "تازہ")}
                 </button>
               )}
-            </form>
+            </div>
           </div>
 
           {!selectedAdmissionId && (
             <div style={{ padding: "2rem", textAlign: "center", color: "#666" }}>
               <p>
                 {t(
-                  "Select an item from the waiting queue on the left or enter an Admission ID to view and identify brought-in medicine packs.",
-                  "بائیں جانب منتظر فہرست سے ایک داخلہ منتخب کریں یا لائی گئی ادویات کی شناخت کے لیے داخلہ نمبر درج کریں۔",
+                  "Select an item from the waiting queue to view and identify brought-in medicine packs.",
+                  "لائی گئی ادویات دیکھنے اور شناخت کرنے کے لیے منتظر فہرست سے ایک اندراج منتخب کریں۔",
                 )}
               </p>
             </div>

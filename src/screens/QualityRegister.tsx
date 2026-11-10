@@ -144,11 +144,13 @@ export function QualityPager({
   next,
   onPage,
   disabled,
+  moreLabel,
 }: {
   cursor?: number;
   next?: number;
   onPage: (cursor?: number) => void;
   disabled?: boolean;
+  moreLabel?: string;
 }) {
   return (
     <div className="toolbar">
@@ -167,7 +169,7 @@ export function QualityPager({
           disabled={disabled}
           onClick={() => onPage(next)}
         >
-          {t("Older records", "پرانے ریکارڈ")}
+          {moreLabel ?? t("Older records", "پرانے ریکارڈ")}
         </button>
       )}
     </div>

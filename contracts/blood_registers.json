@@ -1,7 +1,7 @@
 {
   "screen_id": "blood_registers",
-  "contract_fingerprint": "2bf245cdfd753209ff51",
-  "knowledge_revision": "0adf198241668290",
+  "contract_fingerprint": "257cc319fed31b6ed2ac",
+  "knowledge_revision": "6ef028e8063dcc4a",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -212,6 +212,11 @@
         "cites": []
       },
       {
+        "id": "rule:ba0a58710b",
+        "text": "Trace a unit: pick it from GET /blood/units?status=Transfused (or Discarded, ReturnedToSource; newest first, continue with the last unit_id as before_id; without status it lists the units still on the shelf, reserved or out on a ward); GET /blood/units/{unit_id} gives each issue's transfusion_id, GET /blood/transfusions/{transfusion_id} its observations and reaction_report (reaction_id, incident_id).",
+        "cites": []
+      },
+      {
         "id": "rule:695a69dc26",
         "text": "Registers name patients: say above the buttons that each patient printed is logged as a read of their record.",
         "cites": []
@@ -388,35 +393,41 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 69,
+    "points": 74,
     "items": [
       {
         "id": "ep:GET /blood/statistics",
         "label": "GET /blood/statistics",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /blood/statistics/pdf",
         "label": "GET /blood/statistics/pdf",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /blood/registers/transfusions/pdf",
         "label": "GET /blood/registers/transfusions/pdf",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /blood/registers/reactions/pdf",
         "label": "GET /blood/registers/reactions/pdf",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /blood/storage-checks/pdf",
         "label": "GET /blood/storage-checks/pdf",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /blood/units",
+        "label": "GET /blood/units",
         "points": 3,
         "claimed": false
       },
@@ -459,6 +470,12 @@
       {
         "id": "rule:757f179b0d",
         "label": "A period (default this month, at most 366 days): reactions, wastage and component usage as percentages with their counts, the turnaround of issue by urgency; '-' when nothing was transfused, never 0 %.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:ba0a58710b",
+        "label": "Trace a unit: pick it from GET /blood/units?status=Transfused (or Discarded, ReturnedToSource; newest first, continue with the last unit_id as before_id; without status it lists the units still on the shelf, reserved or out on a ward); GET /blood/units/{unit_id} gives each issue's transfusion_id, GET /blood/transfusions/{transfusion_id} its observations and reaction_report (reaction_id, incident_id).",
         "points": 2,
         "claimed": false
       },
@@ -508,7 +525,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -1178,6 +1195,269 @@
         "media": [
           "application/octet-stream"
         ]
+      }
+    },
+    {
+      "endpoint": "GET /blood/units",
+      "summary": "The blood stock",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "blood.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of blood.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "ot_nurse",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "InStock",
+                  "Reserved",
+                  "Issued",
+                  "Transfused",
+                  "Discarded",
+                  "ReturnedToSource"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "component",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "WholeBlood",
+                  "RedCells",
+                  "FreshFrozenPlasma",
+                  "Cryoprecipitate",
+                  "Platelets"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Component"
+          }
+        },
+        {
+          "name": "abo",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "A",
+                  "B",
+                  "AB",
+                  "O"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abo"
+          }
+        },
+        {
+          "name": "rh",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Positive",
+                  "Negative"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rh"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "default": 200,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "before_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_BloodUnitOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 200,
+            "minimum": 1,
+            "maximum": 1000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "InStock",
+              "Reserved",
+              "Issued",
+              "Transfused",
+              "Discarded",
+              "ReturnedToSource"
+            ]
+          },
+          {
+            "name": "component",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "WholeBlood",
+              "RedCells",
+              "FreshFrozenPlasma",
+              "Cryoprecipitate",
+              "Platelets"
+            ]
+          },
+          {
+            "name": "abo",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "AB",
+              "O"
+            ]
+          },
+          {
+            "name": "rh",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Positive",
+              "Negative"
+            ]
+          },
+          {
+            "name": "before_id",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
       }
     },
     {
@@ -6393,6 +6673,45 @@
         "every screen"
       ],
       "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "unit_id",
+      "source": "this_screen",
+      "call": "GET /blood/units",
+      "field": "unit_id",
+      "used_by": [
+        "GET /blood/units/{unit_id}"
+      ]
+    },
+    {
+      "id": "transfusion_id",
+      "source": "this_screen",
+      "call": "GET /blood/units/{unit_id}",
+      "field": "transfusion_id",
+      "used_by": [
+        "GET /blood/transfusions/{transfusion_id}"
+      ]
+    },
+    {
+      "id": "reaction_id",
+      "source": "this_screen",
+      "call": "GET /blood/transfusions/{transfusion_id}",
+      "field": "reaction_id",
+      "used_by": [
+        "POST /blood/reactions/{reaction_id}/recheck",
+        "GET /blood/reactions/{reaction_id}/pdf"
+      ]
+    },
+    {
+      "id": "incident_id",
+      "source": "this_screen",
+      "call": "GET /blood/transfusions/{transfusion_id}",
+      "field": "incident_id",
+      "used_by": [
+        "GET /incidents/{incident_id}"
+      ]
     }
   ]
 }

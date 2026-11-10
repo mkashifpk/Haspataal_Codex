@@ -1,6 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
 import * as adr from "../generated/adr_report";
-import { listIncidents } from "../generated/incident_register";
 import { Field, LoadState, useLoad, ErrorBox } from "../components";
 import { ApiError } from "../bridge";
 import { ClinicalWriteFeedback, useClinicalWrite } from "../clinical-write";
@@ -52,6 +51,7 @@ export function AdrReport({
   revision,
   timeZone,
   onOpenHelp,
+  entry,
 }: {
   user: ClinicalUser;
   connected: boolean;
@@ -60,8 +60,10 @@ export function AdrReport({
   revision: number;
   timeZone?: string;
   onOpenHelp: () => void;
+  entry?: { incidentId: number; drugId: number | null };
 }) {
-  const [selected, setSelected] = useState<number>();
+  const [selected, setSelected] = useState<number | undefined>(entry?.incidentId);
+  const [filters, setFilters] = useState<{ date_from?: string; date_to?: string; open_only?: boolean }>({});
   const [mode, setMode] = useState<"edit" | "send">();
   const [version, setVersion] = useState<number | null>();
   const [approved, setApproved] = useState(false),
@@ -72,21 +74,13 @@ export function AdrReport({
   const canRead = user.permissions.some((p) =>
     ["incident.view", "incident.manage"].includes(p),
   );
-  const canList =
-    canRead &&
-    user.permissions.some((p) =>
-      [
-        "incident.view",
-        "incident.report",
-        "ot.clinical_statistics.view",
-      ].includes(p),
-    );
+  const canList = user.permissions.includes("incident.view");
   const incidents = useLoad(
     () =>
       canList
-        ? listIncidents({ type_code: adrType, limit: 500 })
+        ? adr.listIncidents({ ...filters, type_code: adrType, limit: 500 })
         : Promise.resolve([]),
-    [canList, revision],
+    [canList, filters, revision],
   );
   const incident = useLoad(
     () =>
@@ -112,7 +106,8 @@ export function AdrReport({
   const canReadStock = user.permissions.some((p) =>
     ["pharmacy.formulary.view", "pharmacy.stock.view"].includes(p),
   );
-  const drug = sourceIncident?.drug_id;
+  const listedIncident = incidents.data?.find(row => row.incident_id === selected && row.type_code === adrType);
+  const drug = listedIncident?.drug_id ?? (entry?.incidentId === selected ? entry?.drugId : undefined);
   const stock = useLoad(
     () =>
       mode === "edit" && batchKind === "stock" && canReadStock && drug
@@ -267,6 +262,26 @@ export function AdrReport({
         )}
         onHelp={onOpenHelp}
       />
+      {canList && <form className="toolbar" onSubmit={event => {
+        event.preventDefault();
+        if (mode || write.blocked) return;
+        const fields = new FormData(event.currentTarget);
+        const date_from = String(fields.get("date_from") ?? "");
+        const date_to = String(fields.get("date_to") ?? "");
+        if (date_from && date_to && date_from > date_to) {
+          setLocalError(Error(t("From must be on or before To.", "ابتدا انتہا کے برابر یا پہلے ہو۔")));
+          return;
+        }
+        setLocalError(undefined);
+        setSelected(undefined);
+        setFilters({ date_from: date_from || undefined, date_to: date_to || undefined, open_only: fields.has("open_only") });
+      }}>
+        <Field label={t("From", "ابتدا")}><input type="date" name="date_from" data-help="adr.source" disabled={!!mode || write.blocked} /></Field>
+        <Field label={t("To", "انتہا")}><input type="date" name="date_to" data-help="adr.source" disabled={!!mode || write.blocked} /></Field>
+        <label className="check"><input type="checkbox" name="open_only" data-help="adr.source" disabled={!!mode || write.blocked} />{t("Open incidents only", "صرف کھلے واقعات")}</label>
+        <button data-help="adr.source" disabled={!connected || !!mode || write.blocked}>{t("Apply ADR filters", "ردعمل فلٹر لگائیں")}</button>
+      </form>}
+      {!mode && <ErrorBox error={localError} />}
       <LoadState {...incidents} retry={() => void incidents.reload()} />
       {canList && !incidents.loading && !incidents.error && (
         <Field label={t("ADR incident", "دوا ردعمل واقعہ")}>
@@ -281,6 +296,7 @@ export function AdrReport({
             <option value="">
               {t("Choose the incident number", "واقعہ نمبر چنیں")}
             </option>
+            {sourceIncident && !listedIncident && <option value={sourceIncident.incident_id}>{sourceIncident.incident_number} · {sourceIncident.type_name}</option>}
             {incidents.data
               ?.filter((x) => x.type_code === adrType)
               .map((x) => (

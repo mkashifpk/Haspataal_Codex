@@ -1,3 +1,5 @@
+import { LoadState, useLoad } from "../components";
+import { bilingual as t } from "../i18n";
 import {canReadDirectory} from "../DirectoryPicker";
 import {DirectoryPicker} from "../DirectoryPicker";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
@@ -17,6 +19,7 @@ import {
   feed as fetchFacilityFeed,
   lookupStaff,
   markCleaned,
+  bedMatrix,
   clearStage,
   type WorkOrderListItemOut,
   type WorkOrderOut,
@@ -167,6 +170,12 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
   const [dischargeAdmissionId, setDischargeAdmissionId] = useState<string>("");
   const [dischargeStage, setDischargeStage] = useState<"BillingSettlement" | "NursingMARVerification" | "OpsCleaning" | "PharmacyClearance">("OpsCleaning");
   const [dischargeNote, setDischargeNote] = useState<string>("");
+  const matrix = useLoad(() => showCleanBedModal || showClearDischargeModal ? bedMatrix({include_beds:true}) : Promise.resolve(null), [showCleanBedModal, showClearDischargeModal]);
+  const matrixBeds = matrix.loading || matrix.error ? [] : matrix.data?.beds ?? [];
+  const cleaningBeds = matrixBeds.filter(bed => bed.current_state === "Cleaning" || bed.current_state === "Dirty");
+  const dischargeBeds = matrixBeds.filter(bed => bed.admission_id !== null && bed.admission_status === "DischargeInProgress");
+  const bedLabel = (wardId: number, bed: string) => [matrix.data?.wards.find(ward => ward.ward_id === wardId)?.name, bed].filter(Boolean).join(" · ");
+
 
   useEffect(() => {
     if (!capability.canClearDischarge || !canClearOpsDischargeStage(sessionInfo, dischargeStage)) {
@@ -429,7 +438,7 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
   const handleMarkCleanedSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const bedId = Number(cleanBedId);
-    if (!bedId) return;
+    if (!cleaningBeds.some(bed => bed.bed_id === bedId)) return;
     setSubmitting(true);
     try {
       const res = await markCleaned(bedId, {
@@ -455,7 +464,7 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
       return;
     }
     const admId = Number(dischargeAdmissionId);
-    if (!admId) return;
+    if (!dischargeBeds.some(bed => bed.admission_id === admId)) return;
     setSubmitting(true);
     try {
       await clearStage(admId, dischargeStage, { note: dischargeNote || null });
@@ -1610,16 +1619,14 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
             <h3 className="text-base font-bold text-slate-900 mb-2">Confirm Bed Cleaned</h3>
             <form onSubmit={handleMarkCleanedSubmit} className="space-y-3">
               <div>
-                <label className="block font-semibold mb-1">Bed ID *</label>
-                <input
-                  type="number"
-                  value={cleanBedId}
-                  onChange={(e) => setCleanBedId(e.target.value)}
-                  placeholder="e.g. 101"
-                  className="w-full px-3 py-1.5 border rounded"
-                  data-help="ops_console.input_clean_bed_id"
-                  required
-                />
+                <label className="block font-semibold mb-1">{t("Ward and bed", "وارڈ اور بستر")}</label>
+                <LoadState {...matrix} retry={matrix.reload} />
+                <select value={cleanBedId} onChange={e => setCleanBedId(e.target.value)} required
+                  className="w-full px-3 py-1.5 border rounded" data-help="ops_console.input_clean_bed_id"
+                  disabled={matrix.loading || Boolean(matrix.error)}>
+                  <option value="">{t("Choose a bed awaiting cleaning", "صفائی کا منتظر بستر چنیں")}</option>
+                  {cleaningBeds.map(bed => <option key={bed.bed_id} value={bed.bed_id ?? ""}>{bedLabel(bed.ward_id, bed.label)}</option>)}
+                </select>
               </div>
               <div>
                 <label className="block font-semibold mb-1">Housekeeping Staff ID (Optional)</label>
@@ -1660,16 +1667,14 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
             <h3 className="text-base font-bold text-slate-900 mb-2">Clear Discharge Stage</h3>
             <form onSubmit={handleClearDischargeSubmit} className="space-y-3">
               <div>
-                <label className="block font-semibold mb-1">Admission ID *</label>
-                <input
-                  type="number"
-                  value={dischargeAdmissionId}
-                  onChange={(e) => setDischargeAdmissionId(e.target.value)}
-                  placeholder="e.g. 1"
-                  className="w-full px-3 py-1.5 border rounded"
-                  data-help="ops_console.input_discharge_adm_id"
-                  required
-                />
+                <label className="block font-semibold mb-1">{t("Ward and bed", "وارڈ اور بستر")}</label>
+                <LoadState {...matrix} retry={matrix.reload} />
+                <select value={dischargeAdmissionId} onChange={e => setDischargeAdmissionId(e.target.value)} required
+                  className="w-full px-3 py-1.5 border rounded" data-help="ops_console.input_discharge_adm_id"
+                  disabled={matrix.loading || Boolean(matrix.error)}>
+                  <option value="">{t("Choose a bed with discharge in progress", "جاری ڈسچارج والا بستر چنیں")}</option>
+                  {dischargeBeds.map(bed => <option key={bed.bed_id} value={bed.admission_id ?? ""}>{bedLabel(bed.ward_id, bed.label)}</option>)}
+                </select>
               </div>
               <div>
                 <label className="block font-semibold mb-1">Clearance Stage</label>

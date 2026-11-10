@@ -3,7 +3,6 @@ import { idCard, whoami, type IdCardOut, type TerminalIdentityOut } from "../gen
 import {
   getIdCardCapabilityView,
   getCardPrinterStatus,
-  validateEmployeeIdInput,
   formatCardSize,
   ID_CARD_ERROR_MESSAGES,
 } from "../id-card-policy";
@@ -22,9 +21,9 @@ export interface IdCardProps {
 }
 
 export const IdCard: React.FC<IdCardProps> = ({
-  initialEmployeeId = 4,
+  initialEmployeeId,
   establishment,
-  permissions = ["hr.idcard.print"],
+  permissions = [],
   currentUser,
   onOpenHelp,
   onNavigateToStaff,
@@ -38,8 +37,7 @@ export const IdCard: React.FC<IdCardProps> = ({
   const canPrintPermission = permissions.includes("hr.idcard.print");
 
   // State management
-  const [employeeIdInput, setEmployeeIdInput] = useState<string>(String(initialEmployeeId || 4));
-  const [activeEmployeeId, setActiveEmployeeId] = useState<number | null>(initialEmployeeId || 4);
+  const [activeEmployeeId, setActiveEmployeeId] = useState<number | null>(initialEmployeeId ?? null);
   const [cardData, setCardData] = useState<IdCardOut | null>(null);
   const [loadingCard, setLoadingCard] = useState<boolean>(false);
   const [cardError, setCardError] = useState<string | null>(null);
@@ -110,23 +108,6 @@ export const IdCard: React.FC<IdCardProps> = ({
       void loadCardData(initialEmployeeId);
     }
   }, [loadTerminalIdentity, loadCardData, initialEmployeeId]);
-
-  // Handle employee search submit
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const validation = validateEmployeeIdInput(employeeIdInput);
-    if (!validation.valid || !validation.employeeId) {
-      setCardError(validation.errorEn || "Please enter a valid Employee ID.");
-      return;
-    }
-    void loadCardData(validation.employeeId);
-  };
-
-  // Quick switch employee
-  const handleQuickSelect = (empId: number) => {
-    setEmployeeIdInput(String(empId));
-    void loadCardData(empId);
-  };
 
   // Printer status analysis
   const printerStatus = useMemo(
@@ -292,58 +273,9 @@ export const IdCard: React.FC<IdCardProps> = ({
               <strong className="text-dark small text-uppercase">1. Staff Employee Lookup</strong>
             </div>
             <div className="card-body">
-              <form onSubmit={handleSearchSubmit}>
-                <div className="mb-2">
-                  <label htmlFor="emp-id-input" className="form-label small fw-semibold text-secondary">
-                    Staff Database ID (employee_id)
-                  </label>
-                  <div className="input-group">
-                    <input
-                      id="emp-id-input"
-                      type="number"
-                      min="1"
-                      className="form-control"
-                      placeholder="e.g. 4"
-                      value={employeeIdInput}
-                      onChange={(e) => setEmployeeIdInput(e.target.value)}
-                      disabled={loadingCard}
-                      data-help="id_card.input_employee_id"
-                    />
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                      disabled={loadingCard}
-                      data-help="id_card.btn_load_card"
-                    >
-                      {loadingCard ? "Loading..." : "Load Card"}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mt-2">
-                  <div className="small text-muted mb-1">Quick Select Demo Staff:</div>
-                  <div className="d-flex gap-2">
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={() => handleQuickSelect(4)}
-                      disabled={loadingCard}
-                      data-help="id_card.btn_quick_emp_4"
-                    >
-                      Staff Nurse #4
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={() => handleQuickSelect(1)}
-                      disabled={loadingCard}
-                      data-help="id_card.btn_quick_emp_1"
-                    >
-                      Employee #1
-                    </button>
-                  </div>
-                </div>
-              </form>
+              <button type="button" data-help="id_card.btn_load_card" onClick={() => onNavigateToStaff?.()}>
+                Choose staff member / ملازم چنیں
+              </button>
             </div>
           </div>
 
