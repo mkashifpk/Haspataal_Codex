@@ -15,7 +15,7 @@ Live server build `2026-11-09T17:10:47.430848+00:00`, contract `257cc319fed31b6e
 
 ## Next actions
 
-Commit the verified implementation and submit two separate proposals for tested items. Verify receipts and record IDs here. Then continue P9B 202 `record_review_report` (Quality), followed by 203 `record_review_overview` (Owner). Both roadmap entries have been read. Read complete current bundles, design/UI/workspace briefs and test plans before implementation. Use cycle 2's real open findings for the report read path. Verify closure only after appropriately addressing all remaining synthetic findings. Earlier Home Visits 187 remains hidden on DEV pending authorized exposed history. Previous checkpoints are preserved in Git and under docs.
+Implementation commit 22030f2. Proposals 400 (Doctor) and 401 (Head Nurse) were saved and verified pending, awaiting human review on /docs -> My progress. Continue P9B 202 `record_review_report` (Quality), followed by 203 `record_review_overview` (Owner). Both roadmap entries have been read. Read complete current bundles, design/UI/workspace briefs and test plans before implementation. Use cycle 2's real open findings for the report read path. Verify closure only after appropriately addressing all remaining synthetic findings. Earlier Home Visits 187 remains hidden on DEV pending authorized exposed history. Previous checkpoints are preserved in Git and under docs.
 
 ## Environment
 

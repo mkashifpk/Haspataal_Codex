@@ -19,3 +19,4 @@ Cycle 2 remains InReview with four Open synthetic findings (2, 3, 4 and 6). Defi
 Next in P9B is screen 202, Review report, deficiencies & actions (Quality), followed by 203, Medical record review (Owner). The existing cycle is useful for the report’s open-findings journey. Read the current report and overview bundles before extending it. To test closure, use only a truthful action and documented resolution for each synthetic finding under the new screen’s contract.
 
 Final npm.cmd run build passed full handbook coverage for 200 screens, TypeScript and the DEV bundle. Final npm.cmd test passed 873 of 873. The build emitted the exact renderer used in both live journeys.
+Separate proposals 400 and 401 were verified pending, awaiting human review on /docs -> My progress. See proposals-verified.json.
