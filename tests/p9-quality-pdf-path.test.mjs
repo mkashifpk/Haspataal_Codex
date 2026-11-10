@@ -7,6 +7,11 @@ test('Quality PDFs admit only documented paths and canonical date queries',()=>{
   assert(!allowed('/consent-policy/pdf?scope=all'));
   assert(allowed('/incidents/8/adr-report/pdf'));
   assert(allowed('/blood/reactions/17/pdf'));
+  for (const p of ['/tariff/pricing-policy/pdf', '/tariff/pdf', '/medication-safety/policy/pdf']) {
+    assert(allowed(p));
+    assert(!allowed(p + '?scope=all'));
+    assert(!allowed(p + '/extra'));
+  }
   assert(allowed('/quality/record-reviews/2/report/pdf'));
   for (const p of ['/quality/record-reviews/0/report/pdf', '/quality/record-reviews/02/report/pdf', '/quality/record-reviews/2/report/pdf?x=1', '/quality/record-reviews/2/report/pdf/extra']) assert(!allowed(p));
   assert(allowed('/maternity/labour-register/pdf?date_from=2026-11-01&date_to=2026-11-09'));

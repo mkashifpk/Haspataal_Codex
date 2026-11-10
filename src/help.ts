@@ -10,6 +10,176 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  diagnostic_correlation: {
+    title: "Diagnostic correlation review",
+    titleUr: "تشخیصی مطابقت کا جائزہ",
+    purpose: "Choose the hospital period and source. In history, filter by outcome and read the reviewer and date.",
+    purposeUr: "ہسپتال مدت اور ماخذ چنیں۔ تاریخ میں نتیجہ چھانٹیں اور جائزہ لینے والا اور تاریخ پڑھیں۔",
+    steps: [
+      "Choose the hospital period and source. In history, filter by outcome and read the reviewer and date.",
+      "Pick an unreviewed report or choose Review again. Verify the patient and examination, enter the clinical diagnosis and outcome, and add a note for any outcome other than Correlates. Confirm once. A later review adds a new entry. Not assessable results are excluded from the indicator."
+    ],
+    stepsUr: [
+      "ہسپتال مدت اور ماخذ چنیں۔ تاریخ میں نتیجہ چھانٹیں اور جائزہ لینے والا اور تاریخ پڑھیں۔",
+      "غیر جائزہ شدہ رپورٹ یا دوبارہ جائزہ چنیں۔ مریض اور معائنہ چیک کریں، تشخیص اور نتیجہ درج کریں، اور مطابقت کے علاوہ ہر نتیجے پر نوٹ دیں۔ ایک بار تصدیق کریں۔ اگلا جائزہ نیا اندراج ہے۔ ناقابل جائزہ نتائج اشاریے سے خارج ہیں۔"
+    ],
+    faq: [
+      [
+        "Filter reports and reviews",
+        "Choose the hospital period and source. In history, filter by outcome and read the reviewer and date."
+      ],
+      [
+        "Append a correlation review",
+        "Pick an unreviewed report or choose Review again. Verify the patient and examination, enter the clinical diagnosis and outcome, and add a note for any outcome other than Correlates. Confirm once. A later review adds a new entry. Not assessable results are excluded from the indicator."
+      ]
+    ],
+    faqUr: [
+      [
+        "رپورٹس اور جائزے چھانٹیں",
+        "ہسپتال مدت اور ماخذ چنیں۔ تاریخ میں نتیجہ چھانٹیں اور جائزہ لینے والا اور تاریخ پڑھیں۔"
+      ],
+      [
+        "مطابقت جائزہ شامل کریں",
+        "غیر جائزہ شدہ رپورٹ یا دوبارہ جائزہ چنیں۔ مریض اور معائنہ چیک کریں، تشخیص اور نتیجہ درج کریں، اور مطابقت کے علاوہ ہر نتیجے پر نوٹ دیں۔ ایک بار تصدیق کریں۔ اگلا جائزہ نیا اندراج ہے۔ ناقابل جائزہ نتائج اشاریے سے خارج ہیں۔"
+      ]
+    ]
+  },
+  medication_statistics: {
+    title: "Medication safety statistics",
+    titleUr: "ادویات حفاظت کے اعداد",
+    purpose: "Choose the hospital period. Read the dose checks, variances, queries, MSDS denominators and recall durations. Open the high-alert, restricted and LASA reference lists and the permitted policy PDF.",
+    purposeUr: "ہسپتال مدت چنیں۔ خوراک جانچ، انحراف، سوالات، ایم ایس ڈی ایس مخرج اور واپسی مدت پڑھیں۔ ہائی الرٹ، محدود اور ملتے جلتے ناموں کی فہرستیں اور مجاز پالیسی پی ڈی ایف کھولیں۔",
+    steps: [
+      "Choose the hospital period. Read the dose checks, variances, queries, MSDS denominators and recall durations. Open the high-alert, restricted and LASA reference lists and the permitted policy PDF.",
+      "Open its recall number from the register and check batches, remaining ward stock and patient follow-up. Follow the designated recall workflow for any clinical action."
+    ],
+    stepsUr: [
+      "ہسپتال مدت چنیں۔ خوراک جانچ، انحراف، سوالات، ایم ایس ڈی ایس مخرج اور واپسی مدت پڑھیں۔ ہائی الرٹ، محدود اور ملتے جلتے ناموں کی فہرستیں اور مجاز پالیسی پی ڈی ایف کھولیں۔",
+      "رجسٹر میں واپسی نمبر کھولیں اور بیچ، باقی وارڈ اسٹاک اور مریض پیروی چیک کریں۔ طبی کارروائی کے لیے واپسی کا مقررہ طریقہ استعمال کریں۔"
+    ],
+    faq: [
+      [
+        "Read medication safety measures",
+        "Choose the hospital period. Read the dose checks, variances, queries, MSDS denominators and recall durations. Open the high-alert, restricted and LASA reference lists and the permitted policy PDF."
+      ],
+      [
+        "Open a medication recall",
+        "Open its recall number from the register and check batches, remaining ward stock and patient follow-up. Follow the designated recall workflow for any clinical action."
+      ]
+    ],
+    faqUr: [
+      [
+        "ادویات حفاظت کی پیمائش پڑھیں",
+        "ہسپتال مدت چنیں۔ خوراک جانچ، انحراف، سوالات، ایم ایس ڈی ایس مخرج اور واپسی مدت پڑھیں۔ ہائی الرٹ، محدود اور ملتے جلتے ناموں کی فہرستیں اور مجاز پالیسی پی ڈی ایف کھولیں۔"
+      ],
+      [
+        "دوا واپسی کھولیں",
+        "رجسٹر میں واپسی نمبر کھولیں اور بیچ، باقی وارڈ اسٹاک اور مریض پیروی چیک کریں۔ طبی کارروائی کے لیے واپسی کا مقررہ طریقہ استعمال کریں۔"
+      ]
+    ]
+  },
+  estimate_statistics: {
+    title: "Cost estimates: statistics and the pricing policy",
+    titleUr: "لاگت تخمینے: اعداد اور قیمت پالیسی",
+    purpose: "Choose a hospital period. Check the explanation target and accuracy threshold, including the underlying counts. Read overdue entries in the estimate worklist.",
+    purposeUr: "ہسپتال مدت چنیں۔ اصل تعداد، وضاحت کا ہدف اور درستگی کی حد دیکھیں۔ تخمینہ فہرست میں تاخیر والے اندراج پڑھیں۔",
+    steps: [
+      "Choose a hospital period. Check the explanation target and accuracy threshold, including the underlying counts. Read overdue entries in the estimate worklist.",
+      "Use the PDF preference for separate pricing policy and tariff documents, or one combined PDF. Confirm the save location and print the saved file when needed."
+    ],
+    stepsUr: [
+      "ہسپتال مدت چنیں۔ اصل تعداد، وضاحت کا ہدف اور درستگی کی حد دیکھیں۔ تخمینہ فہرست میں تاخیر والے اندراج پڑھیں۔",
+      "پی ڈی ایف ترجیح سے قیمت پالیسی اور نرخ نامہ الگ یا ایک مشترکہ پی ڈی ایف محفوظ کریں۔ جگہ کی تصدیق کریں اور ضرورت پر محفوظ فائل پرنٹ کریں۔"
+    ],
+    faq: [
+      [
+        "Review estimate coverage",
+        "Choose a hospital period. Check the explanation target and accuracy threshold, including the underlying counts. Read overdue entries in the estimate worklist."
+      ],
+      [
+        "Save estimate documents",
+        "Use the PDF preference for separate pricing policy and tariff documents, or one combined PDF. Confirm the save location and print the saved file when needed."
+      ]
+    ],
+    faqUr: [
+      [
+        "تخمینہ کوریج پڑھیں",
+        "ہسپتال مدت چنیں۔ اصل تعداد، وضاحت کا ہدف اور درستگی کی حد دیکھیں۔ تخمینہ فہرست میں تاخیر والے اندراج پڑھیں۔"
+      ],
+      [
+        "تخمینہ دستاویزات محفوظ کریں",
+        "پی ڈی ایف ترجیح سے قیمت پالیسی اور نرخ نامہ الگ یا ایک مشترکہ پی ڈی ایف محفوظ کریں۔ جگہ کی تصدیق کریں اور ضرورت پر محفوظ فائل پرنٹ کریں۔"
+      ]
+    ]
+  },
+  surgical_statistics: {
+    title: "Surgical care statistics",
+    titleUr: "جراحی نگہداشت کے اعداد",
+    purpose: "Choose the hospital period. Check the numerator, denominator and rate for each MSDS measure, plus the chart gap threshold and surgeon and theatre breakdowns.",
+    purposeUr: "ہسپتال مدت چنیں۔ ہر ایم ایس ڈی ایس پیمائش کا شمار، مخرج اور شرح، چارٹ وقفے کی حد اور سرجن و تھیٹر کی تفصیل دیکھیں۔",
+    steps: [
+      "Choose the hospital period. Check the numerator, denominator and rate for each MSDS measure, plus the chart gap threshold and surgeon and theatre breakdowns.",
+      "Choose Surgery or Anaesthesia. The open list shows current incidents. The summary above reflects the selected reporting period."
+    ],
+    stepsUr: [
+      "ہسپتال مدت چنیں۔ ہر ایم ایس ڈی ایس پیمائش کا شمار، مخرج اور شرح، چارٹ وقفے کی حد اور سرجن و تھیٹر کی تفصیل دیکھیں۔",
+      "جراحی یا بے ہوشی چنیں۔ کھلی فہرست موجودہ واقعات دکھاتی ہے۔ اوپر کا خلاصہ منتخب رپورٹ مدت کا ہے۔"
+    ],
+    faq: [
+      [
+        "Read theatre and recovery measures",
+        "Choose the hospital period. Check the numerator, denominator and rate for each MSDS measure, plus the chart gap threshold and surgeon and theatre breakdowns."
+      ],
+      [
+        "Review open adverse events",
+        "Choose Surgery or Anaesthesia. The open list shows current incidents. The summary above reflects the selected reporting period."
+      ]
+    ],
+    faqUr: [
+      [
+        "تھیٹر اور بحالی کی پیمائش پڑھیں",
+        "ہسپتال مدت چنیں۔ ہر ایم ایس ڈی ایس پیمائش کا شمار، مخرج اور شرح، چارٹ وقفے کی حد اور سرجن و تھیٹر کی تفصیل دیکھیں۔"
+      ],
+      [
+        "کھلے منفی واقعات دیکھیں",
+        "جراحی یا بے ہوشی چنیں۔ کھلی فہرست موجودہ واقعات دکھاتی ہے۔ اوپر کا خلاصہ منتخب رپورٹ مدت کا ہے۔"
+      ]
+    ]
+  },
+  surgical_statistics_owner: {
+    title: "Surgical care statistics",
+    titleUr: "جراحی نگہداشت کے اعداد",
+    purpose: "Choose the hospital period. Check the numerator, denominator and rate for each MSDS measure, plus the chart gap threshold and surgeon and theatre breakdowns.",
+    purposeUr: "ہسپتال مدت چنیں۔ ہر ایم ایس ڈی ایس پیمائش کا شمار، مخرج اور شرح، چارٹ وقفے کی حد اور سرجن و تھیٹر کی تفصیل دیکھیں۔",
+    steps: [
+      "Choose the hospital period. Check the numerator, denominator and rate for each MSDS measure, plus the chart gap threshold and surgeon and theatre breakdowns.",
+      "Choose Surgery or Anaesthesia. The open list shows current incidents. The summary above reflects the selected reporting period."
+    ],
+    stepsUr: [
+      "ہسپتال مدت چنیں۔ ہر ایم ایس ڈی ایس پیمائش کا شمار، مخرج اور شرح، چارٹ وقفے کی حد اور سرجن و تھیٹر کی تفصیل دیکھیں۔",
+      "جراحی یا بے ہوشی چنیں۔ کھلی فہرست موجودہ واقعات دکھاتی ہے۔ اوپر کا خلاصہ منتخب رپورٹ مدت کا ہے۔"
+    ],
+    faq: [
+      [
+        "Read theatre and recovery measures",
+        "Choose the hospital period. Check the numerator, denominator and rate for each MSDS measure, plus the chart gap threshold and surgeon and theatre breakdowns."
+      ],
+      [
+        "Review open adverse events",
+        "Choose Surgery or Anaesthesia. The open list shows current incidents. The summary above reflects the selected reporting period."
+      ]
+    ],
+    faqUr: [
+      [
+        "تھیٹر اور بحالی کی پیمائش پڑھیں",
+        "ہسپتال مدت چنیں۔ ہر ایم ایس ڈی ایس پیمائش کا شمار، مخرج اور شرح، چارٹ وقفے کی حد اور سرجن و تھیٹر کی تفصیل دیکھیں۔"
+      ],
+      [
+        "کھلے منفی واقعات دیکھیں",
+        "جراحی یا بے ہوشی چنیں۔ کھلی فہرست موجودہ واقعات دکھاتی ہے۔ اوپر کا خلاصہ منتخب رپورٹ مدت کا ہے۔"
+      ]
+    ]
+  },
   lab_quality: {
     title: "Diagnostic services quality (MSDS)",
     titleUr: "تشخیصی خدمات کا معیار (ایم ایس ڈی ایس)",

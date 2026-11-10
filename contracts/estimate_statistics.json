@@ -1,0 +1,224 @@
+{
+  "screen": {
+    "id": "estimate_statistics",
+    "workspace": "owner_dashboard",
+    "title": "Cost estimates: statistics and the pricing policy",
+    "purpose": "Were patients told their costs in time, and were the estimates close to the bills?",
+    "workflow": "MSDS PRE 76-79",
+    "rule_objects": [
+      {
+        "id": "rule:7bce258cc7",
+        "text": "Tiles: explained_in_time_pct (PRE 78), ward_changes_explained_pct (PRE 79), bills_within_accuracy_pct; print the pricing policy for approval.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "cost-estimates-and-tariff"
+    ]
+  },
+  "definition_of_done": {
+    "points": 41,
+    "items": [
+      {
+        "id": "ep:GET /cost-estimates/statistics",
+        "label": "GET /cost-estimates/statistics",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /tariff/pricing-policy/pdf",
+        "label": "GET /tariff/pricing-policy/pdf",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /tariff/pdf",
+        "label": "GET /tariff/pdf",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /cost-estimates/worklist",
+        "label": "GET /cost-estimates/worklist",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:7bce258cc7",
+        "label": "Tiles: explained_in_time_pct (PRE 78), ward_changes_explained_pct (PRE 79), bills_within_accuracy_pct; print the pricing policy for approval.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /cost-estimates/statistics",
+      "summary": "Estimate statistics",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "estimate.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of estimate.view",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /tariff/pricing-policy/pdf",
+      "summary": "The uniform pricing policy (PDF)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "estimate.view",
+          "estimate.prepare"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of estimate.view or estimate.prepare",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /tariff/pdf",
+      "summary": "The tariff to print and display (PDF)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /cost-estimates/worklist",
+      "summary": "Estimates to explain: new admissions and changes of ward",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "estimate.view",
+          "estimate.prepare",
+          "estimate.explain"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of estimate.view or estimate.prepare or estimate.explain",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ]
+      },
+      "service_gates": []
+    }
+  ],
+  "id_sources": [],
+  "realtime": {
+    "topics": [
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "contract_fingerprint": "257cc319fed31b6ed2ac"
+}

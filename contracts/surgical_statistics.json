@@ -1,0 +1,227 @@
+{
+  "screen": {
+    "id": "surgical_statistics",
+    "workspace": "quality",
+    "title": "Surgical care statistics",
+    "purpose": "What the surveyor samples in surgical records, counted over every operation of the period, and the adverse events per surgeon and theatre.",
+    "workflow": "MSDS COP 32-50, IMS 150",
+    "rule_objects": [
+      {
+        "id": "rule:66f90b7aa5",
+        "text": "Default period: this month so far. One row per `measures` item: label, the MSDS reference, met / applicable and the percentage (red below 100: the surveyor scores 'not met' for one bad record).",
+        "cites": []
+      },
+      {
+        "id": "rule:8598941e65",
+        "text": "Tiles: operations, with an anaesthetist, adverse events (open now). Tables `by_surgeon` and `by_theatre` for the surgical quality committee (MSDS 45, 48).",
+        "cites": [
+          "MSDS 45"
+        ]
+      },
+      {
+        "id": "rule:17bdef417c",
+        "text": "Exists for the service surgery (records): show it as GET /establishment views.screens says for screen_id surgical_statistics (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "incidents-and-sentinel-events",
+      "surgical-care"
+    ],
+    "service": {
+      "services": [
+        "surgery"
+      ],
+      "role": "records",
+      "views": {
+        "full": "Show it; every action the user's permissions allow.",
+        "open_work": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting).",
+        "records": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work.",
+        "setup": "Not in the daily menus: reach it from Facility settings (a preview's prerequisites link to it) to set the service up before switching it on.",
+        "hidden": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      },
+      "how": "GET /establishment after login and on establishment.changed: views.screens gives this screen's view (one frontend build for every profile; never decide it from the profile's category)"
+    }
+  },
+  "definition_of_done": {
+    "points": 39,
+    "items": [
+      {
+        "id": "ep:GET /ot/clinical-statistics",
+        "label": "GET /ot/clinical-statistics",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /incidents",
+        "label": "GET /incidents",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:66f90b7aa5",
+        "label": "Default period: this month so far. One row per `measures` item: label, the MSDS reference, met / applicable and the percentage (red below 100: the surveyor scores 'not met' for one bad record).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:8598941e65",
+        "label": "Tiles: operations, with an anaesthetist, adverse events (open now). Tables `by_surgeon` and `by_theatre` for the surgical quality committee (MSDS 45, 48).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:17bdef417c",
+        "label": "Exists for the service surgery (records): show it as GET /establishment views.screens says for screen_id surgical_statistics (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /ot/clinical-statistics",
+      "summary": "Surgical care statistics",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ot.clinical_statistics.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of ot.clinical_statistics.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "ot_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /incidents",
+      "summary": "The incident register",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "incident.view",
+          "incident.report",
+          "ot.clinical_statistics.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of incident.view or incident.report or ot.clinical_statistics.view",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ]
+      },
+      "service_gates": []
+    }
+  ],
+  "id_sources": [],
+  "realtime": {
+    "topics": [
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "contract_fingerprint": "257cc319fed31b6ed2ac"
+}

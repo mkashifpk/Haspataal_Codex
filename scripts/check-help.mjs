@@ -333,6 +333,7 @@ export function checkHelp({
       "IcdReports",
       "EmergencyReports",
       "DiagnosticsQuality",
+      "FinalClinicalReports",
 
       "ConsentRegister",
       "ConsentPolicySetup",

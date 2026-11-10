@@ -1225,11 +1225,12 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       // authorised metadata read. Normal api calls keep their window's scope.
       return await api("GET", "/meta/handbook", undefined, undefined);
     }
-    if (action === "diagnostic-pdf-pack") {
+    if (action === "diagnostic-pdf-pack" || action === "estimate-pdf-pack") {
       const paths=args.paths;
-      const {isDiagnosticPdfPath}=require("./p9-quality-pdf-path.cjs");
-      if(!Array.isArray(paths)||paths.length<1||paths.length>5||new Set(paths).size!==paths.length||!paths.every(isDiagnosticPdfPath))
-        throw new Error("Invalid diagnostic PDF set");
+      const estimates=action==="estimate-pdf-pack";
+      const {isDiagnosticPdfPath,isEstimatePdfPath}=require("./p9-quality-pdf-path.cjs");
+      if(!Array.isArray(paths)||paths.length<1||paths.length>(estimates?2:5)||new Set(paths).size!==paths.length||!paths.every(estimates?isEstimatePdfPath:isDiagnosticPdfPath))
+        throw new Error("Invalid report PDF set");
       const operations=paths.map(path=>matchOperation("GET",path));
       if(!auth||operations.some(op=>!op||!permissionAllows(op,auth.user)))throw new Error("You do not have permission to download every document in this set");
       if(Date.now()>auth.expires-60000)await refresh();
@@ -1252,7 +1253,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       }
       const bytes=await pack.save();
       verifySession();
-      const selected=await dialog.showSaveDialog(win,{defaultPath:"Diagnostic-quality-documents.pdf",filters:[{name:"PDF",extensions:["pdf"]}]});
+      const selected=await dialog.showSaveDialog(win,{defaultPath:estimates?"Estimate-pricing-documents.pdf":"Diagnostic-quality-documents.pdf",filters:[{name:"PDF",extensions:["pdf"]}]});
       verifySession();
       if(!selected.canceled)fs.writeFileSync(selected.filePath,bytes);
       return {ok:true,data:{saved:!selected.canceled}};
