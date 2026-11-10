@@ -329,6 +329,7 @@ export function checkHelp({
       "RecordReviewCycles",
       "RecordReviewReport",
       "MortalityRegister",
+      "MedicoLegalRegister",
 
       "ConsentRegister",
       "ConsentPolicySetup",

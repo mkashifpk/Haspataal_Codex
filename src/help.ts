@@ -10,6 +10,94 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  mlc_register: {
+    title: "Medico-legal register & setup",
+    titleUr: "میڈیکو لیگل رجسٹر اور ترتیبات",
+    purpose: "Owner reads the medico-legal register and maintains the hospital contact directory.",
+    purposeUr: "مالک رجسٹر پڑھتا اور ہسپتال رابطہ فہرست برقرار رکھتا ہے۔",
+    steps: [
+      "Read the register and overdue cases. Apply the hospital date range. Select status, case type, police station or Overdue police intimation only. Quality starts with open cases and overdue cases are first.",
+      "Open the exact case. Match the MLC number and MRN. Read the recorded history, examination, police intimation, report, evidence handover and closure. Keep the register in authorized hospital review.",
+      "Maintain the SOP and contact directories. Add unique uppercase case codes and named contacts. Police stations, designated hospitals and emergency/referral services are separate contact types. Retire an entry by clearing Active; existing records keep their links. If a write reply is lost, check the exact existing record or use the original key where available.",
+      "Read and print the authorized intimation. Read the exact case’s police intimation payload, check identity, then print the isolated document. For the public directory preview or save the separate contact display PDF."
+    ],
+    stepsUr: [
+      "رجسٹر اور تاخیر شدہ مقدمات پڑھیں۔ ہسپتال کی تاریخیں لگائیں۔ حالت، قسم، تھانہ یا صرف تاخیر شدہ پولیس اطلاع چنیں۔ کوالٹی کھلے مقدمات سے شروع کرتی ہے اور تاخیر والے پہلے ہیں۔",
+      "عین مقدمہ کھولیں۔ میڈیکو لیگل نمبر اور ایم آر این ملائیں۔ درج تاریخ، معائنہ، پولیس اطلاع، رپورٹ، شواہد کی حوالگی اور بندش پڑھیں۔ رجسٹر مجاز ہسپتال جائزے تک رکھیں۔",
+      "ایس او پی اور رابطہ فہرست برقرار رکھیں۔ منفرد بڑے حروف کے کوڈ اور نام والے رابطے شامل کریں۔ تھانے، مقررہ ہسپتال اور ایمرجنسی/ریفرل الگ اقسام ہیں۔ فعال نشان ہٹا کر اندراج غیر فعال کریں؛ موجودہ ربط برقرار رہتے ہیں۔ جواب گم ہو تو اصل اندراج چیک کریں یا دستیاب اصل کلید استعمال کریں۔",
+      "مجاز اطلاع پڑھیں اور پرنٹ کریں۔ عین مقدمے کی پولیس اطلاع پڑھیں، شناخت چیک کریں، پھر الگ دستاویز پرنٹ کریں۔ عوامی فہرست کے لیے رابطہ نمائش پی ڈی ایف الگ دیکھیں یا محفوظ کریں۔"
+    ],
+    faq: [
+      [
+        "Read the register and overdue cases",
+        "Apply the hospital date range. Select status, case type, police station or Overdue police intimation only. Quality starts with open cases and overdue cases are first."
+      ],
+      [
+        "Open the exact case",
+        "Match the MLC number and MRN. Read the recorded history, examination, police intimation, report, evidence handover and closure. Keep the register in authorized hospital review."
+      ],
+      [
+        "Maintain the SOP and contact directories",
+        "Add unique uppercase case codes and named contacts. Police stations, designated hospitals and emergency/referral services are separate contact types. Retire an entry by clearing Active; existing records keep their links. If a write reply is lost, check the exact existing record or use the original key where available."
+      ],
+      [
+        "Read and print the authorized intimation",
+        "Read the exact case’s police intimation payload, check identity, then print the isolated document. For the public directory preview or save the separate contact display PDF."
+      ]
+    ],
+    faqUr: [
+      [
+        "رجسٹر اور تاخیر شدہ مقدمات پڑھیں",
+        "ہسپتال کی تاریخیں لگائیں۔ حالت، قسم، تھانہ یا صرف تاخیر شدہ پولیس اطلاع چنیں۔ کوالٹی کھلے مقدمات سے شروع کرتی ہے اور تاخیر والے پہلے ہیں۔"
+      ],
+      [
+        "عین مقدمہ کھولیں",
+        "میڈیکو لیگل نمبر اور ایم آر این ملائیں۔ درج تاریخ، معائنہ، پولیس اطلاع، رپورٹ، شواہد کی حوالگی اور بندش پڑھیں۔ رجسٹر مجاز ہسپتال جائزے تک رکھیں۔"
+      ],
+      [
+        "ایس او پی اور رابطہ فہرست برقرار رکھیں",
+        "منفرد بڑے حروف کے کوڈ اور نام والے رابطے شامل کریں۔ تھانے، مقررہ ہسپتال اور ایمرجنسی/ریفرل الگ اقسام ہیں۔ فعال نشان ہٹا کر اندراج غیر فعال کریں؛ موجودہ ربط برقرار رہتے ہیں۔ جواب گم ہو تو اصل اندراج چیک کریں یا دستیاب اصل کلید استعمال کریں۔"
+      ],
+      [
+        "مجاز اطلاع پڑھیں اور پرنٹ کریں",
+        "عین مقدمے کی پولیس اطلاع پڑھیں، شناخت چیک کریں، پھر الگ دستاویز پرنٹ کریں۔ عوامی فہرست کے لیے رابطہ نمائش پی ڈی ایف الگ دیکھیں یا محفوظ کریں۔"
+      ]
+    ]
+  },
+  mlc_register_quality: {
+    title: "Medico-legal register",
+    titleUr: "میڈیکو لیگل رجسٹر",
+    purpose: "Quality inspects open medico-legal records and delayed police intimation.",
+    purposeUr: "کوالٹی کھلے میڈیکو لیگل ریکارڈ اور تاخیر شدہ پولیس اطلاع کا جائزہ لیتی ہے۔",
+    steps: [
+      "Read the register and overdue cases. Apply the hospital date range. Select status, case type, police station or Overdue police intimation only. Quality starts with open cases and overdue cases are first.",
+      "Open the exact case. Match the MLC number and MRN. Read the recorded history, examination, police intimation, report, evidence handover and closure. Keep the register in authorized hospital review."
+    ],
+    stepsUr: [
+      "رجسٹر اور تاخیر شدہ مقدمات پڑھیں۔ ہسپتال کی تاریخیں لگائیں۔ حالت، قسم، تھانہ یا صرف تاخیر شدہ پولیس اطلاع چنیں۔ کوالٹی کھلے مقدمات سے شروع کرتی ہے اور تاخیر والے پہلے ہیں۔",
+      "عین مقدمہ کھولیں۔ میڈیکو لیگل نمبر اور ایم آر این ملائیں۔ درج تاریخ، معائنہ، پولیس اطلاع، رپورٹ، شواہد کی حوالگی اور بندش پڑھیں۔ رجسٹر مجاز ہسپتال جائزے تک رکھیں۔"
+    ],
+    faq: [
+      [
+        "Read the register and overdue cases",
+        "Apply the hospital date range. Select status, case type, police station or Overdue police intimation only. Quality starts with open cases and overdue cases are first."
+      ],
+      [
+        "Open the exact case",
+        "Match the MLC number and MRN. Read the recorded history, examination, police intimation, report, evidence handover and closure. Keep the register in authorized hospital review."
+      ]
+    ],
+    faqUr: [
+      [
+        "رجسٹر اور تاخیر شدہ مقدمات پڑھیں",
+        "ہسپتال کی تاریخیں لگائیں۔ حالت، قسم، تھانہ یا صرف تاخیر شدہ پولیس اطلاع چنیں۔ کوالٹی کھلے مقدمات سے شروع کرتی ہے اور تاخیر والے پہلے ہیں۔"
+      ],
+      [
+        "عین مقدمہ کھولیں",
+        "میڈیکو لیگل نمبر اور ایم آر این ملائیں۔ درج تاریخ، معائنہ، پولیس اطلاع، رپورٹ، شواہد کی حوالگی اور بندش پڑھیں۔ رجسٹر مجاز ہسپتال جائزے تک رکھیں۔"
+      ]
+    ]
+  },
   mortality_review: {
     title: "Mortality statistics & death register",
     titleUr: "اعداد اموات اور رجسٹر اموات",

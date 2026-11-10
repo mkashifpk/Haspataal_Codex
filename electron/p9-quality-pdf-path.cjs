@@ -8,6 +8,7 @@ const periodDocuments = new Set([
 exports.isQualityRegisterPdfPath = value => {
   if (typeof value !== 'string' || value !== value.trim()) return false;
   if (value === '/consent-policy/pdf') return true;
+  if (value === '/mlc/contacts/pdf') return true;
   if (/^\/quality\/record-reviews\/[1-9]\d*\/report\/pdf$/.test(value)) return true;
   if (/^\/deaths\/[1-9]\d*\/pdf\?document=(?:certificate|autopsy_order)$/.test(value)) return true;
   if (/^\/(?:incidents\/[1-9]\d*\/adr-report|blood\/reactions\/[1-9]\d*)\/pdf$/.test(value)) return true;
