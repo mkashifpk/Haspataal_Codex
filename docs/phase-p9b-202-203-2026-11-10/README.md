@@ -14,3 +14,4 @@ Baseline 3483225. DEV build 2026-11-09T17:10:47.430848+00:00, contract 257cc319f
 Next in P9B are 204 Mortality statistics & death register (Quality) and 205 Death register & mortality (Owner).
 
 The final Owner run opened the synthetic cycle, read its sampling plan and sampled item, and verified Close review was disabled with open findings. It then opened the report and server PDF. Final renderer index-BCpwAFtE.js, SHA-256 009f3a7c8626deef0c5d2e4fff084e065060afef73f0bd466bf8a7e9fb699f95. Quality writes ran on index-CGHWkCww.js; the final renderer adds the workspace guide text. Demo profiles restored preferences and signed out.
+Proposals 402 and 403 were verified pending, awaiting human review on /docs -> My progress.
