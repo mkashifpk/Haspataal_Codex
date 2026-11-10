@@ -330,6 +330,7 @@ export function checkHelp({
       "RecordReviewReport",
       "MortalityRegister",
       "MedicoLegalRegister",
+      "IcdReports",
 
       "ConsentRegister",
       "ConsentPolicySetup",

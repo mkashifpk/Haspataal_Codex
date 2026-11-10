@@ -10,6 +10,118 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  icd_code_lists: {
+    title: "ICD code lists",
+    titleUr: "آئی سی ڈی کوڈ فہرستیں",
+    purpose: "Quality and Super Admin inspect and manage authorized ICD releases.",
+    purposeUr: "کوالٹی اور سپر ایڈمن مجاز آئی سی ڈی اجرا دیکھیں اور سنبھالیں۔",
+    steps: [
+      "Read the releases. Read each classification, release label, source, count, licence and active flag. Only Super Admin changes the coding classification in System settings, after that classification has an active release.",
+      "Load a licensed code list. Choose an approved XML, ZIP, TXT, CSV or TSV file. Enter classification, label and language. The hospital’s WHO licence note is required for ICD-10. The server validates the file and shows invalid examples. Inspect the original list after a lost response.",
+      "Review activation. Import as inactive unless you explicitly choose activation. To activate a listed release, check its exact classification and label. Activation changes the active list for that classification for the hospital."
+    ],
+    stepsUr: [
+      "اجرا پڑھیں۔ ہر درجہ بندی، اجرا، ماخذ، گنتی، لائسنس اور فعال حالت پڑھیں۔ فعال اجرا کے بعد صرف سپر ایڈمن نظام کی ترتیبات میں درجہ بندی بدلتا ہے۔",
+      "مجاز کوڈ فہرست لوڈ کریں۔ مجاز ایکس ایم ایل، زپ، ٹیکسٹ، سی ایس وی یا ٹی ایس وی فائل چنیں۔ درجہ بندی، لیبل اور زبان درج کریں۔ آئی سی ڈی ۱۰ کے لیے ہسپتال کا عالمی ادارہ صحت لائسنس لازم ہے۔ سرور فائل چیک اور غلط مثالیں دکھاتا ہے۔ گم جواب پر اصل فہرست پڑھیں۔",
+      "فعال کرنے کا جائزہ۔ جب تک واضح طور پر فعال نہ کریں، غیر فعال درآمد کریں۔ فہرست کے اجرا کو فعال کرنے سے پہلے عین درجہ بندی اور لیبل دیکھیں۔ یہ ہسپتال کی اس درجہ بندی کی فعال فہرست بدلتا ہے۔"
+    ],
+    faq: [
+      [
+        "Read the releases",
+        "Read each classification, release label, source, count, licence and active flag. Only Super Admin changes the coding classification in System settings, after that classification has an active release."
+      ],
+      [
+        "Load a licensed code list",
+        "Choose an approved XML, ZIP, TXT, CSV or TSV file. Enter classification, label and language. The hospital’s WHO licence note is required for ICD-10. The server validates the file and shows invalid examples. Inspect the original list after a lost response."
+      ],
+      [
+        "Review activation",
+        "Import as inactive unless you explicitly choose activation. To activate a listed release, check its exact classification and label. Activation changes the active list for that classification for the hospital."
+      ]
+    ],
+    faqUr: [
+      [
+        "اجرا پڑھیں",
+        "ہر درجہ بندی، اجرا، ماخذ، گنتی، لائسنس اور فعال حالت پڑھیں۔ فعال اجرا کے بعد صرف سپر ایڈمن نظام کی ترتیبات میں درجہ بندی بدلتا ہے۔"
+      ],
+      [
+        "مجاز کوڈ فہرست لوڈ کریں",
+        "مجاز ایکس ایم ایل، زپ، ٹیکسٹ، سی ایس وی یا ٹی ایس وی فائل چنیں۔ درجہ بندی، لیبل اور زبان درج کریں۔ آئی سی ڈی ۱۰ کے لیے ہسپتال کا عالمی ادارہ صحت لائسنس لازم ہے۔ سرور فائل چیک اور غلط مثالیں دکھاتا ہے۔ گم جواب پر اصل فہرست پڑھیں۔"
+      ],
+      [
+        "فعال کرنے کا جائزہ",
+        "جب تک واضح طور پر فعال نہ کریں، غیر فعال درآمد کریں۔ فہرست کے اجرا کو فعال کرنے سے پہلے عین درجہ بندی اور لیبل دیکھیں۔ یہ ہسپتال کی اس درجہ بندی کی فعال فہرست بدلتا ہے۔"
+      ]
+    ]
+  },
+  disease_statistics: {
+    title: "Coded diagnosis statistics",
+    titleUr: "کوڈ شدہ تشخیص کے اعداد",
+    purpose: "Read coding completeness and attributed diagnosis totals for committee review.",
+    purposeUr: "کمیٹی کے لیے کوڈنگ تکمیل اور انتسابی تشخیص اعداد پڑھیں۔",
+    steps: [
+      "Read the hospital month. The initial period is the current hospital month. Change both dates to read a different period. Compare coded versus total for finalized OPD/emergency notes, discharges and certified deaths.",
+      "Print the coding statistics. Apply the hospital period and review coding completeness, chapter totals and top codes. An unknown chapter means no loaded list has it. Use the isolated print view to print or save as PDF with the server’s ICD attribution."
+    ],
+    stepsUr: [
+      "ہسپتال مہینہ پڑھیں۔ ابتدائی مدت ہسپتال کا رواں مہینہ ہے۔ مختلف مدت کے لیے دونوں تاریخیں بدلیں۔ حتمی او پی ڈی/ایمرجنسی نوٹ، ڈسچارج اور تصدیق شدہ اموات کے کوڈ شدہ و کل دیکھیں۔",
+      "کوڈنگ اعداد پرنٹ کریں۔ ہسپتال مدت لگائیں اور تکمیل، ابواب اور اہم کوڈ دیکھیں۔ نامعلوم باب کسی لوڈ فہرست میں نہیں۔ سرور کے آئی سی ڈی انتساب کے ساتھ الگ پرنٹ منظر سے پرنٹ یا پی ڈی ایف محفوظ کریں۔"
+    ],
+    faq: [
+      [
+        "Read the hospital month",
+        "The initial period is the current hospital month. Change both dates to read a different period. Compare coded versus total for finalized OPD/emergency notes, discharges and certified deaths."
+      ],
+      [
+        "Print the coding statistics",
+        "Apply the hospital period and review coding completeness, chapter totals and top codes. An unknown chapter means no loaded list has it. Use the isolated print view to print or save as PDF with the server’s ICD attribution."
+      ]
+    ],
+    faqUr: [
+      [
+        "ہسپتال مہینہ پڑھیں",
+        "ابتدائی مدت ہسپتال کا رواں مہینہ ہے۔ مختلف مدت کے لیے دونوں تاریخیں بدلیں۔ حتمی او پی ڈی/ایمرجنسی نوٹ، ڈسچارج اور تصدیق شدہ اموات کے کوڈ شدہ و کل دیکھیں۔"
+      ],
+      [
+        "کوڈنگ اعداد پرنٹ کریں",
+        "ہسپتال مدت لگائیں اور تکمیل، ابواب اور اہم کوڈ دیکھیں۔ نامعلوم باب کسی لوڈ فہرست میں نہیں۔ سرور کے آئی سی ڈی انتساب کے ساتھ الگ پرنٹ منظر سے پرنٹ یا پی ڈی ایف محفوظ کریں۔"
+      ]
+    ]
+  },
+  disease_statistics_owner: {
+    title: "Coded diagnosis statistics",
+    titleUr: "کوڈ شدہ تشخیص کے اعداد",
+    purpose: "Read coding completeness and attributed diagnosis totals for committee review.",
+    purposeUr: "کمیٹی کے لیے کوڈنگ تکمیل اور انتسابی تشخیص اعداد پڑھیں۔",
+    steps: [
+      "Read the hospital month. The initial period is the current hospital month. Change both dates to read a different period. Compare coded versus total for finalized OPD/emergency notes, discharges and certified deaths.",
+      "Print the coding statistics. Apply the hospital period and review coding completeness, chapter totals and top codes. An unknown chapter means no loaded list has it. Use the isolated print view to print or save as PDF with the server’s ICD attribution."
+    ],
+    stepsUr: [
+      "ہسپتال مہینہ پڑھیں۔ ابتدائی مدت ہسپتال کا رواں مہینہ ہے۔ مختلف مدت کے لیے دونوں تاریخیں بدلیں۔ حتمی او پی ڈی/ایمرجنسی نوٹ، ڈسچارج اور تصدیق شدہ اموات کے کوڈ شدہ و کل دیکھیں۔",
+      "کوڈنگ اعداد پرنٹ کریں۔ ہسپتال مدت لگائیں اور تکمیل، ابواب اور اہم کوڈ دیکھیں۔ نامعلوم باب کسی لوڈ فہرست میں نہیں۔ سرور کے آئی سی ڈی انتساب کے ساتھ الگ پرنٹ منظر سے پرنٹ یا پی ڈی ایف محفوظ کریں۔"
+    ],
+    faq: [
+      [
+        "Read the hospital month",
+        "The initial period is the current hospital month. Change both dates to read a different period. Compare coded versus total for finalized OPD/emergency notes, discharges and certified deaths."
+      ],
+      [
+        "Print the coding statistics",
+        "Apply the hospital period and review coding completeness, chapter totals and top codes. An unknown chapter means no loaded list has it. Use the isolated print view to print or save as PDF with the server’s ICD attribution."
+      ]
+    ],
+    faqUr: [
+      [
+        "ہسپتال مہینہ پڑھیں",
+        "ابتدائی مدت ہسپتال کا رواں مہینہ ہے۔ مختلف مدت کے لیے دونوں تاریخیں بدلیں۔ حتمی او پی ڈی/ایمرجنسی نوٹ، ڈسچارج اور تصدیق شدہ اموات کے کوڈ شدہ و کل دیکھیں۔"
+      ],
+      [
+        "کوڈنگ اعداد پرنٹ کریں",
+        "ہسپتال مدت لگائیں اور تکمیل، ابواب اور اہم کوڈ دیکھیں۔ نامعلوم باب کسی لوڈ فہرست میں نہیں۔ سرور کے آئی سی ڈی انتساب کے ساتھ الگ پرنٹ منظر سے پرنٹ یا پی ڈی ایف محفوظ کریں۔"
+      ]
+    ]
+  },
   mlc_register: {
     title: "Medico-legal register & setup",
     titleUr: "میڈیکو لیگل رجسٹر اور ترتیبات",

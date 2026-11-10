@@ -1,0 +1,219 @@
+{
+  "screen": {
+    "id": "icd_code_lists",
+    "workspace": "quality",
+    "title": "ICD code lists",
+    "purpose": "The classifications the hospital codes in: the bundled WHO ICD-11 and, under the hospital's own WHO licence, ICD-10; which one doctors code in.",
+    "workflow": "MSDS IMS 148",
+    "rule_objects": [
+      {
+        "id": "rule:3164c69b78",
+        "text": "List the releases with source, codes, licence note and the active flag per classification.",
+        "cites": []
+      },
+      {
+        "id": "rule:99b61f6466",
+        "text": "'Load code list': multipart upload (file + code_system + release_label + licence_note, which ICD-10 requires: WHO licenses ICD-10 separately and it is never shipped). ICD_IMPORT_INVALID lists examples of what is wrong; ICD_RELEASE_EXISTS: that release is already loaded.",
+        "cites": []
+      },
+      {
+        "id": "rule:ef77cd4fcf",
+        "text": "Switching the classification doctors code in is the setting icd_coding_system (the Super Admin's settings: PUT /admin/settings/icd_coding_system), refused until a list of that classification is active.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "icd-coding"
+    ]
+  },
+  "definition_of_done": {
+    "points": 44,
+    "items": [
+      {
+        "id": "ep:GET /icd/releases",
+        "label": "GET /icd/releases",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /icd/releases",
+        "label": "POST /icd/releases",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /icd/releases/{release_id}/activate",
+        "label": "POST /icd/releases/{release_id}/activate",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:3164c69b78",
+        "label": "List the releases with source, codes, licence note and the active flag per classification.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:99b61f6466",
+        "label": "'Load code list': multipart upload (file + code_system + release_label + licence_note, which ICD-10 requires: WHO licenses ICD-10 separately and it is never shipped). ICD_IMPORT_INVALID lists examples of what is wrong; ICD_RELEASE_EXISTS: that release is already loaded.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:ef77cd4fcf",
+        "label": "Switching the classification doctors code in is the setting icd_coding_system (the Super Admin's settings: PUT /admin/settings/icd_coding_system), refused until a list of that classification is active.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /icd/releases",
+      "summary": "The ICD code lists loaded",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      }
+    },
+    {
+      "endpoint": "POST /icd/releases",
+      "summary": "Load an ICD code list (the hospital's licensed ICD-10, or a newer WHO ICD-11 release)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "icd.release.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of icd.release.manage",
+        "roles_allowed": [
+          "quality_officer",
+          "super_admin"
+        ]
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with ICD_RELEASE_EXISTS: the release is loaded already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /icd/releases",
+        "refused_with": "ICD_RELEASE_EXISTS",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /icd/releases/{release_id}/activate",
+      "summary": "Make a release the active list of its classification",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "icd.release.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of icd.release.manage",
+        "roles_allowed": [
+          "quality_officer",
+          "super_admin"
+        ]
+      },
+      "write": {
+        "protection": "repeat_safe",
+        "on_lost_answer": "A repeat is harmless for the same state: the release is active already. No response is stored; re-read before resubmitting because newer data may have arrived.",
+        "reconcile_with": "GET /icd/releases",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "release_id",
+      "source": "this_screen",
+      "call": "GET /icd/releases",
+      "field": "release_id",
+      "used_by": [
+        "POST /icd/releases/{release_id}/activate"
+      ]
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "contract_fingerprint": "257cc319fed31b6ed2ac"
+}

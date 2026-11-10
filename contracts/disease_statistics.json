@@ -1,0 +1,169 @@
+{
+  "screen": {
+    "id": "disease_statistics",
+    "workspace": "quality",
+    "title": "Coded diagnosis statistics",
+    "purpose": "The hospital's morbidity and mortality by ICD chapter and code, and how completely records are coded.",
+    "workflow": "MSDS IMS 148; indicator 105 vii",
+    "rule_objects": [
+      {
+        "id": "rule:fe27d9c286",
+        "text": "Default period: this month so far (date_from / date_to to change). Tiles from `completeness`: % of OPD / emergency notes, discharges and certified deaths carrying a code (MSDS 105 vii); low coding in red.",
+        "cites": [
+          "MSDS 105"
+        ]
+      },
+      {
+        "id": "rule:049f40bf0d",
+        "text": "Tables: `chapters` (code_system + chapter + title, OPD / inpatient / deaths / total) and `top_codes`; a null chapter means the code is in no loaded list.",
+        "cites": []
+      },
+      {
+        "id": "rule:ff9f153566",
+        "text": "Print or export it for the quality committee and the district's monthly return, with `citation` (the ICD-11 licence requires the attribution) at the foot.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "icd-coding"
+    ]
+  },
+  "definition_of_done": {
+    "points": 39,
+    "items": [
+      {
+        "id": "ep:GET /icd/statistics",
+        "label": "GET /icd/statistics",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /icd/releases",
+        "label": "GET /icd/releases",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:fe27d9c286",
+        "label": "Default period: this month so far (date_from / date_to to change). Tiles from `completeness`: % of OPD / emergency notes, discharges and certified deaths carrying a code (MSDS 105 vii); low coding in red.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:049f40bf0d",
+        "label": "Tables: `chapters` (code_system + chapter + title, OPD / inpatient / deaths / total) and `top_codes`; a null chapter means the code is in no loaded list.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:ff9f153566",
+        "label": "Print or export it for the quality committee and the district's monthly return, with `citation` (the ICD-11 licence requires the attribution) at the foot.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /icd/statistics",
+      "summary": "Coded diagnosis statistics: by ICD chapter and code, and coding completeness",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "icd.statistics.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of icd.statistics.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      }
+    },
+    {
+      "endpoint": "GET /icd/releases",
+      "summary": "The ICD code lists loaded",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      }
+    }
+  ],
+  "id_sources": [],
+  "realtime": {
+    "topics": [
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "contract_fingerprint": "257cc319fed31b6ed2ac"
+}

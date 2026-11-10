@@ -63,6 +63,26 @@ test("OPD printing preserves server text as escaped text and isolates SVG as ima
   );
 });
 
+test("ICD code files are accepted only on the exact release upload path", async () => {
+  const seen = [];
+  const server = http.createServer((req, res) => {
+    const chunks = [];
+    req.on("data", chunk => chunks.push(chunk));
+    req.on("end", () => { seen.push(Buffer.concat(chunks).toString()); res.end("{}"); });
+  });
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const upload = filename => ({method:"POST",body:{__multipart:[{name:"file",filename,type:"text/csv",bytes:Buffer.from("code,title\nX,Example") }]}});
+  try {
+    await request(base + "/api/v1/icd/releases", upload("codes.csv"));
+    assert.match(seen[0], /Content-Type: text\/csv/);
+    await assert.rejects(request(base + "/api/v1/icd/releases", upload("codes.pdf")), LocalUploadError);
+    await assert.rejects(request(base + "/api/v1/icd/releases?other=1", upload("codes.csv")), LocalUploadError);
+    await assert.rejects(request(base + "/api/v1/patients/1/documents", upload("codes.csv")), LocalUploadError);
+    assert.equal(seen.length, 1);
+  } finally { await new Promise(resolve => server.close(resolve)); }
+});
+
 test("local invalid multipart and terminal size refusals send zero HTTP requests", async () => {
   let received = 0;
   const server = http.createServer((req, res) => {

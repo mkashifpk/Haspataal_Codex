@@ -5,6 +5,10 @@ const { X509Certificate } = require("node:crypto");
 // These checks happen before an HTTP request exists. They are safe to correct,
 // unlike a transport failure after submission whose server result is unknown.
 class LocalUploadError extends Error {}
+const icdFileTypes = {
+  ".xml": "application/xml", ".zip": "application/zip",
+  ".txt": "text/plain", ".csv": "text/csv", ".tsv": "text/tab-separated-values",
+};
 
 function checkedRoot(pem, fingerprint) {
   const cert = new X509Certificate(pem);
@@ -41,6 +45,7 @@ function request(
     let contentType = "application/json";
     let data;
     if (body?.__multipart) {
+      const icdImport = method === "POST" && target.pathname === "/api/v1/icd/releases" && !target.search;
       const boundary = "haspataal-" + require("node:crypto").randomUUID();
       contentType = `multipart/form-data; boundary=${boundary}`;
       const parts = [];
@@ -48,8 +53,13 @@ function request(
         if (!/^[a-z_]+$/.test(part.name))
           throw new LocalUploadError("Invalid upload field");
         const filename = part.filename?.replace(/[\r\n"\\]/g, "_");
+        const type = icdImport && filename
+          ? icdFileTypes[require("node:path").extname(filename).toLowerCase()]
+          : part.type;
+        if (icdImport && filename && (part.name !== "file" || !type))
+          throw new LocalUploadError("Choose an XML, ZIP, TXT, CSV or TSV ICD release file");
         if (
-          filename &&
+          filename && !icdImport &&
           !["image/jpeg", "image/png", "application/pdf"].includes(part.type)
         )
           throw new LocalUploadError(
@@ -57,7 +67,7 @@ function request(
           );
         parts.push(
           Buffer.from(
-            `--${boundary}\r\nContent-Disposition: form-data; name="${part.name}"${filename ? `; filename="${filename}"` : ""}\r\n${filename ? `Content-Type: ${part.type}\r\n` : ""}\r\n`,
+            `--${boundary}\r\nContent-Disposition: form-data; name="${part.name}"${filename ? `; filename="${filename}"` : ""}\r\n${filename ? `Content-Type: ${type}\r\n` : ""}\r\n`,
           ),
         );
         parts.push(
