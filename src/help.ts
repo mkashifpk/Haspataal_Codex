@@ -10,6 +10,164 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  record_review_report: {
+    title: "Review report, deficiencies & actions",
+    titleUr: "جائزہ رپورٹ، کمیاں اور اقدامات",
+    purpose: "Quality reviews survey evidence, findings, actions and the checklist.",
+    purposeUr: "کوالٹی معائنے کے شواہد، کمیاں، اقدامات اور چیک لسٹ دیکھے۔",
+    steps: [
+      "Select and refresh a cycle. Choose the actual cycle from the server list, even when it has no findings. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN.",
+      "Review a finding. Filter findings by status. Quality acknowledges a true finding that cannot be undone or withdraws a mistaken finding, with a reason. Authors record their own corrections from their worklist after adding the source correction.",
+      "Manage a corrective or preventive action. Choose type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason.",
+      "Maintain the checklist. Add a unique uppercase code, category, applicable records, responsible team, title and optional guidance. Reviewer answers apply to hospital items. Edit wording, order or active status. A system check retains its original check; retired criteria remain in history.",
+      "Review, submit and recover. Check the exact row, reason and changes before confirming once. A refused change needs a fresh read. For an unknown result, read the exact original record or use only the original key where the form offers it.",
+      "How do I preview or print the survey report?. Open the server PDF in the terminal and print it on A4 from the viewer, or save the PDF. The indicator block is first."
+    ],
+    stepsUr: [
+      "دور منتخب اور تازہ کریں۔ سرور کی فہرست سے اصل دور منتخب کریں، خواہ کوئی کمی نہ ہو۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔",
+      "کمی کا جائزہ لیں۔ حالت سے کمیاں محدود کریں۔ کوالٹی ناقابل واپسی حقیقی کمی تسلیم یا غلط کمی وجہ کے ساتھ واپس لے۔ مصنف اصل اصلاح کے بعد اپنی فہرست میں اصلاح درج کرے۔",
+      "اصلاحی یا احتیاطی اقدام سنبھالیں۔ قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔",
+      "چیک لسٹ برقرار رکھیں۔ منفرد بڑے حروف کا کوڈ، زمرہ، ریکارڈ، ذمہ دار ٹیم، عنوان اور اختیاری رہنمائی درج کریں۔ ہسپتال کے معیار کا جواب جائزہ لینے والا دیتا ہے۔ عبارت، ترتیب یا فعال حالت بدلیں۔ نظام کی اصل جانچ اور غیر فعال معیار کی تاریخ برقرار رہتی ہے۔",
+      "جائزہ، ارسال اور بحالی۔ ایک بار تصدیق سے پہلے عین قطار، وجہ اور تبدیلی چیک کریں۔ انکار پر تازہ پڑھیں۔ نامعلوم نتیجے پر اصل ریکارڈ پڑھیں یا فارم کی پیشکش پر صرف اصل کلید استعمال کریں۔",
+      "معائنہ رپورٹ کیسے دیکھیں یا پرنٹ کریں؟۔ سرور کی پی ڈی ایف ٹرمینل میں کھولیں اور ویوئر سے اے فور پر پرنٹ کریں یا محفوظ کریں۔ اشاریے پہلے ہیں۔"
+    ],
+    faq: [
+      [
+        "Select and refresh a cycle",
+        "Choose the actual cycle from the server list, even when it has no findings. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN."
+      ],
+      [
+        "Review a finding",
+        "Filter findings by status. Quality acknowledges a true finding that cannot be undone or withdraws a mistaken finding, with a reason. Authors record their own corrections from their worklist after adding the source correction."
+      ],
+      [
+        "Manage a corrective or preventive action",
+        "Choose type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason."
+      ],
+      [
+        "Maintain the checklist",
+        "Add a unique uppercase code, category, applicable records, responsible team, title and optional guidance. Reviewer answers apply to hospital items. Edit wording, order or active status. A system check retains its original check; retired criteria remain in history."
+      ],
+      [
+        "Review, submit and recover",
+        "Check the exact row, reason and changes before confirming once. A refused change needs a fresh read. For an unknown result, read the exact original record or use only the original key where the form offers it."
+      ],
+      [
+        "How do I preview or print the survey report?",
+        "Open the server PDF in the terminal and print it on A4 from the viewer, or save the PDF. The indicator block is first."
+      ]
+    ],
+    faqUr: [
+      [
+        "دور منتخب اور تازہ کریں",
+        "سرور کی فہرست سے اصل دور منتخب کریں، خواہ کوئی کمی نہ ہو۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔"
+      ],
+      [
+        "کمی کا جائزہ لیں",
+        "حالت سے کمیاں محدود کریں۔ کوالٹی ناقابل واپسی حقیقی کمی تسلیم یا غلط کمی وجہ کے ساتھ واپس لے۔ مصنف اصل اصلاح کے بعد اپنی فہرست میں اصلاح درج کرے۔"
+      ],
+      [
+        "اصلاحی یا احتیاطی اقدام سنبھالیں",
+        "قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔"
+      ],
+      [
+        "چیک لسٹ برقرار رکھیں",
+        "منفرد بڑے حروف کا کوڈ، زمرہ، ریکارڈ، ذمہ دار ٹیم، عنوان اور اختیاری رہنمائی درج کریں۔ ہسپتال کے معیار کا جواب جائزہ لینے والا دیتا ہے۔ عبارت، ترتیب یا فعال حالت بدلیں۔ نظام کی اصل جانچ اور غیر فعال معیار کی تاریخ برقرار رہتی ہے۔"
+      ],
+      [
+        "جائزہ، ارسال اور بحالی",
+        "ایک بار تصدیق سے پہلے عین قطار، وجہ اور تبدیلی چیک کریں۔ انکار پر تازہ پڑھیں۔ نامعلوم نتیجے پر اصل ریکارڈ پڑھیں یا فارم کی پیشکش پر صرف اصل کلید استعمال کریں۔"
+      ],
+      [
+        "معائنہ رپورٹ کیسے دیکھیں یا پرنٹ کریں؟",
+        "سرور کی پی ڈی ایف ٹرمینل میں کھولیں اور ویوئر سے اے فور پر پرنٹ کریں یا محفوظ کریں۔ اشاریے پہلے ہیں۔"
+      ]
+    ]
+  },
+  record_review_overview: {
+    title: "Medical record review (MSDS)",
+    titleUr: "طبی ریکارڈ کا جائزہ (ایم ایس ڈی ایس)",
+    purpose: "Owner follows the medical record review schedule, survey evidence and authorized actions.",
+    purposeUr: "مالک طبی ریکارڈ جائزے کا شیڈول، شواہد اور مجاز کارروائیاں دیکھے۔",
+    steps: [
+      "Select and refresh a cycle. Choose the actual cycle from the server list, even when it has no findings. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN.",
+      "Review a finding. Filter findings by status. Quality acknowledges a true finding that cannot be undone or withdraws a mistaken finding, with a reason. Authors record their own corrections from their worklist after adding the source correction.",
+      "Manage a corrective or preventive action. Choose type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason.",
+      "Maintain the checklist. Add a unique uppercase code, category, applicable records, responsible team, title and optional guidance. Reviewer answers apply to hospital items. Edit wording, order or active status. A system check retains its original check; retired criteria remain in history.",
+      "Review, submit and recover. Check the exact row, reason and changes before confirming once. A refused change needs a fresh read. For an unknown result, read the exact original record or use only the original key where the form offers it.",
+      "Switch between schedule and report. Owner can review due periods, cycle panel, sample, assigned items and closure readiness on Schedule and cycles. Survey report and findings shows the MSDS evidence and the permitted follow-up actions.",
+      "How do I preview or print the survey report?. Open the server PDF in the terminal and print it on A4 from the viewer, or save the PDF. The indicator block is first."
+    ],
+    stepsUr: [
+      "دور منتخب اور تازہ کریں۔ سرور کی فہرست سے اصل دور منتخب کریں، خواہ کوئی کمی نہ ہو۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔",
+      "کمی کا جائزہ لیں۔ حالت سے کمیاں محدود کریں۔ کوالٹی ناقابل واپسی حقیقی کمی تسلیم یا غلط کمی وجہ کے ساتھ واپس لے۔ مصنف اصل اصلاح کے بعد اپنی فہرست میں اصلاح درج کرے۔",
+      "اصلاحی یا احتیاطی اقدام سنبھالیں۔ قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔",
+      "چیک لسٹ برقرار رکھیں۔ منفرد بڑے حروف کا کوڈ، زمرہ، ریکارڈ، ذمہ دار ٹیم، عنوان اور اختیاری رہنمائی درج کریں۔ ہسپتال کے معیار کا جواب جائزہ لینے والا دیتا ہے۔ عبارت، ترتیب یا فعال حالت بدلیں۔ نظام کی اصل جانچ اور غیر فعال معیار کی تاریخ برقرار رہتی ہے۔",
+      "جائزہ، ارسال اور بحالی۔ ایک بار تصدیق سے پہلے عین قطار، وجہ اور تبدیلی چیک کریں۔ انکار پر تازہ پڑھیں۔ نامعلوم نتیجے پر اصل ریکارڈ پڑھیں یا فارم کی پیشکش پر صرف اصل کلید استعمال کریں۔",
+      "شیڈول اور رپورٹ کے درمیان جائیں۔ مالک شیڈول اور دور میں مدت، پینل، نمونہ، مقرر ریکارڈ اور بندش کی تیاری دیکھ سکتا ہے۔ معائنہ رپورٹ اور کمیاں ایم ایس ڈی ایس شواہد اور مجاز کارروائیاں دکھاتی ہیں۔",
+      "معائنہ رپورٹ کیسے دیکھیں یا پرنٹ کریں؟۔ سرور کی پی ڈی ایف ٹرمینل میں کھولیں اور ویوئر سے اے فور پر پرنٹ کریں یا محفوظ کریں۔ اشاریے پہلے ہیں۔"
+    ],
+    faq: [
+      [
+        "Select and refresh a cycle",
+        "Choose the actual cycle from the server list, even when it has no findings. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN."
+      ],
+      [
+        "Review a finding",
+        "Filter findings by status. Quality acknowledges a true finding that cannot be undone or withdraws a mistaken finding, with a reason. Authors record their own corrections from their worklist after adding the source correction."
+      ],
+      [
+        "Manage a corrective or preventive action",
+        "Choose type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason."
+      ],
+      [
+        "Maintain the checklist",
+        "Add a unique uppercase code, category, applicable records, responsible team, title and optional guidance. Reviewer answers apply to hospital items. Edit wording, order or active status. A system check retains its original check; retired criteria remain in history."
+      ],
+      [
+        "Review, submit and recover",
+        "Check the exact row, reason and changes before confirming once. A refused change needs a fresh read. For an unknown result, read the exact original record or use only the original key where the form offers it."
+      ],
+      [
+        "Switch between schedule and report",
+        "Owner can review due periods, cycle panel, sample, assigned items and closure readiness on Schedule and cycles. Survey report and findings shows the MSDS evidence and the permitted follow-up actions."
+      ],
+      [
+        "How do I preview or print the survey report?",
+        "Open the server PDF in the terminal and print it on A4 from the viewer, or save the PDF. The indicator block is first."
+      ]
+    ],
+    faqUr: [
+      [
+        "دور منتخب اور تازہ کریں",
+        "سرور کی فہرست سے اصل دور منتخب کریں، خواہ کوئی کمی نہ ہو۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔"
+      ],
+      [
+        "کمی کا جائزہ لیں",
+        "حالت سے کمیاں محدود کریں۔ کوالٹی ناقابل واپسی حقیقی کمی تسلیم یا غلط کمی وجہ کے ساتھ واپس لے۔ مصنف اصل اصلاح کے بعد اپنی فہرست میں اصلاح درج کرے۔"
+      ],
+      [
+        "اصلاحی یا احتیاطی اقدام سنبھالیں",
+        "قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔"
+      ],
+      [
+        "چیک لسٹ برقرار رکھیں",
+        "منفرد بڑے حروف کا کوڈ، زمرہ، ریکارڈ، ذمہ دار ٹیم، عنوان اور اختیاری رہنمائی درج کریں۔ ہسپتال کے معیار کا جواب جائزہ لینے والا دیتا ہے۔ عبارت، ترتیب یا فعال حالت بدلیں۔ نظام کی اصل جانچ اور غیر فعال معیار کی تاریخ برقرار رہتی ہے۔"
+      ],
+      [
+        "جائزہ، ارسال اور بحالی",
+        "ایک بار تصدیق سے پہلے عین قطار، وجہ اور تبدیلی چیک کریں۔ انکار پر تازہ پڑھیں۔ نامعلوم نتیجے پر اصل ریکارڈ پڑھیں یا فارم کی پیشکش پر صرف اصل کلید استعمال کریں۔"
+      ],
+      [
+        "شیڈول اور رپورٹ کے درمیان جائیں",
+        "مالک شیڈول اور دور میں مدت، پینل، نمونہ، مقرر ریکارڈ اور بندش کی تیاری دیکھ سکتا ہے۔ معائنہ رپورٹ اور کمیاں ایم ایس ڈی ایس شواہد اور مجاز کارروائیاں دکھاتی ہیں۔"
+      ],
+      [
+        "معائنہ رپورٹ کیسے دیکھیں یا پرنٹ کریں؟",
+        "سرور کی پی ڈی ایف ٹرمینل میں کھولیں اور ویوئر سے اے فور پر پرنٹ کریں یا محفوظ کریں۔ اشاریے پہلے ہیں۔"
+      ]
+    ]
+  },
   record_deficiencies_doctor: {
     title: "Record deficiencies to fix",
     titleUr: "ریکارڈ کی درست کرنے والی کمیاں",

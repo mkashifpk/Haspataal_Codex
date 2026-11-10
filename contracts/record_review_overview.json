@@ -1,0 +1,1019 @@
+{
+  "screen": {
+    "id": "record_review_overview",
+    "workspace": "owner_dashboard",
+    "title": "Medical record review (MSDS)",
+    "purpose": "The quarterly medical record review: plan and follow cycles, read the surveyor's report.",
+    "workflow": "MSDS IMS-3 (156-162)",
+    "rule_objects": [
+      {
+        "id": "rule:338133b2d4",
+        "text": "Start from GET /quality/record-review/status: `next_due` names the period to review (a quarter by default); 'Plan review' pre-fills it (POST /quality/record-reviews with no period).",
+        "cites": []
+      },
+      {
+        "id": "rule:48266a93af",
+        "text": "Panel picker = GET /quality/record-review/people (can_review). Show each reviewer's discipline: MSDS 158 wants doctors AND nurses, never only the records staff.",
+        "cites": [
+          "MSDS 158"
+        ]
+      },
+      {
+        "id": "rule:f5168043b0",
+        "text": "Before 'Start', show GET .../sample-plan as a table (department x state: population, sample) with the formula line; after the start the sample and period are frozen (say so on the button's confirmation).",
+        "cites": []
+      },
+      {
+        "id": "rule:376b13b9aa",
+        "text": "Progress bar per reviewer (reviewers[].assigned / reviewed), live with record_review.updated. Records with no reviewer (everyone on the panel wrote in them) need 'Assign' to a new panel member.",
+        "cites": []
+      },
+      {
+        "id": "rule:ae8d532fe1",
+        "text": "'Close' asks for the minutes. Show the three refusals as a checklist before enabling it: all reviewed, no open deficiency, an action recorded when deficiencies were found.",
+        "cites": []
+      },
+      {
+        "id": "rule:80b0f59dc0",
+        "text": "The report is the surveyor's evidence: print it (A4). Put the MSDS block first: one row per indicator 156-162 with Met (green) / PartlyMet (amber) / NotMet (red) and the evidence text.",
+        "cites": []
+      },
+      {
+        "id": "rule:b5f80216fd",
+        "text": "Records appear by record number and MRN only; never add patient names to this screen or its printout.",
+        "cites": []
+      },
+      {
+        "id": "rule:d3796b0405",
+        "text": "'Print' = GET .../report/pdf (A4, the MSDS block first); it is also the record_review_report of the inspection pack.",
+        "cites": []
+      },
+      {
+        "id": "rule:03e2f92d13",
+        "text": "Deficiencies: Acknowledge (true but cannot be undone, e.g. a late note) or Withdraw (not a deficiency); authors mark their own Corrected from their workspace.",
+        "cites": []
+      },
+      {
+        "id": "rule:bd15655f09",
+        "text": "Actions: type, owner (GET /quality/record-review/people), due date; they join the hospital's action register (GET /quality/actions?source=RecordReview); overdue ones in red (is_overdue).",
+        "cites": []
+      },
+      {
+        "id": "rule:4c9ae06af8",
+        "text": "Checklist editor: built-in items (auto_check set) can be reworded or retired, not deleted; the hospital's own items are answered by the reviewer.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "clinic-quality-and-education",
+      "complaints",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "facility-compliance-equipment-drills",
+      "finance-and-owner",
+      "hr-and-payroll",
+      "incidents-and-sentinel-events",
+      "infection-control",
+      "medical-record-review",
+      "personnel-records",
+      "phc-interview-prep",
+      "quality-indicators-and-committees"
+    ]
+  },
+  "id_sources": [
+    {
+      "id": "cycle_id",
+      "source": "this_screen",
+      "call": "GET /quality/record-review/status",
+      "field": "cycle_id",
+      "used_by": [
+        "GET /quality/record-reviews/{cycle_id}",
+        "PUT /quality/record-reviews/{cycle_id}/reviewers",
+        "GET /quality/record-reviews/{cycle_id}/sample-plan",
+        "POST /quality/record-reviews/{cycle_id}/start",
+        "POST /quality/record-reviews/{cycle_id}/close",
+        "POST /quality/record-reviews/{cycle_id}/cancel",
+        "GET /quality/record-reviews/{cycle_id}/report",
+        "GET /quality/record-reviews/{cycle_id}/report/pdf",
+        "POST /quality/record-reviews/{cycle_id}/actions"
+      ]
+    },
+    {
+      "id": "item_id",
+      "source": "this_screen",
+      "call": "POST /quality/record-reviews",
+      "field": "item_id",
+      "used_by": [
+        "POST /quality/record-review-items/{item_id}/assign",
+        "GET /quality/record-review-items/{item_id}"
+      ]
+    },
+    {
+      "id": "deficiency_id",
+      "source": "this_screen",
+      "call": "GET /quality/record-review-items/{item_id}",
+      "field": "deficiency_id",
+      "used_by": [
+        "POST /quality/record-review-deficiencies/{deficiency_id}/resolve"
+      ]
+    },
+    {
+      "id": "action_id",
+      "source": "this_screen",
+      "call": "POST /quality/record-reviews",
+      "field": "action_id",
+      "used_by": [
+        "POST /quality/actions/{action_id}/complete"
+      ]
+    },
+    {
+      "id": "criterion_id",
+      "source": "this_screen",
+      "call": "GET /quality/record-review-items/{item_id}",
+      "field": "criterion_id",
+      "used_by": [
+        "PATCH /quality/record-review/criteria/{criterion_id}"
+      ]
+    }
+  ],
+  "definition_of_done": {
+    "points": 122,
+    "items": [
+      {
+        "id": "ep:GET /quality/record-review/status",
+        "label": "GET /quality/record-review/status",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/record-reviews",
+        "label": "GET /quality/record-reviews",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /quality/record-reviews",
+        "label": "POST /quality/record-reviews",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/record-reviews/{cycle_id}",
+        "label": "GET /quality/record-reviews/{cycle_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/record-review/people",
+        "label": "GET /quality/record-review/people",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:PUT /quality/record-reviews/{cycle_id}/reviewers",
+        "label": "PUT /quality/record-reviews/{cycle_id}/reviewers",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/record-reviews/{cycle_id}/sample-plan",
+        "label": "GET /quality/record-reviews/{cycle_id}/sample-plan",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /quality/record-reviews/{cycle_id}/start",
+        "label": "POST /quality/record-reviews/{cycle_id}/start",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /quality/record-review-items/{item_id}/assign",
+        "label": "POST /quality/record-review-items/{item_id}/assign",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/record-review-items/{item_id}",
+        "label": "GET /quality/record-review-items/{item_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /quality/record-reviews/{cycle_id}/close",
+        "label": "POST /quality/record-reviews/{cycle_id}/close",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /quality/record-reviews/{cycle_id}/cancel",
+        "label": "POST /quality/record-reviews/{cycle_id}/cancel",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/record-reviews/{cycle_id}/report",
+        "label": "GET /quality/record-reviews/{cycle_id}/report",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/record-reviews/{cycle_id}/report/pdf",
+        "label": "GET /quality/record-reviews/{cycle_id}/report/pdf",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/record-review-deficiencies",
+        "label": "GET /quality/record-review-deficiencies",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+        "label": "POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /quality/record-reviews/{cycle_id}/actions",
+        "label": "POST /quality/record-reviews/{cycle_id}/actions",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/actions",
+        "label": "GET /quality/actions",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /quality/actions/{action_id}/complete",
+        "label": "POST /quality/actions/{action_id}/complete",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /quality/record-review/criteria",
+        "label": "GET /quality/record-review/criteria",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /quality/record-review/criteria",
+        "label": "POST /quality/record-review/criteria",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:PATCH /quality/record-review/criteria/{criterion_id}",
+        "label": "PATCH /quality/record-review/criteria/{criterion_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /admin/departments",
+        "label": "GET /admin/departments",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ev:record_review.updated",
+        "label": "record_review.updated",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:338133b2d4",
+        "label": "Start from GET /quality/record-review/status: `next_due` names the period to review (a quarter by default); 'Plan review' pre-fills it (POST /quality/record-reviews with no period).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:48266a93af",
+        "label": "Panel picker = GET /quality/record-review/people (can_review). Show each reviewer's discipline: MSDS 158 wants doctors AND nurses, never only the records staff.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:f5168043b0",
+        "label": "Before 'Start', show GET .../sample-plan as a table (department x state: population, sample) with the formula line; after the start the sample and period are frozen (say so on the button's confirmation).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:376b13b9aa",
+        "label": "Progress bar per reviewer (reviewers[].assigned / reviewed), live with record_review.updated. Records with no reviewer (everyone on the panel wrote in them) need 'Assign' to a new panel member.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:ae8d532fe1",
+        "label": "'Close' asks for the minutes. Show the three refusals as a checklist before enabling it: all reviewed, no open deficiency, an action recorded when deficiencies were found.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:80b0f59dc0",
+        "label": "The report is the surveyor's evidence: print it (A4). Put the MSDS block first: one row per indicator 156-162 with Met (green) / PartlyMet (amber) / NotMet (red) and the evidence text.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:b5f80216fd",
+        "label": "Records appear by record number and MRN only; never add patient names to this screen or its printout.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:d3796b0405",
+        "label": "'Print' = GET .../report/pdf (A4, the MSDS block first); it is also the record_review_report of the inspection pack.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:03e2f92d13",
+        "label": "Deficiencies: Acknowledge (true but cannot be undone, e.g. a late note) or Withdraw (not a deficiency); authors mark their own Corrected from their workspace.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:bd15655f09",
+        "label": "Actions: type, owner (GET /quality/record-review/people), due date; they join the hospital's action register (GET /quality/actions?source=RecordReview); overdue ones in red (is_overdue).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:4c9ae06af8",
+        "label": "Checklist editor: built-in items (auto_check set) can be reworded or retired, not deleted; the hospital's own items are answered by the reviewer.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /quality/record-review/status",
+      "summary": "Review schedule at a glance (what is due, what is open, MSDS 156)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.review.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.review.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /quality/record-reviews",
+      "summary": "Review cycles (newest period first)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.review.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.review.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "POST /quality/record-reviews",
+      "summary": "Plan a review cycle",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of quality.review.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /quality/record-reviews",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /quality/record-reviews/{cycle_id}",
+      "summary": "A cycle with its panel, sampled records, deficiency counts and actions",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.review.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.review.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /quality/record-review/people",
+      "summary": "Every member of staff a quality record may name (and who can review records)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "PUT /quality/record-reviews/{cycle_id}/reviewers",
+      "summary": "Replace the review panel",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of quality.review.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /quality/record-reviews/{cycle_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /quality/record-reviews/{cycle_id}/sample-plan",
+      "summary": "The sampling plan (a preview before the start; nothing is drawn)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.review.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.review.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "POST /quality/record-reviews/{cycle_id}/start",
+      "summary": "Draw the sample and start the review",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of quality.review.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with RECORD_REVIEW_TRANSITION_INVALID: the cycle is started already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /quality/record-reviews/{cycle_id}",
+        "refused_with": "RECORD_REVIEW_TRANSITION_INVALID",
+        "emits_events": [
+          "notification.created",
+          "record_review.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "POST /quality/record-review-items/{item_id}/assign",
+      "summary": "Hand a pending record to another panel member",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of quality.review.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: assigns the same reviewer again (who is told again). Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": "GET /quality/record-review-items/{item_id}",
+        "emits_events": [
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /quality/record-review-items/{item_id}",
+      "summary": "A sampled record with its checklist and the system's answers",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.perform",
+          "quality.review.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.perform or quality.review.manage",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "POST /quality/record-reviews/{cycle_id}/close",
+      "summary": "Close the cycle with the minutes",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of quality.review.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with RECORD_REVIEW_FROZEN: the cycle is closed already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /quality/record-reviews/{cycle_id}",
+        "refused_with": "RECORD_REVIEW_FROZEN",
+        "emits_events": [
+          "record_review.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "POST /quality/record-reviews/{cycle_id}/cancel",
+      "summary": "Cancel a cycle",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of quality.review.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with RECORD_REVIEW_FROZEN: the cycle is cancelled already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /quality/record-reviews/{cycle_id}",
+        "refused_with": "RECORD_REVIEW_FROZEN",
+        "emits_events": [
+          "record_review.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /quality/record-reviews/{cycle_id}/report",
+      "summary": "The surveyor's report, with the MSDS 156-162 ratings",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.review.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.review.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /quality/record-reviews/{cycle_id}/report/pdf",
+      "summary": "The surveyor's report as a PDF",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.review.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.review.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /quality/record-review-deficiencies",
+      "summary": "Record deficiencies (mine: to fix, or raised by me)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.deficiency.resolve",
+          "quality.review.perform"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.deficiency.resolve or quality.review.perform",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "POST /quality/record-review-deficiencies/{deficiency_id}/resolve",
+      "summary": "Resolve a deficiency",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.deficiency.resolve",
+          "quality.review.perform"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.deficiency.resolve or quality.review.perform",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ]
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with RECORD_DEFICIENCY_RESOLVED: the deficiency is resolved already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /quality/record-review-deficiencies",
+        "refused_with": "RECORD_DEFICIENCY_RESOLVED",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "POST /quality/record-reviews/{cycle_id}/actions",
+      "summary": "Record a corrective or preventive action",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of quality.review.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /quality/record-reviews/{cycle_id}",
+        "emits_events": [
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /quality/actions",
+      "summary": "The action register (mine: the actions I own)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user: the actions they own (mine is forced without quality.action.view or quality.action.manage)"
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "POST /quality/actions/{action_id}/complete",
+      "summary": "Close an action: done with the evidence, or cancelled",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "the action's owner or quality.action.manage"
+      },
+      "write": {
+        "protection": "version_check",
+        "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+        "reconcile_with": "GET /quality/actions/{action_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /quality/record-review/criteria",
+      "summary": "The review checklist",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.review.view",
+          "quality.review.perform"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.review.view or quality.review.perform",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "POST /quality/record-review/criteria",
+      "summary": "Add a checklist item of the hospital's own",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of quality.review.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /quality/record-review/criteria",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "PATCH /quality/record-review/criteria/{criterion_id}",
+      "summary": "Reword, reorder or retire a checklist item",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of quality.review.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "write": {
+        "protection": "version_check",
+        "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+        "reconcile_with": "GET /quality/record-review/criteria",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /admin/departments",
+      "summary": "Departments",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": []
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "record_review.updated",
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [
+      {
+        "event": "record_review.updated",
+        "priority": "normal",
+        "presentation": null,
+        "emitted_by_operations": [
+          "POST /quality/record-review-items/{item_id}/review",
+          "POST /quality/record-reviews/{cycle_id}/cancel",
+          "POST /quality/record-reviews/{cycle_id}/close",
+          "POST /quality/record-reviews/{cycle_id}/start"
+        ],
+        "refresh": [
+          "GET /quality/record-review/status",
+          "GET /quality/record-reviews",
+          "GET /quality/record-reviews/{cycle_id}",
+          "GET /quality/record-review/people",
+          "GET /quality/record-reviews/{cycle_id}/sample-plan",
+          "GET /quality/record-reviews/{cycle_id}/report",
+          "GET /quality/record-reviews/{cycle_id}/report/pdf",
+          "GET /quality/record-review-deficiencies",
+          "GET /quality/actions",
+          "GET /quality/record-review/criteria",
+          "GET /admin/departments"
+        ]
+      }
+    ],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "contract_fingerprint": "257cc319fed31b6ed2ac"
+}

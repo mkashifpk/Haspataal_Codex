@@ -151,12 +151,14 @@ function SamplingPlan({ plan }: { plan: review.PlanPreviewOut }) {
 
 export function RecordReviewCycles({
   user,
+  screenId = "record_review_cycles",
   connected,
   readOnly,
   revision,
   onOpenHelp,
 }: {
   user: ClinicalUser;
+  screenId?: "record_review_cycles" | "record_review_overview";
   connected: boolean;
   readOnly: boolean;
   revision: number;
@@ -241,7 +243,7 @@ export function RecordReviewCycles({
   };
   const write = useClinicalWrite(
     user,
-    "record_review_cycles",
+    screenId,
     async (result, command) => {
       if (command.path === cyclesPath) setCycleId(result.cycle_id);
       await refresh();
@@ -477,12 +479,12 @@ export function RecordReviewCycles({
 
   return (
     <section
-      data-screen="record_review_cycles"
+      data-screen={screenId}
       data-unsaved={!!draft}
       data-write-pending={write.blocked}
     >
       <QualityHeading
-        title={t("Record review cycles", "طبی ریکارڈ کے جائزے")}
+        title={screenId === "record_review_overview" ? t("Medical record review (MSDS)", "طبی ریکارڈ کا جائزہ (ایم ایس ڈی ایس)") : t("Record review cycles", "طبی ریکارڈ کے جائزے")}
         text={t(
           "Plan a cycle, choose the panel, review the sampling plan and follow the records and deficiencies through closure.",
           "جائزے کی مدت اور پینل طے کریں، نمونے کا منصوبہ دیکھیں اور ریکارڈ و کمیوں کی بندش تک پیروی کریں۔",

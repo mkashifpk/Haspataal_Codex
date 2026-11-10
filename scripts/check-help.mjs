@@ -327,6 +327,7 @@ export function checkHelp({
       "RecordReviewWorklist",
       "RecordDeficiencies",
       "RecordReviewCycles",
+      "RecordReviewReport",
 
       "ConsentRegister",
       "ConsentPolicySetup",
