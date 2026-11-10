@@ -1,0 +1,499 @@
+{
+  "screen": {
+    "id": "death_register",
+    "workspace": "owner_dashboard",
+    "title": "Death register & mortality",
+    "purpose": "The death register, the month's mortality statistics and the deaths to review; authorize clinical autopsies.",
+    "workflow": "MSDS IMS 153, 154; 103, 105, 106",
+    "rule_objects": [
+      {
+        "id": "rule:91d5d8d9b1",
+        "text": "Statistics default to this month (date_from / date_to to change): tiles for gross and net death rates, deaths within 24 / 48 hours of admission, post-operative deaths, deaths within 48 hours of an operation (the anaesthesia screen), maternal, neonatal, brought dead, medico-legal; tables by setting, manner, department and the top underlying causes (ICD categories, with their titles).",
+        "cites": []
+      },
+      {
+        "id": "rule:7edb40cffa",
+        "text": "review_list is the mortality meeting's agenda (unexpected and maternal deaths are sentinel events, MSDS 106): each opens the death record.",
+        "cites": [
+          "MSDS 106"
+        ]
+      },
+      {
+        "id": "rule:6de3a9a514",
+        "text": "An autopsy request (notification category autopsy_request) waits here: 'Authorize' certifies the death is not medico-legal, records the next of kin's consent (name, relationship, what was agreed) and names the prosector; the doctor who asked cannot authorize it (AUTOPSY_SELF_AUTHORIZED). Then print the order (print-payload?document=autopsy_order) for the prosector.",
+        "cites": []
+      },
+      {
+        "id": "rule:00c679a136",
+        "text": "The register lists patient names: open it only for the hospital's own review.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "deaths-and-medico-legal-cases",
+      "icd-coding",
+      "incidents-and-sentinel-events"
+    ]
+  },
+  "definition_of_done": {
+    "points": 62,
+    "items": [
+      {
+        "id": "ep:GET /deaths",
+        "label": "GET /deaths",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /deaths/statistics",
+        "label": "GET /deaths/statistics",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /deaths/{death_id}",
+        "label": "GET /deaths/{death_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /deaths/{death_id}/autopsy/authorize",
+        "label": "POST /deaths/{death_id}/autopsy/authorize",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /deaths/{death_id}/autopsy/cancel",
+        "label": "POST /deaths/{death_id}/autopsy/cancel",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /deaths/{death_id}/print-payload",
+        "label": "GET /deaths/{death_id}/print-payload",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /deaths/{death_id}/pdf",
+        "label": "GET /deaths/{death_id}/pdf",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ev:death.recorded",
+        "label": "death.recorded",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "ev:notification.created",
+        "label": "notification.created",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:91d5d8d9b1",
+        "label": "Statistics default to this month (date_from / date_to to change): tiles for gross and net death rates, deaths within 24 / 48 hours of admission, post-operative deaths, deaths within 48 hours of an operation (the anaesthesia screen), maternal, neonatal, brought dead, medico-legal; tables by setting, manner, department and the top underlying causes (ICD categories, with their titles).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:7edb40cffa",
+        "label": "review_list is the mortality meeting's agenda (unexpected and maternal deaths are sentinel events, MSDS 106): each opens the death record.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:6de3a9a514",
+        "label": "An autopsy request (notification category autopsy_request) waits here: 'Authorize' certifies the death is not medico-legal, records the next of kin's consent (name, relationship, what was agreed) and names the prosector; the doctor who asked cannot authorize it (AUTOPSY_SELF_AUTHORIZED). Then print the order (print-payload?document=autopsy_order) for the prosector.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:00c679a136",
+        "label": "The register lists patient names: open it only for the hospital's own review.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /deaths",
+      "summary": "The death register",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "death.register.view",
+          "death.record",
+          "death.body.release"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of death.register.view or death.record or death.body.release",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      }
+    },
+    {
+      "endpoint": "GET /deaths/statistics",
+      "summary": "Mortality statistics for a period",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "death.register.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of death.register.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      }
+    },
+    {
+      "endpoint": "GET /deaths/{death_id}",
+      "summary": "A death record with its certificate",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "death.record",
+          "death.body.release",
+          "death.register.view",
+          "death.autopsy.authorize"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of death.record or death.body.release or death.register.view or death.autopsy.authorize",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      }
+    },
+    {
+      "endpoint": "POST /deaths/{death_id}/autopsy/authorize",
+      "summary": "Authorize the clinical autopsy: non-medico-legal certificate, consent, order to the prosector",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "death.autopsy.authorize"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of death.autopsy.authorize",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner"
+        ]
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with AUTOPSY_TRANSITION_INVALID: the autopsy has moved on. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /deaths/{death_id}",
+        "refused_with": "AUTOPSY_TRANSITION_INVALID",
+        "emits_events": [
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /deaths/{death_id}/autopsy/cancel",
+      "summary": "Cancel the autopsy request",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "death.record",
+          "death.autopsy.authorize"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of death.record or death.autopsy.authorize",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "surgeon"
+        ]
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /deaths/{death_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /deaths/{death_id}/print-payload",
+      "summary": "Printable death certificate, or the order for a clinical autopsy",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "death.record",
+          "death.body.release",
+          "death.register.view",
+          "death.autopsy.authorize"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of death.record or death.body.release or death.register.view or death.autopsy.authorize",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      }
+    },
+    {
+      "endpoint": "GET /deaths/{death_id}/pdf",
+      "summary": "The death certificate or the autopsy order as a PDF",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "death.record",
+          "death.body.release",
+          "death.register.view",
+          "death.autopsy.authorize"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of death.record or death.body.release or death.register.view or death.autopsy.authorize",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      }
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "death_id",
+      "source": "this_screen",
+      "call": "GET /deaths",
+      "field": "death_id",
+      "used_by": [
+        "GET /deaths/{death_id}",
+        "POST /deaths/{death_id}/autopsy/authorize",
+        "POST /deaths/{death_id}/autopsy/cancel",
+        "GET /deaths/{death_id}/print-payload",
+        "GET /deaths/{death_id}/pdf"
+      ]
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "death.recorded",
+      "notification.created",
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [
+      {
+        "event": "death.recorded",
+        "priority": "high",
+        "presentation": null,
+        "emitted_by_operations": [
+          "POST /patients/{patient_id}/death"
+        ],
+        "refresh": [
+          "GET /deaths",
+          "GET /deaths/statistics",
+          "GET /deaths/{death_id}",
+          "GET /deaths/{death_id}/print-payload",
+          "GET /deaths/{death_id}/pdf"
+        ]
+      },
+      {
+        "event": "notification.created",
+        "priority": "normal",
+        "presentation": null,
+        "emitted_by_operations": [
+          "PATCH /rosters/{roster_id}",
+          "POST /admin/change-requests",
+          "POST /admissions/{admission_id}/transfer",
+          "POST /admissions/{admission_id}/treating-doctor",
+          "POST /approvals/{request_id}/approve",
+          "POST /approvals/{request_id}/cancel",
+          "POST /approvals/{request_id}/reject",
+          "POST /committee-meetings/{meeting_id}/actions",
+          "POST /complaints",
+          "POST /complaints/{complaint_id}/acknowledge",
+          "POST /complaints/{complaint_id}/actions",
+          "POST /complaints/{complaint_id}/appeal",
+          "POST /cssd/cycles/{cycle_id}/recall",
+          "POST /cssd/cycles/{cycle_id}/results",
+          "POST /deaths/{death_id}/autopsy",
+          "POST /deaths/{death_id}/autopsy/authorize",
+          "POST /deaths/{death_id}/certify",
+          "POST /drug-recalls",
+          "POST /facility/drills/{drill_id}/actions",
+          "POST /finance/cash-shifts/{shift_id}/cash-drop",
+          "POST /hr/employees/{employee_id}/status",
+          "POST /hr/employees/{employee_id}/submit",
+          "POST /hr/leave-requests/{leave_request_id}/decision",
+          "POST /imaging/orders/{order_id}/report",
+          "POST /incidents",
+          "POST /incidents/{incident_id}/actions",
+          "POST /incidents/{incident_id}/analysis/sign",
+          "POST /incidents/{incident_id}/review",
+          "POST /infection-cases",
+          "POST /infection/audits/{audit_id}/actions",
+          "POST /lab/results/{result_id}/verify",
+          "POST /lab/samples/{sample_id}/reject",
+          "POST /msds/interview-prep/mock-interviews",
+          "POST /opd-tickets/{ticket_id}/credit-request",
+          "POST /opd-tickets/{ticket_id}/refund-request",
+          "POST /opd-tickets/{ticket_id}/vip-waiver-post-consult",
+          "POST /opd-tickets/{ticket_id}/vip-waiver-request",
+          "POST /ot/bookings/{booking_id}/ssi-checks",
+          "POST /patient-feedback",
+          "POST /patient-feedback/{feedback_id}/actions",
+          "POST /personnel/qualifications/{qualification_id}/verify",
+          "POST /pharmacy/charity-override-request",
+          "POST /prescription-queries/{query_id}/answer",
+          "POST /prescriptions/{prescription_id}/queries",
+          "POST /qa/rounds/{round_id}/actions",
+          "POST /quality/record-review-items/{item_id}/assign",
+          "POST /quality/record-review-items/{item_id}/review",
+          "POST /quality/record-reviews/{cycle_id}/actions",
+          "POST /quality/record-reviews/{cycle_id}/start",
+          "POST /rosters",
+          "POST /rosters/copy",
+          "POST /rosters/swaps/{swap_id}/approve",
+          "POST /rosters/swaps/{swap_id}/reject",
+          "POST /rosters/{roster_id}/cancel",
+          "POST /self/leave-requests",
+          "POST /self/leave-requests/{leave_request_id}/cancel",
+          "POST /self/roster/swaps",
+          "POST /self/roster/swaps/{swap_id}/accept",
+          "POST /self/roster/swaps/{swap_id}/cancel",
+          "POST /self/roster/swaps/{swap_id}/decline",
+          "POST /wards/{ward_id}/indents"
+        ],
+        "refresh": [
+          "GET /deaths",
+          "GET /deaths/statistics"
+        ]
+      }
+    ],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "contract_fingerprint": "257cc319fed31b6ed2ac"
+}

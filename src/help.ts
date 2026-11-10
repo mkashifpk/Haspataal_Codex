@@ -10,6 +10,124 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  mortality_review: {
+    title: "Mortality statistics & death register",
+    titleUr: "اعداد اموات اور رجسٹر اموات",
+    purpose: "Quality reviews the mortality agenda, certification gaps and death records.",
+    purposeUr: "کوالٹی اموات کا ایجنڈا، تصدیق کی کمیاں اور ریکارڈ دیکھتی ہے۔",
+    steps: [
+      "Read the mortality statistics. The default period is this month to date. Compare gross and net rates, timing from admission or operation, and the groups and underlying ICD causes. A dash means the server cannot calculate a rate for that period.",
+      "Read the register. Choose the hospital dates and certification status. Review Draft deaths older than 24 hours with the certifying doctor. Names and MRNs are available for authorized hospital review.",
+      "Open a death record. Open the exact death number from the register or meeting agenda. Verify the MRN. Use the sentinel and early-death flags to prepare the mortality meeting. Record the root-cause review in committee minutes.",
+      "Read or print the server document. Read the certified death certificate or the authorized autopsy order. Preview the exact server PDF to print, or save it. A refused draft certificate needs certification from the doctor."
+    ],
+    stepsUr: [
+      "اعداد اموات پڑھیں۔ طے شدہ مدت رواں ماہ ہے۔ مجموعی اور خالص شرح، داخلے یا آپریشن سے وقت، گروہ اور بنیادی آئی سی ڈی وجوہ دیکھیں۔ ڈیش کا مطلب ہے مدت کی شرح دستیاب نہیں۔",
+      "رجسٹر پڑھیں۔ ہسپتال کی تاریخیں اور تصدیق کی حالت چنیں۔ ۲۴ گھنٹے سے پرانے مسودے متعلقہ ڈاکٹر کے ساتھ دیکھیں۔ نام اور ایم آر این صرف مجاز ہسپتال جائزے کے لیے ہیں۔",
+      "ریکارڈ وفات کھولیں۔ رجسٹر یا اجلاس کے ایجنڈے سے عین وفات نمبر کھولیں۔ ایم آر این ملائیں۔ سنگین اور جلد وفات کے نشان سے اجلاس کی تیاری کریں۔ بنیادی وجہ کا جائزہ کمیٹی کی روداد میں درج کریں۔",
+      "سرور دستاویز پڑھیں یا پرنٹ کریں۔ تصدیق شدہ وفات سرٹیفکیٹ یا منظور آٹوپسی آرڈر پڑھیں۔ پرنٹ کے لیے عین سرور پی ڈی ایف دیکھیں یا محفوظ کریں۔ مسودے کی تصدیق ڈاکٹر سے کرائیں۔"
+    ],
+    faq: [
+      [
+        "Read the mortality statistics",
+        "The default period is this month to date. Compare gross and net rates, timing from admission or operation, and the groups and underlying ICD causes. A dash means the server cannot calculate a rate for that period."
+      ],
+      [
+        "Read the register",
+        "Choose the hospital dates and certification status. Review Draft deaths older than 24 hours with the certifying doctor. Names and MRNs are available for authorized hospital review."
+      ],
+      [
+        "Open a death record",
+        "Open the exact death number from the register or meeting agenda. Verify the MRN. Use the sentinel and early-death flags to prepare the mortality meeting. Record the root-cause review in committee minutes."
+      ],
+      [
+        "Read or print the server document",
+        "Read the certified death certificate or the authorized autopsy order. Preview the exact server PDF to print, or save it. A refused draft certificate needs certification from the doctor."
+      ]
+    ],
+    faqUr: [
+      [
+        "اعداد اموات پڑھیں",
+        "طے شدہ مدت رواں ماہ ہے۔ مجموعی اور خالص شرح، داخلے یا آپریشن سے وقت، گروہ اور بنیادی آئی سی ڈی وجوہ دیکھیں۔ ڈیش کا مطلب ہے مدت کی شرح دستیاب نہیں۔"
+      ],
+      [
+        "رجسٹر پڑھیں",
+        "ہسپتال کی تاریخیں اور تصدیق کی حالت چنیں۔ ۲۴ گھنٹے سے پرانے مسودے متعلقہ ڈاکٹر کے ساتھ دیکھیں۔ نام اور ایم آر این صرف مجاز ہسپتال جائزے کے لیے ہیں۔"
+      ],
+      [
+        "ریکارڈ وفات کھولیں",
+        "رجسٹر یا اجلاس کے ایجنڈے سے عین وفات نمبر کھولیں۔ ایم آر این ملائیں۔ سنگین اور جلد وفات کے نشان سے اجلاس کی تیاری کریں۔ بنیادی وجہ کا جائزہ کمیٹی کی روداد میں درج کریں۔"
+      ],
+      [
+        "سرور دستاویز پڑھیں یا پرنٹ کریں",
+        "تصدیق شدہ وفات سرٹیفکیٹ یا منظور آٹوپسی آرڈر پڑھیں۔ پرنٹ کے لیے عین سرور پی ڈی ایف دیکھیں یا محفوظ کریں۔ مسودے کی تصدیق ڈاکٹر سے کرائیں۔"
+      ]
+    ]
+  },
+  death_register: {
+    title: "Death register & mortality",
+    titleUr: "رجسٹر اموات اور شرح اموات",
+    purpose: "Review the hospital death register, mortality figures and authorized clinical autopsy requests.",
+    purposeUr: "ہسپتال رجسٹر اموات، اعداد اور مجاز طبی آٹوپسی درخواستیں دیکھیں۔",
+    steps: [
+      "Read the mortality statistics. The default period is this month to date. Compare gross and net rates, timing from admission or operation, and the groups and underlying ICD causes. A dash means the server cannot calculate a rate for that period.",
+      "Read the register. Choose the hospital dates and certification status. Review Draft deaths older than 24 hours with the certifying doctor. Names and MRNs are available for authorized hospital review.",
+      "Open a death record. Open the exact death number from the register or meeting agenda. Verify the MRN. Use the sentinel and early-death flags to prepare the mortality meeting. Record the root-cause review in committee minutes.",
+      "Read or print the server document. Read the certified death certificate or the authorized autopsy order. Preview the exact server PDF to print, or save it. A refused draft certificate needs certification from the doctor.",
+      "Decide the clinical autopsy. An authorized hospital head other than the requester verifies the death is not medico-legal, records the legal next of kin’s consent and its extent, and names the prosector. Read the resulting order before printing. To cancel an eligible request, record a reason. If the result is uncertain, read the original request before any replacement action."
+    ],
+    stepsUr: [
+      "اعداد اموات پڑھیں۔ طے شدہ مدت رواں ماہ ہے۔ مجموعی اور خالص شرح، داخلے یا آپریشن سے وقت، گروہ اور بنیادی آئی سی ڈی وجوہ دیکھیں۔ ڈیش کا مطلب ہے مدت کی شرح دستیاب نہیں۔",
+      "رجسٹر پڑھیں۔ ہسپتال کی تاریخیں اور تصدیق کی حالت چنیں۔ ۲۴ گھنٹے سے پرانے مسودے متعلقہ ڈاکٹر کے ساتھ دیکھیں۔ نام اور ایم آر این صرف مجاز ہسپتال جائزے کے لیے ہیں۔",
+      "ریکارڈ وفات کھولیں۔ رجسٹر یا اجلاس کے ایجنڈے سے عین وفات نمبر کھولیں۔ ایم آر این ملائیں۔ سنگین اور جلد وفات کے نشان سے اجلاس کی تیاری کریں۔ بنیادی وجہ کا جائزہ کمیٹی کی روداد میں درج کریں۔",
+      "سرور دستاویز پڑھیں یا پرنٹ کریں۔ تصدیق شدہ وفات سرٹیفکیٹ یا منظور آٹوپسی آرڈر پڑھیں۔ پرنٹ کے لیے عین سرور پی ڈی ایف دیکھیں یا محفوظ کریں۔ مسودے کی تصدیق ڈاکٹر سے کرائیں۔",
+      "طبی آٹوپسی کا فیصلہ کریں۔ درخواست دینے والے کے علاوہ مجاز سربراہ تصدیق کرے کہ وفات میڈیکو لیگل نہیں، قانونی قریبی رشتہ دار کی رضامندی اور دائرہ درج کرے اور معالج نامزد کرے۔ پرنٹ سے پہلے آرڈر پڑھیں۔ اہل درخواست منسوخ کرنے کی وجہ درج کریں۔ نامعلوم نتیجے پر پہلے اصل درخواست پڑھیں۔"
+    ],
+    faq: [
+      [
+        "Read the mortality statistics",
+        "The default period is this month to date. Compare gross and net rates, timing from admission or operation, and the groups and underlying ICD causes. A dash means the server cannot calculate a rate for that period."
+      ],
+      [
+        "Read the register",
+        "Choose the hospital dates and certification status. Review Draft deaths older than 24 hours with the certifying doctor. Names and MRNs are available for authorized hospital review."
+      ],
+      [
+        "Open a death record",
+        "Open the exact death number from the register or meeting agenda. Verify the MRN. Use the sentinel and early-death flags to prepare the mortality meeting. Record the root-cause review in committee minutes."
+      ],
+      [
+        "Read or print the server document",
+        "Read the certified death certificate or the authorized autopsy order. Preview the exact server PDF to print, or save it. A refused draft certificate needs certification from the doctor."
+      ],
+      [
+        "Decide the clinical autopsy",
+        "An authorized hospital head other than the requester verifies the death is not medico-legal, records the legal next of kin’s consent and its extent, and names the prosector. Read the resulting order before printing. To cancel an eligible request, record a reason. If the result is uncertain, read the original request before any replacement action."
+      ]
+    ],
+    faqUr: [
+      [
+        "اعداد اموات پڑھیں",
+        "طے شدہ مدت رواں ماہ ہے۔ مجموعی اور خالص شرح، داخلے یا آپریشن سے وقت، گروہ اور بنیادی آئی سی ڈی وجوہ دیکھیں۔ ڈیش کا مطلب ہے مدت کی شرح دستیاب نہیں۔"
+      ],
+      [
+        "رجسٹر پڑھیں",
+        "ہسپتال کی تاریخیں اور تصدیق کی حالت چنیں۔ ۲۴ گھنٹے سے پرانے مسودے متعلقہ ڈاکٹر کے ساتھ دیکھیں۔ نام اور ایم آر این صرف مجاز ہسپتال جائزے کے لیے ہیں۔"
+      ],
+      [
+        "ریکارڈ وفات کھولیں",
+        "رجسٹر یا اجلاس کے ایجنڈے سے عین وفات نمبر کھولیں۔ ایم آر این ملائیں۔ سنگین اور جلد وفات کے نشان سے اجلاس کی تیاری کریں۔ بنیادی وجہ کا جائزہ کمیٹی کی روداد میں درج کریں۔"
+      ],
+      [
+        "سرور دستاویز پڑھیں یا پرنٹ کریں",
+        "تصدیق شدہ وفات سرٹیفکیٹ یا منظور آٹوپسی آرڈر پڑھیں۔ پرنٹ کے لیے عین سرور پی ڈی ایف دیکھیں یا محفوظ کریں۔ مسودے کی تصدیق ڈاکٹر سے کرائیں۔"
+      ],
+      [
+        "طبی آٹوپسی کا فیصلہ کریں",
+        "درخواست دینے والے کے علاوہ مجاز سربراہ تصدیق کرے کہ وفات میڈیکو لیگل نہیں، قانونی قریبی رشتہ دار کی رضامندی اور دائرہ درج کرے اور معالج نامزد کرے۔ پرنٹ سے پہلے آرڈر پڑھیں۔ اہل درخواست منسوخ کرنے کی وجہ درج کریں۔ نامعلوم نتیجے پر پہلے اصل درخواست پڑھیں۔"
+      ]
+    ]
+  },
   record_review_report: {
     title: "Review report, deficiencies & actions",
     titleUr: "جائزہ رپورٹ، کمیاں اور اقدامات",
