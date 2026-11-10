@@ -331,6 +331,7 @@ export function checkHelp({
       "MortalityRegister",
       "MedicoLegalRegister",
       "IcdReports",
+      "EmergencyReports",
 
       "ConsentRegister",
       "ConsentPolicySetup",

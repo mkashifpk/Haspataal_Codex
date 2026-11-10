@@ -1,0 +1,216 @@
+{
+  "screen": {
+    "id": "er_register",
+    "workspace": "quality",
+    "title": "ER register (emergency log book)",
+    "purpose": "Every emergency visit with its triage and how the patient left: the log book the surveyor samples.",
+    "workflow": "MSDS AAC 20",
+    "rule_objects": [
+      {
+        "id": "rule:69a1271774",
+        "text": "Filters: date range (day of arrival), disposition, triage level, still open. Columns: ER number, arrival, patient, level (colour), stage or disposition, departure time, MLC number.",
+        "cites": []
+      },
+      {
+        "id": "rule:f019e47a1f",
+        "text": "A departed visit without the fields its disposition needs cannot exist (the database refuses it); open visits older than a shift deserve a question to the ER.",
+        "cites": []
+      },
+      {
+        "id": "rule:dac6eaa9d9",
+        "text": "Exists for the service emergency_department (records): show it as GET /establishment views.screens says for screen_id er_register (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "emergency-department"
+    ],
+    "service": {
+      "services": [
+        "emergency_department"
+      ],
+      "role": "records",
+      "views": {
+        "full": "Show it; every action the user's permissions allow.",
+        "open_work": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting).",
+        "records": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work.",
+        "setup": "Not in the daily menus: reach it from Facility settings (a preview's prerequisites link to it) to set the service up before switching it on.",
+        "hidden": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      },
+      "how": "GET /establishment after login and on establishment.changed: views.screens gives this screen's view (one frontend build for every profile; never decide it from the profile's category)"
+    }
+  },
+  "definition_of_done": {
+    "points": 39,
+    "items": [
+      {
+        "id": "ep:GET /er/visits",
+        "label": "GET /er/visits",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /er/visits/{er_visit_id}",
+        "label": "GET /er/visits/{er_visit_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:69a1271774",
+        "label": "Filters: date range (day of arrival), disposition, triage level, still open. Columns: ER number, arrival, patient, level (colour), stage or disposition, departure time, MLC number.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:f019e47a1f",
+        "label": "A departed visit without the fields its disposition needs cannot exist (the database refuses it); open visits older than a shift deserve a question to the ER.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:dac6eaa9d9",
+        "label": "Exists for the service emergency_department (records): show it as GET /establishment views.screens says for screen_id er_register (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /er/visits",
+      "summary": "The ER register (emergency log book)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "er.visit.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of er.visit.view",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "receptionist",
+          "surgeon",
+          "triage_nurse"
+        ]
+      },
+      "service_gates": []
+    },
+    {
+      "endpoint": "GET /er/visits/{er_visit_id}",
+      "summary": "One ER visit",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "er.visit.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of er.visit.view",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "receptionist",
+          "surgeon",
+          "triage_nurse"
+        ]
+      },
+      "service_gates": []
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "er_visit_id",
+      "source": "this_screen",
+      "call": "GET /er/visits",
+      "field": "er_visit_id",
+      "used_by": [
+        "GET /er/visits/{er_visit_id}"
+      ]
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "contract_fingerprint": "257cc319fed31b6ed2ac"
+}

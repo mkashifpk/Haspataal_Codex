@@ -10,6 +10,118 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  er_register: {
+    title: "ER register (emergency log book)",
+    titleUr: "ایمرجنسی رجسٹر",
+    purpose: "Inspect the authorized emergency log and exact visit history.",
+    purposeUr: "مجاز ایمرجنسی رجسٹر اور عین وزٹ کی تاریخ دیکھیں۔",
+    steps: [
+      "Read the ER arrival register. Choose the hospital dates, disposition, triage level and still-open filter. Review elapsed open time and the server’s delay flags. Ask ER staff about visits that remain open across a shift.",
+      "Open the exact emergency visit. Verify the ER number and MRN. Read arrival, triage and overrides, stage history, departure notes and MLC linkage. This register is for review.",
+      "How does the service view affect the screen?. The hospital sets access and visibility. The screen reads permitted history in Records mode. In Open work mode, existing work remains available; the banner explains the service is retiring."
+    ],
+    stepsUr: [
+      "ایمرجنسی آمد رجسٹر پڑھیں۔ ہسپتال کی تاریخیں، روانگی، ٹریاج سطح اور کھلے وزٹ چنیں۔ کھلا وقت اور سرور تاخیر نشان دیکھیں۔ شفٹ کے بعد بھی کھلے وزٹ کے لیے ایمرجنسی عملے سے پوچھیں۔",
+      "عین ایمرجنسی وزٹ کھولیں۔ ای آر نمبر اور ایم آر این ملائیں۔ آمد، ٹریاج و تبدیلی، مراحل، روانگی اور میڈیکو لیگل ربط پڑھیں۔ یہ رجسٹر جائزے کے لیے ہے۔",
+      "سروس کا منظر کیا اثر رکھتا ہے؟۔ ہسپتال رسائی اور دستیابی طے کرتا ہے۔ ریکارڈ حالت میں مجاز تاریخ پڑھیں۔ کھلا کام حالت میں موجودہ کام دستیاب ہے اور بینر بند ہوتی سروس بتاتا ہے۔"
+    ],
+    faq: [
+      [
+        "Read the ER arrival register",
+        "Choose the hospital dates, disposition, triage level and still-open filter. Review elapsed open time and the server’s delay flags. Ask ER staff about visits that remain open across a shift."
+      ],
+      [
+        "Open the exact emergency visit",
+        "Verify the ER number and MRN. Read arrival, triage and overrides, stage history, departure notes and MLC linkage. This register is for review."
+      ],
+      [
+        "How does the service view affect the screen?",
+        "The hospital sets access and visibility. The screen reads permitted history in Records mode. In Open work mode, existing work remains available; the banner explains the service is retiring."
+      ]
+    ],
+    faqUr: [
+      [
+        "ایمرجنسی آمد رجسٹر پڑھیں",
+        "ہسپتال کی تاریخیں، روانگی، ٹریاج سطح اور کھلے وزٹ چنیں۔ کھلا وقت اور سرور تاخیر نشان دیکھیں۔ شفٹ کے بعد بھی کھلے وزٹ کے لیے ایمرجنسی عملے سے پوچھیں۔"
+      ],
+      [
+        "عین ایمرجنسی وزٹ کھولیں",
+        "ای آر نمبر اور ایم آر این ملائیں۔ آمد، ٹریاج و تبدیلی، مراحل، روانگی اور میڈیکو لیگل ربط پڑھیں۔ یہ رجسٹر جائزے کے لیے ہے۔"
+      ],
+      [
+        "سروس کا منظر کیا اثر رکھتا ہے؟",
+        "ہسپتال رسائی اور دستیابی طے کرتا ہے۔ ریکارڈ حالت میں مجاز تاریخ پڑھیں۔ کھلا کام حالت میں موجودہ کام دستیاب ہے اور بینر بند ہوتی سروس بتاتا ہے۔"
+      ]
+    ]
+  },
+  er_statistics: {
+    title: "Emergency department statistics",
+    titleUr: "ایمرجنسی شعبے کے اعداد",
+    purpose: "Review emergency triage targets, wait times and departure outcomes.",
+    purposeUr: "ایمرجنسی ٹریاج اہداف، انتظار اور روانگی نتائج دیکھیں۔",
+    steps: [
+      "Review triage and waits. Choose the arrival period. Read time to triage and doctor, per-level targets, overrides, median, 90th percentile and longest waits. Review patients seen before triage and departures without being seen. A dash means the server has no denominator or observation.",
+      "How does the service view affect the screen?. The hospital sets access and visibility. The screen reads permitted history in Records mode. In Open work mode, existing work remains available; the banner explains the service is retiring."
+    ],
+    stepsUr: [
+      "ٹریاج اور انتظار دیکھیں۔ آمد کی مدت چنیں۔ ٹریاج اور ڈاکٹر تک وقت، سطحی اہداف، تبدیلی، درمیانی، نوے فیصدی اور طویل ترین انتظار پڑھیں۔ ٹریاج سے پہلے معائنے اور بغیر معائنے روانگی دیکھیں۔ ڈیش کا مطلب پیمائش دستیاب نہیں۔",
+      "سروس کا منظر کیا اثر رکھتا ہے؟۔ ہسپتال رسائی اور دستیابی طے کرتا ہے۔ ریکارڈ حالت میں مجاز تاریخ پڑھیں۔ کھلا کام حالت میں موجودہ کام دستیاب ہے اور بینر بند ہوتی سروس بتاتا ہے۔"
+    ],
+    faq: [
+      [
+        "Review triage and waits",
+        "Choose the arrival period. Read time to triage and doctor, per-level targets, overrides, median, 90th percentile and longest waits. Review patients seen before triage and departures without being seen. A dash means the server has no denominator or observation."
+      ],
+      [
+        "How does the service view affect the screen?",
+        "The hospital sets access and visibility. The screen reads permitted history in Records mode. In Open work mode, existing work remains available; the banner explains the service is retiring."
+      ]
+    ],
+    faqUr: [
+      [
+        "ٹریاج اور انتظار دیکھیں",
+        "آمد کی مدت چنیں۔ ٹریاج اور ڈاکٹر تک وقت، سطحی اہداف، تبدیلی، درمیانی، نوے فیصدی اور طویل ترین انتظار پڑھیں۔ ٹریاج سے پہلے معائنے اور بغیر معائنے روانگی دیکھیں۔ ڈیش کا مطلب پیمائش دستیاب نہیں۔"
+      ],
+      [
+        "سروس کا منظر کیا اثر رکھتا ہے؟",
+        "ہسپتال رسائی اور دستیابی طے کرتا ہے۔ ریکارڈ حالت میں مجاز تاریخ پڑھیں۔ کھلا کام حالت میں موجودہ کام دستیاب ہے اور بینر بند ہوتی سروس بتاتا ہے۔"
+      ]
+    ]
+  },
+  er_statistics_owner: {
+    title: "Emergency department statistics",
+    titleUr: "ایمرجنسی شعبے کے اعداد",
+    purpose: "Review emergency triage targets, wait times and departure outcomes.",
+    purposeUr: "ایمرجنسی ٹریاج اہداف، انتظار اور روانگی نتائج دیکھیں۔",
+    steps: [
+      "Review triage and waits. Choose the arrival period. Read time to triage and doctor, per-level targets, overrides, median, 90th percentile and longest waits. Review patients seen before triage and departures without being seen. A dash means the server has no denominator or observation.",
+      "How does the service view affect the screen?. The hospital sets access and visibility. The screen reads permitted history in Records mode. In Open work mode, existing work remains available; the banner explains the service is retiring."
+    ],
+    stepsUr: [
+      "ٹریاج اور انتظار دیکھیں۔ آمد کی مدت چنیں۔ ٹریاج اور ڈاکٹر تک وقت، سطحی اہداف، تبدیلی، درمیانی، نوے فیصدی اور طویل ترین انتظار پڑھیں۔ ٹریاج سے پہلے معائنے اور بغیر معائنے روانگی دیکھیں۔ ڈیش کا مطلب پیمائش دستیاب نہیں۔",
+      "سروس کا منظر کیا اثر رکھتا ہے؟۔ ہسپتال رسائی اور دستیابی طے کرتا ہے۔ ریکارڈ حالت میں مجاز تاریخ پڑھیں۔ کھلا کام حالت میں موجودہ کام دستیاب ہے اور بینر بند ہوتی سروس بتاتا ہے۔"
+    ],
+    faq: [
+      [
+        "Review triage and waits",
+        "Choose the arrival period. Read time to triage and doctor, per-level targets, overrides, median, 90th percentile and longest waits. Review patients seen before triage and departures without being seen. A dash means the server has no denominator or observation."
+      ],
+      [
+        "How does the service view affect the screen?",
+        "The hospital sets access and visibility. The screen reads permitted history in Records mode. In Open work mode, existing work remains available; the banner explains the service is retiring."
+      ]
+    ],
+    faqUr: [
+      [
+        "ٹریاج اور انتظار دیکھیں",
+        "آمد کی مدت چنیں۔ ٹریاج اور ڈاکٹر تک وقت، سطحی اہداف، تبدیلی، درمیانی، نوے فیصدی اور طویل ترین انتظار پڑھیں۔ ٹریاج سے پہلے معائنے اور بغیر معائنے روانگی دیکھیں۔ ڈیش کا مطلب پیمائش دستیاب نہیں۔"
+      ],
+      [
+        "سروس کا منظر کیا اثر رکھتا ہے؟",
+        "ہسپتال رسائی اور دستیابی طے کرتا ہے۔ ریکارڈ حالت میں مجاز تاریخ پڑھیں۔ کھلا کام حالت میں موجودہ کام دستیاب ہے اور بینر بند ہوتی سروس بتاتا ہے۔"
+      ]
+    ]
+  },
   icd_code_lists: {
     title: "ICD code lists",
     titleUr: "آئی سی ڈی کوڈ فہرستیں",

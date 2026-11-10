@@ -46,6 +46,8 @@ export function screenNavigation(
     const view = establishment.views.screens.find(
       (s) => s.screen_id === id,
     )?.view;
+    if (["er_register","er_statistics","er_statistics_owner"].includes(id))
+      return view === "full" || view === "open_work" || view === "records";
     if (view === "hidden") return false;
     // Facility-profile configuration owns this setup-only entry.
     return view !== "setup" || !["imaging_quality_setup", "preventive_programmes_setup", "labour_register_columns"].includes(id);
