@@ -1,49 +1,28 @@
 # Handoff — 2026-11-10 — Codex / PowerShell + Haspataal MCP
 
-## Current scope and status
+## Scope and status
 
-User asked to finish upcoming/current P9B screens and cover their features. Clean baseline 3483225. Implemented 202 record_review_report (Quality) and 203 record_review_overview (Owner) in 03f598c. Shared RecordReviewReport and existing RecordReviewCycles cover MSDS survey evidence, exact PDF, scoped findings, action register and checklist. Owner also exposes schedule, panel, sampling, sampled details, assignment and closure. EN/UR screen/workspace help and four screenshots included.
+User requested all pending P9B screens. From clean baseline `ef5ea92`, built the 19 remaining catalogue entries (204–222) in Records and clinical statistics. P9B 194–203 already had UI. All 19 have native DEV journey evidence and English/Urdu screen help, workspace FAQs, contextual F1, and shared zoom coverage. Named human reviews and P9B phase acceptance are still pending. DEV server `2026-11-09T17:10:47.430848+00:00`, contract `257cc319fed31b6ed2ac`, rubric `f5cb9ab955e1`, implementation 1.
 
-DEV 2026-11-09T17:10:47.430848+00:00, contract 257cc319fed31b6ed2ac, rubric f5cb9ab955e1, implementation 1. Proposals 400/401 were accepted before this turn. 668/913 distinct operations consumed at session start. No review code entered.
+| Catalogue | Implementation | Evidence |
+| --- | --- | --- |
+| 204–205 Mortality review and death register | `eaf9783` | `docs/phase-p9b-204-205-2026-11-10` |
+| 206–207 Owner/Quality MLC register | `2c8a493` | `docs/phase-p9b-206-207-2026-11-10` |
+| 208–210 ICD releases and two diagnosis-statistics views | `7fee593` | `docs/phase-p9b-208-210-2026-11-10` |
+| 211–213 ER register and two ER-statistics views | `e58106b` | `docs/phase-p9b-211-213-2026-11-10` |
+| 214–217 Diagnostic quality in four workspaces | `9641d60` | `docs/phase-p9b-214-217-2026-11-10` |
+| 218–222 Correlation, medication safety, estimates, and two surgical-statistics views | `5b1101e` | `docs/phase-p9b-218-222-2026-11-10` |
 
-## Verification and synthetic state
+## Verification and remaining acceptance
 
-- Final npm.cmd run build passed 202-screen coverage and TypeScript, renderer index-BCpwAFtE.js, SHA-256 009f3a7c8626deef0c5d2e4fff084e065060afef73f0bd466bf8a7e9fb699f95. npm.cmd test passed 873/873. Expanded PDF allowlist assertions passed in targeted run.
-- Native Quality read, PDF, F1 and 250% passed; criterion creation and retirement and action creation/completion passed. Follow-up acknowledged finding 3 once. These used index-CGHWkCww.js, before final workspace-help text. Final Owner run on index-BCpwAFtE.js read schedule, cycle, sample plan and sampled item, verified closure was disabled with open findings, and exercised report, PDF, F1 and both themes/languages at 250%. Initial Owner bootstrap timeout recovered by read-only retry.
-- Cycle 2 MRR-2026-002 remains InReview. Action 17 is Done v2, finding 3 Acknowledged, 1/5 Corrected, 2/4/6 Open. The one added synthetic criterion was retired. Exact intents/results and proposal records are under docs/phase-p9b-202-203-2026-11-10. Do not replay. Profiles closed and preferences restored. No running command or uncertain business write.
-- Successful closure, Owner writes, a withdrawal, overdue action and physical print remain untested. Named fresh-data and language sign-off remain pending. Proposals 402 and 403 verified pending, awaiting human review on /docs -> My progress.
+- Final `npm.cmd test` 874/874; `npm.cmd run build:release` staged a local release and verified DEV review exclusion; `npm.cmd run build` passed with 221 handbook screens, TypeScript and renderer `index-BEIVnCto.js`. Vite emitted its bundle size warning. Last five native DEV journeys on `index-B5Dut_1l.js` preceded source formatting only. Separate/Combined PDF dialogs reached and cancelled, both languages/themes at 250%, F1 focus restored. No physical output or signed installer tested.
+- Verified proposals 402–405 accepted; 406–422 pending, awaiting human review on /docs -> My progress. Final five proposals 418–422 have their exact payloads and confirmed receipts saved under the 218–222 evidence directory. No test entered a Review code.
+- Synthetic certified Death 6/autopsy 3 was requested, authorized and cancelled. MLC synthetic directory additions were created and retired. ICD malformed file reached DEV and returned ICD_IMPORT_INVALID; no release was added or activated. ER synthetic ER-2026-000001 used read-only. Native profiles closed and preferences restored. No uncertain business writes.
+- Fresh correlation append/review-again, send-out detail, recall detail/event refresh, populated surgical journeys and service variants remain unverified. Successful ICD import/activation needs an appropriate DEV setup. Named fresh-data and translation sign-off remains. Phase exit also requires actual cycle closure. Cycle 2 MRR-2026-002 InReview: action 17 Done v2, finding 3 Acknowledged, 1/5 Corrected, 2/4/6 Open. Do not replay settled actions.
+- Backend issues #65–#68 last verified New on 2026-11-10. #67 Quality bundle omits cycle directory for cycles without findings; #68 completion ID source omits action register. #62–#64 Fixed and verified earlier in `ea5903d` / `feeb1d5`. No new backend issue reproduced this turn. Legacy path-source audit remains open; Home visits 187 remains hidden on DEV.
 
-## Backend gaps and next action
+## Next action
 
-#67 New, Quality report bundle omits the working cycle directory for cycles without findings. #68 New, completion ID source omits the working action register. Both documented with request IDs in the evidence folder; UI uses actual server lists. #65/#66 still New. #62–#64 remain Fixed/closed and verified previously. The broader legacy path audit remains open, and Home visits 187 remains hidden on DEV. Prior P9B 200/201 evidence is under docs/phase-p9b-200-201-2026-11-10.
+Sign-off is human-owned. Next roadmap phase P9C starts at 223 `report_infection_doctor`, then 224 `report_infection_ward` and 225 `infection_cases`. Read the fresh roadmap and bundles before starting. No implementation or command in progress. Application baseline `5b1101e` and the subsequent evidence-only commit. No uncommitted work expected.
 
-Next build P9B 204 mortality_review (Quality) and 205 death_register (Owner). Their build roadmap entries were verified. Read both complete bundles, current design/UI briefs, workspace guides and plans before implementation. Preserve existing death-record workflows; use an explicitly synthetic certified death for verification.
-
-## Environment
-
-PowerShell, Node 24, npm.cmd. Authorized local config is ignored .dev-terminal.json, .codex/config.toml and .agents/mcp_config.json. No secrets or patient data in handoff. Native support scripts/clinical-test-kit.mjs. Reconcile uncertain writes with the original key or exact server read.
-Active P9B implementation request from clean ef5ea92. Roadmap has 19 unbuilt screens 204–222; 402/403 remain pending, #65–68 New and DEV unchanged. Retrieved bundles, generated clients, design and quality briefs and plans for all 19. Start with shared mortality/death register 204/205; DEV read against existing synthetic Death:6, then gated autopsy actions, PDF bridge, F1 and verification. No pending business writes.
-One guarded DEV autopsy request for previously proven synthetic Death 6 is pending. On a lost response read GET /deaths/6 and reconcile exact key. No physical action.
-Synthetic Death 6 request confirmed 201, autopsy 3 Requested by demo.doctor (11). No replay. Mortality app and bilingual help wired; preview compile and Electron pending.
-Preview build index-DOKwqEVi.js and static help coverage passed. Pending node scripts/p9b204-205-ui.mjs --writes on synthetic Death 6/autopsy 3. Native will guard and journal Owner authorize, order PDF, then cancel. Reconcile exact record/transport if any response or script is uncertain.
-Quality 204 native passed real register/statistics/detail, certification filter, F1 and certificate PDF. Owner 205 native still running. Prepare the next paired MLC screens 206/207 using shared register and Owner setup; generated APIs and saved bundles first. No MLC writes yet.
-Both mortality native journeys passed on index-DOKwqEVi.js. Owner authorized synthetic autopsy 3, fetched order print payload and PDF, then cancelled it. No pending business write. Start mandatory build and full tests for the 204/205 checkpoint; MLC files currently generated/contracts only and excluded from this checkpoint.
-MLC shared screen, setup, exact contact PDF and scoped intimation output now wired. Existing confirmed synthetic MLC-2026-00001 is Open/overdue. Pending compile, native tests and four journaled writes to create/retire one synthetic case type and one non-operational contact. No MLC writes started.
-Mortality proposals 404 and 405 confirmed pending, awaiting human review on /docs -> My progress. Current MLC native process pending; prepare next ICD screens 208–210 after 206/207. ICD activation changes the hospital-wide list, so native verification should use the read and harmless validation paths, not switch the shared DEV classification.
-Owner 206 and Quality 207 native passed. Case type and contact created/retired exactly once; see 206/207 journals. Start full build/tests for MLC checkpoint. ICD source and contracts prepared, but no ICD mutation/activation has started.
-MLC proposals 406 and 407 verified pending, awaiting human review on /docs -> My progress. Commit 2c8a493. The 208–210 ICD pages are wired and their static help coverage is 209; pending compile and native tests. Do not activate a synthetic ICD release on shared DEV.
-Pending tsc, preview build and node scripts/p9b208-210-ui.mjs for the ICD pages. The only intended POST is a malformed non-activating synthetic CSV, journaled before the click; confirm refusal and unchanged releases. No activation is authorized by the harness.
-ER 211–213 current catalogue and generated clients reviewed. Prepare shared statistics and ER register using real visit selectors, service views and bilingual help. ICD native continues against its frozen renderer. No ER mutation planned.
-ICD initial native run found a frontend defect: multipart patient MIME guard refused ICD CSV before HTTP, confirmed zero POST in trace. Scoped native transport to exact POST /api/v1/icd/releases and allowed only contracted extensions with canonical MIME. Transport regression test added. Preserve local rejected intent; rerun native with a fresh malformed non-activating file.
-Scoped ICD transport test passed all 4 transport cases. Pending node scripts/p9b208-210-ui.mjs --quality on existing renderer with updated native code. Test should now observe server rejection. Owner 210 native already passed read/F1/print preparation.
-ICD native Quality retry passed: malformed CSV reached DEV and was rejected with ICD_IMPORT_INVALID, release list unchanged. Owner stats already passed. Pending full npm.cmd run build and npm.cmd test for 208–210 before enabling ER help/mounts. ER source/contracts are drafted and unstaged.
-ICD 208–210 native passed with confirmed server invalid-upload refusal, no release changes. Full build 209 and tests 874 passed. Commit 208–210 excluding unmounted ER draft source; then mount ER and run native 211–213.
-211–213 service-aware views wired and static handbook coverage 212. Existing synthetic ER-2026-000001 is present. Pending TypeScript/preview and native script with read-only register, visit detail, open-only filter and Quality/Owner stats.
-Prepare shared Diagnostics Quality 214–217. Need combined PDF preference support for five exact server documents. Pending npm.cmd install --save-exact --ignore-scripts pdf-lib@1.17.1; native merge will allow only exact diagnostic documents.
-ICD proposals 408–410 verified pending, awaiting human review on /docs -> My progress. ER 211–213 native all passed, read-only. Start final npm.cmd run build and tests for ER; diagnostics drafts and package work are still separate.
-Diagnostics 214–217 shared UI wired with authorized service views and individual or combined PDF preference. Static help 216. Pending preview build and node scripts/p9b214-217-ui.mjs, a read-only backend journey in four roles with preferences restored. Current synthetic DEV send-out list is empty; no detail claim without actual row.
-Final P9B 218–222 contracts and plans read. Implement diagnostic correlation (append-only), medication statistics and recall read, cost-estimate statistics and policy/tariff PDFs, surgical metrics and open adverse-event lists. No clinical writes planned without exact eligible synthetic source.
-All four Diagnostics native journeys 214–217 passed, including Separate and the five-document Combined save-dialog journey. No business writes. Pending mandatory build at 216, then commit/propose. Final 218–222 source and contracts drafted but not mounted; no correlation eligible fixture at preflight.
-ER proposals 411–413 verified pending, awaiting human review on /docs -> My progress.
-Final screens 218–222 mounted with native estimate/policy PDF support. Pending TypeScript, handbook wiring, and native read-only Quality and Owner journeys.
-Diagnostics proposals 414–417 verified pending, awaiting human review on /docs -> My progress. Final five static handbook checks at 221 and TypeScript passed; native journey pending.
+PowerShell, Node 24, `npm.cmd`. Authorized ignored config in `.dev-terminal.json`, `.codex/config.toml`, and `.agents/mcp_config.json`. Native support `scripts/clinical-test-kit.mjs`. Never include credentials or real patient data.
