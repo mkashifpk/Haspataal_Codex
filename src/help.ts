@@ -10,6 +10,222 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  lab_quality: {
+    title: "Diagnostic services quality (MSDS)",
+    titleUr: "تشخیصی خدمات کا معیار (ایم ایس ڈی ایس)",
+    purpose: "Inspect permitted diagnostic results, turnarounds and the quality evidence for your workspace.",
+    purposeUr: "اپنی جگہ کے مجاز تشخیصی نتائج، بروقت کارکردگی اور معیار کے شواہد دیکھیں۔",
+    steps: [
+      "Read turnaround and quality measures. Choose the hospital period and Lab or Imaging. Review on-time results against each class target, score, late reasons, MSDS measures, rejected samples, repeated exposures and partner performance.",
+      "Review a dispatch and partner. Choose a real dispatch or worklist item. Match manifest and sample identifiers. Use partner and Outstanding only filters. The partner directory shows MOU and active state.",
+      "Review critical results. Choose source and status. Read the result, due time and current acknowledgment; use the appropriate clinical workflow for any real response.",
+      "Download documents for inspection. Use the terminal PDF preference to save each authorized document or a single combined PDF. The period applies to turnaround and the critical register; policies and services are current. Print the saved or previewed PDF."
+    ],
+    stepsUr: [
+      "بروقت نتائج اور معیار پڑھیں۔ ہسپتال مدت اور لیبارٹری یا امیجنگ چنیں۔ ہر درجے کا بروقت ہدف، معیار، تاخیر وجوہ، ایم ایس ڈی ایس پیمائش، مسترد نمونے، دہرائی امیجنگ اور شراکت دار دیکھیں۔",
+      "روانگی اور شراکت دار دیکھیں۔ اصل روانگی یا کام منتخب کریں۔ فہرست اور نمونہ شناخت ملائیں۔ شراکت دار اور صرف باقی فلٹر استعمال کریں۔ فہرست معاہدہ اور فعال حالت دکھاتی ہے۔",
+      "اہم نتائج کا جائزہ۔ ماخذ اور حالت چنیں۔ نتیجہ، آخری وقت اور موجودہ تصدیق پڑھیں؛ حقیقی جواب کے لیے طبی طریقہ استعمال کریں۔",
+      "معائنے کے لیے دستاویزات۔ ٹرمینل پی ڈی ایف ترجیح سے ہر مجاز دستاویز الگ یا ایک مشترکہ پی ڈی ایف محفوظ کریں۔ مدت بروقت رپورٹ اور اہم رجسٹر پر لاگو ہے؛ پالیسیاں اور خدمات موجودہ ہیں۔ محفوظ یا دیکھی پی ڈی ایف پرنٹ کریں۔"
+    ],
+    faq: [
+      [
+        "Read turnaround and quality measures",
+        "Choose the hospital period and Lab or Imaging. Review on-time results against each class target, score, late reasons, MSDS measures, rejected samples, repeated exposures and partner performance."
+      ],
+      [
+        "Review a dispatch and partner",
+        "Choose a real dispatch or worklist item. Match manifest and sample identifiers. Use partner and Outstanding only filters. The partner directory shows MOU and active state."
+      ],
+      [
+        "Review critical results",
+        "Choose source and status. Read the result, due time and current acknowledgment; use the appropriate clinical workflow for any real response."
+      ],
+      [
+        "Download documents for inspection",
+        "Use the terminal PDF preference to save each authorized document or a single combined PDF. The period applies to turnaround and the critical register; policies and services are current. Print the saved or previewed PDF."
+      ]
+    ],
+    faqUr: [
+      [
+        "بروقت نتائج اور معیار پڑھیں",
+        "ہسپتال مدت اور لیبارٹری یا امیجنگ چنیں۔ ہر درجے کا بروقت ہدف، معیار، تاخیر وجوہ، ایم ایس ڈی ایس پیمائش، مسترد نمونے، دہرائی امیجنگ اور شراکت دار دیکھیں۔"
+      ],
+      [
+        "روانگی اور شراکت دار دیکھیں",
+        "اصل روانگی یا کام منتخب کریں۔ فہرست اور نمونہ شناخت ملائیں۔ شراکت دار اور صرف باقی فلٹر استعمال کریں۔ فہرست معاہدہ اور فعال حالت دکھاتی ہے۔"
+      ],
+      [
+        "اہم نتائج کا جائزہ",
+        "ماخذ اور حالت چنیں۔ نتیجہ، آخری وقت اور موجودہ تصدیق پڑھیں؛ حقیقی جواب کے لیے طبی طریقہ استعمال کریں۔"
+      ],
+      [
+        "معائنے کے لیے دستاویزات",
+        "ٹرمینل پی ڈی ایف ترجیح سے ہر مجاز دستاویز الگ یا ایک مشترکہ پی ڈی ایف محفوظ کریں۔ مدت بروقت رپورٹ اور اہم رجسٹر پر لاگو ہے؛ پالیسیاں اور خدمات موجودہ ہیں۔ محفوظ یا دیکھی پی ڈی ایف پرنٹ کریں۔"
+      ]
+    ]
+  },
+  radiology_quality: {
+    title: "Diagnostic services quality (MSDS)",
+    titleUr: "تشخیصی خدمات کا معیار (ایم ایس ڈی ایس)",
+    purpose: "Inspect permitted diagnostic results, turnarounds and the quality evidence for your workspace.",
+    purposeUr: "اپنی جگہ کے مجاز تشخیصی نتائج، بروقت کارکردگی اور معیار کے شواہد دیکھیں۔",
+    steps: [
+      "Read turnaround and quality measures. Choose the hospital period and Lab or Imaging. Review on-time results against each class target, score, late reasons, MSDS measures, rejected samples, repeated exposures and partner performance.",
+      "Review a dispatch and partner. Choose a real dispatch or worklist item. Match manifest and sample identifiers. Use partner and Outstanding only filters. The partner directory shows MOU and active state.",
+      "Review critical results. Choose source and status. Read the result, due time and current acknowledgment; use the appropriate clinical workflow for any real response.",
+      "Download documents for inspection. Use the terminal PDF preference to save each authorized document or a single combined PDF. The period applies to turnaround and the critical register; policies and services are current. Print the saved or previewed PDF."
+    ],
+    stepsUr: [
+      "بروقت نتائج اور معیار پڑھیں۔ ہسپتال مدت اور لیبارٹری یا امیجنگ چنیں۔ ہر درجے کا بروقت ہدف، معیار، تاخیر وجوہ، ایم ایس ڈی ایس پیمائش، مسترد نمونے، دہرائی امیجنگ اور شراکت دار دیکھیں۔",
+      "روانگی اور شراکت دار دیکھیں۔ اصل روانگی یا کام منتخب کریں۔ فہرست اور نمونہ شناخت ملائیں۔ شراکت دار اور صرف باقی فلٹر استعمال کریں۔ فہرست معاہدہ اور فعال حالت دکھاتی ہے۔",
+      "اہم نتائج کا جائزہ۔ ماخذ اور حالت چنیں۔ نتیجہ، آخری وقت اور موجودہ تصدیق پڑھیں؛ حقیقی جواب کے لیے طبی طریقہ استعمال کریں۔",
+      "معائنے کے لیے دستاویزات۔ ٹرمینل پی ڈی ایف ترجیح سے ہر مجاز دستاویز الگ یا ایک مشترکہ پی ڈی ایف محفوظ کریں۔ مدت بروقت رپورٹ اور اہم رجسٹر پر لاگو ہے؛ پالیسیاں اور خدمات موجودہ ہیں۔ محفوظ یا دیکھی پی ڈی ایف پرنٹ کریں۔"
+    ],
+    faq: [
+      [
+        "Read turnaround and quality measures",
+        "Choose the hospital period and Lab or Imaging. Review on-time results against each class target, score, late reasons, MSDS measures, rejected samples, repeated exposures and partner performance."
+      ],
+      [
+        "Review a dispatch and partner",
+        "Choose a real dispatch or worklist item. Match manifest and sample identifiers. Use partner and Outstanding only filters. The partner directory shows MOU and active state."
+      ],
+      [
+        "Review critical results",
+        "Choose source and status. Read the result, due time and current acknowledgment; use the appropriate clinical workflow for any real response."
+      ],
+      [
+        "Download documents for inspection",
+        "Use the terminal PDF preference to save each authorized document or a single combined PDF. The period applies to turnaround and the critical register; policies and services are current. Print the saved or previewed PDF."
+      ]
+    ],
+    faqUr: [
+      [
+        "بروقت نتائج اور معیار پڑھیں",
+        "ہسپتال مدت اور لیبارٹری یا امیجنگ چنیں۔ ہر درجے کا بروقت ہدف، معیار، تاخیر وجوہ، ایم ایس ڈی ایس پیمائش، مسترد نمونے، دہرائی امیجنگ اور شراکت دار دیکھیں۔"
+      ],
+      [
+        "روانگی اور شراکت دار دیکھیں",
+        "اصل روانگی یا کام منتخب کریں۔ فہرست اور نمونہ شناخت ملائیں۔ شراکت دار اور صرف باقی فلٹر استعمال کریں۔ فہرست معاہدہ اور فعال حالت دکھاتی ہے۔"
+      ],
+      [
+        "اہم نتائج کا جائزہ",
+        "ماخذ اور حالت چنیں۔ نتیجہ، آخری وقت اور موجودہ تصدیق پڑھیں؛ حقیقی جواب کے لیے طبی طریقہ استعمال کریں۔"
+      ],
+      [
+        "معائنے کے لیے دستاویزات",
+        "ٹرمینل پی ڈی ایف ترجیح سے ہر مجاز دستاویز الگ یا ایک مشترکہ پی ڈی ایف محفوظ کریں۔ مدت بروقت رپورٹ اور اہم رجسٹر پر لاگو ہے؛ پالیسیاں اور خدمات موجودہ ہیں۔ محفوظ یا دیکھی پی ڈی ایف پرنٹ کریں۔"
+      ]
+    ]
+  },
+  diagnostics_quality: {
+    title: "Diagnostic services quality (MSDS)",
+    titleUr: "تشخیصی خدمات کا معیار (ایم ایس ڈی ایس)",
+    purpose: "Inspect permitted diagnostic results, turnarounds and the quality evidence for your workspace.",
+    purposeUr: "اپنی جگہ کے مجاز تشخیصی نتائج، بروقت کارکردگی اور معیار کے شواہد دیکھیں۔",
+    steps: [
+      "Read turnaround and quality measures. Choose the hospital period and Lab or Imaging. Review on-time results against each class target, score, late reasons, MSDS measures, rejected samples, repeated exposures and partner performance.",
+      "Review a dispatch and partner. Choose a real dispatch or worklist item. Match manifest and sample identifiers. Use partner and Outstanding only filters. The partner directory shows MOU and active state.",
+      "Review critical results. Choose source and status. Read the result, due time and current acknowledgment; use the appropriate clinical workflow for any real response.",
+      "Download documents for inspection. Use the terminal PDF preference to save each authorized document or a single combined PDF. The period applies to turnaround and the critical register; policies and services are current. Print the saved or previewed PDF."
+    ],
+    stepsUr: [
+      "بروقت نتائج اور معیار پڑھیں۔ ہسپتال مدت اور لیبارٹری یا امیجنگ چنیں۔ ہر درجے کا بروقت ہدف، معیار، تاخیر وجوہ، ایم ایس ڈی ایس پیمائش، مسترد نمونے، دہرائی امیجنگ اور شراکت دار دیکھیں۔",
+      "روانگی اور شراکت دار دیکھیں۔ اصل روانگی یا کام منتخب کریں۔ فہرست اور نمونہ شناخت ملائیں۔ شراکت دار اور صرف باقی فلٹر استعمال کریں۔ فہرست معاہدہ اور فعال حالت دکھاتی ہے۔",
+      "اہم نتائج کا جائزہ۔ ماخذ اور حالت چنیں۔ نتیجہ، آخری وقت اور موجودہ تصدیق پڑھیں؛ حقیقی جواب کے لیے طبی طریقہ استعمال کریں۔",
+      "معائنے کے لیے دستاویزات۔ ٹرمینل پی ڈی ایف ترجیح سے ہر مجاز دستاویز الگ یا ایک مشترکہ پی ڈی ایف محفوظ کریں۔ مدت بروقت رپورٹ اور اہم رجسٹر پر لاگو ہے؛ پالیسیاں اور خدمات موجودہ ہیں۔ محفوظ یا دیکھی پی ڈی ایف پرنٹ کریں۔"
+    ],
+    faq: [
+      [
+        "Read turnaround and quality measures",
+        "Choose the hospital period and Lab or Imaging. Review on-time results against each class target, score, late reasons, MSDS measures, rejected samples, repeated exposures and partner performance."
+      ],
+      [
+        "Review a dispatch and partner",
+        "Choose a real dispatch or worklist item. Match manifest and sample identifiers. Use partner and Outstanding only filters. The partner directory shows MOU and active state."
+      ],
+      [
+        "Review critical results",
+        "Choose source and status. Read the result, due time and current acknowledgment; use the appropriate clinical workflow for any real response."
+      ],
+      [
+        "Download documents for inspection",
+        "Use the terminal PDF preference to save each authorized document or a single combined PDF. The period applies to turnaround and the critical register; policies and services are current. Print the saved or previewed PDF."
+      ]
+    ],
+    faqUr: [
+      [
+        "بروقت نتائج اور معیار پڑھیں",
+        "ہسپتال مدت اور لیبارٹری یا امیجنگ چنیں۔ ہر درجے کا بروقت ہدف، معیار، تاخیر وجوہ، ایم ایس ڈی ایس پیمائش، مسترد نمونے، دہرائی امیجنگ اور شراکت دار دیکھیں۔"
+      ],
+      [
+        "روانگی اور شراکت دار دیکھیں",
+        "اصل روانگی یا کام منتخب کریں۔ فہرست اور نمونہ شناخت ملائیں۔ شراکت دار اور صرف باقی فلٹر استعمال کریں۔ فہرست معاہدہ اور فعال حالت دکھاتی ہے۔"
+      ],
+      [
+        "اہم نتائج کا جائزہ",
+        "ماخذ اور حالت چنیں۔ نتیجہ، آخری وقت اور موجودہ تصدیق پڑھیں؛ حقیقی جواب کے لیے طبی طریقہ استعمال کریں۔"
+      ],
+      [
+        "معائنے کے لیے دستاویزات",
+        "ٹرمینل پی ڈی ایف ترجیح سے ہر مجاز دستاویز الگ یا ایک مشترکہ پی ڈی ایف محفوظ کریں۔ مدت بروقت رپورٹ اور اہم رجسٹر پر لاگو ہے؛ پالیسیاں اور خدمات موجودہ ہیں۔ محفوظ یا دیکھی پی ڈی ایف پرنٹ کریں۔"
+      ]
+    ]
+  },
+  owner_diagnostics: {
+    title: "Diagnostic services quality (MSDS)",
+    titleUr: "تشخیصی خدمات کا معیار (ایم ایس ڈی ایس)",
+    purpose: "Inspect permitted diagnostic results, turnarounds and the quality evidence for your workspace.",
+    purposeUr: "اپنی جگہ کے مجاز تشخیصی نتائج، بروقت کارکردگی اور معیار کے شواہد دیکھیں۔",
+    steps: [
+      "Read turnaround and quality measures. Choose the hospital period and Lab or Imaging. Review on-time results against each class target, score, late reasons, MSDS measures, rejected samples, repeated exposures and partner performance.",
+      "Review a dispatch and partner. Choose a real dispatch or worklist item. Match manifest and sample identifiers. Use partner and Outstanding only filters. The partner directory shows MOU and active state.",
+      "Review critical results. Choose source and status. Read the result, due time and current acknowledgment; use the appropriate clinical workflow for any real response.",
+      "Download documents for inspection. Use the terminal PDF preference to save each authorized document or a single combined PDF. The period applies to turnaround and the critical register; policies and services are current. Print the saved or previewed PDF."
+    ],
+    stepsUr: [
+      "بروقت نتائج اور معیار پڑھیں۔ ہسپتال مدت اور لیبارٹری یا امیجنگ چنیں۔ ہر درجے کا بروقت ہدف، معیار، تاخیر وجوہ، ایم ایس ڈی ایس پیمائش، مسترد نمونے، دہرائی امیجنگ اور شراکت دار دیکھیں۔",
+      "روانگی اور شراکت دار دیکھیں۔ اصل روانگی یا کام منتخب کریں۔ فہرست اور نمونہ شناخت ملائیں۔ شراکت دار اور صرف باقی فلٹر استعمال کریں۔ فہرست معاہدہ اور فعال حالت دکھاتی ہے۔",
+      "اہم نتائج کا جائزہ۔ ماخذ اور حالت چنیں۔ نتیجہ، آخری وقت اور موجودہ تصدیق پڑھیں؛ حقیقی جواب کے لیے طبی طریقہ استعمال کریں۔",
+      "معائنے کے لیے دستاویزات۔ ٹرمینل پی ڈی ایف ترجیح سے ہر مجاز دستاویز الگ یا ایک مشترکہ پی ڈی ایف محفوظ کریں۔ مدت بروقت رپورٹ اور اہم رجسٹر پر لاگو ہے؛ پالیسیاں اور خدمات موجودہ ہیں۔ محفوظ یا دیکھی پی ڈی ایف پرنٹ کریں۔"
+    ],
+    faq: [
+      [
+        "Read turnaround and quality measures",
+        "Choose the hospital period and Lab or Imaging. Review on-time results against each class target, score, late reasons, MSDS measures, rejected samples, repeated exposures and partner performance."
+      ],
+      [
+        "Review a dispatch and partner",
+        "Choose a real dispatch or worklist item. Match manifest and sample identifiers. Use partner and Outstanding only filters. The partner directory shows MOU and active state."
+      ],
+      [
+        "Review critical results",
+        "Choose source and status. Read the result, due time and current acknowledgment; use the appropriate clinical workflow for any real response."
+      ],
+      [
+        "Download documents for inspection",
+        "Use the terminal PDF preference to save each authorized document or a single combined PDF. The period applies to turnaround and the critical register; policies and services are current. Print the saved or previewed PDF."
+      ]
+    ],
+    faqUr: [
+      [
+        "بروقت نتائج اور معیار پڑھیں",
+        "ہسپتال مدت اور لیبارٹری یا امیجنگ چنیں۔ ہر درجے کا بروقت ہدف، معیار، تاخیر وجوہ، ایم ایس ڈی ایس پیمائش، مسترد نمونے، دہرائی امیجنگ اور شراکت دار دیکھیں۔"
+      ],
+      [
+        "روانگی اور شراکت دار دیکھیں",
+        "اصل روانگی یا کام منتخب کریں۔ فہرست اور نمونہ شناخت ملائیں۔ شراکت دار اور صرف باقی فلٹر استعمال کریں۔ فہرست معاہدہ اور فعال حالت دکھاتی ہے۔"
+      ],
+      [
+        "اہم نتائج کا جائزہ",
+        "ماخذ اور حالت چنیں۔ نتیجہ، آخری وقت اور موجودہ تصدیق پڑھیں؛ حقیقی جواب کے لیے طبی طریقہ استعمال کریں۔"
+      ],
+      [
+        "معائنے کے لیے دستاویزات",
+        "ٹرمینل پی ڈی ایف ترجیح سے ہر مجاز دستاویز الگ یا ایک مشترکہ پی ڈی ایف محفوظ کریں۔ مدت بروقت رپورٹ اور اہم رجسٹر پر لاگو ہے؛ پالیسیاں اور خدمات موجودہ ہیں۔ محفوظ یا دیکھی پی ڈی ایف پرنٹ کریں۔"
+      ]
+    ]
+  },
   er_register: {
     title: "ER register (emergency log book)",
     titleUr: "ایمرجنسی رجسٹر",

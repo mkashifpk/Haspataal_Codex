@@ -1225,6 +1225,38 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       // authorised metadata read. Normal api calls keep their window's scope.
       return await api("GET", "/meta/handbook", undefined, undefined);
     }
+    if (action === "diagnostic-pdf-pack") {
+      const paths=args.paths;
+      const {isDiagnosticPdfPath}=require("./p9-quality-pdf-path.cjs");
+      if(!Array.isArray(paths)||paths.length<1||paths.length>5||new Set(paths).size!==paths.length||!paths.every(isDiagnosticPdfPath))
+        throw new Error("Invalid diagnostic PDF set");
+      const operations=paths.map(path=>matchOperation("GET",path));
+      if(!auth||operations.some(op=>!op||!permissionAllows(op,auth.user)))throw new Error("You do not have permission to download every document in this set");
+      if(Date.now()>auth.expires-60000)await refresh();
+      const requestSession=auth, workspace=windows.get(win.id);
+      const verifySession=()=> {
+        if(!auth||auth!==requestSession||windows.get(win.id)!==workspace||operations.some(op=>!permissionAllows(op,auth.user)))
+          throw new Error("The session or permission changed during the download");
+      };
+      const { PDFDocument }=require("pdf-lib");
+      const pack=await PDFDocument.create();
+      for(const path of paths){
+        verifySession();
+        const reply=await raw("GET",path,undefined,workspace,undefined,true);
+        verifySession();
+        if(reply.status!==200){try{reply.body=JSON.parse(reply.bytes.toString("utf8"))}catch{}return errorResult(reply);}
+        if(String(reply.headers["content-type"]).split(";")[0]!=="application/pdf"||!reply.bytes.subarray(0,5).equals(Buffer.from("%PDF-")))throw new Error("The server did not return a PDF for every document");
+        const source=await PDFDocument.load(reply.bytes);
+        const pages=await pack.copyPages(source,source.getPageIndices());
+        for(const page of pages)pack.addPage(page);
+      }
+      const bytes=await pack.save();
+      verifySession();
+      const selected=await dialog.showSaveDialog(win,{defaultPath:"Diagnostic-quality-documents.pdf",filters:[{name:"PDF",extensions:["pdf"]}]});
+      verifySession();
+      if(!selected.canceled)fs.writeFileSync(selected.filePath,bytes);
+      return {ok:true,data:{saved:!selected.canceled}};
+    }
     if (action === "clinical-pdf") {
       if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/(?:consents|cost-estimates|incidents)\/[1-9]\d*\/pdf|\/admissions\/[1-9]\d*\/discharge-summary\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/incidents\/sentinel-list\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf|\/facility\/equipment\/plan\/pdf|\/facility\/compliance-documents\/register\/pdf|\/facility\/drills\/[1-9]\d*\/pdf)$/.test(args.path) && !/^\/complaints\/[1-9]\d*\/letter\/pdf\?letter=(?:Acknowledgement|Outcome|AppealOutcome)$/.test(args.path)) if(!require("./complaint-report-path.cjs").isComplaintReportPath(args.path) && !require("./incident-report-path.cjs").isIncidentReportPath(args.path) && !require("./action-register-path.cjs").isActionRegisterPdfPath(args.path) && !require("./qa-round-path.cjs").isQaRoundPdfPath(args.path) && !require("./feedback-form-path.cjs").isFeedbackFormPdfPath(args.path) && !require("./p9-quality-pdf-path.cjs").isQualityRegisterPdfPath(args.path)) throw new Error("Clinical download not permitted");
       const op=matchOperation("GET",args.path);
