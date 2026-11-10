@@ -16,3 +16,5 @@ The inventory in id-sources.json contains the current bundle path metadata for 1
 No human worksheet, Review code or sign-off was entered.
 
 Final build passed handbook coverage (198 screens), TypeScript and DEV bundle. Renderer index-CR8pmPXO.js SHA-256 eaf3ca3d3c296588c474e96815f829b44cc1d315a5aff6dbb8eb21ddff51aa1e. Final npm test passed 873 of 873. The later build includes the legacy audit changes. Four native journeys ran on the identifiable earlier renderer above. Report #66 records the working Ops asset directory source omitted by the bundle.
+
+A follow-up on the final renderer verified the ward approval rule end to end. Pharmacy Admin rejected synthetic approval 3 once. Electron automatically reread the exact indent and displayed Rejected. See ward-event-native.json and ward-event-reject-result.json. This supersedes the earlier approval-event limit. Proposal 399 contains only that newly tested rule. Proposals 395–399 were all verified pending.

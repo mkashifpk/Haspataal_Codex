@@ -8,13 +8,14 @@ const save = (name, value) => fs.writeFileSync(`${dir}/${name}.json`, JSON.strin
 const incident = read("62-incident-result").data;
 const bloodUnit = read("63-unit-result").data;
 const donation = read("64-period").selected;
+const checkApprovalEvent = process.argv[2] === "ward-event";
 const open = (s, screen) => s.p.getByRole("navigation").locator(`[data-screen-target="${screen}"]`).click();
 const root = (s, screen) => s.p.locator(`[data-screen="${screen}"]`);
 const requests = async (s, pattern) => (await s.trace()).requests.filter(r => pattern.test(r.path)).map(r => ({
   method:r.method, path:r.path, status:r.status, request_id:r.result?.request_id, ...(r.method === "GET" ? {} : {key:r.key, body:r.body}),
 }));
 
-if (process.argv[2] !== "ward") {
+if (process.argv[2] !== "ward" && !checkApprovalEvent) {
   const s = await session("877-quality", "demo.quality");
   try {
     await open(s, "adr_report");
@@ -84,8 +85,8 @@ if (process.argv[2] !== "ward") {
   } finally { await s.close(); }
 }
 
-if (process.argv[2] === "ward") {
-  const intent="artifacts/877-ward-intent.json";
+if (process.argv[2] === "ward" || checkApprovalEvent) {
+  const intent=checkApprovalEvent ? "artifacts/877-ward-event-intent.json" : "artifacts/877-ward-intent.json";
   assert(!fs.existsSync(intent),"Reconcile the earlier UI indent intent before retrying.");
   const s=await session("877-ward","demo.headnurse");
   try {
@@ -112,8 +113,19 @@ if (process.argv[2] === "ward") {
     const id=created.result.data.indent_id;
     assert(trace.some(r=>r.method==="GET" && r.path.endsWith(`/ward-indents/${id}`) && r.status===200));
     fs.writeFileSync(intent,JSON.stringify({note,ward_id:chosen.ward_id,indent_id:id,pending:false}));
-    await capture(s,"ward_indent",()=>expect(ward).toBeVisible());
-    save("ward-native",{passed:true,renderer:s.j.renderer,indent_id:id,requests:await requests(s,/\/beds\/matrix|\/ward-indents\/|\/wards\/\d+\//)});
+    if (checkApprovalEvent) {
+      const approvalId=created.result.data.approval_request_id;
+      assert(approvalId);
+      const readsBefore=trace.filter(r=>r.method==="GET" && r.path.endsWith(`/ward-indents/${id}`) && r.status===200).length;
+      save("ward-event-ready",{note,indent_id:id,approval_request_id:approvalId,request_id:created.result.request_id,reads_before:readsBefore});
+      await expect(ward.locator('[data-help="ward_indent.tracked_card"]')).toContainText("Rejected",{timeout:180000});
+      const after=await requests(s,/\/ward-indents\//);
+      assert(after.filter(r=>r.path.endsWith(`/ward-indents/${id}`) && r.status===200).length>readsBefore);
+      save("ward-event-native",{passed:true,renderer:s.j.renderer,indent_id:id,requests:after});
+    } else {
+      await capture(s,"ward_indent",()=>expect(ward).toBeVisible());
+      save("ward-native",{passed:true,renderer:s.j.renderer,indent_id:id,requests:await requests(s,/\/beds\/matrix|\/ward-indents\/|\/wards\/\d+\//)});
+    }
     s.j.passed=true;
     s.pass("Named ward directory, one synthetic indent, and automatic exact-result readback.");
   } catch(e) {
