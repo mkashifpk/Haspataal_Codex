@@ -1714,7 +1714,7 @@ export function App() {
               {screen === "waste_log" && <WasteLog key={user.user_id+":"+screen} screenId={screen} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === "infection_statistics_ipc" || screen === "infection_statistics" || screen === "infection_statistics_owner") && <InfectionStatistics key={user.user_id+":"+screen} screenId={screen} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}} onFollowup={nav.includes("ssi_surveillance")?()=>{navigate("ssi_surveillance");}:undefined} onActions={nav.includes("action_register")?()=>{navigate("action_register");}:undefined}/>}
               {isPersonnelReviewScreen(screen) && nav.includes(screen) && <PersonnelReview
-                key={user.user_id + ":" + screen} screenId={screen} revision={revision} permissions={user.permissions} connected={connected}
+                key={user.user_id + ":" + screen} screenId={screen} revision={revision} user={user} connected={connected}
                 onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === "orientation_job_descriptions" || screen === "staff_training_hr") && <HrPersonnel
                 key={user.user_id + ":" + screen} screenId={screen} revision={revision} connected={connected}
