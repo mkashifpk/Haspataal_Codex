@@ -12,7 +12,7 @@ import {
 } from "./P9cShared";
 import { QualityPaper } from "./QualityPaper";
 
-type Id = "my_committees" | "committees_quality" | "committees_ipc";
+type Id = "my_committees" | "committees_quality" | "committees_ipc" | "committees_owner";
 type Draft = "new" | "edit" | "schedule" | "minutes" | "finalize" | "action";
 type Member = committees.MemberIn;
 const kinds = {

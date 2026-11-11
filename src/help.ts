@@ -300,6 +300,60 @@ export const help: Record<string, HelpPage> = {
       ]
     ]
   },
+  committees_owner: {
+    title: "Committees and minutes",
+    titleUr: "کمیٹیاں اور کارروائی",
+    purpose: "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. In the Owner workspace, review the committee schedule and its recorded minutes. Management and final approval depend on your permissions and chair assignment.",
+    purposeUr: "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ مالک کے ورک اسپیس میں کمیٹی کا شیڈول اور درج شدہ کارروائی دیکھیں۔ انتظام اور حتمی منظوری اجازت اور صدارت کی ذمہ داری پر منحصر ہیں۔",
+    steps: [
+      "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. In the Owner workspace, review the committee schedule and its recorded minutes. Management and final approval depend on your permissions and chair assignment.",
+      "Choose one chair and one secretary, add the departments they represent and set the meeting frequency and terms of reference. Select real staff from the directory or enter an external member's name.",
+      "Schedule with the agenda. After the meeting, record attendees, apologies, issues, activities reviewed and decisions. The authorized chair approves the minutes, which become final and carry the author's stamp.",
+      "Choose a final meeting. Assign the corrective or preventive action to a named owner with a due date. Review meeting actions in the action register at the next meeting."
+    ],
+    stepsUr: [
+      "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ مالک کے ورک اسپیس میں کمیٹی کا شیڈول اور درج شدہ کارروائی دیکھیں۔ انتظام اور حتمی منظوری اجازت اور صدارت کی ذمہ داری پر منحصر ہیں۔",
+      "ایک صدر اور ایک سیکرٹری چنیں، نمائندہ شعبے شامل کریں، تعدد اور دائرہ کار درج کریں۔ فہرست سے اصل عملہ یا بیرونی رکن کا نام چنیں۔",
+      "ایجنڈے کے ساتھ اجلاس مقرر کریں۔ بعد میں شرکاء، معذرت، مسائل، سرگرمیاں اور فیصلے درج کریں۔ مجاز صدر کارروائی منظور کرتا ہے۔ کارروائی حتمی اور دستخط شدہ ہوتی ہے۔",
+      "حتمی اجلاس چنیں۔ اصلاحی یا احتیاطی عمل ذمہ دار اور تاریخ کے ساتھ تفویض کریں۔ اگلے اجلاس میں کارروائی رجسٹر سے عمل دیکھیں۔"
+    ],
+    faq: [
+      [
+        "Find a committee or meeting",
+        "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. In the Owner workspace, review the committee schedule and its recorded minutes. Management and final approval depend on your permissions and chair assignment."
+      ],
+      [
+        "Set up the committee",
+        "Choose one chair and one secretary, add the departments they represent and set the meeting frequency and terms of reference. Select real staff from the directory or enter an external member's name."
+      ],
+      [
+        "Schedule, draft and approve minutes",
+        "Schedule with the agenda. After the meeting, record attendees, apologies, issues, activities reviewed and decisions. The authorized chair approves the minutes, which become final and carry the author's stamp."
+      ],
+      [
+        "Assign an action from final minutes",
+        "Choose a final meeting. Assign the corrective or preventive action to a named owner with a due date. Review meeting actions in the action register at the next meeting."
+      ]
+    ],
+    faqUr: [
+      [
+        "کمیٹی یا اجلاس تلاش کریں",
+        "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ مالک کے ورک اسپیس میں کمیٹی کا شیڈول اور درج شدہ کارروائی دیکھیں۔ انتظام اور حتمی منظوری اجازت اور صدارت کی ذمہ داری پر منحصر ہیں۔"
+      ],
+      [
+        "کمیٹی قائم کریں",
+        "ایک صدر اور ایک سیکرٹری چنیں، نمائندہ شعبے شامل کریں، تعدد اور دائرہ کار درج کریں۔ فہرست سے اصل عملہ یا بیرونی رکن کا نام چنیں۔"
+      ],
+      [
+        "اجلاس، مسودہ اور منظوری",
+        "ایجنڈے کے ساتھ اجلاس مقرر کریں۔ بعد میں شرکاء، معذرت، مسائل، سرگرمیاں اور فیصلے درج کریں۔ مجاز صدر کارروائی منظور کرتا ہے۔ کارروائی حتمی اور دستخط شدہ ہوتی ہے۔"
+      ],
+      [
+        "حتمی کارروائی سے عمل تفویض کریں",
+        "حتمی اجلاس چنیں۔ اصلاحی یا احتیاطی عمل ذمہ دار اور تاریخ کے ساتھ تفویض کریں۔ اگلے اجلاس میں کارروائی رجسٹر سے عمل دیکھیں۔"
+      ]
+    ]
+  },
   committees_ipc: {
     title: "Committees and minutes",
     titleUr: "کمیٹیاں اور کارروائی",

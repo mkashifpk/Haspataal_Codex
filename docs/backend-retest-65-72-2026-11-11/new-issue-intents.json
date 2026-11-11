@@ -1,0 +1,32 @@
+[
+  {
+    "implementation_id": 1,
+    "agent": "Codex",
+    "request_id": "codex-20261111-imaging-first-repeat-id-source-v1",
+    "kind": "MissingWorkflow",
+    "severity": "Medium",
+    "screen_id": "imaging_repeats",
+    "endpoint": "POST /imaging/orders/{order_id}/repeats",
+    "title": "First imaging repeat has no documented source for a reported examination",
+    "actual": "Current imaging_repeats id_sources lists only GET /imaging/repeats -> imaging_order_id. That is a register of repeat entries; an eligible examination with no repeat cannot be selected from it. The separate imaging worklist contract accepts through Completed and rejects status=Reported.",
+    "expected": "Name an authorized source or handoff for the actual eligible completed/reported examination before its first repeat, with the ID field and scope; retain the repeat register for reopening prior repeats.",
+    "steps": "Read the imaging_repeats ID sources. As demo.radiologist read the repeat register with a valid date range, and try filtering the imaging worklist for Reported.",
+    "evidence": "DEV build 2026-11-10T18:52:47.676222+00:00. GET /imaging/repeats?date_from=2026-11-01&date_to=2026-11-11&limit=50 returned 200 and zero repeat entries (6c8558b14b624f99b8fdaef26145f33d). GET /imaging/worklist?status=Reported returned 422 VALIDATION_ERROR (c3178fcbf92143fa9f0d18a5fa080eed). Contract names the repeat register only. No patient, order, or write used in these checks. This is a source gap; neither read is claimed broken.",
+    "build": "cf03bd5"
+  },
+  {
+    "implementation_id": 1,
+    "agent": "Codex",
+    "request_id": "codex-20261111-hr-saved-jd-assignment-source-v1",
+    "kind": "MissingWorkflow",
+    "severity": "Medium",
+    "screen_id": "orientation_job_descriptions",
+    "endpoint": "POST /personnel/employee-job-descriptions/{assignment_id}/sign",
+    "title": "HR cannot reopen an issued job description from the documented screen reads",
+    "actual": "The orientation_job_descriptions bundle lists only the issue response as the source of assignment_id for sign and PDF. Orientation rows carry employee_id and topic completion, no assignment_id. Job-description rows have a holder count, not assignment records.",
+    "expected": "Document an authorized read or handoff for a saved assignment, including assignment_id and the displayed employee/description and signature state, so HR can open its PDF and record signatures after returning to the screen.",
+    "steps": "Read orientation_job_descriptions id_sources and list response schemas. As demo.hr read the orientation and job-description registers and check their response field names.",
+    "evidence": "DEV build 2026-11-10T18:52:47.676222+00:00. GET /personnel/orientation 200 request 1a2600499a3946a7a36292b0016026e9 (35 rows); GET /personnel/job-descriptions 200 request 852535088856468eb31e45e1dcdff335 (1 row, holders is numeric). Neither carries assignment_id. No names, signatures, or writes used. Sign/PDF handlers were not called.",
+    "build": "cf03bd5"
+  }
+]
