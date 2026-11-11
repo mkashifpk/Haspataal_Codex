@@ -27,6 +27,12 @@ export const deliveredHelpScreens = [
   "staff_training_ipc",
   "orientation_job_descriptions",
   "staff_training_hr",
+  "appraisals_hr",
+  "appraise_staff_doctor",
+  "appraise_staff_head_nurse",
+  "discipline_health_hr",
+  "personnel_files_hr",
+  "personnel_files_quality",
   "quality_indicator_targets",
   "quality_indicators",
   "quality_indicators_owner",
@@ -250,6 +256,10 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  "personnel.review.help": g(["appraisals_hr","appraise_staff_doctor","appraise_staff_head_nurse","discipline_health_hr","personnel_files_hr","personnel_files_quality"], ["Staff appraisals","عملے کی کارکردگی کا جائزہ"], ["Open contextual help for this screen.","اس اسکرین کی متعلقہ مدد کھولیں۔"]),
+  "personnel.review.appraisal": g(["appraisals_hr","appraise_staff_doctor","appraise_staff_head_nurse"], ["Staff appraisals","عملے کی کارکردگی کا جائزہ"], ["Review the due schedule. Select an appraisal number from the register to open its record.","مقررہ شیڈول دیکھیں۔ ریکارڈ کھولنے کے لیے رجسٹر سے جائزہ نمبر منتخب کریں۔"]),
+  "personnel.review.health": g(["discipline_health_hr"], ["Discipline and staff health","نظم و ضبط اور عملے کی صحت"], ["Review the confidential case register. Select an employee from the health due list to open their health history.","خفیہ تادیبی رجسٹر دیکھیں۔ صحت کی تاریخ کھولنے کے لیے مقررہ جانچ کی فہرست سے ملازم منتخب کریں۔"]),
+  "personnel.review.files": g(["personnel_files_hr","personnel_files_quality"], ["Personnel files","عملے کی فائلیں"], ["Filter to incomplete files and select an employee by name and staff number to see what is missing.","نامکمل فائلیں چھانٹیں اور باقی دستاویزات دیکھنے کے لیے نام اور ملازم نمبر سے انتخاب کریں۔"]),
   "hr.personnel.filter": g(["orientation_job_descriptions","staff_training_hr"], ["Filter the register","رجسٹر چھانٹیں"], ["Show only incomplete orientation or overdue training.","صرف نامکمل تعارفی تربیت یا تاخیر شدہ تربیت دکھائیں۔"]),
   "hr.personnel.employee": g(["orientation_job_descriptions"], ["Select an employee","ملازم منتخب کریں"], ["Match the staff name and number before entering a record.","ریکارڈ درج کرنے سے پہلے نام اور ملازم نمبر ملائیں۔"]),
   "hr.personnel.orientation": g(["orientation_job_descriptions"], ["Record orientation","تعارفی تربیت درج کریں"], ["Select the topics actually covered and confirm the checklist signature only if signed.","مکمل موضوعات منتخب کریں اور دستخط ہونے پر ہی تصدیق کریں۔"]),

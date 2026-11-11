@@ -153,6 +153,7 @@ export function checkHelp({
   const files = [
     "src/App.tsx",
     "src/screens/HrPersonnel.tsx",
+    "src/screens/PersonnelReview.tsx",
     "src/components.tsx",
     "src/StaffPicker.tsx",
     "src/PMDCStaffPicker.tsx",

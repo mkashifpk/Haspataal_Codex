@@ -1,0 +1,802 @@
+{
+  "screen_id": "personnel_files_quality",
+  "endpoints": [
+    {
+      "endpoint": "GET /personnel/completeness",
+      "summary": "What the personnel files lack",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view",
+          "personnel.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.view or personnel.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "incomplete_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Incomplete Only"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_PersonnelCompletenessOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "incomplete_only",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /personnel/employees/{employee_id}/file",
+      "summary": "The personnel file",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Employee Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_PersonnelFileOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /personnel/employees/{employee_id}/file/pdf",
+      "summary": "The personnel file (PDF)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Employee Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "The stored file, with its own Content-Type (e.g. application/pdf) and its file name in Content-Disposition.",
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "file",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "prints": {
+        "kind": "file",
+        "media": [
+          "application/octet-stream"
+        ]
+      }
+    },
+    {
+      "endpoint": "GET /personnel/credentials",
+      "summary": "Credentials and their verification",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view",
+          "personnel.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.view or personnel.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Id"
+          }
+        },
+        {
+          "name": "state",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Unverified",
+                  "Expiring",
+                  "Expired"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_CredentialOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "employee_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "state",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Unverified",
+              "Expiring",
+              "Expired"
+            ]
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /personnel/orientation",
+      "summary": "Who is oriented",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view",
+          "personnel.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.view or personnel.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "incomplete_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Incomplete Only"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_OrientationStatusOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "incomplete_only",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /personnel/appraisals/statistics",
+      "summary": "Appraisals on time; development",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view",
+          "personnel.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.view or personnel.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AppraisalStatisticsOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /personnel/training-compliance",
+      "summary": "Who needs which mandatory training",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view",
+          "personnel.manage",
+          "personnel.training.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.view or personnel.manage or personnel.training.record",
+        "roles_allowed": [
+          "clinic_director",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "requirement_code",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requirement Code"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "overdue_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Overdue Only"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_TrainingComplianceOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "requirement_code",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "overdue_only",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "employee_id",
+      "source": "this_screen",
+      "call": "GET /personnel/completeness",
+      "field": "employee_id",
+      "used_by": [
+        "GET /personnel/employees/{employee_id}/file",
+        "GET /personnel/employees/{employee_id}/file/pdf"
+      ],
+      "also": [
+        {
+          "call": "GET /personnel/credentials",
+          "field": "employee_id"
+        },
+        {
+          "call": "GET /personnel/orientation",
+          "field": "employee_id"
+        },
+        {
+          "call": "GET /personnel/training-compliance",
+          "field": "employee_id"
+        }
+      ]
+    }
+  ]
+}

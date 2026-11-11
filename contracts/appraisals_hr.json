@@ -1,0 +1,1885 @@
+{
+  "screen_id": "appraisals_hr",
+  "endpoints": [
+    {
+      "endpoint": "GET /personnel/appraisals/schedule",
+      "summary": "Appraisals due",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view",
+          "personnel.manage",
+          "personnel.appraise"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.view or personnel.manage or personnel.appraise",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "lab_admin",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "owner",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "days",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 365,
+            "minimum": 0,
+            "default": 30,
+            "title": "Days"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_AppraisalDueOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "days",
+            "required": false,
+            "type": "integer",
+            "default": 30,
+            "minimum": 0,
+            "maximum": 365
+          },
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /personnel/appraisals",
+      "summary": "Appraisals",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view",
+          "personnel.manage",
+          "personnel.appraise"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.view or personnel.manage or personnel.appraise",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "lab_admin",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "owner",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Id"
+          }
+        },
+        {
+          "name": "kind",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Probation",
+                  "Annual",
+                  "AdHoc"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Draft",
+                  "Signed",
+                  "Acknowledged",
+                  "Cancelled"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "mine",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Mine"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "default": 200,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_AppraisalOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 200,
+            "minimum": 1,
+            "maximum": 1000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "employee_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Probation",
+              "Annual",
+              "AdHoc"
+            ]
+          },
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Signed",
+              "Acknowledged",
+              "Cancelled"
+            ]
+          },
+          {
+            "name": "mine",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "POST /personnel/appraisals",
+      "summary": "Start an appraisal (draft)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.appraise",
+          "personnel.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.appraise or personnel.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "lab_admin",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "owner",
+          "pharmacy_admin",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "APPRAISAL_DRAFT_OPEN",
+          "http_status": 409,
+          "message": "A draft appraisal is open for this member of staff (details.appraisal_id).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "appraisal_id"
+          ],
+          "details_from": "POST /api/v1/personnel/appraisals"
+        },
+        {
+          "code": "APPRAISAL_STATE_INVALID",
+          "http_status": 409,
+          "message": "The appraisal cannot change that way: a signed appraisal is final but for the member of staff's comments; nobody appraises themselves.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/personnel/appraisals/{appraisal_id}"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "REFERENCE_NOT_FOUND",
+          "http_status": 422,
+          "message": "A referenced record does not exist.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "ward_id"
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppraisalIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AppraisalDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "AppraisalIn",
+        "fields": [
+          {
+            "pointer": "/period_from",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/period_to",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/ratings",
+            "type": "array",
+            "required": false,
+            "nullable": false,
+            "description": "Default criteria: setting appraisal_criteria (GET /personnel/appraisal-policy/pdf)",
+            "items": "RatingIn"
+          },
+          {
+            "pointer": "/targets",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 4000
+          },
+          {
+            "pointer": "/overall_rating",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "Outstanding",
+              "Good",
+              "Satisfactory",
+              "NeedsImprovement",
+              "Unsatisfactory"
+            ]
+          },
+          {
+            "pointer": "/strengths",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 4000
+          },
+          {
+            "pointer": "/development_needs",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 4000
+          },
+          {
+            "pointer": "/development_plan",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 4000,
+            "description": "Required below Satisfactory (MSDS HRM 136)"
+          },
+          {
+            "pointer": "/employee_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false
+          },
+          {
+            "pointer": "/kind",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Probation",
+              "Annual",
+              "AdHoc"
+            ]
+          },
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 2000,
+            "description": "An ad hoc evaluation: why (an incident, a complaint)"
+          },
+          {
+            "pointer": "/incident_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/appraiser_user_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "Default: you. HR may name the supervisor who will sign (GET /staff/lookup → user_id)"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /personnel/appraisals",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /personnel/appraisals/{appraisal_id}",
+      "summary": "One appraisal",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "personnel.view or personnel.manage, the appraiser and the member of staff appraised"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "appraisal_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Appraisal Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AppraisalDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "PUT /personnel/appraisals/{appraisal_id}",
+      "summary": "Write the appraisal",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.appraise",
+          "personnel.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.appraise or personnel.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "lab_admin",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "owner",
+          "pharmacy_admin",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "APPRAISAL_STATE_INVALID",
+          "http_status": 409,
+          "message": "The appraisal cannot change that way: a signed appraisal is final but for the member of staff's comments; nobody appraises themselves.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/personnel/appraisals/{appraisal_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "appraisal_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Appraisal Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppraisalUpdateIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AppraisalDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "AppraisalUpdateIn",
+        "fields": [
+          {
+            "pointer": "/period_from",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/period_to",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/ratings",
+            "type": "array",
+            "required": false,
+            "nullable": false,
+            "description": "Default criteria: setting appraisal_criteria (GET /personnel/appraisal-policy/pdf)",
+            "items": "RatingIn"
+          },
+          {
+            "pointer": "/targets",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 4000
+          },
+          {
+            "pointer": "/overall_rating",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "Outstanding",
+              "Good",
+              "Satisfactory",
+              "NeedsImprovement",
+              "Unsatisfactory"
+            ]
+          },
+          {
+            "pointer": "/strengths",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 4000
+          },
+          {
+            "pointer": "/development_needs",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 4000
+          },
+          {
+            "pointer": "/development_plan",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 4000,
+            "description": "Required below Satisfactory (MSDS HRM 136)"
+          },
+          {
+            "pointer": "/expected_version",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "version_check",
+        "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+        "reconcile_with": "GET /personnel/appraisals/{appraisal_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /personnel/appraisals/{appraisal_id}/sign",
+      "summary": "Sign the appraisal",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.appraise"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.appraise",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "lab_admin",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "owner",
+          "pharmacy_admin",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "APPRAISAL_INCOMPLETE",
+          "http_status": 422,
+          "message": "Rate the administrative factors and the performance, give the overall rating, and a development plan below Satisfactory, before signing.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "missing"
+          ],
+          "details_from": "POST /api/v1/personnel/appraisals/{appraisal_id}/sign"
+        },
+        {
+          "code": "APPRAISAL_STATE_INVALID",
+          "http_status": 409,
+          "message": "The appraisal cannot change that way: a signed appraisal is final but for the member of staff's comments; nobody appraises themselves.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/personnel/appraisals/{appraisal_id}"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "appraisal_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Appraisal Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AppraisalDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with APPRAISAL_STATE_INVALID: the appraisal has moved on. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /personnel/appraisals/{appraisal_id}",
+        "refused_with": "APPRAISAL_STATE_INVALID",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /personnel/appraisals/{appraisal_id}/cancel",
+      "summary": "Cancel a draft appraisal",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.appraise",
+          "personnel.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.appraise or personnel.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "lab_admin",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "owner",
+          "pharmacy_admin",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "APPRAISAL_STATE_INVALID",
+          "http_status": 409,
+          "message": "The appraisal cannot change that way: a signed appraisal is final but for the member of staff's comments; nobody appraises themselves.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/personnel/appraisals/{appraisal_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "appraisal_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Appraisal Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppraisalCancelIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AppraisalDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "AppraisalCancelIn",
+        "fields": [
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 5,
+            "max_length": 1000
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with APPRAISAL_STATE_INVALID: the appraisal has moved on. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /personnel/appraisals/{appraisal_id}",
+        "refused_with": "APPRAISAL_STATE_INVALID",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /personnel/appraisals/{appraisal_id}/pdf",
+      "summary": "The appraisal (PDF)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "personnel.view or personnel.manage, the appraiser and the member of staff appraised"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "appraisal_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Appraisal Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "The stored file, with its own Content-Type (e.g. application/pdf) and its file name in Content-Disposition.",
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "file",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "prints": {
+        "kind": "file",
+        "media": [
+          "application/octet-stream"
+        ]
+      }
+    },
+    {
+      "endpoint": "GET /personnel/appraisal-policy/pdf",
+      "summary": "The performance appraisal system (PDF)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "The stored file, with its own Content-Type (e.g. application/pdf) and its file name in Content-Disposition.",
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "file",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "prints": {
+        "kind": "file",
+        "media": [
+          "application/octet-stream"
+        ]
+      }
+    },
+    {
+      "endpoint": "GET /staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "UNAUTHENTICATED",
+          "http_status": 401,
+          "message": "Authentication is required.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/settings/sections"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": true,
+          "description": "Part of the name, or the start of the employee number",
+          "schema": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80,
+            "description": "Part of the name, or the start of the employee number",
+            "title": "Q"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "Only this department",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only this department",
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "license_type",
+          "in": "query",
+          "required": false,
+          "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "PMDC",
+                  "PNC"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+            "title": "License Type"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 20,
+            "minimum": 1,
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_StaffLookupOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 20
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": true,
+            "type": "string",
+            "min_length": 2,
+            "description": "Part of the name, or the start of the employee number"
+          }
+        ],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer",
+            "description": "Only this department"
+          },
+          {
+            "name": "license_type",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PMDC",
+              "PNC"
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "GET /personnel/appraisals/statistics",
+      "summary": "Appraisals on time; development",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.view",
+          "personnel.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.view or personnel.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AppraisalStatisticsOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /personnel/appraisals/{appraisal_id}/acknowledge",
+      "summary": "The member of staff's comments and acknowledgement",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "the member of staff appraised, or personnel.manage from the signed paper"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "APPRAISAL_STATE_INVALID",
+          "http_status": 409,
+          "message": "The appraisal cannot change that way: a signed appraisal is final but for the member of staff's comments; nobody appraises themselves.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/personnel/appraisals/{appraisal_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "appraisal_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Appraisal Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppraisalAcknowledgeIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AppraisalDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "AppraisalAcknowledgeIn",
+        "fields": [
+          {
+            "pointer": "/acknowledged_on",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/employee_comments",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 4000
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with APPRAISAL_STATE_INVALID: the appraisal has moved on. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /personnel/appraisals/{appraisal_id}",
+        "refused_with": "APPRAISAL_STATE_INVALID",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /personnel/employees/{employee_id}/trainings",
+      "summary": "Record an individual training",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.training.record",
+          "personnel.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of personnel.training.record or personnel.manage",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Employee Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EmployeeTrainingIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TrainingRecordOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "EmployeeTrainingIn",
+        "fields": [
+          {
+            "pointer": "/title",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 200
+          },
+          {
+            "pointer": "/requirement_code",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/category",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Clinical",
+              "Safety",
+              "Emergency",
+              "InfectionControl",
+              "PatientRights",
+              "Quality",
+              "Medication",
+              "Equipment",
+              "Management",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/provider",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200
+          },
+          {
+            "pointer": "/completed_on",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/hours",
+            "type": "number",
+            "required": false,
+            "nullable": true,
+            "maximum": 2000,
+            "exclusive_minimum": 0
+          },
+          {
+            "pointer": "/certificate_no",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 100
+          },
+          {
+            "pointer": "/valid_until",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date"
+          },
+          {
+            "pointer": "/appraisal_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "The appraisal that asked for this training (MSDS HRM 136 ii) (GET /personnel/appraisals?employee_id=)"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": "employee"
+      }
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "appraisal_id",
+      "source": "this_screen",
+      "call": "GET /personnel/appraisals",
+      "field": "appraisal_id",
+      "used_by": [
+        "GET /personnel/appraisals/{appraisal_id}",
+        "PUT /personnel/appraisals/{appraisal_id}",
+        "POST /personnel/appraisals/{appraisal_id}/sign",
+        "POST /personnel/appraisals/{appraisal_id}/cancel",
+        "GET /personnel/appraisals/{appraisal_id}/pdf",
+        "POST /personnel/appraisals/{appraisal_id}/acknowledge"
+      ],
+      "also": [
+        {
+          "call": "POST /personnel/appraisals",
+          "field": "appraisal_id"
+        }
+      ]
+    },
+    {
+      "id": "employee_id",
+      "source": "this_screen",
+      "call": "GET /personnel/appraisals/schedule",
+      "field": "employee_id",
+      "used_by": [
+        "POST /personnel/employees/{employee_id}/trainings"
+      ],
+      "also": [
+        {
+          "call": "GET /personnel/appraisals",
+          "field": "employee_id"
+        },
+        {
+          "call": "GET /staff/lookup",
+          "field": "employee_id"
+        },
+        {
+          "call": "GET /personnel/appraisals/{appraisal_id}",
+          "field": "employee_id"
+        }
+      ]
+    }
+  ]
+}

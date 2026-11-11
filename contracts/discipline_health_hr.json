@@ -1,0 +1,984 @@
+{
+  "screen_id": "discipline_health_hr",
+  "endpoints": [
+    {
+      "endpoint": "GET /personnel/disciplinary-cases",
+      "summary": "Disciplinary cases (confidential)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.discipline.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.discipline.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Id"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Open",
+                  "Decided",
+                  "Dropped"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DisciplinaryCaseOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "employee_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Open",
+              "Decided",
+              "Dropped"
+            ]
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /personnel/employees/{employee_id}/disciplinary-cases",
+      "summary": "Open a disciplinary case",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.discipline.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.discipline.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "DISCIPLINARY_CASE_CLOSED",
+          "http_status": 409,
+          "message": "This disciplinary case is decided or dropped; nobody opens or decides their own case.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/personnel/disciplinary-cases/{case_id}/decide"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Employee Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DisciplinaryCaseIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DisciplinaryCaseOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "DisciplinaryCaseIn",
+        "fields": [
+          {
+            "pointer": "/occurred_on",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/allegation",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 10,
+            "max_length": 4000
+          },
+          {
+            "pointer": "/incident_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/complaint_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": "employee"
+      }
+    },
+    {
+      "endpoint": "POST /personnel/disciplinary-cases/{case_id}/decide",
+      "summary": "Decide or drop a case",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.discipline.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.discipline.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "DISCIPLINARY_CASE_CLOSED",
+          "http_status": 409,
+          "message": "This disciplinary case is decided or dropped; nobody opens or decides their own case.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/personnel/disciplinary-cases/{case_id}/decide"
+        },
+        {
+          "code": "DISCIPLINARY_NOT_HEARD",
+          "http_status": 422,
+          "message": "Record the member of staff's response before deciding an action: nobody is punished unheard.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/personnel/disciplinary-cases/{case_id}/decide"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "case_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Case Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DisciplinaryDecisionIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DisciplinaryCaseOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "DisciplinaryDecisionIn",
+        "fields": [
+          {
+            "pointer": "/outcome",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Decided",
+              "Dropped"
+            ]
+          },
+          {
+            "pointer": "/employee_response",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 4000,
+            "description": "Their explanation (required for any action)"
+          },
+          {
+            "pointer": "/action",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "NoAction",
+              "Counselling",
+              "VerbalWarning",
+              "WrittenWarning",
+              "FinalWarning",
+              "Suspension",
+              "Termination"
+            ]
+          },
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 5,
+            "max_length": 4000,
+            "description": "Decided: the reasons; Dropped: why"
+          },
+          {
+            "pointer": "/decided_on",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          }
+        ],
+        "cross_field_rules": {
+          "DisciplinaryDecisionIn": [
+            "A decision names the action (NoAction when none)"
+          ]
+        },
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /personnel/disciplinary-cases",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": "disciplinary_case"
+      }
+    },
+    {
+      "endpoint": "GET /personnel/health/due",
+      "summary": "Medicals and vaccinations due",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.health.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.health.manage",
+        "roles_allowed": [
+          "hr_admin",
+          "ipc_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_StaffHealthDueOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /personnel/employees/{employee_id}/health",
+      "summary": "The staff health record (confidential)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.health.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.health.manage",
+        "roles_allowed": [
+          "hr_admin",
+          "ipc_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Employee Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_StaffHealthRecordOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /personnel/employees/{employee_id}/health",
+      "summary": "Record a medical, a screening or a vaccination",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "personnel.health.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of personnel.health.manage",
+        "roles_allowed": [
+          "hr_admin",
+          "ipc_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "employee_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Employee Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HealthRecordIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_StaffHealthRecordOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "HealthRecordIn",
+        "fields": [
+          {
+            "pointer": "/kind",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "PreEmploymentMedical",
+              "PeriodicMedical",
+              "HepatitisBVaccine",
+              "HepatitisBAntibody",
+              "HepatitisBScreen",
+              "HepatitisCScreen",
+              "HIVScreen",
+              "TBScreen",
+              "TetanusVaccine",
+              "InfluenzaVaccine",
+              "TyphoidVaccine",
+              "NeedlestickExposure",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/done_on",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/dose",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 5,
+            "description": "A vaccine: the dose number"
+          },
+          {
+            "pointer": "/result",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 500
+          },
+          {
+            "pointer": "/fit_for_duty",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "Fit",
+              "FitWithRestrictions",
+              "Unfit"
+            ],
+            "description": "Required for a medical"
+          },
+          {
+            "pointer": "/next_due",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date",
+            "description": "The next dose or check"
+          },
+          {
+            "pointer": "/incident_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "A needlestick exposure: its incident"
+          },
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 2000
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /personnel/employees/{employee_id}/health",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": "employee"
+      }
+    },
+    {
+      "endpoint": "GET /facility/staff",
+      "summary": "Pick a member of staff",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.compliance.manage",
+          "facility.equipment.manage",
+          "facility.maintenance.record",
+          "facility.drill.manage",
+          "personnel.training.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.compliance.manage or facility.equipment.manage or facility.maintenance.record or facility.drill.manage or personnel.training.record",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Q"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 500,
+            "minimum": 1,
+            "default": 50,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_FacilityStaffOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 500
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "employee_id",
+      "source": "this_screen",
+      "call": "GET /personnel/health/due",
+      "field": "employee_id",
+      "used_by": [
+        "POST /personnel/employees/{employee_id}/disciplinary-cases",
+        "GET /personnel/employees/{employee_id}/health",
+        "POST /personnel/employees/{employee_id}/health"
+      ],
+      "also": [
+        {
+          "call": "GET /personnel/disciplinary-cases",
+          "field": "employee_id"
+        },
+        {
+          "call": "GET /facility/staff",
+          "field": "employee_id"
+        }
+      ]
+    },
+    {
+      "id": "case_id",
+      "source": "this_screen",
+      "call": "GET /personnel/disciplinary-cases",
+      "field": "case_id",
+      "used_by": [
+        "POST /personnel/disciplinary-cases/{case_id}/decide"
+      ],
+      "also": [
+        {
+          "call": "POST /personnel/employees/{employee_id}/disciplinary-cases",
+          "field": "case_id"
+        }
+      ]
+    }
+  ]
+}
