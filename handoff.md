@@ -32,3 +32,5 @@ P9C 242–247: generated shared clients appraisals_hr, discipline_health_hr and 
 Resuming six register screens 242–247. Saving endpoint bundles; then wire App, bilingual help and check native register reads. No DEV writes planned for this checkpoint.
 Native smoke command pending: node artifacts/personnel-review-native.mjs. Read-only, masks confidential table contents in screenshots.
 P9C 242–247 are mounted with contextual help and saved bundles. Native read smoke passed all six on index-DsjbKMKR.js, bilingual screenshots mask table data. Evidence docs/phase-p9c-242-247-2026-11-11. Final build/unit command running, logs artifacts/personnel-review-final-build.log and personnel-review-final-test.log. Next commit and propose tested reads; detail journeys, mutations and PDFs pending. No DEV writes.
+P9C register implementation b1280fd. Build passed with 246 handbook screens. Proposals 449–454 verified pending, awaiting human review on /docs -> My progress. Next finish 242–247 detail/write/PDF verification; next new screens 248–253. No DEV writes.
+Final npm.cmd test 874/874. All native profiles closed. No test or write commands running.
