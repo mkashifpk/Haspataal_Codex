@@ -14,6 +14,7 @@ import { SsiSurveillance } from "./screens/SsiSurveillance";
 import { IpcAudits } from "./screens/IpcAudits";
 import { InfectionStatistics } from "./screens/InfectionStatistics";
 import { IpcStaffTraining } from "./screens/IpcStaffTraining";
+import { HrPersonnel } from "./screens/HrPersonnel";
 import { IndicatorTargets, QualityIndicators } from "./screens/QualityIndicators";
 import { Committees } from "./screens/Committees";
 import { listCommittees } from "./generated/my_committees";
@@ -1711,6 +1712,11 @@ export function App() {
               {screen === "ipc_audits" && <IpcAudits key={user.user_id} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === "waste_log" && <WasteLog key={user.user_id+":"+screen} screenId={screen} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === "infection_statistics_ipc" || screen === "infection_statistics" || screen === "infection_statistics_owner") && <InfectionStatistics key={user.user_id+":"+screen} screenId={screen} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}} onFollowup={nav.includes("ssi_surveillance")?()=>{navigate("ssi_surveillance");}:undefined} onActions={nav.includes("action_register")?()=>{navigate("action_register");}:undefined}/>}
+              {(screen === "orientation_job_descriptions" || screen === "staff_training_hr") && <HrPersonnel
+                key={user.user_id + ":" + screen} screenId={screen} revision={revision} connected={connected}
+                canManage={user.permissions.includes("personnel.manage")}
+                canRecordSession={user.permissions.includes("personnel.training.record")}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === "staff_training_ipc" && <IpcStaffTraining key={user.user_id} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === "quality_indicator_targets" && <IndicatorTargets key={user.user_id} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === "quality_indicators" || screen === "quality_indicators_owner") && <QualityIndicators key={user.user_id+":"+screen} screenId={screen} user={user} connected={connected} timeZone={meta?.hospital_timezone} revision={revision} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}

@@ -34,7 +34,7 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 238);
+  assert.equal(result.screens, 240);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });
@@ -136,3 +136,4 @@ test('Ward assessment cannot ship an unmapped review control',()=>{assert.throws
 test('Ward patient handover cannot ship an unmapped context control',()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==='src/ward-admission.tsx'?read(file).replace('data-help="ward.context"',''):read(file)}),/missing\/broken control help mapping/)});
 test('Vitals cannot ship an unmapped correction/review control',()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/VitalsFlowsheet.tsx'?read(file).replace('data-help="vitals.review"',''):read(file)}),/missing\/broken control help mapping/)});
 test('MAR and verbal order review controls must retain authored help',()=>{for(const [file,id]of [['src/screens/MedicationAdministration.tsx','mar.review'],['src/screens/VerbalOrders.tsx','verbal.review']])assert.throws(()=>checkHelp({media:false,read:path=>path===file?read(path).replace('data-help="'+id+'"',''):read(path)}),/missing\/broken control help mapping/)});
+

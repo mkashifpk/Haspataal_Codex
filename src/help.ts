@@ -10,6 +10,26 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  orientation_job_descriptions: {
+    title: "Orientation and job descriptions",
+    titleUr: "تعارفی تربیت اور ملازمت کی تفصیل",
+    purpose: "HR can review missing orientation topics and issue active job descriptions to selected staff.",
+    purposeUr: "انسانی وسائل کا عملہ باقی تعارفی موضوعات دیکھ سکتا ہے اور منتخب ملازم کو فعال ملازمت کی تفصیل جاری کر سکتا ہے۔",
+    steps: ["Select the employee by name and number. Mark topics actually covered and record the completion date. Mark the signature only if the employee signed the checklist.", "Choose an active job description and confirm the issue date for the selected employee."],
+    stepsUr: ["نام اور نمبر سے ملازم منتخب کریں۔ مکمل موضوعات اور تکمیل کی تاریخ درج کریں۔ دستخط کا نشان صرف دستخط ہونے پر لگائیں۔", "منتخب ملازم کے لیے فعال ملازمت کی تفصیل اور اجرا کی تاریخ درج کریں۔"],
+    faq: [["How do I find incomplete orientation?", "Select Incomplete orientation only. The register shows the due date and missing topics."]],
+    faqUr: [["نامکمل تعارفی تربیت کیسے تلاش کریں؟", "صرف نامکمل تعارفی تربیت منتخب کریں۔ رجسٹر میں مقررہ تاریخ اور باقی موضوعات نظر آئیں گے۔"]],
+  },
+  staff_training_hr: {
+    title: "Staff training",
+    titleUr: "عملے کی تربیت",
+    purpose: "HR can review training compliance and open sessions from the training register.",
+    purposeUr: "انسانی وسائل کا عملہ تربیت کی تعمیل دیکھ اور رجسٹر سے نشستیں کھول سکتا ہے۔",
+    steps: ["Use Overdue training only to narrow the compliance list. Select a session number to read its details.", "For a new session, search for staff and select the people who attended. Enter the title, trainer, date, and hours before saving."],
+    stepsUr: ["تعمیل کی فہرست مختصر کرنے کے لیے صرف تاخیر شدہ تربیت منتخب کریں۔ تفصیل کے لیے نشست کا نمبر کھولیں۔", "نئی نشست کے لیے عملہ تلاش کریں اور حاضر افراد منتخب کریں۔ محفوظ کرنے سے پہلے عنوان، تربیت دینے والا، تاریخ اور گھنٹے درج کریں۔"],
+    faq: [["Where do I record training for one employee?", "Choose Record individual training, select the employee from the list, and enter the training details."]],
+    faqUr: [["ایک ملازم کی تربیت کہاں درج کریں؟", "انفرادی تربیت درج کریں منتخب کریں، فہرست سے ملازم چنیں اور تربیت کی تفصیلات درج کریں۔"]],
+  },
   waste_log: {
     title: "Healthcare waste log",
     titleUr: "طبی فضلہ رجسٹر",

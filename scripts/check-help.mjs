@@ -152,6 +152,7 @@ export function checkHelp({
   foundationJourney.glossary.forEach((p, i) => bilingual(p, `glossary ${i}`));
   const files = [
     "src/App.tsx",
+    "src/screens/HrPersonnel.tsx",
     "src/components.tsx",
     "src/StaffPicker.tsx",
     "src/PMDCStaffPicker.tsx",
