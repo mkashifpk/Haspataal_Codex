@@ -20,6 +20,8 @@ exports.isQualityRegisterPdfPath = value => {
   if (typeof value !== 'string' || value !== value.trim()) return false;
   if (value === '/consent-policy/pdf') return true;
   if (value === '/mlc/contacts/pdf') return true;
+  if (value === '/personnel/appraisal-policy/pdf') return true;
+  if (/^\/personnel\/(?:appraisals\/[1-9]\d*|employees\/[1-9]\d*\/file)\/pdf$/.test(value)) return true;
   if (/^\/committee-meetings\/[1-9]\d*\/pdf$/.test(value)) return true;
   if (exports.isDiagnosticPdfPath(value)) return true;
   if (exports.isEstimatePdfPath(value) || value === '/medication-safety/policy/pdf') return true;

@@ -5,6 +5,7 @@ import * as appraisals from "../generated/appraisals_hr";
 import * as discipline from "../generated/discipline_health_hr";
 import * as files from "../generated/personnel_files_hr";
 import { ReportTable } from "./P9cShared";
+import { QualityPaper } from "./QualityPaper";
 
 export const personnelReviewScreens = [
   "appraisals_hr", "appraise_staff_doctor", "appraise_staff_head_nurse",
@@ -14,7 +15,7 @@ type Screen = (typeof personnelReviewScreens)[number];
 export function isPersonnelReviewScreen(value: string): value is Screen {
   return personnelReviewScreens.some(screen => screen === value);
 }
-type Props = { screenId: Screen; revision: number; permissions: readonly string[]; onOpenHelp: () => void };
+type Props = { screenId: Screen; revision: number; permissions: readonly string[]; onOpenHelp: () => void; connected: boolean };
 type Selection = { id: number; label: string };
 
 export function PersonnelReview(props: Props) {
@@ -27,7 +28,7 @@ export function PersonnelReview(props: Props) {
   </>;
 }
 
-function AppraisalRegister({ screenId, revision }: Props) {
+function AppraisalRegister({ screenId, revision, connected }: Props) {
   const [selected, setSelected] = useState<number>();
   const mine = screenId !== "appraisals_hr";
   const schedule = useLoad(() => appraisals.appraisalSchedule(), [revision]);
@@ -37,6 +38,7 @@ function AppraisalRegister({ screenId, revision }: Props) {
 
   return <section data-screen={screenId}>
     <h1>{t("Staff appraisals", "عملے کی کارکردگی کا جائزہ")}</h1>
+    <QualityPaper disabled={!connected} documents={[{ path: "/personnel/appraisal-policy/pdf", label: t("appraisal policy", "جائزے کی پالیسی") }]} />
     <LoadState {...schedule} retry={schedule.reload} />
     {!schedule.loading && !schedule.error && <ReportTable title={t("Appraisals due", "مقررہ جائزے")}
       columns={[t("Employee", "ملازم"), t("Type", "قسم"), t("Due", "مقررہ تاریخ")]}
@@ -56,6 +58,7 @@ function AppraisalRegister({ screenId, revision }: Props) {
       <p>{t("Appraiser", "جائزہ لینے والا")} · {appraisal.appraiser_name}</p>
       {appraisal.overall_rating && <p>{t("Overall rating", "مجموعی درجہ")} · {appraisal.overall_rating}</p>}
       {appraisal.development_plan && <p>{t("Development plan", "ترقی کا منصوبہ")} · {appraisal.development_plan}</p>}
+      <QualityPaper disabled={!connected} documents={[{ path: `/personnel/appraisals/${appraisal.appraisal_id}/pdf`, label: t("appraisal PDF", "جائزے کی پی ڈی ایف") }]} />
     </article>}
   </section>;
 }
@@ -94,7 +97,7 @@ function DisciplineHealth({ screenId, permissions, revision }: Props) {
   </section>;
 }
 
-function PersonnelFiles({ screenId, permissions, revision }: Props) {
+function PersonnelFiles({ screenId, permissions, revision, connected }: Props) {
   const [incomplete, setIncomplete] = useState(false);
   const [selected, setSelected] = useState<number>();
   const mayOpen = permissions.includes("personnel.view");
@@ -120,6 +123,7 @@ function PersonnelFiles({ screenId, permissions, revision }: Props) {
       <p>{file.designation} · {file.department_name} · {file.employment_status}</p>
       <p>{t("Missing", "باقی")} · {file.missing.join(", ") || "—"}</p>
       <p>{t("Credentials", "اسناد")} · {file.credentials.length} · {t("Documents", "دستاویزات")} · {file.documents.length}</p>
+      <QualityPaper disabled={!connected} documents={[{ path: `/personnel/employees/${file.employee_id}/file/pdf`, label: t("personnel file PDF", "ملازم کی فائل کی پی ڈی ایف") }]} />
     </article>}
   </section>;
 }

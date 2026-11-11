@@ -4,6 +4,13 @@ import { createRequire } from 'node:module';
 const {isQualityRegisterPdfPath: allowed}=createRequire(import.meta.url)('../electron/p9-quality-pdf-path.cjs');
 test('Quality PDFs admit only documented paths and canonical date queries',()=>{
   assert(allowed('/consent-policy/pdf'));
+  for (const p of ['/personnel/appraisal-policy/pdf', '/personnel/appraisals/7/pdf', '/personnel/employees/7/file/pdf']) {
+    assert(allowed(p));
+    assert(!allowed(p + '?scope=all'));
+    assert(!allowed(p + '/extra'));
+  }
+  assert(!allowed('/personnel/employees/07/file/pdf'));
+  assert(!allowed('/personnel/employees/7/health/pdf'));
   assert(!allowed('/consent-policy/pdf?scope=all'));
   assert(allowed('/incidents/8/adr-report/pdf'));
   assert(allowed('/blood/reactions/17/pdf'));
