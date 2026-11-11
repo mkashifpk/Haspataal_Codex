@@ -37,3 +37,4 @@ Final npm.cmd test 874/874. All native profiles closed. No test or write command
 Current request: finish all pending P9C work before 248–253. Clean baseline 41e6a2e. #73/#74 still New. Starting pending appraisal and personnel-file PDF actions using existing native PDF authorization; next verify build and native PDF.
 Pending native policy smoke node artifacts/p9c-appraisal-policy.mjs after build; read-only and cancels file save.
 Appraisal policy, individual appraisal and personnel-file PDF actions added. Build and PDF allowlist regression passed. Native HR appraisal policy download returned successfully and cancelled native save. Individual appraisal and file PDF journeys still pending. No DEV writes.
+Appraisal policy proposal 455 verified pending, awaiting human review on /docs -> My progress. No commands running. Next implement appraisal/discipline/health writes and verify detail/PDF journeys before new screens 248–253.
