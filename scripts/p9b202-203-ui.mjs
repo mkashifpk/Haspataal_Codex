@@ -21,6 +21,7 @@ async function run(owner) {
   await p.getByRole("navigation").locator(`[data-screen-target="${id}"]`).click();
   const root=p.locator(`[data-screen="${id}"]`);
   if(owner) {
+   await p.getByRole("button",{name:"Schedule and cycles",exact:true}).click();
    await expect(root.getByRole("heading",{name:"Review schedule",exact:true})).toBeVisible();
    await root.getByRole("row").filter({hasText:fixture.cycle_number}).getByRole("button",{name:"Open cycle",exact:true}).click();
    await expect(root.getByRole("heading",{name:"Sampling plan",exact:true})).toBeVisible();

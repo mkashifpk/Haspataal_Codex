@@ -5,7 +5,6 @@ import { ClinicalWriteFeedback, useClinicalWrite, type ClinicalCommand } from ".
 import { Empty, Field, LoadState, Modal, useLoad } from "../components";
 import { bilingual as t } from "../i18n";
 import * as api from "../generated/record_review_report";
-import { listCyclesQualityRecordReviews } from "../generated/record_review_cycles";
 import { QualityHeading } from "./QualityRegister";
 import { QualityPaper } from "./QualityPaper";
 import { RecordReviewCycles } from "./RecordReviewCycles";
@@ -45,11 +44,12 @@ export function RecordReviewReport({ user, screenId, connected, readOnly, revisi
   const read = manage || user.permissions.includes("quality.review.view");
   const actionManager = user.permissions.includes("quality.action.manage");
   const [cycle, setCycle] = useState<number>();
+  const [cycleStatus, setCycleStatus] = useState<api.CycleListItemOut["status"] | "">("");
   const [filter, setFilter] = useState<api.DeficiencyOut["status"] | "">("");
   const [draft, setDraft] = useState<Draft>();
   const [changed, setChanged] = useState(false);
   const [failure, setFailure] = useState<unknown>();
-  const cycles = useLoad(() => read ? listCyclesQualityRecordReviews({limit:200}) : Promise.resolve([]), [read, revision]);
+  const cycles = useLoad(() => read ? api.listCyclesQualityRecordReviews({status:cycleStatus || undefined,limit:200}) : Promise.resolve([]), [read, cycleStatus, revision]);
   const report = useLoad(() => read && cycle ? api.reportQualityRecordReviews(cycle) : Promise.resolve(undefined), [read, cycle, revision]);
   const deficiencies = useLoad(async () => manage && cycle
     ? { cycle, filter, rows: await api.deficiencies({cycle_id:cycle,status:filter || undefined,limit:1000}) }
@@ -100,7 +100,7 @@ export function RecordReviewReport({ user, screenId, connected, readOnly, revisi
         if (!live.some(x => x.deficiency_id === row.deficiency_id && x.status === "Open")) throw versionChanged();
       });
     }
-    if (draft.kind === "action" && manage && draft.cycle === cycle) {
+    if (draft.kind === "action" && manage && draft.cycle === cycle && active?.cycle.status === "InReview") {
       const owner = Number(value("owner"));
       const department = Number(value("department")) || null;
       const criterion = value("criterion") || null;
@@ -151,6 +151,18 @@ export function RecordReviewReport({ user, screenId, connected, readOnly, revisi
       text={t("Read the survey evidence and follow findings through the hospital action register.","معائنے کے شواہد پڑھیں اور ہسپتال کے اقدامات کے رجسٹر میں نتائج کی پیروی کریں۔")} onHelp={onOpenHelp}/>
     {!read ? <Empty>{t("Record review access is required.","ریکارڈ جائزے کی اجازت درکار ہے۔")}</Empty> : <>
       <div className="toolbar">
+        <Field label={t("Cycle status","دور کی حالت")}>
+          <select data-help="rrp.cycle" disabled={!!draft} value={cycleStatus} onChange={e => {
+            setCycle(undefined);
+            setCycleStatus(e.target.value as typeof cycleStatus);
+          }}>
+            <option value="">{t("All statuses","تمام حالتیں")}</option>
+            <option value="Planned">{t("Planned","طے شدہ")}</option>
+            <option value="InReview">{t("In review","زیر جائزہ")}</option>
+            <option value="Closed">{t("Closed","بند")}</option>
+            <option value="Cancelled">{t("Cancelled","منسوخ")}</option>
+          </select>
+        </Field>
         <Field label={t("Review cycle","جائزے کا دور")}>
           <select data-help="rrp.cycle" disabled={cycles.loading || Boolean(cycles.error) || !!draft} value={cycle ?? ""} onChange={e => setCycle(Number(e.target.value) || undefined)}>
             <option value="">{t("Choose a cycle","دور منتخب کریں")}</option>
@@ -194,7 +206,7 @@ export function RecordReviewReport({ user, screenId, connected, readOnly, revisi
         </article>
         <article className="card">
           <h2>{t("Corrective and preventive actions","اصلاحی اور احتیاطی اقدامات")}</h2>
-          {manage && <button data-help="rrp.action" disabled={!allowDraft} onClick={() => open({kind:"action",cycle:active.cycle.cycle_id})}>{t("Add action","اقدام شامل کریں")}</button>}
+          {manage && active.cycle.status === "InReview" && <button data-help="rrp.action" disabled={!allowDraft} onClick={() => open({kind:"action",cycle:active.cycle.cycle_id})}>{t("Add action","اقدام شامل کریں")}</button>}
           <LoadState {...actions} retry={actions.reload}/>
           {!actions.loading && !actions.error && table([t("Action","اقدام"),t("Owner / department","ذمہ دار / شعبہ"),t("Due and status","تاریخ اور حالت"),t("Evidence","شواہد")],
             (user.permissions.some(x => ["quality.action.view","quality.action.manage"].includes(x)) ? visibleActions : active.actions).map(x => [
@@ -262,7 +274,7 @@ export function RecordReviewReport({ user, screenId, connected, readOnly, revisi
 }
 
 export function RecordReviewOverview(props: Omit<Parameters<typeof RecordReviewReport>[0], "screenId">) {
-  const [report, setReport] = useState(false);
+  const [report, setReport] = useState(true);
   return <>
     <div className="toolbar">
       <button data-help="rrp.overview" aria-pressed={!report} onClick={() => {if (report && mayChangeClinicalContext()) setReport(false);}}>{t("Schedule and cycles","شیڈول اور دور")}</button>

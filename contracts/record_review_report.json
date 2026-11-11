@@ -57,12 +57,22 @@
     {
       "id": "cycle_id",
       "source": "this_screen",
-      "call": "GET /quality/record-review-deficiencies",
+      "call": "GET /quality/record-reviews",
       "field": "cycle_id",
       "used_by": [
         "GET /quality/record-reviews/{cycle_id}/report",
         "GET /quality/record-reviews/{cycle_id}/report/pdf",
         "POST /quality/record-reviews/{cycle_id}/actions"
+      ],
+      "also": [
+        {
+          "call": "GET /quality/record-review-deficiencies",
+          "field": "cycle_id"
+        },
+        {
+          "call": "GET /quality/actions",
+          "field": "cycle_id"
+        }
       ]
     },
     {
@@ -72,15 +82,31 @@
       "field": "deficiency_id",
       "used_by": [
         "POST /quality/record-review-deficiencies/{deficiency_id}/resolve"
+      ],
+      "also": [
+        {
+          "call": "GET /quality/record-reviews/{cycle_id}/report",
+          "field": "deficiency_id"
+        }
       ]
     },
     {
       "id": "action_id",
       "source": "this_screen",
-      "call": "POST /quality/record-reviews/{cycle_id}/actions",
+      "call": "GET /quality/actions",
       "field": "action_id",
       "used_by": [
         "POST /quality/actions/{action_id}/complete"
+      ],
+      "also": [
+        {
+          "call": "GET /quality/record-reviews/{cycle_id}/report",
+          "field": "action_id"
+        },
+        {
+          "call": "POST /quality/record-reviews/{cycle_id}/actions",
+          "field": "action_id"
+        }
       ]
     },
     {
@@ -90,6 +116,12 @@
       "field": "criterion_id",
       "used_by": [
         "PATCH /quality/record-review/criteria/{criterion_id}"
+      ],
+      "also": [
+        {
+          "call": "POST /quality/record-review/criteria",
+          "field": "criterion_id"
+        }
       ]
     }
   ],
@@ -280,6 +312,146 @@
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
   },
   "endpoints": [
+    {
+      "endpoint": "GET /quality/record-reviews",
+      "summary": "Review cycles (newest period first)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "quality.review.manage",
+          "quality.review.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of quality.review.manage or quality.review.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Planned",
+                  "InReview",
+                  "Closed",
+                  "Cancelled"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 500,
+            "minimum": 1,
+            "default": 50,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_CycleListItemOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 500
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Planned",
+              "InReview",
+              "Closed",
+              "Cancelled"
+            ]
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
     {
       "endpoint": "GET /quality/record-reviews/{cycle_id}/report",
       "summary": "The surveyor's report, with the MSDS 156-162 ratings",

@@ -55,7 +55,7 @@ export interface InfectionCaseIn {
   /** The patient (GET /patients/search) */
   patient_id?: number | null;
   admission_id?: number | null;
-  /** A surgical site infection: the operation (GET /infection/ssi-surveillance) */
+  /** A surgical site infection: the operation (GET /infection/ssi-surveillance?patient_id=) */
   booking_id?: number | null;
   ssi_depth?: "Superficial" | "Deep" | "OrganSpace" | null;
   onset_date: string;
@@ -179,8 +179,8 @@ export function decideCaseInfectionCasesDecision(case_id: number, body: CaseDeci
   return api<InfectionCaseOut>("POST", `/infection-cases/${case_id}/decision`, body, { idempotent: true });
 }
 
-/** Operations under wound surveillance — GET /api/v1/infection/ssi-surveillance (who may call: holders of infection.control.manage or infection.statistics.view). */
-export function ssiSurveillance(query?: { state?: string | null; surgeon_id?: number | null; limit?: number }): Promise<SurveillanceOut[]> {
+/** Operations under wound surveillance — GET /api/v1/infection/ssi-surveillance (who may call: holders of infection.control.manage or infection.statistics.view or infection.case.report). */
+export function ssiSurveillance(query?: { state?: string | null; surgeon_id?: number | null; patient_id?: number | null; admission_id?: number | null; limit?: number }): Promise<SurveillanceOut[]> {
   return api<SurveillanceOut[]>("GET", withQuery(`/infection/ssi-surveillance`, query), undefined);
 }
 

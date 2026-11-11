@@ -13,7 +13,7 @@ export interface InfectionCaseIn {
   /** The patient (GET /patients/search) */
   patient_id?: number | null;
   admission_id?: number | null;
-  /** A surgical site infection: the operation (GET /infection/ssi-surveillance) */
+  /** A surgical site infection: the operation (GET /infection/ssi-surveillance?patient_id=) */
   booking_id?: number | null;
   ssi_depth?: "Superficial" | "Deep" | "OrganSpace" | null;
   onset_date: string;
@@ -63,6 +63,34 @@ export interface AuthorStampOut {
   at: string;
   /** The printed line: name, designation, registration, date and time */
   text: string;
+}
+
+/** An operation under surgical site infection surveillance (MSDS COP 50). */
+export interface SurveillanceOut {
+  booking_id: number;
+  booking_number: string;
+  procedure_name: string;
+  patient_id: number;
+  mrn: string;
+  patient_name: string;
+  ot_id: number | null;
+  ot_name: string | null;
+  primary_surgeon_id: number;
+  surgeon_name: string;
+  wound_class: "Clean" | "CleanContaminated" | "Contaminated" | "Dirty" | null;
+  implant_left: boolean;
+  operated_on: string;
+  /** ssi_followup_days, or ssi_implant_followup_days with an implant */
+  window_days: number;
+  /** Days since the operation */
+  day: number;
+  last_check: string | null;
+  checks: number;
+  /** A check in the last week of the window or later */
+  closing_check: boolean;
+  /** A surgical site infection reported for it */
+  infection: "Suspected" | "Confirmed" | "Excluded" | null;
+  state: "InWindow" | "Due" | "Overdue" | "Complete";
 }
 
 export interface SsiCheckIn {
@@ -117,6 +145,11 @@ export interface SsiCheckOut {
 /** Report a suspected healthcare-associated infection — POST /api/v1/infection-cases (who may call: holders of infection.case.report or infection.control.manage). */
 export function reportCase(body: InfectionCaseIn): Promise<InfectionCaseOut> {
   return api<InfectionCaseOut>("POST", `/infection-cases`, body, { idempotent: true });
+}
+
+/** Operations under wound surveillance — GET /api/v1/infection/ssi-surveillance (who may call: holders of infection.control.manage or infection.statistics.view or infection.case.report). */
+export function ssiSurveillance(query?: { state?: string | null; surgeon_id?: number | null; patient_id?: number | null; admission_id?: number | null; limit?: number }): Promise<SurveillanceOut[]> {
+  return api<SurveillanceOut[]>("GET", withQuery(`/infection/ssi-surveillance`, query), undefined);
 }
 
 /** Infection cases — GET /api/v1/infection-cases (who may call: holders of infection.case.report or infection.control.manage or infection.statistics.view). */

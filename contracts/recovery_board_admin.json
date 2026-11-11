@@ -7598,12 +7598,21 @@
           },
           "type": "array",
           "title": "Patients"
+        },
+        "awaiting": {
+          "type": "array",
+          "title": "Awaiting",
+          "description": "Operations over (Cleaning or Completed) in the last 24 hours with no recovery stay, newest first: after local anaesthesia the stay opens only when the patient comes (POST /ot/bookings/{booking_id}/recovery)",
+          "items": {
+            "$ref": "#/components/schemas/RecoveryAwaitingOut"
+          }
         }
       },
       "type": "object",
       "required": [
         "targets",
-        "patients"
+        "patients",
+        "awaiting"
       ],
       "title": "RecoveryBoardOut"
     },
@@ -9247,6 +9256,99 @@
         "type"
       ],
       "title": "ValidationError"
+    },
+    "RecoveryAwaitingOut": {
+      "title": "RecoveryAwaitingOut",
+      "properties": {
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "type": "string",
+          "title": "Booking Number"
+        },
+        "procedure_name": {
+          "type": "string",
+          "title": "Procedure Name"
+        },
+        "anesthesia_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anesthesia Type"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Requested",
+            "Scheduled",
+            "InProgress",
+            "Cleaning",
+            "Completed",
+            "Cancelled",
+            "EmergencyHold"
+          ],
+          "title": "Status"
+        },
+        "ot_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Name"
+        },
+        "surgeon_name": {
+          "type": "string",
+          "title": "Surgeon Name"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "actual_end": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Actual End"
+        },
+        "minutes_since_end": {
+          "type": "integer",
+          "title": "Minutes Since End"
+        }
+      },
+      "type": "object",
+      "required": [
+        "booking_id",
+        "booking_number",
+        "procedure_name",
+        "anesthesia_type",
+        "status",
+        "ot_name",
+        "surgeon_name",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "actual_end",
+        "minutes_since_end"
+      ],
+      "description": "An operation over in the last 24 hours with no recovery stay (local anaesthesia): its patient may still come to\nrecovery (backend issue #65)."
     }
   },
   "unknowns": [
@@ -9394,6 +9496,21 @@
         "every screen"
       ],
       "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "id_sources": [
+    {
+      "id": "booking_id",
+      "source": "this_screen",
+      "call": "GET /ot/recovery-board",
+      "field": "booking_id",
+      "used_by": [
+        "GET /ot/bookings/{booking_id}/surgical-record",
+        "POST /ot/bookings/{booking_id}/recovery",
+        "POST /ot/bookings/{booking_id}/recovery/observations",
+        "POST /ot/bookings/{booking_id}/recovery/discharge",
+        "POST /ot/bookings/{booking_id}/corrections"
+      ]
     }
   ]
 }

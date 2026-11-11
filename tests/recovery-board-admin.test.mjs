@@ -45,7 +45,7 @@ test("recovery_board_admin: getRecoveryBoardScreenView evaluates runtime service
 test("recovery_board_admin: role and permission gates for OT Admin staff", () => {
   const admin = { user_id: 10, roles: ["ot_admin"], permissions: ["ot.clinical.view", "ot.recovery.open", "ot.clinical.correct", "incident.report"] };
   assert.equal(canViewRecoveryBoard(admin), true);
-  assert.equal(canOpenRecovery(admin), true);
+  assert.equal(canOpenRecovery(admin), false);
   assert.equal(canCorrectRecovery(admin), true);
   assert.equal(canReportIncident(admin), true);
 

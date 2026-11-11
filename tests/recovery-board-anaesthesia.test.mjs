@@ -51,7 +51,7 @@ test("recovery_board_anaesthesia: role and permission gates for anaesthetist sta
   assert.equal(canViewRecoveryBoard(anaesthetist), true);
   assert.equal(canRecordObservation(anaesthetist), true);
   assert.equal(canDischargePatient(anaesthetist), true);
-  assert.equal(canOpenRecovery(anaesthetist), true);
+  assert.equal(canOpenRecovery(anaesthetist), false);
   assert.equal(canCorrectRecovery(anaesthetist), true);
   assert.equal(canReportIncident(anaesthetist), true);
 

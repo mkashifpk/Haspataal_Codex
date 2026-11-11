@@ -144,7 +144,7 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
   const [cancelError, setCancelError] = useState<string | null>(null);
 
   const [showAssetModal, setShowAssetModal] = useState<boolean>(false);
-  const [editingAssetId, setEditingAssetId] = useState<number | null>(null);
+  const [editingAsset, setEditingAsset] = useState<AssetOut | null>(null);
   const [assetTag, setAssetTag] = useState<string>("");
   const [assetName, setAssetName] = useState<string>("");
   const [assetCategory, setAssetCategory] = useState<string>("");
@@ -362,6 +362,7 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
   // Register / Update Asset
   const handleAssetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (editingAsset?.status === "Disposed") return;
     const validation = validateAssetForm(assetTag, assetName, assetCategory);
     if (!validation.valid) {
       setAssetErrors(validation.errors);
@@ -370,14 +371,19 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
     setSubmitting(true);
     setAssetErrors({});
     try {
-      if (editingAssetId) {
-        const updated = await updateAsset(editingAssetId, {
+      if (editingAsset) {
+        const updated = await updateAsset(editingAsset.asset_id, {
           asset_tag: assetTag.trim(),
           name: assetName.trim(),
           category: assetCategory.trim(),
           location: assetLocation.trim() || null,
           serial_no: assetSerial.trim() || null,
-          purchase_cost: assetCost ? Number(assetCost) : null,
+          purchase_cost: assetCost || null,
+          department_id: editingAsset.department_id,
+          ward_id: editingAsset.ward_id,
+          purchase_date: editingAsset.purchase_date,
+          notes: editingAsset.notes,
+          status: editingAsset.status,
         });
         setSuccessMessage(`Asset ${updated.asset_tag} (${updated.name}) updated.`);
       } else {
@@ -392,7 +398,7 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
         setSuccessMessage(`Asset ${created.asset_tag} registered successfully.`);
       }
       setShowAssetModal(false);
-      setEditingAssetId(null);
+      setEditingAsset(null);
       await loadAssetsAndUtilities();
     } catch (err: any) {
       const msg = OPS_CONSOLE_ERROR_MESSAGES[err?.code]?.en || err?.message || "Failed to save asset";
@@ -556,7 +562,7 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
           {capability.canManageAssets && (
             <button
               onClick={() => {
-                setEditingAssetId(null);
+                setEditingAsset(null);
                 setAssetTag("");
                 setAssetName("");
                 setAssetCategory("Biomedical");
@@ -983,10 +989,10 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
                         {asset.purchase_cost != null ? `Rs. ${Number(asset.purchase_cost).toLocaleString()}` : "—"}
                       </td>
                       <td className="px-3 py-2 text-center">
-                        {capability.canManageAssets && (
+                        {capability.canManageAssets && asset.status !== "Disposed" && (
                           <button
                             onClick={() => {
-                              setEditingAssetId(asset.asset_id);
+                              setEditingAsset(asset);
                               setAssetTag(asset.asset_tag);
                               setAssetName(asset.name);
                               setAssetCategory(asset.category);
@@ -1397,7 +1403,7 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" data-help="ops_console.modal_asset">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 border border-slate-200 text-xs">
             <h3 className="text-base font-bold text-slate-900 mb-3">
-              {editingAssetId ? "Update Hospital Asset" : "Register New Equipment / Asset"}
+              {editingAsset ? "Update Hospital Asset" : "Register New Equipment / Asset"}
             </h3>
             <form onSubmit={handleAssetSubmit} className="space-y-3">
               <div>
@@ -1434,6 +1440,8 @@ export const OpsConsole: React.FC<OpsConsoleProps> = ({
                   className="w-full px-3 py-1.5 border rounded"
                   data-help="ops_console.select_asset_category"
                 >
+                  {editingAsset && !["Biomedical", "Electrical", "HVAC", "IT", "Plumbing", "General"].includes(editingAsset.category) &&
+                    <option value={editingAsset.category}>{editingAsset.category}</option>}
                   <option value="Biomedical">Biomedical</option>
                   <option value="Electrical">Electrical</option>
                   <option value="HVAC">HVAC</option>

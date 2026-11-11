@@ -11,6 +11,8 @@ const withQuery = (path: string, q?: Record<string, unknown>) => {
 export interface RecoveryBoardOut {
   targets: RecoveryTargetsOut;
   patients: RecoveryBoardRowOut[];
+  /** Operations over (Cleaning or Completed) in the last 24 hours with no recovery stay, newest first: after local anaesthesia the stay opens only when the patient comes (POST /ot/bookings/{booking_id}/recovery) */
+  awaiting: RecoveryAwaitingOut[];
 }
 
 export interface RecoveryTargetsOut {
@@ -45,6 +47,22 @@ export interface RecoveryBoardRowOut {
   anaesthesia_record_status: "Draft" | "Final" | null;
   needs_anaesthetist: boolean;
   flags: ("NoObservation" | "ObservationOverdue" | "LongStay" | "OperativeNoteUnsigned" | "AnaesthesiaRecordOpen")[];
+}
+
+/** An operation over in the last 24 hours with no recovery stay (local anaesthesia): its patient may still come to recovery (backend issue #65). */
+export interface RecoveryAwaitingOut {
+  booking_id: number;
+  booking_number: string;
+  procedure_name: string;
+  anesthesia_type: string | null;
+  status: "Requested" | "Scheduled" | "InProgress" | "Cleaning" | "Completed" | "Cancelled" | "EmergencyHold";
+  ot_name: string | null;
+  surgeon_name: string;
+  patient_id: number;
+  mrn: string;
+  patient_name: string;
+  actual_end: string;
+  minutes_since_end: number;
 }
 
 export interface SurgicalRecordOut {

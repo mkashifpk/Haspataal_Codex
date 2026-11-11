@@ -120,14 +120,7 @@ export function canDischargePatient(user: ClinicalUser | null | undefined): bool
 }
 
 export function canOpenRecovery(user: ClinicalUser | null | undefined): boolean {
-  if (!user) return false;
-  const permissions = user.permissions || [];
-  const roles = user.roles || [];
-  return (
-    permissions.includes("ot.recovery.open") ||
-    permissions.includes("ot.clinical.record") ||
-    roles.some((r) => ["ot_nurse", "head_nurse", "ot_admin", "anaesthetist"].includes(r))
-  );
+  return user?.permissions?.includes("ot.recovery.record") ?? false;
 }
 
 export function canCorrectRecovery(user: ClinicalUser | null | undefined): boolean {

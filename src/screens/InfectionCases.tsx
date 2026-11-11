@@ -77,6 +77,7 @@ export function InfectionCases({
     user,
     "infection.control.manage",
     "infection.statistics.view",
+    "infection.case.report",
   );
   const canRead = !!permission(
     user,
@@ -87,7 +88,7 @@ export function InfectionCases({
   const [range, setRange] = useState(() => currentMonth(timeZone));
   const [status, setStatus] = useState<inf.InfectionCaseOut["status"] | "">("");
   const [filter, setFilter] = useState<inf.InfectionCaseIn["kind"] | "">("");
-  const [draft, setDraft] = useState<"report" | "decision">();
+  const [draft, setDraft] = useState<"report" | "decision" | "wound">();
   const [row, setRow] = useState<inf.InfectionCaseOut>();
   const [kind, setKind] =
     useState<inf.InfectionCaseIn["kind"]>("CatheterUrinary");
@@ -95,7 +96,6 @@ export function InfectionCases({
   const [term, setTerm] = useState("");
   const [patient, setPatient] = useState<inf.PatientSearchHitOut>();
   const [booking, setBooking] = useState<inf.SurveillanceOut>();
-  const [reportSource, setReportSource] = useState<inf.InfectionCaseOut>();
   const [wound, setWound] = useState<WoundTarget>();
   const canStart = screenId !== "report_infection_ward" || view === "full";
   const rows = useLoad(
@@ -110,16 +110,21 @@ export function InfectionCases({
         : Promise.resolve([]),
     [canRead, range, status, filter, revision],
   );
+  const pickingOperation = draft === "wound" || (draft === "report" && kind === "SurgicalSite");
   const operations = useLoad(
     () =>
-      draft === "report" && kind === "SurgicalSite" && canPickOperation
-        ? inf.ssiSurveillance({ limit: 200 })
+      pickingOperation && canPickOperation && patient
+        ? inf.ssiSurveillance({ patient_id: patient.patient_id, limit: 200 })
         : Promise.resolve([]),
-    [draft, kind, canPickOperation, revision],
+    [pickingOperation, patient, canPickOperation, revision],
   );
+  const patientOperations = operations.data?.filter(x => x.patient_id === patient?.patient_id) ?? [];
+  const selectedOperation = !operations.loading && !operations.error
+    ? patientOperations.find(x => x.booking_id === booking?.booking_id)
+    : undefined;
   const hits = useLoad(
     () =>
-      draft === "report" && term && canSearch
+      (draft === "report" || draft === "wound") && term && canSearch
         ? inf.searchPatients({ q: term, limit: 10 })
         : Promise.resolve([]),
     [draft, term, canSearch],
@@ -127,9 +132,7 @@ export function InfectionCases({
   const identityId =
     draft === "decision"
       ? row?.patient_id
-      : kind === "SurgicalSite"
-        ? booking?.patient_id
-        : patient?.patient_id;
+      : patient?.patient_id;
   const identity = useLoad(
     () => (identityId ? getPatient(identityId) : Promise.resolve(undefined)),
     [identityId, revision],
@@ -145,14 +148,13 @@ export function InfectionCases({
     !identity.error
       ? identity.data
       : undefined;
-  const write = useClinicalWrite(user, screenId, async (value, command) => {
-    if (command.path === "/infection-cases") setReportSource(value);
+  const write = useClinicalWrite(user, screenId, async () => {
     setDraft(undefined);
     await rows.reload();
   });
   const edit = connected && !write.blocked;
-  function startReport() {
-    setDraft("report");
+  function startReport(next: "report" | "wound" = "report") {
+    setDraft(next);
     setKind("CatheterUrinary");
     setPatient(undefined);
     setBooking(undefined);
@@ -174,13 +176,13 @@ export function InfectionCases({
       !detail.is_deceased
     ) {
       const description = formText(f, "description");
-      if (!description || (kind === "SurgicalSite" && (!booking || !ssi_depth)))
+      if (!description || (kind === "SurgicalSite" && (!selectedOperation || !ssi_depth)))
         return;
       const body: inf.InfectionCaseIn = {
         kind,
         patient_id: detail.patient_id,
         admission_id: !admissions.loading && !admissions.error ? admissions.data?.find(x => x.patient_id === detail.patient_id && String(x.admission_id) === formText(f,"admission"))?.admission_id : undefined,
-        booking_id: kind === "SurgicalSite" ? booking?.booking_id : undefined,
+        booking_id: kind === "SurgicalSite" ? selectedOperation?.booking_id : undefined,
         ssi_depth: kind === "SurgicalSite" ? ssi_depth : undefined,
         onset_date: formText(f, "onset"),
         found_at: formText(f, "location") as inf.InfectionCaseIn["found_at"],
@@ -261,52 +263,16 @@ export function InfectionCases({
           data-help="ipc.report"
           type="button"
           disabled={!edit || !!draft || !!wound}
-          onClick={startReport}
+          onClick={() => startReport()}
         >
           {t("Report suspected infection", "مشتبہ انفیکشن رپورٹ کریں")}
         </button>
       )}
-      {!manager && reportSource?.booking_id && view !== "records" && (
-        <button
-          data-help="ipc.wound"
-          disabled={!edit}
-          onClick={() =>
-            setWound({
-              booking_id: reportSource.booking_id!,
-              booking_number: reportSource.booking_number ?? "",
-              procedure_name: reportSource.procedure_name ?? "",
-              patient_id: reportSource.patient_id,
-              patient_name: reportSource.patient_name,
-              mrn: reportSource.mrn,
-            })
-          }
-        >
-          {t(
-            "Record wound check for this report",
-            "اس رپورٹ کے لیے زخم کی جانچ درج کریں",
-          )}
+      {!manager && canStart && writePermission && canPickOperation && view !== "records" && (
+        <button type="button" data-help="ipc.wound" disabled={!edit || !!draft || !!wound}
+          onClick={() => startReport("wound")}>
+          {t("Record wound check", "زخم کی جانچ درج کریں")}
         </button>
-      )}
-      {!manager && !canPickOperation && (
-        <p>
-          {t(
-            "An independent wound check needs an operation selected from a permitted surveillance list.",
-            "آزاد زخم جانچ کے لیے مجاز نگرانی فہرست سے آپریشن منتخب کرنا ضروری ہے۔",
-          )}
-        </p>
-      )}
-      {manager && (
-        <p>
-          {t(
-            "For a cluster of the same organism on one ward, report an OUTBREAK incident.",
-            "ایک وارڈ میں ایک جیسے جرثومے کے گروہ پر وبا کا واقعہ رپورٹ کریں۔",
-          )}{" "}
-          {onIncident && (
-            <button data-help="ipc.report" onClick={onIncident}>
-              {t("Report outbreak incident", "وبا کا واقعہ رپورٹ کریں")}
-            </button>
-          )}
-        </p>
       )}
       <LoadState {...rows} retry={rows.reload} />
       {!rows.loading && !rows.error && (
@@ -371,6 +337,7 @@ export function InfectionCases({
           title={
             draft === "report"
               ? t("New suspected infection", "نیا مشتبہ انفیکشن")
+              : draft === "wound" ? t("Choose operation for wound check", "زخم کی جانچ کے لیے آپریشن منتخب کریں")
               : t("Confirm or exclude infection", "انفیکشن کی تصدیق یا اخراج")
           }
           closable={!write.blocked}
@@ -378,9 +345,9 @@ export function InfectionCases({
             if (!write.blocked) setDraft(undefined);
           }}
         >
-          {draft === "report" && (
+          {(draft === "report" || draft === "wound") && (
             <>
-              <Field label={t("Infection kind", "انفیکشن قسم")}>
+              {draft === "report" && <Field label={t("Infection kind", "انفیکشن قسم")}>
                 <select
                   data-help="ipc.report"
                   disabled={write.blocked}
@@ -389,50 +356,14 @@ export function InfectionCases({
                 >
                   {options(kinds)}
                 </select>
-              </Field>
-              {kind === "SurgicalSite" ? (
-                <>
-                  <LoadState {...operations} retry={operations.reload} />
-                  {canPickOperation ? (
-                    <Field label={t("Operation", "آپریشن")}>
-                      <select
-                        data-help="ipc.report"
-                        disabled={write.blocked || operations.loading}
-                        value={booking?.booking_id ?? ""}
-                        onChange={(e) =>
-                          setBooking(
-                            operations.data?.find(
-                              (x) => String(x.booking_id) === e.target.value,
-                            ),
-                          )
-                        }
-                      >
-                        <option value="">
-                          {t("Choose an operation", "آپریشن منتخب کریں")}
-                        </option>
-                        {(operations.data ?? []).map((x) => (
-                          <option key={x.booking_id} value={x.booking_id}>
-                            {x.booking_number} · {x.procedure_name} · {x.mrn} ·{" "}
-                            {x.patient_name}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                  ) : (
-                    <Empty>
-                      {t(
-                        "This role has no authorized operation selector. Ask Infection Control to review the operation.",
-                        "اس کردار کے پاس مجاز آپریشن فہرست نہیں۔ انفیکشن کنٹرول سے جائزہ لینے کو کہیں۔",
-                      )}
-                    </Empty>
-                  )}
-                </>
-              ) : canSearch ? (
+              </Field>}
+              {canSearch ? (
                 <form
                   className="toolbar"
                   onSubmit={(e) => {
                     e.preventDefault();
                     setPatient(undefined);
+                    setBooking(undefined);
                     setTerm(query.trim());
                   }}
                 >
@@ -460,7 +391,7 @@ export function InfectionCases({
                   )}
                 </Empty>
               )}
-              {kind !== "SurgicalSite" && term && (
+              {term && (
                 <>
                   <LoadState {...hits} retry={hits.reload} />
                   {!hits.loading &&
@@ -472,7 +403,7 @@ export function InfectionCases({
                           key={x.patient_id}
                           data-help="ipc.report"
                           disabled={write.blocked}
-                          onClick={() => setPatient(x)}
+                          onClick={() => { setPatient(x); setBooking(undefined); }}
                         >
                           {x.full_name} · <bdi>{x.mrn}</bdi> ·{" "}
                           {x.dob ?? x.age_years}
@@ -489,7 +420,31 @@ export function InfectionCases({
           )}
           {identityId && <LoadState {...identity} retry={identity.reload} />}
           {detail && <PatientIdentity patient={detail} />}
-          <form className="form" onSubmit={submit}>
+          {pickingOperation && detail && (
+            <>
+              <LoadState {...operations} retry={operations.reload} />
+              {!operations.loading && !operations.error && (patientOperations.length ? (
+                <Field label={t("Operation", "آپریشن")}>
+                  <select data-help={draft === "wound" ? "ipc.wound" : "ipc.report"}
+                    disabled={write.blocked} value={booking?.booking_id ?? ""}
+                    onChange={e => setBooking(patientOperations.find(x => String(x.booking_id) === e.target.value))}>
+                    <option value="">{t("Choose an operation", "آپریشن منتخب کریں")}</option>
+                    {patientOperations.map(x => <option key={x.booking_id} value={x.booking_id}>
+                      {x.booking_number} · {x.procedure_name} · {x.operated_on} · {t("Day", "دن")} {x.day}/{x.window_days}
+                      {" · "}{t("Last check", "آخری جانچ")} {x.last_check ?? "—"} · {x.state}
+                    </option>)}
+                  </select>
+                </Field>
+              ) : <Empty>{t("This patient has no operation in the surveillance window.", "نگرانی کی مدت میں اس مریض کا کوئی آپریشن نہیں ہے۔")}</Empty>)}
+            </>
+          )}
+          {draft === "wound" ? (
+            <button type="button" data-help="ipc.wound"
+              disabled={!edit || !detail || !selectedOperation}
+              onClick={() => { if (selectedOperation) { setWound(selectedOperation); setDraft(undefined); } }}>
+              {t("Continue to wound check", "زخم کی جانچ جاری رکھیں")}
+            </button>
+          ) : <form className="form" onSubmit={submit}>
             <fieldset disabled={write.blocked}>
               {draft==="report" && detail && canReadAdmissions && <>
                 <LoadState {...admissions} retry={admissions.reload}/>
@@ -593,12 +548,12 @@ export function InfectionCases({
                 !edit ||
                 !detail ||
                 !!detail.merged_into_id ||
-                (draft === "report" && detail.is_deceased)
+                (draft === "report" && (detail.is_deceased || (kind === "SurgicalSite" && !selectedOperation)))
               }
             >
               {t("Confirm submission", "ارسال کی تصدیق")}
             </button>
-          </form>
+          </form>}
         </Modal>
       )}
       {wound && writePermission && (

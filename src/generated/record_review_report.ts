@@ -8,6 +8,22 @@ const withQuery = (path: string, q?: Record<string, unknown>) => {
   return s ? `${path}?${s}` : path;
 };
 
+export interface CycleListItemOut {
+  cycle_id: number;
+  cycle_number: string;
+  title: string;
+  period_start: string;
+  period_end: string;
+  due_date: string;
+  status: "Planned" | "InReview" | "Closed" | "Cancelled";
+  created_at: string;
+  closed_at: string | null;
+  is_overdue: boolean;
+  items_total: number;
+  items_reviewed: number;
+  open_deficiencies: number;
+}
+
 /** The surveyor's report of one cycle, with the MSDS 156-162 ratings. */
 export interface ReportOut {
   cycle: ReportCycleOut;
@@ -265,6 +281,11 @@ export interface PersonOut {
   /** Holds quality.review.perform: may sit on the record review panel */
   can_review: boolean;
   default_discipline: "Medical" | "Nursing" | "Pharmacy" | "Laboratory" | "Other";
+}
+
+/** Review cycles (newest period first) — GET /api/v1/quality/record-reviews (who may call: holders of quality.review.manage or quality.review.view). */
+export function listCyclesQualityRecordReviews(query?: { status?: "Planned" | "InReview" | "Closed" | "Cancelled" | null; limit?: number }): Promise<CycleListItemOut[]> {
+  return api<CycleListItemOut[]>("GET", withQuery(`/quality/record-reviews`, query), undefined);
 }
 
 /** The surveyor's report, with the MSDS 156-162 ratings — GET /api/v1/quality/record-reviews/{cycle_id}/report (who may call: holders of quality.review.manage or quality.review.view). */

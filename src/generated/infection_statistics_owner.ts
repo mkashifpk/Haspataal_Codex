@@ -222,7 +222,7 @@ export function listCasesInfection(query?: { status?: "Suspected" | "Confirmed" 
   return api<InfectionCaseOut[]>("GET", withQuery(`/infection-cases`, query), undefined);
 }
 
-/** Operations under wound surveillance — GET /api/v1/infection/ssi-surveillance (who may call: holders of infection.control.manage or infection.statistics.view). */
-export function ssiSurveillance(query?: { state?: string | null; surgeon_id?: number | null; limit?: number }): Promise<SurveillanceOut[]> {
+/** Operations under wound surveillance — GET /api/v1/infection/ssi-surveillance (who may call: holders of infection.control.manage or infection.statistics.view or infection.case.report). */
+export function ssiSurveillance(query?: { state?: string | null; surgeon_id?: number | null; patient_id?: number | null; admission_id?: number | null; limit?: number }): Promise<SurveillanceOut[]> {
   return api<SurveillanceOut[]>("GET", withQuery(`/infection/ssi-surveillance`, query), undefined);
 }

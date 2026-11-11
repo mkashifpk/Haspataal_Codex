@@ -113,11 +113,11 @@ export const help: Record<string, HelpPage> = {
     purposeUr: "تاریخ، ضرورت، زمرہ اور ٹرینر چنیں۔ فہرست سے ملازم منتخب کریں اور ہوا ہو تو ہر جائزہ درج کریں۔ ضرورت، شعبے یا تاخیر سے تعمیل چھانٹیں۔",
     steps: [
       "Choose the date, requirement, category and trainer. Select employees from the directory and record each assessment if there was one. Filter compliance by requirement, department or overdue state.",
-      "Open an employee from the authorized due list. Read the missing medical, hepatitis B doses or antibody and next check. Confirm each actual dose separately. Enter a dose number and next due date where applicable."
+      "Open an employee from the health due list or search by name or staff number. Read the missing medical, hepatitis B doses or antibody and next check. Confirm each actual dose separately. Enter a dose number and next due date where applicable."
     ],
     stepsUr: [
       "تاریخ، ضرورت، زمرہ اور ٹرینر چنیں۔ فہرست سے ملازم منتخب کریں اور ہوا ہو تو ہر جائزہ درج کریں۔ ضرورت، شعبے یا تاخیر سے تعمیل چھانٹیں۔",
-      "مجاز مقررہ فہرست سے ملازم کھولیں۔ غائب معائنہ، ہیپاٹائٹس بی خوراک یا اینٹی باڈی اور اگلی جانچ پڑھیں۔ ہر اصل خوراک الگ تصدیق کریں۔ متعلقہ خوراک نمبر اور اگلی تاریخ درج کریں۔"
+      "مقررہ صحت فہرست سے ملازم کھولیں یا نام یا ملازم نمبر سے تلاش کریں۔ غائب معائنہ، ہیپاٹائٹس بی خوراک یا اینٹی باڈی اور اگلی جانچ پڑھیں۔ ہر اصل خوراک الگ تصدیق کریں۔ متعلقہ خوراک نمبر اور اگلی تاریخ درج کریں۔"
     ],
     faq: [
       [
@@ -126,7 +126,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "Review confidential staff health",
-        "Open an employee from the authorized due list. Read the missing medical, hepatitis B doses or antibody and next check. Confirm each actual dose separately. Enter a dose number and next due date where applicable."
+        "Open an employee from the health due list or search by name or staff number. Read the missing medical, hepatitis B doses or antibody and next check. Confirm each actual dose separately. Enter a dose number and next due date where applicable."
       ]
     ],
     faqUr: [
@@ -136,7 +136,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "خفیہ عملہ صحت دیکھیں",
-        "مجاز مقررہ فہرست سے ملازم کھولیں۔ غائب معائنہ، ہیپاٹائٹس بی خوراک یا اینٹی باڈی اور اگلی جانچ پڑھیں۔ ہر اصل خوراک الگ تصدیق کریں۔ متعلقہ خوراک نمبر اور اگلی تاریخ درج کریں۔"
+        "مقررہ صحت فہرست سے ملازم کھولیں یا نام یا ملازم نمبر سے تلاش کریں۔ غائب معائنہ، ہیپاٹائٹس بی خوراک یا اینٹی باڈی اور اگلی جانچ پڑھیں۔ ہر اصل خوراک الگ تصدیق کریں۔ متعلقہ خوراک نمبر اور اگلی تاریخ درج کریں۔"
       ]
     ]
   },
@@ -215,20 +215,20 @@ export const help: Record<string, HelpPage> = {
   my_committees: {
     title: "My committees",
     titleUr: "میری کمیٹیاں",
-    purpose: "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
-    purposeUr: "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+    purpose: "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. My committees appears only when the server returns committees for you.",
+    purposeUr: "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
     steps: [
-      "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
+      "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. My committees appears only when the server returns committees for you.",
       "Schedule with the agenda. After the meeting, record attendees, apologies, issues, activities reviewed and decisions. The authorized chair approves the minutes, which become final and carry the author's stamp."
     ],
     stepsUr: [
-      "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+      "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
       "ایجنڈے کے ساتھ اجلاس مقرر کریں۔ بعد میں شرکاء، معذرت، مسائل، سرگرمیاں اور فیصلے درج کریں۔ مجاز صدر کارروائی منظور کرتا ہے۔ کارروائی حتمی اور دستخط شدہ ہوتی ہے۔"
     ],
     faq: [
       [
         "Find a committee or meeting",
-        "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you."
+        "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. My committees appears only when the server returns committees for you."
       ],
       [
         "Schedule, draft and approve minutes",
@@ -238,7 +238,7 @@ export const help: Record<string, HelpPage> = {
     faqUr: [
       [
         "کمیٹی یا اجلاس تلاش کریں",
-        "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔"
+        "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔"
       ],
       [
         "اجلاس، مسودہ اور منظوری",
@@ -249,16 +249,16 @@ export const help: Record<string, HelpPage> = {
   committees_quality: {
     title: "Committees and minutes",
     titleUr: "کمیٹیاں اور کارروائی",
-    purpose: "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
-    purposeUr: "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+    purpose: "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. My committees appears only when the server returns committees for you.",
+    purposeUr: "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
     steps: [
-      "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
+      "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. My committees appears only when the server returns committees for you.",
       "Choose one chair and one secretary, add the departments they represent and set the meeting frequency and terms of reference. Select real staff from the directory or enter an external member's name.",
       "Schedule with the agenda. After the meeting, record attendees, apologies, issues, activities reviewed and decisions. The authorized chair approves the minutes, which become final and carry the author's stamp.",
       "Choose a final meeting. Assign the corrective or preventive action to a named owner with a due date. Review meeting actions in the action register at the next meeting."
     ],
     stepsUr: [
-      "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+      "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
       "ایک صدر اور ایک سیکرٹری چنیں، نمائندہ شعبے شامل کریں، تعدد اور دائرہ کار درج کریں۔ فہرست سے اصل عملہ یا بیرونی رکن کا نام چنیں۔",
       "ایجنڈے کے ساتھ اجلاس مقرر کریں۔ بعد میں شرکاء، معذرت، مسائل، سرگرمیاں اور فیصلے درج کریں۔ مجاز صدر کارروائی منظور کرتا ہے۔ کارروائی حتمی اور دستخط شدہ ہوتی ہے۔",
       "حتمی اجلاس چنیں۔ اصلاحی یا احتیاطی عمل ذمہ دار اور تاریخ کے ساتھ تفویض کریں۔ اگلے اجلاس میں کارروائی رجسٹر سے عمل دیکھیں۔"
@@ -266,7 +266,7 @@ export const help: Record<string, HelpPage> = {
     faq: [
       [
         "Find a committee or meeting",
-        "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you."
+        "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. My committees appears only when the server returns committees for you."
       ],
       [
         "Set up the committee",
@@ -284,7 +284,7 @@ export const help: Record<string, HelpPage> = {
     faqUr: [
       [
         "کمیٹی یا اجلاس تلاش کریں",
-        "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔"
+        "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔"
       ],
       [
         "کمیٹی قائم کریں",
@@ -303,16 +303,16 @@ export const help: Record<string, HelpPage> = {
   committees_ipc: {
     title: "Committees and minutes",
     titleUr: "کمیٹیاں اور کارروائی",
-    purpose: "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
-    purposeUr: "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+    purpose: "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. My committees appears only when the server returns committees for you.",
+    purposeUr: "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
     steps: [
-      "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you.",
+      "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. My committees appears only when the server returns committees for you.",
       "Choose one chair and one secretary, add the departments they represent and set the meeting frequency and terms of reference. Select real staff from the directory or enter an external member's name.",
       "Schedule with the agenda. After the meeting, record attendees, apologies, issues, activities reviewed and decisions. The authorized chair approves the minutes, which become final and carry the author's stamp.",
       "Choose a final meeting. Assign the corrective or preventive action to a named owner with a due date. Review meeting actions in the action register at the next meeting."
     ],
     stepsUr: [
-      "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
+      "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔",
       "ایک صدر اور ایک سیکرٹری چنیں، نمائندہ شعبے شامل کریں، تعدد اور دائرہ کار درج کریں۔ فہرست سے اصل عملہ یا بیرونی رکن کا نام چنیں۔",
       "ایجنڈے کے ساتھ اجلاس مقرر کریں۔ بعد میں شرکاء، معذرت، مسائل، سرگرمیاں اور فیصلے درج کریں۔ مجاز صدر کارروائی منظور کرتا ہے۔ کارروائی حتمی اور دستخط شدہ ہوتی ہے۔",
       "حتمی اجلاس چنیں۔ اصلاحی یا احتیاطی عمل ذمہ دار اور تاریخ کے ساتھ تفویض کریں۔ اگلے اجلاس میں کارروائی رجسٹر سے عمل دیکھیں۔"
@@ -320,7 +320,7 @@ export const help: Record<string, HelpPage> = {
     faq: [
       [
         "Find a committee or meeting",
-        "Due committees appear first. Open a committee to see its members, schedule and meetings. Open the meeting number for the minutes and authorized PDF. My committees appears only when the server returns committees for you."
+        "Due committees appear first. Open a committee to see its members, schedule and meetings. Open a meeting number from the saved committee to view the minutes and authorized PDF. A newly scheduled meeting opens directly. My committees appears only when the server returns committees for you."
       ],
       [
         "Set up the committee",
@@ -338,7 +338,7 @@ export const help: Record<string, HelpPage> = {
     faqUr: [
       [
         "کمیٹی یا اجلاس تلاش کریں",
-        "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے اجلاس نمبر کھولیں۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔"
+        "مقررہ کمیٹیاں پہلے ہیں۔ ارکان، شیڈول اور اجلاس کے لیے کمیٹی کھولیں۔ کارروائی اور مجاز پی ڈی ایف کے لیے محفوظ کمیٹی سے اجلاس نمبر کھولیں۔ نیا مقرر کردہ اجلاس براہ راست کھلتا ہے۔ میری کمیٹیاں تبھی جب سرور کمیٹیاں لوٹائے۔"
       ],
       [
         "کمیٹی قائم کریں",
@@ -357,26 +357,26 @@ export const help: Record<string, HelpPage> = {
   report_infection_doctor: {
     title: "Report infection",
     titleUr: "انفیکشن رپورٹ کریں",
-    purpose: "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
-    purposeUr: "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
+    purpose: "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite, choose an operation from the selected patient surveillance list and record the wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
+    purposeUr: "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے منتخب مریض کی نگرانی فہرست سے آپریشن اور زخم کی گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
     steps: [
-      "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
-      "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review.",
+      "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite, choose an operation from the selected patient surveillance list and record the wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
+      "Find the patient and choose their operation. Check the booking, procedure, date, surveillance day, last check and state. If the list is empty, the patient has no operation in the surveillance window. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case.",
       "Choose the reporting period or filters. Correct invalid dates and retry a failed read from the message."
     ],
     stepsUr: [
-      "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
-      "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔",
+      "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے منتخب مریض کی نگرانی فہرست سے آپریشن اور زخم کی گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
+      "مریض تلاش کریں اور اس کا آپریشن چنیں۔ بکنگ، طریقہ، تاریخ، نگرانی کا دن، آخری جانچ اور حالت دیکھیں۔ خالی فہرست کا مطلب ہے کہ نگرانی کی مدت میں مریض کا کوئی آپریشن نہیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔",
       "مدت یا فلٹر چنیں۔ غلط تاریخ درست کریں اور پیغام سے ناکام پڑھائی دوبارہ کریں۔"
     ],
     faq: [
       [
         "Report suspected infection",
-        "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control."
+        "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite, choose an operation from the selected patient surveillance list and record the wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control."
       ],
       [
         "Record a wound check",
-        "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review."
+        "Find the patient and choose their operation. Check the booking, procedure, date, surveillance day, last check and state. If the list is empty, the patient has no operation in the surveillance window. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case."
       ],
       [
         "Read and filter registers",
@@ -386,11 +386,11 @@ export const help: Record<string, HelpPage> = {
     faqUr: [
       [
         "مشتبہ انفیکشن رپورٹ کریں",
-        "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔"
+        "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے منتخب مریض کی نگرانی فہرست سے آپریشن اور زخم کی گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔"
       ],
       [
         "زخم کی جانچ درج کریں",
-        "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔"
+        "مریض تلاش کریں اور اس کا آپریشن چنیں۔ بکنگ، طریقہ، تاریخ، نگرانی کا دن، آخری جانچ اور حالت دیکھیں۔ خالی فہرست کا مطلب ہے کہ نگرانی کی مدت میں مریض کا کوئی آپریشن نہیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔"
       ],
       [
         "رجسٹر پڑھیں اور چھانٹیں",
@@ -401,26 +401,26 @@ export const help: Record<string, HelpPage> = {
   report_infection_ward: {
     title: "Report infection",
     titleUr: "انفیکشن رپورٹ کریں",
-    purpose: "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
-    purposeUr: "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
+    purpose: "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite, choose an operation from the selected patient surveillance list and record the wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
+    purposeUr: "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے منتخب مریض کی نگرانی فہرست سے آپریشن اور زخم کی گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
     steps: [
-      "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
-      "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review.",
+      "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite, choose an operation from the selected patient surveillance list and record the wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
+      "Find the patient and choose their operation. Check the booking, procedure, date, surveillance day, last check and state. If the list is empty, the patient has no operation in the surveillance window. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case.",
       "Choose the reporting period or filters. Correct invalid dates and retry a failed read from the message."
     ],
     stepsUr: [
-      "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
-      "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔",
+      "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے منتخب مریض کی نگرانی فہرست سے آپریشن اور زخم کی گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
+      "مریض تلاش کریں اور اس کا آپریشن چنیں۔ بکنگ، طریقہ، تاریخ، نگرانی کا دن، آخری جانچ اور حالت دیکھیں۔ خالی فہرست کا مطلب ہے کہ نگرانی کی مدت میں مریض کا کوئی آپریشن نہیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔",
       "مدت یا فلٹر چنیں۔ غلط تاریخ درست کریں اور پیغام سے ناکام پڑھائی دوبارہ کریں۔"
     ],
     faq: [
       [
         "Report suspected infection",
-        "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control."
+        "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite, choose an operation from the selected patient surveillance list and record the wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control."
       ],
       [
         "Record a wound check",
-        "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review."
+        "Find the patient and choose their operation. Check the booking, procedure, date, surveillance day, last check and state. If the list is empty, the patient has no operation in the surveillance window. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case."
       ],
       [
         "Read and filter registers",
@@ -430,11 +430,11 @@ export const help: Record<string, HelpPage> = {
     faqUr: [
       [
         "مشتبہ انفیکشن رپورٹ کریں",
-        "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔"
+        "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے منتخب مریض کی نگرانی فہرست سے آپریشن اور زخم کی گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔"
       ],
       [
         "زخم کی جانچ درج کریں",
-        "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔"
+        "مریض تلاش کریں اور اس کا آپریشن چنیں۔ بکنگ، طریقہ، تاریخ، نگرانی کا دن، آخری جانچ اور حالت دیکھیں۔ خالی فہرست کا مطلب ہے کہ نگرانی کی مدت میں مریض کا کوئی آپریشن نہیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔"
       ],
       [
         "رجسٹر پڑھیں اور چھانٹیں",
@@ -449,12 +449,12 @@ export const help: Record<string, HelpPage> = {
     purposeUr: "مشتبہ کیس چھانٹیں، کیس چنیں اور مریض چیک کریں۔ معیار کے مطابق تصدیق کریں یا وجہ دے کر خارج کریں۔ ضرورت پر جرثومہ یا جراحی گہرائی درست کریں۔ فیصلہ حتمی ہے۔ ایک وارڈ میں ایک جرثومے کے گروہ کو وبا کے طور پر رپورٹ کریں۔",
     steps: [
       "Filter to Suspected, choose a case and check the patient. Confirm against criteria or exclude with a reason. Correct the organism or surgical depth where needed. The decision is final. Report a same-organism ward cluster as an OUTBREAK incident.",
-      "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
+      "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite, choose an operation from the selected patient surveillance list and record the wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control.",
       "Choose the reporting period or filters. Correct invalid dates and retry a failed read from the message."
     ],
     stepsUr: [
       "مشتبہ کیس چھانٹیں، کیس چنیں اور مریض چیک کریں۔ معیار کے مطابق تصدیق کریں یا وجہ دے کر خارج کریں۔ ضرورت پر جرثومہ یا جراحی گہرائی درست کریں۔ فیصلہ حتمی ہے۔ ایک وارڈ میں ایک جرثومے کے گروہ کو وبا کے طور پر رپورٹ کریں۔",
-      "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
+      "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے منتخب مریض کی نگرانی فہرست سے آپریشن اور زخم کی گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔",
       "مدت یا فلٹر چنیں۔ غلط تاریخ درست کریں اور پیغام سے ناکام پڑھائی دوبارہ کریں۔"
     ],
     faq: [
@@ -464,7 +464,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "Report suspected infection",
-        "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite select an authorized operation and wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control."
+        "Choose the kind and find the patient by name or MRN. Verify identity and recorded allergies. For SurgicalSite, choose an operation from the selected patient surveillance list and record the wound depth. Enter onset, where found, signs and criteria. Confirm once. The case remains Suspected for Infection Control."
       ],
       [
         "Read and filter registers",
@@ -478,7 +478,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "مشتبہ انفیکشن رپورٹ کریں",
-        "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے مجاز آپریشن اور گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔"
+        "قسم چنیں اور نام یا ایم آر این سے مریض تلاش کریں۔ شناخت اور درج الرجی چیک کریں۔ جراحی زخم کے لیے منتخب مریض کی نگرانی فہرست سے آپریشن اور زخم کی گہرائی چنیں۔ آغاز، مقام، علامات اور معیار درج کریں۔ ایک بار تصدیق کریں۔ کیس انفیکشن کنٹرول کے لیے مشتبہ رہے گا۔"
       ],
       [
         "رجسٹر پڑھیں اور چھانٹیں",
@@ -493,11 +493,11 @@ export const help: Record<string, HelpPage> = {
     purposeUr: "پہلے تاخیر پھر مقررہ جانچ دیکھیں۔ سرجن یا حالت سے فلٹر کریں۔ ہسپتال مدت کی شرح دیکھیں اور نئی جانچ کے لیے آپریشن سطر منتخب کریں۔",
     steps: [
       "Review overdue then due checks. Filter by surgeon or state. Compare the rate for the hospital period and use the operation row for a new check.",
-      "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review."
+      "Find the patient and choose their operation. Check the booking, procedure, date, surveillance day, last check and state. If the list is empty, the patient has no operation in the surveillance window. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case."
     ],
     stepsUr: [
       "پہلے تاخیر پھر مقررہ جانچ دیکھیں۔ سرجن یا حالت سے فلٹر کریں۔ ہسپتال مدت کی شرح دیکھیں اور نئی جانچ کے لیے آپریشن سطر منتخب کریں۔",
-      "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔"
+      "مریض تلاش کریں اور اس کا آپریشن چنیں۔ بکنگ، طریقہ، تاریخ، نگرانی کا دن، آخری جانچ اور حالت دیکھیں۔ خالی فہرست کا مطلب ہے کہ نگرانی کی مدت میں مریض کا کوئی آپریشن نہیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔"
     ],
     faq: [
       [
@@ -506,7 +506,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "Record a wound check",
-        "Use the permitted operation source and match the patient. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case. If your role lacks an operation source, ask Infection Control to review."
+        "Find the patient and choose their operation. Check the booking, procedure, date, surveillance day, last check and state. If the list is empty, the patient has no operation in the surveillance window. Record the date, contact method and wound. Signs of infection require a note and depth and open a suspected case."
       ]
     ],
     faqUr: [
@@ -516,27 +516,27 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "زخم کی جانچ درج کریں",
-        "مجاز آپریشن ماخذ سے مریض ملائیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔ مجاز ماخذ دستیاب نہ ہو تو انفیکشن کنٹرول سے جائزہ لیں۔"
+        "مریض تلاش کریں اور اس کا آپریشن چنیں۔ بکنگ، طریقہ، تاریخ، نگرانی کا دن، آخری جانچ اور حالت دیکھیں۔ خالی فہرست کا مطلب ہے کہ نگرانی کی مدت میں مریض کا کوئی آپریشن نہیں۔ تاریخ، رابطہ اور زخم درج کریں۔ علامات پر نوٹ اور گہرائی درکار ہیں اور مشتبہ کیس کھلے گا۔"
       ]
     ]
   },
   ipc_audits: {
     title: "Infection control audits",
     titleUr: "انفیکشن کنٹرول آڈٹ",
-    purpose: "Choose the kind and location. For hand hygiene enter observations and completed actions for the five WHO moments. For other audits add the checked items. After recording, assign the required follow-up to a named owner with a due date.",
-    purposeUr: "قسم اور مقام چنیں۔ ہاتھوں کی صفائی میں عالمی ادارہ صحت کے پانچ مواقع کے مشاہدات اور مکمل عمل درج کریں۔ دیگر آڈٹ کے جانچے گئے آئٹم شامل کریں۔ اندراج کے بعد ذمہ دار اور تاریخ کے ساتھ پیروی تفویض کریں۔",
+    purpose: "Choose the kind and location. For hand hygiene enter observations and completed actions for the five WHO moments. For other audits add the checked items. Open the newly recorded audit or choose a saved audit from the register. Assign its follow-up to a named owner with a due date.",
+    purposeUr: "قسم اور مقام چنیں۔ ہاتھوں کی صفائی میں عالمی ادارہ صحت کے پانچ مواقع کے مشاہدات اور مکمل عمل درج کریں۔ دیگر آڈٹ کے جانچے گئے آئٹم شامل کریں۔ نیا درج شدہ آڈٹ کھولیں یا رجسٹر سے محفوظ آڈٹ منتخب کریں۔ اس کی پیروی ذمہ دار اور مقررہ تاریخ کے ساتھ تفویض کریں۔",
     steps: [
-      "Choose the kind and location. For hand hygiene enter observations and completed actions for the five WHO moments. For other audits add the checked items. After recording, assign the required follow-up to a named owner with a due date.",
+      "Choose the kind and location. For hand hygiene enter observations and completed actions for the five WHO moments. For other audits add the checked items. Open the newly recorded audit or choose a saved audit from the register. Assign its follow-up to a named owner with a due date.",
       "Choose the dates, kind or ward. Compare compliance by kind and area, then expand an audit row to inspect findings and each count."
     ],
     stepsUr: [
-      "قسم اور مقام چنیں۔ ہاتھوں کی صفائی میں عالمی ادارہ صحت کے پانچ مواقع کے مشاہدات اور مکمل عمل درج کریں۔ دیگر آڈٹ کے جانچے گئے آئٹم شامل کریں۔ اندراج کے بعد ذمہ دار اور تاریخ کے ساتھ پیروی تفویض کریں۔",
+      "قسم اور مقام چنیں۔ ہاتھوں کی صفائی میں عالمی ادارہ صحت کے پانچ مواقع کے مشاہدات اور مکمل عمل درج کریں۔ دیگر آڈٹ کے جانچے گئے آئٹم شامل کریں۔ نیا درج شدہ آڈٹ کھولیں یا رجسٹر سے محفوظ آڈٹ منتخب کریں۔ اس کی پیروی ذمہ دار اور مقررہ تاریخ کے ساتھ تفویض کریں۔",
       "تاریخ، قسم یا وارڈ چنیں۔ قسم اور علاقے کی تعمیل ملائیں، پھر نتائج اور شمار کے لیے آڈٹ سطر کھولیں۔"
     ],
     faq: [
       [
         "Record an audit or assign an action",
-        "Choose the kind and location. For hand hygiene enter observations and completed actions for the five WHO moments. For other audits add the checked items. After recording, assign the required follow-up to a named owner with a due date."
+        "Choose the kind and location. For hand hygiene enter observations and completed actions for the five WHO moments. For other audits add the checked items. Open the newly recorded audit or choose a saved audit from the register. Assign its follow-up to a named owner with a due date."
       ],
       [
         "Read compliance",
@@ -546,7 +546,7 @@ export const help: Record<string, HelpPage> = {
     faqUr: [
       [
         "آڈٹ درج کریں یا کارروائی تفویض کریں",
-        "قسم اور مقام چنیں۔ ہاتھوں کی صفائی میں عالمی ادارہ صحت کے پانچ مواقع کے مشاہدات اور مکمل عمل درج کریں۔ دیگر آڈٹ کے جانچے گئے آئٹم شامل کریں۔ اندراج کے بعد ذمہ دار اور تاریخ کے ساتھ پیروی تفویض کریں۔"
+        "قسم اور مقام چنیں۔ ہاتھوں کی صفائی میں عالمی ادارہ صحت کے پانچ مواقع کے مشاہدات اور مکمل عمل درج کریں۔ دیگر آڈٹ کے جانچے گئے آئٹم شامل کریں۔ نیا درج شدہ آڈٹ کھولیں یا رجسٹر سے محفوظ آڈٹ منتخب کریں۔ اس کی پیروی ذمہ دار اور مقررہ تاریخ کے ساتھ تفویض کریں۔"
       ],
       [
         "تعمیل پڑھیں",
@@ -1376,17 +1376,17 @@ export const help: Record<string, HelpPage> = {
     purpose: "Quality reviews survey evidence, findings, actions and the checklist.",
     purposeUr: "کوالٹی معائنے کے شواہد، کمیاں، اقدامات اور چیک لسٹ دیکھے۔",
     steps: [
-      "Select and refresh a cycle. Choose the actual cycle from the server list, even when it has no findings. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN.",
+      "Select and refresh a cycle. Choose a cycle from the newest-first list, including cycles without findings. Use Cycle status to narrow the list. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN.",
       "Review a finding. Filter findings by status. Quality acknowledges a true finding that cannot be undone or withdraws a mistaken finding, with a reason. Authors record their own corrections from their worklist after adding the source correction.",
-      "Manage a corrective or preventive action. Choose type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason.",
+      "Manage a corrective or preventive action. While the cycle is InReview, choose Add action, then select the type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason.",
       "Maintain the checklist. Add a unique uppercase code, category, applicable records, responsible team, title and optional guidance. Reviewer answers apply to hospital items. Edit wording, order or active status. A system check retains its original check; retired criteria remain in history.",
       "Review, submit and recover. Check the exact row, reason and changes before confirming once. A refused change needs a fresh read. For an unknown result, read the exact original record or use only the original key where the form offers it.",
       "How do I preview or print the survey report?. Open the server PDF in the terminal and print it on A4 from the viewer, or save the PDF. The indicator block is first."
     ],
     stepsUr: [
-      "دور منتخب اور تازہ کریں۔ سرور کی فہرست سے اصل دور منتخب کریں، خواہ کوئی کمی نہ ہو۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔",
+      "دور منتخب اور تازہ کریں۔ تازہ ترین دور پہلے دکھائے جاتے ہیں، چاہے کوئی کمی نہ ہو۔ فہرست مختصر کرنے کے لیے دور کی حالت چنیں۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔",
       "کمی کا جائزہ لیں۔ حالت سے کمیاں محدود کریں۔ کوالٹی ناقابل واپسی حقیقی کمی تسلیم یا غلط کمی وجہ کے ساتھ واپس لے۔ مصنف اصل اصلاح کے بعد اپنی فہرست میں اصلاح درج کرے۔",
-      "اصلاحی یا احتیاطی اقدام سنبھالیں۔ قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔",
+      "اصلاحی یا احتیاطی اقدام سنبھالیں۔ زیر جائزہ دور میں اقدام شامل کریں، پھر قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔",
       "چیک لسٹ برقرار رکھیں۔ منفرد بڑے حروف کا کوڈ، زمرہ، ریکارڈ، ذمہ دار ٹیم، عنوان اور اختیاری رہنمائی درج کریں۔ ہسپتال کے معیار کا جواب جائزہ لینے والا دیتا ہے۔ عبارت، ترتیب یا فعال حالت بدلیں۔ نظام کی اصل جانچ اور غیر فعال معیار کی تاریخ برقرار رہتی ہے۔",
       "جائزہ، ارسال اور بحالی۔ ایک بار تصدیق سے پہلے عین قطار، وجہ اور تبدیلی چیک کریں۔ انکار پر تازہ پڑھیں۔ نامعلوم نتیجے پر اصل ریکارڈ پڑھیں یا فارم کی پیشکش پر صرف اصل کلید استعمال کریں۔",
       "معائنہ رپورٹ کیسے دیکھیں یا پرنٹ کریں؟۔ سرور کی پی ڈی ایف ٹرمینل میں کھولیں اور ویوئر سے اے فور پر پرنٹ کریں یا محفوظ کریں۔ اشاریے پہلے ہیں۔"
@@ -1394,7 +1394,7 @@ export const help: Record<string, HelpPage> = {
     faq: [
       [
         "Select and refresh a cycle",
-        "Choose the actual cycle from the server list, even when it has no findings. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN."
+        "Choose a cycle from the newest-first list, including cycles without findings. Use Cycle status to narrow the list. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN."
       ],
       [
         "Review a finding",
@@ -1402,7 +1402,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "Manage a corrective or preventive action",
-        "Choose type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason."
+        "While the cycle is InReview, choose Add action, then select the type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason."
       ],
       [
         "Maintain the checklist",
@@ -1420,7 +1420,7 @@ export const help: Record<string, HelpPage> = {
     faqUr: [
       [
         "دور منتخب اور تازہ کریں",
-        "سرور کی فہرست سے اصل دور منتخب کریں، خواہ کوئی کمی نہ ہو۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔"
+        "تازہ ترین دور پہلے دکھائے جاتے ہیں، چاہے کوئی کمی نہ ہو۔ فہرست مختصر کرنے کے لیے دور کی حالت چنیں۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔"
       ],
       [
         "کمی کا جائزہ لیں",
@@ -1428,7 +1428,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "اصلاحی یا احتیاطی اقدام سنبھالیں",
-        "قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔"
+        "زیر جائزہ دور میں اقدام شامل کریں، پھر قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔"
       ],
       [
         "چیک لسٹ برقرار رکھیں",
@@ -1450,18 +1450,18 @@ export const help: Record<string, HelpPage> = {
     purpose: "Owner follows the medical record review schedule, survey evidence and authorized actions.",
     purposeUr: "مالک طبی ریکارڈ جائزے کا شیڈول، شواہد اور مجاز کارروائیاں دیکھے۔",
     steps: [
-      "Select and refresh a cycle. Choose the actual cycle from the server list, even when it has no findings. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN.",
+      "Select and refresh a cycle. Choose a cycle from the newest-first list, including cycles without findings. Use Cycle status to narrow the list. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN.",
       "Review a finding. Filter findings by status. Quality acknowledges a true finding that cannot be undone or withdraws a mistaken finding, with a reason. Authors record their own corrections from their worklist after adding the source correction.",
-      "Manage a corrective or preventive action. Choose type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason.",
+      "Manage a corrective or preventive action. While the cycle is InReview, choose Add action, then select the type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason.",
       "Maintain the checklist. Add a unique uppercase code, category, applicable records, responsible team, title and optional guidance. Reviewer answers apply to hospital items. Edit wording, order or active status. A system check retains its original check; retired criteria remain in history.",
       "Review, submit and recover. Check the exact row, reason and changes before confirming once. A refused change needs a fresh read. For an unknown result, read the exact original record or use only the original key where the form offers it.",
       "Switch between schedule and report. Owner can review due periods, cycle panel, sample, assigned items and closure readiness on Schedule and cycles. Survey report and findings shows the MSDS evidence and the permitted follow-up actions.",
       "How do I preview or print the survey report?. Open the server PDF in the terminal and print it on A4 from the viewer, or save the PDF. The indicator block is first."
     ],
     stepsUr: [
-      "دور منتخب اور تازہ کریں۔ سرور کی فہرست سے اصل دور منتخب کریں، خواہ کوئی کمی نہ ہو۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔",
+      "دور منتخب اور تازہ کریں۔ تازہ ترین دور پہلے دکھائے جاتے ہیں، چاہے کوئی کمی نہ ہو۔ فہرست مختصر کرنے کے لیے دور کی حالت چنیں۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔",
       "کمی کا جائزہ لیں۔ حالت سے کمیاں محدود کریں۔ کوالٹی ناقابل واپسی حقیقی کمی تسلیم یا غلط کمی وجہ کے ساتھ واپس لے۔ مصنف اصل اصلاح کے بعد اپنی فہرست میں اصلاح درج کرے۔",
-      "اصلاحی یا احتیاطی اقدام سنبھالیں۔ قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔",
+      "اصلاحی یا احتیاطی اقدام سنبھالیں۔ زیر جائزہ دور میں اقدام شامل کریں، پھر قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔",
       "چیک لسٹ برقرار رکھیں۔ منفرد بڑے حروف کا کوڈ، زمرہ، ریکارڈ، ذمہ دار ٹیم، عنوان اور اختیاری رہنمائی درج کریں۔ ہسپتال کے معیار کا جواب جائزہ لینے والا دیتا ہے۔ عبارت، ترتیب یا فعال حالت بدلیں۔ نظام کی اصل جانچ اور غیر فعال معیار کی تاریخ برقرار رہتی ہے۔",
       "جائزہ، ارسال اور بحالی۔ ایک بار تصدیق سے پہلے عین قطار، وجہ اور تبدیلی چیک کریں۔ انکار پر تازہ پڑھیں۔ نامعلوم نتیجے پر اصل ریکارڈ پڑھیں یا فارم کی پیشکش پر صرف اصل کلید استعمال کریں۔",
       "شیڈول اور رپورٹ کے درمیان جائیں۔ مالک شیڈول اور دور میں مدت، پینل، نمونہ، مقرر ریکارڈ اور بندش کی تیاری دیکھ سکتا ہے۔ معائنہ رپورٹ اور کمیاں ایم ایس ڈی ایس شواہد اور مجاز کارروائیاں دکھاتی ہیں۔",
@@ -1470,7 +1470,7 @@ export const help: Record<string, HelpPage> = {
     faq: [
       [
         "Select and refresh a cycle",
-        "Choose the actual cycle from the server list, even when it has no findings. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN."
+        "Choose a cycle from the newest-first list, including cycles without findings. Use Cycle status to narrow the list. The MSDS indicators and evidence come first. The report gives cycle, panel, sample and compliance results. The screen identifies records by record number and MRN."
       ],
       [
         "Review a finding",
@@ -1478,7 +1478,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "Manage a corrective or preventive action",
-        "Choose type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason."
+        "While the cycle is InReview, choose Add action, then select the type, staff owner and due date. Choose an optional department and criterion. The hospital action register shows the result and overdue flag. An authorized owner or manager records completion evidence or a cancellation reason."
       ],
       [
         "Maintain the checklist",
@@ -1500,7 +1500,7 @@ export const help: Record<string, HelpPage> = {
     faqUr: [
       [
         "دور منتخب اور تازہ کریں",
-        "سرور کی فہرست سے اصل دور منتخب کریں، خواہ کوئی کمی نہ ہو۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔"
+        "تازہ ترین دور پہلے دکھائے جاتے ہیں، چاہے کوئی کمی نہ ہو۔ فہرست مختصر کرنے کے لیے دور کی حالت چنیں۔ پہلے ایم ایس ڈی ایس اشاریے اور شواہد ہیں۔ دور، پینل، نمونہ اور تعمیل کے نتائج دیکھیں۔ ریکارڈ نمبر اور ایم آر این سے شناخت کریں۔"
       ],
       [
         "کمی کا جائزہ لیں",
@@ -1508,7 +1508,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "اصلاحی یا احتیاطی اقدام سنبھالیں",
-        "قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔"
+        "زیر جائزہ دور میں اقدام شامل کریں، پھر قسم، ذمہ دار عملہ اور آخری تاریخ چنیں۔ اختیاری شعبہ اور معیار منتخب کریں۔ ہسپتال کا رجسٹر نتیجہ اور تاخیر دکھاتا ہے۔ مجاز ذمہ دار یا منتظم تکمیل کے شواہد یا منسوخی کی وجہ لکھے۔"
       ],
       [
         "چیک لسٹ برقرار رکھیں",
@@ -13648,7 +13648,7 @@ consents_doctor: {
     steps: [
       "Open the recovery board to inspect active patients emerging from anaesthesia in PACU, sorted longest-in-recovery first (Rule f995066a59).",
       "Check vital signs and warning badges: red NoObservation / ObservationOverdue flags and amber LongStay indicators.",
-      "For regional or local block patients transferred directly, open recovery stay via '+ Open Recovery Stay' (Rule 1653612103).",
+      "For a local anaesthesia arrival, match the booking, name and MRN under Awaiting recovery. If you can record recovery, choose Receive in recovery. If another staff member already received the patient, the board refreshes.",
       "Review the patient's continuous vitals flowsheet (HR, BP, RR, SpO2, airway patency, AVPU consciousness, pain, PONV nausea) under Rule 08ba1ce134.",
       "Confirm that intra-operative anaesthesia notes and post-procedure summaries are finalized and signed before PACU discharge.",
       "Evaluate Modified Aldrete recovery domains (Activity, Respiration, Circulation, Consciousness, SpO2) against target score (≥9) via '✓ Discharge Patient' (Rule 99dea44a26).",
@@ -13665,7 +13665,7 @@ consents_doctor: {
     stepsUr: [
       "پی اے سی یو ریکوری بورڈ کھول کر اینستھیزیا کے بعد ہوش میں آنے والے مریضوں کا جائزہ لیں (قاعدہ f995066a59)۔",
       "اہم علامات اور وارننگ بیجز دیکھیں: سرخ بیجز (غیر اندراج شدہ وائٹلز) اور امبر بیجز (طویل قیام)۔",
-      "لوکل یا ریجنل اینستھیزیا کے مریضوں کے لیے '+ اوپن ریکوری اسٹے' منتخب کر کے بکنگ نمبر درج کریں (قاعدہ 1653612103)۔",
+      "مقامی بے ہوشی کے بعد آمد پر ریکوری کے منتظر فہرست میں بکنگ، نام اور ایم آر این ملائیں۔ ریکوری درج کرنے کی اجازت ہو تو ریکوری میں وصول کریں دبائیں۔ اگر کسی اور نے پہلے وصول کیا ہو تو بورڈ تازہ ہو گا۔",
       "مریض کے نبض، بلڈ پریشر، سانس، آکسیجن، ایئر وے، ہوش اور متلی/درد کے ریکارڈز کا معائنہ کریں (قاعدہ 08ba1ce134)۔",
       "ڈسچارج سے قبل اینستھیزیا ریکارڈ اور سرجن کے آپریٹو نوٹ کے مکمل ہونے کی تصدیق کریں۔",
       "ایلڈریٹ اسکور کے پانچوں شعبوں کی جانچ کریں اور مطلوبہ حد (≥9) کی تصدیق کریں (قاعدہ 99dea44a26)۔",
@@ -13734,7 +13734,7 @@ consents_doctor: {
     steps: [
       "Inspect the live PACU recovery board displaying all active recovery patients sorted longest-in-recovery first (Rule f995066a59).",
       "Review patient badges: check for red NoObservation / ObservationOverdue flags, amber LongStay warnings, and prerequisite holds (OperativeNoteUnsigned, AnaesthesiaRecordOpen).",
-      "If a patient arrives following local or regional anaesthesia, click '+ Open Recovery Stay', enter the Booking ID, and confirm arrival (Rule 1653612103).",
+      "For a local anaesthesia arrival, match the booking, name and MRN under Awaiting recovery. If you can record recovery, choose Receive in recovery. If another staff member already received the patient, the board refreshes.",
       "Select a patient card to load their recovery timeline, discharge prerequisite checklist, and physiological observation history.",
       "Review or record vitals: pulse, BP systolic/diastolic, respiratory rate, SpO2, airway patency, AVPU, and pain score (Rule 08ba1ce134, MSDS 38).",
       "Verify that the primary surgeon signed the operative note and post-op care orders, and that the anaesthetist signed the anaesthesia record before approving PACU discharge.",
@@ -13751,7 +13751,7 @@ consents_doctor: {
     stepsUr: [
       "پی اے سی یو ریکوری بورڈ پر سرجری کے بعد زیر نگرانی تمام مریضوں کی فہرست طویل ترین قیام کے مطابق دیکھیں (قاعدہ f995066a59)۔",
       "مریض کے بیجز دیکھیں: سرخ بیجز (غیر اندراج شدہ یا تاخیر شدہ وائٹلز) اور امبر بیجز (طویل قیام) کی نشاندہی کریں۔",
-      "لوکل اینستھیزیا کے مریض کے لیے '+ اوپن ریکوری اسٹے' منتخب کر کے بکنگ نمبر درج کریں (قاعدہ 1653612103)۔",
+      "مقامی بے ہوشی کے بعد آمد پر ریکوری کے منتظر فہرست میں بکنگ، نام اور ایم آر این ملائیں۔ ریکوری درج کرنے کی اجازت ہو تو ریکوری میں وصول کریں دبائیں۔ اگر کسی اور نے پہلے وصول کیا ہو تو بورڈ تازہ ہو گا۔",
       "کسی بھی مریض کا کارڈ منتخب کر کے وائٹلز فلو شیٹ اور ڈسچارج کی شرائط کا معائنہ کریں۔",
       "وائٹلز ریکارڈز کا جائزہ لیں: نبض، بلڈ پریشر، سانس، آکسیجن، ایئر وے اور درد کا اسکور (قاعدہ 08ba1ce134)۔",
       "اس بات کی تصدیق کریں کہ سرجن نے آپریٹو نوٹ اور اینستھیٹسٹ نے اینستھیزیا ریکارڈ مکمل کر لیا ہے۔",
@@ -13820,7 +13820,7 @@ consents_doctor: {
     steps: [
       "Inspect the live PACU recovery board displaying all active recovery patients sorted longest-in-recovery first (Rule f995066a59).",
       "Review patient badges: check for red NoObservation / ObservationOverdue flags, amber LongStay warnings, and prerequisite holds (OperativeNoteUnsigned, AnaesthesiaRecordOpen).",
-      "If a patient arrives following local or regional anaesthesia, click '+ Open Recovery Stay', enter the Booking ID, and confirm arrival (Rule 1653612103).",
+      "For a local anaesthesia arrival, match the booking, name and MRN under Awaiting recovery. If you can record recovery, choose Receive in recovery. If another staff member already received the patient, the board refreshes.",
       "Select a patient card to load their recovery timeline, discharge prerequisite checklist, and physiological observation history.",
       "Click '+ Record Vitals' to open the observation modal: enter heart rate, BP systolic/diastolic, respiratory rate, SpO2, airway patency (Patent, Supported, Obstructed), AVPU, and pain score (Rule 08ba1ce134, MSDS 38).",
       "Save the observation: the readings are charted to the chronological flowsheet and update the patient card's last observation timestamp.",
@@ -13837,7 +13837,7 @@ consents_doctor: {
     stepsUr: [
       "پی اے سی یو ریکوری بورڈ کا معائنہ کریں جہاں تمام زیر نگہداشت مریض طویل ترین قیام کے مطابق ترتیب وار موجود ہیں (قاعدہ f995066a59)۔",
       "مریض کے انتباہی بیجز دیکھیں: سرخ رنگ میں معائنے کی تاخیر، پیلے رنگ میں طویل قیام اور آپریٹو نوٹ یا اینستھیزیا ریکارڈ کے دستخط کا انتظار۔",
-      "اگر مریض لوکل اینستھیزیا کے بعد ریکوری میں آئے تو '+ اوپن ریکوری اسٹے' پر کلک کریں اور بکنگ نمبر درج کر کے آمد کی تصدیق کریں (قاعدہ 1653612103)۔",
+      "مقامی بے ہوشی کے بعد آمد پر ریکوری کے منتظر فہرست میں بکنگ، نام اور ایم آر این ملائیں۔ ریکوری درج کرنے کی اجازت ہو تو ریکوری میں وصول کریں دبائیں۔ اگر کسی اور نے پہلے وصول کیا ہو تو بورڈ تازہ ہو گا۔",
       "مریض کا کارڈ منتخب کریں تاکہ اس کے وائٹلز کی فلو شیٹ، ڈسچارج شرائط اور آپریشن کی تفصیلات ظاہر ہو سکیں۔",
       "وائٹلز درج کرنے کے لیے '+ ریکارڈ وائٹلز' پر کلک کریں: دل کی دھڑکن، بلڈ پریشر، سانس، آکسیجن، ایئر وے کی حالت، ہوش اور درد کا اسکور درج کریں (قاعدہ 08ba1ce134)۔",
       "مشاہدہ محفوظ کریں: یہ ریڈنگز فوری طور پر فلو شیٹ کا حصہ بن جاتی ہیں اور بورڈ پر مریض کے آخری معائنے کا وقت اپ ڈیٹ ہو جاتا ہے۔",
@@ -13870,7 +13870,7 @@ consents_doctor: {
       ],
       [
         "How is a local anaesthesia patient admitted to PACU recovery?",
-        "Under Rule 1653612103, for local or regional procedures where theatre transfer is direct, clicking '+ Open Recovery Stay' and providing the surgical booking ID admits the case directly into the active PACU queue."
+        "For a local anaesthesia arrival, match the booking, name and MRN under Awaiting recovery. If you can record recovery, choose Receive in recovery. If another staff member already received the patient, the board refreshes."
       ]
     ,
 ["How do I find a record, and who adds it if missing?","Patient: Patient search by name; Reception registers a missing patient first. Admission: Current admitted stays by patient name. Booking: Operations by patient and procedure name, only with lookup permission. Drug: Medicine search by name; Pharmacy adds a missing medicine to the formulary. Death: Death register by patient name, only with lookup permission. Department: Departments (active only); IT adds missing departments. Ward: Wards; IT adds missing wards. Bed selection loads the beds too."]],
@@ -13893,7 +13893,7 @@ consents_doctor: {
       ],
       [
         "لوکل اینستھیزیا کے مریض کو ریکوری میں کیسے داخل کیا جاتا ہے؟",
-        "قاعدہ 1653612103 کے تحت لوکل سرجری کے مریضوں کے لیے '+ اوپن ریکوری اسٹے' کا بٹن دبا کر بکنگ نمبر درج کرنے سے مریض کا ریکوری قیام شروع ہو جاتا ہے۔"
+        "مقامی بے ہوشی کے بعد آمد پر ریکوری کے منتظر فہرست میں بکنگ، نام اور ایم آر این ملائیں۔ ریکوری درج کرنے کی اجازت ہو تو ریکوری میں وصول کریں دبائیں۔ اگر کسی اور نے پہلے وصول کیا ہو تو بورڈ تازہ ہو گا۔"
       ]
     ,
 ["ریکارڈ کیسے ملے اور غائب ہو تو کون درج کرے؟","Patient: مریض کا نام تلاش کریں؛ استقبالیہ غائب مریض پہلے درج کرتا ہے۔ Admission: داخل مریضوں کے موجودہ قیام نام سے۔ Booking: مریض اور عمل کے نام سے آپریشن؛ صرف مجاز فہرست۔ Drug: دوا نام سے تلاش کریں؛ فارمیسی غائب دوا فہرست میں درج کرتی ہے۔ Death: مریض نام سے وفات رجسٹر؛ صرف مجاز فہرست۔ Department: فعال شعبے؛ آئی ٹی غائب شعبہ درج کرتا ہے۔ Ward: وارڈ؛ آئی ٹی غائب وارڈ درج کرتا ہے۔ بستر چننے پر بستروں کی فہرست بھی کھلتی ہے۔"]]

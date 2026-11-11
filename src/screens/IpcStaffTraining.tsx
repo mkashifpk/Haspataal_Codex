@@ -74,6 +74,8 @@ export function IpcStaffTraining({
   const [draft, setDraft] = useState<"training" | "health">();
   const [attendees, setAttendees] = useState<AttendeeDraft[]>([]);
   const [selected, setSelected] = useState<StaffRef>();
+  const [staffQuery, setStaffQuery] = useState("");
+  const [staffTerm, setStaffTerm] = useState("");
   const [sessionResult, setSessionResult] =
     useState<staff.TrainingSessionDetailOut>();
   const [kind, setKind] =
@@ -107,6 +109,10 @@ export function IpcStaffTraining({
   const due = useLoad(
     () => (health ? staff.healthDue() : Promise.resolve([])),
     [health, revision],
+  );
+  const staffMatches = useLoad(
+    () => health && staffTerm ? staff.staffFacility({ q: staffTerm, limit: 30 }) : Promise.resolve([]),
+    [health, staffTerm],
   );
   const employee = selected?.employee_id;
   const records = useLoad(
@@ -388,6 +394,29 @@ export function IpcStaffTraining({
       {health && (
         <article className="card">
           <h2>{t("Confidential staff health", "خفیہ عملہ صحت")}</h2>
+          <form className="toolbar" onSubmit={event => {
+            event.preventDefault();
+            setStaffTerm(staffQuery.trim());
+          }}>
+            <Field label={t("Staff name or number", "ملازم کا نام یا نمبر")}>
+              <input data-help="ipc.health" value={staffQuery} required
+                onChange={event => { setStaffQuery(event.target.value); setStaffTerm(""); }} />
+            </Field>
+            <button data-help="ipc.health" disabled={!!draft || write.blocked}>
+              {t("Find staff", "ملازم تلاش کریں")}
+            </button>
+          </form>
+          {staffTerm && <>
+            <LoadState {...staffMatches} retry={staffMatches.reload} />
+            {!staffMatches.loading && !staffMatches.error && (staffMatches.data?.length
+              ? staffMatches.data.map(x => (
+                <button type="button" key={x.employee_id} data-help="ipc.health"
+                  disabled={!!draft || write.blocked} onClick={() => setSelected(x)}>
+                  {x.emp_number} · {x.full_name}
+                </button>
+              ))
+              : <p>{t("No matching staff.", "کوئی مماثل ملازم نہیں۔")}</p>)}
+          </>}
           <LoadState {...due} retry={due.reload} />
           {!due.loading && !due.error && (
             <ReportTable
@@ -406,7 +435,7 @@ export function IpcStaffTraining({
               rows={(due.data ?? []).map((x) => ({
                 key: x.employee_id,
                 cells: [
-                  <button data-help="ipc.health" onClick={() => setSelected(x)}>
+                  <button data-help="ipc.health" disabled={!!draft || write.blocked} onClick={() => setSelected(x)}>
                     {x.emp_number} · {x.full_name}
                   </button>,
                   (x.pre_employment_medical

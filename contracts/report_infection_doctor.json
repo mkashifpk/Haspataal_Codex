@@ -227,16 +227,233 @@
         "related_state_machine": null
       },
       "summary": "Record a wound check after an operation"
+    },
+    {
+      "endpoint": "GET /infection/ssi-surveillance",
+      "summary": "Operations under wound surveillance",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "infection.control.manage",
+          "infection.statistics.view",
+          "infection.case.report"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of infection.control.manage or infection.statistics.view or infection.case.report",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "state",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(InWindow|Due|Overdue|Complete)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          }
+        },
+        {
+          "name": "surgeon_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Surgeon Id"
+          }
+        },
+        {
+          "name": "patient_id",
+          "in": "query",
+          "required": false,
+          "description": "One patient's operations (GET /patients/search)",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "One patient's operations (GET /patients/search)",
+            "title": "Patient Id"
+          }
+        },
+        {
+          "name": "admission_id",
+          "in": "query",
+          "required": false,
+          "description": "The operations of one stay",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The operations of one stay",
+            "title": "Admission Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 2000,
+            "minimum": 1,
+            "default": 500,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_SurveillanceOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 500,
+            "minimum": 1,
+            "maximum": 2000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "state",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "surgeon_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "patient_id",
+            "required": false,
+            "type": "integer",
+            "description": "One patient's operations (GET /patients/search)"
+          },
+          {
+            "name": "admission_id",
+            "required": false,
+            "type": "integer",
+            "description": "The operations of one stay"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
     }
   ],
   "id_sources": [
     {
       "id": "booking_id",
       "source": "this_screen",
-      "call": "POST /infection-cases",
+      "call": "GET /infection/ssi-surveillance",
       "field": "booking_id",
       "used_by": [
         "POST /ot/bookings/{booking_id}/ssi-checks"
+      ],
+      "also": [
+        {
+          "call": "GET /infection-cases",
+          "field": "booking_id"
+        }
       ]
     }
   ],

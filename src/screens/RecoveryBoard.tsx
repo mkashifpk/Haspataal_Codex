@@ -1,5 +1,6 @@
 import { bilingual } from "../i18n";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { ApiError } from "../bridge";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { EstablishmentOut } from "../generated/facility_profile";
 import type {
   RecoveryBoardOut,
@@ -14,6 +15,7 @@ import type {
 } from "../generated/recovery_board";
 import {
   recoveryBoard as fetchRecoveryBoard,
+  openRecovery,
   getRecord as getSurgicalRecord,
   recoveryObservation as postRecoveryObservation,
   dischargeRecovery as postDischargeRecovery,
@@ -49,7 +51,6 @@ export interface RecoveryBoardProps {
   establishment?: EstablishmentOut | null;
   currentUser?: ClinicalUser | null;
   connected?: boolean;
-  stream?: any;
   timeZone?: string;
   screenId?: string;
   onNavigate?: (screenId: string) => void;
@@ -60,7 +61,6 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
   establishment,
   currentUser,
   connected = true,
-  stream,
   screenId = "recovery_board",
   onNavigate,
   onNavigateScreen,
@@ -82,6 +82,7 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
 
   // Recovery board state
   const [boardData, setBoardData] = useState<RecoveryBoardOut | null>(null);
+  const boardRead = useRef(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorBanner, setErrorBanner] = useState<{ en: string; ur: string } | null>(null);
   const [successBanner, setSuccessBanner] = useState<string | null>(null);
@@ -136,18 +137,20 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
   const [staffList, setStaffList] = useState<StaffLookupOut[]>([]);
 
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [receiving, setReceiving] = useState<number | null>(null);
 
   // Load Board
   const loadBoard = useCallback(async () => {
+    const read = ++boardRead.current;
     try {
       setLoading(true);
       setErrorBanner(null);
       const data = await fetchRecoveryBoard();
-      setBoardData(data);
+      if (read === boardRead.current) setBoardData(data);
     } catch (err: any) {
-      setErrorBanner(explainRecoveryBoardError(err?.code, err?.details));
+      if (read === boardRead.current) setErrorBanner(explainRecoveryBoardError(err?.code, err?.details));
     } finally {
-      setLoading(false);
+      if (read === boardRead.current) setLoading(false);
     }
   }, []);
 
@@ -178,17 +181,38 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
 
   // Real-time synchronization
   useEffect(() => {
-    if (!stream) return;
-    const unsubscribe = stream.on?.("ot.clinical.updated", () => {
-      loadBoard();
-      if (selectedBookingId) {
-        loadRecord(selectedBookingId);
+    return window.terminal.subscribe((event) => {
+      if (event.type === "stream" && event.resync) void loadBoard();
+      if (event.type !== "event") return;
+      if (event.event_type === "ot.booking.updated" || event.event_type === "ot.clinical.updated") {
+        void loadBoard();
+      }
+      if (event.event_type === "ot.clinical.updated" && selectedBookingId) {
+        void loadRecord(selectedBookingId);
       }
     });
-    return () => {
-      if (typeof unsubscribe === "function") unsubscribe();
-    };
-  }, [stream, loadBoard, selectedBookingId, loadRecord]);
+  }, [loadBoard, selectedBookingId, loadRecord]);
+
+  async function receive(bookingId: number) {
+    if (!connected || !canOpen || receiving !== null) return;
+    setReceiving(bookingId);
+    setErrorBanner(null);
+    setSuccessBanner(null);
+    try {
+      await openRecovery(bookingId);
+      await loadBoard();
+    } catch (err) {
+      const error = err instanceof ApiError ? err.response.error : undefined;
+      if (error?.code === "OT_RECOVERY_OPEN") {
+        await loadBoard();
+        setSuccessBanner(bilingual("The patient was already received in recovery.", "مریض پہلے ہی ریکوری میں وصول ہو چکا ہے۔"));
+      } else {
+        setErrorBanner(explainRecoveryBoardError(error?.code, error?.details));
+      }
+    } finally {
+      setReceiving(null);
+    }
+  }
 
   // Filtered patients
   const filteredPatients = useMemo(() => {
@@ -388,7 +412,7 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
   }
 
   return (
-    <div className="space-y-4 max-w-7xl mx-auto p-4 bg-slate-50 min-h-screen text-slate-900">
+    <div data-screen={screenId} className="space-y-4 max-w-7xl mx-auto p-4 bg-slate-50 min-h-screen text-slate-900">
       {/* Capability View Banners */}
       {viewMode === "open_work" && (
         <div className="p-3 bg-amber-50 border-l-4 border-amber-500 text-amber-900 text-sm rounded shadow-sm">
@@ -460,17 +484,6 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
             </div>
           )}
 
-          {canOpen && (
-            <div>
-              <button type="button" disabled aria-describedby="local-recovery-source" data-help="recovery_board.open_recovery_btn">
-                {bilingual("Open Recovery Stay", "ریکوری قیام کھولیں")}
-              </button>
-              <p id="local-recovery-source" role="status">
-                {bilingual("Opening a local-anaesthesia recovery stay is unavailable until the server provides an eligible booking to select.", "مقامی بے ہوشی کے بعد ریکوری قیام کھولنے کے لیے سرور سے قابلِ انتخاب بکنگ درکار ہے۔")}
-              </p>
-            </div>
-          )}
-
           <button
             type="button"
             onClick={loadBoard}
@@ -505,6 +518,26 @@ export const RecoveryBoard: React.FC<RecoveryBoardProps> = ({
           </button>
         )}
       </div>
+
+      {boardData && viewMode !== "records" && (
+        <section className="panel">
+          <h2>{bilingual("Awaiting recovery", "ریکوری کے منتظر")}</h2>
+          {boardData.awaiting.length === 0 && <p>{bilingual("No patients awaiting recovery.", "ریکوری کے لیے کوئی مریض منتظر نہیں۔")}</p>}
+          {boardData.awaiting.map((row) => (
+            <div className="toolbar" key={row.booking_id}>
+              <span><bdi>{row.booking_number} · {row.patient_name} · {row.mrn} · {row.procedure_name}</bdi></span>
+              <span>{bilingual(`${row.minutes_since_end} min since surgery ended`, `آپریشن ختم ہوئے ${row.minutes_since_end} منٹ`)}</span>
+              {canOpen && (
+                <button type="button" data-help="recovery_board.open_recovery_btn"
+                  disabled={!connected || loading || receiving !== null}
+                  onClick={() => void receive(row.booking_id)}>
+                  {bilingual("Receive in recovery", "ریکوری میں وصول کریں")}
+                </button>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
 
       {/* Main Grid: Left = Patients Cards Queue, Right = Detailed Patient View */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">

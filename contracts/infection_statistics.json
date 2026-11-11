@@ -277,21 +277,156 @@
         "authentication": "user",
         "permissions": [
           "infection.control.manage",
-          "infection.statistics.view"
+          "infection.statistics.view",
+          "infection.case.report"
         ],
         "permissions_mode": "any",
-        "who": "holders of infection.control.manage or infection.statistics.view",
+        "who": "holders of infection.control.manage or infection.statistics.view or infection.case.report",
         "roles_allowed": [
+          "anaesthetist",
           "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
           "hospital_admin",
           "hospital_director",
           "ipc_nurse",
+          "ot_admin",
+          "ot_nurse",
           "owner",
-          "quality_officer"
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
         ]
       },
       "service_gates": [],
-      "summary": "Operations under wound surveillance"
+      "summary": "Operations under wound surveillance",
+      "parameters": [
+        {
+          "name": "state",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(InWindow|Due|Overdue|Complete)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          }
+        },
+        {
+          "name": "surgeon_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Surgeon Id"
+          }
+        },
+        {
+          "name": "patient_id",
+          "in": "query",
+          "required": false,
+          "description": "One patient's operations (GET /patients/search)",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "One patient's operations (GET /patients/search)",
+            "title": "Patient Id"
+          }
+        },
+        {
+          "name": "admission_id",
+          "in": "query",
+          "required": false,
+          "description": "The operations of one stay",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The operations of one stay",
+            "title": "Admission Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 2000,
+            "minimum": 1,
+            "default": 500,
+            "title": "Limit"
+          }
+        }
+      ],
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 500,
+            "minimum": 1,
+            "maximum": 2000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "state",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "surgeon_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "patient_id",
+            "required": false,
+            "type": "integer",
+            "description": "One patient's operations (GET /patients/search)"
+          },
+          {
+            "name": "admission_id",
+            "required": false,
+            "type": "integer",
+            "description": "The operations of one stay"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
     }
   ],
   "id_sources": [],
