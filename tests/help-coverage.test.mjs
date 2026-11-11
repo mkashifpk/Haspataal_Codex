@@ -112,7 +112,7 @@ test("missing translated screen steps fail coverage", () => {
         media: false,
         read: (file) =>
           file === "src/help.ts"
-            ? read(file).replace(/stepsUr: \[[\s\S]*?\n\s*\],/, "stepsUr: [],")
+            ? read(file).replace(/stepsUr: \[\s*\n[\s\S]*?\n\s*\],/, "stepsUr: [],")
             : read(file),
       }),
     /empty stepsUr/,
