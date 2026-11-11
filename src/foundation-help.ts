@@ -256,6 +256,7 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  "personnel.review.credential": g(["personnel_files_hr"], ["Verify a credential","سند کی تصدیق کریں"], ["Check the selected employee and credential. Record the primary source, reference, date and actual verification outcome.","منتخب ملازم اور سند ملائیں۔ بنیادی ماخذ، حوالہ، تاریخ اور اصل نتیجہ درج کریں۔"]),
   "personnel.review.discipline": g(["discipline_health_hr"], ["Record a confidential case","خفیہ تادیبی کیس درج کریں"], ["Confirm the employee, date and allegation. Record the employee response before taking action and state the reasons for the outcome.","ملازم، تاریخ اور الزام کی تصدیق کریں۔ کارروائی سے پہلے ملازم کا جواب اور فیصلے کی وجوہات درج کریں۔"]),
   "personnel.review.help": g(["appraisals_hr","appraise_staff_doctor","appraise_staff_head_nurse","discipline_health_hr","personnel_files_hr","personnel_files_quality"], ["Staff appraisals","عملے کی کارکردگی کا جائزہ"], ["Open contextual help for this screen.","اس اسکرین کی متعلقہ مدد کھولیں۔"]),
   "personnel.review.appraisal": g(["appraisals_hr","appraise_staff_doctor","appraise_staff_head_nurse"], ["Staff appraisals","عملے کی کارکردگی کا جائزہ"], ["Review the due schedule. Select an appraisal number from the register to open its record.","مقررہ شیڈول دیکھیں۔ ریکارڈ کھولنے کے لیے رجسٹر سے جائزہ نمبر منتخب کریں۔"]),

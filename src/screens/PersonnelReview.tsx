@@ -191,21 +191,48 @@ function DisciplineHealth({ screenId, user, revision, connected }: Props) {
 function PersonnelFiles({ screenId, user, revision, connected }: Props) {
   const [incomplete, setIncomplete] = useState(false);
   const [selected, setSelected] = useState<number>();
+  const [credential, setCredential] = useState<files.CredentialOut>();
+  const [verification, setVerification] = useState<files.CredentialVerifyIn["outcome"]>("Verified");
   const mayOpen = user.permissions.includes("personnel.view");
   const summary = useLoad(() => files.completeness({ incomplete_only: incomplete || undefined }), [incomplete, revision]);
   const detail = useLoad(() => mayOpen && selected ? files.personnelFile(selected) : Promise.resolve(undefined), [mayOpen, selected, revision]);
   const file = !detail.loading && !detail.error && detail.data?.employee_id === selected ? detail.data : undefined;
+  const mayVerify = screenId === "personnel_files_hr" && user.permissions.includes("personnel.manage");
+  const write = useClinicalWrite(user, screenId, async () => {
+    setCredential(undefined);
+    await Promise.all([detail.reload(), summary.reload()]);
+  });
+  const currentCredential = file?.credentials.find(row => row.qualification_id === credential?.qualification_id &&
+    row.row_version === credential?.row_version && row.employee_id === selected);
+  const maySubmit = connected && mayVerify && !write.blocked && !!currentCredential;
 
-  return <section data-screen={screenId}>
+  function verify(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!maySubmit || !currentCredential) return;
+    const data = new FormData(event.currentTarget);
+    const verified_on = formText(data, "date");
+    const verified_with = formText(data, "source");
+    if (!verified_on || (verification !== "NotRequired" && !verified_with)) return;
+    const body: files.CredentialVerifyIn = {
+      outcome: verification, verified_on, verified_with: verified_with || undefined,
+      verification_ref: formText(data, "reference") || undefined,
+    };
+    write.start({ method: "POST", path: `/personnel/qualifications/${currentCredential.qualification_id}/verify`,
+      body, permission: "personnel.manage", protection: "reconcile",
+      reconcilePath: `/personnel/employees/${currentCredential.employee_id}/file`,
+      label: t("Record credential verification", "اسناد کی تصدیق درج کریں") });
+  }
+
+  return <section data-screen={screenId} data-unsaved={!!credential} data-write-pending={write.blocked}>
     <h1>{t("Personnel files", "عملے کی فائلیں")}</h1>
-    <label><input type="checkbox" data-help="personnel.review.files" checked={incomplete} onChange={e => { setSelected(undefined); setIncomplete(e.target.checked); }} />
+    <label><input type="checkbox" data-help="personnel.review.files" checked={incomplete} disabled={!!credential || write.blocked} onChange={e => { setSelected(undefined); setIncomplete(e.target.checked); }} />
       {t("Incomplete files only", "صرف نامکمل فائلیں")}
     </label>
     <LoadState {...summary} retry={summary.reload} />
     {!summary.loading && !summary.error && summary.data && <ReportTable title={t("File completeness", "فائل کی تکمیل")}
       columns={[t("Employee", "ملازم"), t("Designation", "عہدہ"), t("Missing", "باقی")]}
       rows={summary.data.rows.map(row => ({ key: row.employee_id, cells: [
-        mayOpen ? <button data-help="personnel.review.files" onClick={() => setSelected(row.employee_id)}>{row.emp_number} · {row.full_name}</button>
+        mayOpen ? <button data-help="personnel.review.files" disabled={!!credential || write.blocked} onClick={() => setSelected(row.employee_id)}>{row.emp_number} · {row.full_name}</button>
           : <bdi>{row.emp_number} · {row.full_name}</bdi>, row.designation, row.missing.join(", "),
       ] }))} />}
     {selected && <LoadState {...detail} retry={detail.reload} />}
@@ -213,8 +240,35 @@ function PersonnelFiles({ screenId, user, revision, connected }: Props) {
       <h2>{file.emp_number} · {file.full_name}</h2>
       <p>{file.designation} · {file.department_name} · {file.employment_status}</p>
       <p>{t("Missing", "باقی")} · {file.missing.join(", ") || "—"}</p>
-      <p>{t("Credentials", "اسناد")} · {file.credentials.length} · {t("Documents", "دستاویزات")} · {file.documents.length}</p>
+      <p>{t("Documents", "دستاویزات")} · {file.documents.length}</p>
+      <ReportTable title={t("Credentials", "اسناد")}
+        columns={[t("Credential", "سند"), t("Expiry", "میعاد"), t("Verification", "تصدیق")]}
+        rows={file.credentials.map(row => ({key:row.qualification_id,cells:[
+          row.title, row.license_expiry ?? "—", <>{row.verification_status}{" "}
+            {mayVerify && <button type="button" data-help="personnel.review.credential" disabled={!connected || !!credential || write.blocked}
+              onClick={() => { setCredential(row); setVerification("Verified"); }}>{t("Record verification", "تصدیق درج کریں")}</button>}
+          </>,
+        ]}))} />
       <QualityPaper disabled={!connected} documents={[{ path: `/personnel/employees/${file.employee_id}/file/pdf`, label: t("personnel file PDF", "ملازم کی فائل کی پی ڈی ایف") }]} />
     </article>}
+    {credential && <form className="card" onSubmit={verify}>
+      <h2>{credential.emp_number} · {credential.full_name} · {credential.title}</h2>
+      {!detail.loading && !currentCredential && <p role="alert">{t("The credential changed. Close this form and reopen the current record.", "سند بدل گئی ہے۔ فارم بند کر کے تازہ ریکارڈ کھولیں۔")}</p>}
+      <fieldset disabled={!maySubmit}>
+        <Field label={t("Outcome", "نتیجہ")}><select data-help="personnel.review.credential" value={verification}
+          onChange={e => setVerification(e.target.value as typeof verification)}>
+          <option value="Verified">{t("Verified", "تصدیق شدہ")}</option>
+          <option value="Failed">{t("Verification failed", "تصدیق ناکام")}</option>
+          <option value="NotRequired">{t("Verification not required", "تصدیق ضروری نہیں")}</option>
+        </select></Field>
+        <Field label={t("Verified on", "تصدیق کی تاریخ")}><input data-help="personnel.review.credential" type="date" name="date" required /></Field>
+        <Field label={t("Primary source", "بنیادی ماخذ")}><input data-help="personnel.review.credential" name="source" required={verification !== "NotRequired"} /></Field>
+        <Field label={t("Verification reference", "تصدیقی حوالہ")}><input data-help="personnel.review.credential" name="reference" /></Field>
+        <label><input data-help="personnel.review.credential" type="checkbox" required /> {t("I checked this employee and credential.", "میں نے ملازم اور سند کی تصدیق کی ہے۔")}</label>
+        <button data-help="personnel.review.credential">{t("Save verification", "تصدیق محفوظ کریں")}</button>
+      </fieldset>
+      <button type="button" data-help="personnel.review.credential" disabled={write.blocked} onClick={() => setCredential(undefined)}>{t("Cancel", "منسوخ کریں")}</button>
+    </form>}
+    <ClinicalWriteFeedback write={write} />
   </section>;
 }
