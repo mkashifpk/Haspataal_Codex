@@ -70,11 +70,80 @@ const disciplinaryActions = {
   WrittenWarning: "تحریری تنبیہ", FinalWarning: "آخری تنبیہ", Suspension: "معطلی", Termination: "ملازمت کا خاتمہ",
 } as const;
 
+const healthKinds = {
+  PreEmploymentMedical: "ملازمت سے پہلے طبی معائنہ",
+  PeriodicMedical: "دورانیہ وار طبی معائنہ",
+  HepatitisBVaccine: "ہیپاٹائٹس بی ویکسین",
+  HepatitisBAntibody: "ہیپاٹائٹس بی اینٹی باڈی",
+  HepatitisBScreen: "ہیپاٹائٹس بی جانچ",
+  HepatitisCScreen: "ہیپاٹائٹس سی جانچ",
+  HIVScreen: "ایچ آئی وی جانچ",
+  TBScreen: "ٹی بی جانچ",
+  TetanusVaccine: "تشنج ویکسین",
+  InfluenzaVaccine: "انفلوئنزا ویکسین",
+  TyphoidVaccine: "ٹائیفائیڈ ویکسین",
+  Other: "دیگر",
+} as const satisfies Partial<Record<discipline.HealthRecordIn["kind"], string>>;
+
+function HealthEntry({ employee, onCancel, onSubmit, disabled }: {
+  employee: Selection;
+  onCancel: () => void;
+  onSubmit: (body: discipline.HealthRecordIn) => void;
+  disabled: boolean;
+}) {
+  const [kind, setKind] = useState<keyof typeof healthKinds>("PeriodicMedical");
+  const medical = kind.endsWith("Medical");
+  const vaccine = kind.endsWith("Vaccine");
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (disabled) return;
+    const form = new FormData(event.currentTarget);
+    const done_on = formText(form, "done");
+    if (!done_on) return;
+    onSubmit({
+      kind, done_on,
+      dose: vaccine ? Number(form.get("dose")) : undefined,
+      fit_for_duty: medical ? form.get("fitness") as discipline.HealthRecordIn["fit_for_duty"] : undefined,
+      result: formText(form, "result") || undefined,
+      next_due: formText(form, "next") || undefined,
+      note: formText(form, "note") || undefined,
+    });
+  }
+
+  return <form className="card" onSubmit={submit}>
+    <h2>{t("Record staff health", "عملے کی صحت درج کریں")} · <bdi>{employee.label}</bdi></h2>
+    <fieldset disabled={disabled}>
+      <Field label={t("Entry type", "اندراج کی قسم")}><select data-help="personnel.review.health" value={kind}
+        onChange={event => setKind(event.target.value as keyof typeof healthKinds)}>
+        {Object.entries(healthKinds).map(([code, ur]) => <option key={code} value={code}>{t(code.replace(/([a-z])([A-Z])/g, "$1 $2"), ur)}</option>)}
+      </select></Field>
+      <Field label={t("Date completed", "تکمیل کی تاریخ")}><input name="done" type="date" required data-help="personnel.review.health" /></Field>
+      {medical && <Field label={t("Fitness for duty", "کام کے لیے موزونیت")}>
+        <select name="fitness" required defaultValue="" data-help="personnel.review.health">
+          <option value="">{t("Select fitness", "موزونیت منتخب کریں")}</option>
+          <option value="Fit">{t("Fit", "موزوں")}</option>
+          <option value="FitWithRestrictions">{t("Fit with restrictions", "پابندیوں کے ساتھ موزوں")}</option>
+          <option value="Unfit">{t("Unfit", "ناموزوں")}</option>
+        </select>
+      </Field>}
+      {vaccine && <Field label={t("Dose number", "خوراک کا نمبر")}><input name="dose" type="number" min={1} max={5} required data-help="personnel.review.health" /></Field>}
+      <Field label={t("Result", "نتیجہ")}><input name="result" maxLength={500} data-help="personnel.review.health" /></Field>
+      <Field label={t("Next due date", "اگلی مقررہ تاریخ")}><input name="next" type="date" data-help="personnel.review.health" /></Field>
+      <Field label={t("Note", "نوٹ")}><textarea name="note" maxLength={2000} data-help="personnel.review.health" /></Field>
+      <label><input type="checkbox" required data-help="personnel.review.health" /> {t("I checked the employee and this entry.", "میں نے ملازم اور اس اندراج کی تصدیق کی ہے۔")}</label>
+      <button data-help="personnel.review.health">{t("Save health entry", "صحت کا اندراج محفوظ کریں")}</button>
+      <button type="button" data-help="personnel.review.health" onClick={onCancel}>{t("Cancel", "منسوخ کریں")}</button>
+    </fieldset>
+  </form>;
+}
+
 function DisciplineHealth({ screenId, user, revision, connected }: Props) {
   const { permissions } = user;
   const mayDiscipline = permissions.includes("personnel.discipline.manage");
   const mayHealth = permissions.includes("personnel.health.manage");
   const [employee, setEmployee] = useState<Selection>();
+  const [healthEntry, setHealthEntry] = useState<Selection>();
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const [newCase, setNewCase] = useState<Selection>();
@@ -90,11 +159,16 @@ function DisciplineHealth({ screenId, user, revision, connected }: Props) {
   const history = useLoad(async () => mayHealth && employee
     ? { id: employee.id, rows: await discipline.healthRecord(employee.id) } : undefined, [mayHealth, employee, revision]);
   const write = useClinicalWrite(user, screenId, async () => {
+    if (healthEntry) {
+      setHealthEntry(undefined);
+      await Promise.all([history.reload(), due.reload()]);
+      return;
+    }
     setNewCase(undefined);
     setDecision(undefined);
     await cases.reload();
   });
-  const writable = connected && mayDiscipline && !write.blocked;
+  const writable = connected && mayDiscipline && !write.blocked && !healthEntry;
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -121,7 +195,7 @@ function DisciplineHealth({ screenId, user, revision, connected }: Props) {
     }
   }
 
-  return <section data-screen={screenId} data-unsaved={!!newCase || !!decision} data-write-pending={write.blocked}>
+  return <section data-screen={screenId} data-unsaved={!!newCase || !!decision || !!healthEntry} data-write-pending={write.blocked}>
     <h1>{t("Discipline and staff health", "نظم و ضبط اور عملے کی صحت")}</h1>
     {maySearch && (mayHealth || mayDiscipline) && <form className="toolbar" onSubmit={e => { e.preventDefault(); setSearch(query.trim()); }}>
       <Field label={t("Staff name or number", "ملازم کا نام یا نمبر")}><input data-help="personnel.review.health" value={query} required
@@ -134,7 +208,7 @@ function DisciplineHealth({ screenId, user, revision, connected }: Props) {
       {matches?.map(row => {
         const target = {id:row.employee_id,label:row.emp_number + " · " + row.full_name};
         return <p key={row.employee_id}>{target.label}{" "}
-          {mayHealth && <button data-help="personnel.review.health" onClick={() => setEmployee(target)}>{t("Read health record", "صحت کا ریکارڈ دیکھیں")}</button>}
+          {mayHealth && <button disabled={!!healthEntry} data-help="personnel.review.health" onClick={() => setEmployee(target)}>{t("Read health record", "صحت کا ریکارڈ دیکھیں")}</button>}
           {writable && !newCase && !decision && <button data-help="personnel.review.discipline" onClick={() => setNewCase(target)}>{t("Open case", "کیس کھولیں")}</button>}
         </p>;
       })}
@@ -177,13 +251,23 @@ function DisciplineHealth({ screenId, user, revision, connected }: Props) {
       {!due.loading && !due.error && <ReportTable title={t("Staff health due", "عملے کی مقررہ صحت جانچ")}
         columns={[t("Employee", "ملازم"), t("Next due", "اگلی تاریخ"), t("Missing", "باقی")]}
         rows={(due.data ?? []).map(row => ({ key: row.employee_id, cells: [
-          <button data-help="personnel.review.health" onClick={() => setEmployee({ id: row.employee_id, label: row.emp_number + " · " + row.full_name })}>{row.emp_number} · {row.full_name}</button>,
+          <button disabled={!!healthEntry} data-help="personnel.review.health" onClick={() => setEmployee({ id: row.employee_id, label: row.emp_number + " · " + row.full_name })}>{row.emp_number} · {row.full_name}</button>,
           row.next_due ?? "—", row.missing.join(", "),
         ] }))} />}
       {employee && <LoadState {...history} retry={history.reload} />}
-      {employee && !history.loading && !history.error && history.data?.id === employee.id && <ReportTable title={employee.label}
+      {employee && !history.loading && !history.error && history.data?.id === employee.id && <>
+        <ReportTable title={employee.label}
         columns={[t("Health entry", "صحت کا اندراج"), t("Date", "تاریخ"), t("Next due", "اگلی تاریخ")]}
-        rows={history.data.rows.map(row => ({ key: row.record_id, cells: [row.kind, row.done_on, row.next_due ?? "—"] }))} />}
+        rows={history.data.rows.map(row => ({ key: row.record_id, cells: [row.kind, row.done_on, row.next_due ?? "—"] }))} />
+        {connected && !write.blocked && !healthEntry && !newCase && !decision &&
+          <button data-help="personnel.review.health" onClick={() => setHealthEntry(employee)}>{t("Add health entry", "صحت کا اندراج شامل کریں")}</button>}
+      </>}
+      {healthEntry && <HealthEntry employee={healthEntry} disabled={!connected || write.blocked}
+        onCancel={() => setHealthEntry(undefined)} onSubmit={body => write.start({
+          method: "POST", permission: "personnel.health.manage", protection: "idempotent",
+          path: `/personnel/employees/${healthEntry.id}/health`, body,
+          label: t("Save health entry", "صحت کا اندراج محفوظ کریں"),
+        })} />}
     </>}
   </section>;
 }

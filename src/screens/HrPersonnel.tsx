@@ -4,6 +4,7 @@ import { bilingual as t } from "../i18n";
 import * as orientation from "../generated/orientation_job_descriptions";
 import * as training from "../generated/staff_training_hr";
 import { QualityHeading } from "./QualityRegister";
+import { QualityPaper } from "./QualityPaper";
 import { ReportTable } from "./P9cShared";
 
 const categories: Record<training.TrainingSessionIn["category"], string> = {
@@ -158,7 +159,13 @@ export function HrPersonnel({ screenId, revision, onOpenHelp, canManage = false,
             <button data-help="hr.personnel.issue">{t("Issue to employee", "ملازم کو جاری کریں")}</button>
           </fieldset>
         </form>}
-        {issued && <p role="status">{t("Job description issued", "ملازمت کی تفصیل جاری ہو گئی")} · {issued.full_name}</p>}
+        {issued && <div key={issued.assignment_id}>
+          <p role="status">{t("Job description issued", "ملازمت کی تفصیل جاری ہو گئی")} · <bdi>{issued.full_name}</bdi></p>
+          <QualityPaper disabled={!connected || saving} documents={[{
+            label: t("issued job description PDF", "جاری شدہ ملازمت کی تفصیل کی پی ڈی ایف"),
+            path: `/personnel/employee-job-descriptions/${issued.assignment_id}/pdf`,
+          }]} />
+        </div>}
       </article>}
     </> : <>
       {canManage && <button type="button" data-help="hr.personnel.training" disabled={saving} onClick={() => { setError(undefined); setTrainingMode("individual"); }}>{t("Record individual training", "انفرادی تربیت درج کریں")}</button>}
