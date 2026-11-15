@@ -1,0 +1,1482 @@
+{
+  "screen_id": "mock_drills_quality",
+  "endpoints": [
+    {
+      "endpoint": "GET /facility/drills",
+      "summary": "The mock drills",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.view",
+          "facility.drill.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.view or facility.drill.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "kind",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Fire",
+                  "Evacuation",
+                  "CodeBlue",
+                  "MassCasualty",
+                  "Earthquake",
+                  "BombThreat",
+                  "ChemicalSpill",
+                  "PowerFailure",
+                  "InfantAbduction",
+                  "Flood",
+                  "Other"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Draft",
+                  "Final"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DrillOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Fire",
+              "Evacuation",
+              "CodeBlue",
+              "MassCasualty",
+              "Earthquake",
+              "BombThreat",
+              "ChemicalSpill",
+              "PowerFailure",
+              "InfantAbduction",
+              "Flood",
+              "Other"
+            ]
+          },
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Final"
+            ]
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /facility/drills",
+      "summary": "Report a mock drill",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.drill.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of facility.drill.manage",
+        "roles_allowed": [
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DrillFieldsIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DrillDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "DrillFieldsIn",
+        "fields": [
+          {
+            "pointer": "/kind",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Fire",
+              "Evacuation",
+              "CodeBlue",
+              "MassCasualty",
+              "Earthquake",
+              "BombThreat",
+              "ChemicalSpill",
+              "PowerFailure",
+              "InfantAbduction",
+              "Flood",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/scenario",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 5,
+            "max_length": 2000
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/ward_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "The ward (GET /beds/matrix?include_beds=false)"
+          },
+          {
+            "pointer": "/area",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200,
+            "description": "An area that is neither a department nor a ward"
+          },
+          {
+            "pointer": "/shift",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Morning",
+              "Evening",
+              "Night"
+            ]
+          },
+          {
+            "pointer": "/held_at",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date-time"
+          },
+          {
+            "pointer": "/announced",
+            "type": "boolean",
+            "required": true,
+            "nullable": false
+          },
+          {
+            "pointer": "/external_agency",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200
+          },
+          {
+            "pointer": "/response_minutes",
+            "type": "number",
+            "required": false,
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 600,
+            "description": "From the alarm to the first response"
+          },
+          {
+            "pointer": "/evacuation_minutes",
+            "type": "number",
+            "required": false,
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 600,
+            "description": "Until the area was cleared"
+          },
+          {
+            "pointer": "/observations",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 8000,
+            "description": "What went well and what did not (required to sign)"
+          },
+          {
+            "pointer": "/outcome",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "Satisfactory",
+              "NeedsImprovement",
+              "Unsatisfactory"
+            ]
+          },
+          {
+            "pointer": "/participants",
+            "type": "array",
+            "required": false,
+            "nullable": false,
+            "items": "DrillParticipantIn"
+          }
+        ],
+        "cross_field_rules": {
+          "DrillFieldsIn": [
+            "Say where: the department, the ward or the area"
+          ]
+        },
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /facility/drills",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /facility/drills/coverage",
+      "summary": "Drill coverage by department and shift",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.view",
+          "facility.drill.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.view or facility.drill.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DrillCoverageOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /facility/drills/{drill_id}",
+      "summary": "One drill report",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.view",
+          "facility.drill.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.view or facility.drill.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "drill_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Drill Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DrillDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "PUT /facility/drills/{drill_id}",
+      "summary": "Complete the draft report",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.drill.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of facility.drill.manage",
+        "roles_allowed": [
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "DRILL_FINAL",
+          "http_status": 409,
+          "message": "The report of this drill is signed and final.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/facility/drills/{drill_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "drill_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Drill Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DrillUpdateIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DrillDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "DrillUpdateIn",
+        "fields": [
+          {
+            "pointer": "/kind",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Fire",
+              "Evacuation",
+              "CodeBlue",
+              "MassCasualty",
+              "Earthquake",
+              "BombThreat",
+              "ChemicalSpill",
+              "PowerFailure",
+              "InfantAbduction",
+              "Flood",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/scenario",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 5,
+            "max_length": 2000
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/ward_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "The ward (GET /beds/matrix?include_beds=false)"
+          },
+          {
+            "pointer": "/area",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200,
+            "description": "An area that is neither a department nor a ward"
+          },
+          {
+            "pointer": "/shift",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Morning",
+              "Evening",
+              "Night"
+            ]
+          },
+          {
+            "pointer": "/held_at",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date-time"
+          },
+          {
+            "pointer": "/announced",
+            "type": "boolean",
+            "required": true,
+            "nullable": false
+          },
+          {
+            "pointer": "/external_agency",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200
+          },
+          {
+            "pointer": "/response_minutes",
+            "type": "number",
+            "required": false,
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 600,
+            "description": "From the alarm to the first response"
+          },
+          {
+            "pointer": "/evacuation_minutes",
+            "type": "number",
+            "required": false,
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 600,
+            "description": "Until the area was cleared"
+          },
+          {
+            "pointer": "/observations",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 8000,
+            "description": "What went well and what did not (required to sign)"
+          },
+          {
+            "pointer": "/outcome",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "Satisfactory",
+              "NeedsImprovement",
+              "Unsatisfactory"
+            ]
+          },
+          {
+            "pointer": "/participants",
+            "type": "array",
+            "required": false,
+            "nullable": false,
+            "items": "DrillParticipantIn"
+          },
+          {
+            "pointer": "/expected_version",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "version_check",
+        "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+        "reconcile_with": "GET /facility/drills/{drill_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /facility/drills/{drill_id}/finalize",
+      "summary": "Sign the report",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.drill.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of facility.drill.manage",
+        "roles_allowed": [
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "DRILL_FINAL",
+          "http_status": 409,
+          "message": "The report of this drill is signed and final.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/facility/drills/{drill_id}"
+        },
+        {
+          "code": "DRILL_REPORT_INCOMPLETE",
+          "http_status": 422,
+          "message": "Write the observations and the outcome, and list who took part, before signing the report.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "missing"
+          ],
+          "details_from": "POST /api/v1/facility/drills/{drill_id}/finalize"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "drill_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Drill Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DrillDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /facility/drills/{drill_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /facility/drills/{drill_id}/actions",
+      "summary": "Record an action the drill showed was needed",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.drill.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of facility.drill.manage",
+        "roles_allowed": [
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "drill_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Drill Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/QualityActionIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_QualityActionOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "QualityActionIn",
+        "fields": [
+          {
+            "pointer": "/action_type",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Corrective",
+              "Preventive"
+            ]
+          },
+          {
+            "pointer": "/description",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 5,
+            "max_length": 1000
+          },
+          {
+            "pointer": "/owner_user_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "Who carries it out; they are notified and close it with the evidence (GET /staff/lookup → user_id; GET /quality/record-review/people, GET /facility/staff)"
+          },
+          {
+            "pointer": "/due_date",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "The department (GET /admin/departments)"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /facility/drills/{drill_id}",
+        "emits_events": [
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /facility/drills/{drill_id}/pdf",
+      "summary": "The drill report (PDF)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.view",
+          "facility.drill.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.view or facility.drill.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "drill_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Drill Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "The stored file, with its own Content-Type (e.g. application/pdf) and its file name in Content-Disposition.",
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "file",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "prints": {
+        "kind": "file",
+        "media": [
+          "application/octet-stream"
+        ]
+      }
+    },
+    {
+      "endpoint": "GET /facility/staff",
+      "summary": "Pick a member of staff",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.compliance.manage",
+          "facility.equipment.manage",
+          "facility.maintenance.record",
+          "facility.drill.manage",
+          "personnel.training.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.compliance.manage or facility.equipment.manage or facility.maintenance.record or facility.drill.manage or personnel.training.record",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Q"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 500,
+            "minimum": 1,
+            "default": 50,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_FacilityStaffOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 500
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "GET /beds/matrix",
+      "summary": "Live bed matrix (counts per ward + optional bed list)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage",
+          "complaint.manage",
+          "incident.view",
+          "facility.drill.manage",
+          "roster.manage.all",
+          "facility.equipment.manage",
+          "pharmacy.storage.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage or complaint.manage or incident.view or facility.drill.manage or roster.manage.all or facility.equipment.manage or pharmacy.storage.record",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "BED_NO_LONGER_AVAILABLE",
+          "http_status": 409,
+          "message": "Bed was reserved by another terminal.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "bed_id",
+            "current_state"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/allocate-bed"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "include_beds",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "title": "Include Beds"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_BedMatrixOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "include_beds",
+            "required": false,
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        "note": null
+      }
+    }
+  ]
+}

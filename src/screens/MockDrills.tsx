@@ -70,12 +70,14 @@ const emptyAction = () => ({
   department_id: "",
 });
 export function MockDrills({
+  screenId = "mock_drills_ops",
   user,
   establishment,
   connected,
   timeZone,
   onOpenHelp,
 }: {
+  screenId?: string;
   user: ClinicalUser;
   establishment?: EstablishmentOut | null;
   connected: boolean;
@@ -410,7 +412,7 @@ export function MockDrills({
   return (
     <section
       className="drill-screen"
-      data-screen="mock_drills_ops"
+      data-screen={screenId}
       data-write-pending={blocked ? "true" : undefined}
       data-unsaved={editor ? "true" : "false"}
     >

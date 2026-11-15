@@ -16,6 +16,20 @@ import { InfectionStatistics } from "./screens/InfectionStatistics";
 import { IpcStaffTraining } from "./screens/IpcStaffTraining";
 import { HrPersonnel } from "./screens/HrPersonnel";
 import { isPersonnelReviewScreen, PersonnelReview } from "./screens/PersonnelReview";
+import { MyPersonnelRecord } from "./screens/MyPersonnelRecord";
+import { EquipmentWriteOff } from "./screens/EquipmentWriteOff";
+import { EquipmentRequisitions } from "./screens/EquipmentRequisitions";
+import { MsdsAuthorizedPersonnel } from "./screens/MsdsAuthorizedPersonnel";
+import { MsdsReadiness } from "./screens/MsdsReadiness";
+import { MsdsInspectionPack } from "./screens/MsdsInspectionPack";
+import { PhcCpsaDocuments } from "./screens/PhcCpsaDocuments";
+import { PhcInspectorAccounts } from "./screens/PhcInspectorAccounts";
+import { InspectionHome } from "./screens/InspectionHome";
+import { InterviewPractice } from "./screens/InterviewPractice";
+import { MockInterviews } from "./screens/MockInterviews";
+import { InterviewBank } from "./screens/InterviewBank";
+import { InterviewReadiness } from "./screens/InterviewReadiness";
+import { TreatingDoctors } from "./screens/TreatingDoctors";
 import { IndicatorTargets, QualityIndicators } from "./screens/QualityIndicators";
 import { Committees } from "./screens/Committees";
 import { listCommittees } from "./generated/my_committees";
@@ -1196,6 +1210,7 @@ export function App() {
       ? ["facility_profile"]
       : []),
     "settings",
+    "my_personnel_record",
   ] : []).filter(
     (id) =>
       (!frontDeskScreens.has(id) || (!!workspace && (
@@ -1716,6 +1731,51 @@ export function App() {
               {isPersonnelReviewScreen(screen) && nav.includes(screen) && <PersonnelReview
                 key={user.user_id + ":" + screen} screenId={screen} revision={revision} user={user} connected={connected}
                 onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "my_personnel_record" && <MyPersonnelRecord
+                key={user.user_id + ":" + screen} revision={revision} user={user} connected={connected}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "equipment_write_off" && <EquipmentWriteOff
+                key={user.user_id + ":" + screen} revision={revision} user={user} connected={connected}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "equipment_requisitions" && <EquipmentRequisitions
+                key={user.user_id + ":" + screen} revision={revision} user={user} connected={connected}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "msds_authorized_personnel" && <MsdsAuthorizedPersonnel
+                key={user.user_id + ":" + screen} revision={revision} user={user} connected={connected}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {(screen === "msds_readiness" || screen === "msds_readiness_owner") && <MsdsReadiness
+                key={user.user_id + ":" + screen} screenId={screen} revision={revision} user={user} connected={connected}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {(screen === "msds_inspection_pack" || screen === "msds_inspection_pack_owner" || screen === "msds_inspection_pack_inspector") && <MsdsInspectionPack
+                key={user.user_id + ":" + screen} screenId={screen} revision={revision} user={user} connected={connected}
+                combined={prefs.pdf_download === "Combined"}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {(screen === "phc_cpsa_documents" || screen === "phc_cpsa_documents_owner" || screen === "phc_cpsa_documents_inspector") && <PhcCpsaDocuments
+                key={user.user_id + ":" + screen} screenId={screen} revision={revision} user={user} connected={connected}
+                combined={prefs.pdf_download === "Combined"}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "phc_inspector_accounts" && <PhcInspectorAccounts
+                key={user.user_id + ":" + screen} revision={revision} user={user} connected={connected}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "inspection_home" && <InspectionHome
+                key={user.user_id + ":" + screen} revision={revision} user={user} connected={connected}
+                onNavigate={(target) => navigate(target)}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "interview_practice" && <InterviewPractice
+                key={user.user_id + ":" + screen} revision={revision} user={user} connected={connected}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "mock_interviews" && <MockInterviews
+                key={user.user_id + ":" + screen} revision={revision} user={user} connected={connected}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "interview_bank" && <InterviewBank
+                key={user.user_id + ":" + screen} revision={revision} user={user} connected={connected}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {(screen === "interview_readiness" || screen === "interview_readiness_owner") && <InterviewReadiness
+                key={user.user_id + ":" + screen} screenId={screen} revision={revision} user={user} connected={connected}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {screen === "treating_doctors" && <TreatingDoctors
+                key={user.user_id + ":" + screen} revision={revision} user={user} connected={connected}
+                onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === "orientation_job_descriptions" || screen === "staff_training_hr") && <HrPersonnel
                 key={user.user_id + ":" + screen} screenId={screen} revision={revision} connected={connected}
                 canManage={user.permissions.includes("personnel.manage")}
@@ -1746,8 +1806,8 @@ export function App() {
               {screen === 'my_actions'&&<MyActions key={user.user_id} initialAction={actionEntry} onChanged={()=>void ownedActions.reload()} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id==='my_actions')?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'my_complaint_investigations'&&<MyComplaintInvestigations key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id==='my_complaint_investigations')?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'my_investigations'&&<MyInvestigations key={user.user_id} user={user} revision={revision} connected={connected} readOnly={['records','setup','hidden'].includes(est?.views.screens.find(s=>s.screen_id==='my_investigations')?.view??'full')} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
-              {screen === "mock_drills_ops" && <MockDrills key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
-              {screen === "compliance_register_ops" && <ComplianceRegister key={user.user_id} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {(screen === "mock_drills_ops" || screen === "mock_drills_quality") && <MockDrills key={user.user_id + screen} screenId={screen} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
+              {(screen === "compliance_register_ops" || screen === "compliance_register_quality") && <ComplianceRegister key={user.user_id + screen} screenId={screen} user={user} establishment={est} connected={connected} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {(screen === "equipment_maintenance" || screen === "equipment_maintenance_ops") && <EquipmentMaintenance key={user.user_id + screen} screenId={screen} timeZone={meta?.hospital_timezone} user={user} establishment={est} connected={connected} lang={prefs.language === "ur" ? "ur" : "en"} onOpenHelp={()=>{setHelpPage(screen);setHelpOpen(true);}}/>}
               {screen === 'badge_station_kiosk' && <BadgeStationKiosk onOpenHelp={() => { setHelpPage('badge_station_kiosk'); setHelpOpen(true); }} />}
               {screen === 'owner_dashboard' && <OwnerDashboard key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Field, LoadState, useLoad } from "../components";
+import { ErrorBox, Field, LoadState, useLoad } from "../components";
 import { ClinicalWriteFeedback, useClinicalWrite } from "../clinical-write";
 import type { ClinicalUser } from "../clinical-context";
 import { bilingual as t } from "../i18n";
@@ -12,6 +12,7 @@ import { QualityPaper } from "./QualityPaper";
 export const personnelReviewScreens = [
   "appraisals_hr", "appraise_staff_doctor", "appraise_staff_head_nurse",
   "discipline_health_hr", "personnel_files_hr", "personnel_files_quality",
+  "personnel_files_owner",
 ] as const;
 type Screen = (typeof personnelReviewScreens)[number];
 export function isPersonnelReviewScreen(value: string): value is Screen {
@@ -25,42 +26,464 @@ export function PersonnelReview(props: Props) {
   return <>
     <button type="button" data-help="personnel.review.help" onClick={props.onOpenHelp}>{t("Help", "مدد")}</button>
     {screenId === "discipline_health_hr" ? <DisciplineHealth {...props} />
-      : screenId === "personnel_files_hr" || screenId === "personnel_files_quality" ? <PersonnelFiles {...props} />
+      : screenId === "personnel_files_hr" || screenId === "personnel_files_quality" || screenId === "personnel_files_owner" ? <PersonnelFiles {...props} />
         : <AppraisalRegister {...props} />}
   </>;
 }
 
-function AppraisalRegister({ screenId, revision, connected }: Props) {
+const ratingLabels: Record<number, [string, string]> = {
+  1: ["1 - Unsatisfactory", "1 - غیر اطمینان بخش"],
+  2: ["2 - Needs Improvement", "2 - بہتری درکار"],
+  3: ["3 - Satisfactory", "3 - اطمینان بخش"],
+  4: ["4 - Good", "4 - اچھا"],
+  5: ["5 - Outstanding", "5 - شاندار"],
+};
+
+const overallRatingLabels: Record<string, [string, string]> = {
+  Outstanding: ["Outstanding", "شاندار"],
+  Good: ["Good", "اچھا"],
+  Satisfactory: ["Satisfactory", "اطمینان بخش"],
+  NeedsImprovement: ["Needs Improvement", "بہتری درکار"],
+  Unsatisfactory: ["Unsatisfactory", "غیر اطمینان بخش"],
+};
+
+function AppraisalRegister({ screenId, revision, connected, user }: Props) {
   const [selected, setSelected] = useState<number>();
+  const [showStats, setShowStats] = useState(false);
+  const [creating, setCreating] = useState<{
+    employee_id: number;
+    name: string;
+    emp_number: string;
+    kind: "Probation" | "Annual" | "AdHoc";
+    due_on?: string;
+  }>();
+  const [adHoc, setAdHoc] = useState(false);
+  const [staffSearch, setStaffSearch] = useState("");
+  const [selectedStaff, setSelectedStaff] = useState<appraisals.StaffLookupOut>();
+  const [editingDraft, setEditingDraft] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [acknowledging, setAcknowledging] = useState(false);
+  const [trainingMode, setTrainingMode] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<unknown>();
+
   const mine = screenId !== "appraisals_hr";
   const schedule = useLoad(() => appraisals.appraisalSchedule(), [revision]);
   const register = useLoad(() => appraisals.listAppraisals({ mine: mine || undefined }), [mine, revision]);
   const detail = useLoad(() => selected ? appraisals.getAppraisal(selected) : Promise.resolve(undefined), [selected, revision]);
+  const statistics = useLoad(() => showStats ? appraisals.appraisalStatistics() : Promise.resolve(undefined), [showStats, revision]);
+  const staffLookup = useLoad(() => (creating || adHoc) && staffSearch
+    ? appraisals.lookupStaff({ q: staffSearch, limit: 20 }) : Promise.resolve([]), [creating, adHoc, staffSearch]);
   const appraisal = !detail.loading && !detail.error && detail.data?.appraisal_id === selected ? detail.data : undefined;
+
+  async function createDraftAppraisal(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!connected || saving) return;
+    const form = new FormData(event.currentTarget);
+    const empId = creating?.employee_id ?? selectedStaff?.employee_id;
+    const kind = (creating?.kind ?? (adHoc ? "AdHoc" : "Annual")) as "Probation" | "Annual" | "AdHoc";
+    const period_from = String(form.get("period_from") ?? "");
+    const period_to = String(form.get("period_to") ?? "");
+    const reason = String(form.get("reason") ?? "").trim() || undefined;
+    if (!empId || !period_from || !period_to) return;
+    if (kind === "AdHoc" && !reason) return;
+    setError(undefined);
+    setSaving(true);
+    try {
+      const created = await appraisals.addAppraisal({
+        employee_id: empId,
+        kind,
+        period_from,
+        period_to,
+        reason,
+        appraiser_user_id: user.user_id,
+      });
+      setCreating(undefined);
+      setAdHoc(false);
+      setSelectedStaff(undefined);
+      setSelected(created.appraisal_id);
+      await Promise.all([schedule.reload(), register.reload()]);
+    } catch (failure) {
+      setError(failure);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function updateAppraisalForm(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!appraisal || !connected || saving) return;
+    const form = new FormData(event.currentTarget);
+    const overall = form.get("overall_rating") as appraisals.AppraisalDetailOut["overall_rating"];
+    const targets = String(form.get("targets") ?? "").trim() || null;
+    const strengths = String(form.get("strengths") ?? "").trim() || null;
+    const development_needs = String(form.get("development_needs") ?? "").trim() || null;
+    const development_plan = String(form.get("development_plan") ?? "").trim() || null;
+    const period_from = String(form.get("period_from") ?? appraisal.period_from);
+    const period_to = String(form.get("period_to") ?? appraisal.period_to);
+
+    // Below satisfactory requires development plan (MSDS HRM 136)
+    if ((overall === "NeedsImprovement" || overall === "Unsatisfactory") && !development_plan) {
+      setError(t("A development plan is required when rating is below Satisfactory.", "اطمینان بخش سے کم درجہ بندی پر ترقی کا منصوبہ لازمی ہے۔"));
+      return;
+    }
+
+    const ratings: appraisals.RatingIn[] = appraisal.criteria.map(crit => ({
+      criterion: crit.criterion,
+      kind: crit.kind,
+      rating: Number(form.get(`rating_${crit.criterion}`) || 3),
+      comment: String(form.get(`comment_${crit.criterion}`) ?? "").trim() || undefined,
+    }));
+
+    setError(undefined);
+    setSaving(true);
+    try {
+      await appraisals.updateAppraisal(appraisal.appraisal_id, {
+        period_from,
+        period_to,
+        overall_rating: overall,
+        targets,
+        strengths,
+        development_needs,
+        development_plan,
+        ratings,
+        expected_version: appraisal.row_version,
+      });
+      setEditingDraft(false);
+      await Promise.all([detail.reload(), register.reload()]);
+    } catch (failure) {
+      setError(failure);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function signAppraisalAction() {
+    if (!appraisal || !connected || saving) return;
+    setError(undefined);
+    setSaving(true);
+    try {
+      await appraisals.signAppraisal(appraisal.appraisal_id);
+      await Promise.all([detail.reload(), register.reload(), schedule.reload()]);
+    } catch (failure) {
+      setError(failure);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function cancelAppraisalAction(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!appraisal || !connected || saving) return;
+    const form = new FormData(event.currentTarget);
+    const reason = String(form.get("reason") ?? "").trim();
+    if (!reason) return;
+    setError(undefined);
+    setSaving(true);
+    try {
+      await appraisals.cancelAppraisal(appraisal.appraisal_id, { reason });
+      setCancelling(false);
+      await Promise.all([detail.reload(), register.reload(), schedule.reload()]);
+    } catch (failure) {
+      setError(failure);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function acknowledgeAction(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!appraisal || !connected || saving) return;
+    const form = new FormData(event.currentTarget);
+    const ackDate = String(form.get("acknowledged_on") ?? "");
+    const comments = String(form.get("employee_comments") ?? "").trim() || undefined;
+    if (!ackDate) return;
+    setError(undefined);
+    setSaving(true);
+    try {
+      await appraisals.acknowledgeAppraisal(appraisal.appraisal_id, {
+        acknowledged_on: ackDate,
+        employee_comments: comments,
+      });
+      setAcknowledging(false);
+      await Promise.all([detail.reload(), register.reload()]);
+    } catch (failure) {
+      setError(failure);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function recordTrainingAction(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!appraisal || !connected || saving) return;
+    const form = new FormData(event.currentTarget);
+    const title = String(form.get("title") ?? "").trim();
+    const date = String(form.get("date") ?? "");
+    const hours = Number(form.get("hours"));
+    const category = form.get("category") as appraisals.EmployeeTrainingIn["category"];
+    if (!title || !date || !hours) return;
+    setError(undefined);
+    setSaving(true);
+    try {
+      await appraisals.addTraining(appraisal.employee_id, {
+        title,
+        category,
+        completed_on: date,
+        hours,
+        appraisal_id: appraisal.appraisal_id,
+      });
+      setTrainingMode(false);
+      await detail.reload();
+    } catch (failure) {
+      setError(failure);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return <section data-screen={screenId}>
     <h1>{t("Staff appraisals", "عملے کی کارکردگی کا جائزہ")}</h1>
-    <QualityPaper disabled={!connected} documents={[{ path: "/personnel/appraisal-policy/pdf", label: t("appraisal policy", "جائزے کی پالیسی") }]} />
+    <div className="toolbar">
+      <QualityPaper disabled={!connected} documents={[{ path: "/personnel/appraisal-policy/pdf", label: t("appraisal policy", "جائزے کی پالیسی") }]} />
+      <button type="button" data-help="personnel.review.appraisal" onClick={() => setShowStats(!showStats)}>
+        {showStats ? t("Hide statistics", "اعداد و شمار چھپائیں") : t("Appraisal statistics", "کارکردگی جائزے کے اعداد و شمار")}
+      </button>
+      {!mine && <button type="button" data-help="personnel.review.appraisal" onClick={() => { setAdHoc(true); setCreating(undefined); }}>
+        {t("New ad-hoc appraisal", "نیا وقتی جائزہ")}
+      </button>}
+    </div>
+
+    <ErrorBox error={error} />
+
+    {showStats && <article className="card">
+      <h2>{t("Appraisal statistics", "کارکردگی جائزے کے اعداد و شمار")}</h2>
+      <LoadState {...statistics} retry={statistics.reload} />
+      {!statistics.loading && !statistics.error && statistics.data && <div>
+        <p>{t("Period:", "مدت:")} {statistics.data.date_from} – {statistics.data.date_to} · {t("Grace days:", "رعایتی دن:")} {statistics.data.grace_days}</p>
+        <p>{t("On-time percentage (MSDS HRM 137 >90%):", "بروقت تناسب (ایم ایس ڈی ایس >90%):")} <strong>{statistics.data.on_time_pct !== null ? `${statistics.data.on_time_pct}%` : "—"}</strong></p>
+        <ReportTable title={t("Appraisal metrics", "جائزے کے پیمانے")}
+          columns={[t("Metric", "پیمانہ"), t("Count", "تعداد")]}
+          rows={[
+            { key: "due", cells: [t("Due appraisals", "مقررہ جائزے"), statistics.data.due] },
+            { key: "signed", cells: [t("Signed appraisals", "دستخط شدہ جائزے"), statistics.data.signed] },
+            { key: "on_time", cells: [t("Signed on time", "بروقت دستخط شدہ"), statistics.data.on_time] },
+            { key: "probation", cells: [t("Probationary appraisals", "آزمائشی جائزے"), statistics.data.probation] },
+            { key: "ad_hoc", cells: [t("Ad-hoc appraisals", "وقتی جائزے"), statistics.data.ad_hoc] },
+            { key: "missing", cells: [t("Overdue / Missing", "تاخیر شدہ / باقی"), statistics.data.missing] },
+            { key: "development_planned", cells: [t("Development planned", "منصوبہ بندی شدہ"), statistics.data.development_planned] },
+            { key: "development_trained", cells: [t("Development trained", "تربیت یافتہ"), statistics.data.development_trained] },
+          ]} />
+      </div>}
+    </article>}
+
+    {(creating || adHoc) && <form className="card" onSubmit={createDraftAppraisal}>
+      <fieldset disabled={saving || !connected}>
+        <legend>{creating ? `${t("Start appraisal", "جائزہ شروع کریں")} (${creating.kind})` : t("New ad-hoc appraisal", "نیا وقتی جائزہ")}</legend>
+        {creating ? <p><strong>{creating.emp_number} · {creating.name}</strong></p> : <>
+          <Field label={t("Find staff by name or number", "نام یا نمبر سے عملہ تلاش کریں")}>
+            <input data-help="personnel.review.appraisal" value={staffSearch} onChange={e => setStaffSearch(e.target.value)} />
+          </Field>
+          <LoadState {...staffLookup} retry={staffLookup.reload} />
+          {!staffLookup.loading && !staffLookup.error && staffLookup.data && staffLookup.data.length > 0 && <div>
+            {staffLookup.data.map(st => (
+              <button key={st.employee_id} type="button" data-help="personnel.review.appraisal" onClick={() => setSelectedStaff(st)} style={{ fontWeight: selectedStaff?.employee_id === st.employee_id ? "bold" : "normal" }}>
+                {st.emp_number} · {st.full_name} ({st.designation})
+              </button>
+            ))}
+          </div>}
+          {selectedStaff && <p>{t("Selected:", "منتخب:")} <strong>{selectedStaff.emp_number} · {selectedStaff.full_name}</strong></p>}
+        </>}
+        <Field label={t("Period from", "مدت از")}>
+          <input data-help="personnel.review.appraisal" type="date" name="period_from" required />
+        </Field>
+        <Field label={t("Period to", "مدت تا")}>
+          <input data-help="personnel.review.appraisal" type="date" name="period_to" required />
+        </Field>
+        {adHoc && <Field label={t("Reason for ad-hoc appraisal", "وقتی جائزے کی وجہ")}>
+          <textarea data-help="personnel.review.appraisal" name="reason" required placeholder={t("Incident, complaint or special review...", "واقعہ، شکایت یا خصوصی جائزہ...")} />
+        </Field>}
+        <button data-help="personnel.review.appraisal">{t("Create draft appraisal", "مسودہ جائزہ بنائیں")}</button>
+        <button type="button" data-help="personnel.review.appraisal" onClick={() => { setCreating(undefined); setAdHoc(false); }}>{t("Cancel", "منسوخ کریں")}</button>
+      </fieldset>
+    </form>}
+
     <LoadState {...schedule} retry={schedule.reload} />
     {!schedule.loading && !schedule.error && <ReportTable title={t("Appraisals due", "مقررہ جائزے")}
-      columns={[t("Employee", "ملازم"), t("Type", "قسم"), t("Due", "مقررہ تاریخ")]}
+      columns={[t("Employee", "ملازم"), t("Type", "قسم"), t("Due", "مقررہ تاریخ"), t("Actions", "اقدامات")]}
       rows={(schedule.data ?? []).map(row => ({ key: row.employee_id + ":" + row.kind,
-        cells: [<bdi>{row.emp_number} · {row.full_name}</bdi>, row.kind, row.due_on] }))} />}
+        cells: [
+          <bdi>{row.emp_number} · {row.full_name}</bdi>,
+          row.kind,
+          <span style={{ color: row.overdue ? "var(--color-danger, #d32f2f)" : undefined, fontWeight: row.overdue ? "bold" : "normal" }}>
+            {row.due_on}{row.overdue ? ` (${t("Overdue", "تاخیر")})` : ""}
+          </span>,
+          row.draft_id ? (
+            <button type="button" data-help="personnel.review.appraisal" onClick={() => setSelected(row.draft_id!)}>
+              {t("Continue draft", "مسودہ جاری رکھیں")}
+            </button>
+          ) : (
+            <button type="button" data-help="personnel.review.appraisal" onClick={() => setCreating({
+              employee_id: row.employee_id,
+              name: row.full_name,
+              emp_number: row.emp_number,
+              kind: row.kind,
+              due_on: row.due_on,
+            })}>
+              {t("Start appraisal", "جائزہ شروع کریں")}
+            </button>
+          ),
+        ] }))} />}
+
     <LoadState {...register} retry={register.reload} />
     {!register.loading && !register.error && <ReportTable title={t("Appraisal register", "جائزوں کا رجسٹر")}
-      columns={[t("Appraisal", "جائزہ"), t("Employee", "ملازم"), t("Status", "حالت")]}
+      columns={[t("Appraisal", "جائزہ"), t("Employee", "ملازم"), t("Period", "مدت"), t("Status", "حالت")]}
       rows={(register.data ?? []).map(row => ({ key: row.appraisal_id, cells: [
         <button data-help="personnel.review.appraisal" onClick={() => setSelected(row.appraisal_id)}>{row.appraisal_number}</button>,
-        <bdi>{row.emp_number} · {row.full_name}</bdi>, row.status,
+        <bdi>{row.emp_number} · {row.full_name}</bdi>,
+        `${row.period_from} – ${row.period_to}`,
+        row.status,
       ] }))} />}
+
     {selected && <LoadState {...detail} retry={detail.reload} />}
     {appraisal && <article className="card">
       <h2>{appraisal.appraisal_number} · {appraisal.full_name}</h2>
-      <p>{appraisal.period_from} – {appraisal.period_to} · {appraisal.status}</p>
+      <p>{appraisal.period_from} – {appraisal.period_to} · <strong>{appraisal.status}</strong></p>
       <p>{t("Appraiser", "جائزہ لینے والا")} · {appraisal.appraiser_name}</p>
-      {appraisal.overall_rating && <p>{t("Overall rating", "مجموعی درجہ")} · {appraisal.overall_rating}</p>}
+      {appraisal.reason && <p>{t("Reason", "وجہ")}: {appraisal.reason}</p>}
+      {appraisal.overall_rating && <p>{t("Overall rating", "مجموعی درجہ")} · {overallRatingLabels[appraisal.overall_rating] ? t(...overallRatingLabels[appraisal.overall_rating]) : appraisal.overall_rating}</p>}
+      {appraisal.targets && <p>{t("Targets", "اہداف")}: {appraisal.targets}</p>}
+      {appraisal.strengths && <p>{t("Strengths", "خوبیاں")}: {appraisal.strengths}</p>}
+      {appraisal.development_needs && <p>{t("Development needs", "ترقی کی ضروریات")}: {appraisal.development_needs}</p>}
       {appraisal.development_plan && <p>{t("Development plan", "ترقی کا منصوبہ")} · {appraisal.development_plan}</p>}
+      {appraisal.employee_comments && <p>{t("Employee comments", "ملازم کی رائے")}: {appraisal.employee_comments}</p>}
+      {appraisal.acknowledged_on && <p>{t("Acknowledged on", "اعتراف کی تاریخ")}: {appraisal.acknowledged_on}</p>}
+
       <QualityPaper disabled={!connected} documents={[{ path: `/personnel/appraisals/${appraisal.appraisal_id}/pdf`, label: t("appraisal PDF", "جائزے کی پی ڈی ایف") }]} />
+
+      <div className="toolbar" style={{ marginTop: "12px" }}>
+        {appraisal.status === "Draft" && !editingDraft && (
+          <button type="button" data-help="personnel.review.appraisal" onClick={() => setEditingDraft(true)}>
+            {t("Edit draft appraisal", "مسودہ جائزے میں ترمیم")}
+          </button>
+        )}
+        {appraisal.status === "Draft" && (
+          <button type="button" data-help="personnel.review.appraisal" disabled={saving || !connected} onClick={signAppraisalAction}>
+            {t("Sign appraisal (Final)", "جائزے پر دستخط کریں (حتمی)")}
+          </button>
+        )}
+        {appraisal.status === "Draft" && !cancelling && (
+          <button type="button" data-help="personnel.review.appraisal" onClick={() => setCancelling(true)}>
+            {t("Cancel appraisal", "جائزہ منسوخ کریں")}
+          </button>
+        )}
+        {appraisal.status === "Signed" && !acknowledging && (
+          <button type="button" data-help="personnel.review.appraisal" onClick={() => setAcknowledging(true)}>
+            {t("Record employee acknowledgement", "ملازم کا اعتراف درج کریں")}
+          </button>
+        )}
+        {appraisal.status === "Acknowledged" && !trainingMode && (
+          <button type="button" data-help="personnel.review.appraisal" onClick={() => setTrainingMode(true)}>
+            {t("Record training for development plan", "ترقی کے منصوبے کے لیے تربیت درج کریں")}
+          </button>
+        )}
+      </div>
+
+      {editingDraft && appraisal.status === "Draft" && <form className="card" onSubmit={updateAppraisalForm}>
+        <fieldset disabled={saving || !connected}>
+          <legend>{t("Conduct appraisal", "کارکردگی کا جائزہ لیں")}</legend>
+          <Field label={t("Overall rating", "مجموعی درجہ")}>
+            <select name="overall_rating" data-help="personnel.review.appraisal" defaultValue={appraisal.overall_rating ?? "Satisfactory"} required>
+              {Object.entries(overallRatingLabels).map(([code, pair]) => (
+                <option key={code} value={code}>{t(...pair)}</option>
+              ))}
+            </select>
+          </Field>
+          <fieldset>
+            <legend>{t("Evaluation criteria (1 to 5)", "معیارات برائے جائزہ (1 تا 5)")}</legend>
+            {appraisal.criteria.map(crit => {
+              const current = appraisal.ratings.find(r => r.criterion === crit.criterion);
+              return <div key={crit.criterion} style={{ marginBottom: "12px", padding: "8px", border: "1px solid #ddd" }}>
+                <strong>{crit.criterion} ({crit.kind})</strong>
+                <Field label={t("Score", "اسکور")}>
+                  <select name={`rating_${crit.criterion}`} data-help="personnel.review.appraisal" defaultValue={current?.rating ?? 3}>
+                    {Object.entries(ratingLabels).map(([num, pair]) => (
+                      <option key={num} value={num}>{t(...pair)}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label={t("Comment", "تبصرہ")}>
+                  <input name={`comment_${crit.criterion}`} data-help="personnel.review.appraisal" defaultValue={current?.comment ?? ""} />
+                </Field>
+              </div>;
+            })}
+          </fieldset>
+          <Field label={t("Targets", "اہداف")}>
+            <textarea name="targets" data-help="personnel.review.appraisal" defaultValue={appraisal.targets ?? ""} />
+          </Field>
+          <Field label={t("Strengths", "خوبیاں")}>
+            <textarea name="strengths" data-help="personnel.review.appraisal" defaultValue={appraisal.strengths ?? ""} />
+          </Field>
+          <Field label={t("Development needs", "ترقی کی ضروریات")}>
+            <textarea name="development_needs" data-help="personnel.review.appraisal" defaultValue={appraisal.development_needs ?? ""} />
+          </Field>
+          <Field label={t("Development plan (required below Satisfactory)", "ترقی کا منصوبہ (اطمینان بخش سے کم پر لازمی)")}>
+            <textarea name="development_plan" data-help="personnel.review.appraisal" defaultValue={appraisal.development_plan ?? ""} />
+          </Field>
+          <button data-help="personnel.review.appraisal">{t("Save draft", "مسودہ محفوظ کریں")}</button>
+          <button type="button" data-help="personnel.review.appraisal" onClick={() => setEditingDraft(false)}>{t("Cancel", "منسوخ کریں")}</button>
+        </fieldset>
+      </form>}
+
+      {cancelling && <form className="card" onSubmit={cancelAppraisalAction}>
+        <fieldset disabled={saving || !connected}>
+          <legend>{t("Cancel appraisal", "جائزہ منسوخ کریں")}</legend>
+          <Field label={t("Cancellation reason", "منسوخی کی وجہ")}>
+            <textarea name="reason" data-help="personnel.review.appraisal" required />
+          </Field>
+          <button data-help="personnel.review.appraisal">{t("Confirm cancellation", "منسوخی کی تصدیق")}</button>
+          <button type="button" data-help="personnel.review.appraisal" onClick={() => setCancelling(false)}>{t("Back", "واپس")}</button>
+        </fieldset>
+      </form>}
+
+      {acknowledging && <form className="card" onSubmit={acknowledgeAction}>
+        <fieldset disabled={saving || !connected}>
+          <legend>{t("Acknowledge appraisal", "جائزے کا اعتراف")}</legend>
+          <Field label={t("Acknowledged on", "اعتراف کی تاریخ")}>
+            <input data-help="personnel.review.appraisal" type="date" name="acknowledged_on" required />
+          </Field>
+          <Field label={t("Employee comments", "ملازم کے تاثرات")}>
+            <textarea data-help="personnel.review.appraisal" name="employee_comments" />
+          </Field>
+          <button data-help="personnel.review.appraisal">{t("Confirm acknowledgement", "اعتراف کی تصدیق")}</button>
+          <button type="button" data-help="personnel.review.appraisal" onClick={() => setAcknowledging(false)}>{t("Cancel", "منسوخ کریں")}</button>
+        </fieldset>
+      </form>}
+
+      {trainingMode && <form className="card" onSubmit={recordTrainingAction}>
+        <fieldset disabled={saving || !connected}>
+          <legend>{t("Record development training", "ترقیاتی تربیت درج کریں")}</legend>
+          <Field label={t("Training title", "تربیت کا عنوان")}>
+            <input data-help="personnel.review.appraisal" name="title" required />
+          </Field>
+          <Field label={t("Category", "زمرہ")}>
+            <select name="category" data-help="personnel.review.appraisal">
+              <option value="Clinical">{t("Clinical", "طبی")}</option>
+              <option value="Safety">{t("Safety", "حفاظت")}</option>
+              <option value="Quality">{t("Quality", "معیار")}</option>
+              <option value="Management">{t("Management", "انتظام")}</option>
+            </select>
+          </Field>
+          <Field label={t("Completed on", "تکمیل کی تاریخ")}>
+            <input data-help="personnel.review.appraisal" type="date" name="date" required />
+          </Field>
+          <Field label={t("Hours", "گھنٹے")}>
+            <input data-help="personnel.review.appraisal" type="number" step="0.5" min="0.5" name="hours" required defaultValue="1" />
+          </Field>
+          <button data-help="personnel.review.appraisal">{t("Save training", "تربیت محفوظ کریں")}</button>
+          <button type="button" data-help="personnel.review.appraisal" onClick={() => setTrainingMode(false)}>{t("Cancel", "منسوخ کریں")}</button>
+        </fieldset>
+      </form>}
     </article>}
   </section>;
 }
@@ -308,7 +731,35 @@ function PersonnelFiles({ screenId, user, revision, connected }: Props) {
   }
 
   return <section data-screen={screenId} data-unsaved={!!credential} data-write-pending={write.blocked}>
-    <h1>{t("Personnel files", "عملے کی فائلیں")}</h1>
+    <h1>{screenId === "personnel_files_owner" ? t("Personnel files (MSDS HRM)", "عملے کی فائلیں (ایم ایس ڈی ایس)") : t("Personnel files", "عملے کی فائلیں")}</h1>
+    {summary.data && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", marginBottom: "16px" }}>
+      <div className="card">
+        <h3>{t("Files complete", "فائلیں مکمل")}</h3>
+        <p style={{ fontSize: "1.4em", fontWeight: "bold" }}>
+          {summary.data.complete_pct !== null ? `${summary.data.complete_pct}%` : "—"}
+        </p>
+        <small>{summary.data.complete} / {summary.data.staff}</small>
+      </div>
+      <div className="card">
+        <h3>{t("Oriented staff (HRM 131)", "تعارف یافتہ عملہ")}</h3>
+        <p style={{ fontSize: "1.4em", fontWeight: "bold" }}>
+          {summary.data.orientation.oriented_pct !== null ? `${summary.data.orientation.oriented_pct}%` : "—"}
+        </p>
+        <small>{t("Target ≥80%", "ہدف ≥80%")}</small>
+      </div>
+      <div className="card">
+        <h3>{t("Patient rights (HRM 133)", "مریض کے حقوق")}</h3>
+        <p style={{ fontSize: "1.4em", fontWeight: "bold" }}>
+          {summary.data.orientation.patient_rights_pct !== null ? `${summary.data.orientation.patient_rights_pct}%` : "—"}
+        </p>
+      </div>
+      <div className="card">
+        <h3>{t("Orientation overdue", "تعارف میں تاخیر")}</h3>
+        <p style={{ fontSize: "1.4em", fontWeight: "bold", color: summary.data.orientation.overdue > 0 ? "var(--color-danger, #d32f2f)" : undefined }}>
+          {summary.data.orientation.overdue}
+        </p>
+      </div>
+    </div>}
     <label><input type="checkbox" data-help="personnel.review.files" checked={incomplete} disabled={!!credential || write.blocked} onChange={e => { setSelected(undefined); setIncomplete(e.target.checked); }} />
       {t("Incomplete files only", "صرف نامکمل فائلیں")}
     </label>
@@ -317,7 +768,9 @@ function PersonnelFiles({ screenId, user, revision, connected }: Props) {
       columns={[t("Employee", "ملازم"), t("Designation", "عہدہ"), t("Missing", "باقی")]}
       rows={summary.data.rows.map(row => ({ key: row.employee_id, cells: [
         mayOpen ? <button data-help="personnel.review.files" disabled={!!credential || write.blocked} onClick={() => setSelected(row.employee_id)}>{row.emp_number} · {row.full_name}</button>
-          : <bdi>{row.emp_number} · {row.full_name}</bdi>, row.designation, row.missing.join(", "),
+          : <bdi>{row.emp_number} · {row.full_name}</bdi>,
+        row.designation,
+        row.missing.length > 0 ? row.missing.map(m => <span key={m} style={{ display: "inline-block", margin: "2px", padding: "1px 6px", background: "#f0f2f5", borderRadius: "3px", fontSize: "0.85em" }}>{m}</span>) : t("None (Complete)", "کوئی نہیں (مکمل)"),
       ] }))} />}
     {selected && <LoadState {...detail} retry={detail.reload} />}
     {file && <article className="card">

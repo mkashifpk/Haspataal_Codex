@@ -73,11 +73,13 @@ type Editor = {
   original?: contract.ComplianceDocumentDetailOut;
 };
 export function ComplianceRegister({
+  screenId = "compliance_register_ops",
   user,
   establishment,
   connected,
   onOpenHelp,
 }: {
+  screenId?: string;
   user: ClinicalUser;
   establishment?: EstablishmentOut | null;
   connected: boolean;
@@ -413,7 +415,7 @@ export function ComplianceRegister({
   return (
     <section
       className="compliance-register"
-      data-screen="compliance_register_ops"
+      data-screen={screenId}
       data-write-pending={blocked ? "true" : undefined}
       data-unsaved={editor || file ? "true" : "false"}
     >

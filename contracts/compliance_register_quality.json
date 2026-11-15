@@ -1,0 +1,1666 @@
+{
+  "screen_id": "compliance_register_quality",
+  "endpoints": [
+    {
+      "endpoint": "GET /facility/compliance-documents",
+      "summary": "The compliance register",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.view",
+          "facility.compliance.manage",
+          "blood.bank.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.view or facility.compliance.manage or blood.bank.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "kind",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Licence",
+                  "Registration",
+                  "Certificate",
+                  "Plan",
+                  "Law"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          }
+        },
+        {
+          "name": "category",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Hospital",
+                  "Radiation",
+                  "Building",
+                  "Fire",
+                  "Lift",
+                  "Boiler",
+                  "Power",
+                  "BloodTransfusion",
+                  "Food",
+                  "Waste",
+                  "Pharmacy",
+                  "Laboratory",
+                  "Water",
+                  "Environment",
+                  "Emergency",
+                  "Equipment",
+                  "Staff",
+                  "Other"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          }
+        },
+        {
+          "name": "state",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Valid",
+                  "DueForRenewal",
+                  "Expired",
+                  "NoExpiry"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          }
+        },
+        {
+          "name": "responsible_user_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsible User Id"
+          }
+        },
+        {
+          "name": "include_closed",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Include Closed"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_ComplianceDocumentOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "kind",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Licence",
+              "Registration",
+              "Certificate",
+              "Plan",
+              "Law"
+            ]
+          },
+          {
+            "name": "category",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Hospital",
+              "Radiation",
+              "Building",
+              "Fire",
+              "Lift",
+              "Boiler",
+              "Power",
+              "BloodTransfusion",
+              "Food",
+              "Waste",
+              "Pharmacy",
+              "Laboratory",
+              "Water",
+              "Environment",
+              "Emergency",
+              "Equipment",
+              "Staff",
+              "Other"
+            ]
+          },
+          {
+            "name": "state",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Valid",
+              "DueForRenewal",
+              "Expired",
+              "NoExpiry"
+            ]
+          },
+          {
+            "name": "responsible_user_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "include_closed",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /facility/compliance-documents",
+      "summary": "Add a licence, certificate, plan or law to the register",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.compliance.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of facility.compliance.manage",
+        "roles_allowed": [
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ComplianceDocumentIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ComplianceDocumentDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ComplianceDocumentIn",
+        "fields": [
+          {
+            "pointer": "/title",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 300
+          },
+          {
+            "pointer": "/authority",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200
+          },
+          {
+            "pointer": "/reference_no",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 100
+          },
+          {
+            "pointer": "/issued_on",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date"
+          },
+          {
+            "pointer": "/valid_until",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date",
+            "description": "Required for a licence, and for a plan (its review date); none for a law"
+          },
+          {
+            "pointer": "/renewal_lead_days",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 365,
+            "description": "Default: compliance_renewal_lead_days"
+          },
+          {
+            "pointer": "/responsible_user_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "The official who keeps it current (MSDS ROM 119 i)"
+          },
+          {
+            "pointer": "/asset_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "The equipment it covers: the X-ray unit, the lift, the boiler (GET /facility/equipment)"
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "The department (GET /admin/departments)"
+          },
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 2000
+          },
+          {
+            "pointer": "/kind",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Licence",
+              "Registration",
+              "Certificate",
+              "Plan",
+              "Law"
+            ]
+          },
+          {
+            "pointer": "/category",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Hospital",
+              "Radiation",
+              "Building",
+              "Fire",
+              "Lift",
+              "Boiler",
+              "Power",
+              "BloodTransfusion",
+              "Food",
+              "Waste",
+              "Pharmacy",
+              "Laboratory",
+              "Water",
+              "Environment",
+              "Emergency",
+              "Equipment",
+              "Staff",
+              "Other"
+            ]
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /facility/compliance-documents",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /facility/compliance-documents/{document_id}",
+      "summary": "One entry of the register, with the entries it renewed",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.view",
+          "facility.compliance.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.view or facility.compliance.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "document_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Document Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ComplianceDocumentDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "PUT /facility/compliance-documents/{document_id}",
+      "summary": "Correct an entry, or record that its renewal is applied for",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.compliance.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of facility.compliance.manage",
+        "roles_allowed": [
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "COMPLIANCE_DOCUMENT_CLOSED",
+          "http_status": 409,
+          "message": "This entry of the register was renewed or withdrawn: work on the current one.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/facility/compliance-documents/{document_id}/renew"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "document_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Document Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ComplianceDocumentUpdateIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ComplianceDocumentDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ComplianceDocumentUpdateIn",
+        "fields": [
+          {
+            "pointer": "/title",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "min_length": 3,
+            "max_length": 300
+          },
+          {
+            "pointer": "/authority",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200
+          },
+          {
+            "pointer": "/reference_no",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 100
+          },
+          {
+            "pointer": "/issued_on",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date"
+          },
+          {
+            "pointer": "/valid_until",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date"
+          },
+          {
+            "pointer": "/renewal_lead_days",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 365
+          },
+          {
+            "pointer": "/responsible_user_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/asset_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "The equipment it covers: the X-ray unit, the lift, the boiler (GET /facility/equipment)"
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "The department (GET /admin/departments)"
+          },
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 2000
+          },
+          {
+            "pointer": "/renewal_applied_on",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date",
+            "description": "The renewal is applied for (keep the receipt as the scan)"
+          },
+          {
+            "pointer": "/renewal_reference",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200
+          },
+          {
+            "pointer": "/expected_version",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "version_check",
+        "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+        "reconcile_with": "GET /facility/compliance-documents/{document_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": "compliance_document"
+      }
+    },
+    {
+      "endpoint": "POST /facility/compliance-documents/{document_id}/renew",
+      "summary": "Record the renewal (or the amendment)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.compliance.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of facility.compliance.manage",
+        "roles_allowed": [
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "COMPLIANCE_DOCUMENT_CLOSED",
+          "http_status": 409,
+          "message": "This entry of the register was renewed or withdrawn: work on the current one.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/facility/compliance-documents/{document_id}/renew"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "document_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Document Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ComplianceRenewIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ComplianceDocumentDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ComplianceRenewIn",
+        "fields": [
+          {
+            "pointer": "/reference_no",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 100,
+            "description": "Default: the old one"
+          },
+          {
+            "pointer": "/issued_on",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/valid_until",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date",
+            "description": "Required unless the document has no expiry"
+          },
+          {
+            "pointer": "/title",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "min_length": 3,
+            "max_length": 300,
+            "description": "Default: the old one"
+          },
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 2000
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /facility/compliance-documents/{document_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": "compliance_document"
+      }
+    },
+    {
+      "endpoint": "POST /facility/compliance-documents/{document_id}/withdraw",
+      "summary": "Withdraw an entry no longer needed",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.compliance.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of facility.compliance.manage",
+        "roles_allowed": [
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "COMPLIANCE_DOCUMENT_CLOSED",
+          "http_status": 409,
+          "message": "This entry of the register was renewed or withdrawn: work on the current one.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/facility/compliance-documents/{document_id}/renew"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "document_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Document Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ComplianceWithdrawIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ComplianceDocumentDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ComplianceWithdrawIn",
+        "fields": [
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 5,
+            "max_length": 1000
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /facility/compliance-documents/{document_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": "compliance_document"
+      }
+    },
+    {
+      "endpoint": "POST /facility/compliance-documents/{document_id}/scan",
+      "summary": "Attach the scan (PDF or image)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.compliance.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of facility.compliance.manage",
+        "roles_allowed": [
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "COMPLIANCE_DOCUMENT_CLOSED",
+          "http_status": 409,
+          "message": "This entry of the register was renewed or withdrawn: work on the current one.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/facility/compliance-documents/{document_id}/renew"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "document_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Document Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "$ref": "#/components/schemas/Body_upload_scan_api_v1_facility_compliance_documents__document_id__scan_post"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ComplianceDocumentDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "multipart/form-data",
+        "model": "Body_upload_scan_api_v1_facility_compliance_documents__document_id__scan_post",
+        "fields": [
+          {
+            "pointer": "/file",
+            "type": "string",
+            "required": true,
+            "nullable": false
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /facility/compliance-documents/{document_id}/scan",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": "compliance_document"
+      }
+    },
+    {
+      "endpoint": "GET /facility/compliance-documents/{document_id}/scan",
+      "summary": "Download the scan",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.view",
+          "facility.compliance.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.view or facility.compliance.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "document_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Document Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "The stored file, with its own Content-Type (e.g. application/pdf) and its file name in Content-Disposition.",
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "file",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "prints": {
+        "kind": "file",
+        "media": [
+          "application/octet-stream"
+        ]
+      }
+    },
+    {
+      "endpoint": "GET /facility/compliance-documents/register/pdf",
+      "summary": "The register to print (PDF)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.view",
+          "facility.compliance.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.view or facility.compliance.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "The stored file, with its own Content-Type (e.g. application/pdf) and its file name in Content-Disposition.",
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "file",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "prints": {
+        "kind": "file",
+        "media": [
+          "application/octet-stream"
+        ]
+      }
+    },
+    {
+      "endpoint": "GET /facility/staff",
+      "summary": "Pick a member of staff",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.compliance.manage",
+          "facility.equipment.manage",
+          "facility.maintenance.record",
+          "facility.drill.manage",
+          "personnel.training.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.compliance.manage or facility.equipment.manage or facility.maintenance.record or facility.drill.manage or personnel.training.record",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Q"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 500,
+            "minimum": 1,
+            "default": 50,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_FacilityStaffOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 500
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "GET /facility/equipment",
+      "summary": "The equipment inventory",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "facility.view",
+          "facility.equipment.manage",
+          "facility.maintenance.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of facility.view or facility.equipment.manage or facility.maintenance.record",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "medical_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "title": "Medical Only"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "overdue_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Overdue Only"
+          }
+        },
+        {
+          "name": "include_disposed",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Include Disposed"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_EquipmentOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "medical_only",
+            "required": false,
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "overdue_only",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "include_disposed",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/departments",
+      "summary": "Departments",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DepartmentOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    }
+  ]
+}

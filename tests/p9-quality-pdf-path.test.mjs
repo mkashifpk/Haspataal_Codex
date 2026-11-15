@@ -29,6 +29,15 @@ test('Quality PDFs admit only documented paths and canonical date queries',()=>{
     assert(!allowed(p + '?date_from=2026-10-01&date_to=2026-10-31&scope=all'));
   }
   for (const p of ['/quality/record-reviews/0/report/pdf', '/quality/record-reviews/02/report/pdf', '/quality/record-reviews/2/report/pdf?x=1', '/quality/record-reviews/2/report/pdf/extra']) assert(!allowed(p));
+  assert(allowed('/msds/inspection-pack/documents/authorized_personnel/pdf'));
+  assert(allowed('/msds/inspection-pack/documents/ims_policy/pdf'));
+  assert(allowed('/msds/inspection-pack/exports/1/pdf'));
+  assert(allowed('/msds/patient-register/pdf?date_from=2026-08-01&date_to=2026-10-31&part=1'));
+  assert(allowed('/msds/selected-records/pdf?date_from=2026-08-01&date_to=2026-10-31&patient_id=1'));
+  assert(allowed('/phc/cpsa/pdf?date_from=2026-08-17&date_to=2026-11-14'));
+  assert(allowed('/phc/cpsa/documents/head_credentials/pdf?date_from=2026-08-17&date_to=2026-11-14'));
+  assert(allowed('/phc/cpsa/documents/declaration/pdf?date_from=2026-08-17&date_to=2026-11-14'));
+  assert(allowed('/phc/cpsa/documents/services_list/pdf'));
   assert(allowed('/maternity/labour-register/pdf?date_from=2026-11-01&date_to=2026-11-09'));
   for(const p of ['/incidents/0/adr-report/pdf','/blood/reactions/01/pdf','/blood/reactions/1/pdf?x=1','/maternity/labour-register/pdf','/blood/statistics/pdf?date_from=2026-11-01&date_to=2026-11-09&x=1','https://example.org/blood/reactions/1/pdf','/blood/reactions/1/pdf\n','/maternity/assessments/register/pdf?date_to=2026-11-09&date_from=2026-11-01']) assert(!allowed(p));
 });
